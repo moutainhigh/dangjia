@@ -65,4 +65,6 @@ public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRe
     List<Map<String,Object>> selectCategoryByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("storefrontId") String storefrontId);
 
     List<ActuarialProductAppDTO> selectMaintenaceProductByCategoryId(@Param("maintenanceRecordId") String maintenanceRecordId, @Param("maintenanceRecordType") Integer maintenanceRecordType, @Param("storefrontId") String storefrontId, @Param("categoryId") String categoryId);
+
+    int setWorkerMaintenanceGoods(Map<String,Object> map);
 }

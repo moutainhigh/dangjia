@@ -366,6 +366,18 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.confirmStart(businessId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse setWorkerMaintenanceGoods(String userToken, String maintenanceRecordId, String jsonStr) {
+        try {
+            return djMaintenanceRecordService.setWorkerMaintenanceGoods(userToken,maintenanceRecordId,jsonStr);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("操作失败",e);
+            return ServerResponse.createByErrorMessage("操作成功");
+        }
+    }
+
 
     @Override
     @ApiMethod

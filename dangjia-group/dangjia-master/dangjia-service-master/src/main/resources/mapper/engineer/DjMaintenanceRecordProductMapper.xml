@@ -256,4 +256,19 @@
         and pay_state=2
         and maintenance_product_type in(1,2)
     </update>
+
+    <update id="setWorkerMaintenanceGoods">
+        UPDATE dj_maintenance_record_product
+        SET
+        <if test="null!=totalPrice and ''!=totalPrice">
+            pay_price = #{totalPrice},
+        </if>
+         pay_state = #{payState}
+        WHERE
+        house_id =#{houseId}
+        AND maintenance_member_id =#{maintenanceMemberId}
+        AND maintenance_record_id =#{maintenanceRecordId}
+        AND maintenance_product_type = 3
+        AND pay_state = 1
+    </update>
 </mapper>

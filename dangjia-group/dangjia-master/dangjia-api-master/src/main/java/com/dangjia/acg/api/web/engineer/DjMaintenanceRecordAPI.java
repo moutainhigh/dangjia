@@ -291,4 +291,10 @@ public interface DjMaintenanceRecordAPI {
     @ApiOperation(value = "已确认可开工", notes = "已确认可开工")
     ServerResponse confirmStart(@RequestParam("businessId") String businessId);
 
+    @PostMapping(value = "web/engineer/setWorkerMaintenanceGoods")
+    @ApiOperation(value = "工匠维保要货", notes = "工匠维保要货")
+    ServerResponse setWorkerMaintenanceGoods(@RequestParam("userToken") String userToken,
+                                             @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                             @RequestParam("jsonStr") String jsonStr);
+
 }

@@ -474,8 +474,10 @@ public class WalletService {
         }
         Example example = new Example(WorkerDetail.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andLessThanOrEqualTo(WorkerDetail.CREATE_DATE, time);
-        criteria.andGreaterThanOrEqualTo(WorkerDetail.CREATE_DATE, DateUtil.getDateString(DateUtil.getMonthFirst(DateUtil.toDate(time), -12).getTime()));
+        if(type!=5) {
+            criteria.andLessThanOrEqualTo(WorkerDetail.CREATE_DATE, time);
+            criteria.andGreaterThanOrEqualTo(WorkerDetail.CREATE_DATE, DateUtil.getDateString(DateUtil.getMonthFirst(DateUtil.toDate(time), -12).getTime()));
+        }
         criteria.andEqualTo(WorkerDetail.WORKER_ID, member.getId());
         if (state != null) {
             criteria.andIn(WorkerDetail.STATE, Arrays.asList(state));
@@ -505,9 +507,9 @@ public class WalletService {
             }
 
             detailDTO.setTime(timeYear);
-            if (timeYear.equals(dqYear)) {
-                detailDTO.setTime("本月");
-            }
+//            if (timeYear.equals(dqYear)) {
+//                detailDTO.setTime("本月");
+//            }
             detailDTO.setWorkerDetailId(workerDetail.getId());
             detailDTO.setImage(imageAddress + getIcon(workerDetail.getState()));//图标
             detailDTO.setName(workerDetail.getName());

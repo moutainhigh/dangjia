@@ -71,7 +71,6 @@ import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.swagger.annotations.ExampleProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -200,17 +199,17 @@ public class DjMaintenanceRecordService {
             serviveState = 0;//未过保
         }
         //2.添加质保信息
-        DjMaintenanceRecord djMaintenanceRecord=new DjMaintenanceRecord();
+        DjMaintenanceRecord djMaintenanceRecord = new DjMaintenanceRecord();
         djMaintenanceRecord.setHouseId(houseId);
         djMaintenanceRecord.setMemberId(member.getId());
         djMaintenanceRecord.setOwnerName(member.getName());
         djMaintenanceRecord.setOwnerMobile(member.getMobile());
         djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
         djMaintenanceRecord.setWorkerTypeId(workerTypeSafeOrder.getWorkerTypeId());
-        djMaintenanceRecord.setState(serviveState                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         );
+        djMaintenanceRecord.setState(serviveState);
         djMaintenanceRecordMapper.insert(djMaintenanceRecord);
         //3.添加质保对应的图片、备注信息
-        DjMaintenanceRecordContent djMaintenanceRecordContent=new DjMaintenanceRecordContent();
+        DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
         djMaintenanceRecordContent.setMaintenanceRecordId(djMaintenanceRecord.getId());
         djMaintenanceRecordContent.setRemark(remark);
         djMaintenanceRecordContent.setImage(images);
@@ -219,9 +218,10 @@ public class DjMaintenanceRecordService {
         djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
 
         //5.添加维保商品
-        insertMaintenanceProductInfo(productId,djMaintenanceRecord,serviveState);
-        return getMaintenaceProductList(djMaintenanceRecord.getId(),1);//业主所选维保商品
+        insertMaintenanceProductInfo(productId, djMaintenanceRecord, serviveState);
+        return getMaintenaceProductList(djMaintenanceRecord.getId(), 1);//业主所选维保商品
     }
+
     /**
      * 添加维保商品信息
      *
@@ -241,9 +241,9 @@ public class DjMaintenanceRecordService {
         mrp.setTotalPrice(storefrontProduct.getSellPrice());
         mrp.setOverProtection(serviceState);
         mrp.setStorefrontId(storefrontProduct.getStorefrontId());
-       if (serviceState == 1) {
+        if (serviceState == 1) {
             mrp.setPayPrice(mrp.getTotalPrice());//已过保需支付金额为当前金额
-        }else{
+        } else {
             mrp.setPayPrice(0d);//未过保需支付金额为0
         }
         mrp.setPayState(1);
@@ -252,28 +252,29 @@ public class DjMaintenanceRecordService {
 
     /**
      * 判断是否需在大管家勘查商品
+     *
      * @param mrProductList
      * @param serviveState
      * @param maintenanceRecordId
      * @return
      */
-    public Integer updateMaitenanceProductInfo(List<DjMaintenanceRecordProduct> mrProductList,Integer serviveState,String maintenanceRecordId){
-        Integer stewardExploration=0;//是否需要管家勘查,默认为否
+    public Integer updateMaitenanceProductInfo(List<DjMaintenanceRecordProduct> mrProductList, Integer serviveState, String maintenanceRecordId) {
+        Integer stewardExploration = 0;//是否需要管家勘查,默认为否
         //查询业主添加的维保商品
-        if(mrProductList!=null&&mrProductList.size()>0){
-            for(DjMaintenanceRecordProduct mrp:mrProductList){
-               if(stewardExploration==0){
-                   //判断当前商品是否需要管家勘查
-                   StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(mrp.getProductId());
-                   DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
-                   stewardExploration=djBasicsProductTemplate.getStewardExploration();
-               }
-               //修改当前商品的过期状态
+        if (mrProductList != null && mrProductList.size() > 0) {
+            for (DjMaintenanceRecordProduct mrp : mrProductList) {
+                if (stewardExploration == 0) {
+                    //判断当前商品是否需要管家勘查
+                    StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(mrp.getProductId());
+                    DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+                    stewardExploration = djBasicsProductTemplate.getStewardExploration();
+                }
+                //修改当前商品的过期状态
                 mrp.setMaintenanceRecordId(maintenanceRecordId);
                 mrp.setOverProtection(serviveState);
-                if(serviveState==1){
+                if (serviveState == 1) {
                     mrp.setPayPrice(mrp.getTotalPrice());//已过保需支付金额为当前金额
-                }else{
+                } else {
                     mrp.setPayPrice(0d);//未过保需支付金额为0
                 }
                 mrp.setModifyDate(new Date());
@@ -292,240 +293,245 @@ public class DjMaintenanceRecordService {
      * @param maintenanceRecordType
      * @return
      */
-    public ServerResponse getMaintenaceProductList(String maintenanceRecordId,Integer maintenanceRecordType){
-        Map<String,Object> paramMap=new HashMap<>();
-        if(maintenanceRecordType==2){
-            paramMap.put("titleName","您在维保时是否出现了问题呢？如若不清楚问题所属哪项维保服务项目可先进行勘查。");
+    public ServerResponse getMaintenaceProductList(String maintenanceRecordId, Integer maintenanceRecordType) {
+        Map<String, Object> paramMap = new HashMap<>();
+        if (maintenanceRecordType == 2) {
+            paramMap.put("titleName", "您在维保时是否出现了问题呢？如若不清楚问题所属哪项维保服务项目可先进行勘查。");
         }
         //2.查询对应工总的质保商品总 额
-        Double totalPrice=0d;
-        Double payPrice=0d;
-        List<Map<String,Object>> workerTypeList=djMaintenanceRecordProductMapper.selectWorkerTypeListById(maintenanceRecordId,maintenanceRecordType);
-        if(workerTypeList!=null&&workerTypeList.size()>0){
+        Double totalPrice = 0d;
+        Double payPrice = 0d;
+        List<Map<String, Object>> workerTypeList = djMaintenanceRecordProductMapper.selectWorkerTypeListById(maintenanceRecordId, maintenanceRecordType);
+        if (workerTypeList != null && workerTypeList.size() > 0) {
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            for(Map map:workerTypeList){
-               // String workerTypeId=(String)map.get("workerTypeId");
-                String workerTypeImage=(String)map.get("workerTypeImage");
-                Integer overProtection=(Integer)map.get("overProtection");
-                map.put("workerTypeImageUrl",address+workerTypeImage);
-                map.put("workerTypeName",map.get("workerTypeName")+"维保卡");
-                totalPrice= MathUtil.add(totalPrice,(Double)map.get("totalPrice"));
-                payPrice= MathUtil.add(payPrice,(Double)map.get("payPrice"));
+            for (Map map : workerTypeList) {
+                // String workerTypeId=(String)map.get("workerTypeId");
+                String workerTypeImage = (String) map.get("workerTypeImage");
+                Integer overProtection = (Integer) map.get("overProtection");
+                map.put("workerTypeImageUrl", address + workerTypeImage);
+                map.put("workerTypeName", map.get("workerTypeName") + "维保卡");
+                totalPrice = MathUtil.add(totalPrice, (Double) map.get("totalPrice"));
+                payPrice = MathUtil.add(payPrice, (Double) map.get("payPrice"));
                 //查对应的商品信息
-                Example example=new Example(DjMaintenanceRecordProduct.class);
-                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
-                                   .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_PRODUCT_TYPE,maintenanceRecordType);
-                List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
-                List productList=workerTypeSafeOrderService.getRecordProductList(mrProductList);
-                if(overProtection==1){
-                    map.put("overProtectionName","已过保");
-                }else{
-                    map.put("overProtectionName","质保期内");
+                Example example = new Example(DjMaintenanceRecordProduct.class);
+                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId)
+                        .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_PRODUCT_TYPE, maintenanceRecordType);
+                List<DjMaintenanceRecordProduct> mrProductList = djMaintenanceRecordProductMapper.selectByExample(example);
+                List productList = workerTypeSafeOrderService.getRecordProductList(mrProductList);
+                if (overProtection == 1) {
+                    map.put("overProtectionName", "已过保");
+                } else {
+                    map.put("overProtectionName", "质保期内");
                 }
-                map.put("productList",productList);
+                map.put("productList", productList);
             }
         }
         //加上工种列表
-        paramMap.put("workerTypeList",workerTypeList);
+        paramMap.put("workerTypeList", workerTypeList);
         //设置商品总额，及需支付总额
-        paramMap.put("totalPrice",totalPrice);
-        paramMap.put("payPrice",payPrice);
-        paramMap.put("maintenanceRecordType",maintenanceRecordType);//维保商品类型
-        return  ServerResponse.createBySuccess("查询成功",paramMap);
+        paramMap.put("totalPrice", totalPrice);
+        paramMap.put("payPrice", payPrice);
+        paramMap.put("maintenanceRecordType", maintenanceRecordType);//维保商品类型
+        return ServerResponse.createBySuccess("查询成功", paramMap);
     }
-
 
 
     /**
      * 消息弹窗，维保材料商品订单
+     *
      * @param userToken 用户token
-     * @param houseId 房子IDss
-     * @param taskId 任务ID
+     * @param houseId   房子IDss
+     * @param taskId    任务ID
      * @return
      */
-    public ServerResponse searchMaintenanceProduct(String userToken,String houseId,String taskId){
-        TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
-        if(taskStack!=null&&taskStack.getState()==0){
-            Map<String,Object> resultMap=new HashMap<>();
+    public ServerResponse searchMaintenanceProduct(String userToken, String houseId, String taskId) {
+        TaskStack taskStack = taskStackService.selectTaskStackById(taskId);
+        if (taskStack != null && taskStack.getState() == 0) {
+            Map<String, Object> resultMap = new HashMap<>();
             //1.查询最新需要处理的商品信息
-            DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
-            List list=new ArrayList();
-            Map<String,Object> param=new HashMap<>();
+            DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
+            List list = new ArrayList();
+            Map<String, Object> param = new HashMap<>();
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal totalPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
-            if(djMaintenanceRecord!=null&&StringUtils.isNotBlank(djMaintenanceRecord.getId())){
+            if (djMaintenanceRecord != null && StringUtils.isNotBlank(djMaintenanceRecord.getId())) {
                 String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-                List<DjMaintenanceRecordProduct> storeProductList=djMaintenanceRecordProductMapper.selectStorefrontIdByTypeId(djMaintenanceRecord.getId(),3,1);//查询维保商品，按店铺划分
-                if(storeProductList!=null&&storeProductList.size()>0){
-                    for(DjMaintenanceRecordProduct mrp:storeProductList){
-                        param=new HashMap<>();
-                        Double freight=storefrontConfigAPI.getFreightPrice(mrp.getStorefrontId(),mrp.getTotalPrice());
-                        freightPrice=freightPrice.add(new BigDecimal(freight));
+                List<DjMaintenanceRecordProduct> storeProductList = djMaintenanceRecordProductMapper.selectStorefrontIdByTypeId(djMaintenanceRecord.getId(), 3, 1);//查询维保商品，按店铺划分
+                if (storeProductList != null && storeProductList.size() > 0) {
+                    for (DjMaintenanceRecordProduct mrp : storeProductList) {
+                        param = new HashMap<>();
+                        Double freight = storefrontConfigAPI.getFreightPrice(mrp.getStorefrontId(), mrp.getTotalPrice());
+                        freightPrice = freightPrice.add(new BigDecimal(freight));
                         //查询符合条件的商品的末级分类
-                        List<Map<String,Object>> categoryList=djMaintenanceRecordProductMapper.selectCategoryByRecordId(djMaintenanceRecord.getId(),3,mrp.getStorefrontId());
-                        for(Map<String,Object> pMap:categoryList){
-                            String categoryId=(String)pMap.get("categoryId");
-                            List<ActuarialProductAppDTO> productlist = djMaintenanceRecordProductMapper.selectMaintenaceProductByCategoryId(djMaintenanceRecord.getId(),3,mrp.getStorefrontId(),categoryId);
+                        List<Map<String, Object>> categoryList = djMaintenanceRecordProductMapper.selectCategoryByRecordId(djMaintenanceRecord.getId(), 3, mrp.getStorefrontId());
+                        for (Map<String, Object> pMap : categoryList) {
+                            String categoryId = (String) pMap.get("categoryId");
+                            List<ActuarialProductAppDTO> productlist = djMaintenanceRecordProductMapper.selectMaintenaceProductByCategoryId(djMaintenanceRecord.getId(), 3, mrp.getStorefrontId(), categoryId);
                             houseService.getProductList(productlist, address);
                             //计算搬运费
-                            for(ActuarialProductAppDTO product:productlist){
-                                if(StringUtils.isNotBlank(product.getProductId())){
+                            for (ActuarialProductAppDTO product : productlist) {
+                                if (StringUtils.isNotBlank(product.getProductId())) {
                                     //搬运费运算
-                                    Double moveDost=masterCostAcquisitionService.getStevedorageCost(djMaintenanceRecord.getHouseId(),product.getProductId(),product.getShopCount());
-                                    totalMoveDost=totalMoveDost.add(new BigDecimal(moveDost));
+                                    Double moveDost = masterCostAcquisitionService.getStevedorageCost(djMaintenanceRecord.getHouseId(), product.getProductId(), product.getShopCount());
+                                    totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
                                 }
                             }
 
                         }
-                        param.put("storefrontId",mrp.getStorefrontId());//店铺ID
-                        Storefront storefront=iMasterStorefrontMapper.selectByPrimaryKey(mrp.getStorefrontId());
-                        param.put("storefrontName",storefront.getStorefrontName());//店铺名称
-                        param.put("totalPrice",mrp.getTotalPrice());
-                        param.put("categoryList",categoryList);
-                        totalPrice=totalPrice.add(BigDecimal.valueOf(mrp.getTotalPrice()));//汇总总价
+                        param.put("storefrontId", mrp.getStorefrontId());//店铺ID
+                        Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(mrp.getStorefrontId());
+                        param.put("storefrontName", storefront.getStorefrontName());//店铺名称
+                        param.put("totalPrice", mrp.getTotalPrice());
+                        param.put("categoryList", categoryList);
+                        totalPrice = totalPrice.add(BigDecimal.valueOf(mrp.getTotalPrice()));//汇总总价
                     }
                 }
-                resultMap.put("totalPrice",totalPrice);//订单总额
-                if(djMaintenanceRecord.getOverProtection()==1){
-                    resultMap.put("payPrice",totalPrice.add(totalMoveDost).add(freightPrice));//支付总额
-                }else{
-                    resultMap.put("payPrice",0);//支付总额
+                resultMap.put("totalPrice", totalPrice);//订单总额
+                if (djMaintenanceRecord.getOverProtection() == 1) {
+                    resultMap.put("payPrice", totalPrice.add(totalMoveDost).add(freightPrice));//支付总额
+                } else {
+                    resultMap.put("payPrice", 0);//支付总额
                 }
-                resultMap.put("stevedorageCost",totalMoveDost);//搬运费
-                resultMap.put("transportationCost",freightPrice);//运费
+                resultMap.put("stevedorageCost", totalMoveDost);//搬运费
+                resultMap.put("transportationCost", freightPrice);//运费
                 //返回符合条件的数据给前端
-                return ServerResponse.createBySuccess("查询成功","");
+                return ServerResponse.createBySuccess("查询成功", "");
             }
         }
         return ServerResponse.createBySuccess("未找到需处理的任务");
     }
 
 
-
     /**
      * 消息弹窗--报销商品订单
+     *
      * @param userToken
      * @param houseId
      * @param taskId
      * @return
      */
-    public ServerResponse searchExpenseMaintenanceProduct(String userToken,String houseId,String taskId){
-        try{
-            TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
-            if(taskStack!=null&&taskStack.getState()==0){
-                Example example=new Example(Complain.class);
-                example.createCriteria().andEqualTo(Complain.HOUSE_ID,houseId)
-                        .andEqualTo(Complain.BUSINESS_ID,taskStack.getData())
-                        .andEqualTo(Complain.COMPLAIN_TYPE,9)
-                        .andEqualTo(Complain.STATUS,2);
-                Complain complain=iComplainMapper.selectOneByExample(example);
-                return ServerResponse.createBySuccess("查询成功",complain);
+    public ServerResponse searchExpenseMaintenanceProduct(String userToken, String houseId, String taskId) {
+        try {
+            TaskStack taskStack = taskStackService.selectTaskStackById(taskId);
+            if (taskStack != null && taskStack.getState() == 0) {
+                Example example = new Example(Complain.class);
+                example.createCriteria().andEqualTo(Complain.HOUSE_ID, houseId)
+                        .andEqualTo(Complain.BUSINESS_ID, taskStack.getData())
+                        .andEqualTo(Complain.COMPLAIN_TYPE, 9)
+                        .andEqualTo(Complain.STATUS, 2);
+                Complain complain = iComplainMapper.selectOneByExample(example);
+                return ServerResponse.createBySuccess("查询成功", complain);
             }
-           return ServerResponse.createBySuccess("未找到需处理的任务");
-        }catch (Exception e){
-            logger.error("查询失败",e);
+            return ServerResponse.createBySuccess("未找到需处理的任务");
+        } catch (Exception e) {
+            logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 
     /**
      * 消息弹窗--验收申请单
+     *
      * @param userToken
      * @param houseId
      * @param taskId
      * @return
      */
-    public ServerResponse searchAcceptanceApplication(String userToken,String houseId,String taskId){
-        try{
-            TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
-            if(taskStack!=null&&taskStack.getState()==0){
-                Map<String,Object> map=new HashMap();
-                DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
-                if(djMaintenanceRecord!=null&& !("2".equals(djMaintenanceRecord.getState())||!"4".equals(djMaintenanceRecord.getState()))&&StringUtils.isNotBlank(djMaintenanceRecord.getWorkerMemberId())){
-                    Member member=iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
-                    WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
-                    map.put("workerId",member.getId());
-                    map.put("workerName",member.getName());
-                    map.put("labelName",workerType.getName());
-                    map.put("headImage",member.getHead());
+    public ServerResponse searchAcceptanceApplication(String userToken, String houseId, String taskId) {
+        try {
+            TaskStack taskStack = taskStackService.selectTaskStackById(taskId);
+            if (taskStack != null && taskStack.getState() == 0) {
+                Map<String, Object> map = new HashMap();
+                DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
+                if (djMaintenanceRecord != null && !("2".equals(djMaintenanceRecord.getState()) || !"4".equals(djMaintenanceRecord.getState())) && StringUtils.isNotBlank(djMaintenanceRecord.getWorkerMemberId())) {
+                    Member member = iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
+                    map.put("workerId", member.getId());
+                    map.put("workerName", member.getName());
+                    map.put("labelName", workerType.getName());
+                    map.put("headImage", member.getHead());
                     //查询申请内容，申请时间
-                    Example example=new Example(DjMaintenanceRecordContent.class);
-                    example.createCriteria().andEqualTo(DjMaintenanceRecordContent.MAINTENANCE_RECORD_ID,djMaintenanceRecord.getId())
-                            .andEqualTo(DjMaintenanceRecordContent.TYPE,1);//查询工匠的信息
-                    DjMaintenanceRecordContent djMaintenanceRecordContent=djMaintenanceRecordContentMapper.selectOneByExample(example);
-                    if(djMaintenanceRecordContent!=null){
+                    Example example = new Example(DjMaintenanceRecordContent.class);
+                    example.createCriteria().andEqualTo(DjMaintenanceRecordContent.MAINTENANCE_RECORD_ID, djMaintenanceRecord.getId())
+                            .andEqualTo(DjMaintenanceRecordContent.TYPE, 1);//查询工匠的信息
+                    DjMaintenanceRecordContent djMaintenanceRecordContent = djMaintenanceRecordContentMapper.selectOneByExample(example);
+                    if (djMaintenanceRecordContent != null) {
                         map.putAll(BeanUtils.beanToMap(djMaintenanceRecordContent));
-                        map.put("reparirRemainingTime",getRemainingTime(djMaintenanceRecordContent.getCreateDate()));//剩余处理时间戳
+                        map.put("reparirRemainingTime", getRemainingTime(djMaintenanceRecordContent.getCreateDate()));//剩余处理时间戳
                     }
-                    return ServerResponse.createBySuccess("查询成功",map);
-                }else{
+                    return ServerResponse.createBySuccess("查询成功", map);
+                } else {
                     return ServerResponse.createByErrorMessage("此维保已处理完成，请勿重复处理。");
                 }
 
             }
             return ServerResponse.createBySuccess("未找到需处理的任务");
-        }catch (Exception e){
-            logger.error("查询失败",e);
+        } catch (Exception e) {
+            logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
     /**
      * 获取当前阶段剩余可处理时间
+     *
      * @return
      */
-    private long getRemainingTime(Date createDate){
-        try{
-            String parayKey="";
-            if(parayKey!=null&&StringUtils.isNotBlank(parayKey)){
-                Config config=iConfigMapper.selectConfigInfoByParamKey(parayKey);//获取对应阶段需处理剩余时间
-                if(config!=null&&StringUtils.isNotBlank(config.getId())){
-                    String hour=config.getParamValue();
-                    Date newDate=DateUtil.addDateHours(createDate,Integer.parseInt(hour));
-                    return DateUtil.daysBetweenTime(new Date(),newDate);
+    private long getRemainingTime(Date createDate) {
+        try {
+            String parayKey = "";
+            if (parayKey != null && StringUtils.isNotBlank(parayKey)) {
+                Config config = iConfigMapper.selectConfigInfoByParamKey(parayKey);//获取对应阶段需处理剩余时间
+                if (config != null && StringUtils.isNotBlank(config.getId())) {
+                    String hour = config.getParamValue();
+                    Date newDate = DateUtil.addDateHours(createDate, Integer.parseInt(hour));
+                    return DateUtil.daysBetweenTime(new Date(), newDate);
                 }
             }
-        }catch (Exception e){
-            logger.error("获取剩余时间异常:",e);
+        } catch (Exception e) {
+            logger.error("获取剩余时间异常:", e);
         }
 
         return 0;
     }
+
     /**
      * 保存质保订单表
      *
      * @param userToken
      * @param houseId
-     * @param maintenanceRecordId 质保ID
+     * @param maintenanceRecordId   质保ID
      * @param maintenanceRecordType 质保订单类型（１业主维保商品，２管家勘查商品，３工匠维修要货商品，４工匠报销费用）
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveMaintenanceRecordOrder(String userToken,String houseId,String maintenanceRecordId,Integer maintenanceRecordType,String cityId) {
+    public ServerResponse saveMaintenanceRecordOrder(String userToken, String houseId, String maintenanceRecordId, Integer maintenanceRecordType, String cityId) {
 
-        return paymentService.generateMaintenanceRecordOrder(userToken,maintenanceRecordId,maintenanceRecordType,cityId);
+        return paymentService.generateMaintenanceRecordOrder(userToken, maintenanceRecordId, maintenanceRecordType, cityId);
     }
 
     /**
      * 提前结束，返回维保订单商品
+     *
      * @param userToken
      * @param houseId
      * @param maintenanceRecordId
      * @param cityId
      * @return
      */
-    public ServerResponse endMaintenanceSearchProduct(String userToken,String houseId,String maintenanceRecordId,String cityId){
-        List<Map<String,Object>> workerTypeList=djMaintenanceRecordProductMapper.selectWorkerTypeListById(maintenanceRecordId,2);//查询是否已添加勘查费用的商品
-        DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
-        if(workerTypeList==null||workerTypeList.size()<=0){
+    public ServerResponse endMaintenanceSearchProduct(String userToken, String houseId, String maintenanceRecordId, String cityId) {
+        List<Map<String, Object>> workerTypeList = djMaintenanceRecordProductMapper.selectWorkerTypeListById(maintenanceRecordId, 2);//查询是否已添加勘查费用的商品
+        DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+        if (workerTypeList == null || workerTypeList.size() <= 0) {
             //添加维保勘查费用的商品
-            Example example=new Example(DjBasicsProductTemplate.class);
-            example.createCriteria().andEqualTo(DjBasicsProductTemplate.MAINTENANCE_INVESTIGATION,1);
-            DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectOneByExample(example);
-            if(djBasicsProductTemplate!=null&& StringUtils.isNotBlank(djBasicsProductTemplate.getId())){
-                StorefrontProductDTO storefrontProductDTO=imasterProductTemplateService.getStorefrontProductByTemplateId(djBasicsProductTemplate.getId());
-                DjMaintenanceRecordProduct mrp=new DjMaintenanceRecordProduct();
+            Example example = new Example(DjBasicsProductTemplate.class);
+            example.createCriteria().andEqualTo(DjBasicsProductTemplate.MAINTENANCE_INVESTIGATION, 1);
+            DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectOneByExample(example);
+            if (djBasicsProductTemplate != null && StringUtils.isNotBlank(djBasicsProductTemplate.getId())) {
+                StorefrontProductDTO storefrontProductDTO = imasterProductTemplateService.getStorefrontProductByTemplateId(djBasicsProductTemplate.getId());
+                DjMaintenanceRecordProduct mrp = new DjMaintenanceRecordProduct();
                 mrp.setProductId(storefrontProductDTO.getStorefrontProductId());
                 mrp.setMaintenanceRecordId(djMaintenanceRecord.getId());
                 mrp.setHouseId(houseId);
@@ -536,24 +542,25 @@ public class DjMaintenanceRecordService {
                 mrp.setTotalPrice(storefrontProductDTO.getSellPrice());
                 mrp.setOverProtection(djMaintenanceRecord.getOverProtection());
                 mrp.setStorefrontId(storefrontProductDTO.getStorefrontId());
-                if(djMaintenanceRecord.getOverProtection()==1){
+                if (djMaintenanceRecord.getOverProtection() == 1) {
                     mrp.setPayPrice(mrp.getTotalPrice());//已过保需支付金额为当前金额
-                }else{
+                } else {
                     mrp.setPayPrice(0d);//未过保需支付金额为0
                 }
                 mrp.setPayState(1);
                 djMaintenanceRecordProductMapper.insert(mrp);//添加维保勘查费用商品
-            }else{
+            } else {
                 //结束维保
-                return endMaintenanceRecord(userToken,houseId,maintenanceRecordId,cityId);
+                return endMaintenanceRecord(userToken, houseId, maintenanceRecordId, cityId);
             }
         }
-        return getMaintenaceProductList(djMaintenanceRecord.getId(),2);//业主所选维保商品
+        return getMaintenaceProductList(djMaintenanceRecord.getId(), 2);//业主所选维保商品
 
     }
 
     /**
      * 提前结束，结束维保
+     *
      * @param userToken
      * @param houseId
      * @param maintenanceRecordId
@@ -561,26 +568,26 @@ public class DjMaintenanceRecordService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse endMaintenanceRecord(String userToken,String houseId,String maintenanceRecordId,String cityId){
+    public ServerResponse endMaintenanceRecord(String userToken, String houseId, String maintenanceRecordId, String cityId) {
         //1.结束当前维保
-        DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
-        if(djMaintenanceRecord!=null&&!("2".equals(djMaintenanceRecord.getState())||"4".equals(djMaintenanceRecord.getState()))){
+        DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+        if (djMaintenanceRecord != null && !("2".equals(djMaintenanceRecord.getState()) || "4".equals(djMaintenanceRecord.getState()))) {
             //修改质保单为结束
             djMaintenanceRecord.setState(4);
             djMaintenanceRecord.setModifyDate(new Date());
             djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
             //2.判断是否为质保期外的，且有已支付的订单
-            if(djMaintenanceRecord.getOverProtection()==1){
-                Double payPriceOne=djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId,1);
-                Double payPriceTwo=djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId,2);
-                if(payPriceOne==null){
-                    payPriceOne=0d;
+            if (djMaintenanceRecord.getOverProtection() == 1) {
+                Double payPriceOne = djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId, 1);
+                Double payPriceTwo = djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId, 2);
+                if (payPriceOne == null) {
+                    payPriceOne = 0d;
                 }
-                if(payPriceTwo==null){
-                    payPriceTwo=0d;
+                if (payPriceTwo == null) {
+                    payPriceTwo = 0d;
                 }
-                Double totalPrice=MathUtil.add(payPriceOne,payPriceTwo);
-                if(totalPrice>0){
+                Double totalPrice = MathUtil.add(payPriceOne, payPriceTwo);
+                if (totalPrice > 0) {
                     //3.退已支付钱给业主
                     /*退钱给业主*/
                     Member member = iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getMemberId());
@@ -605,24 +612,25 @@ public class DjMaintenanceRecordService {
                     djMaintenanceRecordProductMapper.updateRecordProductInfoByRecordId(maintenanceRecordId);
                     //5.通知业主已退款
                     //推送消息给业主退货退款通知
-                    configMessageService.addConfigMessage( AppType.ZHUANGXIU, member.getId(),
-                            "0", "有退款到账啦", String.format(DjConstants.PushMessage.YEZHUENDMAINTENANCE),7, "提前结束维保订单");
+                    configMessageService.addConfigMessage(AppType.ZHUANGXIU, member.getId(),
+                            "0", "有退款到账啦", String.format(DjConstants.PushMessage.YEZHUENDMAINTENANCE), 7, "提前结束维保订单");
 
                 }
             }
 
-        }else{
+        } else {
             return ServerResponse.createByErrorMessage("当前订单已结束，请勿重复提交！");
         }
         return ServerResponse.createBySuccessMessage("提交成功");
     }
-        /**
-         * 查询质保审核列表
-         *
-         * @param pageDTO
-         * @param searchKey
-         * @return
-         */
+
+    /**
+     * 查询质保审核列表
+     *
+     * @param pageDTO
+     * @param searchKey
+     * @return
+     */
 
     public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {
         try {
@@ -703,7 +711,7 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordDTOS.setStewardImages(this.getImage(djMaintenanceRecordDTOS.getStewardImage()));
             }
 
-            return ServerResponse.createBySuccess("查询成功",djMaintenanceRecordDTOS);
+            return ServerResponse.createBySuccess("查询成功", djMaintenanceRecordDTOS);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -730,7 +738,7 @@ public class DjMaintenanceRecordService {
                         djMaintenanceRecordResponsiblePartyMapper.selectByExample(example);
                 djMaintenanceRecordResponsibleParties.forEach(djMaintenanceRecordResponsibleParty -> {
                     //扣除金额
-                    Double amountDeducted =0d;// (djMaintenanceRecordResponsibleParty.getProportion() / 100) * (djMaintenanceRecord1.getSincePurchaseAmount() + djMaintenanceRecord1.getEnoughAmount());
+                    Double amountDeducted = 0d;// (djMaintenanceRecordResponsibleParty.getProportion() / 100) * (djMaintenanceRecord1.getSincePurchaseAmount() + djMaintenanceRecord1.getEnoughAmount());
                     if (djMaintenanceRecordResponsibleParty.getResponsiblePartyType() == 1) {
                         AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
                         accountFlowRecord.setState(3);
@@ -888,7 +896,7 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecord.setId(id);
                 djMaintenanceRecord.setState(1);
                 djMaintenanceRecord.setCreateDate(null);
-               // djMaintenanceRecord.setHandleType(handleType);
+                // djMaintenanceRecord.setHandleType(handleType);
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
                 return ServerResponse.createBySuccess("提交成功");
             } else if (handleType != null && handleType == 4) {
@@ -1334,7 +1342,7 @@ public class DjMaintenanceRecordService {
             djMaintenanceRecord.setState(state);
             djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
             djMaintenanceRecord.setMemberId(member.getId());
-           // djMaintenanceRecord.setStewardState(2);//管家处理状态 1：待处理 2：已处理
+            // djMaintenanceRecord.setStewardState(2);//管家处理状态 1：待处理 2：已处理
             djMaintenanceRecord.setWorkerTypeId(null);
             int i = djMaintenanceRecordMapper.updateByPrimaryKey(djMaintenanceRecord);
             if (i <= 0)
@@ -1425,12 +1433,12 @@ public class DjMaintenanceRecordService {
                 .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId);
         DjMaintenanceRecordProduct djMaintenanceRecordProduct = djMaintenanceRecordProductMapper.selectOneByExample(example);
         //商品存在 对商品数量进行操作
-        if (djMaintenanceRecordProduct!=null) {
-            if(shopCount==0){
+        if (djMaintenanceRecordProduct != null) {
+            if (shopCount == 0) {
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
             djMaintenanceRecordProduct.setShopCount(djMaintenanceRecordProduct.getShopCount() + shopCount);
-            if(djMaintenanceRecordProduct.getShopCount()==0){
+            if (djMaintenanceRecordProduct.getShopCount() == 0) {
                 djMaintenanceRecordProductMapper.delete(djMaintenanceRecordProduct);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
@@ -1452,6 +1460,7 @@ public class DjMaintenanceRecordService {
         djMaintenanceRecordProduct1.setTotalPrice(djMaintenanceRecordProduct1.getShopCount() * storefrontProduct.getSellPrice());
         djMaintenanceRecordProduct1.setPayPrice(0d);
         djMaintenanceRecordProduct1.setPayState(1);
+        djMaintenanceRecordProduct1.setTotalPrice(djMaintenanceRecordProduct1.getTotalPrice());
         djMaintenanceRecordProduct1.setStorefrontId(storefrontProduct.getId());
         djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct1);
         return ServerResponse.createBySuccessMessage("操作成功");
@@ -1500,7 +1509,7 @@ public class DjMaintenanceRecordService {
                     memberType = 3;
                     example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
                             .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
-                           // .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 3)
+                            // .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 3)
                             .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId)
                             .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_ID, worker.getId());
                     djMaintenanceRecordProducts =
@@ -1517,7 +1526,7 @@ public class DjMaintenanceRecordService {
                             example = new Example(DjMaintenanceRecordProduct.class);
                             example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
                                     .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
-                                   // .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 1)
+                                    // .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 1)
                                     .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId);
                             djMaintenanceRecordProducts =
                                     djMaintenanceRecordProductMapper.selectByExample(example);
@@ -1526,9 +1535,9 @@ public class DjMaintenanceRecordService {
                 }
                 djMaintenanceRecordProducts.forEach(djMaintenanceRecordProduct -> {
                     djMaintenanceRecordProduct.setId((Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
-                   // djMaintenanceRecordProduct.setWorkerTypeId(worker.getWorkerTypeId());
+                    // djMaintenanceRecordProduct.setWorkerTypeId(worker.getWorkerTypeId());
                     djMaintenanceRecordProduct.setMaintenanceMemberId(worker.getId());
-                   // djMaintenanceRecordProduct.setMaintenanceMemberType(memberType);
+                    // djMaintenanceRecordProduct.setMaintenanceMemberType(memberType);
                     djMaintenanceRecordProduct.setPayState(1);
                     djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct);
                 });
@@ -1569,7 +1578,7 @@ public class DjMaintenanceRecordService {
                 MaintenanceShoppingBasketDTO maintenanceShoppingBasketDTO = new MaintenanceShoppingBasketDTO();
                 maintenanceShoppingBasketDTO.setId(basicsGoodsCategory.getId());
                 maintenanceShoppingBasketDTO.setName(basicsGoodsCategory.getName());
-                map.put("parentTop",basicsGoodsCategory.getId());
+                map.put("parentTop", basicsGoodsCategory.getId());
                 maintenanceShoppingBasketDTO.setDjMaintenanceRecordProductDTOS(djMaintenanceRecordProductMapper.queryMaintenanceShoppingBasket(map));
                 maintenanceShoppingBasketDTOS.add(maintenanceShoppingBasketDTO);
             });
@@ -1600,12 +1609,12 @@ public class DjMaintenanceRecordService {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
-        DjMaintenanceRecord djMaintenanceRecord=new DjMaintenanceRecord();
+        DjMaintenanceRecord djMaintenanceRecord = new DjMaintenanceRecord();
         djMaintenanceRecord.setId(maintenanceRecordId);
         djMaintenanceRecord.setState(2);
         //djMaintenanceRecord.setStewardState(2);
         djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
-        DjMaintenanceRecordContent djMaintenanceRecordContent=new DjMaintenanceRecordContent();
+        DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
         djMaintenanceRecordContent.setImage(image);
         djMaintenanceRecordContent.setMaintenanceRecordId(maintenanceRecordId);
         djMaintenanceRecordContent.setMemberId(worker.getId());
@@ -1626,7 +1635,7 @@ public class DjMaintenanceRecordService {
     public ServerResponse deleteMaintenanceRecordProduct(String id) {
         try {
             DjMaintenanceRecordProduct djMaintenanceRecordProduct = djMaintenanceRecordProductMapper.selectByPrimaryKey(id);
-            if(djMaintenanceRecordProduct.getPayState()==2)
+            if (djMaintenanceRecordProduct.getPayState() == 2)
                 return ServerResponse.createByErrorMessage("商品已支付不能修改");
             djMaintenanceRecordProductMapper.deleteByPrimaryKey(id);
             return ServerResponse.createBySuccessMessage("删除成功");
@@ -1635,8 +1644,6 @@ public class DjMaintenanceRecordService {
             return ServerResponse.createBySuccessMessage("删除失败");
         }
     }
-
-
 
 
     /**
@@ -1649,16 +1656,16 @@ public class DjMaintenanceRecordService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse addApplyNewspaper(String userToken,
-                                             String memberId,
-                                             Double money,
-                                             String description,
-                                             String image,
-                                             String houseId,
-                                             String businessId){
+                                            String memberId,
+                                            Double money,
+                                            String description,
+                                            String image,
+                                            String houseId,
+                                            String businessId) {
         try {
             Member member = iMemberMapper.selectByPrimaryKey(memberId);
-            if(member == null){
-                return  ServerResponse.createByErrorMessage("用户不存在");
+            if (member == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
             }
             Complain complain = new Complain();
             complain.setMemberId(memberId);
@@ -1688,12 +1695,12 @@ public class DjMaintenanceRecordService {
      * @param memberId
      * @return
      */
-    public ServerResponse queryComplain(String userToken,String memberId){
+    public ServerResponse queryComplain(String userToken, String memberId) {
         try {
             Example example = new Example(Complain.class);
-            example.createCriteria().andEqualTo(Complain.MEMBER_ID,memberId)
-                    .andEqualTo(Complain.DATA_STATUS,0).
-                    andEqualTo(Complain.COMPLAIN_TYPE,9);
+            example.createCriteria().andEqualTo(Complain.MEMBER_ID, memberId)
+                    .andEqualTo(Complain.DATA_STATUS, 0).
+                    andEqualTo(Complain.COMPLAIN_TYPE, 9);
             example.orderBy(Complain.MODIFY_DATE).desc();
             List<Complain> member = iComplainMapper.selectByExample(example);
             if (member.size() <= 0) {
@@ -1712,19 +1719,19 @@ public class DjMaintenanceRecordService {
      * @param id
      * @return
      */
-    public ServerResponse queryComplainInFo(String id){
+    public ServerResponse queryComplainInFo(String id) {
         try {
             if (CommonUtil.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("id不能为空");
             }
 
             Complain complain = iComplainMapper.selectByPrimaryKey(id);
-            Map<String,Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>();
 
-            if(complain != null ){
+            if (complain != null) {
                 House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
-                if(house != null){
-                    map.put("houseName",house.getResidential() + house.getBuilding() + "栋" +
+                if (house != null) {
+                    map.put("houseName", house.getResidential() + house.getBuilding() + "栋" +
                             house.getUnit() + "单元" + house.getNumber() + "号");
                 }
                 map.put("complainType", complain.getComplainType());
@@ -1751,6 +1758,7 @@ public class DjMaintenanceRecordService {
 
     /**
      * 处理工匠报销申诉
+     *
      * @param id
      * @return
      */
@@ -1759,7 +1767,7 @@ public class DjMaintenanceRecordService {
                                        Integer type,
                                        Double actualMoney,
                                        String operateId,
-                                       String rejectReason){
+                                       String rejectReason) {
         try {
             if (CommonUtil.isEmpty(type)) {
                 return ServerResponse.createByErrorMessage("type不能为空");
@@ -1779,7 +1787,7 @@ public class DjMaintenanceRecordService {
             complain.setCreateDate(null);
 //            complain.setId(id);
             //type: 0 -确定处理 1-结束流程
-            if(type == 0){
+            if (type == 0) {
                 complain.setStatus(2);
                 complain.setActualMoney(actualMoney);
                 Complain complain1 = iComplainMapper.selectByPrimaryKey(id);
@@ -1794,7 +1802,7 @@ public class DjMaintenanceRecordService {
 
                 //查询维保任务
                 DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(complain.getBusinessId());
-                if(djMaintenanceRecord == null){
+                if (djMaintenanceRecord == null) {
                     return ServerResponse.createByErrorMessage("该条任务异常");
                 }
 
@@ -1807,18 +1815,18 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordProduct.setTotalPrice(complain.getApplyMoney());
                 djMaintenanceRecordProduct.setPayState(1);
                 //是否过保  1是，0否
-                if(djMaintenanceRecord.getOverProtection() == 0){
+                if (djMaintenanceRecord.getOverProtection() == 0) {
                     //未过保
                     djMaintenanceRecordProduct.setPayPrice(0d);
                     djMaintenanceRecordProduct.setOverProtection(djMaintenanceRecord.getOverProtection());
-                }else if(djMaintenanceRecord.getOverProtection() == 1){
+                } else if (djMaintenanceRecord.getOverProtection() == 1) {
                     //已过保
                     djMaintenanceRecordProduct.setPayPrice(actualMoney);
                     djMaintenanceRecordProduct.setOverProtection(djMaintenanceRecord.getOverProtection());
                 }
                 djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct);
 
-            }else if(type == 1){
+            } else if (type == 1) {
                 complain.setStatus(1);
                 complain.setRejectReason(rejectReason);
             }
@@ -1842,7 +1850,7 @@ public class DjMaintenanceRecordService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse workerApplyCollect(String id,String remarks,String image){
+    public ServerResponse workerApplyCollect(String id, String remarks, String image) {
         try {
             if (CommonUtil.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("任务不存在");
@@ -1850,7 +1858,7 @@ public class DjMaintenanceRecordService {
 
             DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(id);
 
-            if(djMaintenanceRecord == null){
+            if (djMaintenanceRecord == null) {
                 return ServerResponse.createByErrorMessage("该任务不存在");
             }
 
@@ -1889,7 +1897,6 @@ public class DjMaintenanceRecordService {
     }
 
 
-
     /**
      * 已确认可开工
      *
@@ -1897,7 +1904,7 @@ public class DjMaintenanceRecordService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse confirmStart(String businessId){
+    public ServerResponse confirmStart(String businessId) {
         try {
             DjMaintenanceRecord djMaintenanceRecord = new DjMaintenanceRecord();
             djMaintenanceRecord.setState(5);
@@ -1940,7 +1947,7 @@ public class DjMaintenanceRecordService {
         djMaintenanceRecordContent.setWorkerTypeId(worker.getWorkerTypeId());
         djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
         //扣除管家滞留金
-        if(djMaintenanceRecord.equals("0")) {//维保期内
+        if (djMaintenanceRecord.equals("0")) {//维保期内
             Example example = new Example(DjMaintenanceRecordProduct.class);
             example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
                     .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId)
@@ -1952,27 +1959,74 @@ public class DjMaintenanceRecordService {
             for (DjMaintenanceRecordProduct djMaintenanceRecordProduct : djMaintenanceRecordProducts) {
                 sumPrice.add(BigDecimal.valueOf(djMaintenanceRecordProduct.getPrice() * djMaintenanceRecordProduct.getShopCount()));
             }
-            worker.setRetentionMoney(worker.getRetentionMoney().subtract(sumPrice));
-            worker.setHaveMoney(worker.getHaveMoney().subtract(sumPrice));
-            //生成流水
-            WorkerDetail workerDetail=new WorkerDetail();
-            workerDetail.setName("质保维修扣除费用");
-            workerDetail.setWorkerId(worker.getId());
-            workerDetail.setWorkerName(worker.getName());
-            workerDetail.setHouseId(djMaintenanceRecord.getHouseId());
-            workerDetail.setMoney(sumPrice);
-            workerDetail.setState(14);
-            workerDetail.setDefinedWorkerId(maintenanceRecordId);
-            workerDetail.setDefinedName("质保维修扣除费用");
-            workerDetail.setHouseWorkerOrderId(maintenanceRecordId);
-            workerDetail.setHaveMoney(sumPrice);
-            workerDetail.setApplyMoney(sumPrice);
-            workerDetail.setWalletMoney(worker.getHaveMoney());
-            workerDetail.setDataStatus(0);
-            iWorkerDetailMapper.insert(workerDetail);
-            iMemberMapper.updateByPrimaryKeySelective(worker);
+            this.maintenanceMinusDetention(worker,djMaintenanceRecord.getHouseId(),sumPrice,maintenanceRecordId);
         }
         return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+    /**
+     * 维保扣除滞留金
+     * @param worker
+     * @param houseId
+     * @param sumPrice
+     * @param maintenanceRecordId
+     */
+    private void maintenanceMinusDetention(Member worker,String houseId,BigDecimal sumPrice,String maintenanceRecordId){
+        worker.setRetentionMoney(worker.getRetentionMoney().subtract(sumPrice));
+        worker.setHaveMoney(worker.getHaveMoney().subtract(sumPrice));
+        //生成流水
+        WorkerDetail workerDetail = new WorkerDetail();
+        workerDetail.setName("质保维修扣除费用");
+        workerDetail.setWorkerId(worker.getId());
+        workerDetail.setWorkerName(worker.getName());
+        workerDetail.setHouseId(houseId);
+        workerDetail.setMoney(sumPrice);
+        workerDetail.setState(14);
+        workerDetail.setDefinedWorkerId(maintenanceRecordId);
+        workerDetail.setDefinedName("质保维修扣除费用");
+        workerDetail.setHouseWorkerOrderId(maintenanceRecordId);
+        workerDetail.setHaveMoney(sumPrice);
+        workerDetail.setApplyMoney(sumPrice);
+        workerDetail.setWalletMoney(worker.getHaveMoney());
+        workerDetail.setDataStatus(0);
+        iWorkerDetailMapper.insert(workerDetail);
+        iMemberMapper.updateByPrimaryKeySelective(worker);
+    }
+
+    /**
+     * 工匠维保要货
+     *
+     * @param userToken
+     * @param maintenanceRecordId
+     * @param houseId
+     * @return
+     */
+    public ServerResponse setWorkerMaintenanceGoods(String userToken, String maintenanceRecordId, String houseId) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        House house = houseMapper.selectByPrimaryKey(houseId);
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+        DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+        Map<String,Object> map=new HashMap<>();
+        map.put("houseId",houseId);
+        map.put("maintenanceMemberId",worker.getId());
+        map.put("maintenanceRecordId",maintenanceRecordId);
+        if (djMaintenanceRecord.getOverProtection() == 1) {//过保
+            map.put("payState",1);
+            map.put("totalPrice",null);
+            djMaintenanceRecordProductMapper.setWorkerMaintenanceGoods(map);
+            taskStackService.insertTaskStackInfo(houseId,house.getMemberId(),"维保商品费用",workerType.getImage(),14,maintenanceRecordId);
+            return ServerResponse.createBySuccessMessage("提交成功,待业主审核");
+        } else {//未过保
+            map.put("payState",1);
+            map.put("totalPrice",0);
+            djMaintenanceRecordProductMapper.setWorkerMaintenanceGoods(map);
+            paymentService.generateMaintenanceRecordOrder(userToken,maintenanceRecordId,3,house.getCityId());
+        }
+        return ServerResponse.createBySuccessMessage("提交成功");
     }
 }
 
