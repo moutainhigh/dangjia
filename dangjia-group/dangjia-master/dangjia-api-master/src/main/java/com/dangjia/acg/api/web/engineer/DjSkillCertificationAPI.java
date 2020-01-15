@@ -47,7 +47,7 @@ public interface DjSkillCertificationAPI {
 
     @PostMapping(value = "web/engineer/queryWorkerTypeSkillPackConfigurationDetail")
     @ApiOperation(value = "工种技能包配置详情", notes = "工种技能包配置详情")
-    ServerResponse queryWorkerTypeSkillPackConfigurationDetail(@RequestParam("workerTypeId") Integer workerTypeId);
+    ServerResponse queryWorkerTypeSkillPackConfigurationDetail(@RequestParam("workerTypeId") String workerTypeId);
 
     @PostMapping(value = "web/engineer/insertWorkerTypeSkillPackConfiguration")
     @ApiOperation(value = "工种技能包配置", notes = "工种技能包配置")

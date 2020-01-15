@@ -9,6 +9,7 @@
             bsp.product_name AS productName,
             bsp.image,
             bpt.unit_name AS unitName,
+            bsp.sell_price AS sellPrice,
 			bsp.adjusted_price as adjustedPrice,
 			bsp.modity_price_time as modityPriceTime,
 			bs.storefront_name as storefrontName,

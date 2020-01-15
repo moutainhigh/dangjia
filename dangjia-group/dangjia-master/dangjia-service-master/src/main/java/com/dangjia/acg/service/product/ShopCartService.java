@@ -418,6 +418,11 @@ public class ShopCartService {
     public ServerResponse delCheckCart(String shopCartIds) {
         try {
             List<String> stringList = Arrays.asList(shopCartIds.split(","));
+            Example example = new Example(ShoppingCart.class);
+            example.createCriteria().andIn(ShoppingCart.ID, stringList);
+            List<ShoppingCart> shoppingCarts = iShoppingCartmapper.selectByExample(example);
+            if(shoppingCarts.size()<0)
+                return ServerResponse.createBySuccessMessage("商品不存在!");
             if (stringList.size() > 0) {
                 for (String shoppingCartId : stringList) {
                     Example example1 = new Example(DeliverOrderAddedProduct.class);
@@ -425,9 +430,6 @@ public class ShopCartService {
                     masterDeliverOrderAddedProductMapper.deleteByExample(example1);
                 }
             }
-
-            Example example = new Example(ShoppingCart.class);
-            example.createCriteria().andIn(ShoppingCart.ID, stringList);
             int i = iShoppingCartmapper.deleteByExample(example);
             if (i >= 0) {
                 return ServerResponse.createBySuccessMessage("删除已选商品成功!");

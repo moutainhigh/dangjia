@@ -217,7 +217,8 @@ public interface DjMaintenanceRecordAPI {
     ServerResponse insertMaintenanceRecordProduct(@RequestParam("userToken") String userToken,
                                                   @RequestParam("houseId") String houseId,
                                                   @RequestParam("maintenanceRecordId") String maintenanceRecordId,
-                                                  @RequestParam("productId") String productId);
+                                                  @RequestParam("productId") String productId,
+                                                  @RequestParam("shopCount") Double shopCount);
 
     @PostMapping(value = "app/engineer/setMaintenanceRecordProduct")
     @ApiOperation(value = "管家/工匠维保购物篮处理", notes = "管家/工匠维保购物篮处理")
