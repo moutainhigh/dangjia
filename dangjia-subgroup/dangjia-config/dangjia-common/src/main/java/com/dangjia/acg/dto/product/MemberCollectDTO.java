@@ -10,7 +10,7 @@ public class MemberCollectDTO {
     private String id;
     private String productId;
     private String productName;
-    private double sellPrice;
+    private Double sellPrice;
     private String image;
     @ApiModelProperty("商品图片(单张)")
     private String imageSingle;

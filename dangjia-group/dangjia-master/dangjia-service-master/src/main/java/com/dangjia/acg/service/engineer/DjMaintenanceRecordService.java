@@ -1410,57 +1410,51 @@ public class DjMaintenanceRecordService {
      * @param productId
      * @return
      */
-    public ServerResponse insertMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId, String productId) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member worker = (Member) object;
-            Example example = new Example(DjMaintenanceRecordProduct.class);
-            example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_ID, worker.getId())
-                    .andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
-                    .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
-                    .andEqualTo(DjMaintenanceRecordProduct.PRODUCT_ID, productId)
-                    .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId);
-            if (djMaintenanceRecordMapper.selectCountByExample(example) > 0)
-                return ServerResponse.createByErrorMessage("商品已选");
-            StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
-            Integer memberType;
-            //业主添加
-            if (StringUtils.isEmpty(maintenanceRecordId)) {
-                memberType = 1;
-            } else {
-                DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
-                if (djMaintenanceRecord.getStewardId().equals(worker.getId())) {
-                    //管家添加
-                    memberType = 2;
-                } else {
-                    //工匠添加
-                    memberType = 3;
-                }
-            }
-            DjBasicsProductTemplate djBasicsProductTemplate =
-                    iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
-            DjMaintenanceRecordProduct djMaintenanceRecordProduct = new DjMaintenanceRecordProduct();
-            djMaintenanceRecordProduct.setHouseId(houseId);
-            djMaintenanceRecordProduct.setProductId(storefrontProduct.getId());
-            djMaintenanceRecordProduct.setMaintenanceRecordId(maintenanceRecordId);
-            djMaintenanceRecordProduct.setShopCount(1d);
-            djMaintenanceRecordProduct.setPrice(storefrontProduct.getSellPrice());
-            //djMaintenanceRecordProduct.setWorkerTypeId(djBasicsProductTemplate.getWorkerTypeId());
-            djMaintenanceRecordProduct.setMaintenanceMemberId(worker.getId());
-           // djMaintenanceRecordProduct.setMaintenanceMemberType(memberType);
-            djMaintenanceRecordProduct.setTotalPrice(djMaintenanceRecordProduct.getShopCount() * storefrontProduct.getSellPrice());
-            djMaintenanceRecordProduct.setPayPrice(0d);
-            djMaintenanceRecordProduct.setPayState(1);
-            djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct);
-            return ServerResponse.createBySuccessMessage("添加成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.info("添加失败", e);
-            return ServerResponse.createByErrorMessage("添加失败");
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse insertMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId, String productId, Double shopCount) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
+        Member worker = (Member) object;
+        Example example = new Example(DjMaintenanceRecordProduct.class);
+        example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_ID, worker.getId())
+                .andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
+                .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
+                .andEqualTo(DjMaintenanceRecordProduct.PRODUCT_ID, productId)
+                .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId);
+        DjMaintenanceRecordProduct djMaintenanceRecordProduct = djMaintenanceRecordProductMapper.selectOneByExample(example);
+        //商品存在 对商品数量进行操作
+        if (djMaintenanceRecordProduct!=null) {
+            if(shopCount==0){
+                return ServerResponse.createBySuccessMessage("操作成功");
+            }
+            djMaintenanceRecordProduct.setShopCount(djMaintenanceRecordProduct.getShopCount() + shopCount);
+            if(djMaintenanceRecordProduct.getShopCount()==0){
+                djMaintenanceRecordProductMapper.delete(djMaintenanceRecordProduct);
+                return ServerResponse.createBySuccessMessage("操作成功");
+            }
+            djMaintenanceRecordProduct.setTotalPrice(djMaintenanceRecordProduct.getShopCount() * djMaintenanceRecordProduct.getPrice());
+            djMaintenanceRecordProductMapper.updateByPrimaryKeySelective(djMaintenanceRecordProduct);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        }
+        StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+        DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+        DjMaintenanceRecordProduct djMaintenanceRecordProduct1 = new DjMaintenanceRecordProduct();
+        djMaintenanceRecordProduct1.setHouseId(houseId);
+        djMaintenanceRecordProduct1.setProductId(storefrontProduct.getId());
+        djMaintenanceRecordProduct1.setMaintenanceRecordId(maintenanceRecordId);
+        djMaintenanceRecordProduct1.setShopCount(shopCount);
+        djMaintenanceRecordProduct1.setPrice(storefrontProduct.getSellPrice());
+        djMaintenanceRecordProduct1.setMaintenanceMemberId(worker.getId());
+        djMaintenanceRecordProduct1.setMaintenanceProductType(3);
+        djMaintenanceRecordProduct1.setOverProtection(djMaintenanceRecord.getOverProtection());
+        djMaintenanceRecordProduct1.setTotalPrice(djMaintenanceRecordProduct1.getShopCount() * storefrontProduct.getSellPrice());
+        djMaintenanceRecordProduct1.setPayPrice(0d);
+        djMaintenanceRecordProduct1.setPayState(1);
+        djMaintenanceRecordProduct1.setStorefrontId(storefrontProduct.getId());
+        djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct1);
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
 
 
@@ -1567,16 +1561,7 @@ public class DjMaintenanceRecordService {
             map.put("maintenanceMemberId", worker.getId());
             map.put("houseId", houseId);
             map.put("maintenanceRecordId", maintenanceRecordId);
-            if (StringUtils.isEmpty(maintenanceRecordId)) {//业主维保购物篮
-                map.put("maintenanceMemberType", 1);
-            } else {
-                DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
-                if (djMaintenanceRecord.getStewardId().equals(worker.getId())) {//管家维保购物篮
-                    map.put("maintenanceMemberType", 2);
-                } else {//工匠
-                    map.put("maintenanceMemberType", 3);
-                }
-            }
+            map.put("maintenanceMemberType", 3);
             List<BasicsGoodsCategory> basicsGoodsCategories =
                     djMaintenanceRecordProductMapper.queryGroupByGoodsCategory(map);
             List<MaintenanceShoppingBasketDTO> maintenanceShoppingBasketDTOS = new ArrayList<>();
@@ -1584,7 +1569,8 @@ public class DjMaintenanceRecordService {
                 MaintenanceShoppingBasketDTO maintenanceShoppingBasketDTO = new MaintenanceShoppingBasketDTO();
                 maintenanceShoppingBasketDTO.setId(basicsGoodsCategory.getId());
                 maintenanceShoppingBasketDTO.setName(basicsGoodsCategory.getName());
-                maintenanceShoppingBasketDTO.setDjMaintenanceRecordProductDTOS(djMaintenanceRecordProductMapper.queryMaintenanceShoppingBasket(basicsGoodsCategory.getId()));
+                map.put("parentTop",basicsGoodsCategory.getId());
+                maintenanceShoppingBasketDTO.setDjMaintenanceRecordProductDTOS(djMaintenanceRecordProductMapper.queryMaintenanceShoppingBasket(map));
                 maintenanceShoppingBasketDTOS.add(maintenanceShoppingBasketDTO);
             }) ;
             if (maintenanceShoppingBasketDTOS.size() <= 0)
@@ -1954,18 +1940,38 @@ public class DjMaintenanceRecordService {
         djMaintenanceRecordContent.setWorkerTypeId(worker.getWorkerTypeId());
         djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
         //扣除管家滞留金
-        Example example=new Example(DjMaintenanceRecordProduct.class);
-        example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS,0)
-                .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
-                .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_PRODUCT_TYPE,2)
-                .andEqualTo(DjMaintenanceRecordProduct.PAY_STATE,2);
-        List<DjMaintenanceRecordProduct> djMaintenanceRecordProducts =
-                djMaintenanceRecordProductMapper.selectByExample(example);
-        BigDecimal sumPrice=new BigDecimal(0);
-        for (DjMaintenanceRecordProduct djMaintenanceRecordProduct : djMaintenanceRecordProducts) {
-            sumPrice.add(BigDecimal.valueOf(djMaintenanceRecordProduct.getPrice()*djMaintenanceRecordProduct.getShopCount()));
+        if(djMaintenanceRecord.equals("0")) {//维保期内
+            Example example = new Example(DjMaintenanceRecordProduct.class);
+            example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
+                    .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId)
+                    .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_PRODUCT_TYPE, 2)
+                    .andEqualTo(DjMaintenanceRecordProduct.PAY_STATE, 2);
+            List<DjMaintenanceRecordProduct> djMaintenanceRecordProducts =
+                    djMaintenanceRecordProductMapper.selectByExample(example);
+            BigDecimal sumPrice = new BigDecimal(0);
+            for (DjMaintenanceRecordProduct djMaintenanceRecordProduct : djMaintenanceRecordProducts) {
+                sumPrice.add(BigDecimal.valueOf(djMaintenanceRecordProduct.getPrice() * djMaintenanceRecordProduct.getShopCount()));
+            }
+            worker.setRetentionMoney(worker.getRetentionMoney().subtract(sumPrice));
+            worker.setHaveMoney(worker.getHaveMoney().subtract(sumPrice));
+            //生成流水
+            WorkerDetail workerDetail=new WorkerDetail();
+            workerDetail.setName("质保维修扣除费用");
+            workerDetail.setWorkerId(worker.getId());
+            workerDetail.setWorkerName(worker.getName());
+            workerDetail.setHouseId(djMaintenanceRecord.getHouseId());
+            workerDetail.setMoney(sumPrice);
+            workerDetail.setState(14);
+            workerDetail.setDefinedWorkerId(maintenanceRecordId);
+            workerDetail.setDefinedName("质保维修扣除费用");
+            workerDetail.setHouseWorkerOrderId(maintenanceRecordId);
+            workerDetail.setHaveMoney(sumPrice);
+            workerDetail.setApplyMoney(sumPrice);
+            workerDetail.setWalletMoney(worker.getHaveMoney());
+            workerDetail.setDataStatus(0);
+            iWorkerDetailMapper.insert(workerDetail);
+            iMemberMapper.updateByPrimaryKeySelective(worker);
         }
-        worker.setRetentionMoney(worker.getRetentionMoney().subtract(sumPrice));
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 }

@@ -318,8 +318,14 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse insertMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId,String productId) {
-        return djMaintenanceRecordService.insertMaintenanceRecordProduct(userToken,houseId,maintenanceRecordId,productId);
+    public ServerResponse insertMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId,String productId,Double shopCount) {
+        try {
+            return djMaintenanceRecordService.insertMaintenanceRecordProduct(userToken,houseId,maintenanceRecordId,productId,shopCount);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("操作失败", e);
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
     @Override

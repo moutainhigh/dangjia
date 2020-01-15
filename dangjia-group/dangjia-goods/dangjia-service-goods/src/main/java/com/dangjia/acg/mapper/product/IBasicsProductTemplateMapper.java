@@ -137,6 +137,8 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      * @param searchKey 商品名称
      * @return
      */
-    List<ActuarialProductAppDTO>  queryMaintenanceRecordProduct(@Param("cityId") String cityId,@Param("workerTypeId") String workerTypeId
-            ,@Param("topCategoryId") String topCategoryId,@Param("searchKey") String searchKey);
+    List<ActuarialProductAppDTO>  queryMaintenanceRecordProduct(@Param("cityId") String cityId,
+                                                                @Param("workerTypeId") String workerTypeId,
+                                                                @Param("topCategoryId") String topCategoryId,
+                                                                @Param("searchKey") String searchKey);
 }

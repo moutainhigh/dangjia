@@ -723,15 +723,21 @@
         WHERE
             p.is_shelf_status = 1
         AND bg.data_status = 0
-        AND bg.type = 5
+        <choose>
+            <when test="null!=workerTypeId and ''!=workerTypeId">
+                AND bg.type = 5
+                and bp.worker_type_id=#{workerTypeId}
+            </when>
+            <otherwise>
+                and bg.type=0
+            </otherwise>
+        </choose>
         and bg.city_id= #{cityId}
-        and bp.worker_type_id=#{workerTypeId}
         <if test="topCategoryId!=null and topCategoryId!=''">
             and gc.parent_top=#{topCategoryId}
         </if>
         <if test="searchKey!=null and searchKey!=''">
             and t.name like CONCAT('%',#{searchKey},'%')
         </if>
-
     </select>
 </mapper>
