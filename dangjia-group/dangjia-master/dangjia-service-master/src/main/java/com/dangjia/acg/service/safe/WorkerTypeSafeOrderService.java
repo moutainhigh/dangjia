@@ -204,39 +204,7 @@ public class WorkerTypeSafeOrderService {
     }
 
 
-    /**
-     * 获取对应处理人大管家和工匠
-     * @param mr
-     * @return
-     */
-    public List<Map<String,Object>> getWorkerList(DjMaintenanceRecord mr){
-        List<Map<String,Object>> list=new ArrayList();
-        if(mr.getStewardId()!=null&& StringUtils.isNotBlank(mr.getStewardId())){// 大管家信息
-            list.add(getWokerMemberInfo(mr.getStewardId(),"大管家"));
-        }
-        if(mr.getWorkerMemberId()!=null&&StringUtils.isNotBlank(mr.getWorkerMemberId())){//工匠信息
-            WorkerType workerType=iWorkerTypeMapper.selectByPrimaryKey(mr.getWorkerTypeId());
-            list.add(getWokerMemberInfo(mr.getStewardId(),workerType.getName()));
-        }
-        return list;
-    }
 
-    /**
-     * 获取对应的工匠信息
-     * @param workerId
-     * @return
-     */
-    Map<String,Object> getWokerMemberInfo(String workerId,String labelName){
-        Map<String,Object> map=new HashMap<>();
-        Member member=iMemberMapper.selectByPrimaryKey(workerId);
-        if(member!=null&&StringUtils.isNotBlank(member.getId())){
-            map.put("workerId",workerId);
-            map.put("workerName",member.getName());
-            map.put("labelName",labelName);
-            map.put("headImage",member.getHead());
-        }
-        return map;
-    }
 
 
 

@@ -67,6 +67,9 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("商品单价")
     private BigDecimal price;
 
+    @ApiModelProperty("商品总价")
+    private BigDecimal totalPrice;
+
     @ApiModelProperty("是否按面积计算参考价格(1是，0否)")
     private String isCalculatedArea;
 

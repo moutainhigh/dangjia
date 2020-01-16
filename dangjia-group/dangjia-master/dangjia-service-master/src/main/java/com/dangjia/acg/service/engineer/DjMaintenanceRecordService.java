@@ -71,9 +71,9 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.swagger.annotations.ExampleProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -422,13 +422,17 @@ public class DjMaintenanceRecordService {
         try{
             TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
             if(taskStack!=null&&taskStack.getState()==0){
+                DjMaintenanceRecordProduct recordProduct = djMaintenanceRecordProductMapper.selectByPrimaryKey(taskStack.getData());
                 Example example=new Example(Complain.class);
                 example.createCriteria().andEqualTo(Complain.HOUSE_ID,houseId)
-                        .andEqualTo(Complain.BUSINESS_ID,taskStack.getData())
+                        .andEqualTo(Complain.BUSINESS_ID,recordProduct.getComplainId())
                         .andEqualTo(Complain.COMPLAIN_TYPE,9)
                         .andEqualTo(Complain.STATUS,2);
                 Complain complain=iComplainMapper.selectOneByExample(example);
-                return ServerResponse.createBySuccess("查询成功",complain);
+                Map<String,Object> resultMap=BeanUtils.beanToMap(complain);
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                resultMap.put("imageUrl",StringTool.getImage(complain.getImage(),address));
+                return ServerResponse.createBySuccess("查询成功",resultMap);
             }
            return ServerResponse.createBySuccess("未找到需处理的任务");
         }catch (Exception e){
@@ -449,6 +453,7 @@ public class DjMaintenanceRecordService {
         try{
             TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
             if(taskStack!=null&&taskStack.getState()==0){
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 Map<String,Object> map=new HashMap();
                 DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
                 if(djMaintenanceRecord!=null&& !("2".equals(djMaintenanceRecord.getState())||!"4".equals(djMaintenanceRecord.getState()))&&StringUtils.isNotBlank(djMaintenanceRecord.getWorkerMemberId())){
@@ -457,7 +462,7 @@ public class DjMaintenanceRecordService {
                     map.put("workerId",member.getId());
                     map.put("workerName",member.getName());
                     map.put("labelName",workerType.getName());
-                    map.put("headImage",member.getHead());
+                    map.put("headImage",address+member.getHead());
                     //查询申请内容，申请时间
                     Example example=new Example(DjMaintenanceRecordContent.class);
                     example.createCriteria().andEqualTo(DjMaintenanceRecordContent.MAINTENANCE_RECORD_ID,djMaintenanceRecord.getId())
@@ -516,7 +521,7 @@ public class DjMaintenanceRecordService {
         if (taskStack != null && taskStack.getState() == 0) {
             DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
             if(djMaintenanceRecord!=null&&djMaintenanceRecord.getOverProtection()==1){//维保期外的订单才需要支付
-             return   paymentService.generateMaintenanceRecordOrder(userToken,djMaintenanceRecord.getId(),3,cityId,null);
+               return   paymentService.generateMaintenanceRecordOrder(userToken,djMaintenanceRecord.getId(),3,cityId,null);
             }
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
@@ -583,15 +588,20 @@ public class DjMaintenanceRecordService {
                 if(djMaintenanceRecord.getOverProtection()==0){
                     insertRecordResponsibleParty(djMaintenanceRecord,houseId);
                 }
+                //给新工匠加钱(算出工匠所得工钱)
+                Member worker=iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
+                Double workerPrice=djMaintenanceRecordProductMapper.selectWorkerPriceByRecordId(djMaintenanceRecord.getId());
+                this.maintenancePremiumCraftsman(worker,djMaintenanceRecord.getHouseId(),BigDecimal.valueOf(workerPrice),djMaintenanceRecord.getId());
+
                 configMessageService.addConfigMessage( AppType.GONGJIANG, djMaintenanceRecord.getWorkerMemberId(),
                         "0", "业主审核通过", String.format(DjConstants.CommonMessage.YEZHU_ACCEPT,member.getName()),2, "业主审核通过");
 
-                Member worker=iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
                 map.put("workerId",worker.getId());
                 map.put("workerName",worker.getName());
                 map.put("labelName",workerType.getName());
-                map.put("headImage",worker.getHead());
+                map.put("headImage",address+worker.getHead());
             }
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
@@ -802,6 +812,133 @@ public class DjMaintenanceRecordService {
             return ServerResponse.createByErrorMessage("当前订单已结束，请勿重复提交！");
         }
         return ServerResponse.createBySuccessMessage("提交成功");
+    }
+
+    /**
+     * 查询质保详情信息
+     * @param userToken
+     * @param maintenanceRecordId
+     * @return
+     */
+    public  ServerResponse queryMaintenanceRecordDetail(String userToken,String maintenanceRecordId){
+        try{
+            Map<String,Object> map=new HashMap();
+            DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+            if(djMaintenanceRecord!=null){
+                //1.质保申请时间，质保状态，
+                map.put("createDate",djMaintenanceRecord.getCreateDate());
+                map.put("state",djMaintenanceRecord.getState());
+                map.put("stateName",getStateName(djMaintenanceRecord.getState(),djMaintenanceRecord.getWorkerCreateDate()));
+                if(djMaintenanceRecord.getWorkerCreateDate()==null||djMaintenanceRecord.getState()==null){
+                    map.put("buttonCode","endMaintenance");
+                    map.put("buttonName","结束质保");
+                }else{
+                    map.put("buttonCode","");
+                    map.put("buttonName","");
+                }
+                //2.质保参与人员
+                map.put("workerList",getWorkerList(djMaintenanceRecord));
+                //3.维保商品列表
+                map.put("productList",getMaintenanceProductList(djMaintenanceRecord.getId(),1));
+                //4.报销商品列表
+                map.put("claimExpensesProductList",getClaimExpensesProduct(djMaintenanceRecord.getId()));
+
+            }
+            return ServerResponse.createBySuccess("查询成功","");
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+    }
+
+    /**
+     * 查询对应商品信息
+     * @param maintenanceRecordId
+     * @param type 1查详情商品信息，2查分摊责任商品信息
+     * @return
+     */
+    public List<ActuarialProductAppDTO> getMaintenanceProductList(String maintenanceRecordId,Integer type){
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<ActuarialProductAppDTO> productlist = djMaintenanceRecordProductMapper.selectMaintenanceProductList(maintenanceRecordId,type);
+        houseService.getProductList(productlist,address);
+        return productlist;
+    }
+
+    /**
+     * 报销费用商品信息
+     * @param maintenanceRecordId
+     * @return
+     */
+    public List<Map<String,Object>> getClaimExpensesProduct(String maintenanceRecordId){
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<Map<String,Object>> claimExpensesProductList= djMaintenanceRecordProductMapper.selectClaimExpensesProductList(maintenanceRecordId);
+        if(claimExpensesProductList!=null&&claimExpensesProductList.size()>0){
+           for(Map<String,Object> paramMap:claimExpensesProductList){
+               paramMap.put("imageUrl",StringTool.getImage((String)paramMap.get("image"),address));
+           }
+        }
+        return claimExpensesProductList;
+    }
+
+    /**
+     * 获取对应处理人大管家和工匠
+     * @param mr
+     * @return
+     */
+    public List<Map<String,Object>> getWorkerList(DjMaintenanceRecord mr){
+        List<Map<String,Object>> list=new ArrayList();
+        if(mr.getStewardId()!=null&& StringUtils.isNotBlank(mr.getStewardId())){// 大管家信息
+            list.add(getWokerMemberInfo(mr.getStewardId(),"大管家"));
+        }
+        if(mr.getWorkerMemberId()!=null&&StringUtils.isNotBlank(mr.getWorkerMemberId())){//工匠信息
+            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mr.getWorkerTypeId());
+            list.add(getWokerMemberInfo(mr.getStewardId(),workerType.getName()));
+        }
+        return list;
+    }
+
+    /**
+     * 获取对应的工匠信息
+     * @param workerId
+     * @return
+     */
+    Map<String,Object> getWokerMemberInfo(String workerId,String labelName){
+        Map<String,Object> map=new HashMap<>();
+        Member member=iMemberMapper.selectByPrimaryKey(workerId);
+        if(member!=null&&StringUtils.isNotBlank(member.getId())){
+            map.put("workerId",workerId);
+            map.put("workerName",member.getName());
+            map.put("labelName",labelName);
+            map.put("headImage",member.getHead());
+        }
+        return map;
+    }
+   // 状态 1:业主待验收 2:业主已验收 3:业主拒绝验收通过 4结束质保  5 已开工
+    String getStateName(Integer state,Date workerCreateDate){
+        String stateName;
+        if(workerCreateDate==null) {
+            stateName="待工匠接单";
+        }else{
+
+            switch (state) {
+                case 4:
+                    stateName="已提前结束";
+                    break;
+                case 5:
+                case 1:
+                case 3:
+                    stateName="维修中";
+                    break;
+                case 2:
+                    stateName="已完成";
+                    break;
+                default:
+                    stateName="待工匠确认";
+                    break;
+            }
+        }
+        return stateName;
     }
         /**
          * 查询质保审核列表

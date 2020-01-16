@@ -1025,26 +1025,31 @@ public class HouseFlowService {
             if (house.getMoney() == null) {
                 house.setMoney(new BigDecimal(0));
             }
-            Example example = new Example(BusinessOrder.class);
-            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseFlow.getId());
-            List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-            BusinessOrder businessOrder = null;
-            if(businessOrderList.size()>0){
-                businessOrder = businessOrderList.get(0);
-                if(businessOrder.getState()!=3){
+            if(houseFlow.getPayStatus()!=1){
+                Example example = new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseFlow.getId());
+                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+                BusinessOrder businessOrder = null;
+                if(businessOrderList.size()>0){
+                    businessOrder = businessOrderList.get(0);
+                    if(businessOrder.getState()!=3){
+                        return ServerResponse.createByErrorMessage("该工序未支付，请确保已经支付！");
+                    }
+                }
+                if(businessOrder==null){
                     return ServerResponse.createByErrorMessage("该工序未支付，请确保已经支付！");
                 }
             }
-            if(businessOrder==null){
-                return ServerResponse.createByErrorMessage("该工序未支付，请确保已经支付！");
-            }
+
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-            houseWorker.setWorkType(6);
-            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+            if(houseWorker!=null){
+                houseWorker.setWorkType(6);
+                houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+            }
             /*
              * 工匠订单
              */
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getHouseId(), houseFlow.getWorkerTypeId());
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
             if (hwo != null) {
                 hwo.setWorkerId(houseWorker.getWorkerId());
                 hwo.setPayState(1);
