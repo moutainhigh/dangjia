@@ -1939,7 +1939,6 @@ public class DjMaintenanceRecordService {
 
     /**
      * 处理工匠报销申诉
-     *
      * @param id
      * @return
      */
@@ -1966,20 +1965,19 @@ public class DjMaintenanceRecordService {
             complain.setOperateId(operateId);
             complain.setModifyDate(new Date());
             complain.setCreateDate(null);
-//            complain.setId(id);
+
             //type: 0 -确定处理 1-结束流程
             if (type == 0) {
                 complain.setStatus(2);
                 complain.setActualMoney(actualMoney);
-                Complain complain1 = iComplainMapper.selectByPrimaryKey(id);
                 //给工匠加上申诉金额
-                Member member = iMemberMapper.selectByPrimaryKey(complain1.getMemberId());
-                if (member == null) {
-                    return ServerResponse.createByErrorMessage("用户不存在");
-                }
-                member.setSurplusMoney(new BigDecimal(actualMoney).add(member.getSurplusMoney()));
-                member.setModifyDate(new Date());
-                iMemberMapper.updateByPrimaryKeySelective(member);
+//                Member member = iMemberMapper.selectByPrimaryKey(complain.getMemberId());
+//                if (member == null) {
+//                    return ServerResponse.createByErrorMessage("用户不存在");
+//                }
+//                member.setSurplusMoney(new BigDecimal(actualMoney).add(member.getSurplusMoney()));
+//                member.setModifyDate(new Date());
+//                iMemberMapper.updateByPrimaryKeySelective(member);
 
                 //查询维保任务
                 DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(complain.getBusinessId());
@@ -1991,20 +1989,32 @@ public class DjMaintenanceRecordService {
                 DjMaintenanceRecordProduct djMaintenanceRecordProduct = new DjMaintenanceRecordProduct();
                 djMaintenanceRecordProduct.setHouseId(djMaintenanceRecord.getHouseId());
                 djMaintenanceRecordProduct.setMaintenanceRecordId(djMaintenanceRecord.getId());
-                djMaintenanceRecordProduct.setMaintenanceMemberId(complain1.getMemberId());
+                djMaintenanceRecordProduct.setMaintenanceMemberId(complain.getMemberId());
                 djMaintenanceRecordProduct.setMaintenanceProductType(4);
                 djMaintenanceRecordProduct.setTotalPrice(complain.getApplyMoney());
-                djMaintenanceRecordProduct.setPayState(1);
                 //是否过保  1是，0否
                 if(djMaintenanceRecord.getOverProtection() == 0){
                     //未过保
                     djMaintenanceRecordProduct.setPayPrice(0d);
                     djMaintenanceRecordProduct.setOverProtection(djMaintenanceRecord.getOverProtection());
+                    djMaintenanceRecordProduct.setPayState(2);
                 }else if(djMaintenanceRecord.getOverProtection() == 1){
                     //已过保
+                    djMaintenanceRecordProduct.setPayState(1);
                     djMaintenanceRecordProduct.setPayPrice(actualMoney);
                     djMaintenanceRecordProduct.setOverProtection(djMaintenanceRecord.getOverProtection());
+
+                    TaskStack taskStack = new TaskStack();
+                    taskStack.setData(djMaintenanceRecordProduct.getId());
+                    taskStack.setName("工匠申请报销");
+                    taskStack.setType(15);//工匠报销费用申请
+                    taskStack.setMemberId(djMaintenanceRecord.getMemberId());
+                    taskStack.setHouseId(djMaintenanceRecord.getHouseId());
+                    taskStack.setImage("icon/sheji.png");
+                    taskStack.setState(0);
+                    iMasterTaskStackMapper.insert(taskStack);
                 }
+                djMaintenanceRecordProduct.setComplainId(complain.getId());
                 djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct);
 
             }else if(type == 1){
