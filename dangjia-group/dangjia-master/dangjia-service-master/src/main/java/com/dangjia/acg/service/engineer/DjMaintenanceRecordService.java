@@ -2151,7 +2151,16 @@ public class DjMaintenanceRecordService {
             for (DjMaintenanceRecordProduct djMaintenanceRecordProduct : djMaintenanceRecordProducts) {
                 sumPrice.add(BigDecimal.valueOf(djMaintenanceRecordProduct.getPrice() * djMaintenanceRecordProduct.getShopCount()));
             }
-            this.maintenanceMinusDetention(worker,djMaintenanceRecord.getHouseId(),sumPrice,maintenanceRecordId);
+            //扣除原管家滞留金
+            example=new Example(HouseFlow.class);
+            example.createCriteria().andEqualTo(HouseFlow.DATA_STATUS,0)
+                    .andEqualTo(HouseFlow.HOUSE_ID,djMaintenanceRecord.getHouseId())
+                    .andEqualTo(HouseFlow.WORKER_TYPE_ID,3);
+            HouseFlow houseFlow = iHouseFlowMapper.selectOneByExample(example);
+            this.maintenanceMinusDetention(iMemberMapper.selectByPrimaryKey(houseFlow.getWorkerId()),
+                    djMaintenanceRecord.getHouseId(),sumPrice,maintenanceRecordId);
+            //给新工匠钱
+            this.maintenancePremiumCraftsman(worker,djMaintenanceRecord.getHouseId(),sumPrice,maintenanceRecordId);
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
@@ -2176,6 +2185,36 @@ public class DjMaintenanceRecordService {
         workerDetail.setState(14);
         workerDetail.setDefinedWorkerId(maintenanceRecordId);
         workerDetail.setDefinedName("质保维修扣除费用");
+        workerDetail.setHouseWorkerOrderId(maintenanceRecordId);
+        workerDetail.setHaveMoney(sumPrice);
+        workerDetail.setApplyMoney(sumPrice);
+        workerDetail.setWalletMoney(worker.getHaveMoney());
+        workerDetail.setDataStatus(0);
+        iWorkerDetailMapper.insert(workerDetail);
+        iMemberMapper.updateByPrimaryKeySelective(worker);
+    }
+
+
+    /**
+     * 维保费用给新（工匠）
+     * @param worker
+     * @param houseId
+     * @param sumPrice
+     * @param maintenanceRecordId
+     */
+    private void maintenancePremiumCraftsman(Member worker,String houseId,BigDecimal sumPrice,String maintenanceRecordId){
+        worker.setHaveMoney(worker.getHaveMoney().add(sumPrice));
+        worker.setSurplusMoney(worker.getSurplusMoney().add(sumPrice));
+        //生成流水
+        WorkerDetail workerDetail = new WorkerDetail();
+        workerDetail.setName("质保维修工钱");
+        workerDetail.setWorkerId(worker.getId());
+        workerDetail.setWorkerName(worker.getName());
+        workerDetail.setHouseId(houseId);
+        workerDetail.setMoney(sumPrice);
+        workerDetail.setState(2);
+        workerDetail.setDefinedWorkerId(maintenanceRecordId);
+        workerDetail.setDefinedName("质保维修工钱");
         workerDetail.setHouseWorkerOrderId(maintenanceRecordId);
         workerDetail.setHaveMoney(sumPrice);
         workerDetail.setApplyMoney(sumPrice);
