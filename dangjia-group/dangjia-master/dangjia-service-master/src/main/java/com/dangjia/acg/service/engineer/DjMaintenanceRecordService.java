@@ -74,6 +74,7 @@ import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.sun.corba.se.spi.orbutil.threadpool.Work;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -662,8 +663,9 @@ public class DjMaintenanceRecordService {
                         Member worker=iMemberMapper.selectByPrimaryKey(responsiblePartyId);
                         //扣除责任方的钱(工匠）
                         maintenanceMinusDetention(worker,djMaintenanceRecord.getHouseId(),BigDecimal.valueOf(maintenanceTotalPrice),djMaintenanceRecord.getId());
+                        WorkerType workerType=workerTypeMapper.selectByPrimaryKey(templateRatio.getProductResponsibleId());
                         //推送扣款通知给原工匠
-                        //=====================fzh==================
+                        taskStackService.insertTaskStackInfo(houseId,worker.getId(),"维保责任划分",workerType.getImage(),9,djMaintenanceRecord.getId());
                     }
 
                     //3.保存对应的数据到占比表中去
