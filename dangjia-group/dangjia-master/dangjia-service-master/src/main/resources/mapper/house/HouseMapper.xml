@@ -871,7 +871,7 @@
         </if>
         <if test="budgetOk!=null and budgetOk!=''">
             <if test="budgetOk==1">
-                and (h.budget_ok =1 or h.budget_ok = 4)
+                and (h.budget_ok =1 or h.budget_ok = 4 or h.budget_ok = 6)
             </if>
             <choose>
                 <when test="userId != null and userId != ''">

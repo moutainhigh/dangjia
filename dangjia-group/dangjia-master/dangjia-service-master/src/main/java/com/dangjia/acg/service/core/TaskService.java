@@ -469,7 +469,7 @@ public class TaskService {
             taskList.add(task);
         }
         //任务
-        if (house.getBudgetState() == 2) {
+       /* if (house.getBudgetState() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));
             task.setName("精算审核");
@@ -479,7 +479,7 @@ public class TaskService {
             task.setType(3);
             task.setTaskId("");
             taskList.add(task);
-        }
+        }*/
         //验收任务
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
         for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
