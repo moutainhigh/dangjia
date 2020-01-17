@@ -138,7 +138,7 @@ public class WorkerTypeSafeOrderService {
         WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.selectByPrimaryKey(id);
        //判断是否过保
         wtso.setServiceState(2);//已过保
-       if(wtso.getForceTime()!=null&&wtso.getExpirationDate()!=null&& DateUtil.compareDate(wtso.getExpirationDate(),new Date())){
+       if(wtso.getForceTime()!=null&&wtso.getExpirationDate()!=null&& wtso.getExpirationDate().after(new Date())){
            wtso.setServiceState(1);//未过保
         }
         Map map = BeanUtils.beanToMap(wtso);

@@ -150,7 +150,7 @@
     <!--查询所有需报销的维保商品费用-->
     <select id="selectTotalPayPriceByRecordId" resultType="java.lang.Double">
         SELECT
-            sum(mrp.pay_price) payPrice
+            sum(mrp.total_price) payPrice
         FROM
             dj_maintenance_record_product mrp
         WHERE
@@ -162,7 +162,7 @@
     <!--查询工匠可得工钱-->
     <select id="selectWorkerPriceByRecordId" resultType="java.lang.Double">
          SELECT
-            sum(mrp.pay_price) payPrice
+            sum(mrp.total_price) payPrice
         FROM
             dj_maintenance_record_product mrp
         WHERE
@@ -245,7 +245,6 @@
     <select id="selectMaintenaceProductByCategoryId" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
 
         SELECT
-           SELECT
             bsp.id productId,
             bsp.storefront_id storefrontId,
             bsp.id productTemplateId,
@@ -258,7 +257,8 @@
             bpt.unit_id unit,
             bpt.unit_name unitName,
             bpt.value_id_arr valueIdArr,
-            bpt.value_name_arr valueNameArr
+            bpt.value_name_arr valueNameArr,
+            mrp.total_price totalPrice
         FROM
             dj_maintenance_record_product mrp,
             dj_basics_storefront_product bsp,
@@ -384,7 +384,7 @@
         WHERE
             t1.complain_id = t2.id
         AND t1.pay_state = 2
-        AND t1.maintenance_member_id = ''
+        AND t1.maintenance_record_id = #{maintenanceRecordId}
         AND t1.maintenance_product_type = 4
     </select>
 </mapper>

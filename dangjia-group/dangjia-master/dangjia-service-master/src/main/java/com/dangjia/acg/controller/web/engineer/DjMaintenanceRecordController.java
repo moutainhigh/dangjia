@@ -298,19 +298,6 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.queryRobOrderInFo(userToken,workerId,houseId,data);
     }
 
-
-//    @Override
-//    @ApiMethod
-//    public ServerResponse applicationAcceptance(String houseId) {
-//        return djMaintenanceRecordService.applicationAcceptance(houseId);
-//    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse queryGuaranteeMoneyList(PageDTO pageDTO,String userId,String cityId) {
-        return  djMaintenanceRecordService.queryGuaranteeMoneyList(pageDTO,userId,cityId);
-    }
-
     @Override
     @ApiMethod
     public ServerResponse queryGuaranteeMoneyDetail(String userId,String cityId,String id) {
@@ -319,45 +306,11 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse resolved(String userToken, String remark,String houseId,String image,String id,String workerTypeSafeOrderId ) {
-        return djMaintenanceRecordService.resolved(userToken, remark,houseId,image, id, workerTypeSafeOrderId);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse sendingOwners(String userToken,String houseId,String remark ,String enoughAmount) {
-        return djMaintenanceRecordService.sendingOwners(userToken,houseId,remark,enoughAmount);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse auditMaintenance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
-        return djMaintenanceRecordService.auditMaintenance(userToken, remark, houseId, image, id, state, workerTypeSafeOrderId);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse submitQualityAssurance(String userToken, String houseId,
-                                                 String remark,String image,
-                                                 String id, Integer state,
-                                                 String productId,
-                                                 Double price,
-                                                 Double shopCount,
-                                                 String workerTypeSafeOrderId) {
-        return djMaintenanceRecordService.submitQualityAssurance(userToken, houseId, remark, image, id, state, productId, price,
-                shopCount, workerTypeSafeOrderId);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse addApplyNewspaper(String userToken,
-                                             String memberId,
-                                             Double money,
+    public ServerResponse addApplyNewspaper(Double money,
                                              String description,
                                              String image,
-                                             String houseId,
                                             String businessId) {
-        return djMaintenanceRecordService.addApplyNewspaper(userToken, memberId, money, description, image, houseId,businessId);
+        return djMaintenanceRecordService.addApplyNewspaper( money, description, image,businessId);
     }
 
     @Override
@@ -384,8 +337,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse workerApplyCollect(String id,String remarks,String image){
-        return djMaintenanceRecordService.workerApplyCollect(id,remarks,image);
+    public ServerResponse workerApplyCollect(String id,String remark,String image){
+        return djMaintenanceRecordService.workerApplyCollect(id,remark,image);
     }
 
     @Override

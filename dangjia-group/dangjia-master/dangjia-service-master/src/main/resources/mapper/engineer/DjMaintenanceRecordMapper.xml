@@ -3,28 +3,20 @@
 <mapper namespace="com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper">
 
     <sql id="basic_columns">
-            id,
-            steward_processing_time AS stewardProcessingTime,
-            steward_order_time AS stewardOrderTime,
-            member_id AS memberId,
-            house_id AS houseId,
-            owner_name AS ownerName,
-            owner_mobile AS ownerMobile,
-            supervisor_id AS supervisorId,
-            steward_subsidy AS stewardSubsidy,
-            service_remark AS serviceRemark,
-            steward_id AS stewardId,
-            steward_state AS stewardState,
-            since_purchase_amount AS sincePurchaseAmount,
-            remark,
-            owner_state AS ownerState,
-            state,
-            complain_type AS complainType,
-            handle_type AS handleType,
-            user_id AS userId,
-            worker_member_id AS workerMemberId,
-            worker_create_date AS workerCreateDate,
-           worker_type_safe_order_id workerTypeSafeOrderId
+        id,
+        steward_processing_time AS stewardProcessingTime,
+        steward_order_time AS stewardOrderTime,
+        member_id AS memberId,
+        house_id AS houseId,
+        owner_name AS ownerName,
+        owner_mobile AS ownerMobile,
+        steward_id AS stewardId,
+        state,
+        worker_member_id AS workerMemberId,
+        worker_create_date AS workerCreateDate,
+        worker_type_safe_order_id workerTypeSafeOrderId,
+        apply_collect_time applyCollectTime,
+        over_protection overProtection
     </sql>
     <select id="queryDjMaintenanceRecordList" resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO">
         SELECT
