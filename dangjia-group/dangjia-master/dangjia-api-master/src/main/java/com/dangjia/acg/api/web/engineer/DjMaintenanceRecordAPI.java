@@ -79,6 +79,10 @@ public interface DjMaintenanceRecordAPI {
                                              @RequestParam("taskId") String taskId,
                                              @RequestParam("auditResult") Integer auditResult);
 
+    @PostMapping(value = "app/engineer/saveAcceptanceApplicationJob")
+    @ApiOperation(value = "定时任务--工匠维保申请验收，业主到期自动处理任务", notes = "定时任务--工匠维保申请验收，业主到期自动处理任务")
+    void saveAcceptanceApplicationJob();
+
     @PostMapping(value = "app/engineer/saveMaintenanceRecordOrder")
     @ApiOperation(value = "质保申请--提交订单", notes = "质保申请--提交订单")
     ServerResponse saveMaintenanceRecordOrder(@RequestParam("userToken") String userToken,

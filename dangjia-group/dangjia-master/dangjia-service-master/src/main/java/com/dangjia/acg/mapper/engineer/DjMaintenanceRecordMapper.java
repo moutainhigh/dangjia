@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.engineer;
 
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.house.TaskStack;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -25,4 +26,9 @@ public interface DjMaintenanceRecordMapper extends Mapper<DjMaintenanceRecord> {
     //判断是否有正在处理中的质保
     List<DjMaintenanceRecord> selectMaintenanceRecoredByHouseId(@Param("houseId") String houseId,@Param("workerTypeSafeOrderId") String workerTypeSafeOrderId);
 
+    /**
+     * 查询符合条件的，需要处理的任务
+     * @return
+     */
+    List<TaskStack> queryDjMaintenanceRecordListByStateTime();
 }

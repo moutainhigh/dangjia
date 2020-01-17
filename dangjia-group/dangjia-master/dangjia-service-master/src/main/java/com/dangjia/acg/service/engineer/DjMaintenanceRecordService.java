@@ -471,7 +471,7 @@ public class DjMaintenanceRecordService {
                     DjMaintenanceRecordContent djMaintenanceRecordContent=djMaintenanceRecordContentMapper.selectOneByExample(example);
                     if(djMaintenanceRecordContent!=null){
                         map.putAll(BeanUtils.beanToMap(djMaintenanceRecordContent));
-                        map.put("reparirRemainingTime",getRemainingTime(djMaintenanceRecordContent.getCreateDate()));//剩余处理时间戳
+                        map.put("reparirRemainingTime",getRemainingTime(djMaintenanceRecord.getApplyCollectTime()));//剩余处理时间戳
                     }
                     return ServerResponse.createBySuccess("查询成功",map);
                 }else{
@@ -553,6 +553,25 @@ public class DjMaintenanceRecordService {
         }
         return ServerResponse.createBySuccess("未找到需处理的任务");
     }
+
+    /**
+     * 工匠申请维保，到期自动处理
+     */
+    public void saveAcceptanceApplicationJob() {
+        List<TaskStack> taskStackList = djMaintenanceRecordMapper.queryDjMaintenanceRecordListByStateTime();
+        if (taskStackList != null && taskStackList.size() > 0) {
+           for(TaskStack ts:taskStackList){
+               DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(ts.getData());
+               try{
+                   logger.info("验收记录为：taskId={}"+ts.getId());
+                   saveAcceptanceApplication(null,djMaintenanceRecord.getHouseId(),ts.getId(),1);
+               }catch (Exception e){
+                   logger.error("验收异常：",e);
+               }
+           }
+        }
+    }
+
     /**
      * 消息弹窗--提交验收申请结果
      * @param userToken 用户token

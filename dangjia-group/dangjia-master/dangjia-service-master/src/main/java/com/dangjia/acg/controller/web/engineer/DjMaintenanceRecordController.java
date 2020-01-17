@@ -148,6 +148,11 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
             return ServerResponse.createByErrorMessage("提交失败");
         }
     }
+    @Override
+    @ApiMethod
+    public void saveAcceptanceApplicationJob(){
+         djMaintenanceRecordService.saveAcceptanceApplicationJob();
+    }
 
 
     /**
