@@ -21,8 +21,8 @@ public class OptionalLabelController implements OptionalLabelAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addOptionalLabel(OptionalLabel optionalLabel) {
-        return optionalLabelServices.addOptionalLabel(optionalLabel);
+    public ServerResponse addOptionalLabel(String jsonStr) {
+        return optionalLabelServices.addOptionalLabel(jsonStr);
     }
 
     @Override

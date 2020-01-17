@@ -440,9 +440,9 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setWorkerMaintenanceGoods(String userToken, String maintenanceRecordId, String jsonStr) {
+    public ServerResponse setWorkerMaintenanceGoods(String userToken, String maintenanceRecordId, String houseId) {
         try {
-            return djMaintenanceRecordService.setWorkerMaintenanceGoods(userToken,maintenanceRecordId,jsonStr);
+            return djMaintenanceRecordService.setWorkerMaintenanceGoods(userToken,maintenanceRecordId,houseId);
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("操作失败",e);

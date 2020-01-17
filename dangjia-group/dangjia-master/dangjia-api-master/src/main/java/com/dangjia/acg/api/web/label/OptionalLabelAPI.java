@@ -20,7 +20,7 @@ public interface OptionalLabelAPI {
 
     @PostMapping("/web/label/addOptionalLabel")
     @ApiOperation(value = "添加标签", notes = "添加标签")
-    ServerResponse addOptionalLabel(@RequestParam("optionalLabel") OptionalLabel optionalLabel);
+    ServerResponse addOptionalLabel(@RequestParam("jsonStr") String jsonStr);
 
     @PostMapping("/web/label/queryOptionalLabel")
     @ApiOperation(value = "查询标签", notes = "查询标签")

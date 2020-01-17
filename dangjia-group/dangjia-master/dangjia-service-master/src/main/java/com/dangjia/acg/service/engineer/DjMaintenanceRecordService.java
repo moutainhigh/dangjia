@@ -1798,7 +1798,7 @@ public class DjMaintenanceRecordService {
         djMaintenanceRecordProduct1.setPayPrice(0d);
         djMaintenanceRecordProduct1.setPayState(1);
         djMaintenanceRecordProduct1.setTotalPrice(djMaintenanceRecordProduct1.getTotalPrice());
-        djMaintenanceRecordProduct1.setStorefrontId(storefrontProduct.getId());
+        djMaintenanceRecordProduct1.setStorefrontId(storefrontProduct.getStorefrontId());
         djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct1);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
@@ -1907,7 +1907,7 @@ public class DjMaintenanceRecordService {
             map.put("maintenanceMemberId", worker.getId());
             map.put("houseId", houseId);
             map.put("maintenanceRecordId", maintenanceRecordId);
-            map.put("maintenanceMemberType", 3);
+            map.put("maintenanceProductType", 3);
             List<BasicsGoodsCategory> basicsGoodsCategories =
                     djMaintenanceRecordProductMapper.queryGroupByGoodsCategory(map);
             List<MaintenanceShoppingBasketDTO> maintenanceShoppingBasketDTOS = new ArrayList<>();
@@ -2433,13 +2433,13 @@ public class DjMaintenanceRecordService {
         map.put("maintenanceRecordId",maintenanceRecordId);
         if (djMaintenanceRecord.getOverProtection() == 1) {//过保
             map.put("payState",1);
-            map.put("totalPrice",null);
+            map.put("totalPrice",1);
             djMaintenanceRecordProductMapper.setWorkerMaintenanceGoods(map);
             taskStackService.insertTaskStackInfo(houseId,house.getMemberId(),"维保商品费用",workerType.getImage(),14,maintenanceRecordId);
             return ServerResponse.createBySuccessMessage("提交成功,待业主审核");
         } else {//未过保
             map.put("payState",1);
-            map.put("totalPrice",0);
+            map.put("totalPrice",null);
             djMaintenanceRecordProductMapper.setWorkerMaintenanceGoods(map);
             paymentService.generateMaintenanceRecordOrder(userToken,maintenanceRecordId,3,house.getCityId(),null);
         }
