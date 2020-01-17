@@ -349,6 +349,7 @@
           t4.id productTemplateId,
           t2.product_name productName,
           t4.product_sn productSn,
+          t2.unit_name unitName,
           t4.image,
           t2.price price,
           t2.shop_count shopCount,

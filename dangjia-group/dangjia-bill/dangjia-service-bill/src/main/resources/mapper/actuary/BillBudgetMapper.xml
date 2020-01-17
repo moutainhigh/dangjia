@@ -239,6 +239,7 @@
             bm.product_name productName,
             pt.product_sn productSn,
             sp.image image,
+            bm.unit_name unitName,
             bm.price,
             bm.shop_count shopCount,
             bm.total_price actualPaymentPrice,

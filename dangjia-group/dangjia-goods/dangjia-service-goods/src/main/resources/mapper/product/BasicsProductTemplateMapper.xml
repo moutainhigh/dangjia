@@ -349,7 +349,6 @@
 
         bp.id productTemplateId,
         bp.category_id categoryId,
-        bp.id productId,
         bp.product_sn productSn,
         bp.name productName,
         bp.goods_id goodsId,
