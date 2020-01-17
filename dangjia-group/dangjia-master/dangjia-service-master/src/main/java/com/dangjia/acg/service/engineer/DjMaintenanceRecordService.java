@@ -186,7 +186,7 @@ public class DjMaintenanceRecordService {
         }
         //4.判断当前商品质保卡是否在质保期内
         Integer serviveState = 1;//已过保
-        if (workerTypeSafeOrder.getForceTime() != null && workerTypeSafeOrder.getExpirationDate() != null && DateUtil.compareDate(workerTypeSafeOrder.getExpirationDate(), new Date())) {
+        if (workerTypeSafeOrder.getForceTime() != null && workerTypeSafeOrder.getExpirationDate() != null && workerTypeSafeOrder.getExpirationDate().after(new Date())) {
             serviveState = 0;//未过保
         }
         //2.添加质保信息
@@ -197,7 +197,7 @@ public class DjMaintenanceRecordService {
         djMaintenanceRecord.setOwnerMobile(member.getMobile());
         djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
         djMaintenanceRecord.setWorkerTypeId(workerTypeSafeOrder.getWorkerTypeId());
-        djMaintenanceRecord.setState(serviveState                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         );
+        djMaintenanceRecord.setOverProtection(serviveState);
         djMaintenanceRecordMapper.insert(djMaintenanceRecord);
         //3.添加质保对应的图片、备注信息
         DjMaintenanceRecordContent djMaintenanceRecordContent=new DjMaintenanceRecordContent();
@@ -323,6 +323,7 @@ public class DjMaintenanceRecordService {
         paramMap.put("totalPrice",totalPrice);
         paramMap.put("payPrice",payPrice);
         paramMap.put("maintenanceRecordType",maintenanceRecordType);//维保商品类型
+        paramMap.put("maintenanceRecordId",maintenanceRecordId);//维保商品ID
         return  ServerResponse.createBySuccess("查询成功",paramMap);
     }
 
@@ -370,6 +371,7 @@ public class DjMaintenanceRecordService {
                                     totalMoveDost=totalMoveDost.add(new BigDecimal(moveDost));
                                 }
                             }
+                            pMap.put("productList",productlist);
 
                         }
                         param.put("storefrontId",mrp.getStorefrontId());//店铺ID
@@ -378,8 +380,10 @@ public class DjMaintenanceRecordService {
                         param.put("totalPrice",mrp.getTotalPrice());
                         param.put("categoryList",categoryList);
                         totalPrice=totalPrice.add(BigDecimal.valueOf(mrp.getTotalPrice()));//汇总总价
+                        list.add(param);
                     }
                 }
+                resultMap.put("list",list);
                 resultMap.put("totalPrice",totalPrice);//订单总额
                 if(djMaintenanceRecord.getOverProtection()==1){
                     resultMap.put("payPrice",totalPrice.add(totalMoveDost).add(freightPrice));//支付总额
@@ -389,7 +393,7 @@ public class DjMaintenanceRecordService {
                 resultMap.put("stevedorageCost",totalMoveDost);//搬运费
                 resultMap.put("transportationCost",freightPrice);//运费
                 //返回符合条件的数据给前端
-                return ServerResponse.createBySuccess("查询成功","");
+                return ServerResponse.createBySuccess("查询成功",resultMap);
             }
         }
         return ServerResponse.createBySuccess("未找到需处理的任务");
@@ -409,12 +413,7 @@ public class DjMaintenanceRecordService {
             TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
             if(taskStack!=null&&taskStack.getState()==0){
                 DjMaintenanceRecordProduct recordProduct = djMaintenanceRecordProductMapper.selectByPrimaryKey(taskStack.getData());
-                Example example=new Example(Complain.class);
-                example.createCriteria().andEqualTo(Complain.HOUSE_ID,houseId)
-                        .andEqualTo(Complain.BUSINESS_ID,recordProduct.getComplainId())
-                        .andEqualTo(Complain.COMPLAIN_TYPE,9)
-                        .andEqualTo(Complain.STATUS,2);
-                Complain complain=iComplainMapper.selectOneByExample(example);
+                Complain complain=iComplainMapper.selectByPrimaryKey(recordProduct.getComplainId());
                 Map<String,Object> resultMap=BeanUtils.beanToMap(complain);
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 resultMap.put("imageUrl",StringTool.getImage(complain.getImage(),address));
@@ -442,7 +441,7 @@ public class DjMaintenanceRecordService {
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 Map<String,Object> map=new HashMap();
                 DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
-                if(djMaintenanceRecord!=null&& !("2".equals(djMaintenanceRecord.getState())||!"4".equals(djMaintenanceRecord.getState()))&&StringUtils.isNotBlank(djMaintenanceRecord.getWorkerMemberId())){
+                if(djMaintenanceRecord!=null&& !("2".equals(djMaintenanceRecord.getState())||"4".equals(djMaintenanceRecord.getState()))&&StringUtils.isNotBlank(djMaintenanceRecord.getWorkerMemberId())){
                     Member member=iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
                     WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
                     map.put("workerId",member.getId());
@@ -456,8 +455,10 @@ public class DjMaintenanceRecordService {
                     DjMaintenanceRecordContent djMaintenanceRecordContent=djMaintenanceRecordContentMapper.selectOneByExample(example);
                     if(djMaintenanceRecordContent!=null){
                         map.putAll(BeanUtils.beanToMap(djMaintenanceRecordContent));
+                        map.put("imageUrl",StringTool.getImage(djMaintenanceRecordContent.getImage(),address));
                         map.put("reparirRemainingTime",getRemainingTime(djMaintenanceRecord.getApplyCollectTime()));//剩余处理时间戳
                     }
+                    map.put("applyCollectTime",djMaintenanceRecord.getApplyCollectTime());
                     return ServerResponse.createBySuccess("查询成功",map);
                 }else{
                     return ServerResponse.createByErrorMessage("此维保已处理完成，请勿重复处理。");
@@ -478,7 +479,7 @@ public class DjMaintenanceRecordService {
      */
     private long getRemainingTime(Date createDate){
         try{
-            String parayKey="";
+            String parayKey="MAINTENANCE_RECORD_ACCEPTANCE_TIME";
             if(parayKey!=null&&StringUtils.isNotBlank(parayKey)){
                 Config config=iConfigMapper.selectConfigInfoByParamKey(parayKey);//获取对应阶段需处理剩余时间
                 if(config!=null&&StringUtils.isNotBlank(config.getId())){
@@ -506,12 +507,13 @@ public class DjMaintenanceRecordService {
         TaskStack taskStack = taskStackService.selectTaskStackById(taskId);
         if (taskStack != null && taskStack.getState() == 0) {
             DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
-            if(djMaintenanceRecord!=null&&djMaintenanceRecord.getOverProtection()==1){//维保期外的订单才需要支付
-               return   paymentService.generateMaintenanceRecordOrder(userToken,djMaintenanceRecord.getId(),3,cityId,null);
-            }
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
             taskStackService.updateTaskStackInfo(taskStack);
+            if(djMaintenanceRecord!=null&&djMaintenanceRecord.getOverProtection()==1){//维保期外的订单才需要支付
+               return   paymentService.generateMaintenanceRecordOrder(userToken,djMaintenanceRecord.getId(),3,cityId,null);
+            }
+
         }
         return ServerResponse.createBySuccess("未找到需处理的任务");
     }
@@ -529,12 +531,13 @@ public class DjMaintenanceRecordService {
         if (taskStack != null && taskStack.getState() == 0) {
             DjMaintenanceRecordProduct djMaintenanceRecordProduct=djMaintenanceRecordProductMapper.selectByPrimaryKey(taskStack.getData());
             DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(djMaintenanceRecordProduct.getMaintenanceRecordId());
-            if(djMaintenanceRecord!=null&&djMaintenanceRecord.getOverProtection()==1){//维保期外的报销单需走业主支付
-                return   paymentService.generateMaintenanceRecordOrder(userToken,djMaintenanceRecord.getId(),2,cityId,djMaintenanceRecordProduct.getId());
-            }
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
             taskStackService.updateTaskStackInfo(taskStack);
+            if(djMaintenanceRecord!=null&&djMaintenanceRecord.getOverProtection()==1){//维保期外的报销单需走业主支付
+                return   paymentService.generateMaintenanceRecordOrder(userToken,djMaintenanceRecord.getId(),2,cityId,djMaintenanceRecordProduct.getId());
+            }
+
         }
         return ServerResponse.createBySuccess("未找到需处理的任务");
     }
@@ -567,7 +570,7 @@ public class DjMaintenanceRecordService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveAcceptanceApplication(String userToken,String houseId,String taskId,Integer auditResult){
-        if(auditResult==null||(auditResult!=1||auditResult!=2)){
+        if(auditResult==null||(auditResult!=1&&auditResult!=2)){
             return ServerResponse.createByErrorMessage("请选择你的审批意见！");
         }
         Map<String,Object> map=new HashMap<>();
@@ -586,7 +589,7 @@ public class DjMaintenanceRecordService {
 
            }else if(djMaintenanceRecord!=null&&auditResult==1){
                 //验收通过，修改状态为验收通过
-                djMaintenanceRecord.setState(4);
+                djMaintenanceRecord.setState(2);
                 djMaintenanceRecord.setModifyDate(new Date());
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
                 //质保期内的维保，分担责任给到对应的工匠和店铺
@@ -596,8 +599,10 @@ public class DjMaintenanceRecordService {
                 //给新工匠加钱(算出工匠所得工钱)
                 Member worker=iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
                 Double workerPrice=djMaintenanceRecordProductMapper.selectWorkerPriceByRecordId(djMaintenanceRecord.getId());
-                this.maintenancePremiumCraftsman(worker,djMaintenanceRecord.getHouseId(),BigDecimal.valueOf(workerPrice),djMaintenanceRecord.getId());
+                if(workerPrice!=null){
+                    this.maintenancePremiumCraftsman(worker,djMaintenanceRecord.getHouseId(),BigDecimal.valueOf(workerPrice),djMaintenanceRecord.getId());
 
+                }
                 configMessageService.addConfigMessage( AppType.GONGJIANG, djMaintenanceRecord.getWorkerMemberId(),
                         "0", "业主审核通过", String.format(DjConstants.CommonMessage.YEZHU_ACCEPT,member.getName()),2, "业主审核通过");
 
@@ -850,7 +855,7 @@ public class DjMaintenanceRecordService {
                 map.put("claimExpensesProductList",getClaimExpensesProduct(djMaintenanceRecord.getId()));
 
             }
-            return ServerResponse.createBySuccess("查询成功","");
+            return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
@@ -899,7 +904,7 @@ public class DjMaintenanceRecordService {
         }
         if(mr.getWorkerMemberId()!=null&&StringUtils.isNotBlank(mr.getWorkerMemberId())){//工匠信息
             WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mr.getWorkerTypeId());
-            list.add(getWokerMemberInfo(mr.getStewardId(),workerType.getName()));
+            list.add(getWokerMemberInfo(mr.getWorkerMemberId(),workerType.getName()));
         }
         return list;
     }
@@ -909,14 +914,15 @@ public class DjMaintenanceRecordService {
      * @param workerId
      * @return
      */
-    Map<String,Object> getWokerMemberInfo(String workerId,String labelName){
+    private Map<String,Object> getWokerMemberInfo(String workerId,String labelName){
         Map<String,Object> map=new HashMap<>();
+        String address=configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         Member member=iMemberMapper.selectByPrimaryKey(workerId);
         if(member!=null&&StringUtils.isNotBlank(member.getId())){
             map.put("workerId",workerId);
             map.put("workerName",member.getName());
             map.put("labelName",labelName);
-            map.put("headImage",member.getHead());
+            map.put("headImage",address+member.getHead());
         }
         return map;
     }
@@ -2201,24 +2207,26 @@ public class DjMaintenanceRecordService {
      * @param houseId
      */
     public void maintenanceMinusStorefront( String maintenanceRecordId, String houseId,String storefrontId,Double sumPrice) {
-        AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
-        accountFlowRecord.setState(3);
-        accountFlowRecord.setHouseOrderId(houseId);
-        accountFlowRecord.setDefinedAccountId(maintenanceRecordId);
-        accountFlowRecord.setCreateBy("SYSTEM");
-        accountFlowRecord.setHouseOrderId(maintenanceRecordId);
-        Storefront storefront =
-                iMasterStorefrontMapper.selectByPrimaryKey(storefrontId);
-        accountFlowRecord.setAmountBeforeMoney(storefront.getRetentionMoney());//入账前金额
-        storefront.setRetentionMoney(MathUtil.sub(storefront.getRetentionMoney(),sumPrice));
-        //扣除店铺占比金额
-        iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
-        accountFlowRecord.setAmountAfterMoney(storefront.getRetentionMoney());//入账后金额
-        accountFlowRecord.setFlowType("1");
-        accountFlowRecord.setMoney(sumPrice);
-        accountFlowRecord.setDefinedName("店铺维保占比,扣除滞留金：" + sumPrice);
-        //记录流水
-        iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+        if(storefrontId!=null&&StringUtils.isNotBlank(storefrontId)){
+            AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
+            accountFlowRecord.setState(3);
+            accountFlowRecord.setHouseOrderId(houseId);
+            accountFlowRecord.setDefinedAccountId(maintenanceRecordId);
+            accountFlowRecord.setCreateBy("SYSTEM");
+            accountFlowRecord.setHouseOrderId(maintenanceRecordId);
+            Storefront storefront =
+                    iMasterStorefrontMapper.selectByPrimaryKey(storefrontId);
+            accountFlowRecord.setAmountBeforeMoney(storefront.getRetentionMoney());//入账前金额
+            storefront.setRetentionMoney(MathUtil.sub(storefront.getRetentionMoney(),sumPrice));
+            //扣除店铺占比金额
+            iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
+            accountFlowRecord.setAmountAfterMoney(storefront.getRetentionMoney());//入账后金额
+            accountFlowRecord.setFlowType("1");
+            accountFlowRecord.setMoney(sumPrice);
+            accountFlowRecord.setDefinedName("店铺维保占比,扣除滞留金：" + sumPrice);
+            //记录流水
+            iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+        }
     }
 
 

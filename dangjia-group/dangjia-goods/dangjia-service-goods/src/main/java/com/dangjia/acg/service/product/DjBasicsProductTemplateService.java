@@ -327,7 +327,12 @@ public class DjBasicsProductTemplateService {
         product.setProductSn(productSn);//商品编号
         product.setImage(imgStr.toString());//图片地址
         product.setUnitId(basicsProductDTO.getUnitId());//单位
-        product.setUnitName(basicsProductDTO.getUnitName());//单位
+        if(basicsProductDTO.getUnitId()!=null){
+            Unit unit=iUnitMapper.selectByPrimaryKey(basicsProductDTO.getUnitId());
+            if(unit!=null){
+                product.setUnitName(unit.getName());//单位
+            }
+        }
         product.setType(basicsProductDTO.getType()==null?1:basicsProductDTO.getType());//是否禁用0：禁用；1不禁用
         product.setMaket(basicsProductDTO.getMaket()==null?1:basicsProductDTO.getMaket());//是否上架0：不上架；1：上架
         product.setPrice(basicsProductDTO.getPrice());//销售价

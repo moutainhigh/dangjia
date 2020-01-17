@@ -364,6 +364,7 @@ public class TaskService {
             task.setHtmlUrl("");
             task.setType(1);
             task.setTaskId(houseFlow.getId());
+            task.setHouseId(houseId);
             taskList.add(task);
         }
         //查询待确认的工序
@@ -383,6 +384,7 @@ public class TaskService {
                 task.setHtmlUrl("");
                 task.setType(5);
                 task.setTaskId(houseFlow.getId());
+                task.setHouseId(houseId);
                 taskList.add(task);
             }else{
                 //检测到存在未支付的工序，提示业主去支付
@@ -393,6 +395,7 @@ public class TaskService {
                 task.setHtmlUrl("");
                 task.setType(1);
                 task.setTaskId(houseFlow.getId());
+                task.setHouseId(houseId);
                 taskList.add(task);
             }
 
@@ -417,6 +420,7 @@ public class TaskService {
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId(mendOrder.getId());
+            task.setHouseId(houseId);
             taskList.add(task);
         }
         //补人工任务
@@ -435,6 +439,7 @@ public class TaskService {
                 String url = address + String.format(DjConstants.GJPageAddress.REFUNDITEMDETAIL, userToken, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&roleType=1&state=" + mendOrder.getState();
                 task.setHtmlUrl(url);
                 task.setType(3);
+                task.setHouseId(houseId);
                 task.setTaskId(mendOrder.getId());
                 taskList.add(task);
             }
@@ -466,6 +471,7 @@ public class TaskService {
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId("");
+            task.setHouseId(houseId);
             taskList.add(task);
         }
         //任务
@@ -502,6 +508,7 @@ public class TaskService {
                     userToken, house.getCityId(), "验收工匠完工申请", houseFlowApply.getId()));
             task.setType(3);
             task.setTaskId("");
+            task.setHouseId(houseId);
             taskList.add(task);
         }
         return taskList;
