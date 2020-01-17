@@ -31,6 +31,9 @@
              <if test = "workerTypeId!=null and workerTypeId!=''">
                  and bm.worker_type_id = #{workerTypeId}
              </if>
+             <if test = "steta!=null and steta!=''">
+                 and bm.steta = #{steta}
+             </if>
              <if test = "categoryTopId!=null and categoryTopId!=''">
                  and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
              </if>

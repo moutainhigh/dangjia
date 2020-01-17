@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.order;
 
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -13,7 +12,9 @@ import com.dangjia.acg.mapper.actuary.IBillBudgetMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
 import com.dangjia.acg.mapper.order.IBillDeliverOrderAddedProductMapper;
 import com.dangjia.acg.mapper.order.IBillOrderNodeMapper;
-import com.dangjia.acg.mapper.refund.*;
+import com.dangjia.acg.mapper.refund.IBillBasicsGoodsMapper;
+import com.dangjia.acg.mapper.refund.IBillBrandMapper;
+import com.dangjia.acg.mapper.refund.IBillProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.order.OrderNode;
@@ -24,7 +25,6 @@ import com.dangjia.acg.service.refund.RefundAfterSalesService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -229,7 +229,7 @@ public class DecorationCostService {
         try{
             Map<String,Object> map=new HashMap<>();
             //1.查询对应已支付精算的总金额
-            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null);//查询已支付精算的所有金额
+            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null,null);//查询已支付精算的所有金额
             //2.按工序查询已支付定单的汇总
             List<DecorationCostDTO> budgetList=iBillBudgetMapper.selectBudgetWorkerInfoList(houseId);
             //4.获取符合条件的据数返回给前端
@@ -255,7 +255,7 @@ public class DecorationCostService {
 
             Map<String,Object> map=new HashMap<>();
             //1.查询对应已支付精算的总金额
-            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null);//查询已支付精算的所有金额
+            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null,null);//查询已支付精算的所有金额
             //2.按类别查询已支付定单的汇总
             List<DecorationCostDTO> budgetList=iBillBudgetMapper.selectBudgetCategoryInfoList(houseId);
             //4.获取符合条件的据数返回给前端
@@ -322,8 +322,10 @@ public class DecorationCostService {
 
            Map<String,Object> decorationMap=new HashMap<>();
            List<DecorationCostDTO> categoryLabelList=iBillBudgetMapper.searchBudgetCategoryLabelList(houseId,workerTypeId,categoryTopId);
-           Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,workerTypeId,categoryTopId);
+           Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,workerTypeId,categoryTopId,null);
+           Double totalzgPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,workerTypeId,categoryTopId,2);//自购商品汇总
            decorationMap.put("actualPaymentPrice",totalPrice);
+           decorationMap.put("actualSelfPrice",totalzgPrice);
            decorationMap.put("categoryLabelList",categoryLabelList);
            return ServerResponse.createBySuccess("查询成功",decorationMap);
        }catch (Exception e){
