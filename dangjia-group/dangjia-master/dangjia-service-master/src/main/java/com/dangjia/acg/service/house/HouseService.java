@@ -2606,11 +2606,14 @@ public class HouseService {
                 houseFlow.setWorkType(2);//待业主支付
                 houseFlow.setModifyDate(new Date());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
-                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+                //生成任务
+                taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),"大管家待支付",workerType.getImage(),3,houseFlow.getId());
+//                configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
+//                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
                 //推送消息给业主等待大管家抢单
                 configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
-                        "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
+                        "0", "大管家待支付", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
                                 house.getHouseName()), "");
 //                //告知工程部精算已通过
 //                Map<String, String> temp_para = new HashMap();
