@@ -444,5 +444,41 @@ public class ConfigRuleUtilService {
         house.setSchedule("1");
         houseMapper.updateByPrimaryKeySelective(house);
     }
+    /**
+     * 补人工排期设置
+     * @param houseFlow
+     * @param workPrice
+     */
+    public void setAutoSchedulingWorkerType(HouseFlow houseFlow, BigDecimal workPrice) {
+        House house= houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+        DjConfigRuleItemTwo configRuleItemTwo= getApartmentConfig(house.getSquare());
+        List<Map> averageLabourPrice = getAutoSchedulingConfig(ConfigRuleService.PQ102);//平均工价
+        List<Map> defaultNumber = getAutoSchedulingConfig(ConfigRuleService.PQ103);//默认人数
+
+        BigDecimal gongJia=new BigDecimal(0);
+        Integer renShu=0;
+        for (Map map : averageLabourPrice) {
+            if(houseFlow.getWorkerTypeId().equals(map.get(DjConfigRuleItemOne.RANK_ID))){
+                gongJia=new BigDecimal(map.get(configRuleItemTwo.getFieldCode()).toString());
+            }
+        }
+        for (Map map : defaultNumber) {
+            if(houseFlow.getWorkerTypeId().equals(map.get(DjConfigRuleItemOne.RANK_ID))){
+                renShu=Integer.parseInt(map.get("number").toString());
+            }
+        }
+        //工期 = 工序工价 / （户型平均工价（工序）* 默认工人人数）
+        Integer dayNum=(workPrice.intValue()/(gongJia.intValue()*renShu))-1;
+        Date endDate=DateUtil.addDateDays(houseFlow.getEndDate(),dayNum);
+        //如果不包含周末，则加上周末的天数
+        if(house.getIsWeekend()){
+            dayNum = dayNum + DateUtil.getWeekendDay(houseFlow.getEndDate(),endDate);
+        }
+        houseFlow.setEndDate(DateUtil.addDateDays(houseFlow.getEndDate(),dayNum));
+        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+        house.setEndDate(DateUtil.addDateDays(house.getEndDate(),dayNum));
+        houseMapper.updateByPrimaryKeySelective(house);
+    }
 
 }
