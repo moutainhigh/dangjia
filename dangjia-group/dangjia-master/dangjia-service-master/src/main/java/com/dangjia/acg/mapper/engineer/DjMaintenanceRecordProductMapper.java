@@ -3,6 +3,7 @@ package com.dangjia.acg.mapper.engineer;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import org.apache.ibatis.annotations.Param;
@@ -48,6 +49,12 @@ public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRe
     Double selectTotalPayPriceByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId);
 
     /**
+     * 查询工匠所得工钱
+     * @param maintenanceRecordId
+     * @return
+     */
+    Double selectWorkerPriceByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId);
+    /**
      * 查询需报销维保商品的运费，搬运费
      * @param maintenanceRecordId
      * @return
@@ -88,4 +95,8 @@ public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRe
     String selectStorefrontIdByHouseId(@Param("houseId") String houseId,@Param("categoryId") String categoryId);
 
     int setWorkerMaintenanceGoods(Map<String,Object> map);
+
+    List<ActuarialProductAppDTO> selectMaintenanceProductList(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("type") Integer type);
+
+    List<Map<String,Object>> selectClaimExpensesProductList(@Param("maintenanceRecordId") String maintenanceRecordId);
 }

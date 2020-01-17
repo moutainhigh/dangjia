@@ -79,6 +79,10 @@ public interface DjMaintenanceRecordAPI {
                                              @RequestParam("taskId") String taskId,
                                              @RequestParam("auditResult") Integer auditResult);
 
+    @PostMapping(value = "app/engineer/saveAcceptanceApplicationJob")
+    @ApiOperation(value = "定时任务--工匠维保申请验收，业主到期自动处理任务", notes = "定时任务--工匠维保申请验收，业主到期自动处理任务")
+    void saveAcceptanceApplicationJob();
+
     @PostMapping(value = "app/engineer/saveMaintenanceRecordOrder")
     @ApiOperation(value = "质保申请--提交订单", notes = "质保申请--提交订单")
     ServerResponse saveMaintenanceRecordOrder(@RequestParam("userToken") String userToken,
@@ -101,11 +105,18 @@ public interface DjMaintenanceRecordAPI {
                                        @RequestParam("maintenanceRecordId") String maintenanceRecordId,
                                        @RequestParam("cityId") String cityId);
 
+    @PostMapping(value = "web/engineer/queryMaintenanceRecordDetail")
+    @ApiOperation(value = "查询质保详情信息", notes = "查询质保详情信息")
+    ServerResponse queryMaintenanceRecordDetail(@RequestParam("userToken") String userToken,
+                                                @RequestParam("maintenanceRecordId") String maintenanceRecordId);
+
+
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordList")
     @ApiOperation(value = "查询质保审核列表", notes = "查询质保审核列表")
     ServerResponse queryDjMaintenanceRecordList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                 @RequestParam("searchKey") String searchKey,
                                                 @RequestParam("state") Integer state);
+
 
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordDetail")
     @ApiOperation(value = "查询质保审核详情", notes = "查询质保审核详情")

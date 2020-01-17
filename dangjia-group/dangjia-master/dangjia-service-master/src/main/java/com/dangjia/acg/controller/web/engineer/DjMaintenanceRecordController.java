@@ -148,6 +148,11 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
             return ServerResponse.createByErrorMessage("提交失败");
         }
     }
+    @Override
+    @ApiMethod
+    public void saveAcceptanceApplicationJob(){
+         djMaintenanceRecordService.saveAcceptanceApplicationJob();
+    }
 
 
     /**
@@ -202,6 +207,17 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         }
     }
 
+    /**
+     * 查询质保详情记录
+     * @param userToken
+     * @param maintenanceRecordId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public  ServerResponse queryMaintenanceRecordDetail(String userToken,String maintenanceRecordId){
+        return djMaintenanceRecordService.queryMaintenanceRecordDetail(userToken,maintenanceRecordId);
+    }
     @Override
     @ApiMethod
     public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {

@@ -159,6 +159,17 @@
         and mrp.maintenance_product_type in(1,3,4)
     </select>
 
+    <!--查询工匠可得工钱-->
+    <select id="selectWorkerPriceByRecordId" resultType="java.lang.Double">
+         SELECT
+            sum(mrp.pay_price) payPrice
+        FROM
+            dj_maintenance_record_product mrp
+        WHERE
+            mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.pay_state = 2
+        and mrp.maintenance_product_type in(1,4)
+    </select>
     <!-- 查询需报销维保商品的运费，搬运费-->
     <select id="selectProductCostByRecordId" resultType="java.util.Map">
         SELECT
@@ -242,7 +253,7 @@
             bsp.product_name productName,
             bpt.goods_id goodsId,
             mrp.price price,
-            mrp.shop_count shopCount
+            mrp.shop_count shopCount,
             bsp.image,
             bpt.unit_id unit,
             bpt.unit_name unitName,
@@ -260,6 +271,41 @@
         AND mrp.pay_state = 1
         and mrp.storefront_id=#{storefrontId}
         and bpt.category_id=#{categoryId}
+    </select>
+
+
+    <!-- 维保商品信息-->
+    <select id="selectMaintenanceProductList"  resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        SELECT
+            bsp.id productId,
+            bsp.storefront_id storefrontId,
+            bsp.id productTemplateId,
+            bpt.product_sn productSn,
+            bsp.product_name productName,
+            bpt.goods_id goodsId,
+            mrp.price price,
+            mrp.shop_count shopCount,
+            bsp.image,
+            bpt.unit_id unit,
+            bpt.unit_name unitName,
+            bpt.value_id_arr valueIdArr,
+            bpt.value_name_arr valueNameArr,
+            mrp.total_price totalPrice
+        FROM
+            dj_maintenance_record_product mrp,
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt
+        WHERE
+            mrp.product_id = bsp.id
+        AND bsp.prod_template_id = bpt.id
+        AND mrp.maintenance_record_id = #{maintenanceRecordId}
+        <if test="type == 1">
+            AND mrp.maintenance_product_type IN (1, 2, 3)
+        </if>
+        <if test="type == 2">
+            AND mrp.maintenance_product_type IN (1, 3)
+        </if>
+        AND mrp.pay_state = 2
     </select>
 
     <select id="selectStorefrontIdByHouseId" resultType="java.lang.String">
@@ -325,4 +371,20 @@
         AND maintenance_product_type = 3
         AND pay_state = 1
     </update>
+
+    <select id="selectClaimExpensesProductList" resultType="java.util.Map">
+        SELECT
+            t1.pay_price payPrice,
+            t1.total_price totalPrice,
+            t2.description,
+            t2.image
+        FROM
+            dj_maintenance_record_product t1,
+            dj_complain t2
+        WHERE
+            t1.complain_id = t2.id
+        AND t1.pay_state = 2
+        AND t1.maintenance_member_id = ''
+        AND t1.maintenance_product_type = 4
+    </select>
 </mapper>

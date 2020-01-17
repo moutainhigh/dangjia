@@ -71,9 +71,10 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.swagger.annotations.ExampleProperty;
+import com.sun.corba.se.spi.orbutil.threadpool.Work;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -422,13 +423,17 @@ public class DjMaintenanceRecordService {
         try{
             TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
             if(taskStack!=null&&taskStack.getState()==0){
+                DjMaintenanceRecordProduct recordProduct = djMaintenanceRecordProductMapper.selectByPrimaryKey(taskStack.getData());
                 Example example=new Example(Complain.class);
                 example.createCriteria().andEqualTo(Complain.HOUSE_ID,houseId)
-                        .andEqualTo(Complain.BUSINESS_ID,taskStack.getData())
+                        .andEqualTo(Complain.BUSINESS_ID,recordProduct.getComplainId())
                         .andEqualTo(Complain.COMPLAIN_TYPE,9)
                         .andEqualTo(Complain.STATUS,2);
                 Complain complain=iComplainMapper.selectOneByExample(example);
-                return ServerResponse.createBySuccess("查询成功",complain);
+                Map<String,Object> resultMap=BeanUtils.beanToMap(complain);
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                resultMap.put("imageUrl",StringTool.getImage(complain.getImage(),address));
+                return ServerResponse.createBySuccess("查询成功",resultMap);
             }
            return ServerResponse.createBySuccess("未找到需处理的任务");
         }catch (Exception e){
@@ -449,6 +454,7 @@ public class DjMaintenanceRecordService {
         try{
             TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
             if(taskStack!=null&&taskStack.getState()==0){
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 Map<String,Object> map=new HashMap();
                 DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
                 if(djMaintenanceRecord!=null&& !("2".equals(djMaintenanceRecord.getState())||!"4".equals(djMaintenanceRecord.getState()))&&StringUtils.isNotBlank(djMaintenanceRecord.getWorkerMemberId())){
@@ -457,7 +463,7 @@ public class DjMaintenanceRecordService {
                     map.put("workerId",member.getId());
                     map.put("workerName",member.getName());
                     map.put("labelName",workerType.getName());
-                    map.put("headImage",member.getHead());
+                    map.put("headImage",address+member.getHead());
                     //查询申请内容，申请时间
                     Example example=new Example(DjMaintenanceRecordContent.class);
                     example.createCriteria().andEqualTo(DjMaintenanceRecordContent.MAINTENANCE_RECORD_ID,djMaintenanceRecord.getId())
@@ -465,7 +471,7 @@ public class DjMaintenanceRecordService {
                     DjMaintenanceRecordContent djMaintenanceRecordContent=djMaintenanceRecordContentMapper.selectOneByExample(example);
                     if(djMaintenanceRecordContent!=null){
                         map.putAll(BeanUtils.beanToMap(djMaintenanceRecordContent));
-                        map.put("reparirRemainingTime",getRemainingTime(djMaintenanceRecordContent.getCreateDate()));//剩余处理时间戳
+                        map.put("reparirRemainingTime",getRemainingTime(djMaintenanceRecord.getApplyCollectTime()));//剩余处理时间戳
                     }
                     return ServerResponse.createBySuccess("查询成功",map);
                 }else{
@@ -516,7 +522,7 @@ public class DjMaintenanceRecordService {
         if (taskStack != null && taskStack.getState() == 0) {
             DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
             if(djMaintenanceRecord!=null&&djMaintenanceRecord.getOverProtection()==1){//维保期外的订单才需要支付
-             return   paymentService.generateMaintenanceRecordOrder(userToken,djMaintenanceRecord.getId(),3,cityId,null);
+               return   paymentService.generateMaintenanceRecordOrder(userToken,djMaintenanceRecord.getId(),3,cityId,null);
             }
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
@@ -547,6 +553,25 @@ public class DjMaintenanceRecordService {
         }
         return ServerResponse.createBySuccess("未找到需处理的任务");
     }
+
+    /**
+     * 工匠申请维保，到期自动处理
+     */
+    public void saveAcceptanceApplicationJob() {
+        List<TaskStack> taskStackList = djMaintenanceRecordMapper.queryDjMaintenanceRecordListByStateTime();
+        if (taskStackList != null && taskStackList.size() > 0) {
+           for(TaskStack ts:taskStackList){
+               DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(ts.getData());
+               try{
+                   logger.info("验收记录为：taskId={}"+ts.getId());
+                   saveAcceptanceApplication(null,djMaintenanceRecord.getHouseId(),ts.getId(),1);
+               }catch (Exception e){
+                   logger.error("验收异常：",e);
+               }
+           }
+        }
+    }
+
     /**
      * 消息弹窗--提交验收申请结果
      * @param userToken 用户token
@@ -583,15 +608,20 @@ public class DjMaintenanceRecordService {
                 if(djMaintenanceRecord.getOverProtection()==0){
                     insertRecordResponsibleParty(djMaintenanceRecord,houseId);
                 }
+                //给新工匠加钱(算出工匠所得工钱)
+                Member worker=iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
+                Double workerPrice=djMaintenanceRecordProductMapper.selectWorkerPriceByRecordId(djMaintenanceRecord.getId());
+                this.maintenancePremiumCraftsman(worker,djMaintenanceRecord.getHouseId(),BigDecimal.valueOf(workerPrice),djMaintenanceRecord.getId());
+
                 configMessageService.addConfigMessage( AppType.GONGJIANG, djMaintenanceRecord.getWorkerMemberId(),
                         "0", "业主审核通过", String.format(DjConstants.CommonMessage.YEZHU_ACCEPT,member.getName()),2, "业主审核通过");
 
-                Member worker=iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
                 map.put("workerId",worker.getId());
                 map.put("workerName",worker.getName());
                 map.put("labelName",workerType.getName());
-                map.put("headImage",worker.getHead());
+                map.put("headImage",address+worker.getHead());
             }
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
@@ -652,8 +682,9 @@ public class DjMaintenanceRecordService {
                         Member worker=iMemberMapper.selectByPrimaryKey(responsiblePartyId);
                         //扣除责任方的钱(工匠）
                         maintenanceMinusDetention(worker,djMaintenanceRecord.getHouseId(),BigDecimal.valueOf(maintenanceTotalPrice),djMaintenanceRecord.getId());
+                        WorkerType workerType=workerTypeMapper.selectByPrimaryKey(templateRatio.getProductResponsibleId());
                         //推送扣款通知给原工匠
-                        //=====================fzh==================
+                        taskStackService.insertTaskStackInfo(houseId,worker.getId(),"维保责任划分",workerType.getImage(),9,djMaintenanceRecord.getId());
                     }
 
                     //3.保存对应的数据到占比表中去
@@ -802,6 +833,133 @@ public class DjMaintenanceRecordService {
             return ServerResponse.createByErrorMessage("当前订单已结束，请勿重复提交！");
         }
         return ServerResponse.createBySuccessMessage("提交成功");
+    }
+
+    /**
+     * 查询质保详情信息
+     * @param userToken
+     * @param maintenanceRecordId
+     * @return
+     */
+    public  ServerResponse queryMaintenanceRecordDetail(String userToken,String maintenanceRecordId){
+        try{
+            Map<String,Object> map=new HashMap();
+            DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+            if(djMaintenanceRecord!=null){
+                //1.质保申请时间，质保状态，
+                map.put("createDate",djMaintenanceRecord.getCreateDate());
+                map.put("state",djMaintenanceRecord.getState());
+                map.put("stateName",getStateName(djMaintenanceRecord.getState(),djMaintenanceRecord.getWorkerCreateDate()));
+                if(djMaintenanceRecord.getWorkerCreateDate()==null||djMaintenanceRecord.getState()==null){
+                    map.put("buttonCode","endMaintenance");
+                    map.put("buttonName","结束质保");
+                }else{
+                    map.put("buttonCode","");
+                    map.put("buttonName","");
+                }
+                //2.质保参与人员
+                map.put("workerList",getWorkerList(djMaintenanceRecord));
+                //3.维保商品列表
+                map.put("productList",getMaintenanceProductList(djMaintenanceRecord.getId(),1));
+                //4.报销商品列表
+                map.put("claimExpensesProductList",getClaimExpensesProduct(djMaintenanceRecord.getId()));
+
+            }
+            return ServerResponse.createBySuccess("查询成功","");
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+    }
+
+    /**
+     * 查询对应商品信息
+     * @param maintenanceRecordId
+     * @param type 1查详情商品信息，2查分摊责任商品信息
+     * @return
+     */
+    public List<ActuarialProductAppDTO> getMaintenanceProductList(String maintenanceRecordId,Integer type){
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<ActuarialProductAppDTO> productlist = djMaintenanceRecordProductMapper.selectMaintenanceProductList(maintenanceRecordId,type);
+        houseService.getProductList(productlist,address);
+        return productlist;
+    }
+
+    /**
+     * 报销费用商品信息
+     * @param maintenanceRecordId
+     * @return
+     */
+    public List<Map<String,Object>> getClaimExpensesProduct(String maintenanceRecordId){
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<Map<String,Object>> claimExpensesProductList= djMaintenanceRecordProductMapper.selectClaimExpensesProductList(maintenanceRecordId);
+        if(claimExpensesProductList!=null&&claimExpensesProductList.size()>0){
+           for(Map<String,Object> paramMap:claimExpensesProductList){
+               paramMap.put("imageUrl",StringTool.getImage((String)paramMap.get("image"),address));
+           }
+        }
+        return claimExpensesProductList;
+    }
+
+    /**
+     * 获取对应处理人大管家和工匠
+     * @param mr
+     * @return
+     */
+    public List<Map<String,Object>> getWorkerList(DjMaintenanceRecord mr){
+        List<Map<String,Object>> list=new ArrayList();
+        if(mr.getStewardId()!=null&& StringUtils.isNotBlank(mr.getStewardId())){// 大管家信息
+            list.add(getWokerMemberInfo(mr.getStewardId(),"大管家"));
+        }
+        if(mr.getWorkerMemberId()!=null&&StringUtils.isNotBlank(mr.getWorkerMemberId())){//工匠信息
+            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mr.getWorkerTypeId());
+            list.add(getWokerMemberInfo(mr.getStewardId(),workerType.getName()));
+        }
+        return list;
+    }
+
+    /**
+     * 获取对应的工匠信息
+     * @param workerId
+     * @return
+     */
+    Map<String,Object> getWokerMemberInfo(String workerId,String labelName){
+        Map<String,Object> map=new HashMap<>();
+        Member member=iMemberMapper.selectByPrimaryKey(workerId);
+        if(member!=null&&StringUtils.isNotBlank(member.getId())){
+            map.put("workerId",workerId);
+            map.put("workerName",member.getName());
+            map.put("labelName",labelName);
+            map.put("headImage",member.getHead());
+        }
+        return map;
+    }
+   // 状态 1:业主待验收 2:业主已验收 3:业主拒绝验收通过 4结束质保  5 已开工
+    String getStateName(Integer state,Date workerCreateDate){
+        String stateName;
+        if(workerCreateDate==null) {
+            stateName="待工匠接单";
+        }else{
+
+            switch (state) {
+                case 4:
+                    stateName="已提前结束";
+                    break;
+                case 5:
+                case 1:
+                case 3:
+                    stateName="维修中";
+                    break;
+                case 2:
+                    stateName="已完成";
+                    break;
+                default:
+                    stateName="待工匠确认";
+                    break;
+            }
+        }
+        return stateName;
     }
         /**
          * 查询质保审核列表
@@ -1939,7 +2097,6 @@ public class DjMaintenanceRecordService {
 
     /**
      * 处理工匠报销申诉
-     *
      * @param id
      * @return
      */
@@ -1966,20 +2123,19 @@ public class DjMaintenanceRecordService {
             complain.setOperateId(operateId);
             complain.setModifyDate(new Date());
             complain.setCreateDate(null);
-//            complain.setId(id);
+
             //type: 0 -确定处理 1-结束流程
             if (type == 0) {
                 complain.setStatus(2);
                 complain.setActualMoney(actualMoney);
-                Complain complain1 = iComplainMapper.selectByPrimaryKey(id);
                 //给工匠加上申诉金额
-                Member member = iMemberMapper.selectByPrimaryKey(complain1.getMemberId());
-                if (member == null) {
-                    return ServerResponse.createByErrorMessage("用户不存在");
-                }
-                member.setSurplusMoney(new BigDecimal(actualMoney).add(member.getSurplusMoney()));
-                member.setModifyDate(new Date());
-                iMemberMapper.updateByPrimaryKeySelective(member);
+//                Member member = iMemberMapper.selectByPrimaryKey(complain.getMemberId());
+//                if (member == null) {
+//                    return ServerResponse.createByErrorMessage("用户不存在");
+//                }
+//                member.setSurplusMoney(new BigDecimal(actualMoney).add(member.getSurplusMoney()));
+//                member.setModifyDate(new Date());
+//                iMemberMapper.updateByPrimaryKeySelective(member);
 
                 //查询维保任务
                 DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(complain.getBusinessId());
@@ -1991,20 +2147,32 @@ public class DjMaintenanceRecordService {
                 DjMaintenanceRecordProduct djMaintenanceRecordProduct = new DjMaintenanceRecordProduct();
                 djMaintenanceRecordProduct.setHouseId(djMaintenanceRecord.getHouseId());
                 djMaintenanceRecordProduct.setMaintenanceRecordId(djMaintenanceRecord.getId());
-                djMaintenanceRecordProduct.setMaintenanceMemberId(complain1.getMemberId());
+                djMaintenanceRecordProduct.setMaintenanceMemberId(complain.getMemberId());
                 djMaintenanceRecordProduct.setMaintenanceProductType(4);
                 djMaintenanceRecordProduct.setTotalPrice(complain.getApplyMoney());
-                djMaintenanceRecordProduct.setPayState(1);
                 //是否过保  1是，0否
                 if(djMaintenanceRecord.getOverProtection() == 0){
                     //未过保
                     djMaintenanceRecordProduct.setPayPrice(0d);
                     djMaintenanceRecordProduct.setOverProtection(djMaintenanceRecord.getOverProtection());
+                    djMaintenanceRecordProduct.setPayState(2);
                 }else if(djMaintenanceRecord.getOverProtection() == 1){
                     //已过保
+                    djMaintenanceRecordProduct.setPayState(1);
                     djMaintenanceRecordProduct.setPayPrice(actualMoney);
                     djMaintenanceRecordProduct.setOverProtection(djMaintenanceRecord.getOverProtection());
+
+                    TaskStack taskStack = new TaskStack();
+                    taskStack.setData(djMaintenanceRecordProduct.getId());
+                    taskStack.setName("工匠申请报销");
+                    taskStack.setType(15);//工匠报销费用申请
+                    taskStack.setMemberId(djMaintenanceRecord.getMemberId());
+                    taskStack.setHouseId(djMaintenanceRecord.getHouseId());
+                    taskStack.setImage("icon/sheji.png");
+                    taskStack.setState(0);
+                    iMasterTaskStackMapper.insert(taskStack);
                 }
+                djMaintenanceRecordProduct.setComplainId(complain.getId());
                 djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct);
 
             }else if(type == 1){
@@ -2141,7 +2309,16 @@ public class DjMaintenanceRecordService {
             for (DjMaintenanceRecordProduct djMaintenanceRecordProduct : djMaintenanceRecordProducts) {
                 sumPrice.add(BigDecimal.valueOf(djMaintenanceRecordProduct.getPrice() * djMaintenanceRecordProduct.getShopCount()));
             }
-            this.maintenanceMinusDetention(worker,djMaintenanceRecord.getHouseId(),sumPrice,maintenanceRecordId);
+            //扣除原管家滞留金
+            example=new Example(HouseFlow.class);
+            example.createCriteria().andEqualTo(HouseFlow.DATA_STATUS,0)
+                    .andEqualTo(HouseFlow.HOUSE_ID,djMaintenanceRecord.getHouseId())
+                    .andEqualTo(HouseFlow.WORKER_TYPE_ID,3);
+            HouseFlow houseFlow = iHouseFlowMapper.selectOneByExample(example);
+            this.maintenanceMinusDetention(iMemberMapper.selectByPrimaryKey(houseFlow.getWorkerId()),
+                    djMaintenanceRecord.getHouseId(),sumPrice,maintenanceRecordId);
+            //给新工匠钱
+            this.maintenancePremiumCraftsman(worker,djMaintenanceRecord.getHouseId(),sumPrice,maintenanceRecordId);
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
@@ -2166,6 +2343,36 @@ public class DjMaintenanceRecordService {
         workerDetail.setState(14);
         workerDetail.setDefinedWorkerId(maintenanceRecordId);
         workerDetail.setDefinedName("质保维修扣除费用");
+        workerDetail.setHouseWorkerOrderId(maintenanceRecordId);
+        workerDetail.setHaveMoney(sumPrice);
+        workerDetail.setApplyMoney(sumPrice);
+        workerDetail.setWalletMoney(worker.getHaveMoney());
+        workerDetail.setDataStatus(0);
+        iWorkerDetailMapper.insert(workerDetail);
+        iMemberMapper.updateByPrimaryKeySelective(worker);
+    }
+
+
+    /**
+     * 维保费用给新（工匠）
+     * @param worker
+     * @param houseId
+     * @param sumPrice
+     * @param maintenanceRecordId
+     */
+    private void maintenancePremiumCraftsman(Member worker,String houseId,BigDecimal sumPrice,String maintenanceRecordId){
+        worker.setHaveMoney(worker.getHaveMoney().add(sumPrice));
+        worker.setSurplusMoney(worker.getSurplusMoney().add(sumPrice));
+        //生成流水
+        WorkerDetail workerDetail = new WorkerDetail();
+        workerDetail.setName("质保维修工钱");
+        workerDetail.setWorkerId(worker.getId());
+        workerDetail.setWorkerName(worker.getName());
+        workerDetail.setHouseId(houseId);
+        workerDetail.setMoney(sumPrice);
+        workerDetail.setState(2);
+        workerDetail.setDefinedWorkerId(maintenanceRecordId);
+        workerDetail.setDefinedName("质保维修工钱");
         workerDetail.setHouseWorkerOrderId(maintenanceRecordId);
         workerDetail.setHaveMoney(sumPrice);
         workerDetail.setApplyMoney(sumPrice);

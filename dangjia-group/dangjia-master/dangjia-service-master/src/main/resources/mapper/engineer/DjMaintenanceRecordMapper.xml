@@ -193,4 +193,28 @@
         AND state NOT IN (2, 4)
     </select>
 
+    <select id="queryDjMaintenanceRecordListByStateTime" resultType="com.dangjia.acg.modle.house.TaskStack">
+    <![CDATA[
+        SELECT
+            t.id,
+            t.create_date createDate,
+            t.modify_date modifyDate,
+            t.house_id houseId,
+            t.image,
+            t.member_id memberId,
+            t.`name`,
+            t.remarks,
+            t.state,
+            t.type,
+            t.`data`
+        FROM
+            dj_task_stack t,
+            dj_maintenance_record t1
+        WHERE
+           t.state = 0
+        AND t.`data` = t1.id
+        AND t.type = 13
+        AND t1.apply_collect_time <date_add(now(), interval -(select param_value from dj_config where param_key='MAINTENANCE_RECORD_ACCEPTANCE_TIME') hour)
+    ]]>
+    </select>
 </mapper>

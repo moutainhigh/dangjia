@@ -158,7 +158,7 @@ public class HouseController implements HouseAPI {
     @Override
     @ApiMethod
     public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
-        return houseService.setHouseBudgetOk(houseId, budgetOk);
+        return houseService.setHouseBudgetOk(houseId, budgetOk,null);
     }
 
     /**
@@ -170,8 +170,8 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setHouseBudgetOk(String userToken, String houseId, Integer budgetOk) {
-        return houseService.setHouseBudgetOk(houseId, budgetOk);
+    public ServerResponse setHouseBudgetOk(String userToken, String houseId, Integer budgetOk,String taskId) {
+        return houseService.setHouseBudgetOk(houseId, budgetOk,taskId);
     }
 
 

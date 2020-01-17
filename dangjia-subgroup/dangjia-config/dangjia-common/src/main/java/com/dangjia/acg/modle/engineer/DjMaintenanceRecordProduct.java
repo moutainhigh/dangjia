@@ -89,4 +89,10 @@ public class DjMaintenanceRecordProduct extends BaseEntity {
     @Desc(value = "业务支付单号")
     @ApiModelProperty("业务支付单号")
     private String businessOrderNumber;
+
+    @Column(name = "complain_id")
+    @Desc(value = "申诉id(工匠申请报销用)")
+    @ApiModelProperty("申诉id(工匠申请报销用)")
+    private String complainId;
+
 }

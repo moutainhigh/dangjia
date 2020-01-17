@@ -2546,7 +2546,7 @@ public class HouseService {
      * 修改房子精算状态
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
+    public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk,String taskId) {
         try {
             House house = iHouseMapper.selectByPrimaryKey(houseId);
             if (house == null) {
@@ -2560,6 +2560,9 @@ public class HouseService {
                 Double price = iMasterBudgetMapper.getMasterBudgetWorkerPrice(houseId, "3");
                 if (price == 0) {
                     return ServerResponse.createByErrorMessage("大管家没有精算人工费,请重新添加");
+                }else{
+                    //精算审核任务
+                    taskStackService.insertTaskStackInfo(houseId,house.getMemberId(),"精算审核","icon/jingsuan.png",16,houseId);
                 }
             }
             if (house.getBudgetState() == 2 && budgetOk == 2) {
@@ -2677,6 +2680,16 @@ public class HouseService {
             }
             house.setBudgetOk(budgetOk);//精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过
             iHouseMapper.updateByPrimaryKeySelective(house);
+
+            if(taskId!=null){//如果任务不为空，则修改任务
+                TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
+                if(taskStack!=null){
+                    taskStack.setState(1);
+                    taskStack.setModifyDate(new Date());
+                    taskStackService.updateTaskStackInfo(taskStack);
+                }
+            }
+
             return ServerResponse.createBySuccessMessage("修改房子精算状态成功");
         } catch (Exception e) {
             e.printStackTrace();
