@@ -2,7 +2,6 @@ package com.dangjia.acg.service.engineer;
 
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.StorefrontConfigAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -15,11 +14,9 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.actuary.ActuarialProductDTO;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.engineer.*;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
-import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
@@ -47,7 +44,6 @@ import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct;
@@ -74,7 +70,6 @@ import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.sun.corba.se.spi.orbutil.threadpool.Work;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +79,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -118,11 +112,8 @@ public class DjMaintenanceRecordService {
     IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
     private MasterCostAcquisitionService masterCostAcquisitionService;
-
     @Autowired
     private IConfigMapper iConfigMapper;
-    @Autowired
-    private IOrderMapper iOrderMapper;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
@@ -138,26 +129,20 @@ public class DjMaintenanceRecordService {
     private DjMaintenanceRecordContentMapper djMaintenanceRecordContentMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
-
     @Autowired
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
     @Autowired
     private MasterProductTemplateService imasterProductTemplateService;
-
     @Autowired
     private IHouseFlowMapper iHouseFlowMapper;
-
     @Autowired
     private TaskStackService taskStackService;
-
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
-
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private StorefrontConfigAPI storefrontConfigAPI;
-
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -1521,43 +1506,7 @@ public class DjMaintenanceRecordService {
         }
         return type;
     }
-    /**
-     * 确认申请验收
-     * @param houseId
-     * @return
-     */
-//    public ServerResponse applicationAcceptance(String houseId) {
-//        try {
-//            return null;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-//        }
-//    }
 
-    /**
-     * 缴纳质保金列表
-     *
-     * @param pageDTO
-     * @param userId
-     * @param cityId
-     * @return
-     */
-    public ServerResponse queryGuaranteeMoneyList(PageDTO pageDTO, String userId, String cityId) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
-            }
-            List<ResponsiblePartyDTO> list = djMaintenanceRecordResponsiblePartyMapper.queryGuaranteeMoneyList(storefront.getId());
-            PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
 
     /**
      * 缴纳质保金详情
@@ -1594,154 +1543,6 @@ public class DjMaintenanceRecordService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-    /**
-     * 已解决
-     *
-     * @return
-     */
-    public ServerResponse resolved(String userToken, String remark, String houseId, String image, String id, String workerTypeSafeOrderId) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member member = (Member) object;//业主信息
-            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-            House house = houseMapper.selectByPrimaryKey(houseId);
-
-            DjMaintenanceRecordContent record = new DjMaintenanceRecordContent();
-            record.setMaintenanceRecordId(id);
-            record.setRemark(remark);
-            record.setImage(image);
-            record.setMemberId(member.getId());
-            record.setType(1);
-
-            //            configMessageService.addConfigMessage(AppType.SALE, member.getId(), "开工提醒",
-//                    "您申请的维修已经解决【" + house.getHouseName() + "】", 0, url
-//                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
-
-            djMaintenanceRecordContentMapper.insertSelective(record);
-            return ServerResponse.createBySuccessMessage("已解决");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-    /**
-     * (自购金额确认)发送给业主
-     *
-     * @return
-     */
-    public ServerResponse sendingOwners(String userToken, String houseId, String remark, String enoughAmount) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member member = (Member) object;//业主信息
-            StringBuffer sb = new StringBuffer();
-            sb.append(enoughAmount).append(",").append(remark);
-            taskStackService.insertTaskStackInfo(houseId, member.getId(), "(自购金额确认)发送给业主", null, 10, sb.toString());
-            return ServerResponse.createBySuccessMessage("发送成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("(自购金额确认)发送给业主异常");
-        }
-    }
-
-    /**
-     * 管家审核维修
-     *
-     * @param userToken
-     * @param remark
-     * @param houseId
-     * @param image
-     * @param id
-     * @param state
-     * @param workerTypeSafeOrderId
-     * @return
-     */
-    public ServerResponse auditMaintenance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member member = (Member) object;//业主信息
-            DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(id);
-            //djMaintenanceRecord.setRemark(remark);
-            djMaintenanceRecord.setHouseId(houseId);
-            djMaintenanceRecord.setState(state);
-            djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
-            djMaintenanceRecord.setMemberId(member.getId());
-           // djMaintenanceRecord.setStewardState(2);//管家处理状态 1：待处理 2：已处理
-            djMaintenanceRecord.setWorkerTypeId(null);
-            int i = djMaintenanceRecordMapper.updateByPrimaryKey(djMaintenanceRecord);
-            if (i <= 0)
-                return ServerResponse.createByErrorMessage("审核失败");
-            return ServerResponse.createBySuccessMessage("审核成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("管家审核维修异常");
-        }
-    }
-
-
-    /**
-     * 提交质保处理
-     *
-     * @param userToken
-     * @param remark
-     * @param houseId
-     * @param image
-     * @param id
-     * @param state
-     * @param workerTypeSafeOrderId
-     * @return
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ServerResponse submitQualityAssurance(String userToken, String houseId,
-                                                 String remark, String image,
-                                                 String id, Integer state,
-                                                 String productId, Double price, Double shopCount,
-                                                 String workerTypeSafeOrderId) {
-        try {
-            //获取业主信息
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member member = (Member) object;//业主信息
-
-            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-            WorkerTypeSafeOrder workerTypeSafeOrder = workerTypeSafeOrderMapper.selectByPrimaryKey(workerTypeSafeOrderId);//查询保险订单
-            Date createDate = workerTypeSafeOrder.getCreateDate();//人工保险订单的创建时间
-            Date today = new Date(); // new Date()为获取当前系统时间//获取当前时间
-            //质保过期
-            if (today.getTime() > createDate.getTime()) {
-                //生成订单
-                return ServerResponse.createByErrorMessage("质保过期");
-            }
-
-            //维保商品
-            DjMaintenanceRecordProduct djMaintenanceRecordProduct = new DjMaintenanceRecordProduct();
-            djMaintenanceRecordProduct.setProductId(productId);
-            djMaintenanceRecordProduct.setMaintenanceRecordId(id);
-            djMaintenanceRecordProduct.setShopCount(shopCount);
-            djMaintenanceRecordProduct.setPrice(price);
-            djMaintenanceRecordProductMapper.insertSelective(djMaintenanceRecordProduct);
-            // 定则
-            DjMaintenanceRecordResponsibleParty djMaintenanceRecordResponsibleParty = new DjMaintenanceRecordResponsibleParty();
-            djMaintenanceRecordResponsiblePartyMapper.insertSelective(djMaintenanceRecordResponsibleParty);
-            return ServerResponse.createBySuccessMessage("提交成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("提交质保处理异常");
         }
     }
 
@@ -1994,30 +1795,33 @@ public class DjMaintenanceRecordService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse addApplyNewspaper(String userToken,
-                                             String memberId,
-                                             Double money,
+    public ServerResponse addApplyNewspaper( Double money,
                                              String description,
                                              String image,
-                                             String houseId,
                                              String businessId){
         try {
-            Member member = iMemberMapper.selectByPrimaryKey(memberId);
+            if(businessId == null){
+                return  ServerResponse.createByErrorMessage("任务不存在");
+            }
+
+            DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(businessId);
+
+            Member member = iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
             if(member == null){
                 return  ServerResponse.createByErrorMessage("用户不存在");
             }
             Complain complain = new Complain();
-            complain.setMemberId(memberId);
+            complain.setMemberId(member.getId());
             complain.setUserName(member.getName());
             complain.setUserNickName(member.getNickName());
             complain.setUserMobile(member.getMobile());
             complain.setComplainType(9);
-            complain.setHouseId(houseId);
+            complain.setHouseId(djMaintenanceRecord.getHouseId());
             complain.setDescription(description);
             complain.setApplyMoney(money);
             complain.setImage(image);
             complain.setStatus(0);
-            complain.setBusinessId(businessId);
+            complain.setBusinessId(businessId);//维保id
             iComplainMapper.insert(complain);
             return ServerResponse.createBySuccessMessage("提交成功");
         } catch (Exception e) {
@@ -2118,24 +1922,18 @@ public class DjMaintenanceRecordService {
             }
 
             Complain complain = iComplainMapper.selectByPrimaryKey(id);
+            if(complain == null){
+                return ServerResponse.createByErrorMessage("申诉任务不存在");
+            }
             MainUser mainUser = userMapper.selectByPrimaryKey(operateId);
-            complain.setOperateName(mainUser.getUsername());
             complain.setOperateId(operateId);
             complain.setModifyDate(new Date());
             complain.setCreateDate(null);
-
+            complain.setOperateName(mainUser.getUsername());
             //type: 0 -确定处理 1-结束流程
             if (type == 0) {
                 complain.setStatus(2);
                 complain.setActualMoney(actualMoney);
-                //给工匠加上申诉金额
-//                Member member = iMemberMapper.selectByPrimaryKey(complain.getMemberId());
-//                if (member == null) {
-//                    return ServerResponse.createByErrorMessage("用户不存在");
-//                }
-//                member.setSurplusMoney(new BigDecimal(actualMoney).add(member.getSurplusMoney()));
-//                member.setModifyDate(new Date());
-//                iMemberMapper.updateByPrimaryKeySelective(member);
 
                 //查询维保任务
                 DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(complain.getBusinessId());
@@ -2149,7 +1947,7 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordProduct.setMaintenanceRecordId(djMaintenanceRecord.getId());
                 djMaintenanceRecordProduct.setMaintenanceMemberId(complain.getMemberId());
                 djMaintenanceRecordProduct.setMaintenanceProductType(4);
-                djMaintenanceRecordProduct.setTotalPrice(complain.getApplyMoney());
+                djMaintenanceRecordProduct.setTotalPrice(actualMoney);
                 //是否过保  1是，0否
                 if(djMaintenanceRecord.getOverProtection() == 0){
                     //未过保
@@ -2180,8 +1978,6 @@ public class DjMaintenanceRecordService {
                 complain.setRejectReason(rejectReason);
             }
             iComplainMapper.updateByPrimaryKeySelective(complain);
-
-
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -2194,32 +1990,42 @@ public class DjMaintenanceRecordService {
      * 工匠申请维保验收
      *
      * @param id
-     * @param remarks
+     * @param remark
      * @param image
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse workerApplyCollect(String id,String remarks,String image){
+    public ServerResponse workerApplyCollect(String id,String remark,String image){
         try {
             if (CommonUtil.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("任务不存在");
             }
-
             DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(id);
-
             if(djMaintenanceRecord == null){
                 return ServerResponse.createByErrorMessage("该任务不存在");
             }
-
-            //增加工匠验收内容
-            DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
-            djMaintenanceRecordContent.setImage(image);
-            djMaintenanceRecordContent.setRemark(remarks);
-            djMaintenanceRecordContent.setMaintenanceRecordId(id);
-            djMaintenanceRecordContent.setMemberId(djMaintenanceRecord.getMemberId());
-            djMaintenanceRecordContent.setType(1);
-            djMaintenanceRecordContent.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
-            djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
+            if(djMaintenanceRecord.getState() == 3){
+                //二次验收
+                Example example = new Example(DjMaintenanceRecordContent.class);
+                example.createCriteria().andEqualTo(DjMaintenanceRecordContent.DATA_STATUS, 0)
+                        .andEqualTo(DjMaintenanceRecordContent.MAINTENANCE_RECORD_ID,id);
+                List<DjMaintenanceRecordContent> djMaintenanceRecordContents = djMaintenanceRecordContentMapper.selectByExample(example);
+                DjMaintenanceRecordContent dj = djMaintenanceRecordContents.get(0);
+                dj.setImage(image);
+                dj.setRemark(remark);
+                djMaintenanceRecordContentMapper.updateByPrimaryKeySelective(dj);
+            }else{
+                //一次验收
+                //增加工匠验收内容
+                DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
+                djMaintenanceRecordContent.setImage(image);
+                djMaintenanceRecordContent.setRemark(remark);
+                djMaintenanceRecordContent.setMaintenanceRecordId(id);
+                djMaintenanceRecordContent.setMemberId(djMaintenanceRecord.getMemberId());
+                djMaintenanceRecordContent.setType(1);
+                djMaintenanceRecordContent.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
+                djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
+            }
 
             //修改维保状态
             djMaintenanceRecord.setState(1);//业主待验收
@@ -2236,7 +2042,7 @@ public class DjMaintenanceRecordService {
             taskStack.setHouseId(djMaintenanceRecord.getHouseId());
             taskStack.setImage("icon/sheji.png");
             taskStack.setState(0);
-            taskStack.setRemarks(remarks);
+            taskStack.setRemarks(remark);
             iMasterTaskStackMapper.insert(taskStack);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -2256,11 +2062,18 @@ public class DjMaintenanceRecordService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse confirmStart(String businessId){
         try {
-            DjMaintenanceRecord djMaintenanceRecord = new DjMaintenanceRecord();
+
+            if (CommonUtil.isEmpty(businessId)) {
+                return ServerResponse.createByErrorMessage("任务不存在");
+            }
+            DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(businessId);
+
+            if (CommonUtil.isEmpty(djMaintenanceRecord)) {
+                return ServerResponse.createByErrorMessage("任务不存在");
+            }
+
             djMaintenanceRecord.setState(5);
-            djMaintenanceRecord.setId(businessId);
             djMaintenanceRecord.setModifyDate(new Date());
-            djMaintenanceRecord.setCreateDate(null);
             djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

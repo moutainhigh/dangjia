@@ -306,7 +306,9 @@ public class DesignerOperationService {
             return ServerResponse.createByErrorMessage("您无权操作此房产");
         }
         Example examples = new Example(HouseFlow.class);
-        examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE, "1");
+        examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
+                .andEqualTo(HouseFlow.WORKER_TYPE, "1");
+        examples.orderBy(HouseFlow.CREATE_DATE).desc();
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(examples);
         HouseWorkerOrder hwo = null;
         if (houseFlows.size() > 0) {
@@ -346,6 +348,11 @@ public class DesignerOperationService {
                     quantityRoomMapper.insert(quantityRoom);
 
                     house.setDesignerOk(3);
+
+                    //设计结束时间
+                    HouseFlow houseFlow = houseFlows.get(0);
+                    houseFlow.setEndDate(new Date());
+                    houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
                     if (hwo != null) {
                         //订单拿钱更新
