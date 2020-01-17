@@ -2611,7 +2611,7 @@ public class HouseService {
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 //生成任务
-                taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),"大管家待支付",workerType.getImage(),3,houseFlow.getId());
+                taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),"大管家待支付",workerType.getImage(),1,houseFlow.getId());
 //                configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
 //                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
                 //推送消息给业主等待大管家抢单
