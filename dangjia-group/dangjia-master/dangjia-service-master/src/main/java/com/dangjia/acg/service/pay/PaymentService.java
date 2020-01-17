@@ -2188,9 +2188,6 @@ public class PaymentService {
             if (type == 1) {//精算商品
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(taskId);
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-                if (houseFlow.getWorkType() == 2) {
-                    return ServerResponse.createByErrorMessage("等待工匠抢单");
-                }
                 if (houseFlow.getWorkType() == 4) {
                     return ServerResponse.createByErrorMessage("该订单已支付");
                 }
