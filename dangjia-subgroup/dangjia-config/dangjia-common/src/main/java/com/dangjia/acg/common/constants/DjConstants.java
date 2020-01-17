@@ -282,7 +282,7 @@ public class DjConstants {
         public final static String CRAFTSMAN_ABSENTEEISM = "工匠您好！系统检测到您的工地【%s】今日未开工，将扣除您100元，请知晓！";
 
 
-        public final static String ACTUARIAL_COMPLETION = "业主您好！您的美宅【%s】精算已完成，请等待大管家抢单。";
+        public final static String ACTUARIAL_COMPLETION = "业主您好！您的美宅【%s】精算已完成，请查看并支付。";
         public final static String REPLACEMENT_OF_CRAFTSMEN = "工匠您好！经多方协调，【%s】已更换工匠，请查看!";
 
         public final static String LIANGFANGWANCHENG = "业主您好！您的美宅【%s】已完成量房，请查看。";

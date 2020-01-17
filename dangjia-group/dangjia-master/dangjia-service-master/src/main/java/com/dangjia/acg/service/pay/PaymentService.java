@@ -725,6 +725,14 @@ public class PaymentService {
         }
         /*处理保险订单*/
         this.insurance(hwo, payState);
+
+        //修改待处理的任务为已处理
+        TaskStack taskStack=taskStackService.selectTaskStackByHouseIdData(order.getHouseId(),houseFlow.getId());
+        if(taskStack!=null&& !CommonUtil.isEmpty(taskStack.getId())){
+            taskStack.setState(1);
+            taskStack.setModifyDate(new Date());
+            taskStackService.updateTaskStackInfo(taskStack);
+        }
     }
 
 
