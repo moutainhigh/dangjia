@@ -5,7 +5,7 @@
     <!--查询精算总价-->
      <select id="selectTotalPriceByHouseId" resultType="java.lang.Double">
         SELECT
-            sum(tt.total_price) totalPrice
+            IFNULL(sum(tt.total_price),0) totalPrice
         FROM
             (
                SELECT
