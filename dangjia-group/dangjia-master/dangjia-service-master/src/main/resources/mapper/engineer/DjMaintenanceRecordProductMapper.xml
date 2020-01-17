@@ -52,10 +52,10 @@
         INNER JOIN dj_basics_goods_category bgc1 ON bgc1.id = bgc.parent_top
         WHERE 1=1
         <if test="null!=maintenanceMemberId and ''!=maintenanceMemberId">
-            mrp.maintenance_member_id =#{maintenanceMemberId}
+            AND mrp.maintenance_member_id =#{maintenanceMemberId}
         </if>
-        <if test="null!=maintenanceMemberType and ''!=maintenanceMemberType">
-            AND mrp.maintenance_product_type =#{maintenanceMemberType}
+        <if test="null!=maintenanceProductType and ''!=maintenanceProductType">
+            AND mrp.maintenance_product_type =#{maintenanceProductType}
         </if>
         <if test="null!=maintenanceRecordId and ''!=maintenanceRecordId">
             AND mrp.maintenance_record_id =#{maintenanceRecordId}
@@ -83,10 +83,10 @@
         INNER JOIN dj_basics_goods_category bgc ON bgc.id = bpt.category_id
         WHERE bgc.parent_top =#{parentTop}
         <if test="null!=maintenanceMemberId and ''!=maintenanceMemberId">
-            mrp.maintenance_member_id =#{maintenanceMemberId}
+            AND mrp.maintenance_member_id =#{maintenanceMemberId}
         </if>
-        <if test="null!=maintenanceMemberType and ''!=maintenanceMemberType">
-            AND mrp.maintenance_member_type =#{maintenanceMemberType}
+        <if test="null!=maintenanceProductType and ''!=maintenanceProductType">
+            AND mrp.maintenance_product_type =#{maintenanceProductType}
         </if>
         <if test="null!=maintenanceRecordId and ''!=maintenanceRecordId">
             AND mrp.maintenance_record_id =#{maintenanceRecordId}
@@ -361,7 +361,7 @@
         UPDATE dj_maintenance_record_product
         SET
         <if test="null!=totalPrice and ''!=totalPrice">
-            pay_price = #{totalPrice},
+            pay_price = total_price,
         </if>
          pay_state = #{payState}
         WHERE

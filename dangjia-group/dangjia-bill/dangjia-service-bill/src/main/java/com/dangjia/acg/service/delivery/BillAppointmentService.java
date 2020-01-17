@@ -81,6 +81,7 @@ public class BillAppointmentService {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryDjDeliverOrderStorefront(houseId,member.getId());
+            PageInfo pageResult = new PageInfo(orderStorefrontDTOS);
             List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
@@ -97,8 +98,7 @@ public class BillAppointmentService {
             });
             if (appointmentListDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            PageInfo pageResult = new PageInfo(appointmentListDTOS);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            return ServerResponse.createBySuccess("查询成功", appointmentListDTOS);
         } catch (Exception e) {
             logger.info("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败" + e);

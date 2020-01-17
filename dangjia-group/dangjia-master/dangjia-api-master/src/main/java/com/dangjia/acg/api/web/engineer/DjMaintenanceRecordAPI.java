@@ -327,6 +327,6 @@ public interface DjMaintenanceRecordAPI {
     @ApiOperation(value = "工匠维保要货", notes = "工匠维保要货")
     ServerResponse setWorkerMaintenanceGoods(@RequestParam("userToken") String userToken,
                                              @RequestParam("maintenanceRecordId") String maintenanceRecordId,
-                                             @RequestParam("jsonStr") String jsonStr);
+                                             @RequestParam("houseId") String houseId);
 
 }

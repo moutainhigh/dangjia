@@ -334,7 +334,7 @@ public class PaymentService {
                     if(djMaintenanceRecordProduct.getMaintenanceProductType()==1||djMaintenanceRecordProduct.getMaintenanceProductType()==2){//质保和勘查费用订单
                        setHouseWorker(djMaintenanceRecord,djMaintenanceRecordProduct.getMaintenanceProductType(),businessOrder.getTotalPrice());
                     }else if(djMaintenanceRecordProduct.getMaintenanceProductType()==3){//维保材料商品付款后，走要货流程
-                        insertDeliverSplitOrderInfo(businessOrder.getNumber());
+                        insertDeliverSplitOrderInfo(businessOrder.getId());
                     }
                     //修改维保订单的支付状态为已支付
                     djMaintenanceRecordProductMapper.updateRecordProductInfoByBusinessNumber(businessOrder.getMaintenanceRecordId(),businessOrder.getNumber());
@@ -1626,7 +1626,7 @@ public class PaymentService {
                         setHouseWorker(djMaintenanceRecord, maintenanceRecordType, order.getTotalAmount());
                     }else if(maintenanceRecordType==3){// 质保期内的商品
                         //如果是维保生成的要货材料，则生成要货单到对应的店铺
-                        insertDeliverSplitOrderInfo(businessOrder.getNumber());
+                        insertDeliverSplitOrderInfo(businessOrder.getId());
                     }
                 }else if(djMaintenanceRecord.getOverProtection()==1){//过保需业主支付时，则返回业务订单号
                     return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
@@ -1646,7 +1646,7 @@ public class PaymentService {
      */
     public void insertDeliverSplitOrderInfo(String businessOrderNumber){
         BusinessOrder businessOrder=businessOrderMapper.selectByPrimaryKey(businessOrderNumber);
-        List<Order> orderList=orderMapper.byBusinessOrderNumber(businessOrderNumber);
+        List<Order> orderList=orderMapper.byBusinessOrderNumber(businessOrder.getNumber());
         if(orderList!=null&&orderList.size()>0){//查订单表
             for(Order order:orderList){//查订单详情表
                 List<OrderItem> orderItemList=orderItemMapper.byOrderIdList(order.getId());
