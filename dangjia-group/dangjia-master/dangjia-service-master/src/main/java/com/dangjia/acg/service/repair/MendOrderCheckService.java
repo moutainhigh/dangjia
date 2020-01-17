@@ -32,18 +32,17 @@ import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.repair.*;
-import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowScheduleService;
 import com.dangjia.acg.service.deliver.RepairMendOrderService;
@@ -69,6 +68,10 @@ public class MendOrderCheckService {
 
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
+
+
     @Autowired
     private IMendOrderCheckMapper mendOrderCheckMapper;
     @Autowired
@@ -611,8 +614,8 @@ public class MendOrderCheckService {
                 member.setHaveMoney(haveMoney);
                 memberMapper.updateByPrimaryKeySelective(member);
 
-                houseFlowScheduleService.updateFlowSchedule(changeOrder.getHouseId(), changeOrder.getWorkerTypeId(), null, changeOrder.getScheduleDay());
-
+//                houseFlowScheduleService.updateFlowSchedule(changeOrder.getHouseId(), changeOrder.getWorkerTypeId(), null, changeOrder.getScheduleDay());
+                configRuleUtilService.setAutoSchedulingWorkerType(changeOrder.getHouseId(), changeOrder.getWorkerTypeId(),refund,1);
                 //记录流水
                 WorkerDetail workerDetail = new WorkerDetail();
                 workerDetail.setName("退人工退款");

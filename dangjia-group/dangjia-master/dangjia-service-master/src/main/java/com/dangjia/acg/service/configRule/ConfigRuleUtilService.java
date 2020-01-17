@@ -444,12 +444,16 @@ public class ConfigRuleUtilService {
         house.setSchedule("1");
         houseMapper.updateByPrimaryKeySelective(house);
     }
+
     /**
-     * 补人工排期设置
-     * @param houseFlow
-     * @param workPrice
+     * 补、退人工排期设置
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param workPrice 总工钱
+     * @param type 0=补人工  1=退人工
      */
-    public void setAutoSchedulingWorkerType(HouseFlow houseFlow, BigDecimal workPrice) {
+    public void setAutoSchedulingWorkerType(String houseId,  String workerTypeId, BigDecimal workPrice,Integer type) {
+        HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,workerTypeId);
         House house= houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
         DjConfigRuleItemTwo configRuleItemTwo= getApartmentConfig(house.getSquare());
         List<Map> averageLabourPrice = getAutoSchedulingConfig(ConfigRuleService.PQ102);//平均工价
@@ -469,16 +473,29 @@ public class ConfigRuleUtilService {
         }
         //工期 = 工序工价 / （户型平均工价（工序）* 默认工人人数）
         Integer dayNum=(workPrice.intValue()/(gongJia.intValue()*renShu))-1;
-        Date endDate=DateUtil.addDateDays(houseFlow.getEndDate(),dayNum);
-        //如果不包含周末，则加上周末的天数
-        if(house.getIsWeekend()){
-            dayNum = dayNum + DateUtil.getWeekendDay(houseFlow.getEndDate(),endDate);
-        }
-        houseFlow.setEndDate(DateUtil.addDateDays(houseFlow.getEndDate(),dayNum));
-        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+        if(type==0){
+            Date endDate=DateUtil.addDateDays(houseFlow.getEndDate(),dayNum);
+            //如果不包含周末，则加上周末的天数
+            if(house.getIsWeekend()){
+                dayNum = dayNum + DateUtil.getWeekendDay(houseFlow.getEndDate(),endDate);
+            }
+            houseFlow.setEndDate(DateUtil.addDateDays(houseFlow.getEndDate(),dayNum));
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
-        house.setEndDate(DateUtil.addDateDays(house.getEndDate(),dayNum));
-        houseMapper.updateByPrimaryKeySelective(house);
+            house.setEndDate(DateUtil.addDateDays(house.getEndDate(),dayNum));
+            houseMapper.updateByPrimaryKeySelective(house);
+        }else{
+            Date endDate=DateUtil.delDateDays(houseFlow.getEndDate(),dayNum);
+            //如果不包含周末，则加上周末的天数
+            if(house.getIsWeekend()){
+                dayNum = dayNum + DateUtil.getWeekendDay(endDate,houseFlow.getEndDate());
+            }
+            houseFlow.setEndDate(DateUtil.delDateDays(houseFlow.getEndDate(),dayNum));
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+            house.setEndDate(DateUtil.delDateDays(house.getEndDate(),dayNum));
+            houseMapper.updateByPrimaryKeySelective(house);
+        }
     }
 
 }

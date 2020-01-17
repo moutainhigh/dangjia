@@ -30,6 +30,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.house.HouseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -76,6 +77,8 @@ public class HouseWorkerSupService {
     private HouseService houseService;
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
     @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
     @Autowired
