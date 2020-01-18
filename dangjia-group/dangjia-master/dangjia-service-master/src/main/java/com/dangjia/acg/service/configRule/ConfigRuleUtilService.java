@@ -1,6 +1,9 @@
 package com.dangjia.acg.service.configRule;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.configRule.*;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -48,6 +51,8 @@ public class ConfigRuleUtilService {
     @Autowired
     private IOperationFlowMapper operationFlowMapper;
 
+    @Autowired
+    private RedisClient redisClient;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -595,7 +600,7 @@ public class ConfigRuleUtilService {
 
     /**
      * 获取施工积分
-     * @param batchCode 批次号
+     * @param houseId 房子ID
      * @param typeId 类型：
      *                  SG001 = 管家周计划
      *                  SG002 = 管家巡查
@@ -607,51 +612,58 @@ public class ConfigRuleUtilService {
      * @param star 星级（SG003/SG004/SG006时必传）
      * @return
      */
-    public Double getWerkerIntegral(String batchCode,String typeId,BigDecimal evaluationScore,Integer star) {
-            Example example=new Example(DjConfigRuleRank.class);
-            example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
-            List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
-            Double amount=0d;
-            if(configRuleRanks.size()>0){
-                DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
-                String[] typeIds= new String[]{ConfigRuleService.MK003,ConfigRuleService.MK004};
-                example=new Example(DjConfigRuleModule.class);
-                example.createCriteria().andIn(DjConfigRuleModule.TYPE_ID,Arrays.asList(typeIds));
-                DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
-                ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),typeId,batchCode);
-                if(serverResponse.isSuccess()){
-                    List<Map> returnData = (List<Map>) serverResponse.getResultObj();
-                    if(returnData.size()>0){
-                        for (Map returnDatum : returnData) {
-                            if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
-                                String keyVal;
-                                switch (star) {
-                                    case 1:
-                                        keyVal="starOne";
-                                        break;
-                                    case 2:
-                                        keyVal="starTwo";
-                                        break;
-                                    case 3:
-                                        keyVal="starThree";
-                                        break;
-                                    case 4:
-                                        keyVal="starFour";
-                                        break;
-                                    case 5:
-                                        keyVal="starFive";
-                                        break;
-                                    default:
-                                        keyVal="integral";
-                                        break;
-                                }
-                                amount=(Double) returnDatum.get(keyVal);
-                                break;
+    public Double getWerkerIntegral(String houseId,String typeId,BigDecimal evaluationScore,Integer star) {
+        String batchCode = redisClient.getCache(Constants.HOUSE_BATCH + houseId+"-"+typeId, String.class);
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Double amount=0d;
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            String[] typeIds= new String[]{ConfigRuleService.MK003,ConfigRuleService.MK004};
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andIn(DjConfigRuleModule.TYPE_ID,Arrays.asList(typeIds));
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),typeId,batchCode);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(CommonUtil.isEmpty(batchCode)){
+                            batchCode=(String)returnDatum.get(DjConfigRuleItemOne.BATCH_CODE);
+                            redisClient.put(Constants.HOUSE_BATCH + houseId+"-"+typeId,batchCode);
+                        }
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            String keyVal;
+                            switch (star) {
+                                case 1:
+                                    keyVal="starOne";
+                                    break;
+                                case 2:
+                                    keyVal="starTwo";
+                                    break;
+                                case 3:
+                                    keyVal="starThree";
+                                    break;
+                                case 4:
+                                    keyVal="starFour";
+                                    break;
+                                case 5:
+                                    keyVal="starFive";
+                                    break;
+                                default:
+                                    keyVal="integral";
+                                    break;
                             }
+                            amount=(Double) returnDatum.get(keyVal);
+                            break;
                         }
                     }
                 }
             }
-            return amount;
+        }
+        return amount;
     }
+
+
 }

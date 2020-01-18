@@ -88,6 +88,10 @@ public final class Constants {
    **/
   public static final String USER_KEY = "user_";
   /**
+   * 房子规则批次
+   **/
+  public static final String HOUSE_BATCH = "house_batch:";
+  /**
    * 中台城市Key
    **/
   public static final String CITY_KEY = "city_";
