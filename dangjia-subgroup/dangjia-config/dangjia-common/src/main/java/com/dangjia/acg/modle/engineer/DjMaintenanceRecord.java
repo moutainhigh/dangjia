@@ -96,4 +96,9 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("是否过保（1是，0否）")
     private Integer overProtection;
 
+    @Column(name = "end_maintenance_type")
+    @Desc(value = "结束维保人员类型（1:工匠 2:大管家 3：业主）")
+    @ApiModelProperty("结束维保人员类型（1:工匠 2:大管家 3：业主）")
+    private Integer endMaintenanceType;
+
 }

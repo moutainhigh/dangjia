@@ -43,6 +43,7 @@ import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
@@ -708,7 +709,11 @@ public class DjMaintenanceRecordService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveMaintenanceRecordOrder(String userToken,String houseId,String maintenanceRecordId,Integer maintenanceRecordType,String cityId) {
-
+        if(maintenanceRecordType==2){
+            //如果提交勘查费用的订单，则需要把工匠的抢单结束掉
+            DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+            paymentService.updateHouseWorker(maintenanceRecordId,djMaintenanceRecord.getWorkerMemberId());
+        }
         return paymentService.generateMaintenanceRecordOrder(userToken, maintenanceRecordId, maintenanceRecordType, cityId,null);
     }
 
@@ -816,18 +821,22 @@ public class DjMaintenanceRecordService {
             //修改质保单为结束
             djMaintenanceRecord.setState(4);
             djMaintenanceRecord.setModifyDate(new Date());
+            djMaintenanceRecord.setEndMaintenanceType(type);// 结束维保人员类型
             djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
             //2.判断是否为质保期外的，且有已支付的订单
             if(djMaintenanceRecord.getOverProtection()==1){
-                Double payPriceOne=djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId,1);
-                Double payPriceTwo=djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId,2);
-                if(payPriceOne==null){
-                    payPriceOne=0d;
+                Double totalPrice=djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId,1);
+                if(totalPrice==null){
+                    totalPrice=0d;
                 }
-                if(payPriceTwo==null){
-                    payPriceTwo=0d;
+                if(type==3){//若为大管家结束维保，则无需退勘查费用
+                   Double payPriceTwo=djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId,2);
+                   if(payPriceTwo==null) {
+                       payPriceTwo = 0d;
+                   }
+                    totalPrice = MathUtil.add(totalPrice, payPriceTwo);
                 }
-                Double totalPrice=MathUtil.add(payPriceOne,payPriceTwo);
+
                 if(totalPrice>0){
                     //3.退已支付钱给业主
                     /*退钱给业主*/
@@ -887,13 +896,22 @@ public class DjMaintenanceRecordService {
                     map.put("buttonCode","");
                     map.put("buttonName","");
                 }
+                map.put("showType",djMaintenanceRecord.getEndMaintenanceType());
                 //2.质保参与人员
                 map.put("workerList",getWorkerList(djMaintenanceRecord));
-                //3.维保商品列表
-                map.put("productList",getMaintenanceProductList(djMaintenanceRecord.getId(),1));
-                //4.报销商品列表
-                map.put("claimExpensesProductList",getClaimExpensesProduct(djMaintenanceRecord.getId()));
-
+                if(djMaintenanceRecord.getEndMaintenanceType()==1){
+                    //查询工匠提交信息
+                    map.put("maintenaceContentInfo",getMaintenaceRecordInfo(maintenanceRecordId,1));
+                }else if(djMaintenanceRecord.getEndMaintenanceType()==2){
+                    //查询管家提交的信息
+                    map.put("maintenaceContentInfo",getMaintenaceRecordInfo(maintenanceRecordId,2));
+                }else if(djMaintenanceRecord.getEndMaintenanceType()==null){
+                    map.put("showType",4);
+                    //3.维保商品列表
+                    map.put("productList",getMaintenanceProductList(djMaintenanceRecord.getId(),1));
+                    //4.报销商品列表
+                    map.put("claimExpensesProductList",getClaimExpensesProduct(djMaintenanceRecord.getId()));
+                }
             }
             return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
@@ -902,6 +920,29 @@ public class DjMaintenanceRecordService {
         }
 
     }
+
+    /**
+     * 查询结束处理信息
+     * @param maintenanceRecordId
+     * @param type
+     * @return
+     */
+    public Map<String,Object> getMaintenaceRecordInfo(String maintenanceRecordId,Integer type){
+         Map<String,Object> resultMap=new HashMap<>();
+         Example example=new Example(DjMaintenanceRecordContent.class);
+         example.createCriteria().andEqualTo(DjMaintenanceRecordContent.MAINTENANCE_RECORD_ID,maintenanceRecordId)
+                 .andEqualTo(DjMaintenanceRecordContent.TYPE,type);
+         DjMaintenanceRecordContent djMaintenanceRecordContent=djMaintenanceRecordContentMapper.selectOneByExample(example);
+         if(djMaintenanceRecordContent!=null){
+             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+             resultMap=BeanUtils.beanToMap(djMaintenanceRecordContent);
+             resultMap.put("imageUrl",StringTool.getImage(djMaintenanceRecordContent.getImage(),address));
+             WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecordContent.getWorkerTypeId());
+             resultMap.putAll(getWokerMemberInfo(djMaintenanceRecordContent.getMemberId(),workerType.getName()));
+         }
+         return resultMap;
+    }
+
 
     /**
      * 查询对应商品信息

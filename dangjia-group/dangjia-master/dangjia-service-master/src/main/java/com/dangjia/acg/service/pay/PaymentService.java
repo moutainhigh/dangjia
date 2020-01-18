@@ -1745,6 +1745,25 @@ public class PaymentService {
         djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
     }
 
+    /**
+     * 修改工匠抢单状态为已放弃
+     * @param maintenanceRecordId
+     * @param workerId
+     */
+    public void updateHouseWorker(String maintenanceRecordId,String workerId){
+        Example example=new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo(HouseWorker.BUSINESS_ID,maintenanceRecordId)
+                .andEqualTo(HouseWorker.WORKER_ID,workerId)
+                .andEqualTo(HouseWorker.TYPE,2);
+        HouseWorker houseWorker=houseWorkerMapper.selectOneByExample(example);
+        if(houseWorker!=null){
+            houseWorker.setWorkType(8);
+            houseWorker.setIsSelect(0);
+            houseWorker.setModifyDate(new Date());
+            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+        }
+    }
+
 
 
     /**
