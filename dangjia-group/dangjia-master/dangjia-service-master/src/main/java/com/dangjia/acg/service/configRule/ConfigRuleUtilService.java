@@ -666,4 +666,100 @@ public class ConfigRuleUtilService {
     }
 
 
+    /**
+     * 月提现次数上限
+     *
+     * @param evaluationScore 积分
+     * @return
+     */
+    public Integer getWithdrawDepositCount(BigDecimal evaluationScore) {
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Integer amount=1;
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK006);
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),null,null);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            amount=(Integer) returnDatum.get("integral");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
+
+
+    /**
+     * 滞留金每单比例
+     *
+     * @param evaluationScore 积分
+     * @return
+     */
+    public Double getRetentionRatio(BigDecimal evaluationScore) {
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Double amount=0d;
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK007);
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),null,null);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            amount=(Double) returnDatum.get("integral");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
+
+    /**
+     * 指定工种的滞留金上限
+     *
+     * @param evaluationScore 积分
+     * @return
+     */
+    public Double getRetentionUpperLimit(String workerTypeId,BigDecimal evaluationScore) {
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Double amount=0d;
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK008);
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),workerTypeId,null);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            amount=(Double) returnDatum.get("integral");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
 }
