@@ -98,7 +98,8 @@ public class BillAppointmentService {
             });
             if (appointmentListDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功", appointmentListDTOS);
+            pageResult.setList(appointmentListDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.info("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败" + e);

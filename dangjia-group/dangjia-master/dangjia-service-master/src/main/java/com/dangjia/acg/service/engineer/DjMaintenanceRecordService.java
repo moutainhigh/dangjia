@@ -2179,6 +2179,8 @@ public class DjMaintenanceRecordService {
             //给新工匠钱
             this.maintenancePremiumCraftsman(worker,djMaintenanceRecord.getHouseId(),sumPrice,maintenanceRecordId);
         }
+        House house = houseMapper.selectByPrimaryKey(djMaintenanceRecord.getHouseId());
+        this.endMaintenanceRecord(userToken,djMaintenanceRecord.getHouseId(),maintenanceRecordId,house.getCityId(),2);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
