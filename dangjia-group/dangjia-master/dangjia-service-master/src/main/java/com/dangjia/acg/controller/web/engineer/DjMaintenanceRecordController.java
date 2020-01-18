@@ -250,19 +250,6 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.queryMemberList(pageDTO,name);
     }
 
-
-    @Override
-    @ApiMethod
-    public ServerResponse upDateMaintenanceInFo(String supervisorId,
-                                                  Integer stewardSubsidy,
-                                                  String serviceRemark,
-                                                  String userId,
-                                                  String id,
-                                                  Integer handleType) {
-        return djMaintenanceRecordService.upDateMaintenanceInFo(supervisorId,stewardSubsidy
-                ,serviceRemark,userId,id,handleType);
-    }
-
     @Override
     @ApiMethod
     public ServerResponse updateTaskStackData(String id) {
