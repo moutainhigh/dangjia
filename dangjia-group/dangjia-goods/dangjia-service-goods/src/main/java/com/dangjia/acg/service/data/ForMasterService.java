@@ -267,8 +267,11 @@ public class ForMasterService {
     /*********************商品3.0改造 **************************/
 
     public List<ShopGoodsDTO> queryShopGoods(String houseId, String workerTypeId){
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         List<ShopGoodsDTO> budgetLabelDTOS =  budgetMaterialMapper.queryShopGoods(houseId,workerTypeId);
         for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
+            budgetLabelDTO.setShopLogo(CommonUtil.isEmpty(budgetLabelDTO.getShopLogo())?"":imageAddress+budgetLabelDTO.getShopLogo());
+            budgetLabelDTO.setSystemLogo(CommonUtil.isEmpty(budgetLabelDTO.getSystemLogo())?"":imageAddress+budgetLabelDTO.getSystemLogo());
             budgetLabelDTO.setLabelDTOS(queryBudgetLabel(houseId,workerTypeId,budgetLabelDTO.getShopId()));
             BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
             for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
