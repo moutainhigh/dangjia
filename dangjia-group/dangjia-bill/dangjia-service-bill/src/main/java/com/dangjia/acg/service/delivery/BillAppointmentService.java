@@ -194,6 +194,7 @@ public class BillAppointmentService {
                     orderSplit.setCityId(djDeliverOrder.getCityId());
                     orderSplit.setOrderId(orderId);
                     orderSplit.setIsReservationDeliver("1");
+                    orderSplit.setAddressId(djDeliverOrder.getAddressId());
                     orderSplit.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                     billDjDeliverOrderSplitMapper.insert(orderSplit);
                     for (String orderItemsId : orderItemsIds) {
