@@ -68,6 +68,7 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
+import com.dangjia.acg.service.worker.EvaluateService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -123,7 +124,8 @@ public class DjMaintenanceRecordService {
     private IComplainMapper iComplainMapper;
     @Autowired
     private HouseService houseService;
-
+    @Autowired
+    private EvaluateService evaluateService;
     @Autowired
     private IMasterTaskStackMapper iMasterTaskStackMapper;
     @Autowired
@@ -613,6 +615,7 @@ public class DjMaintenanceRecordService {
                 map.put("workerName",worker.getName());
                 map.put("labelName",workerType.getName());
                 map.put("headImage",address+worker.getHead());
+                map.put("maintenanceRecordId",djMaintenanceRecord.getId());
             }
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
@@ -868,6 +871,27 @@ public class DjMaintenanceRecordService {
             return ServerResponse.createByErrorMessage("当前订单已结束，请勿重复提交！");
         }
         return ServerResponse.createBySuccessMessage("提交成功");
+    }
+
+    /**
+     * 质保管理--发表评价
+     * @param userToken
+     * @param houseId 房子ID
+     * @param maintenanceRecordId 质保ID
+     * @param workerId 工匠ID
+     * @param start 星级
+     * @param content 评价内容
+     * @param image 评价图片
+     * @param cityId 城市ID
+     * @return
+     */
+    public ServerResponse evaluationMaintenanceRecord(String userToken,String houseId,String maintenanceRecordId,String workerId,
+                                                      Integer start,String content,String image,String cityId){
+        Member worker=iMemberMapper.selectByPrimaryKey(workerId);
+        if(worker!=null){
+            evaluateService.setEvaluate(houseId,worker,null,maintenanceRecordId,null,3,content,image,start);
+        }
+        return ServerResponse.createBySuccessMessage("评价成功");
     }
 
     /**

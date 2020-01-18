@@ -76,4 +76,9 @@ public class Evaluate extends BaseEntity {
 	@Desc(value = "1为阶段完工评价，2为整体完工评价")
 	@ApiModelProperty("1为阶段完工评价，2为整体完工评价")
 	private Integer applyType;//applytype
+
+	@Column(name = "image")
+	@Desc(value = "图片")
+	@ApiModelProperty("图片")
+	private String image;//图片
 }

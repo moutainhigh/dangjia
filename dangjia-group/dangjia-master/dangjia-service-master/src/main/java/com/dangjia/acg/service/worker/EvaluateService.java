@@ -442,7 +442,7 @@ public class EvaluateService {
      * @param image            图片
      * @param star             星级
      */
-    protected void setEvaluate(String houseId,
+    public void setEvaluate(String houseId,
                                Member worker,
                                String supervisorId,
                                String houseFlowApplyId,
@@ -468,6 +468,7 @@ public class EvaluateService {
         evaluate.setWorkerName(worker.getName());
         evaluate.setState(1);//业主对工人的评价
         evaluate.setApplyType(applyType);
+        evaluate.setImage(image);
         evaluateMapper.insert(evaluate);
         updateIntegral(evaluate);//工人积分
     }
