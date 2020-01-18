@@ -216,6 +216,31 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     }
 
     /**
+     * 质保管理--发表评价
+     * @param userToken
+     * @param houseId 房子ID
+     * @param maintenanceRecordId 质保ID
+     * @param workerId 工匠ID
+     * @param start 星级
+     * @param content 评价内容
+     * @param image 评价图片
+     * @param cityId 城市ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse evaluationMaintenanceRecord(String userToken,String houseId,String maintenanceRecordId,String workerId,
+                                               Integer start,String content,String image,String cityId){
+        try{
+            return djMaintenanceRecordService.evaluationMaintenanceRecord( userToken, houseId, maintenanceRecordId, workerId,
+                     start, content, image, cityId);
+        }catch (Exception e){
+            logger.error("评价失败",e);
+            return ServerResponse.createByErrorMessage("评价失败");
+        }
+    }
+
+    /**
      * 查询质保详情记录
      * @param userToken
      * @param maintenanceRecordId
