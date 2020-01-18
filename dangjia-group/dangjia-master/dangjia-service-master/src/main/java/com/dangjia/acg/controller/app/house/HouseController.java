@@ -163,9 +163,10 @@ public class HouseController implements HouseAPI {
 
     /**
      * app修改房子精算状态
-     *
-     * @param houseId
+     * @param userToken
+     * @param houseId 来源ID
      * @param budgetOk
+     * @param taskId 任务ID
      * @return
      */
     @Override
