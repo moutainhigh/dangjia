@@ -407,7 +407,7 @@ public class EvaluateService {
                 hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
                 hfa.setPayState(0);//是否付款
                 hfa.setType(2);
-                hfa.setApplyDec(StringUtils.isNotBlank(content)?content:"尊敬的业主，您好！<br/>" +
+                hfa.setApplyDec(StringUtils.isNotBlank(content) ? content : "尊敬的业主，您好！<br/>" +
                         "当家大管家【" + supervisor.getName() + "】为您新家质量保驾护航，工地【" + workerType.getName() + "】已" + (houseFlowApply.getApplyType() == 1 ? "阶段完工" : "整体完工") + "，已经根据平台施工验收标准进行验收，未发现漏项及施工不合格情况，请您查收。<br/>");//描述
 //                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1 ? "的阶段完工" : "的整体完工"));//描述
                 hfa.setIsReadType(0);
@@ -422,7 +422,7 @@ public class EvaluateService {
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
             //生成任务
-            taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),"大管家主动验收","icon/sheji.png",3,houseFlowApply.getId());
+            taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -431,15 +431,26 @@ public class EvaluateService {
         }
     }
 
-    private void setEvaluate(String houseId,
-                             Member worker,
-                             String supervisorId,
-                             String houseFlowApplyId,
-                             String houseFlowId,
-                             Integer applyType,
-                             String content,
-                             String image,
-                             Integer star){
+    /**
+     * @param houseId          房子ID
+     * @param worker           工匠
+     * @param supervisorId     大管家id
+     * @param houseFlowApplyId houseFlowApplyId
+     * @param houseFlowId      houseFlowId
+     * @param applyType        1为阶段完工评价，2为整体完工评价 3:维保验收评价
+     * @param content          内容
+     * @param image            图片
+     * @param star             星级
+     */
+    protected void setEvaluate(String houseId,
+                               Member worker,
+                               String supervisorId,
+                               String houseFlowApplyId,
+                               String houseFlowId,
+                               Integer applyType,
+                               String content,
+                               String image,
+                               Integer star) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         Evaluate evaluate = new Evaluate();
         evaluate.setContent(content);
@@ -498,7 +509,7 @@ public class EvaluateService {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if(house.getVisitState()==4){
+            if (house.getVisitState() == 4) {
                 return ServerResponse.createByErrorMessage("已提前结束");
             }
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
@@ -540,7 +551,7 @@ public class EvaluateService {
             //短信通知业务本门
             Map<String, String> temp_para = new HashMap();
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
-            if(workerType.getType()==9) {
+            if (workerType.getType() == 9) {
                 temp_para.put("house_name", house.getHouseName());
                 temp_para.put("worker_name", workerType.getName());
                 JsmsUtil.sendSMS("15675101794", "164425", temp_para);
@@ -583,7 +594,7 @@ public class EvaluateService {
             if (house == null) {
                 return ServerResponse.createByErrorMessage("该房产不存在");
             }
-            if(house.getVisitState()==4){
+            if (house.getVisitState() == 4) {
                 return ServerResponse.createByErrorMessage("已提前结束");
             }
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
