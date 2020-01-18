@@ -46,6 +46,7 @@ import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowScheduleService;
 import com.dangjia.acg.service.deliver.RepairMendOrderService;
+import com.dangjia.acg.service.node.NodeProgressService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,7 +71,8 @@ public class MendOrderCheckService {
     private HouseFlowScheduleService houseFlowScheduleService;
     @Autowired
     private ConfigRuleUtilService configRuleUtilService;
-
+    @Autowired
+    private NodeProgressService nodeProgressService;
 
     @Autowired
     private IMendOrderCheckMapper mendOrderCheckMapper;
@@ -252,27 +254,7 @@ public class MendOrderCheckService {
         }
     }
 
-    /**
-     * //添加进度信息
-     *
-     * @param orderId      订单ID
-     * @param progressType 订单类型
-     * @param nodeType     节点类型
-     * @param nodeCode     节点编码
-     * @param userId       用户id
-     */
-    private void updateOrderProgressInfo(String orderId, String progressType, String nodeType, String nodeCode, String userId) {
-        OrderProgress orderProgress = new OrderProgress();
-        orderProgress.setProgressOrderId(orderId);
-        orderProgress.setProgressType(progressType);
-        orderProgress.setNodeType(nodeType);
-        orderProgress.setNodeCode(nodeCode);
-        orderProgress.setCreateBy(userId);
-        orderProgress.setUpdateBy(userId);
-        orderProgress.setCreateDate(new Date());
-        orderProgress.setModifyDate(new Date());
-        iMasterOrderProgressMapper.insert(orderProgress);
-    }
+
 
     private void editOrderProgressStatus(Integer state, String roleType, String changeOrderId, String auditorId) {
         //退人工审核流水记录
@@ -281,12 +263,12 @@ public class MendOrderCheckService {
                 //更新大管家审核中按钮的状态为已删除
                 iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrderId, "REFUND_AFTER_SALES", "RA_013");
                 //fzh.3.0大管家审核不通过，流水记录
-                updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_014", auditorId);//大管家审核未通过，退人工关闭
+                nodeProgressService.updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_014", auditorId);//大管家审核未通过，退人工关闭
             }
             if ("3".equals(roleType)) {//工匠审核结果
                 iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrderId, "REFUND_AFTER_SALES", "RA_016");
                 //fzh.3.0大管家审核不通过，流水记录
-                updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_017", auditorId);//工匠审核未通过
+                nodeProgressService.updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_017", auditorId);//工匠审核未通过
             }
 
         } else {//审核通过时
@@ -294,13 +276,13 @@ public class MendOrderCheckService {
                 //更新大管家审核中按钮的状态为已删除
                 iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrderId, "REFUND_AFTER_SALES", "RA_013");
                 //fzh.3.0大管家审核通过，流水记录
-                updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_015", auditorId);//大管家审核通过
-                updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_016", auditorId);//工匠家审核中
+                nodeProgressService.updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_015", auditorId);//大管家审核通过
+                nodeProgressService.updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_016", auditorId);//工匠家审核中
             }
             if ("3".equals(roleType)) {//工匠审核结果
                 iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrderId, "REFUND_AFTER_SALES", "RA_016");
                 //fzh.3.0大管家审核不通过，流水记录
-                updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_018", auditorId);//工匠审核通过
+                nodeProgressService.updateOrderProgressInfo(changeOrderId, "2", "REFUND_AFTER_SALES", "RA_018", auditorId);//工匠审核通过
 
             }
         }
@@ -770,7 +752,7 @@ public class MendOrderCheckService {
         //更新业主审核中的为已关闭
         iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrder.getId(), "REFUND_AFTER_SALES", "RA_016");
         //添加审核通过节点
-        updateOrderProgressInfo(changeOrder.getId(), "2", "REFUND_AFTER_SALES", "RA_018", changeOrder.getMemberId());
+        nodeProgressService.updateOrderProgressInfo(changeOrder.getId(), "2", "REFUND_AFTER_SALES", "RA_018", changeOrder.getMemberId());
         //退款给业主，将当前工匠还可笑得余钱减去需退款给业主的钱
         // mendOrderCheckService.settleMendOrder(mendOrder);//退钱给业主(业主申请退人工，工匠审核通过)
         return ServerResponse.createBySuccess("审核通过成功", "");//
@@ -815,7 +797,7 @@ public class MendOrderCheckService {
         //更新业主审核中的为已关闭
         iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrder.getId(), "REFUND_AFTER_SALES", "RA_016");
         //添加审核不通过节点
-        updateOrderProgressInfo(changeOrder.getId(), "2", "REFUND_AFTER_SALES", "RA_017", changeOrder.getWorkerId());
+        nodeProgressService.updateOrderProgressInfo(changeOrder.getId(), "2", "REFUND_AFTER_SALES", "RA_017", changeOrder.getWorkerId());
         return ServerResponse.createBySuccess("审核成功", "");//
     }
 
@@ -904,7 +886,7 @@ public class MendOrderCheckService {
         //更新业主审核中的为已关闭
         iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrder.getId(), "REFUND_AFTER_SALES", "RA_021");
         //添加审核通过节点
-        updateOrderProgressInfo(changeOrder.getId(), "3", "REFUND_AFTER_SALES", "RA_023", changeOrder.getMemberId());
+        nodeProgressService.updateOrderProgressInfo(changeOrder.getId(), "3", "REFUND_AFTER_SALES", "RA_023", changeOrder.getMemberId());
 
         return ServerResponse.createBySuccess("审核通过成功", businessNumber);//生成支付单号给到前端
 
@@ -957,7 +939,7 @@ public class MendOrderCheckService {
         //更新业主审核中的为已关闭
         iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrder.getId(), "REFUND_AFTER_SALES", "RA_021");
         //添加审核不通过节点
-        updateOrderProgressInfo(changeOrder.getId(), "3", "REFUND_AFTER_SALES", "RA_022", changeOrder.getMemberId());
+        nodeProgressService.updateOrderProgressInfo(changeOrder.getId(), "3", "REFUND_AFTER_SALES", "RA_022", changeOrder.getMemberId());
         return ServerResponse.createBySuccessMessage("审核成功");
     }
 

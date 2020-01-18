@@ -65,6 +65,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.node.NodeProgressService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
@@ -160,6 +161,8 @@ public class DjMaintenanceRecordService {
     @Autowired
     private IMasterProductTemplateRatioMapper iMasterProductTemplateRatioMapper;
     @Autowired
+    private NodeProgressService nodeProgressService;
+    @Autowired
     private PaymentService paymentService;
     private static Logger logger = LoggerFactory.getLogger(DjMaintenanceRecordService.class);
 
@@ -213,6 +216,8 @@ public class DjMaintenanceRecordService {
 
         //5.添加维保商品
         insertMaintenanceProductInfo(productId,djMaintenanceRecord,serviveState);
+        //6.添加流水记录
+        nodeProgressService.updateOrderProgressInfo(djMaintenanceRecord.getId(), "5", "MAINTENANCE_NODE", "MN_001", member.getId());//业主申请维修
         return getMaintenaceProductList(djMaintenanceRecord.getId(),1);//业主所选维保商品
     }
 
@@ -616,6 +621,10 @@ public class DjMaintenanceRecordService {
                 map.put("labelName",workerType.getName());
                 map.put("headImage",address+worker.getHead());
                 map.put("maintenanceRecordId",djMaintenanceRecord.getId());
+
+                //节点流水
+                nodeProgressService.updateOrderProgressInfo(djMaintenanceRecord.getId(), "5", "MAINTENANCE_NODE", "MN_006", member.getId());//维修完成
+
             }
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
@@ -715,6 +724,8 @@ public class DjMaintenanceRecordService {
         if(maintenanceRecordType==2){
             //如果提交勘查费用的订单，则需要把工匠的抢单结束掉
             DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+            nodeProgressService.updateOrderProgressInfo(djMaintenanceRecord.getId(), "5", "MAINTENANCE_NODE", "MN_003", djMaintenanceRecord.getMemberId());//业主提交了勘查单
+
             paymentService.updateHouseWorker(maintenanceRecordId,djMaintenanceRecord.getWorkerMemberId());
         }
         return paymentService.generateMaintenanceRecordOrder(userToken, maintenanceRecordId, maintenanceRecordType, cityId,null);
@@ -792,7 +803,7 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordProductMapper.insert(mrp);//添加维保勘查费用商品
             }else{
                 //结束维保
-                return endMaintenanceRecord(userToken,houseId,maintenanceRecordId,cityId,3);
+               return endMaintenanceRecord(userToken,houseId,maintenanceRecordId,cityId,3);
             }
         }
         return getMaintenaceProductList(djMaintenanceRecord.getId(),2);//业主所选维保商品
@@ -865,6 +876,17 @@ public class DjMaintenanceRecordService {
                             "0", "有退款到账啦", String.format(DjConstants.PushMessage.YEZHUENDMAINTENANCE),7, "提前结束维保订单");
 
                 }
+            }
+            if(type==3){//业主结束质保
+                //记录流水
+                nodeProgressService.updateOrderProgressInfo(djMaintenanceRecord.getId(), "5", "MAINTENANCE_NODE", "MN_002", djMaintenanceRecord.getMemberId());//业主提前结束
+            }else if(type==2){//管家结束
+                //记录流水
+                nodeProgressService.updateOrderProgressInfo(djMaintenanceRecord.getId(), "5", "MAINTENANCE_NODE", "MN_004", djMaintenanceRecord.getMemberId());//维修结束
+            }else if(type==1){ //工匠结束质保
+                //记录流水
+                nodeProgressService.updateOrderProgressInfo(djMaintenanceRecord.getId(), "5", "MAINTENANCE_NODE", "MN_007", djMaintenanceRecord.getMemberId());//工匠提前结束
+                nodeProgressService.updateOrderProgressInfo(djMaintenanceRecord.getId(), "5", "MAINTENANCE_NODE", "MN_004", djMaintenanceRecord.getMemberId());//维修结束
             }
 
         }else{
