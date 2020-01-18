@@ -94,9 +94,11 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/workerEndMaintenanceRecord")
     @ApiOperation(value = "工匠结束维保", notes = "工匠结束维保")
-    ServerResponse workerEndMaintenanceRecord(@RequestParam("maintenanceRecordId") String maintenanceRecordId,
+    ServerResponse workerEndMaintenanceRecord(@RequestParam("userToken") String userToken,
+                                              @RequestParam("maintenanceRecordId") String maintenanceRecordId,
                                                @RequestParam("image") String image,
-                                               @RequestParam("remark") String remark);
+                                               @RequestParam("remark") String remark,
+                                              @RequestParam("cityId") String cityId);
 
 
 

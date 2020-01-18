@@ -177,8 +177,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse  workerEndMaintenanceRecord(String maintenanceRecordId,String image,String remark){
-        return djMaintenanceRecordService.workerEndMaintenanceRecord(maintenanceRecordId,image,remark);
+    public ServerResponse  workerEndMaintenanceRecord(String userToken,String maintenanceRecordId,String image,String remark,String cityId){
+        return djMaintenanceRecordService.workerEndMaintenanceRecord(userToken,maintenanceRecordId,image,remark,cityId);
     }
 
 

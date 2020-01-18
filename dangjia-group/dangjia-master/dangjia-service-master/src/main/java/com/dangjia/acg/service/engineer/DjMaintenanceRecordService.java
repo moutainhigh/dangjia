@@ -720,7 +720,7 @@ public class DjMaintenanceRecordService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse workerEndMaintenanceRecord(String maintenanceRecordId,String image,String remark){
+    public ServerResponse workerEndMaintenanceRecord(String userToken,String maintenanceRecordId,String image,String remark,String cityId){
         try {
 
             if (CommonUtil.isEmpty(maintenanceRecordId)) {
@@ -741,7 +741,7 @@ public class DjMaintenanceRecordService {
             djMaintenanceRecordContent.setMemberId(djMaintenanceRecord.getWorkerMemberId());
             djMaintenanceRecordContent.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
             djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
-            endMaintenanceRecord(null,maintenanceRecordId,null,null,1);
+            endMaintenanceRecord(userToken,djMaintenanceRecord.getHouseId(),maintenanceRecordId,cityId,1);
             return ServerResponse.createBySuccessMessage("提交成功");
         } catch (Exception e) {
             e.printStackTrace();
