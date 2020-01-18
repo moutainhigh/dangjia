@@ -891,7 +891,7 @@ public class DjMaintenanceRecordService {
         if(worker!=null){
             evaluateService.setEvaluate(houseId,worker,null,maintenanceRecordId,null,3,content,image,start);
         }
-        return ServerResponse.createByErrorMessage("评价成功");
+        return ServerResponse.createBySuccessMessage("评价成功");
     }
 
     /**
