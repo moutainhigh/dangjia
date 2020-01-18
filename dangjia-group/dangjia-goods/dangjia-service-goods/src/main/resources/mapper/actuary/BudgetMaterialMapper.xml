@@ -386,8 +386,8 @@
 	<select id="queryShopGoods" resultType="com.dangjia.acg.dto.actuary.ShopGoodsDTO">
 	SELECT
 		l.id shopId,
-		l.storefront_name shopName
-		l.storefront_logo shopLogo
+		l.storefront_name shopName,
+		l.storefront_logo shopLogo,
 		l.system_logo systemLogo
 	FROM
 		dj_basics_storefront l
