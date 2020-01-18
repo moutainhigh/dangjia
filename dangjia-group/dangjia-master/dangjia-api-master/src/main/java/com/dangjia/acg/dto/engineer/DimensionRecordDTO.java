@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.engineer;
 
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import lombok.Data;
 
 import java.util.Date;
@@ -27,16 +28,19 @@ public class DimensionRecordDTO {
     private String stewardRemark;//自购备注
     private Integer type;//0-申诉 1-申诉中  2-已完成
     private String finishDate;//完工时间
-    private List<DjMaintenanceRecordProductDTO> djMaintenanceRecordProductDTOS;//维保商品列表
-
+//    private List<DjMaintenanceRecordProductDTO> djMaintenanceRecordProductDTOS;//维保商品列表
+    private List<ActuarialProductAppDTO> productList;//维保商品列表
+    private Double totalPrice;//商品总额
+    private Double maintenanceTotalPrice;//付款金额
     private String str;//备注
     private String ownerName;//业主名称;
     private Double square;//房子面积
     private String serviceRemark;//客服备注
-
     private List<Map<String,Object>> list;//详情
-
     private String workerTypeId;//工种id
     private Integer pageType;//1-工匠先进场,2管家先进场
     private Integer primaryType;//1-原工匠,2 非原工匠
+
+
+    private List<Map<String,Object>> reimbursementInFo;//报销信息
 }
