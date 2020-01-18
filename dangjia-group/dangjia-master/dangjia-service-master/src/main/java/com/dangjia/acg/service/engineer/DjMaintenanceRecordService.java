@@ -712,6 +712,42 @@ public class DjMaintenanceRecordService {
         return paymentService.generateMaintenanceRecordOrder(userToken, maintenanceRecordId, maintenanceRecordType, cityId,null);
     }
 
+    /**
+     * 工匠提前结束
+     * @param maintenanceRecordId
+     * @param image
+     * @param remark
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse workerEndMaintenanceRecord(String userToken,String maintenanceRecordId,String image,String remark,String cityId){
+        try {
+
+            if (CommonUtil.isEmpty(maintenanceRecordId)) {
+                return ServerResponse.createByErrorMessage("maintenanceRecordId不能为空");
+            }
+
+            DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+
+            if(djMaintenanceRecord == null ){
+                return ServerResponse.createByErrorMessage("该任务不存在");
+            }
+
+            DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
+            djMaintenanceRecordContent.setRemark(remark);
+            djMaintenanceRecordContent.setImage(image);
+            djMaintenanceRecordContent.setMaintenanceRecordId(maintenanceRecordId);
+            djMaintenanceRecordContent.setType(1);
+            djMaintenanceRecordContent.setMemberId(djMaintenanceRecord.getWorkerMemberId());
+            djMaintenanceRecordContent.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
+            djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
+            endMaintenanceRecord(userToken,djMaintenanceRecord.getHouseId(),maintenanceRecordId,cityId,1);
+            return ServerResponse.createBySuccessMessage("提交成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
 
     /**
      * 提前结束，返回维保订单商品
@@ -752,12 +788,15 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordProductMapper.insert(mrp);//添加维保勘查费用商品
             }else{
                 //结束维保
-                return endMaintenanceRecord(userToken,houseId,maintenanceRecordId,cityId);
+                return endMaintenanceRecord(userToken,houseId,maintenanceRecordId,cityId,3);
             }
         }
         return getMaintenaceProductList(djMaintenanceRecord.getId(),2);//业主所选维保商品
 
     }
+
+
+
 
     /**
      * 提前结束，结束维保
@@ -766,10 +805,11 @@ public class DjMaintenanceRecordService {
      * @param houseId
      * @param maintenanceRecordId
      * @param cityId
+     * @param type 1:工匠 2:大管家 3：业主',
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse endMaintenanceRecord(String userToken,String houseId,String maintenanceRecordId,String cityId){
+    public ServerResponse endMaintenanceRecord(String userToken,String houseId,String maintenanceRecordId,String cityId,Integer type){
         //1.结束当前维保
         DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
         if(djMaintenanceRecord!=null&&!("2".equals(djMaintenanceRecord.getState())||"4".equals(djMaintenanceRecord.getState()))){
@@ -2139,6 +2179,8 @@ public class DjMaintenanceRecordService {
             //给新工匠钱
             this.maintenancePremiumCraftsman(worker,djMaintenanceRecord.getHouseId(),sumPrice,maintenanceRecordId);
         }
+        House house = houseMapper.selectByPrimaryKey(djMaintenanceRecord.getHouseId());
+        this.endMaintenanceRecord(userToken,djMaintenanceRecord.getHouseId(),maintenanceRecordId,house.getCityId(),2);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 

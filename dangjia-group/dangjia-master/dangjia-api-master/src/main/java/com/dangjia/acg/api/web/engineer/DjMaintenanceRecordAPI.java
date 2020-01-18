@@ -91,6 +91,17 @@ public interface DjMaintenanceRecordAPI {
                                               @RequestParam("maintenanceRecordType") Integer maintenanceRecordType,
                                               @RequestParam("cityId") String cityId);
 
+
+    @PostMapping(value = "app/engineer/workerEndMaintenanceRecord")
+    @ApiOperation(value = "工匠结束维保", notes = "工匠结束维保")
+    ServerResponse workerEndMaintenanceRecord(@RequestParam("userToken") String userToken,
+                                              @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                               @RequestParam("image") String image,
+                                               @RequestParam("remark") String remark,
+                                              @RequestParam("cityId") String cityId);
+
+
+
     @PostMapping(value = "app/engineer/endMaintenanceSearchProduct")
     @ApiOperation(value = "提前结束--勘查费用商品页面", notes = "提前结束--勘查费用商品页面")
     ServerResponse endMaintenanceSearchProduct(@RequestParam("userToken") String userToken,

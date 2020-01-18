@@ -174,6 +174,14 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         }
     }
 
+
+    @Override
+    @ApiMethod
+    public ServerResponse  workerEndMaintenanceRecord(String userToken,String maintenanceRecordId,String image,String remark,String cityId){
+        return djMaintenanceRecordService.workerEndMaintenanceRecord(userToken,maintenanceRecordId,image,remark,cityId);
+    }
+
+
     /**
      * 提前结束--勘查费用商品页面
      * @param userToken
@@ -200,7 +208,7 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     @ApiMethod
     public ServerResponse endMaintenanceRecord(String userToken,String houseId,String maintenanceRecordId,String cityId){
         try{
-            return djMaintenanceRecordService.endMaintenanceRecord(userToken,houseId,maintenanceRecordId,cityId);
+            return djMaintenanceRecordService.endMaintenanceRecord(userToken,houseId,maintenanceRecordId,cityId,3);
         }catch (Exception e){
             logger.error("提交失败",e);
             return ServerResponse.createByErrorMessage("提交失败");
