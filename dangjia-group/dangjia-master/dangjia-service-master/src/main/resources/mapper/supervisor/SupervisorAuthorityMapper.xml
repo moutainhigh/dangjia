@@ -343,7 +343,8 @@
         h.start_date AS startDate,
         h.end_date AS endDate,
         <if test="sortNum!=null and sortNum ==8">
-            dmr.since_purchase_amount AS price,
+            mrp.total_price AS price,
+            mrp.maintenance_record_id maintenanceRecordId,
         </if>
         <if test="type!=null and type ==1">
             ROUND(
@@ -413,6 +414,7 @@
         </if>
         <if test="sortNum!=null and sortNum ==8">
             INNER JOIN dj_maintenance_record dmr ON dmr.house_id = h.id
+            INNER JOIN DJ_maintenance_record_product mrp on dmr.id=mrp.maintenance_record_id
         </if>
         WHERE
         h.data_status = 0
@@ -436,6 +438,10 @@
         <if test="sortNum!=null and sortNum ==5">
             AND h.visit_state = 1
         </if>
+        <!--查询维保商品-->
+        <if test="sortNum!=null and sortNum ==8">
+            and mrp.maintenance_product_type = 1
+        </if>
         <if test="searchKey!=null and searchKey!=''">
             and CONCAT(
             h.residential,
@@ -448,9 +454,6 @@
             or ma.address like CONCAT('%',#{searchKey},'%')
             )
         </if>
-        <if test="sortNum!=null and sortNum ==8">
-            GROUP BY dmr.house_id
-        </if>
         <if test="type!=null and type ==1">
             ORDER BY
             juli ASC
@@ -461,11 +464,11 @@
         </if>
         <if test="sortNum!=null and sortNum ==8 and type !=null and type ==2">
             ORDER BY
-            dmr.since_purchase_amount DESC
+            mrp.total_price DESC
         </if>
         <if test="sortNum!=null and sortNum ==8 and type !=null and type ==3">
             ORDER BY
-            dmr.since_purchase_amount ASC
+            mrp.total_price ASC
         </if>
     </select>
 

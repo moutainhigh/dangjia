@@ -12,6 +12,7 @@ import com.dangjia.acg.dto.supervisor.SupHouseDetailsDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
@@ -20,12 +21,14 @@ import com.dangjia.acg.mapper.supervisor.ISupervisorAuthorityMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.supervisor.SupervisorAuthority;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.engineer.DjMaintenanceRecordService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +68,10 @@ public class SupervisorAppService {
     private IModelingVillageMapper modelingVillageMapper;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
+    @Autowired
+    private DjMaintenanceRecordService djMaintenanceRecordService;
 
     /**
      * 督导首页数据获取
@@ -118,6 +125,18 @@ public class SupervisorAppService {
             if (sortNum == 8) {//维保
                 //TODO  查询维保的人员 金额
                 authorityDTO.setType(1);
+                DjMaintenanceRecord djMaintenanceRecord =djMaintenanceRecordMapper.selectByPrimaryKey(authorityDTO.getMaintenanceRecordId());
+                String personnel="";
+                if(djMaintenanceRecord!=null){
+                    if(djMaintenanceRecord.getWorkerMemberId()!=null&&djMaintenanceRecord.getWorkerCreateDate()!=null){
+                        WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
+                        personnel=workerType.getName();
+                    }if(djMaintenanceRecord.getStewardId()!=null&&!"".equals(djMaintenanceRecord.getStewardId())){
+                        personnel="大管家";
+                    }
+
+                }
+                authorityDTO.setPersonnel(personnel);
             } else {
                 //工期
                 int plan = 0;
@@ -190,6 +209,7 @@ public class SupervisorAppService {
         }
 
         //TODO  查询维保
+        djMaintenanceRecordService.queryAssuranceDetailRecord("维保id");
 
         if (house.getVisitState() == 3) {
             detailsDTO.setButtonType(1);

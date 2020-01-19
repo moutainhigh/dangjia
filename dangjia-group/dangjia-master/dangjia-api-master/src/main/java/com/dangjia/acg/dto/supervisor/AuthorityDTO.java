@@ -24,6 +24,7 @@ public class AuthorityDTO {
     private Date constructionDate;//开工时间
     private Boolean selection;//是否选中
     //------------APP-----//
+    private String maintenanceRecordId;//质保申请ID
     private String personnel;//今日施工/参与人员
     private String constructionPeriod;//工期
     private String address;//地址
