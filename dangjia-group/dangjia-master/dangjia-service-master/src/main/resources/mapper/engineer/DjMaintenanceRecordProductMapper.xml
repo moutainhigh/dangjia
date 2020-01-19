@@ -305,9 +305,6 @@
         <if test="type == 2">
             AND mrp.maintenance_product_type IN (1, 3)
         </if>
-        <if test="type == 3">
-            AND mrp.maintenance_product_type IN (3)
-        </if>
         AND mrp.pay_state = 2
     </select>
 

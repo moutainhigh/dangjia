@@ -967,11 +967,10 @@ public class DjMaintenanceRecordService {
 
     /**
      * 督导----------查看质保详情，及节点流水
-     * @param userToken
      * @param maintenanceRecordId
      * @return
      */
-    public  Map<String,Object> queryAssuranceDetailRecord(String userToken,String maintenanceRecordId){
+    public  Map<String,Object> queryAssuranceDetailRecord(String maintenanceRecordId){
 
         Map<String,Object> map=new HashMap();
         DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
@@ -997,7 +996,7 @@ public class DjMaintenanceRecordService {
             //2.维修参与人员
             map.put("workerList", getWorkerList(djMaintenanceRecord));
             //3.维保商品列表
-            map.put("productList", getMaintenanceProductList(djMaintenanceRecord.getId(), 3));
+            map.put("productList", getMaintenanceProductList(djMaintenanceRecord.getId(), 1));
             //4.报销商品列表
             map.put("claimExpensesProductList", getClaimExpensesProduct(djMaintenanceRecord.getId()));
         }
