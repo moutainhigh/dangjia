@@ -2121,7 +2121,7 @@ public class DjMaintenanceRecordService {
                 return ServerResponse.createByErrorMessage("该任务不存在");
             }
             if(djMaintenanceRecord.getState() == 3){
-                //二次验收
+                //多次验收
                 Example example = new Example(DjMaintenanceRecordContent.class);
                 example.createCriteria().andEqualTo(DjMaintenanceRecordContent.DATA_STATUS, 0)
                         .andEqualTo(DjMaintenanceRecordContent.MAINTENANCE_RECORD_ID,id);
@@ -2131,7 +2131,7 @@ public class DjMaintenanceRecordService {
                 dj.setRemark(remark);
                 djMaintenanceRecordContentMapper.updateByPrimaryKeySelective(dj);
             }else{
-                //一次验收
+                //第一次验收
                 //增加工匠验收内容
                 DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
                 djMaintenanceRecordContent.setImage(image);
