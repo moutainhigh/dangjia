@@ -2028,6 +2028,9 @@ public class DjDeliverOrderService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<OrderStorefrontDTO> orderStorefrontDTOS = null;
+            if(StringUtils.isBlank(state)){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
             if (state.equals("2") || state.equals("4")) {
                 orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(houseId, state);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
