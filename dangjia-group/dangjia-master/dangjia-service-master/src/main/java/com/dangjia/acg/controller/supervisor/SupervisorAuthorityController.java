@@ -64,7 +64,7 @@ public class SupervisorAuthorityController implements SupervisorAuthorityAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getSupHouseDetails(HttpServletRequest request, String userToken, String houseId) {
-        return supervisorAppService.getSupHouseDetails(userToken, houseId);
+    public ServerResponse getSupHouseDetails(HttpServletRequest request, String userToken, String houseId, String maintenanceRecordId) {
+        return supervisorAppService.getSupHouseDetails(userToken, houseId, maintenanceRecordId);
     }
 }
