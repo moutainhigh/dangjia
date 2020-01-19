@@ -837,4 +837,19 @@ public class EvaluateService {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 查询业主评价
+     * @param maintentanceId
+     * @return
+     */
+    public Evaluate queryEvaluatesByMaintenanceId(String maintentanceId,String workerId){
+        Example example=new Example(Evaluate.class);
+        example.createCriteria().andEqualTo(Evaluate.HOUSE_FLOW_APPLY_ID,maintentanceId)
+                .andEqualTo(Evaluate.WORKER_ID,workerId)
+                .andEqualTo(Evaluate.APPLY_TYPE,3);
+        Evaluate evaluate=evaluateMapper.selectOneByExample(example);
+        return evaluate;
+    }
+
 }
