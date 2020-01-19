@@ -17,6 +17,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.engineer.*;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
+import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
@@ -963,6 +964,46 @@ public class DjMaintenanceRecordService {
 
     }
 
+
+    /**
+     * 督导----------查看质保详情，及节点流水
+     * @param userToken
+     * @param maintenanceRecordId
+     * @return
+     */
+    public  Map<String,Object> queryAssuranceDetailRecord(String userToken,String maintenanceRecordId){
+
+        Map<String,Object> map=new HashMap();
+        DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+        if(djMaintenanceRecord!=null) {
+            //1.查询节点流水记录
+            List<OrderProgressDTO> orderProgressDTOList = nodeProgressService.queryProgressListByOrderId(maintenanceRecordId);//节点进度信息
+            if (orderProgressDTOList != null && orderProgressDTOList.size() > 0) {
+                OrderProgressDTO orderProgressDTO = orderProgressDTOList.get(orderProgressDTOList.size() - 1);
+                if ("MN_005".equals(orderProgressDTO.getNodeCode())) {
+                    orderProgressDTO.setNodeStatus(6);
+                    orderProgressDTOList.remove(orderProgressDTOList.size() - 1);
+                    orderProgressDTOList.add(orderProgressDTO);
+                    //增加完成的节点
+                    OrderProgressDTO lastOrder = new OrderProgressDTO();
+                    lastOrder.setNodeCode("MN_006");
+                    lastOrder.setNodeName("维修完成");
+                    lastOrder.setNodeStatus(4);
+                    lastOrder.setAssociatedOperation("1");
+                    lastOrder.setAssociatedOperationName("验收动态");
+                    orderProgressDTOList.add(lastOrder);
+                }
+            }
+            //2.维修参与人员
+            map.put("workerList", getWorkerList(djMaintenanceRecord));
+            //3.维保商品列表
+            map.put("productList", getMaintenanceProductList(djMaintenanceRecord.getId(), 3));
+            //4.报销商品列表
+            map.put("claimExpensesProductList", getClaimExpensesProduct(djMaintenanceRecord.getId()));
+        }
+        return map;
+    }
+
     /**
      * 查询结束处理信息
      * @param maintenanceRecordId
@@ -1046,6 +1087,7 @@ public class DjMaintenanceRecordService {
             map.put("workerName",member.getName());
             map.put("labelName",labelName);
             map.put("headImage",address+member.getHead());
+            map.put("mobile",member.getMobile());
         }
         return map;
     }

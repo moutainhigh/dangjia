@@ -6,4 +6,28 @@
     <update id="updateOrderStatusByNodeCode">
         update dj_deliver_order_progress set data_status=1 where node_type=#{nodeType} and progress_order_id=#{repairMendOrderId} and node_code=#{nodeCode}
     </update>
+
+    <select id="queryProgressListByOrderId" resultType="com.dangjia.acg.dto.refund.OrderProgressDTO">
+         SELECT
+          t1.id,
+          t1.create_date createDate,
+          t1.progress_order_id progressOrderId,
+          t1.progress_type progressType,
+          t2.`code` nodeCode,
+          t2.`name` nodeName,
+          t2.node_describe nodeDescribe,
+          t2.associated_operation associatedOperation,
+          t2.associated_operation_name  associatedOperationName,
+          5 nodeStatus
+        FROM
+            dj_deliver_order_progress t1,
+            dj_deliver_order_node t2
+        WHERE
+            t1.progress_order_id = #{repairMendOrderId}
+        AND t1.node_type = t2.type
+        AND t1.node_code = t2.`code`
+        and t1.data_status = 0
+        order by t1.create_date,t2.code
+     </select>
+
 </mapper>

@@ -1,16 +1,23 @@
 package com.dangjia.acg.service.node;
 
+import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
 import com.dangjia.acg.modle.order.OrderProgress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class NodeProgressService {
     @Autowired
     private IMasterOrderProgressMapper iMasterOrderProgressMapper;
+
+    public List<OrderProgressDTO> queryProgressListByOrderId(String progressOrderId){
+
+         return    iMasterOrderProgressMapper.queryProgressListByOrderId(progressOrderId);
+    }
 
     /**
      * //添加进度信息

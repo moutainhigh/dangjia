@@ -37,7 +37,7 @@ public class OrderProgressDTO {
     @ApiModelProperty("拨打电话")
     private String mobile;
 
-    @ApiModelProperty("节点显示状态(1黑勾，2黑叉，3红叉，4灰掉）")
+    @ApiModelProperty("节点显示状态(1黑勾，2黑叉，3红叉，4灰掉，5红点，6白点）")
     private int nodeStatus;
 
     @ApiModelProperty("节点描述")
