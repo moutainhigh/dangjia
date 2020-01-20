@@ -815,8 +815,15 @@
             dj_pay_business_order t2
         WHERE
             t1.business_order_number = t2.number
-            AND t1.id = t1.parent_order_id
-            AND t2.state=#{state}
+            AND (t1.id = t1.parent_order_id or t1.parent_order_id is null)
+        <choose>
+            <when test="state==2">
+                AND t2.state in(1,2)
+            </when>
+            <otherwise>
+                AND t2.state=#{state}
+            </otherwise>
+        </choose>
             AND t1.house_id=#{houseId}
             AND t1.data_status=0
     </select>
@@ -886,7 +893,7 @@
             dj_basics_storefront t4
         WHERE
             t1.parent_order_id = #{orderId}
-        AND t1.id!= t1.parent_order_id
+        AND t1.id!=t1.parent_order_id
         AND t1.data_status=0
         AND t1.storefont_id=t4.id
     </select>
