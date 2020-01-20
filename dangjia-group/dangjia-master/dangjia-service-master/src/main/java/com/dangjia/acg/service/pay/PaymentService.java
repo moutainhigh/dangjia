@@ -795,6 +795,7 @@ public class PaymentService {
                     orderNew = new Order();
                 }
                 orderNew.setHouseId(order.getHouseId());
+                orderNew.setWorkerTypeId(order.getWorkerTypeId());
                 orderNew.setCityId(order.getCityId());
                 orderNew.setStorefontId(queryShopGood.getShopId());
                 orderNew.setMemberId(order.getMemberId());
@@ -811,19 +812,27 @@ public class PaymentService {
                 orderNew.setWorkerId(order.getWorkerId());
                 orderNew.setAddressId(order.getAddressId());
                 orderNew.setCreateBy(order.getCreateBy());
+                orderNew.setWorkerTypeName(order.getWorkerTypeName());
                 orderMapper.insert(orderNew);
             }else {
                 orderNew=order;
                 orderNew.setStorefontId(queryShopGood.getShopId());
                 orderNew.setParentOrderId(order.getId());
             }
-
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(order.getWorkerTypeId());
-            String workerTypeName="";
-            if(workerType!=null){
-                workerTypeName=workerType.getName();
+            if(CommonUtil.isEmpty(order.getWorkerTypeName())) {
+                if (queryShopGood.getProductType() == 0 || queryShopGood.getProductType() == 1) {
+                    order.setWorkerTypeName(order.getWorkerTypeName() + "-实物");
+                }
+                if (queryShopGood.getProductType() == 2) {
+                    order.setWorkerTypeName(order.getWorkerTypeName() + "-人工");
+                }
+                if (queryShopGood.getProductType() == 3) {
+                    order.setWorkerTypeName(order.getWorkerTypeName() + "-体验");
+                }
+                if (queryShopGood.getProductType() == 5) {
+                    order.setWorkerTypeName(order.getWorkerTypeName() + "-维保");
+                }
             }
-            orderNew.setWorkerTypeName(workerTypeName+orderNew.getWorkerTypeName());
             for (BudgetLabelDTO labelDTO : queryShopGood.getLabelDTOS()) {
                 for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
                     OrderItem orderItem = orderItemMapper.selectByPrimaryKey(good.getId());
@@ -1283,19 +1292,15 @@ public class PaymentService {
                         orderItem.setTransportationCost(transportationCost);
                     }
                     if(good.getProductType()==0||good.getProductType()==1){
-                        order.setWorkerTypeName("实物订单");
                         order.setType(2);
                     }
                     if(good.getProductType()==2){
-                        order.setWorkerTypeName("人工订单");
                         order.setType(1);
                     }
                     if(good.getProductType()==3){
-                        order.setWorkerTypeName("体验订单");
                         order.setType(4);
                     }
                     if(good.getProductType()==5){
-                        order.setWorkerTypeName("维保订单");
                         order.setType(5);
                     }
                     orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
@@ -1924,7 +1929,7 @@ public class PaymentService {
                 order.setTotalAmount(paymentPrice);// 订单总额(工钱)
                 orderMapper.updateByPrimaryKeySelective(order);
 
-                budgetCorrect(order,null,null);
+//                budgetCorrect(order,null,null);
                 //该工钟所有保险
                 example = new Example(WorkerTypeSafe.class);
                 example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, wt.getId());
