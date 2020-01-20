@@ -22,8 +22,12 @@ public interface AppActuaryOperationAPI {
      */
     @PostMapping("/app/actuary/actuaryOperation/choiceGoods")
     @ApiOperation(value = "选择取消精算", notes = "选择取消精算")
-    ServerResponse choiceGoods(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("houseId") String houseId, @RequestParam("productId") String productId);
+    ServerResponse choiceGoods(@RequestParam("userToken") String userToken,
+                               @RequestParam("request") HttpServletRequest request,
+                               @RequestParam("houseId") String houseId,
+                               @RequestParam("productId") String productId,
+                               @RequestParam("addedProductIds") String addedProductIds,
+                               @RequestParam("cityId") String cityId);
 
     /**
      * 更换货品
