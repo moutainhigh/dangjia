@@ -866,7 +866,7 @@
         AND t2.product_id = t3.id
         AND t3.prod_template_id = t4.id
         AND t1.parent_order_id = #{orderId}
-        AND (t1.id!=t1.parent_order_id or t1.parent_order_id is not null)
+        AND t1.id!=t1.parent_order_id
         AND t2.data_status=0
     </select>
 
@@ -893,7 +893,7 @@
             dj_basics_storefront t4
         WHERE
             t1.parent_order_id = #{orderId}
-        AND (t1.id!=t1.parent_order_id or t1.parent_order_id is not null)
+        AND t1.id!=t1.parent_order_id
         AND t1.data_status=0
         AND t1.storefont_id=t4.id
     </select>
