@@ -8,6 +8,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.dto.actuary.AttributeValueDTO;
+import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
@@ -119,13 +120,23 @@ public class AppActuaryOperationService {
     /**
      * 恢复精算货品
      */
-    public ServerResponse recoveryProduct(String houseId, String productId) {
+    public ServerResponse recoveryProduct(String houseId, String productId,String workerTypeId,String storefontId,String labelId) {
 
 
         Example example = new Example(BudgetMaterial.class);
-        example.createCriteria()
-                .andEqualTo(BudgetMaterial.HOUSE_ID, houseId)
-                .andCondition("  FIND_IN_SET(product_id,'" + productId + "') ");
+        if(!CommonUtil.isEmpty(productId)){
+            example.createCriteria()
+                    .andEqualTo(BudgetMaterial.HOUSE_ID, houseId)
+                    .andIn(BudgetMaterial.PRODUCT_ID, Arrays.asList(productId.split(",")));
+        }
+        if(!CommonUtil.isEmpty(labelId)){
+            BudgetLabelDTO budgetLabelDTO =  budgetMaterialMapper.getBudgetLabel(houseId,workerTypeId,storefontId,labelId);//精算工钱
+            example.createCriteria()
+                    .andEqualTo(BudgetMaterial.HOUSE_ID, houseId)
+                    .andEqualTo(BudgetMaterial.STOREFONT_ID, storefontId)
+                    .andEqualTo(BudgetMaterial.WORKER_TYPE_ID, workerTypeId)
+                    .andIn(BudgetMaterial.CATEGORY_ID, Arrays.asList(budgetLabelDTO.getCategoryIds().split(",")));
+        }
         List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
         for (BudgetMaterial budgetMaterial : budgetMaterials) {
             if (budgetMaterial.getDeleteState() == 2) {
@@ -185,6 +196,9 @@ public class AppActuaryOperationService {
                             }
                             //查到 老的关联组 的精算
                             BudgetMaterial newBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
+                            if(CommonUtil.isEmpty(newBudgetMaterial.getOriginalProductId())){
+                                newBudgetMaterial.setOriginalProductId(newBudgetMaterial.getProductId());
+                            }
                             StorefrontProduct product = iShopProductMapper.selectByPrimaryKey(targetGroupLink.getProductId());
                             DjBasicsProductTemplate targetProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(product.getProdTemplateId());//目标product 对象
 
@@ -223,6 +237,9 @@ public class AppActuaryOperationService {
             } else {
 
                 BudgetMaterial newBudgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
+                if(CommonUtil.isEmpty(newBudgetMaterial.getOriginalProductId())){
+                    newBudgetMaterial.setOriginalProductId(newBudgetMaterial.getProductId());
+                }
                 StorefrontProduct shopProduct = iShopProductMapper.selectByPrimaryKey(productId);
                 DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(shopProduct.getProdTemplateId());//目标product 对象
 

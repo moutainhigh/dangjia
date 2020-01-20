@@ -43,7 +43,10 @@ public interface AppActuaryOperationAPI {
     @ApiOperation(value = "恢复精算货品", notes = "恢复精算货品")
     ServerResponse recoveryProduct(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("houseId") String houseId,
-                                   @RequestParam("productId") String productId);
+                                   @RequestParam("productId") String productId,
+                                   @RequestParam("workerTypeId") String workerTypeId,
+                                   @RequestParam("storefontId") String storefontId,
+                                   @RequestParam("labelId") String labelId);
     /**
      * 选择货品
      */

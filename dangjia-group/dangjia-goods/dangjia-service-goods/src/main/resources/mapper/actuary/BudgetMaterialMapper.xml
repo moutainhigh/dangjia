@@ -432,6 +432,32 @@
 		GROUP BY l.id
 		ORDER BY l.id desc
 	</select>
+
+	<!--查询工种材料未支付所有商品的标签-->
+	<select id="getBudgetLabel" resultType="com.dangjia.acg.dto.actuary.BudgetLabelDTO">
+		SELECT
+			IFNULL(l.id,'-1') labelId,
+			IFNULL(l.name,'其他') labelName,
+			GROUP_CONCAT(c.id) categoryIds
+		FROM
+			dj_basics_goods_category c
+		LEFT JOIN dj_basics_goods_category l ON l.id=c.parent_id
+		WHERE
+			c.id IN (
+				SELECT
+					m.category_id
+				FROM
+					dj_actuary_budget_material m
+				WHERE m.house_id = #{houseId}
+					and m.worker_type_id = #{workerTypeId}
+					and m.storefont_id = #{storefontId}
+				  	and m.delete_state in (0, 2 ,4)
+				GROUP BY m.category_id
+			  )
+			AND l.id =#{labelId}
+		GROUP BY l.id
+		ORDER BY l.id desc
+	</select>
 	<!--查询工种材料未支付所有商品-->
 	<select id="queryBudgetLabelGoods" resultType="com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO">
 		SELECT
