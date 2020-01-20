@@ -472,7 +472,7 @@
 			m.goods_group_id goodsGroupId,
 			m.product_sn productSn,
 			m.product_name productName,
-			m.price,
+			sp.sell_price price,
 			m.shop_count shopCount,
 			m.unit_name unitName,
 			m.total_price totalPrice,
