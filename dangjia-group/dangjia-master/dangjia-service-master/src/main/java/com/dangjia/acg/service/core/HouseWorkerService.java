@@ -21,6 +21,7 @@ import com.dangjia.acg.dto.house.MyHouseFlowDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -33,6 +34,7 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
@@ -44,6 +46,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
+import com.dangjia.acg.util.LocationUtils;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -118,6 +121,8 @@ public class HouseWorkerService {
     @Autowired
     private EvaluateService evaluateService;
 
+    @Autowired
+    private IModelingVillageMapper modelingVillageMapper;
 
     @Autowired
     private IInsuranceMapper insuranceMapper;
@@ -426,6 +431,27 @@ public class HouseWorkerService {
         House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
         if (house == null) {
             return ServerResponse.createByErrorMessage("未找到该房产");
+        }
+        switch (applyType) {
+            case 0:
+            case 4:
+                if(active!=null&&(active.equals("pre"))) {
+                    ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
+                    if (village != null && village.getLocationx() != null && village.getLocationy() != null
+                            && latitude != null && longitude != null) {
+                        try {
+                            double longitude1 = Double.valueOf(longitude);
+                            double latitude1 = Double.valueOf(latitude);
+                            double longitude2 = Double.valueOf(village.getLocationx());
+                            double latitude2 = Double.valueOf(village.getLocationy());
+                            double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+                            if (distance > 3000) {
+                                return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
         }
         switch (applyType) {
             case 0:
