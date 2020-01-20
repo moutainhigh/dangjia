@@ -2017,6 +2017,13 @@ public class PaymentService {
                         }
                     }
                 }
+                //修改待处理的任务为已处理
+                TaskStack taskStack=taskStackService.selectTaskStackByHouseIdData(order.getHouseId(),houseFlow.getId());
+                if(taskStack!=null&& !CommonUtil.isEmpty(taskStack.getId())){
+                    taskStack.setState(1);
+                    taskStack.setModifyDate(new Date());
+                    taskStackService.updateTaskStackInfo(taskStack);
+                }
                 return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
             }
             return ServerResponse.createBySuccess("提交成功");
