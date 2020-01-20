@@ -581,7 +581,7 @@ public class ShopCartService {
                     OrderSplitItem orderSplitItem = iOrderSplitItemMapper.selectByPrimaryKey(orderItemId);
                     productId.append(orderSplitItem.getProductId());
                 }
-                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId.toString());
                 if (null == storefrontProduct)
                     return ServerResponse.createByErrorMessage("店铺商品不存在");
                 DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
