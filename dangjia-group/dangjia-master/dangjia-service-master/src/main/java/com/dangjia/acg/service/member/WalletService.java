@@ -453,7 +453,7 @@ public class WalletService {
         time = DateUtil.getDateString(DateUtil.getMonthLast(d).getTime());
 
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        String[] state = null;
+        String[] state =  new String[]{};
         if (type == 1) {//收益
             state = new String[]{"0"};
         }
@@ -495,6 +495,7 @@ public class WalletService {
             if (map.get(timeYear) == null) {
                 Date dVal = DateUtil.toDate(timeYear);
                 String timeVal = DateUtil.getDateString(DateUtil.getMonthLast(dVal).getTime());
+
                 Double income = workerDetailMapper.incomeMoney(member.getId(), timeVal, state);
                 Double outMoney = workerDetailMapper.outMoney(member.getId(), timeVal, state);
                 detailDTO.setOutMoneyTotal(outMoney);

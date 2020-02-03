@@ -27,7 +27,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select sum(money)
         from dj_worker_worker_detail
         where worker_id=#{workerId}
-        <if test="states!=null and states!=''">
+        <if test="null!=states and states.length > 0">
         AND state IN
             <foreach collection="states" item="item" index="index"
                      separator="," open="(" close=")">
