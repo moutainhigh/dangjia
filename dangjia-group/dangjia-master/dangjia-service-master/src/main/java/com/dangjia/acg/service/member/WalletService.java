@@ -479,7 +479,7 @@ public class WalletService {
             criteria.andGreaterThanOrEqualTo(WorkerDetail.CREATE_DATE, DateUtil.getDateString(DateUtil.getMonthFirst(DateUtil.toDate(time), -12).getTime()));
         }
         criteria.andEqualTo(WorkerDetail.WORKER_ID, member.getId());
-        if (state != null) {
+        if (state != null&&state.length>0) {
             criteria.andIn(WorkerDetail.STATE, Arrays.asList(state));
         }
         example.orderBy(WorkerDetail.CREATE_DATE).desc();
