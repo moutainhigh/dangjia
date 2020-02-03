@@ -14,6 +14,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -50,8 +51,9 @@ public class MemberAddressService {
      * @param latitude       纬度
      * @return ServerResponse
      */
-    public ServerResponse insertAddress(String userToken, int renovationType,
-                                        int defaultType, String name, String mobile, String cityId, String cityName,
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse insertAddress(String userToken, Integer renovationType,
+                                        Integer defaultType, String name, String mobile, String cityId, String cityName,
                                         String address, BigDecimal inputArea, String longitude, String latitude) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -116,36 +118,45 @@ public class MemberAddressService {
     /**
      * 业主修改地址
      *
-     * @param userToken   userToken
-     * @Param  memberAddress
+     * @param userToken userToken
      * @return ServerResponse
+     * @Param memberAddress
      */
-    public ServerResponse updataAddress(String userToken,MemberAddress memberAddress) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updataAddress(String userToken, String addressId, Integer defaultType,
+                                        String name, String mobile, String cityId, String cityName,
+                                        String address) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        if (CommonUtil.isEmpty(memberAddress.getName())) {
+        if (CommonUtil.isEmpty(name)) {
             return ServerResponse.createByErrorMessage("业主姓名未录入");
         }
-        if (CommonUtil.isEmpty(memberAddress.getMobile())) {
+        if (CommonUtil.isEmpty(mobile)) {
             return ServerResponse.createByErrorMessage("业主手机未录入");
         }
-        if (CommonUtil.isEmpty(memberAddress.getCityId())) {
-            return ServerResponse.createByErrorMessage("业主城市未录入");
-        }
-        if (CommonUtil.isEmpty(memberAddress.getAddress())) {
-            return ServerResponse.createByErrorMessage("业主详细地址未录入");
-        }
-        if (memberAddress.getRenovationType() == 1 && memberAddress.getInputArea() == null) {
-            return ServerResponse.createByErrorMessage("房子面积未录入");
-        }
-        if (CommonUtil.isEmpty(memberAddress.getLongitude()) || CommonUtil.isEmpty(memberAddress.getLatitude())) {
-            return ServerResponse.createByErrorMessage("业主地址信息未录入");
+        MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(addressId);
+        if (memberAddress == null) {
+            return ServerResponse.createByErrorMessage("未找到该地址");
         }
         Member member = (Member) object;
-        memberAddress.setMemberId(member.getId());
-        setAddressDefaultType(memberAddress.getDefaultType(), member.getId());
+        memberAddress.setDefaultType(defaultType);
+        memberAddress.setName(name);
+        memberAddress.setMobile(mobile);
+        if (memberAddress.getRenovationType() == 0) {
+            if (CommonUtil.isEmpty(cityId) || CommonUtil.isEmpty(cityName)) {
+                return ServerResponse.createByErrorMessage("请选择所在地区");
+            }
+            if (CommonUtil.isEmpty(address)) {
+                return ServerResponse.createByErrorMessage("请录入详细地址");
+            }
+            memberAddress.setCityId(cityId);
+            memberAddress.setCityName(cityName);
+            memberAddress.setAddress(address);
+        }
+        memberAddress.setModifyDate(new Date());
+        setAddressDefaultType(defaultType, member.getId());
         iMasterMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
         return ServerResponse.createBySuccessMessage("修改成功");
     }
@@ -174,6 +185,7 @@ public class MemberAddressService {
      * @param addressId 地址ID
      * @return ServerResponse
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse deleteAddress(String userToken, String addressId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {

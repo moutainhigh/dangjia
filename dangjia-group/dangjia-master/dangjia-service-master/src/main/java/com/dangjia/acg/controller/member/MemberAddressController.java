@@ -36,8 +36,9 @@ public class MemberAddressController implements MemberAddressAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updataAddress(HttpServletRequest request, String userToken, MemberAddress memberAddress) {
-        return memberAddressService.updataAddress(userToken, memberAddress);
+    public ServerResponse updataAddress(HttpServletRequest request, String userToken, String addressId, Integer defaultType,
+                                        String name, String mobile, String cityId, String cityName, String address) {
+        return memberAddressService.updataAddress(userToken, addressId, defaultType, name, mobile, cityId, cityName, address);
     }
 
     @Override
