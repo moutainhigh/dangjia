@@ -65,7 +65,7 @@ public class MemberAddressService {
         if (CommonUtil.isEmpty(mobile)) {
             return ServerResponse.createByErrorMessage("业主手机未录入");
         }
-        if (CommonUtil.isEmpty(cityName)) {
+        if (CommonUtil.isEmpty(cityId) || CommonUtil.isEmpty(cityName)) {
             return ServerResponse.createByErrorMessage("业主城市未录入");
         }
         if (CommonUtil.isEmpty(address)) {
@@ -77,7 +77,7 @@ public class MemberAddressService {
         if (CommonUtil.isEmpty(longitude) || CommonUtil.isEmpty(latitude)) {
             return ServerResponse.createByErrorMessage("业主地址信息未录入");
         }
-        if (inputArea.doubleValue() < 70) {
+        if (renovationType == 1 && inputArea.doubleValue() < 70) {
             inputArea = new BigDecimal(70);
         }
         Member member = (Member) object;
@@ -88,9 +88,11 @@ public class MemberAddressService {
         memberAddress.setCityId(cityId);
         memberAddress.setCityName(cityName);
         memberAddress.setAddress(address);
-        memberAddress.setInputArea(inputArea);
-        memberAddress.setLatitude(latitude);
-        memberAddress.setLongitude(longitude);
+        if (renovationType == 1) {
+            memberAddress.setInputArea(inputArea);
+            memberAddress.setLatitude(latitude);
+            memberAddress.setLongitude(longitude);
+        }
         memberAddress.setRenovationType(renovationType);
         memberAddress.setDefaultType(defaultType);
         setAddressDefaultType(defaultType, member.getId());
