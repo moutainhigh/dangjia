@@ -140,4 +140,13 @@ public class HouseWorkerController implements HouseWorkerAPI {
     public ServerResponse setSupervisorApply(String userToken, String houseFlowId) {
         return houseWorkerService.setSupervisorApply(userToken, houseFlowId);
     }
+
+    /**
+     * 大管家申请验收
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse autoDistributeHandle(String houseFlowId) {
+        return houseWorkerService.autoDistributeHandle(houseFlowId);
+    }
 }

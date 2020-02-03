@@ -378,6 +378,7 @@
 		WHERE
 			m.`worker_type` = '3'
 		AND m.`check_type` = '2'
+		And m.auto_order=0
 		AND m.`real_name_state` = '3'
 		AND m.evaluation_score >= 60
 

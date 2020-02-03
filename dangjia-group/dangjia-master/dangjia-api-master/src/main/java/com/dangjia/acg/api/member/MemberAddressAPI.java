@@ -63,10 +63,18 @@ public interface MemberAddressAPI {
                                  @RequestParam("longitude") String longitude,
                                  @RequestParam("latitude") String latitude);
 
+
     /**
      * showdoc
      *
      * @param userToken   必选 string userToken
+     * @param addressId   必选 string 地址ID
+     * @param defaultType 必选 string 是否是默认地址:0：否，1：是
+     * @param name        必选 string 业主姓名
+     * @param mobile      必选 string 业主手机
+     * @param cityId      非装修地址必选 string 城市ID
+     * @param cityName    非装修地址必选 string 省/市/区
+     * @param address     非装修地址必选 string 详细地址
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/我的地址
      * @title 业主修改地址
@@ -82,7 +90,13 @@ public interface MemberAddressAPI {
     @ApiOperation(value = "业主修改地址", notes = "业主修改地址")
     ServerResponse updataAddress(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
-                                 @RequestParam("MemberAddress") MemberAddress memberAddress);
+                                 @RequestParam("addressId") String addressId,
+                                 @RequestParam("defaultType") Integer defaultType,
+                                 @RequestParam("name") String name,
+                                 @RequestParam("mobile") String mobile,
+                                 @RequestParam("cityId") String cityId,
+                                 @RequestParam("cityName") String cityName,
+                                 @RequestParam("address") String address);
 
     /**
      * showdoc

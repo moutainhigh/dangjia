@@ -80,4 +80,5 @@ public class HouseWorker extends BaseEntity {
 	@ApiModelProperty("工钱")
 	private BigDecimal price;
 
+
 }
