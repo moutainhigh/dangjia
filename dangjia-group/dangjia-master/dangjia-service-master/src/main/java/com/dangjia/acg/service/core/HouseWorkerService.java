@@ -591,7 +591,7 @@ public class HouseWorkerService {
                 /*
                  * 工匠订单
                  */
-                HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getHouseId(), houseFlow.getWorkerTypeId());
+                HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                 if (hwo != null) {
                     hwo.setWorkerId(houseWorker.getWorkerId());
                     houseWorkerOrderMapper.updateByPrimaryKey(hwo);
@@ -1524,20 +1524,22 @@ public class HouseWorkerService {
         }
     }
 
-
+    public ServerResponse autoDistributeHandle(String houseFlowId) {
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        return autoDistributeHandle(houseFlow);
+    }
     /**
      * 管家自动派单分值计算
-     * @param houseFlowId
+     * @param houseFlow
      * @return
      */
-    public ServerResponse autoDistributeHandle(String houseFlowId) {
+    public ServerResponse autoDistributeHandle(HouseFlow houseFlow) {
         /*大管家所有待抢单*/
         Example example = new Example(HouseFlow.class);
         example.createCriteria()
                 .andEqualTo(HouseFlow.WORK_TYPE, 2)
                 .andEqualTo(HouseFlow.WORKER_TYPE_ID, 3)
                 .andNotEqualTo(HouseFlow.STATE, 2);
-        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         if(houseFlow.getWorkType()!=2){
             return ServerResponse.createByErrorMessage("状态错误，无法自动派单！");
         }
@@ -1548,7 +1550,7 @@ public class HouseWorkerService {
         ModelingVillage modelingVillage =modelingVillageMapper.selectByPrimaryKey(house.getVillageId());
         List<Map<String, Object>> list = houseWorkerMapper.getSupWorkerConfInfo(modelingVillage.getLocationx(),modelingVillage.getLocationy());
         for (Map<String, Object> stringObjectMap : list) {
-            Double  score = configRuleUtilService.getautoDistributeHandleConfig((Double) stringObjectMap.get("juli"),(Double) stringObjectMap.get(Member.EVALUATION_SCORE),(Integer) stringObjectMap.get(Member.METHODS));
+            Double  score = configRuleUtilService.getautoDistributeHandleConfig((Double) stringObjectMap.get("juli"),(BigDecimal) stringObjectMap.get(Member.EVALUATION_SCORE),(Long) stringObjectMap.get(Member.METHODS));
             stringObjectMap.put("score",score);
         }
         //重新排序
@@ -1561,9 +1563,8 @@ public class HouseWorkerService {
             }
         });
         for (Map<String, Object> stringObjectMap : list) {
-            String userRoleText = "role2:" + stringObjectMap.get(HouseWorker.WORKER_ID);
-            String userToken = redisClient.getCache(userRoleText, String.class);
-            ServerResponse serverResponse = setWorkerGrab(userToken,  houseFlow.getCityId(), houseFlowId,0);
+            String userToken = String.valueOf(stringObjectMap.get(HouseWorker.WORKER_ID));
+            ServerResponse serverResponse = setWorkerGrab(userToken,  houseFlow.getCityId(), houseFlow.getId(),0);
             //如果已指派则无需继续遍历
             if(serverResponse.isSuccess()){
                 break;

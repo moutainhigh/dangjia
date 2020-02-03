@@ -190,4 +190,8 @@ public interface HouseWorkerAPI {
     ServerResponse setSupervisorApply(@RequestParam("userToken") String userToken,
                                       @RequestParam("houseFlowId") String houseFlowId);
 
+    @PostMapping("app/core/houseWorker/autoDistributeHandle")
+    @ApiOperation(value = "大管家自动派单", notes = "大管家自动派单")
+    ServerResponse autoDistributeHandle(
+            @RequestParam("houseFlowId") String houseFlowId);
 }

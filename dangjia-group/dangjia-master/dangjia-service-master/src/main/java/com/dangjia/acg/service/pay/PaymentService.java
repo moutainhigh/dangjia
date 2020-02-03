@@ -48,7 +48,6 @@ import com.dangjia.acg.mapper.product.IShoppingCartMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
@@ -85,7 +84,6 @@ import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.worker.Insurance;
-import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -93,7 +91,6 @@ import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
-import javafx.concurrent.Worker;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -721,7 +718,7 @@ public class PaymentService {
         /*处理人工和取消的材料改到自购精算*/
         budgetCorrect(order, payState, houseFlow.getId());
         if(houseFlow.getWorkType()==3) {//大管家自动派单
-            houseWorkerService.autoDistributeHandle(houseFlow.getId());
+            houseWorkerService.autoDistributeHandle(houseFlow);
         }
         /*处理保险订单*/
         this.insurance(hwo, payState);

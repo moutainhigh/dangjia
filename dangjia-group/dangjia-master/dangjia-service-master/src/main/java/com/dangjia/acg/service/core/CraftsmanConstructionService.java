@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.core;
 
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -41,9 +40,7 @@ import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.design.QuantityRoomService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
-import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
-import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1002,6 +999,10 @@ public class CraftsmanConstructionService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {
+            Member worker  = memberMapper.selectByPrimaryKey(userToken);
+            if (worker != null) {
+                return worker;
+            }
             return ServerResponse.createbyUserTokenError();
         }
         Member worker = accessToken.getMember();

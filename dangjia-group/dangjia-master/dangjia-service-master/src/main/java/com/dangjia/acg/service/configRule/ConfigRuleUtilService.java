@@ -264,7 +264,7 @@ public class ConfigRuleUtilService {
      * @param methods 持单量
      * @return
      */
-    public Double getautoDistributeHandleConfig(Double juli,Double evaluationScore,Integer methods) {
+    public Double getautoDistributeHandleConfig(Double juli,BigDecimal evaluationScore,Long methods) {
         Double amount = 0d;
         Example example = new Example(DjConfigRuleModule.class);
         example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID, ConfigRuleService.MK017);
@@ -305,17 +305,17 @@ public class ConfigRuleUtilService {
                 //积分
                 if(configRuleItemThree.getParamType().equals(ConfigRuleService.CS007)){
                     for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
-                        if(configRuleItemLadder.getPhaseStart()<=evaluationScore&&configRuleItemLadder.getPhaseEnd()>=evaluationScore){
+                        if(configRuleItemLadder.getPhaseStart()<=evaluationScore.doubleValue()&&configRuleItemLadder.getPhaseEnd()>=evaluationScore.doubleValue()){
                             b=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
                             break;
                         }
                     }
                     if(a==0){
                         for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
-                            if(configRuleItemLadder.getPhaseStart()>evaluationScore){
+                            if(configRuleItemLadder.getPhaseStart()>evaluationScore.doubleValue()){
                                 a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
                             }
-                            if(configRuleItemLadder.getPhaseEnd()<evaluationScore){
+                            if(configRuleItemLadder.getPhaseEnd()<evaluationScore.doubleValue()){
                                 a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
                             }
                         }
