@@ -902,6 +902,8 @@ public class MemberService {
                 srcMember.setMobile(member.getMobile());
             if (StringUtils.isNotBlank(member.getRemarks()))
                 srcMember.setRemarks(member.getRemarks());
+            if (StringUtils.isNotBlank(member.getAutoOrder()))
+                srcMember.setAutoOrder(member.getAutoOrder());
             if (srcMember.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");

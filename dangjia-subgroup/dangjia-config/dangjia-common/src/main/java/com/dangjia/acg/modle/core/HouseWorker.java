@@ -80,9 +80,5 @@ public class HouseWorker extends BaseEntity {
 	@ApiModelProperty("工钱")
 	private BigDecimal price;
 
-	@Column(name = "auto_order")
-	@Desc(value = "是否自动接单 0=接单  1=不接单")
-	@ApiModelProperty("是否自动接单 0=接单  1=不接单")
-	private String autoOrder;
 
 }
