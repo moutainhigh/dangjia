@@ -36,11 +36,11 @@ public class WorkerComprehensiveDTO {
 
 
 	public BigDecimal getOverall() {
-		overall=overall.add(praiseRate);
-		overall=overall.add(approved);
-		overall=overall.add(attendance);
-		overall=overall.add(finish);
-		overall=overall.add(punctual);
+		overall=overall.add(praiseRate==null?new BigDecimal(0):praiseRate);
+		overall=overall.add(approved==null?new BigDecimal(0):approved);
+		overall=overall.add(attendance==null?new BigDecimal(0):attendance);
+		overall=overall.add(finish==null?new BigDecimal(0):finish);
+		overall=overall.add(punctual==null?new BigDecimal(0):punctual);
 		return overall;
 	}
 }
