@@ -81,7 +81,8 @@ public interface DjSupplierAPI {
     @PostMapping("/sup/setDjSupplierPass")
     @ApiOperation(value = "店铺-审核供应商-通过", notes = "店铺-审核供应商-通过")
     ServerResponse setDjSupplierPass(@RequestParam("id") String id,
-                                     @RequestParam("applicationStatus") String applicationStatus,@RequestParam("cityId") String cityId);
+                                     @RequestParam("applicationStatus") String applicationStatus,
+                                     @RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/setDjSupplierReject")
     @ApiOperation(value = "店铺-审核供应商-驳回", notes = "店铺-审核供应商-驳回")

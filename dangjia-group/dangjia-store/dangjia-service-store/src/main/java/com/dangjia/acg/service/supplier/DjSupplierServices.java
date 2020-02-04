@@ -347,26 +347,20 @@ public class DjSupplierServices {
                 return ServerResponse.createByErrorMessage("审核状态不能为空");
             }
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createByErrorMessage("主键不能为空");
+                return ServerResponse.createByErrorMessage("申请单ID不能为空");
             }
-
-            String[] iditem = id.split(",");
+            /*String[] iditem = id.split(",");
             Example example = new Example(DjSupApplication.class);
             example.createCriteria().andIn(DjSupApplication.ID, Arrays.asList(iditem));
-
-            DjSupApplication djSupApplication = new DjSupApplication();
-            djSupApplication.setId(null);
+*/
+            DjSupApplication djSupApplication = djSupApplicationMapper.selectByPrimaryKey(id);
             djSupApplication.setApplicationStatus(applicationStatus);
-            djSupApplication.setCreateDate(null);
-            int i = djSupApplicationMapper.updateByExampleSelective(djSupApplication, example);
-
-            if (i <= 0) {
-                ServerResponse.createByErrorMessage("审核失败");
-            }
+            djSupApplication.setModifyDate(new Date());
+            djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
             return ServerResponse.createBySuccessMessage("审核成功");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("供应商申请异常");
+            logger.error("审核失败",e);
+            return ServerResponse.createByErrorMessage("审核通过保存失败");
         }
     }
 
@@ -390,18 +384,14 @@ public class DjSupplierServices {
             Example example = new Example(DjSupApplication.class);
             example.createCriteria().andIn(DjSupApplication.ID, Arrays.asList(iditem));
 
-            DjSupApplication djSupApplication = new DjSupApplication();
-            djSupApplication.setId(null);
+            DjSupApplication djSupApplication = djSupApplicationMapper.selectByPrimaryKey(id);
             djSupApplication.setApplicationStatus(applicationStatus);
+            djSupApplication.setModifyDate(new Date());
             djSupApplication.setFailReason(failReason);
-            djSupApplication.setCreateDate(null);
-            int i = djSupApplicationMapper.updateByExampleSelective(djSupApplication, example);
-            if (i <= 0) {
-                return ServerResponse.createByErrorMessage("驳回失败");
-            }
+            djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
             return ServerResponse.createBySuccessMessage("驳回成功");
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("驳回异常：",e);
             return ServerResponse.createByErrorMessage("驳回供应商申请异常");
         }
     }

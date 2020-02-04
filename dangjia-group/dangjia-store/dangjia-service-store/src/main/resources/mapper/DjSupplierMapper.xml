@@ -50,10 +50,8 @@
         FROM
             dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
-        WHERE 1=1 and da.data_status=0
-        <if test="null!=shopId and ''!=shopId">
-            and  da.shop_id = #{shopId}
-        </if>
+        WHERE  da.data_status=0
+         and da.shop_id = #{shopId}
         <if test="null!=applicationStatus and ''!=applicationStatus">
             AND   da.application_status=#{applicationStatus}
         </if>
@@ -63,6 +61,7 @@
             ds.telephone LIKE CONCAT('%',#{keyWord},'%')
             )
         </if>
+        order by da.application_status,da.create_date desc
     </select>
 
     <select id="queryDjSupplierByPass" resultType="com.dangjia.acg.modle.supplier.DjSupplier" >
