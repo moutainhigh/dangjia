@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.actuary.app;
 
+import com.dangjia.acg.api.app.product.ShopCartAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -81,6 +83,8 @@ public class AppActuaryOperationService {
     private IProductAddedRelationMapper iProductAddedRelationMapper;
     @Autowired
     private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
+    @Autowired
+    private ShopCartAPI shopCartAPI;
 
 
     @Autowired
@@ -93,7 +97,7 @@ public class AppActuaryOperationService {
      * <p>
      * 这里往精算表插入最新价格
      */
-    public ServerResponse choiceGoods(String houseId, String productId) {
+    public ServerResponse choiceGoods(String userToken, String houseId, String productId, String addedProductIds, String cityId) {
         try {
             Example example = new Example(BudgetMaterial.class);
             example.createCriteria()
@@ -108,6 +112,7 @@ public class AppActuaryOperationService {
                 if (goods.getBuy() == 1) {//可选商品取消
                     budgetMaterial.setDeleteState(2);//取消
                     budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                    shopCartAPI.addCart(null,userToken,cityId, productId, budgetMaterial.getShopCount(), addedProductIds);//添加购物车
                 }
             }
             return ServerResponse.createBySuccessMessage("操作成功");

@@ -128,19 +128,18 @@ public class StorefrontService {
             example.createCriteria().andEqualTo(Storefront.USER_ID,userId).
                     andEqualTo(Storefront.CITY_ID,cityId);
             List<Storefront> list =istorefrontMapper.selectByExample(example);
-            if(list.size()<=0)
-            {
+            if(list.size()<=0){
                 return ServerResponse.createByErrorMessage("没有检索到店铺信息数据");
             }
             Storefront storefront=list.get(0);
             StorefrontDTO storefrontDTO = getStorefrontDTO(storefront);
-
+            //查询运费
             Example exampleFreight=new Example(StorefrontConfig.class);
             exampleFreight.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,storefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT);
             List<StorefrontConfig> listFreight=iStorefrontConfigMapper.selectByExample(exampleFreight);
             if(listFreight!=null)
             storefrontDTO.setFreight(listFreight.get(0).getParamValue());
-
+            //查询符合收取运费的条件
             Example exampleFreightTems=new Example(StorefrontConfig.class);
             exampleFreightTems.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,storefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT_TERMS);
             List<StorefrontConfig> listFreightTems=iStorefrontConfigMapper.selectByExample(exampleFreightTems);
@@ -191,152 +190,106 @@ public class StorefrontService {
     }
 
 
-
+    /**
+     * 编辑店铺信息
+     * @param storefrontDTO
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateStorefront(StorefrontDTO storefrontDTO) {
 
-        try {
-
-            if(storefrontDTO==null|| StringUtils.isBlank(storefrontDTO.getUserId()))
-            {
-                return ServerResponse.createByErrorMessage("用户编号不能为空");
+        if(storefrontDTO==null|| StringUtils.isBlank(storefrontDTO.getUserId())) {
+            return ServerResponse.createByErrorMessage("用户信息不能为空");
+        }
+        if(storefrontDTO==null||StringUtils.isBlank(storefrontDTO.getCityId())) {
+            return ServerResponse.createByErrorMessage("城市信息不能为空");
+        }
+        //判断当前城市，当前用户的店铺是否存在
+        Example exampleStorefront=new Example(Storefront.class);
+        exampleStorefront.createCriteria().andEqualTo(Storefront.USER_ID,storefrontDTO.getUserId()).
+                andEqualTo(Storefront.CITY_ID, storefrontDTO.getCityId());
+        List<Storefront> list =istorefrontMapper.selectByExample(exampleStorefront);
+        if(list.size()<=0){//不存在，则添加
+            Storefront storefront=getStorefront(new Storefront(),storefrontDTO);
+            istorefrontMapper.insertSelective(storefront);//添加店铺信息
+            if (StringUtil.isNotEmpty(storefrontDTO.getFreight())){//添加运费
+                insertStorefrontConfig(storefront.getId(),StorefrontConfig.FREIGHT,storefrontDTO.getFreight(),storefrontDTO.getCityId());
             }
-            if(storefrontDTO==null||StringUtils.isBlank(storefrontDTO.getCityId()))
-            {
-                return ServerResponse.createByErrorMessage("城市编号不能为空");
+            if (StringUtil.isNotEmpty(storefrontDTO.getBelowUnitPrice())){//添加符合收取运费的条件
+                insertStorefrontConfig(storefront.getId(),StorefrontConfig.FREIGHT_TERMS,storefrontDTO.getBelowUnitPrice(),storefrontDTO.getCityId());
             }
 
-            Example exampleStorefront=new Example(Storefront.class);
-            exampleStorefront.createCriteria().andEqualTo(Storefront.USER_ID,storefrontDTO.getUserId()).
-                    andEqualTo(Storefront.CITY_ID, storefrontDTO.getCityId());
-            List<Storefront> list =istorefrontMapper.selectByExample(exampleStorefront);
-            if(list.size()<=0)
-            {
-                Storefront storefront=new Storefront();
-                storefront.setUserId(storefrontDTO.getUserId());
-                storefront.setCityId(storefrontDTO.getCityId());
-                storefront.setStorefrontName(storefrontDTO.getStorefrontName());
-                storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
-                storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
-                storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());
-                storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
-                storefront.setMobile(storefrontDTO.getMobile());
-                storefront.setEmail(storefrontDTO.getEmail());
-                String systemlogo = configUtil.getValue(SysConfig.ORDER_DIANPU_ICON, String.class);
-                storefront.setSystemLogo(systemlogo);
-                int i = istorefrontMapper.insertSelective(storefront);
-
-                if (i <= 0) {
-                    return ServerResponse.createByErrorMessage("修改失败!");
-                }
-
-                if (StringUtil.isNotEmpty(storefrontDTO.getFreight()))
-                {
-
-                    StorefrontConfig storefrontConfig=new StorefrontConfig();
-                    storefrontConfig.setStorefrontId(storefront.getId());
+        }else{//否则，则修改
+            Storefront storefront=getStorefront(list.get(0),storefrontDTO);
+            istorefrontMapper.updateByPrimaryKeySelective(storefront);
+            //收取运费
+            if (StringUtil.isNotEmpty(storefrontDTO.getFreight())){
+                Storefront mystorefront =list.get(0);
+                Example example1=new Example(StorefrontConfig.class);
+                example1.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,mystorefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT);
+                List<StorefrontConfig> list1=iStorefrontConfigMapper.selectByExample(example1);
+                if (list1!=null&&list1.size()>0){//修改运费
+                    StorefrontConfig storefrontConfig=list1.get(0);
+                    storefrontConfig.setStorefrontId(mystorefront.getId());
                     storefrontConfig.setParamKey(StorefrontConfig.FREIGHT);
-                    storefrontConfig.setParamValue(storefrontDTO.getBelowUnitPrice());
-                    storefrontConfig.setCityId(storefrontDTO.getCityId());
-                    iStorefrontConfigMapper.insert(storefrontConfig);
+                    storefrontConfig.setParamValue(storefrontDTO.getFreight());
+                    iStorefrontConfigMapper.updateByPrimaryKeySelective(storefrontConfig);
+                } else {//添加运费
+                    insertStorefrontConfig(storefront.getId(),StorefrontConfig.FREIGHT,storefrontDTO.getFreight(),storefrontDTO.getCityId());
                 }
-                if (StringUtil.isNotEmpty(storefrontDTO.getBelowUnitPrice()))
-                {
-                    StorefrontConfig storefrontConfig=new StorefrontConfig();
-                    storefrontConfig.setStorefrontId(storefront.getId());
+            }
+            //每单价格低于
+            if (StringUtil.isNotEmpty(storefrontDTO.getBelowUnitPrice())) {
+                Storefront mystorefront =list.get(0);
+                Example example1=new Example(StorefrontConfig.class);
+                example1.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,mystorefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT_TERMS);
+                List<StorefrontConfig> list1=iStorefrontConfigMapper.selectByExample(example1);
+                if (list1!=null&&list1.size()>0) {//修改符合收取运费的条件
+                    StorefrontConfig storefrontConfig = list1.get(0);
+                    storefrontConfig.setStorefrontId(mystorefront.getId());
                     storefrontConfig.setParamKey(StorefrontConfig.FREIGHT_TERMS);
                     storefrontConfig.setParamValue(storefrontDTO.getBelowUnitPrice());
-                    storefrontConfig.setCityId(storefrontDTO.getCityId());
-                    iStorefrontConfigMapper.insert(storefrontConfig);
-
+                    iStorefrontConfigMapper.updateByPrimaryKeySelective(storefrontConfig);
+                }else{//添加符合收取运费的条件
+                    insertStorefrontConfig(storefront.getId(),StorefrontConfig.FREIGHT_TERMS,storefrontDTO.getBelowUnitPrice(),storefrontDTO.getCityId());
                 }
-                return ServerResponse.createBySuccessMessage("修改成功!");
+
             }
-            else
-            {
-
-                Example example = new Example(Storefront.class);
-                example.createCriteria().andEqualTo(Storefront.USER_ID, storefrontDTO.getUserId()).andEqualTo(Storefront.CITY_ID, storefrontDTO.getCityId());
-                Storefront storefront=new Storefront();
-                storefront.setUserId(storefrontDTO.getUserId());
-                storefront.setCityId(storefrontDTO.getCityId());
-                storefront.setStorefrontName(storefrontDTO.getStorefrontName());
-                storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
-                storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
-                storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());
-                storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
-                storefront.setMobile(storefrontDTO.getMobile());
-                storefront.setEmail(storefrontDTO.getEmail());
-
-                int i = istorefrontMapper.updateByExampleSelective(storefront,example);
-                if (i <= 0) {
-                    return ServerResponse.createByErrorMessage("修改失败!");
-                }
-                //收取运费
-                if (StringUtil.isNotEmpty(storefrontDTO.getFreight()))
-                {
-                    Storefront mystorefront =list.get(0);
-                    Example example1=new Example(StorefrontConfig.class);
-                    example1.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,mystorefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT);
-                    List<StorefrontConfig> list1=iStorefrontConfigMapper.selectByExample(example1);
-                    if (list1!=null&&list1.size()>0)
-                    {
-                        StorefrontConfig storefrontConfig=new StorefrontConfig();
-                        storefrontConfig.setStorefrontId(mystorefront.getId());
-                        storefrontConfig.setParamKey(StorefrontConfig.FREIGHT);
-                        storefrontConfig.setParamValue(storefrontDTO.getFreight());
-                        Example exampleParamkey=new Example(StorefrontConfig.class);
-                        exampleParamkey.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,mystorefront.getId())
-                                .andEqualTo(StorefrontConfig.CITY_ID,storefrontDTO.getCityId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT);
-                        iStorefrontConfigMapper.updateByExampleSelective(storefrontConfig,exampleParamkey);
-                    }
-                    else
-                    {
-                        StorefrontConfig storefrontConfig=new StorefrontConfig();
-                        storefrontConfig.setStorefrontId(mystorefront.getId());
-                        storefrontConfig.setParamKey(StorefrontConfig.FREIGHT);
-                        storefrontConfig.setParamValue(storefrontDTO.getFreight());
-                        storefrontConfig.setCityId(storefrontDTO.getCityId());
-                        iStorefrontConfigMapper.insert(storefrontConfig);
-                    }
-                }
-                //每单价格低于
-                if (StringUtil.isNotEmpty(storefrontDTO.getBelowUnitPrice()))
-                {
-                    Storefront mystorefront =list.get(0);
-                    Example example1=new Example(StorefrontConfig.class);
-                    example1.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,mystorefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT_TERMS);
-                    List<StorefrontConfig> list1=iStorefrontConfigMapper.selectByExample(example1);
-                    if (list1!=null&&list1.size()>0) {
-                        StorefrontConfig storefrontConfig = new StorefrontConfig();
-                        storefrontConfig.setStorefrontId(mystorefront.getId());
-                        storefrontConfig.setParamKey(StorefrontConfig.FREIGHT_TERMS);
-                        storefrontConfig.setParamValue(storefrontDTO.getBelowUnitPrice());
-                        Example exampleFreightTerms = new Example(StorefrontConfig.class);
-                        exampleFreightTerms.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID, mystorefront.getId())
-                                .andEqualTo(StorefrontConfig.CITY_ID, storefrontDTO.getCityId()).andEqualTo(StorefrontConfig.PARAM_KEY, StorefrontConfig.FREIGHT_TERMS);
-                        iStorefrontConfigMapper.updateByExampleSelective(storefrontConfig, exampleFreightTerms);
-                    }
-                    else
-                    {
-                        StorefrontConfig storefrontConfig=new StorefrontConfig();
-                        storefrontConfig.setStorefrontId(mystorefront.getId());
-                        storefrontConfig.setParamKey(StorefrontConfig.FREIGHT_TERMS);
-                        storefrontConfig.setParamValue(storefrontDTO.getBelowUnitPrice());
-                        storefrontConfig.setCityId(storefrontDTO.getCityId());
-                        iStorefrontConfigMapper.insert(storefrontConfig);
-                    }
-
-                }
-                return ServerResponse.createBySuccessMessage("修改成功!");
-            }
-
-        } catch (Exception e) {
-            logger.error("修改失败：", e);
-            return ServerResponse.createByErrorMessage("修改失败");
         }
+        return ServerResponse.createBySuccessMessage("保存成功!");
     }
 
+    //封装店铺参数信息
+    private Storefront getStorefront(Storefront storefront,StorefrontDTO storefrontDTO){
+        storefront.setUserId(storefrontDTO.getUserId());
+        storefront.setCityId(storefrontDTO.getCityId());
+        storefront.setStorefrontName(storefrontDTO.getStorefrontName());
+        storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
+        storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
+        storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());
+        storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
+        storefront.setMobile(storefrontDTO.getMobile());
+        storefront.setEmail(storefrontDTO.getEmail());
+        String systemlogo = configUtil.getValue(SysConfig.ORDER_DIANPU_ICON, String.class);
+        storefront.setSystemLogo(systemlogo);
+        return  storefront;
+    }
 
+    /**
+     * 店铺信息配置
+     * @param storefrontId
+     * @param paramkey
+     * @param paramValue
+     * @param cityId
+     */
+    private void insertStorefrontConfig(String storefrontId,String paramkey,String paramValue,String cityId){
+        StorefrontConfig storefrontConfig=new StorefrontConfig();
+        storefrontConfig.setStorefrontId(storefrontId);
+        storefrontConfig.setParamKey(paramkey);
+        storefrontConfig.setParamValue(paramValue);
+        storefrontConfig.setCityId(cityId);
+        iStorefrontConfigMapper.insert(storefrontConfig);
+    }
     /**
      * 查询供应商申请店铺列表
      *

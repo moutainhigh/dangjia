@@ -22,8 +22,8 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse choiceGoods(HttpServletRequest request, String houseId,String productId) {
-        return actuaryOperationService.choiceGoods( houseId, productId);
+    public ServerResponse choiceGoods(String userToken,HttpServletRequest request, String houseId,String productId,String addedProductIds,String cityId) {
+        return actuaryOperationService.choiceGoods(userToken,houseId, productId,addedProductIds,cityId);
     }
 
     @Override

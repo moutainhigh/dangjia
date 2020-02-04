@@ -40,8 +40,6 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Autowired
     private DjBasicsGoodsService djBasicsGoodsService;
 
-    @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI ;
 
 
     @Override
@@ -314,12 +312,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Override
     @ApiMethod
     public ServerResponse queryGoodsListStorefront(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name,String userId, String cityId, Integer type) {
-        Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-        if(storefront==null)
-        {
-            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-        }
-        return djBasicsGoodsService.queryGoodsListStorefront(storefront.getId(),storefront.getIfDjselfManage(),pageDTO, categoryId, name, type);
+
+        return djBasicsGoodsService.queryGoodsListStorefront(pageDTO, categoryId, name, type,cityId,userId);
     }
 
 

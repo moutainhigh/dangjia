@@ -71,14 +71,16 @@ public class MemberAddressService {
         if (CommonUtil.isEmpty(address)) {
             return ServerResponse.createByErrorMessage("业主详细地址未录入");
         }
-        if (renovationType == 1 && inputArea == null) {
-            return ServerResponse.createByErrorMessage("房子面积未录入");
-        }
-        if (CommonUtil.isEmpty(longitude) || CommonUtil.isEmpty(latitude)) {
-            return ServerResponse.createByErrorMessage("业主地址信息未录入");
-        }
-        if (renovationType == 1 && inputArea.doubleValue() < 70) {
-            inputArea = new BigDecimal(70);
+        if (renovationType == 1) {
+            if (inputArea == null) {
+                return ServerResponse.createByErrorMessage("房子面积未录入");
+            }
+            if (CommonUtil.isEmpty(longitude) || CommonUtil.isEmpty(latitude)) {
+                return ServerResponse.createByErrorMessage("业主地址信息未录入");
+            }
+            if (inputArea.doubleValue() < 70) {
+                inputArea = new BigDecimal(70);
+            }
         }
         Member member = (Member) object;
         MemberAddress memberAddress = new MemberAddress();

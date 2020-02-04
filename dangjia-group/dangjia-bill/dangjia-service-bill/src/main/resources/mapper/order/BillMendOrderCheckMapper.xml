@@ -21,21 +21,30 @@
             dj_core_worker_type t2,
             dj_core_house_worker_order t3  ,
             dj_member t4
-        where t1.type=#{type}
-        and t1.worker_type_id=t2.id
+        where t1.worker_type_id=t2.id
         and t1.house_id=t3.house_id
         and t1.worker_type_id=t3.worker_type_id
         and t3.worker_id = t4.id
         and t1.house_id=#{houseId}
         and t1.data_status = '0'
-        and t1.type=#{type}
         <if test="type==1">
+            and t1.type=#{type}
             and t1.worker_id=#{memberId}
         </if>
          <if test="type==2">
+             and t1.type=#{type}
              and t1.member_id=#{memberId}
          </if>
-
+         <if test="type==3">
+             and t1.type=#{type}
+             and t1.member_id=#{memberId}
+         </if>
+         <if test="type==4">
+             and t1.type in(1,3)
+         </if>
+         <if test="type==5">
+             and t1.type=2
+         </if>
         order by t1.create_date desc
      </select>
 

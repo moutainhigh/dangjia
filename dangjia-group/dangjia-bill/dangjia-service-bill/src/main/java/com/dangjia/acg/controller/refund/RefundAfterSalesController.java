@@ -244,7 +244,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     }
 
     /**
-     * 退人工详情页面
+     * 补、退人工详情页面（普通工匠）
      * @param cityId
      * @param repairWorkOrderId
      * @return
@@ -254,6 +254,19 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     public ServerResponse queryRetrunWorkerHistoryDetail(String cityId,String repairWorkOrderId){
         return refundAfterSalesService.queryRetrunWorkerHistoryDetail(cityId,repairWorkOrderId);
     }
+
+    /**
+     * 补退人工详情（大管家）
+     * @param cityId
+     * @param repairWorkOrderId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchWorkerHistoryInfobyChangeOrderId(String cityId,String repairWorkOrderId){
+        return refundAfterSalesService.searchWorkerHistoryInfobyChangeOrderId(cityId,repairWorkOrderId);
+    }
+
 
     /**
      * 撤销退人工申请
@@ -281,8 +294,8 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse searchAuditInfoByTaskId(String cityId,String mendOrderId){
-        return refundAfterSalesService.searchAuditInfoByTaskId(cityId,mendOrderId);
+    public ServerResponse searchAuditInfoByMendOrderId(String cityId,String mendOrderId){
+        return refundAfterSalesService.searchAuditInfoByMendOrderId(cityId,mendOrderId);
     }
 
 
