@@ -247,10 +247,10 @@
         IFNULL(dsap.supplied_num,0) AS suppliedNum,
         IFNULL(dsap.is_shelf_status,0)  AS isShelfStatus
         FROM dj_basics_product_template bpt
-        LEFT  JOIN dj_basics_goods dbg ON dbg.id=bpt.goods_id
+        INNER  JOIN dj_basics_goods dbg ON dbg.id=bpt.goods_id
         LEFT JOIN (select * from  dj_basics_storefront_product t where t.storefront_id=#{storefontId})dsap  ON dsap.prod_template_id=bpt.id
-        WHERE
-        1=1
+        WHERE bpt.city_id=#{cityId}
+        and bpt.type=#{type}
         <if test="bgtype!=null and bgtype!=''">
             and FIND_IN_SET(dbg.type,#{bgtype})
         </if>
@@ -265,7 +265,6 @@
            and  bpt.category_id=#{categoryId}
         </if>
         AND bpt.data_status = 0
-
         ORDER BY bpt.istop DESC,bpt.create_date DESC
 
     </select>
