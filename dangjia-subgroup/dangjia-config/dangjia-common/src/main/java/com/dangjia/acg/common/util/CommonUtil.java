@@ -633,7 +633,11 @@ public class CommonUtil {
     //状态：0管家处理中,1管家取消,2管家通过(补:业主审核中,退:工匠审核中),3管家重新提交数量,4补人工支付完成,5待业主支付,6退人工完成,7已撤回,8
     String stateName="大管家审核中";
     String workerName="工匠";
-    if("1".equals(type)){
+    String str="补";
+    if("2".equals(type)){
+      str="退";
+    }
+    if("2".equals(type)||"3".equals(type)){
       workerName="业主";
     }
     switch (state){
@@ -654,7 +658,7 @@ public class CommonUtil {
       case "4":
       case "5":
       case "6":
-        stateName="退人工成功";
+        stateName=str+"人工成功";
         break;
       default:
         break;
