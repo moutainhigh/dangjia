@@ -479,7 +479,7 @@ public class WalletService {
             criteria.andGreaterThanOrEqualTo(WorkerDetail.CREATE_DATE, DateUtil.getDateString(DateUtil.getMonthFirst(DateUtil.toDate(time), -12).getTime()));
         }
         criteria.andEqualTo(WorkerDetail.WORKER_ID, member.getId());
-        if (state != null) {
+        if (state != null&&state.length>0) {
             criteria.andIn(WorkerDetail.STATE, Arrays.asList(state));
         }
         example.orderBy(WorkerDetail.CREATE_DATE).desc();
@@ -493,24 +493,26 @@ public class WalletService {
             String dqYear = DateUtil.dateToString(new Date(), DateUtil.FORMAT);
             DetailDTO detailDTO = new DetailDTO();
             if (map.get(timeYear) == null) {
+                DetailDTO detailDTO2 = new DetailDTO();
                 Date dVal = DateUtil.toDate(timeYear);
                 String timeVal = DateUtil.getDateString(DateUtil.getMonthLast(dVal).getTime());
-
                 Double income = workerDetailMapper.incomeMoney(member.getId(), timeVal, state);
                 Double outMoney = workerDetailMapper.outMoney(member.getId(), timeVal, state);
-                detailDTO.setOutMoneyTotal(outMoney);
-                detailDTO.setInMoneyTotal(income);
-                map.put(timeYear, detailDTO);
+                detailDTO2.setOutMoneyTotal(outMoney);
+                detailDTO2.setInMoneyTotal(income);
+                detailDTO2.setType(0);
+                map.put(timeYear, detailDTO2);
+                detailDTO2.setTime(timeYear);
+                if (timeYear.equals(dqYear)) {
+                    detailDTO2.setTime("本月");
+                }
+                detailDTOList.add(detailDTO2);
             } else {
                 DetailDTO detailDTOTime = map.get(timeYear);
                 detailDTO.setOutMoneyTotal(detailDTOTime.getOutMoneyTotal());
                 detailDTO.setInMoneyTotal(detailDTOTime.getInMoneyTotal());
             }
 
-            detailDTO.setTime(timeYear);
-//            if (timeYear.equals(dqYear)) {
-//                detailDTO.setTime("本月");
-//            }
             detailDTO.setWorkerDetailId(workerDetail.getId());
             detailDTO.setImage(imageAddress + getIcon(workerDetail.getState()));//图标
             detailDTO.setName(workerDetail.getName());
