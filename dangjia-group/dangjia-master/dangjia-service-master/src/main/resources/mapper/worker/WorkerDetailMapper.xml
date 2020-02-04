@@ -24,7 +24,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--统计总收入钱 -->
     <select id="incomeMoney" resultType="java.lang.Double">
-        select sum(money)
+        select IFNULL(sum(money),0)
         from dj_worker_worker_detail
         where worker_id=#{workerId}
         <if test="null!=states and states.length > 0">
@@ -126,7 +126,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--统计总支出钱 -->
     <select id="outMoney" resultType="java.lang.Double">
-        select sum(money)
+        select IFNULL(sum(money),0)
         from dj_worker_worker_detail
         where worker_id=#{workerId}
         <if test="null!=states and states.length > 0">
