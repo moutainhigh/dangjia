@@ -514,10 +514,8 @@ public class WalletService {
             DetailDTO detailDTO = new DetailDTO();
             if (map.get(timeYear) == null) {
                 DetailDTO detailDTO2 = new DetailDTO();
-                Date dVal = DateUtil.toDate(timeYear);
-                String timeVal = DateUtil.getDateString(DateUtil.getMonthLast(dVal).getTime());
-                Double income = workerDetailMapper.incomeMoney(member.getId(), timeVal, state);
-                Double outMoney = workerDetailMapper.outMoney(member.getId(), timeVal, state);
+                Double income = workerDetailMapper.incomeMoney(member.getId(), timeYear, state);
+                Double outMoney = workerDetailMapper.outMoney(member.getId(), timeYear, state);
                 detailDTO2.setOutMoneyTotal(outMoney);
                 detailDTO2.setInMoneyTotal(income);
                 detailDTO2.setType(0);
