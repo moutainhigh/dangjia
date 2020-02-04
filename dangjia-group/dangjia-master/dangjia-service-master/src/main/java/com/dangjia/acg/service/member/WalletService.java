@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.member;
 
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -46,6 +47,9 @@ import java.util.*;
 public class WalletService {
     @Autowired
     private ConfigUtil configUtil;
+
+    @Autowired
+    private RedisClient redisClient;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -487,12 +491,12 @@ public class WalletService {
         PageInfo pageResult = new PageInfo(outDetailList);
         List<DetailDTO> detailDTOList = new ArrayList<>();
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        Map<String, DetailDTO> map = new HashMap<>();
         for (WorkerDetail workerDetail : outDetailList) {
             String timeYear = DateUtil.dateToString(workerDetail.getCreateDate(), DateUtil.FORMAT);
             String dqYear = DateUtil.dateToString(new Date(), DateUtil.FORMAT);
             DetailDTO detailDTO = new DetailDTO();
-            if (map.get(timeYear) == null) {
+            DetailDTO  map = redisClient.getCache("workerDetail:"+member.getId()+timeYear,DetailDTO.class);
+            if (map==null) {
                 DetailDTO detailDTO2 = new DetailDTO();
                 Date dVal = DateUtil.toDate(timeYear);
                 String timeVal = DateUtil.getDateString(DateUtil.getMonthLast(dVal).getTime());
@@ -501,16 +505,15 @@ public class WalletService {
                 detailDTO2.setOutMoneyTotal(outMoney);
                 detailDTO2.setInMoneyTotal(income);
                 detailDTO2.setType(0);
-                map.put(timeYear, detailDTO2);
                 detailDTO2.setTime(timeYear);
+                redisClient.put("workerDetail:"+member.getId()+timeYear,detailDTO2);
                 if (timeYear.equals(dqYear)) {
-                    detailDTO2.setTime("本月");
+                    detailDTO.setTime("本月");
                 }
                 detailDTOList.add(detailDTO2);
             } else {
-                DetailDTO detailDTOTime = map.get(timeYear);
-                detailDTO.setOutMoneyTotal(detailDTOTime.getOutMoneyTotal());
-                detailDTO.setInMoneyTotal(detailDTOTime.getInMoneyTotal());
+                detailDTO.setOutMoneyTotal(map.getOutMoneyTotal());
+                detailDTO.setInMoneyTotal(map.getInMoneyTotal());
             }
 
             detailDTO.setWorkerDetailId(workerDetail.getId());
@@ -525,6 +528,7 @@ public class WalletService {
             detailDTO.setMoney(getPlusMinus(workerDetail.getState()) + workerDetail.getMoney());
             detailDTOList.add(detailDTO);
         }
+
         pageResult.setList(detailDTOList);
         return ServerResponse.createBySuccess("获取成功", pageResult);
     }
