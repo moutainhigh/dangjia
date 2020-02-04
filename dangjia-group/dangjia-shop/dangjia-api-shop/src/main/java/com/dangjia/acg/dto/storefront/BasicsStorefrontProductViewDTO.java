@@ -18,6 +18,7 @@ public class BasicsStorefrontProductViewDTO {
     private String suppliedNum; //供货数量
 
     //private String cityId;//城市id
+    private String valueIdArr;//货品属性
     private String valueNameArr;//货品属性
     private String prodTemplateId;//获品模板id
     private StorefrontProduct storefrontProduct;//店铺集合
