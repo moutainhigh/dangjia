@@ -24,7 +24,6 @@ import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordContentMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
@@ -44,7 +43,6 @@ import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
-import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
@@ -53,13 +51,13 @@ import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.BasicsProductTemplateRatio;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
-import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
@@ -84,10 +82,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 import java.util.*;
 
 /**
@@ -1280,7 +1274,7 @@ public class DjMaintenanceRecordService {
                         iMemberMapper.updateByPrimaryKeySelective(member);
                         workerDetail.setWorkerName(member.getName());
                         workerDetail.setMoney(new BigDecimal(amountDeducted));
-                        workerDetail.setState(3);
+                        workerDetail.setState(102);
                         workerDetail.setDefinedWorkerId(djMaintenanceRecordResponsibleParty.getId());
                         //记录流水
                         iWorkerDetailMapper.insert(workerDetail);
