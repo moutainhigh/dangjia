@@ -440,10 +440,11 @@ public class WalletService {
      * @param userToken 用户ToKen
      * @param time      截止的年月（未来一年内） 默认当前年月
      * @param type      0=全部  1=收益  2=提现  3=奖罚  4=滞留
+     * @param stateAll      0=余额  1=滞留金
      * @param pageDTO
      * @return
      */
-    public ServerResponse workerDetail(String userToken, String time, int type, PageDTO pageDTO) {
+    public ServerResponse workerDetail(String userToken, String time, Integer type,Integer stateAll, PageDTO pageDTO) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -458,23 +459,30 @@ public class WalletService {
 
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String[] state =  new String[]{};
-        if (type == 1) {//收益
+        if (stateAll==0&&type == 1) {//收益
             state = new String[]{"0"};
         }
-        if (type == 2) {//提现
+        if (stateAll==0&&type == 2) {//提现
             state = new String[]{"1", "8"};
 
         }
-        if (type == 3) {//奖罚
+        if (stateAll==0&&type == 3) {//奖罚
             state = new String[]{"12", "13"};
 
         }
-        if (type == 4) {//滞留
+        if (stateAll==1&&type == 4) {//滞留
             state = new String[]{"10", "11"};
-
         }
-        if (type == 5) {//业主流水
+        if (stateAll==0&&type == 5) {//业主流水
             state = new String[]{"0","1","2","3","4","5","6","7","8","9"};
+        }
+        if(type==null || type==0){
+            if (stateAll==1) {//滞留
+                state = new String[]{"10", "11"};
+            }
+            if (stateAll==1) {//余额
+                state = new String[]{"0","1","2","3","4","5","6","7","8","9","12","13"};
+            }
         }
         Example example = new Example(WorkerDetail.class);
         Example.Criteria criteria = example.createCriteria();
@@ -512,6 +520,17 @@ public class WalletService {
                 }
                 detailDTOList.add(detailDTO2);
             } else {
+                if(pageDTO.getPageNum()==1||pageDTO.getPageNum()==0){
+                    DetailDTO detailDTO2 = new DetailDTO();
+                    detailDTO2.setOutMoneyTotal(map.getOutMoneyTotal());
+                    detailDTO2.setInMoneyTotal(map.getInMoneyTotal());
+                    detailDTO2.setType(map.getType());
+                    detailDTO2.setTime(map.getTime());
+                    if (map.getTime().equals(dqYear)) {
+                        detailDTO.setTime("本月");
+                    }
+                    detailDTOList.add(detailDTO2);
+                }
                 detailDTO.setOutMoneyTotal(map.getOutMoneyTotal());
                 detailDTO.setInMoneyTotal(map.getInMoneyTotal());
             }
