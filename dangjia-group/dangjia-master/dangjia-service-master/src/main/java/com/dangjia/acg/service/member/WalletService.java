@@ -526,7 +526,7 @@ public class WalletService {
                     detailDTO2.setTime("本月");
                 }
                 map.put(timeYear, detailDTO2);
-                if(!(!CommonUtil.isEmpty(timeMark) && timeYear.equals(timeMark))){
+                if(!(!CommonUtil.isEmpty(timeMark) && detailDTO2.getTime().equals(timeMark))){
                     detailDTOList.add(detailDTO2);
                 }
             }
