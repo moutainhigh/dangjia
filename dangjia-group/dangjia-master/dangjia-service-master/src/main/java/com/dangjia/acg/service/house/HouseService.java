@@ -2034,7 +2034,7 @@ public class HouseService {
 
                     Example example=new Example(DjActuarialTemplateConfig.class);
                     example.createCriteria().andEqualTo(DjActuarialTemplateConfig.SERVICE_TYPE_ID,house.getHouseType())
-                            .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,1);
+                            .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,configType);
                     DjActuarialTemplateConfig djActuarialTemplateConfig=iMasterActuarialTemplateConfigMapper.selectOneByExample(example);
 
 

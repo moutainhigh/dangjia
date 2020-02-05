@@ -101,6 +101,27 @@ public class DjSupApplicationProductService {
     }
 
     /**
+     * 查询待审核供应商品
+     *
+     * @param supId
+     * @param shopId
+     * @return
+     */
+    public Integer searchHaveGoodsSize(String supId, String shopId, String applicationStatus) {
+        try {
+            List<DjSupSupplierProductDTO> list = djSupSupplierProductMapper.searchHaveGoodsSize(supId, shopId, applicationStatus);
+            if (list != null) {
+                return list.size();
+            } else {
+                return 0;
+            }
+
+        } catch (Exception e) {
+           logger.error("查询异常：",e);
+        }
+        return null;
+    }
+    /**
      * 查询已供商品
      *
      * @param supId

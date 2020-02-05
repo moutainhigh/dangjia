@@ -25,6 +25,10 @@ public interface DjSupSupplierProductMapper extends Mapper<DjSupSupplierProduct>
                                                  @Param("applicationStatus") String applicationStatus,
                                                  @Param("keyWord")String keyWord);
 
+    List<DjSupSupplierProductDTO> searchHaveGoodsSize(@Param("supId") String supId,
+                                                      @Param("shopId") String shopId,
+                                                      @Param("applicationStatus") String applicationStatus);
+
     String queryAttributeNameByIds(@Param("ids") String [] ids);
 
     List<SupplyDimensionDTO> queryDjSupSupplierProductList(@Param("supId") String supId,
