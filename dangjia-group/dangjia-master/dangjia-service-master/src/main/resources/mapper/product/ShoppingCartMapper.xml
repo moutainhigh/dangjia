@@ -82,7 +82,7 @@
 			dj_basics_storefront a
 		INNER JOIN dj_basics_storefront_product b ON b.storefront_id = a.id
 		INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
-		INNER JOIN dj_basics_goods d ON b.goods_id = d.id
+		INNER JOIN dj_basics_goods d ON c.goods_id = d.id
 		INNER JOIN dj_basics_unit e ON c.convert_unit = e.id
 		WHERE
 		d.type &lt; 4

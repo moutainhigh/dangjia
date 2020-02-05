@@ -276,18 +276,18 @@ public class DjSupplierServices {
             }
             for (DjSupplierDTO djSupplierDTO : list) {
                 String contract = djSupplierDTO.getContract();
-                if (StringUtil.isEmpty(contract)) {
+                if (StringUtil.isEmpty(contract)) {//是否显示查看合同
                     djSupplierDTO.setContractState("0");
                 } else {
                     djSupplierDTO.setContractState("1");
                 }
-                Integer i = djSupApplicationProductService.queryHaveGoodsSize(djSupplierDTO.getSupId(), djSupplierDTO.getShopId(), "0");
-                djSupplierDTO.setListSize(i);//是否有供应商的供应商品
+                Integer i = djSupApplicationProductService.searchHaveGoodsSize(djSupplierDTO.getSupId(), djSupplierDTO.getShopId(), "0");
+                djSupplierDTO.setListSize(i);//是否有待审核的供应商品
             }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
