@@ -461,6 +461,7 @@
         and t3.worker_id = #{workerId}
         and t2.house_id= #{houseId}
         and t.id = #{id}
+        and t2.state=1
         and t1.type in(2,3)
     </select>
 
@@ -473,6 +474,33 @@
         and t.id = #{id}
     </select>
 
+
+    <select id="getNoTechnologyName" resultType="java.lang.String">
+       SELECT
+            t1.`name`
+        FROM
+            dj_basics_product_template t
+        INNER JOIN dj_basics_technology t1 ON FIND_IN_SET(t1.id, t.technology_ids)
+        LEFT JOIN (
+            SELECT
+                t1.id,
+                t1.`name`
+            FROM
+                dj_basics_product_template t
+            INNER JOIN dj_basics_technology t1 ON FIND_IN_SET(t1.id, t.technology_ids)
+            INNER JOIN dj_matter_technology_record t2 ON t2.technology_Id = t1.id
+            INNER JOIN dj_core_house_flow_apply t3 ON t2.house_flow_apply_id = t3.id
+            WHERE  t3.worker_id = #{workerId}
+            AND t2.house_id= #{houseId}
+            AND t.id = #{id}
+            AND t2.state=1
+            AND t1.type IN (2, 3)
+        ) a1 ON a1.id = t1.id
+        WHERE
+            t.id = #{id}
+        AND a1.id IS NULL
+        LIMIT 1
+    </select>
     <select id="getBudgetOrderNewInfo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
         SELECT
         t.id orderId,

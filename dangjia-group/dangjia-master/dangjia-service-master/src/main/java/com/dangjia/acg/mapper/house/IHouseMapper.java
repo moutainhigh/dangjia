@@ -62,13 +62,35 @@ public interface IHouseMapper extends Mapper<House> {
                                                             @Param("type") Integer type);
 
 
-
-
+    /**
+     * 已完成的节点
+     * @param id
+     * @param houseId
+     * @param workerId
+     * @return
+     */
     int queryTestNumber(@Param("id") String id,
                         @Param("houseId") String houseId,
                         @Param("workerId") String workerId);
 
+    /**
+     * 所有的节点
+     * @param id
+     * @return
+     */
     int queryArrNumber(@Param("id") String id);
+
+    /**
+     * 未完成的节点
+     * @param id
+     * @param houseId
+     * @param workerId
+     * @return
+     */
+    String getNoTechnologyName(@Param("id") String id,
+                        @Param("houseId") String houseId,
+                        @Param("workerId") String workerId);
+
     /**
      * 判断当前订单是否为已退款状态
      * @param houseId

@@ -69,6 +69,7 @@ public class ConstructionByWorkerIdBean {
             private String url;
             private int type;//0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图
             private int state;//0无 1有点
+            private int number;//点数量
         }
     }
 
@@ -77,14 +78,19 @@ public class ConstructionByWorkerIdBean {
         private String buttonTitle;//审核按钮提示
         private String detailUrl;//进程详情链接
         private String houseFlowId;//进程id
-        private String houseFlowName;//进程名称
-        private int houseFlowtype;//进程类型4拆除，5打孔，6水电工，7防水，8泥工,9木工，10油漆工，11安装
-        private int isStart;//是否开工0:今日未开工；1：今日已开工；
-        private String patrolSecond;//巡查次数
-        private String patrolStandard;//巡查标准
-        private int state;//装修进度0：未进场；1：待业主支付；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
+        private Integer workerType;//工种类型
+        private String workerTypeName;//进程名称
+        private String workerTypeColor;//颜色
+        private Integer isStart;//是否开工0:今日未开工；1：今日已开工；
+//        private String patrolSecond;//巡查次数
+//        private String patrolStandard;//巡查标准
+        private Integer state;//装修进度0：未进场；1：待业主支付；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
         private String workerId;//工匠id
         private String workerName;//工匠名字
         private String workerPhone;//工匠电话
+
+
+        private Integer totalNodeNumber;//总节点数
+        private Integer completedNodeNumber;//当前节点
     }
 }

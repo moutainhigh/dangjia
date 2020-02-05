@@ -92,11 +92,12 @@
         from
         dj_core_house_worker
         where
-        work_type = #{workType}
-        and
         worker_type_id = #{workerTypeId}
         and
         house_id = #{houseId}
+        <if test="workType!=null and workType!=''">
+            and work_type = #{workType}
+        </if>
         GROUP BY is_select desc limit 1
     </select>
 
