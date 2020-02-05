@@ -69,6 +69,7 @@ public class ConstructionByWorkerIdBean {
             private String url;
             private int type;//0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图
             private int state;//0无 1有点
+            private int number;//点数量
         }
     }
 

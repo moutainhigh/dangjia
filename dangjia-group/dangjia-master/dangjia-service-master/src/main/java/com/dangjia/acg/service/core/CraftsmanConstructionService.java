@@ -118,7 +118,7 @@ public class CraftsmanConstructionService {
      * @param userToken userToken
      * @return 施工页面信息
      */
-    public ServerResponse getConstructionView(HttpServletRequest request, String userToken,Integer type) {
+    public ServerResponse getConstructionView(HttpServletRequest request, String userToken, String houseId,Integer type) {
         ConstructionByWorkerIdBean bean = new ConstructionByWorkerIdBean();//公用返回体
         Object object = getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -132,12 +132,13 @@ public class CraftsmanConstructionService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        HouseWorker hw = (HouseWorker) object;
-        House house = houseMapper.selectByPrimaryKey(hw.getHouseId());//查询房产信息
+        House house = houseMapper.selectByPrimaryKey(houseId);//查询房产信息
         if (house == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "房产信息不存在");
         }
-        HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hw.getHouseId(), hw.getWorkerTypeId());//查询自己的任务状态
+
+        HouseWorker hw =houseWorkerMapper.getByWorkerTypeId(house.getId(),worker.getWorkerTypeId(),null);
+        HouseFlow hf = houseFlowMapper.getByWorkerTypeId(houseId, hw.getWorkerTypeId());//查询自己的任务状态
         if (hf == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "没有查到该任务");
         }
