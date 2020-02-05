@@ -27,8 +27,8 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryOrderNumber(HttpServletRequest request, String userToken, String houseId) {
-        return djDeliverOrderService.queryOrderNumber(userToken, houseId);
+    public ServerResponse queryOrderNumber(HttpServletRequest request, String userToken) {
+        return djDeliverOrderService.queryOrderNumber(userToken);
     }
 
     @Override

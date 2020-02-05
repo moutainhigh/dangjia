@@ -228,7 +228,7 @@ public class DjDeliverOrderService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryOrderNumber(String userToken, String houseId) {
+    public ServerResponse queryOrderNumber(String userToken) {
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
         Object object = memberAPI.getMember(userToken);
@@ -244,7 +244,7 @@ public class DjDeliverOrderService {
         }
 
         House house = (House) object;
-        houseId = house.getId();
+        String houseId = house.getId();
 
 //        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
 
@@ -328,7 +328,7 @@ public class DjDeliverOrderService {
         }
 
         //获取工序信息
-        List<Object> workNodeListDTO = summationMethod(houseFlows,house);
+        List<Object> workNodeListDTO = summationMethod(houseFlows, house);
         workInFoDTO.setWorkList(workNodeListDTO);
 
         //获取客服明细
@@ -472,35 +472,35 @@ public class DjDeliverOrderService {
             listMap = new HashMap<>();
             workNodeListDTO = new WorkNodeListDTO();
 
-            if(houseFlow.getWorkerTypeId().equals("1")){
+            if (houseFlow.getWorkerTypeId().equals("1")) {
 
                 //设计师
                 listMap = new HashMap<>();
                 listMap.put("name", "实际工期");
-                if(houseFlow.getEndDate() != null){
+                if (houseFlow.getEndDate() != null) {
                     listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
-                }else{
+                } else {
                     listMap.put("value", 0 + "天");
                 }
                 gList.add(listMap);
 
                 listMap = new HashMap<>();
                 listMap.put("name", "施工节点");
-                listMap.put("value", 0+ "/" + 3);
+                listMap.put("value", 0 + "/" + 3);
                 workNodeListDTO.setHundred(0);
-                if(house.getDesignerOk() == 9){
+                if (house.getDesignerOk() == 9) {
                     //上传量房 百分比
                     workNodeListDTO.setHundred(33);
                     listMap = new HashMap<>();
                     listMap.put("name", "施工节点");
-                    listMap.put("value", 1+ "/" + 3);
-                }else if(house.getDesignerOk() == 7){
+                    listMap.put("value", 1 + "/" + 3);
+                } else if (house.getDesignerOk() == 7) {
                     //平面图通过 百分比
                     workNodeListDTO.setHundred(66);
                     listMap = new HashMap<>();
                     listMap.put("name", "施工节点");
-                    listMap.put("value", 2+ "/" + 3);
-                }else if(house.getDesignerOk() == 3){
+                    listMap.put("value", 2 + "/" + 3);
+                } else if (house.getDesignerOk() == 3) {
                     //施工图通过 百分比
                     workNodeListDTO.setHundred(100);
                     listMap = new HashMap<>();
@@ -508,29 +508,29 @@ public class DjDeliverOrderService {
                     listMap.put("value", 3 + "/" + 3);
                 }
                 gList.add(listMap);
-            }else if(houseFlow.getWorkerTypeId().equals("2")){
+            } else if (houseFlow.getWorkerTypeId().equals("2")) {
                 //精算师 百分比
                 listMap = new HashMap<>();
                 listMap.put("name", "实际工期");
-                if(houseFlow.getEndDate() != null){
+                if (houseFlow.getEndDate() != null) {
                     listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
-                }else{
+                } else {
                     listMap.put("value", 0 + "天");
                 }
                 gList.add(listMap);
 
                 listMap = new HashMap<>();
                 listMap.put("name", "施工节点");
-                listMap.put("value", 0+ "/" + 1);
+                listMap.put("value", 0 + "/" + 1);
                 workNodeListDTO.setHundred(0);
-                if(house.getBudgetOk() == 3){
+                if (house.getBudgetOk() == 3) {
                     workNodeListDTO.setHundred(100);
                     listMap = new HashMap<>();
                     listMap.put("name", "施工节点");
-                    listMap.put("value", 1+ "/" + 1);
+                    listMap.put("value", 1 + "/" + 1);
                 }
                 gList.add(listMap);
-            }else{
+            } else {
                 listMap.put("name", "预计工期");
                 if (houseFlow.getStartDate() == null) {
                     listMap.put("value", 0 + "天");
@@ -2011,7 +2011,7 @@ public class DjDeliverOrderService {
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("删除失败",e);
+            logger.info("删除失败", e);
             return ServerResponse.createByErrorMessage("删除失败");
         }
     }
@@ -2028,7 +2028,7 @@ public class DjDeliverOrderService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<OrderStorefrontDTO> orderStorefrontDTOS = null;
-            if(StringUtils.isBlank(state)){
+            if (StringUtils.isBlank(state)) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             if (state.equals("2") || state.equals("4")) {
@@ -2085,8 +2085,8 @@ public class DjDeliverOrderService {
     public Member queryWorker(String houseId, String workerTypeId) {
         try {
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,houseId)
-                    .andEqualTo(HouseFlow.WORKER_TYPE_ID,workerTypeId)
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
+                    .andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(HouseFlow.DATA_STATUS, 0);
             HouseFlow houseFlow = iBillHouseFlowMapper.selectOneByExample(example);
             Member member = iBillMemberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
@@ -2158,16 +2158,17 @@ public class DjDeliverOrderService {
     /**
      * 查询订单人工商品
      * orderStatus 3待收货，4已完成
+     *
      * @param houseId
      * @return
      */
-    public ServerResponse queryWorkerGoods(String houseId,Integer orderStatus) {
+    public ServerResponse queryWorkerGoods(String houseId, Integer orderStatus) {
         try {
 
             List<WorkerGoodsInFoDTO> workerGoodsInFoDTOS = iBillDjDeliverOrderMapper.queryWorkerGoods(houseId, orderStatus);
-            if(workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0){
+            if (workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0) {
                 String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-                workerGoodsInFoDTOS.forEach(a->{
+                workerGoodsInFoDTOS.forEach(a -> {
                     a.setImage(imageAddress + a.getImage());
                 });
             }
@@ -2177,7 +2178,7 @@ public class DjDeliverOrderService {
             return ServerResponse.createBySuccess("查询成功", workerGoodsInFoDTOS);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查询失败",e);
+            logger.info("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -2185,25 +2186,26 @@ public class DjDeliverOrderService {
     /**
      * 查询订单人工商品详情
      * orderStatus 3待收货，4已完成
+     *
      * @param id
      * @return
      */
     public ServerResponse queryWorkerGoodsInFo(String id) {
         try {
             List<WorkerGoodsInFoDTO> workerGoodsInFoDTOS = iBillDjDeliverOrderMapper.queryWorkerGoodsInFo(id);
-            List<Map<String,Object>> list = new ArrayList<>();
-            Map<String,Object> map = new HashMap<>();
-            if(workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0){
+            List<Map<String, Object>> list = new ArrayList<>();
+            Map<String, Object> map = new HashMap<>();
+            if (workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0) {
                 House house = iBillHouseMapper.selectByPrimaryKey(workerGoodsInFoDTOS.get(0).getHouseId());
                 String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
-                map.put("houseName",houseName);
+                map.put("houseName", houseName);
                 map.put("createDate", workerGoodsInFoDTOS.get(0).getCreateDate());
                 map.put("totalAmount", workerGoodsInFoDTOS.get(0).getTotalAmount());
                 String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
 
-                workerGoodsInFoDTOS.forEach(a->{
+                workerGoodsInFoDTOS.forEach(a -> {
                     a.setTotalNodeNumber(iBillDjDeliverOrderMapper.queryArrNumber(a.getProductTemplateId()));//查询总节点数
-                    a.setCompletedNodeNumber( iBillDjDeliverOrderMapper.queryTestNumber(a.getProductTemplateId(),a.getHouseId(),a.getWorkerId()));//已完成节点
+                    a.setCompletedNodeNumber(iBillDjDeliverOrderMapper.queryTestNumber(a.getProductTemplateId(), a.getHouseId(), a.getWorkerId()));//已完成节点
                     a.setImage(imageAddress + a.getImage());
                 });
             }
@@ -2216,7 +2218,7 @@ public class DjDeliverOrderService {
             return ServerResponse.createBySuccess("查询成功", list);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查询失败",e);
+            logger.info("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -2224,6 +2226,7 @@ public class DjDeliverOrderService {
 
     /**
      * 完工后-花费明细
+     *
      * @param houseId
      * @return
      */
@@ -2232,10 +2235,10 @@ public class DjDeliverOrderService {
             List<DecorationCostDTO> decorationCostDTOS = iBillDjDeliverOrderMapper.queryCostDetailsAfterCompletion(houseId);
             Map<String, List<DecorationCostDTO>> collect = decorationCostDTOS.stream()
                     .collect(Collectors.groupingBy(DecorationCostDTO::getWorkerTypeId));
-            return ServerResponse.createBySuccess("查询成功",collect);
+            return ServerResponse.createBySuccess("查询成功", collect);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查询失败",e);
+            logger.info("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
