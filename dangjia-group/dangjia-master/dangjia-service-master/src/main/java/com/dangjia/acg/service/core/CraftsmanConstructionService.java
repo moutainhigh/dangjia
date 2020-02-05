@@ -12,6 +12,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonListBean;
 import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
+import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.dto.core.Task;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.mapper.core.*;
@@ -40,6 +41,7 @@ import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.design.QuantityRoomService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -274,12 +276,15 @@ public class CraftsmanConstructionService {
             for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
                 setProductInfo(houseOrderDetailDTO, address);
                 Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
-                dataMap.put("totalNodeNumber", 2);//总节点数
-                if (workertype == 1 ? house.getDesignerOk() == 3 : house.getBudgetOk() == 3) {
-                    dataMap.put("completedNodeNumber", 2);//已完成节点数(已完成)
+                NodeDTO nodeDTO = new NodeDTO();
+                if (workertype == 1) {
+                    nodeDTO= HouseUtil.getDesignDatas(house,nodeDTO);
                 } else {
-                    dataMap.put("completedNodeNumber", 1);//已完成节点数(进行中）
+                    nodeDTO= HouseUtil.getBudgetDatas(house,nodeDTO);
                 }
+                dataMap.put("completedNodeNumber", nodeDTO.getRank());//已完成节点数(已完成)
+                dataMap.put("totalNodeNumber", nodeDTO.getTotal());//精算总节点数
+                dataMap.put("labelName", nodeDTO.getNameB());//节点名称
                 mapDataList.add(dataMap);
             }
         }
@@ -423,6 +428,7 @@ public class CraftsmanConstructionService {
                 Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
                 dataMap.put("totalNodeNumber", houseMapper.queryArrNumber(houseOrderDetailDTO.getProductTemplateId()));//总节点数
                 dataMap.put("completedNodeNumber", houseMapper.queryTestNumber(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//已完成节点数(已完成)
+                dataMap.put("labelName", houseMapper.getNoTechnologyName(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//节点名称
                 mapDataList.add(dataMap);
             }
             //获取维保id
@@ -467,13 +473,14 @@ public class CraftsmanConstructionService {
                 Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfl.getWorkerTypeId());
                 wfr.setHouseFlowId(hfl.getId());//进程id
-                wfr.setHouseFlowtype(hfl.getWorkerType());//进程类型
-                wfr.setHouseFlowName(workerType == null ? "" : workerType.getName());//大进程名
+                wfr.setWorkerType(workerType.getType());//进程类型
+                wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
                 wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
                 wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
+                wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
                 wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
-                wfr.setPatrolSecond("巡查次数" + houseFlowApplyMapper.countPatrol(house.getId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
-                wfr.setPatrolStandard("巡查标准" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
+//                wfr.setPatrolSecond("巡查次数" + houseFlowApplyMapper.countPatrol(house.getId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
+//                wfr.setPatrolStandard("巡查标准" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
                 if (todayStart == null) {//没有今日开工记录
                     wfr.setIsStart(0);//今日是否开工0:否；1：是；
@@ -530,6 +537,11 @@ public class CraftsmanConstructionService {
                 if (hfl.getPause() == 1) {
                     wfr.setButtonTitle("已停工");//按钮提示
                 }
+                wfr.setTotalNodeNumber(7);
+                if(workerType.getType()==4){//拆除少无阶段完工，减去1节点数
+                    wfr.setTotalNodeNumber(6);
+                }
+                wfr.setCompletedNodeNumber(wfr.getState());//当前完成的节点数
                 workerFlowList.add(wfr);
             }
         }
@@ -638,6 +650,7 @@ public class CraftsmanConstructionService {
                 Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
                 dataMap.put("totalNodeNumber", houseMapper.queryArrNumber(houseOrderDetailDTO.getProductTemplateId()));//总节点数
                 dataMap.put("completedNodeNumber", houseMapper.queryTestNumber(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//已完成节点数(已完成)
+                dataMap.put("labelName", houseMapper.getNoTechnologyName(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//节点名称
                 mapDataList.add(dataMap);
             }
         }
