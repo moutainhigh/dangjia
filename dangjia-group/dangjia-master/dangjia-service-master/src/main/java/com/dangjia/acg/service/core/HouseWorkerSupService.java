@@ -132,9 +132,9 @@ public class HouseWorkerSupService {
                         allgrabBean.setWorkerTypeId(workerTypeId);
                         allgrabBean.setCreateDate(order.getCreateDate());
                         allgrabBean.setHouseName(memberAddress.getAddress());
-                        allgrabBean.setType(2);
+                        allgrabBean.setType(1);
                         allgrabBean.setOrderType(0);
-                        allgrabBean.setHouseMember("业主 " + memberAddress.getName());//业主名称
+                        allgrabBean.setHouseMember(memberAddress.getName());//业主名称
                         allgrabBean.setWorkertotal("¥0");//工钱
                         double totalPrice = houseWorker.getPrice().doubleValue();
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
@@ -150,10 +150,11 @@ public class HouseWorkerSupService {
                         allgrabBean.setHouseFlowId(record.getId());
                         allgrabBean.setCreateDate(record.getCreateDate());
                         allgrabBean.setHouseName(house.getHouseName());
-                        allgrabBean.setType(3);
+                        allgrabBean.setHouseId(house.getId());
+                        allgrabBean.setType(2);
                         allgrabBean.setOrderType(0);
-                        allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                        allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+                        allgrabBean.setSquare((house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+                        allgrabBean.setHouseMember((mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                         allgrabBean.setWorkertotal("¥0");//工钱
                         double totalPrice = houseWorker.getPrice().doubleValue();
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
@@ -172,7 +173,8 @@ public class HouseWorkerSupService {
                         allgrabBean.setHouseFlowId(houseFlow.getId());
                         allgrabBean.setCreateDate(houseFlow.getCreateDate());
                         allgrabBean.setHouseName(house.getHouseName());
-                        allgrabBean.setType(1);
+                        allgrabBean.setHouseId(house.getId());
+                        allgrabBean.setType(0);
                         allgrabBean.setOrderType(0);
                         //是否为新单
                         if (DateUtil.addDateDays(houseFlow.getReleaseTime(), 1).getTime() < new Date().getTime()) {
@@ -183,8 +185,8 @@ public class HouseWorkerSupService {
                         if (qdjl > 0) {
                             allgrabBean.setOrderType(2);
                         }
-                        allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                        allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+                        allgrabBean.setSquare((house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+                        allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                         allgrabBean.setWorkertotal("¥0");//工钱
                         double totalPrice = houseWorker.getPrice().doubleValue();
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
