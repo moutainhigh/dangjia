@@ -48,6 +48,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -131,6 +132,8 @@ public class HouseFlowService {
     private DjMaintenanceRecordProductMapper maintenanceRecordProductMapper;
 
 
+    @Autowired
+    private MasterProductTemplateService masterProductTemplateService;
     @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
 
@@ -335,8 +338,8 @@ public class HouseFlowService {
                                 allgrabBean.setOrderType(2);
                             }
 
-                            allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                            allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+                            allgrabBean.setSquare((house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+                            allgrabBean.setHouseMember((mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                             allgrabBean.setWorkertotal("¥0");//工钱
                             double totalPrice = 0;
                             ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(house.getCityId(), houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
@@ -397,8 +400,8 @@ public class HouseFlowService {
                     allgrabBean.setHouseName(house.getHouseName());
                     allgrabBean.setType(3);
                     allgrabBean.setOrderType(0);
-                    allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                    allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+                    allgrabBean.setSquare( (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+                    allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
                     //    double totalPrice = record.getSincePurchaseAmount();
                     //  allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
@@ -439,13 +442,13 @@ public class HouseFlowService {
             allgrabBean.setHouseName(memberAddress.getAddress());
             allgrabBean.setType(type);
             allgrabBean.setOrderType(0);
-            allgrabBean.setHouseMember("业主 " + memberAddress.getName());//业主名称
+            allgrabBean.setHouseMember( memberAddress.getName());//业主名称
             allgrabBean.setWorkertotal("¥0");//工钱
             double totalPrice = order.getTotalAmount().doubleValue();
             allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
             List<OrderItem> orderItems=orderItemMapper.byOrderIdList(order.getId());
             for (OrderItem orderItem : orderItems) {
-                orderItem.setImage(address + orderItem.getImage());
+                orderItem.setImageUrl(address + orderItem.getImage());
             }
             allgrabBean.setGoodsData(orderItems);
         }else if(type==2){
@@ -459,8 +462,8 @@ public class HouseFlowService {
             allgrabBean.setHouseName(house.getHouseName());
             allgrabBean.setType(3);
             allgrabBean.setOrderType(0);
-            allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-            allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+            allgrabBean.setSquare( (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+            allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
             allgrabBean.setWorkertotal("¥0");//工钱
             // double totalPrice = record.getSincePurchaseAmount();
             //  allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
@@ -468,7 +471,10 @@ public class HouseFlowService {
             //维保商品列表
             List<DjMaintenanceRecordProductDTO> maintenanceRecordProducts = maintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(record.getId());
             maintenanceRecordProducts.forEach(djMaintenanceRecordProductDTO -> {
-                djMaintenanceRecordProductDTO.setImage(address + djMaintenanceRecordProductDTO.getImage());
+                djMaintenanceRecordProductDTO.setImageUrl(address + djMaintenanceRecordProductDTO.getImage());
+                if (StringUtils.isNotBlank(djMaintenanceRecordProductDTO.getValueIdArr())) {
+                    djMaintenanceRecordProductDTO.setValueNameArr(masterProductTemplateService.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()).replaceAll(",", " "));
+                }
             });
             allgrabBean.setGoodsData(maintenanceRecordProducts);
         }else {
@@ -526,8 +532,8 @@ public class HouseFlowService {
             allgrabBean.setHouseId(house.getId());
             allgrabBean.setType(1);
             allgrabBean.setOrderType(0);
-            allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-            allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+            allgrabBean.setSquare((house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+            allgrabBean.setHouseMember((mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
             allgrabBean.setWorkertotal("¥0");//工钱
             double totalPrice = 0;
             ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(house.getCityId(), houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
@@ -539,8 +545,7 @@ public class HouseFlowService {
             }
             allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
 
-            allgrabBean.setReleaseTime("时间 " + (houseFlow.getReleaseTime() == null ? "" :
-                    DateUtil.getDateString(houseFlow.getReleaseTime().getTime())));//发布时间
+            allgrabBean.setReleaseTime(houseFlow.getReleaseTime());//发布时间
             long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
             allgrabBean.setCountDownTime(countDownTime);//可接单时间
 

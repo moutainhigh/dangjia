@@ -2,6 +2,8 @@ package com.dangjia.acg.dto.engineer;
 
 import lombok.Data;
 
+import javax.persistence.Transient;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +21,7 @@ public class DjMaintenanceRecordProductDTO {
     private String productName;//商品名称
     private Double totalPrice;//销售价格
     private String image;//商品图片
+    private String imageUrl;
     private Double price;
 
     private String valueIdArr;//属性选项选中值id集合

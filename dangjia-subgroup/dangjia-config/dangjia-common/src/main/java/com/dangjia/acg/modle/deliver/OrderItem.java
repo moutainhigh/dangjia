@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -79,6 +80,17 @@ public class OrderItem extends BaseEntity {
 
 	@Column(name = "image")
 	private String image;//图片
+
+	@Transient
+	private String imageUrl;
+
+	@Transient
+	private String valueIdArr;
+
+	@Transient
+	private String valueNameArr;
+
+
 
 
 	@Column(name = "storefont_id")
