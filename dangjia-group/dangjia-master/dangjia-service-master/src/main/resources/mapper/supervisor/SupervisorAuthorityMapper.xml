@@ -322,7 +322,7 @@
         AND sa.member_id = #{memberId}
         <if test="cityId!=null and cityId!=''">
             AND h.city_id = #{cityId}
-        </if>s
+        </if>
     </select>
 
     <select id="getSupHouseList" resultType="com.dangjia.acg.dto.supervisor.AuthorityDTO">
