@@ -41,6 +41,7 @@ public interface WebMemberAPI {
     @PostMapping("web/member/setMember")
     @ApiOperation(value = "修改业主信息", notes = "修改业主信息")
     ServerResponse setMember(@RequestParam("request") HttpServletRequest request,
+                             @RequestParam("userToken") String userToken,
                              @RequestParam("member") Member member);
 
     @PostMapping("web/member/getMemberLabelList")

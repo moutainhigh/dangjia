@@ -891,9 +891,17 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse setMember(Member member) {
+    public ServerResponse setMember(String userToken,Member member) {
         try {
-            Member srcMember = memberMapper.selectByPrimaryKey(member.getId());
+            if(CommonUtil.isEmpty(userToken)){
+                userToken=member.getId();
+            }
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member srcMember = (Member)object;
+
             if (srcMember == null)
                 return ServerResponse.createByErrorMessage("该业主不存在");
             if (StringUtils.isNotBlank(member.getNickName()))

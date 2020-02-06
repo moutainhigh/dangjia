@@ -370,6 +370,22 @@ public class ConfigRuleUtilService {
                     break;
                 }
             }
+            if(configRuleItemTwoNew==null){
+                for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                    String[] fieldValues=configRuleItemTwo.getFieldValue().split(",");
+                    if(Double.parseDouble(fieldValues[1])<=square.doubleValue()){
+                        configRuleItemTwoNew= configRuleItemTwo;
+                    }
+                }
+            }
+            if(configRuleItemTwoNew==null){
+                for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                    String[] fieldValues=configRuleItemTwo.getFieldValue().split(",");
+                    if(Double.parseDouble(fieldValues[0])>=square.doubleValue()){
+                        configRuleItemTwoNew= configRuleItemTwo;
+                    }
+                }
+            }
         }
         return configRuleItemTwoNew;
     }

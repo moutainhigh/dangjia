@@ -26,6 +26,7 @@ import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
+import com.dangjia.acg.model.config.DjConfigRuleItemTwo;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.deliver.Order;
@@ -39,6 +40,7 @@ import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.worker.Insurance;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.design.QuantityRoomService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.util.HouseUtil;
@@ -92,6 +94,8 @@ public class CraftsmanConstructionService {
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
     @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
@@ -152,6 +156,13 @@ public class CraftsmanConstructionService {
         MemberAddress memberAddress = iMasterMemberAddressMapper.selectOneByExample(example);
         if (memberAddress != null && StringUtils.isNotBlank(memberAddress.getAddress())) {
             bean.setHouseName(memberAddress.getAddress());
+        }
+
+        if(house.getSquare()!=null) {
+            DjConfigRuleItemTwo configRuleItemTwo = configRuleUtilService.getApartmentConfig(house.getSquare());
+            if(configRuleItemTwo!=null) {
+                bean.setApartmentName(configRuleItemTwo.getFieldName());
+            }
         }
 
         switch (worker.getWorkerType()) {
@@ -436,9 +447,21 @@ public class CraftsmanConstructionService {
         }
         bean.setDataList(mapDataList);
 
-
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria()
+                .andGreaterThan(HouseFlow.WORKER_TYPE, 2)
+                .andEqualTo(HouseFlow.HOUSE_ID, house.getId());
+        example.orderBy(HouseFlow.SORT).desc();
+        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+        int all = 0;
+        for (HouseFlow flow : houseFlows) {
+            if (flow.getWorkerType() != 3 && flow.getPatrol() != null) {
+                all = all + flow.getPatrol();
+            }
+        }
         Long allPatrol = houseFlowApplyMapper.countPatrol(house.getId(), null);
-        bean.setAllPatrol("总巡查次数:" + (allPatrol == null ? 0 : allPatrol));
+        bean.setActualPatrol("实际巡查次数:" + (allPatrol == null ? 0 : allPatrol));
+        bean.setAllPatrol("标准巡查次数:" + all);
         bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
 
 
@@ -449,7 +472,7 @@ public class CraftsmanConstructionService {
         boolean houseIsStart = false;
         //当业主支付大管家费用并且确认开工之后之后才出现
         if (hf.getWorkerType() == 3 && hf.getWorkType() == 4 && hf.getSupervisorStart() == 1) {
-            Example example = new Example(HouseFlow.class);
+            example = new Example(HouseFlow.class);
             example.createCriteria()
                     .andEqualTo(HouseFlow.STATE, 0)
                     .andEqualTo(HouseFlow.HOUSE_ID, hw.getHouseId())
@@ -479,8 +502,8 @@ public class CraftsmanConstructionService {
                 wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
                 wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
                 wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
-//                wfr.setPatrolSecond("巡查次数" + houseFlowApplyMapper.countPatrol(house.getId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
-//                wfr.setPatrolStandard("巡查标准" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
+                wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(house.getId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
+                wfr.setPatrolStandard("" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
                 if (todayStart == null) {//没有今日开工记录
                     wfr.setIsStart(0);//今日是否开工0:否；1：是；
@@ -555,9 +578,8 @@ public class CraftsmanConstructionService {
         //查询是否全部整体完工
         List<HouseFlow> checkFinishList = houseFlowMapper.checkAllFinish(hf.getHouseId(), hf.getId());
         //查询是否提前结束装修
-        Example example = new Example(HouseFlow.class);
+        example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, hf.getHouseId()).andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE, 3);
-        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
         for (HouseFlow h : houseFlows) {
             if (h.getWorkSteta() == 6) {
                 checkFinishList.clear();
@@ -579,10 +601,7 @@ public class CraftsmanConstructionService {
                 buttonList.add(Utils.getButton("巡查工地", 1));
             } else if (hf.getWorkType() == 4) {//支付之后显示按钮
                 if ("0".equals(house.getSchedule())) {
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                            "engineeringSchedule?title=工程日历&houseId=" + house.getId() +
-                            "&houseFlowId=" + hf.getId() + "&houseName=" + house.getHouseName();
-                    buttonList.add(Utils.getButton("装修排期", url, 0));
+                    buttonList.add(Utils.getButton("确认开工", 6));
                 } else {
                     buttonList.add(Utils.getButton("确认开工", 3));
                 }

@@ -8,6 +8,7 @@ public class CraftsmenListDTO {
     private String head;//头像
     private String workerTypeId;//工种id
     private String workerTypeName;//工种id
+    private String workerTypeColor;//颜色
     private String name;//姓名
     private String mobile;//电话
 }
