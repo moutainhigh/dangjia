@@ -577,8 +577,61 @@
         AND visit_state=#{visitState}
     </select>
 
+    <!--查询对应店铺发货任务信息-->
+    <select id="getHouseAddrssByAddress" resultType="com.dangjia.acg.dto.deliver.DeliverHouseDTO">
+            SELECT
+                ord.house_id houseId,
+                ord.address_id addressId,
+                ma.address houseName,
+                ma.member_id AS memberId,
+                ord.storefont_id storefrontId,
+                ma.mobile mobile,
+                m.`name` name,
+                h.create_date AS createDate,
+                h.construction_date AS constructionDate,
+                (
+                    SELECT
+                        COUNT(1)
+                    FROM
+                        dj_deliver_order_split ddos
+                    WHERE
+                        ddos.apply_status = 1
+                    AND (ddos.house_id = h.id or ddos.address_id=ord.address_id)
+                ) AS wait,
+                (
+                    SELECT
+                        COUNT(1)
+                    FROM
+                        dj_deliver_order_split ddos
+                    WHERE
+                        ddos.apply_status = 2
+                    AND (ddos.house_id = h.id or ddos.address_id=ord.address_id)
+                ) AS sent
+            FROM
+              dj_deliver_order ord
+            LEFT JOIN dj_house h on ord.house_id=h.id
+            INNER JOIN dj_member_address ma on ( ord.address_id=ma.id or ord.house_id=ma.house_id)
+            INNER JOIN dj_member m on ma.member_id=m.id
+            INNER JOIN dj_pay_business_order pbo on ord.business_order_number=pbo.number
+        WHERE ord.storefont_id = #{storefrontId}
+          and pbo.state=3
+          and pbo.data_status=0
+        <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
+            and h.construction_date BETWEEN #{startDate} and #{endDate}
+        </if>
+        <if test="likeAddress!=null and likeAddress!=''">
+             AND ma.address LIKE CONCAT('%' ,#{likeAddress}, '%')
+        </if>
 
-    <!--查询所有的房子 指定房子 装修状态-->
+        GROUP BY
+            ma.id
+        ORDER BY
+            wait DESC,
+            sent DESC,
+            ord.create_date DESC
+</select>
+
+<!--查询所有的房子 指定房子 装修状态-->
     <select id="getByLikeAddress" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         house.id,

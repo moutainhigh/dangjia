@@ -892,8 +892,7 @@
             dj_deliver_order t1,
             dj_basics_storefront t4
         WHERE
-            t1.parent_order_id = #{orderId}
-        AND t1.id!=t1.parent_order_id
+            (t1.parent_order_id = #{orderId} or t1.id=#{orderId})
         AND t1.data_status=0
         AND t1.storefont_id=t4.id
     </select>

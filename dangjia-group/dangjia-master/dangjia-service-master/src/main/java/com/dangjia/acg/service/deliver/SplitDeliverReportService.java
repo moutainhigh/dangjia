@@ -14,6 +14,8 @@ import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import java.util.List;
 @Service
 public class SplitDeliverReportService {
 
+    private static Logger logger = LoggerFactory.getLogger(SplitDeliverReportService.class);
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
@@ -43,6 +46,24 @@ public class SplitDeliverReportService {
 
         List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getSplitReportSuppliers(houseId,storefront.getId());
         return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);
+    }
+
+
+    /**
+     * 根据指定地址查询对应的供应商信息
+     * @param request
+     * @param addressId
+     * @param storefrontId
+     * @return
+     */
+    public ServerResponse getReportAdressSuppliers(HttpServletRequest request, String addressId,String storefrontId){
+        try{
+            List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getReportAdressSuppliers(addressId,storefrontId);
+            return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+        }
+        return ServerResponse.createByErrorMessage("查询失败");
     }
 
     public ServerResponse getSplitReportDeliverOrders(String houseId,String supplierId){

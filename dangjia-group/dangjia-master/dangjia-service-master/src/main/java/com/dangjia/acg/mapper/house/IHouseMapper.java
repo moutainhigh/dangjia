@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.house;
 
+import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
@@ -122,6 +123,7 @@ public interface IHouseMapper extends Mapper<House> {
      */
     List<House> getAllHouseByVisitState(@Param("visitState") Integer visitState);
 
+    List<DeliverHouseDTO> getHouseAddrssByAddress(@Param("storefrontId") String storefrontId, @Param("cityId") String cityId, @Param("likeAddress") String likeAddress, @Param("startDate") String startDate, @Param("endDate") String endDate);
     List<House> getByLikeAddress(@Param("storefrontId") String storefrontId,@Param("cityId") String cityId,@Param("likeAddress") String likeAddress,@Param("startDate") String startDate, @Param("endDate") String endDate);
 
     List<DesignDTO> getDesignList(@Param("designerType") int designerType,

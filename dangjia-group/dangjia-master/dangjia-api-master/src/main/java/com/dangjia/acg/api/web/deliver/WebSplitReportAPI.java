@@ -20,6 +20,10 @@ public interface WebSplitReportAPI {
     @ApiOperation(value = "指定房子所有发货的供应商", notes = "指定房子所有发货的供应商")
     ServerResponse getSplitReportSuppliers(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
 
+    @PostMapping("web/deliver/split/reportAdressSuppliers")
+    @ApiOperation(value = "查询指定地址下的所有供应商", notes = "查询指定地址下的所有供应商")
+    ServerResponse getReportAdressSuppliers(@RequestParam("request") HttpServletRequest request,@RequestParam("addressId") String addressId,@RequestParam("storefrontId") String storefrontId);
+
     /*根据供应商和房子查看要货订单*/
     @PostMapping("web/deliver/split/report/deliverOrder")
     @ApiOperation(value = "指定供应商所有的要货订单", notes = "指定供应商所有的要货订单")

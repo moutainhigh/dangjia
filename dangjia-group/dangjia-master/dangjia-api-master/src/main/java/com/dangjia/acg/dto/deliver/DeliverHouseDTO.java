@@ -13,11 +13,14 @@ import java.util.Date;
 public class DeliverHouseDTO {
 
     private Date createDate;// 创建日期
-    private String houseId;
-    private String houseName;
+    private String houseId;//房子ID
+    private String storefrontId;//店铺ID
+    private String addressId;//地址ID
+    private String houseName;//详情地址
+    private String memberId;//接收人ID
     private String name;//业主名字
     private String mobile;// 手机
     protected Date constructionDate;//开工时间
-    private int sent;
-    private int wait;
+    private int sent;//已处理
+    private int wait;//待处理
 }

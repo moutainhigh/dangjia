@@ -25,6 +25,7 @@ import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.deliver.OrderSplit;
@@ -39,9 +40,12 @@ import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +63,7 @@ import java.util.*;
  */
 @Service
 public class OrderSplitService {
-
+    private static Logger logger = LoggerFactory.getLogger(OrderSplitService.class);
     @Autowired
     private ISplitDeliverMapper splitDeliverMapper;
     @Autowired
@@ -85,9 +89,10 @@ public class OrderSplitService {
     @Autowired
     private DjSupplierAPI djSupplierAPI ;
     @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI;
+    private MasterStorefrontService masterStorefrontService;
     @Autowired
     private DjSupApplicationProductAPI djSupApplicationProductAPI;
+
 
     /**
      * 修改 供应商结算状态
@@ -286,7 +291,7 @@ public class OrderSplitService {
                                        String installMobile, String deliveryName, String deliveryMobile) {
         try {
             //判断店铺是否存在
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
@@ -484,42 +489,19 @@ public class OrderSplitService {
     public ServerResponse getHouseList(String userId,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
         try {
             //通过缓存查询店铺信息
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+           Storefront storefront= masterStorefrontService.getStorefrontByUserId(userId,cityId);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //        List<House> houseList = houseMapper.selectAll();
-            List<House> houseList = houseMapper.getByLikeAddress(storefront.getId(),cityId,likeAddress,startDate,endDate);
-            PageInfo pageResult = new PageInfo(houseList);
-
-            List<DeliverHouseDTO> deliverHouseDTOList = new ArrayList<DeliverHouseDTO>();
-            for (House house : houseList) {
-                Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                DeliverHouseDTO deliverHouseDTO = new DeliverHouseDTO();
-                deliverHouseDTO.setHouseId(house.getId());
-                deliverHouseDTO.setCreateDate(house.getCreateDate());
-                deliverHouseDTO.setHouseName(house.getHouseName());
-                deliverHouseDTO.setConstructionDate(house.getConstructionDate());
-                deliverHouseDTO.setName("-");
-                deliverHouseDTO.setMobile("-");
-                if (member != null) {
-                    deliverHouseDTO.setName(member.getName() == null ? member.getNickName() : member.getName());
-                    deliverHouseDTO.setMobile(member.getMobile());
-                }
-                Example example = new Example(OrderSplit.class);
-                example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andEqualTo(OrderSplit.APPLY_STATUS, 2);//已发给供应商
-                deliverHouseDTO.setSent(orderSplitMapper.selectCountByExample(example));
-                example = new Example(OrderSplit.class);
-                example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andEqualTo(OrderSplit.APPLY_STATUS, 1);//要货申请中
-                deliverHouseDTO.setWait(orderSplitMapper.selectCountByExample(example));
-                deliverHouseDTOList.add(deliverHouseDTO);
-            }
+            List<DeliverHouseDTO> deliverHouseDTOList = houseMapper.getHouseAddrssByAddress(storefront.getId(),cityId,likeAddress,startDate,endDate);
+            PageInfo pageResult = new PageInfo(deliverHouseDTOList);
             pageResult.setList(deliverHouseDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -530,7 +512,7 @@ public class OrderSplitService {
     public ServerResponse getOrderSplitList(String userId,String cityId,String houseId) {
         try {
             //通过缓存查询店铺信息
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            Storefront storefront= masterStorefrontService.getStorefrontByUserId(userId,cityId);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");

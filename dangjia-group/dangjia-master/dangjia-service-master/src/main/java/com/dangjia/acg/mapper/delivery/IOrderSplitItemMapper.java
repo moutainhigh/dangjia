@@ -32,6 +32,8 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
 
     /********************查看统计 开始**********************/
 
+    List<SplitReportSupplierDTO> getReportAdressSuppliers(@Param("addressId") String addressId,@Param("storefrontId") String storefrontId);
+
     List<SplitReportSupplierDTO> getSplitReportSuppliers(@Param("houseId")String houseId,@Param("storefrontId") String storefrontId);
 
     List<SplitReportDeliverOrderDTO> getSplitReportDeliverOrders(@Param("houseId")String houseId,@Param("supplierId")String supplierId);

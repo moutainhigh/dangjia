@@ -36,6 +36,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 
     <!--********************查看统计 开始**********************-->
+    <!--getReportAdressSuppliers指定地址的所有发货的供应商-->
+    <select id="getReportAdressSuppliers" resultType="com.dangjia.acg.dto.deliver.SplitReportSupplierDTO">
+
+            SELECT
+                sd.supplier_id supplierId,
+                sd.supplier_name supplierName,
+                sd.supplier_telephone supplierTelephone,
+                si.house_id houseId,
+                sum(si.price * si.num)  totalPrice,
+                sum(
+                    (si.price * si.num) - (si.sup_cost * si.num)
+                )  totalProfit
+            FROM
+                `dj_deliver_order_split_item` si
+            INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
+            INNER JOIN dj_member_address ma on sd.address_id=ma.id
+            WHERE sd.supplier_id IS NOT NULL
+             and sd.storefront_id =#{storefrontId}
+             and ma.id=#{addressId}
+            GROUP BY
+                sd.supplier_id
+            order by sd.modify_date desc
+    </select>
 
     <!--指定房子所有发货的供应商-->
     <select id="getSplitReportSuppliers" resultType="com.dangjia.acg.dto.deliver.SplitReportSupplierDTO">
