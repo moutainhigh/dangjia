@@ -216,10 +216,13 @@ public class HouseFlowService {
                 grab.put("experience",hfList);//体验数
 
                  example = new Example(DjMaintenanceRecord.class);
-                example.createCriteria().andIsNull(DjMaintenanceRecord.STEWARD_ID).andEqualTo(Order.TYPE, 4)
-                        .andEqualTo(Order.ORDER_STATUS, 2);
+                if(member.getWorkerType()==3) {
+                    example.createCriteria().andIsNull(DjMaintenanceRecord.STEWARD_ID);
+                }else{
+                    example.createCriteria().andIsNull(DjMaintenanceRecord.WORKER_MEMBER_ID).andEqualTo(DjMaintenanceRecord.WORKER_TYPE_ID,member.getWorkerTypeId());
+                }
                 hfList = djMaintenanceRecordMapper.selectCountByExample(example);
-                grab.put("repair",hfList);//体验数
+                grab.put("repair",hfList);//维修数
             }
             if(member.getWorkerType()!=3) {
                 /*装修单*/
@@ -376,7 +379,11 @@ public class HouseFlowService {
             //维保抢单列表
             if (type == 2) {
                 Example example = new Example(DjMaintenanceRecord.class);
-                example.createCriteria().andIsNull(DjMaintenanceRecord.STEWARD_ID);
+                if(member.getWorkerType()==3) {
+                    example.createCriteria().andIsNull(DjMaintenanceRecord.STEWARD_ID);
+                }else{
+                    example.createCriteria().andIsNull(DjMaintenanceRecord.WORKER_MEMBER_ID).andEqualTo(DjMaintenanceRecord.WORKER_TYPE_ID,member.getWorkerTypeId());
+                }
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<DjMaintenanceRecord> hfList = djMaintenanceRecordMapper.selectByExample(example);
                 pageResult = new PageInfo(hfList);
