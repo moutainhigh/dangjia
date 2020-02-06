@@ -161,5 +161,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 
+	<select id="searchCountItemByInfo" resultType="java.util.Map">
+		SELECT
+			IFNULL(sum(t2.shop_count),0) shopCount,
+			IFNULL(sum(t2.ask_count),0) askCount
+		FROM
+			dj_deliver_order t1,
+			dj_deliver_order_item t2
+		WHERE
+			t1.id = t2.order_id
+		AND t1.storefont_id = #{storefrontId}
+		AND (
+			t1.address_id = #{addressId}
+			OR t1.house_id = #{houseId}
+		)
+		AND t2.product_id = #{productId}
+
+	</select>
+
 </mapper>
 

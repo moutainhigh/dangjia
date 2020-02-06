@@ -57,4 +57,5 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
      */
     List<OrderSplitItemDTO> getOrderItemListByhouseMemberId(@Param("houseId")String houseId,@Param("workerId") String workerId,@Param("searchKey") String searchKey);
 
+    List<OrderSplitItemDTO> getSplitOrderItemBySplitOrderId(@Param("orderSplitId") String orderSplitId);
 }

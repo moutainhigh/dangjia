@@ -1687,7 +1687,7 @@ public class PaymentService {
                         orderSplitItem.setAskCount(orderItem.getShopCount());
                         orderSplitItem.setCost(orderItem.getCost());
                         orderSplitItem.setShopCount(orderItem.getShopCount());
-                        orderSplitItem.setNum(0d);
+                        orderSplitItem.setNum(orderItem.getShopCount());
                         orderSplitItem.setUnitName(orderItem.getUnitName());
                         orderSplitItem.setTotalPrice(order.getTotalAmount().doubleValue());//单项总价 销售价
                         orderSplitItem.setProductType(orderItem.getProductType());

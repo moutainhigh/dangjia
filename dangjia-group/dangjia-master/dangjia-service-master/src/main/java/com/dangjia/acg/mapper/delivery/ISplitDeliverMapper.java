@@ -59,4 +59,12 @@ public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
                             @Param("beginDate") String beginDate,
                             @Param("endDate") String endDate);
 
+    /**
+     * 查询符合条件的供应商信息
+     * @param storefrontId
+     * @param productId
+     * @return
+     */
+    List<Map<String,Object>> getsupplierByProduct(@Param("storefrontId") String storefrontId,@Param("productId") String productId);
+
 }

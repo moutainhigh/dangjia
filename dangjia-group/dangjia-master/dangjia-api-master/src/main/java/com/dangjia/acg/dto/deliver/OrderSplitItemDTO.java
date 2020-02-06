@@ -2,6 +2,9 @@ package com.dangjia.acg.dto.deliver;
 
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * author: Ronalcheng
  * Date: 2018/12/21 0021
@@ -21,7 +24,7 @@ public class   OrderSplitItemDTO {
 
     private String image;
     private Double askCount;//要货数量
-    private String shopCount;//购买总数
+    private Double shopCount;//购买总数
     private Double receive;//收货数量
 
     private  String orderSplitId;//要货单ID
@@ -69,5 +72,7 @@ public class   OrderSplitItemDTO {
     private Double moveCost;//每层搬运费
 
     private int unitType;//单位数值类型 1=整数单位，2=小数单位
+
+    private List<Map<String,Object>> supplierIdlist;//供应商列表
 
 }
