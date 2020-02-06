@@ -322,8 +322,7 @@
         AND sa.member_id = #{memberId}
         <if test="cityId!=null and cityId!=''">
             AND h.city_id = #{cityId}
-        </if>
-        GROUP BY dmr.house_id
+        </if>s
     </select>
 
     <select id="getSupHouseList" resultType="com.dangjia.acg.dto.supervisor.AuthorityDTO">
