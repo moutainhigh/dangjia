@@ -251,6 +251,7 @@ public class PatrolRecordServices {
                     if (workerType != null) {
                         dto.setWorkerTypeType(workerType.getType());
                         dto.setWorkerTypeName(workerType.getName());
+                        dto.setWorkerTypeColor(workerType.getColor());
                     }
                 }
                 RewardPunishCorrelation rewardPunishCorrelation = rewardPunishCorrelationMapper.selectByPrimaryKey(record.getRewardPunishCorrelationId());

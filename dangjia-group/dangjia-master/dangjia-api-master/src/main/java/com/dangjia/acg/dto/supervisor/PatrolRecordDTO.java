@@ -23,6 +23,7 @@ public class PatrolRecordDTO {
     private String memberHead;//被奖惩的用户头像
     private String workerTypeName;//被奖惩的工种名称
     private Integer workerTypeType;//被奖惩的工种
+    private String workerTypeColor;//被奖惩的颜色
     private Date createDate;// 创建日期
     private String rewardPunishCorrelation;//奖罚原因
     private String rewardPunishId;//奖罚ID

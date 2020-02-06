@@ -376,8 +376,7 @@ public class HouseFlowService {
             //维保抢单列表
             if (type == 2) {
                 Example example = new Example(DjMaintenanceRecord.class);
-                example.createCriteria().andIsNull(DjMaintenanceRecord.STEWARD_ID).andEqualTo(Order.TYPE, 4)
-                        .andEqualTo(Order.ORDER_STATUS, 2);
+                example.createCriteria().andIsNull(DjMaintenanceRecord.STEWARD_ID);
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<DjMaintenanceRecord> hfList = djMaintenanceRecordMapper.selectByExample(example);
                 pageResult = new PageInfo(hfList);
