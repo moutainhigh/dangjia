@@ -17,7 +17,8 @@ import java.util.Map;
 public class ConstructionByWorkerIdBean {
     private String userId = "";//大管家查询时为业主ID,工匠查询是为大管家ID
     private int taskNumber;//任务数量
-    private String allPatrol = "总巡查次数:0";//总巡查次数
+    private String allPatrol = "标准巡查次数:0";//总巡查次数
+    private String actualPatrol = "实际巡查次数:0";//总巡查次数
     private BigDecimal alreadyMoney;//已得钱
     private BigDecimal alsoMoney;//还可得钱
     private String houseFlowId;//进程id
@@ -47,6 +48,7 @@ public class ConstructionByWorkerIdBean {
     private List<Map<String, Object>> dataList;//设计师和精算流程返回体
     private Integer decorationType;//"装修类型: 0表示没有开始，1远程设计，2自带设计，3共享装修")
     private String houseId;
+    private String apartmentName;//户型名称
     private Integer designerOk;
 
     private Integer totalNodeNumber;//总结点数
@@ -82,8 +84,8 @@ public class ConstructionByWorkerIdBean {
         private String workerTypeName;//进程名称
         private String workerTypeColor;//颜色
         private Integer isStart;//是否开工0:今日未开工；1：今日已开工；
-//        private String patrolSecond;//巡查次数
-//        private String patrolStandard;//巡查标准
+        private String patrolSecond;//巡查次数
+        private String patrolStandard;//巡查标准
         private Integer state;//装修进度0：未进场；1：待业主支付；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
         private String workerId;//工匠id
         private String workerName;//工匠名字

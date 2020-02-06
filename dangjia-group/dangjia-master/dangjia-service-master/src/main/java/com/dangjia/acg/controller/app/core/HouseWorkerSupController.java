@@ -70,4 +70,5 @@ public class HouseWorkerSupController implements HouseWorkerSupAPI {
     public ServerResponse getShutdownWorkerType(String houseId){
         return houseWorkerSupService.getShutdownWorkerType(houseId);
     }
+
 }

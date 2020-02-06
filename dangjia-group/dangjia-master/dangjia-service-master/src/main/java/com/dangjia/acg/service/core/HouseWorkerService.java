@@ -509,6 +509,7 @@ public class HouseWorkerService {
                 houseWorkerMapper.doModifyAllByWorkerId(worker.getId());//将所有houseWorker的选中状态IsSelect改为0未选中
                 HouseWorker houseWorker = new HouseWorker();
                 houseWorker.setWorkerId(worker.getId());
+                houseWorker.setOrderId(order.getId());
                 houseWorker.setWorkerTypeId(worker.getWorkerTypeId());
                 houseWorker.setWorkerType(worker.getWorkerType());
                 houseWorker.setWorkType(1);//已抢单
@@ -542,6 +543,7 @@ public class HouseWorkerService {
                 houseWorker.setWorkerTypeId(worker.getWorkerTypeId());
                 houseWorker.setWorkerType(worker.getWorkerType());
                 houseWorker.setWorkType(1);//已抢单
+                houseWorker.setHouseId(record.getHouseId());
                 houseWorker.setIsSelect(1);
              //   houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
                 houseWorker.setType(type);
@@ -572,7 +574,13 @@ public class HouseWorkerService {
                 }
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
                 houseFlow.setGrabNumber(houseFlow.getGrabNumber() + 1);
-                houseFlow.setWorkType(3);//等待支付
+                if(worker.getWorkerType()==3){
+                    houseFlow.setWorkType(4);//等待支付
+                    houseFlow.setWorkSteta(3);//待交底
+                }else {
+                    houseFlow.setWorkType(3);//等待支付
+                }
+                houseFlow.setModifyDate(new Date());
                 houseFlow.setWorkerId(worker.getId());
                 grabSheet(worker, house, houseFlow);
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
@@ -582,7 +590,11 @@ public class HouseWorkerService {
                 houseWorker.setWorkerId(worker.getId());
                 houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
                 houseWorker.setWorkerType(houseFlow.getWorkerType());
-                houseWorker.setWorkType(1);//已抢单
+                if(houseFlow.getWorkType()==4){
+                    houseWorker.setWorkType(6);//大管家自动采纳
+                }else {
+                    houseWorker.setWorkType(1);//已抢单
+                }
                 houseWorker.setIsSelect(1);
                 houseWorker.setPrice(houseFlow.getWorkPrice());
                 houseWorker.setType(0);

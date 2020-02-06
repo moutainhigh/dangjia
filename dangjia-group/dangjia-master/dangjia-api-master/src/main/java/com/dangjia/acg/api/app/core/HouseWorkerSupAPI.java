@@ -69,5 +69,7 @@ public interface HouseWorkerSupAPI {
      */
     @PostMapping("app/core/houseWorkerSup/getShutdownWorkerType")
     @ApiOperation(value = "管家停工选择影响顺延的工序列表", notes = "管家停工选择影响顺延的工序列表")
-     ServerResponse getShutdownWorkerType(String houseId);
+     ServerResponse getShutdownWorkerType(@RequestParam("houseId")String houseId);
+
+
 }

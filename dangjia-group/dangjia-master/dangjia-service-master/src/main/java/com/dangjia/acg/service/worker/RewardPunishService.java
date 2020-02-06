@@ -12,10 +12,12 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.*;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.*;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
@@ -61,6 +63,8 @@ public class RewardPunishService {
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
 
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -156,11 +160,9 @@ public class RewardPunishService {
      *
      * @return
      */
-    public ServerResponse queryCorrelation(PageDTO pageDTO, String name, Integer type) {
+    public ServerResponse queryCorrelation(String name, Integer type) {
         try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<RewardPunishCorrelationDTO> correlationList = rewardPunishCorrelationMapper.queryCorrelation(name, type);
-            PageInfo pageResult = new PageInfo(correlationList);
             List<Map<String, Object>> listMap = new ArrayList<>();
             for (RewardPunishCorrelationDTO correlation : correlationList) {
                 Map<String, Object> correlationMap = BeanUtils.beanToMap(correlation);
@@ -177,8 +179,7 @@ public class RewardPunishService {
                 correlationMap.put("conditionArr", conditionArr.toString());
                 listMap.add(correlationMap);
             }
-            pageResult.setList(listMap);
-            return ServerResponse.createBySuccess("查询奖罚条件成功", pageResult);
+            return ServerResponse.createBySuccess("查询奖罚条件成功", listMap);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询奖罚条件失败");
@@ -421,67 +422,6 @@ public class RewardPunishService {
         }
     }
 
-    /**
-     * 奖罚-选择奖罚原因
-     *
-     * @param pageDTO
-     * @param type
-     * @return
-     */
-    public ServerResponse queryCorrelationList(PageDTO pageDTO, String type) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            PageInfo pageResult = new PageInfo(null);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("奖罚-选择奖罚原因异常");
-        }
-    }
-
-    /**
-     * 奖罚记录列表
-     *
-     * @param pageDTO
-     * @param houseId
-     * @return
-     */
-    public ServerResponse queryPunishRecordList(PageDTO pageDTO, String houseId) {
-        try {
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<RewardPunishRecordListDTO> list = rewardPunishCorrelationMapper.queryPunishRecordList(houseId);
-            list.forEach(rewardPunishRecordListDTO -> {
-                rewardPunishRecordListDTO.setWorkerTypeName(rewardPunishRecordListDTO.getWorkerTypeId() != null ? workerTypeMapper.selectByPrimaryKey(rewardPunishRecordListDTO.getWorkerTypeId()).getName() : "");
-                rewardPunishRecordListDTO.setImagesUrl(StringTool.getImage(rewardPunishRecordListDTO.getImages(), address).split(","));//图片数组
-                String type = rewardPunishRecordListDTO.getType();
-                String name = null;
-                if (type.equals("0"))
-                    name = "奖励";
-                if (type.equals("1"))
-                    name = "处罚";
-                rewardPunishRecordListDTO.setName(name);
-
-                String id = rewardPunishRecordListDTO.getId();
-                RewardPunishRecordDetailDTO rewardPunishRecordDetailDTO = rewardPunishCorrelationMapper.queryPunishRecordDetailList(id);
-                if (rewardPunishRecordDetailDTO != null) {
-                    rewardPunishRecordDetailDTO.setWorkerTypeName(rewardPunishRecordDetailDTO.getWorkerTypeId() != null ? workerTypeMapper.selectByPrimaryKey(rewardPunishRecordDetailDTO.getWorkerTypeId()).getName() : "");
-                    if (rewardPunishRecordDetailDTO.getHead() != null && rewardPunishRecordDetailDTO.getHead().length() > 0) {
-                        rewardPunishRecordDetailDTO.setHead(address + rewardPunishRecordDetailDTO.getHead());
-                    }
-                    rewardPunishRecordDetailDTO.setImagesUrl(StringTool.getImage(rewardPunishRecordDetailDTO.getImages(), address).split(","));//图片数组
-
-                    rewardPunishRecordListDTO.setRewardPunishRecordDetailDTO(rewardPunishRecordDetailDTO);
-                }
-
-            });
-            PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("奖罚记录列表异常");
-        }
-    }
 
 
     /**
@@ -491,23 +431,34 @@ public class RewardPunishService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryCraftsmenList(PageDTO pageDTO, String houseId) {
+    public ServerResponse queryCraftsmenList( String houseId) {
         try {
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<CraftsmenListDTO> list = rewardPunishCorrelationMapper.queryCraftsmenList(houseId);
-            list.forEach(craftsmenListDTO -> {
-                String workerTypeId = craftsmenListDTO.getWorkerTypeId();
-                String workerTypeName = null;
-                if (workerTypeId != null) {
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
-                    workerTypeName = workerType != null ? workerType.getName() : "";
-                    craftsmenListDTO.setWorkerTypeName(workerTypeName);
+            //获取图片url
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            List<CraftsmenListDTO> listMap = new ArrayList<>();//返回工匠list
+            //管家和工匠都能联系精算和设计
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria()
+                    .andEqualTo(HouseWorker.HOUSE_ID, houseId)
+                    .andCondition(" work_type in(6,8) ")
+                    .andCondition(" worker_type > 2 ");
+            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+            for (HouseWorker houseWorker : houseWorkerList) {
+                CraftsmenListDTO map = new CraftsmenListDTO();
+                Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+                if (worker2 == null) {
+                    continue;
                 }
-                craftsmenListDTO.setHead(craftsmenListDTO.getHead() != null && craftsmenListDTO.getHead().length() > 0 ? address + craftsmenListDTO.getHead() : "");
-            });
-            PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId());
+                map.setWorkerTypeName(workerType.getName());
+                map.setWorkerTypeColor(workerType.getColor());
+                map.setName(worker2.getName());
+                map.setMobile(worker2.getMobile());
+                map.setHead(imageAddress+worker2.getHead());
+                map.setWorkerId( worker2.getId());
+                listMap.add(map);
+            }
+            return ServerResponse.createBySuccess("查询成功", listMap);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("奖罚-选择工匠列表异常");

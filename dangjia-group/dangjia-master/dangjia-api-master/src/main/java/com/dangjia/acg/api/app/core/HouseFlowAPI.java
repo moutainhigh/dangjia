@@ -25,6 +25,11 @@ public interface HouseFlowAPI {
     @ApiOperation(value = "抢单播报", notes = "抢单播报")
     ServerResponse getGrabBroadcast(@RequestParam("userToken") String userToken,
                                     @RequestParam("type") Integer type);
+
+    @PostMapping("app/core/houseFlow/getGrabNumber")
+    @ApiOperation(value = "抢单每个Tab总单量", notes = "抢单每个Tab总单量")
+    ServerResponse getGrabNumber(@RequestParam("userToken") String userToken,@RequestParam("cityId") String cityId);
+
     @PostMapping("app/core/houseFlow/getGrabList")
     @ApiOperation(value = "抢单列表", notes = "抢单列表")
     ServerResponse getGrabList(@RequestParam("request")  HttpServletRequest request,

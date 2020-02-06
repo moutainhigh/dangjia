@@ -44,8 +44,8 @@ public class WebMemberController implements WebMemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setMember(HttpServletRequest request, Member member) {
-        return memberService.setMember(member);
+    public ServerResponse setMember(HttpServletRequest request,String userToken, Member member) {
+        return memberService.setMember( userToken,member);
     }
 
     @Override

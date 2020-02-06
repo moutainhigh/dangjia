@@ -2,7 +2,6 @@ package com.dangjia.acg.controller.web.worker;
 
 import com.dangjia.acg.api.web.worker.RewardPunishAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.worker.RewardPunishService;
@@ -54,15 +53,14 @@ public class RewardPunishController implements RewardPunishAPI {
     /**
      * 查询所有奖罚条件及条件明细
      *
-     * @param pageDTO
      * @param name
      * @param type
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryCorrelation(PageDTO pageDTO, String name, Integer type) {
-        return rewardPunishService.queryCorrelation(pageDTO, name, type);
+    public ServerResponse queryCorrelation(String name, Integer type) {
+        return rewardPunishService.queryCorrelation(name, type);
     }
 
     /**
@@ -92,20 +90,10 @@ public class RewardPunishController implements RewardPunishAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryCraftsmenList(PageDTO pageDTO, String houseId) {
-        return rewardPunishService.queryCraftsmenList(pageDTO,houseId);
+    public ServerResponse queryCraftsmenList(String houseId) {
+        return rewardPunishService.queryCraftsmenList(houseId);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse queryCorrelationList(PageDTO pageDTO, String type) {
-        return rewardPunishService.queryCorrelationList(pageDTO,type);
-    }
 
-    @Override
-    @ApiMethod
-    public ServerResponse queryPunishRecordList(PageDTO pageDTO, String houseId) {
-        return rewardPunishService.queryPunishRecordList(pageDTO,houseId);
-    }
 
 }

@@ -387,11 +387,15 @@
         </if>
         WHERE
         t.id = t1.order_id
-        AND ho.order_id = t.id
+
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND t1.product_type in(1,2)
+            AND ho.worker_type_id = t.worker_type_id
+        </if>
+
         AND t1.product_id = t2.id
         AND t.house_id = #{houseId}
         and ho.house_id=t.house_id
-        and t1.shop_count > t1.return_count
         <if test="workerTypeId!=null and workerTypeId!=''">
             <if test="type != null">
                 AND ho.worker_type_id =#{workerTypeId}
@@ -429,12 +433,14 @@
         </if>
         WHERE
         t.id = t1.order_id
-        AND ho.order_id = t.id
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND t1.product_type in(1,2)
+            AND ho.worker_type_id = t.worker_type_id
+        </if>
         AND t3.added_product_id= t2.id
         and t1.id=t3.any_order_id
         AND t.house_id = #{houseId}
         and ho.house_id=t.house_id
-        and t1.shop_count > t1.return_count
         <if test="workerTypeId!=null and workerTypeId!=''">
             <if test="type != null">
                 AND ho.worker_type_id =#{workerTypeId}
