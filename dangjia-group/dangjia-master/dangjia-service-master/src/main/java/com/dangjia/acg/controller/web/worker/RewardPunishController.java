@@ -90,22 +90,4 @@ public class RewardPunishController implements RewardPunishAPI {
         return rewardPunishService.addRewardPunishRecord(userToken, userId, rewardPunishRecord);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse queryCraftsmenList(PageDTO pageDTO, String houseId) {
-        return rewardPunishService.queryCraftsmenList(pageDTO,houseId);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse queryCorrelationList(PageDTO pageDTO, String type) {
-        return rewardPunishService.queryCorrelationList(pageDTO,type);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse queryPunishRecordList(PageDTO pageDTO, String houseId) {
-        return rewardPunishService.queryPunishRecordList(pageDTO,houseId);
-    }
-
 }

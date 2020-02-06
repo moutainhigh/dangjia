@@ -51,20 +51,4 @@ public interface RewardPunishAPI {
                                          @RequestParam("rewardPunishRecord") RewardPunishRecord rewardPunishRecord);
 
 
-    @PostMapping("/app/rewardPunish/queryCraftsmenList")
-    @ApiOperation(value = "奖罚-工匠列表", notes = "奖罚-工匠列表")
-    ServerResponse queryCraftsmenList(@RequestParam("pageDTO") PageDTO pageDTO,
-                                      @RequestParam("houseId") String houseId);
-
-    @PostMapping("/app/rewardPunish/queryCorrelationList")
-    @ApiOperation(value = "奖罚-奖罚原因列表", notes = "奖罚-奖罚原因列表")
-    ServerResponse queryCorrelationList(@RequestParam("pageDTO") PageDTO pageDTO,
-                                        @RequestParam("type") String type);
-
-
-    @PostMapping("/app/rewardPunish/queryPunishRecordList")
-    @ApiOperation(value = "奖惩记录列表", notes = "奖惩记录列表")
-    ServerResponse queryPunishRecordList(@RequestParam("pageDTO") PageDTO pageDTO,
-                                         @RequestParam("houseId") String houseId);
-
 }
