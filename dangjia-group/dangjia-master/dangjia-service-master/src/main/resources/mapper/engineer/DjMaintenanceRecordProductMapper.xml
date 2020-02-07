@@ -144,7 +144,10 @@
         WHERE
             mrp.maintenance_record_id = #{maintenanceRecordId}
         AND mrp.pay_state = 2
-        and mrp.maintenance_product_type in(1,3,4)
+        AND mrp.maintenance_product_type in(1,3,4)
+        <if test="null!=maintenanceRecordType and ''!=maintenanceRecordType">
+            AND mrp.maintenance_product_type =#{maintenanceProductType}
+        </if>
     </select>
 
     <!--查询所有需报销的维保商品费用-->

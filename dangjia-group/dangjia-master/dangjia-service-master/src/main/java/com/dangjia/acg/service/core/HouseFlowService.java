@@ -358,7 +358,7 @@ public class HouseFlowService {
             //体验抢单列表
             if (type == 1) {
                 Example example = new Example(Order.class);
-                example.createCriteria().andIsNull(Order.WORKER_ID).andEqualTo(Order.TYPE, 4)
+                example.createCriteria().andCondition("  (worker_id is null or worker_id = '') ").andEqualTo(Order.TYPE, 4)
                         .andEqualTo(Order.ORDER_STATUS, 2);
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<Order> hfList = orderMapper.selectByExample(example);
@@ -403,8 +403,8 @@ public class HouseFlowService {
                     allgrabBean.setSquare( (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
                     allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
-                    //    double totalPrice = record.getSincePurchaseAmount();
-                    //  allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+                    Double totalPrice = maintenanceRecordProductMapper.queryMaintenanceRecordMoney(record.getId(),record.getEndMaintenanceType());
+                    allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
                     grabList.add(allgrabBean);
                 }
             }
