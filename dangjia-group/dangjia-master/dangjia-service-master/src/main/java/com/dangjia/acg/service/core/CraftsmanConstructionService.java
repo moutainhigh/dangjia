@@ -203,25 +203,25 @@ public class CraftsmanConstructionService {
 //        if (house.getVisitState() == 1 && house.getDesignerState() != 0 && house.getDesignerState() != 4 && house.getDesignerState() != 3) {
 //            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
 //            String data = "&houseId=" + house.getId() + "&houseFlowId=" + hf.getId();
-//            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
+//            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 88));
 //        }
         if (house.getVisitState() == 1) {
             if (house.getDecorationType() != 2 && house.getDesignerState() == 1) {
-                buttonList.add(Utils.getButton("去量房", 2));
+                buttonList.add(Utils.getButton("去量房", 1001));
             } else {
                 switch (house.getDesignerState()) {
                     case 1://1已支付-设计师待量房
                     case 9://9量房图发给业主
-                        buttonList.add(Utils.getButton("上传平面图", 3));
+                        buttonList.add(Utils.getButton("上传平面图", 1002));
                         break;
                     case 6://6平面图审核不通过（NG，可编辑平面图）
-                        buttonList.add(Utils.getButton("修改平面图", 3));
+                        buttonList.add(Utils.getButton("修改平面图", 1003));
                         break;
                     case 7://7通过平面图待发施工图（OK，可编辑施工图）
-                        buttonList.add(Utils.getButton("上传施工图", 4));
+                        buttonList.add(Utils.getButton("上传施工图", 1004));
                         break;
                     case 8://8施工图片审核不通过（NG，可编辑施工图）
-                        buttonList.add(Utils.getButton("修改施工图", 4));
+                        buttonList.add(Utils.getButton("修改施工图", 1005));
                         break;
                     case 3://3设计图完成后有需要改设计的
                         Example example = new Example(DesignBusinessOrder.class);
@@ -239,7 +239,7 @@ public class CraftsmanConstructionService {
                         if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
                             DesignBusinessOrder order = designBusinessOrders.get(0);
                             if (order.getOperationState() == 0) {
-                                buttonList.add(Utils.getButton("上传设计图", 4));
+                                buttonList.add(Utils.getButton("上传设计图", 1006));
                             }
                         }
                         break;
@@ -344,7 +344,7 @@ public class CraftsmanConstructionService {
      * 判断移动端精算当前需显示的按钮
      *
      * @param houseId
-     * @return showButtonType(2001显示装修信息按钮 2002审核图纸 2003请等待业主选择 2004请等待设计师制作完毕 2005已结束 2006上传图纸 ）
+     * @return showButtonType(2001显示装修信息按钮 2002审核图纸 2003请等待业主选择 2004请等待设计师制作完毕 2005已结束 2006上传图纸 2007上传图纸 ）
      */
     public List<ButtonListBean> showActuaryButton(String houseId) {
 
@@ -404,9 +404,9 @@ public class CraftsmanConstructionService {
             } else if (house.getBudgetOk() == 1 && house.getDesignerOk() != 0 && house.getDesignerOk() != 3) {//若精算师为已他单，设计师为已抢单未完成状态
                 buttonList.add(Utils.getButton("请等待设计师制作完毕", 2004));
             } else if (house.getBudgetOk() == 6 && house.getDesignerOk() != 7&& house.getDesignerOk() != 3) {//精算师为已审核完成，设计师为未审核,先上传平面图
-                buttonList.add(Utils.getButton("上传平面图", 3));
+                buttonList.add(Utils.getButton("上传平面图", 2006));
             }else if(house.getBudgetOk() == 6 && house.getDesignerOk() == 7){//精算师为已审核完成，设计师为未审核,先上传施工图
-                buttonList.add(Utils.getButton("上传施工图", 4));
+                buttonList.add(Utils.getButton("上传施工图", 2007));
             }
 
         } catch (Exception e) {
@@ -598,12 +598,12 @@ public class CraftsmanConstructionService {
             if (listStart.size() > 0) {
                 hf.setSupervisorStart(1);//改为开工状态(兼容老数据)
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
-                buttonList.add(Utils.getButton("巡查工地", 1));
+                buttonList.add(Utils.getButton("巡查工地", 3001));
             } else if (hf.getWorkType() == 4) {//支付之后显示按钮
                 if ("0".equals(house.getSchedule())) {
-                    buttonList.add(Utils.getButton("确认开工", 6));
+                    buttonList.add(Utils.getButton("确认开工", 3002));//需要去生成日历
                 } else {
-                    buttonList.add(Utils.getButton("确认开工", 3));
+                    buttonList.add(Utils.getButton("确认开工", 3003));//确认开工
                 }
             }
         } else if (checkFinishList.size() == 0) {//所有工种都整体完工，申请业主验收
@@ -612,11 +612,11 @@ public class CraftsmanConstructionService {
                 String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                         "takeMoneyDetailed?title=拿钱明细&houseId=" + house.getId() +
                         "&houseFlowId=" + hf.getId() + "&houseName=" + house.getHouseName();
-                buttonList.add(Utils.getButton("查看拿钱明细", url, 0));
+                buttonList.add(Utils.getButton("查看拿钱明细", url, 3005));
             } else {
                 HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkSupervisorApply(hf.getId(), worker.getId());//查询大管家是否有验收申请
                 if (houseFlowApp == null) {//没有发验收申请
-                    buttonList.add(Utils.getButton("申请业主验收", 2));
+                    buttonList.add(Utils.getButton("申请业主验收", 3004));
                 } else {
                     if (houseFlowApp.getMemberCheck() == 4) {
                         promptList.add("业主要求整改");
@@ -627,9 +627,9 @@ public class CraftsmanConstructionService {
                 }
             }
         } else if (houseFlowApplyList.size() != 0) {//今日已提交过有人巡查
-            buttonList.add(Utils.getButton("追加巡查", 4));
+            buttonList.add(Utils.getButton("追加巡查", 3006));
         } else {
-            buttonList.add(Utils.getButton("巡查工地", 1));
+            buttonList.add(Utils.getButton("巡查工地", 3001));
         }
         bean.setPromptList(promptList);
         bean.setButtonList(buttonList);
@@ -760,7 +760,7 @@ public class CraftsmanConstructionService {
 //                Date d = DateUtil.addDateMinutes(hw.getCreateDate(), 30);
 //                Date d2 = new Date();
 //                promptList.add("剩余支付保险时间：" + DateUtil.getDiffTime2(d.getTime(), d2.getTime()) + ",超过时间则自动放弃");
-//                buttonList.add(Utils.getButton("购买保险", 9));
+//                buttonList.add(Utils.getButton("购买保险", 4001));
 //            }
 //            bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
 //        } else if (hf.getPause() == 1) {
@@ -781,13 +781,13 @@ public class CraftsmanConstructionService {
                     "&houseId=" + house.getId() +
                     "&houseFlowId=" + hf.getId() +
                     "&houseName=" + house.getHouseName();
-            buttonList.add(Utils.getButton("查看拿钱明细", url, 0));
+            buttonList.add(Utils.getButton("查看拿钱明细", url, 4002));
         } else if (hf.getWorkType() == 4) {
 //            if(!isBX) {
-//                buttonList.add(Utils.getButton("购买保险", 9));
+//                buttonList.add(Utils.getButton("购买保险", 4001));
 //            }else
             if (hf.getWorkSteta() == 3) {//待交底
-                buttonList.add(Utils.getButton("找大管家交底", 1));
+                buttonList.add(Utils.getButton("找大管家交底", 4003));
 //            } else if (worker.getWorkerType() == 4) {//如果是拆除，只有整体完工
 //                setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
             } else {//已交底
@@ -796,7 +796,7 @@ public class CraftsmanConstructionService {
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker.getId(), new Date());//查询今日开工记录
                 List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> workerEverydayList = new ArrayList<>();
                 if (todayStart == null) {//没有今日开工记录
-                    buttonList.add(Utils.getButton("今日开工", 2));
+                    buttonList.add(Utils.getButton("今日开工", 4004));
                     List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
                     for (WorkerEveryday day : listWorDay) {
                         ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
@@ -819,7 +819,7 @@ public class CraftsmanConstructionService {
                         promptList.add("今日已完工");
 //                        bean.setIfBackOut(2);
                     } else {
-                        buttonList.add(Utils.getButton("今日完工", 3));
+                        buttonList.add(Utils.getButton("今日完工", 4005));
                         List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(2);//事项类型  1 开工事项 2 完工事项
                         for (WorkerEveryday day : listWorDay) {
                             ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
@@ -837,7 +837,7 @@ public class CraftsmanConstructionService {
                 }
                 if (active != null && !active.equals("pre")) {//TODO 生产没有
                     if (buttonList.size() <= 0) {
-                        buttonList.add(Utils.getButton("今日开工", 2));
+                        buttonList.add(Utils.getButton("今日开工", 4004));
                         bean.setFootMessageTitle("今日开工任务");//每日开工事项
                         bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
                         List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
@@ -995,7 +995,7 @@ public class CraftsmanConstructionService {
         if (isShow) {//整体完工
             if (checkFlowApp == null) {
                 if (hf.getWorkSteta() != 2) {
-                    buttonList.add(Utils.getButton("申请整体完工", 5));
+                    buttonList.add(Utils.getButton("申请整体完工", 4006));
                 }
             } else if (checkFlowApp.getSupervisorCheck() == 0) {
                 promptList.add("已申请整体完工,等待大管家审核");
@@ -1009,7 +1009,7 @@ public class CraftsmanConstructionService {
         } else {//阶段完工申请
             if (checkFlowApp == null) {
                 if (hf.getWorkSteta() != 1 && hf.getWorkSteta() != 2) {
-                    buttonList.add(Utils.getButton("申请阶段完工", 4));
+                    buttonList.add(Utils.getButton("申请阶段完工", 4007));
                 }
             } else if (checkFlowApp.getSupervisorCheck() == 0) {
                 promptList.add("已申请阶段完工,等待大管家审核");
