@@ -47,6 +47,7 @@ import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
+import com.dangjia.acg.service.engineer.DjMaintenanceRecordService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
@@ -136,6 +137,8 @@ public class HouseFlowService {
     private MasterProductTemplateService masterProductTemplateService;
     @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+    @Autowired
+    private DjMaintenanceRecordService maintenanceRecordService;
 
     private static Logger LOG = LoggerFactory.getLogger(HouseFlowService.class);
 
@@ -403,7 +406,7 @@ public class HouseFlowService {
                     allgrabBean.setSquare( (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
                     allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
-                    Double totalPrice = maintenanceRecordProductMapper.queryMaintenanceRecordMoney(record.getId(),record.getEndMaintenanceType());
+                    Double totalPrice = maintenanceRecordProductMapper.queryTotalPriceByRecordId(record.getId(),1);
                     allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
                     grabList.add(allgrabBean);
                 }
@@ -464,19 +467,22 @@ public class HouseFlowService {
             allgrabBean.setOrderType(0);
             allgrabBean.setSquare( (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
             allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
-            allgrabBean.setWorkertotal("¥0");//工钱
-            // double totalPrice = record.getSincePurchaseAmount();
-            //  allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
-
-            //维保商品列表
-            List<DjMaintenanceRecordProductDTO> maintenanceRecordProducts = maintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(record.getId());
-            maintenanceRecordProducts.forEach(djMaintenanceRecordProductDTO -> {
-                djMaintenanceRecordProductDTO.setImageUrl(address + djMaintenanceRecordProductDTO.getImage());
-                if (StringUtils.isNotBlank(djMaintenanceRecordProductDTO.getValueIdArr())) {
-                    djMaintenanceRecordProductDTO.setValueNameArr(masterProductTemplateService.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()).replaceAll(",", " "));
-                }
-            });
-            allgrabBean.setGoodsData(maintenanceRecordProducts);
+            Double totalPrice = maintenanceRecordProductMapper.queryTotalPriceByRecordId(record.getId(),1);
+            allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+            //2.查询业主提交的维保信息
+            Map<String,Object> dataMap=new HashMap<>();
+            dataMap.put("maintenaceRecoreInfo",maintenanceRecordService.getMaintenaceRecordInfo(record.getId(),3));
+            //判断当前登陆的人员是大管家，还是工匠
+            if(mem.getWorkerType()==3){
+                //查询勘查费用商品
+                dataMap.put("maintenanceRecordProductList",maintenanceRecordService.getMaintenanceProductList(record.getId(),2));//勘查费用商品
+            }else{
+                //查询质保商品
+                dataMap.put("maintenanceRecordProductList",maintenanceRecordService.getMaintenanceProductList(record.getId(),1));//业主提交的质保商品
+            }
+            List list=new ArrayList();
+            list.add(dataMap);
+            allgrabBean.setGoodsData(list);
         }else {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);

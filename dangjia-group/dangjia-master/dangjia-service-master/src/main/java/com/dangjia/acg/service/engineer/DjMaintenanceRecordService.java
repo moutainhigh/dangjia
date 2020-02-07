@@ -1018,8 +1018,13 @@ public class DjMaintenanceRecordService {
              String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
              resultMap=BeanUtils.beanToMap(djMaintenanceRecordContent);
              resultMap.put("imageUrl",StringTool.getImage(djMaintenanceRecordContent.getImage(),address));
-             WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecordContent.getWorkerTypeId());
-             resultMap.putAll(getWokerMemberInfo(djMaintenanceRecordContent.getMemberId(),workerType.getName(),workerType.getColor()));
+             if(type==3){//业主
+                 resultMap.putAll(getWokerMemberInfo(djMaintenanceRecordContent.getMemberId(),"业主",null));
+             }else{
+                 WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecordContent.getWorkerTypeId());
+                 resultMap.putAll(getWokerMemberInfo(djMaintenanceRecordContent.getMemberId(),workerType.getName(),workerType.getColor()));
+             }
+
          }
          //查询业主评分，及业主评价
          Evaluate evaluate=evaluateService.queryEvaluatesByMaintenanceId(maintenanceRecordId,djMaintenanceRecordContent.getMemberId());
@@ -1085,7 +1090,7 @@ public class DjMaintenanceRecordService {
      * @param workerId
      * @return
      */
-    private Map<String,Object> getWokerMemberInfo(String workerId,String labelName,String color){
+    public Map<String,Object> getWokerMemberInfo(String workerId,String labelName,String color){
         Map<String,Object> map=new HashMap<>();
         String address=configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         Member member=iMemberMapper.selectByPrimaryKey(workerId);
