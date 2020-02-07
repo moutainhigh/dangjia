@@ -495,9 +495,7 @@ public class HouseWorkerService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            ServerResponse serverResponse = houseFlowService.setGrabVerification(userToken, cityId, houseFlowId);
-            if (!serverResponse.isSuccess())
-                return serverResponse;
+
             if(type==1){
                 Order order =  orderMapper.selectByPrimaryKey(houseFlowId);
                 Example example = new Example(HouseWorker.class);
@@ -568,6 +566,9 @@ public class HouseWorkerService {
                 h.setText(text);
                 return ServerResponse.createBySuccess("抢单成功");
             }else {
+                ServerResponse serverResponse = houseFlowService.setGrabVerification(userToken, cityId, houseFlowId);
+                if (!serverResponse.isSuccess())
+                    return serverResponse;
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
                 if (houseFlow.getWorkType() == 3) {
                     return ServerResponse.createByErrorMessage("该订单已被抢");

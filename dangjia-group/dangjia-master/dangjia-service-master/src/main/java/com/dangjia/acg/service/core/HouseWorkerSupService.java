@@ -102,7 +102,7 @@ public class HouseWorkerSupService {
      */
     public ServerResponse getHouseOrderList(HttpServletRequest request, PageDTO pageDTO, String userToken,
                                             String nameKey,
-                                            Integer type,
+                                            Integer type,Integer orderTakingTime,
                                             Integer houseType,
                                             Integer startTime,
                                             Integer isPlanWeek,
@@ -120,7 +120,7 @@ public class HouseWorkerSupService {
             String workerTypeId = member.getWorkerTypeId();
             /*大管家所有订单*/
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<HouseWorker>  houseWorkers = houseWorkerMapper.getDetailHouseWorker(member.getId(),nameKey,type,houseType,startTime,isPlanWeek,isPatrol);
+            List<HouseWorker>  houseWorkers = houseWorkerMapper.getDetailHouseWorker(member.getId(),nameKey,type,orderTakingTime,houseType,startTime,isPlanWeek,isPatrol);
             PageInfo pageResult = new PageInfo(houseWorkers);
             if (houseWorkers != null)
                 for (HouseWorker houseWorker : houseWorkers) {
@@ -130,7 +130,7 @@ public class HouseWorkerSupService {
                         MemberAddress memberAddress=iMasterMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
                         allgrabBean.setHouseFlowId(order.getId());
                         allgrabBean.setWorkerTypeId(workerTypeId);
-                        allgrabBean.setCreateDate(order.getCreateDate());
+                        allgrabBean.setCreateDate(houseWorker.getCreateDate());
                         allgrabBean.setHouseName(memberAddress.getAddress());
                         allgrabBean.setType(1);
                         allgrabBean.setOrderType(0);
@@ -148,7 +148,7 @@ public class HouseWorkerSupService {
                         }
                         allgrabBean.setWorkerTypeId(record.getWorkerTypeId());
                         allgrabBean.setHouseFlowId(record.getId());
-                        allgrabBean.setCreateDate(record.getCreateDate());
+                        allgrabBean.setCreateDate(houseWorker.getCreateDate());
                         allgrabBean.setHouseName(house.getHouseName());
                         allgrabBean.setHouseId(house.getId());
                         allgrabBean.setType(2);
@@ -171,7 +171,7 @@ public class HouseWorkerSupService {
 
                         allgrabBean.setWorkerTypeId(workerTypeId);
                         allgrabBean.setHouseFlowId(houseFlow.getId());
-                        allgrabBean.setCreateDate(houseFlow.getCreateDate());
+                        allgrabBean.setCreateDate(houseWorker.getCreateDate());
                         allgrabBean.setHouseName(house.getHouseName());
                         allgrabBean.setHouseId(house.getId());
                         allgrabBean.setType(0);

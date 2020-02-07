@@ -31,7 +31,7 @@ public interface HouseWorkerSupAPI {
      * @param startTime 开工：1:今日开工，2，本周新开工
      * @param isPlanWeek 周计划：1=未做周计划 暂无其他
      * @param isPatrol 巡查：1=巡查未完成  暂无其他
-     * @return
+     * @return orderTakingTime
      */
     @PostMapping("app/core/house/order")
     @ApiOperation(value = "大管家-首页", notes = "大管家-首页")
@@ -40,6 +40,7 @@ public interface HouseWorkerSupAPI {
                                      @RequestParam("userToken")String userToken,
                                      @RequestParam("nameKey")String nameKey,
                                      @RequestParam("type")Integer type,
+                                     @RequestParam("orderTakingTime")Integer orderTakingTime,
                                      @RequestParam("houseType")Integer houseType,
                                      @RequestParam("startTime")Integer startTime,
                                      @RequestParam("isPlanWeek")Integer isPlanWeek,

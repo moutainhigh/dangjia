@@ -34,8 +34,8 @@ public class HouseWorkerSupController implements HouseWorkerSupAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseOrderList(HttpServletRequest request, PageDTO pageDTO, String userToken,String nameKey, Integer type, Integer houseType, Integer startTime, Integer isPlanWeek, Integer isPatrol){
-        return houseWorkerSupService.getHouseOrderList( request,  pageDTO,  userToken, nameKey,type,houseType,startTime,isPlanWeek,isPatrol);
+    public ServerResponse getHouseOrderList(HttpServletRequest request, PageDTO pageDTO, String userToken,String nameKey, Integer type, Integer orderTakingTime,Integer houseType, Integer startTime, Integer isPlanWeek, Integer isPatrol){
+        return houseWorkerSupService.getHouseOrderList( request,  pageDTO,  userToken, nameKey,type, orderTakingTime,houseType,startTime,isPlanWeek,isPatrol);
     }
 
     @Override

@@ -145,7 +145,7 @@
             mrp.maintenance_record_id = #{maintenanceRecordId}
         AND mrp.pay_state = 2
         <if test="null!=maintenanceRecordType and ''!=maintenanceRecordType">
-            AND mrp.maintenance_product_type =#{maintenanceProductType}
+            AND mrp.maintenance_product_type =#{maintenanceRecordType}
         </if>
     </select>
     <!-- 查询已支付的商品总价 -->
