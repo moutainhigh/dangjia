@@ -1019,7 +1019,7 @@ public class DjMaintenanceRecordService {
              resultMap=BeanUtils.beanToMap(djMaintenanceRecordContent);
              resultMap.put("imageUrl",StringTool.getImage(djMaintenanceRecordContent.getImage(),address));
              WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecordContent.getWorkerTypeId());
-             resultMap.putAll(getWokerMemberInfo(djMaintenanceRecordContent.getMemberId(),workerType.getName()));
+             resultMap.putAll(getWokerMemberInfo(djMaintenanceRecordContent.getMemberId(),workerType.getName(),workerType.getColor()));
          }
          //查询业主评分，及业主评价
          Evaluate evaluate=evaluateService.queryEvaluatesByMaintenanceId(maintenanceRecordId,djMaintenanceRecordContent.getMemberId());
@@ -1070,11 +1070,12 @@ public class DjMaintenanceRecordService {
     public List<Map<String,Object>> getWorkerList(DjMaintenanceRecord mr){
         List<Map<String,Object>> list=new ArrayList();
         if(mr.getStewardId()!=null&& StringUtils.isNotBlank(mr.getStewardId())){// 大管家信息
-            list.add(getWokerMemberInfo(mr.getStewardId(),"大管家"));
+            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(3);
+            list.add(getWokerMemberInfo(mr.getStewardId(),"大管家",workerType.getColor()));
         }
         if(mr.getWorkerMemberId()!=null&&StringUtils.isNotBlank(mr.getWorkerMemberId())){//工匠信息
             WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mr.getWorkerTypeId());
-            list.add(getWokerMemberInfo(mr.getWorkerMemberId(),workerType.getName()));
+            list.add(getWokerMemberInfo(mr.getWorkerMemberId(),workerType.getName(),workerType.getColor()));
         }
         return list;
     }
@@ -1084,7 +1085,7 @@ public class DjMaintenanceRecordService {
      * @param workerId
      * @return
      */
-    private Map<String,Object> getWokerMemberInfo(String workerId,String labelName){
+    private Map<String,Object> getWokerMemberInfo(String workerId,String labelName,String color){
         Map<String,Object> map=new HashMap<>();
         String address=configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         Member member=iMemberMapper.selectByPrimaryKey(workerId);
@@ -1094,6 +1095,7 @@ public class DjMaintenanceRecordService {
             map.put("labelName",labelName);
             map.put("headImage",address+member.getHead());
             map.put("mobile",member.getMobile());
+            map.put("color",color);
         }
         return map;
     }

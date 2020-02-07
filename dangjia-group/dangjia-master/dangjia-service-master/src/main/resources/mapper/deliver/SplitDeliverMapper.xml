@@ -277,9 +277,10 @@
             dj_sup_application_product dsp
         WHERE
             ds.id = dsp.sup_id
-        and dsp.application_status=1
+        and dsp.application_status='1'
         and dsp.shop_id=#{storefrontId}
         and dsp.product_id=#{productId}
+        and supply_relationship='0'
         group by ds.id
         order by dsp.price asc
     </select>

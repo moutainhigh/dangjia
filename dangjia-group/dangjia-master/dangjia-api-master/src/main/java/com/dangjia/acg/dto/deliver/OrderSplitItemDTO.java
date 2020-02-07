@@ -73,6 +73,8 @@ public class   OrderSplitItemDTO {
 
     private int unitType;//单位数值类型 1=整数单位，2=小数单位
 
+    private String isDeliveryInstall;//是否施工与安装分开
+
     private List<Map<String,Object>> supplierIdlist;//供应商列表
 
 }
