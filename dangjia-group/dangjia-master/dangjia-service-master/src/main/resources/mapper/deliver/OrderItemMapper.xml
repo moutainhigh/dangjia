@@ -217,6 +217,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		AND t2.product_id = #{productId}
 
 	</select>
-
+	<!--查询是否存在预约商品-->
+	<select id="getReservationDeliverState" resultType="com.dangjia.acg.modle.deliver.OrderItem">
+		SELECT
+		<include refid="all_m_columns"/>
+		FROM
+			dj_deliver_order t1
+		INNER JOIN dj_deliver_order_item m ON t1.id = m.order_id
+		AND m.is_reservation_deliver = '1'
+		WHERE
+			t1.id = #{orderId}
+		AND t1.data_status = 0
+		AND m.is_reservation_deliver = '1'
+		AND (
+			m.reservation_deliver_time IS NULL
+			OR m.reservation_deliver_time = ''
+		)
+    </select>
 </mapper>
 

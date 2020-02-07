@@ -376,6 +376,22 @@ public class PaymentService {
                 //开发回调
                 setServersSuccess(payOrder.getId());
             }
+            Example example = new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.NUMBER, payOrder.getBusinessOrderNumber());
+            List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+            if (businessOrderList.size() > 0) {
+                BusinessOrder businessOrder = businessOrderList.get(0);
+                Order order= orderMapper.selectByPrimaryKey(businessOrder.getTaskId());
+                if(order!=null) {
+                    List<OrderItem> orderItems = orderItemMapper.getReservationDeliverState(order.getId());
+                    returnMap.put("shippingState", orderItems.size() > 0 ? 5 : 1004);//5=存在预约商品  1004=无
+                    returnMap.put("orderId", order.getId());
+                    returnMap.put("shippingType", 2);
+                    returnMap.put("goodsList", orderItems);
+                    returnMap.put("goodsTotalNum", orderItems.size());
+                }
+                returnMap.put("houseId", businessOrder.getHouseId());
+            }
             if (payOrder.getState() == 2) {//已支付
                 returnMap.put("name", "当家装修担保平台");
                 returnMap.put("businessOrderNumber", businessOrderNumber);

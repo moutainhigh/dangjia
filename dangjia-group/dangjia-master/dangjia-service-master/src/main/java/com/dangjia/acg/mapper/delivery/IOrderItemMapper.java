@@ -31,4 +31,6 @@ public interface IOrderItemMapper extends Mapper<OrderItem> {
     List<BudgetLabelGoodsDTO>  queryBudgetLabelGoods(@Param("orderId")String orderId ,@Param("storefontId")String storefontId,@Param("productType")Integer productType);
 
     Map<String,Object> searchCountItemByInfo(@Param("storefrontId") String storefrontId, @Param("addressId") String addressId, @Param("houseId") String houseId, @Param("productId") String productId);
+
+    List<OrderItem> getReservationDeliverState(@Param("orderId") String orderId);
 }
