@@ -191,7 +191,7 @@ public class SupervisorAppService {
         example.createCriteria()
                 .andEqualTo(SupervisorAuthority.MEMBER_ID, member.getId())
                 .andEqualTo(SupervisorAuthority.HOUSE_ID, houseId);
-        if (iSupervisorAuthorityMapper.selectCountByExample(example) > 0) {
+        if (iSupervisorAuthorityMapper.selectCountByExample(example) <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         SupHouseDetailsDTO detailsDTO = new SupHouseDetailsDTO();
