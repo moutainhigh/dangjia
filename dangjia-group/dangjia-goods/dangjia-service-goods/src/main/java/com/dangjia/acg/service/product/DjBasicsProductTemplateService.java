@@ -365,7 +365,7 @@ public class DjBasicsProductTemplateService {
         product.setCost(basicsProductDTO.getCost());
         product.setProfit(basicsProductDTO.getProfit());
         product.setConvertQuality(basicsProductDTO.getConvertQuality());
-        product.setConvertUnit(basicsProductDTO.getConvertUnit());
+        product.setConvertUnit(CommonUtil.isEmpty(basicsProductDTO.getConvertUnit())?basicsProductDTO.getUnitId():basicsProductDTO.getConvertUnit());
         product.setIsInflueWarrantyPeriod(basicsProductDTO.getIsInflueWarrantyPeriod());
         product.setWorkerTypeId(basicsProductDTO.getWorkerTypeId());
         product.setMaxWarrantyPeriodYear(basicsProductDTO.getMaxWarrantyPeriodYear());
