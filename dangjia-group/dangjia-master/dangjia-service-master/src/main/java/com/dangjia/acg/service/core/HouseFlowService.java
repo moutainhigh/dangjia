@@ -375,7 +375,7 @@ public class HouseFlowService {
                     allgrabBean.setHouseName(memberAddress.getAddress());
                     allgrabBean.setType(type);
                     allgrabBean.setOrderType(0);
-                    allgrabBean.setHouseMember("业主 " + memberAddress.getName());//业主名称
+                    allgrabBean.setHouseMember(memberAddress.getName());//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
                     double totalPrice = order.getTotalAmount().doubleValue();
                     allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
