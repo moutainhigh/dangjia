@@ -233,7 +233,7 @@ public class SupervisorAppService {
                     .andEqualTo(HouseFlow.WORK_TYPE, 4)
                     .andGreaterThan(HouseFlow.WORKER_TYPE, 2)
                     .andEqualTo(HouseFlow.HOUSE_ID, houseId);
-            example.orderBy(HouseFlow.SORT).desc();
+            example.orderBy(HouseFlow.SORT).asc();
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
             if (houseFlows.size() > 0) {
                 List<SupHouseDetailsDTO.SupHouseFlowDTO> flowDTOS = new ArrayList<>();
@@ -311,6 +311,7 @@ public class SupervisorAppService {
                         workerMapDTOS.add(workerMapDTO);
                     }
                     flowDTO.setMapList(workerMapDTOS);
+                    flowDTOS.add(flowDTO);
                 }
                 detailsDTO.setFlowDatas(flowDTOS);
             }
