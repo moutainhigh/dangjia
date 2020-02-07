@@ -19,4 +19,9 @@ public class MasterStorefrontService {
         .andEqualTo(Storefront.DATA_STATUS,0);
         return iMasterStorefrontMapper.selectOneByExample(example);
     }
+
+    public Storefront getStorefrontById(String storefrontId){
+        return iMasterStorefrontMapper.selectByPrimaryKey(storefrontId);
+    }
+
 }

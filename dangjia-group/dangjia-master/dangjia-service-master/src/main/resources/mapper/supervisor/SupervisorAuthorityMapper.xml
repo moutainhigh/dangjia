@@ -420,7 +420,7 @@
         AND
         sa.member_id = #{memberId}
         <if test="cityId!=null and cityId!=''">
-            and h.city_id = #{cityid}
+            and h.city_id = #{cityId}
         </if>
         <if test="sortNum!=null and sortNum ==2">
             AND f.supervisor_start = 1
@@ -442,7 +442,7 @@
             and mrp.maintenance_product_type = 1
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and CONCAT(
+            and (CONCAT(
             h.residential,
             IFNULL(h.building, '*'),
             '栋',

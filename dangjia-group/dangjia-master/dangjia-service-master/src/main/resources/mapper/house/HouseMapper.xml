@@ -611,7 +611,7 @@
                     WHERE ddos.apply_status IN (1, 2)
                       AND ddos.storefront_id = #{storefrontId}
                   ) tt
-              WHERE tt.shipping_state IN (-1, 0, 4, 6, 7)
+              WHERE tt.shipping_state IN (-1, 0, 4, 6, 7,9)
              GROUP BY tt.id
              ) tcount
           WHERE(tcount.house_id = h.id OR tcount.address_id = ord.address_id)
@@ -629,7 +629,7 @@
                 WHERE
                    ddos.apply_status IN (1, 2)
                 AND ddos.storefront_id = #{storefrontId}
-                AND sp.shipping_state NOT IN (0, 4, 6, 7)
+                AND sp.shipping_state NOT IN (0, 4, 6, 7,9)
                 GROUP BY
                    ddos.id) tcount
                 WHERE

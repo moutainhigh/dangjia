@@ -178,4 +178,16 @@ public class SplitDeliver extends BaseEntity {
     @Desc(value = "地址ID")
     @ApiModelProperty("地址ID")
     private String addressId;
+
+
+    @Column(name = "total_price")
+    @Desc(value = "商品总额")
+    @ApiModelProperty("商品总额")
+    private Double totalPrice;
+
+    @Column(name = "stevedorage_cost")
+    @Desc(value = "搬运费总额")
+    @ApiModelProperty("搬运费总额")
+    private Double stevedorageCost;
+
 }

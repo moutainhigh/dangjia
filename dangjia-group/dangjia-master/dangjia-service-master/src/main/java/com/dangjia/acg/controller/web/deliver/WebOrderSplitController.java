@@ -1,15 +1,13 @@
 package com.dangjia.acg.controller.web.deliver;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.web.deliver.WebOrderSplitAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.SerializeUtils;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
-import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.deliver.OrderSplitService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class WebOrderSplitController implements WebOrderSplitAPI {
+    private static Logger logger = LoggerFactory.getLogger(WebOrderSplitController.class);
 
     @Autowired
     private OrderSplitService orderSplitService;//生成发货单
@@ -74,7 +73,13 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     public ServerResponse sentSupplier(String orderSplitId, String splitItemList,
                                        String cityId, String userId, String installName
                                        , String installMobile, String deliveryName, String deliveryMobile) {
-        return orderSplitService.sentSupplier(orderSplitId, splitItemList, cityId, userId, installName, installMobile, deliveryName, deliveryMobile);
+        try{
+            return orderSplitService.sentSupplier(orderSplitId, splitItemList, cityId, userId, installName, installMobile, deliveryName, deliveryMobile);
+        }catch (Exception e){
+            logger.error("发送供应商失败：",e);
+            return ServerResponse.createByErrorMessage("发送给供应商失败");
+        }
+
     }
 
 

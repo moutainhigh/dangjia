@@ -271,12 +271,55 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 t.num num,
                 t1.prod_template_id productTemplateId,
                 t1.is_upstairs_cost isUpstairsCost,
-                IFNULL(t1.move_cost, 0) moveCost
+                IFNULL(t1.move_cost, 0) moveCost,
+                t.is_delivery_install isDeliveryInstall
         FROM
                 dj_deliver_order_split_item t
         INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
         WHERE  t.order_split_id=#{orderSplitId}
 
     </select>
+
+    <!--按供应商分组查询对应符合条件的信息-->
+    <select id="selectSupListBySplitId" resultType="java.util.Map">
+        SELECT
+            t.supplier_id supplierId,
+            t.order_split_id orderSplitId,
+            t1.is_non_platform_supplier isNonPlatformSupplier,
+            t1.`name` supName,
+            t1.telephone,
+            sum(t.sup_cost*t.num) totalPrice,
+            sum(t.sup_stevedorage_cost) supStevedorageCost,
+            max(IFNULL(t.is_delivery_install,'0')) isDeliveryInstall
+        FROM
+            dj_deliver_order_split_item t,
+            dj_supplier t1
+        WHERE
+            t.order_split_id = #{orderSplitId}
+        AND t.supplier_id = t1.id
+        GROUP BY
+            t.supplier_id
+
+    </select>
+    <!--查询供应商的供应价格-->
+    <select id="getsupplierProductById" resultType="com.dangjia.acg.modle.sup.SupplierProduct">
+        SELECT
+            t.id,
+            t.product_id productId,
+            t.price,
+            t.porterage,
+            t.is_cartage_price isCartagePrice
+        FROM
+            dj_sup_application_product t
+        WHERE
+            t.shop_id = #{storefrontId}
+        AND t.sup_id = #{supplierId}
+        AND t.product_id = #{productId}
+    </select>
+
+    <!--修改发货单号到发货单明细表中去-->
+    <update id="updateSplitDeliverIdByInfo">
+        update dj_deliver_order_split_item set split_deliver_id=#{splitDeliverId} where order_split_id=#{orderSplitId} and supplier_id=#{supplierId}
+    </update>
 </mapper>
 

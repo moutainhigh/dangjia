@@ -90,7 +90,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     ddos.id = osi.order_split_id
                 AND (
                     sp.shipping_state IS NULL
-                    OR sp.shipping_state IN (0, 4, 6, 7)) > 0),
+                    OR sp.shipping_state IN (0, 4, 6, 7,9)) > 0),
                     1,
                     2
                 ) status,
