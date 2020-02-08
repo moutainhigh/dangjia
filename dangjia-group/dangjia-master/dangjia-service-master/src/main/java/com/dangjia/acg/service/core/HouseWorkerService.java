@@ -63,7 +63,6 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -1400,9 +1399,10 @@ public class HouseWorkerService {
             houseFlow.setWorkType(5);
             houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            configMessageService.addConfigMessage(AppType.GONGJIANG,
-                    DigestUtils.md5Hex("wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId()),
-                    "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
+
+//            configMessageService.addConfigMessage(AppType.GONGJIANG,
+//                    DigestUtils.md5Hex("wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId()),
+//                    "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             return ServerResponse.createBySuccessMessage("提前进场成功");
         } catch (Exception e) {
             e.printStackTrace();
