@@ -317,9 +317,11 @@
         dj_basics_supervisor_authority sa
         INNER JOIN dj_house h ON sa.house_id = h.id
         INNER JOIN dj_maintenance_record dmr ON dmr.house_id = h.id
+        INNER JOIN DJ_maintenance_record_product mrp on dmr.id=mrp.maintenance_record_id
         WHERE
         h.data_status = 0
         AND sa.member_id = #{memberId}
+        AND mrp.maintenance_product_type = 1
         <if test="cityId!=null and cityId!=''">
             AND h.city_id = #{cityId}
         </if>
