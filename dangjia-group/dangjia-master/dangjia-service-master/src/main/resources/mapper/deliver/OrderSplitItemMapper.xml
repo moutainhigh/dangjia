@@ -269,12 +269,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 t.shop_count shopCount,
                 IFNULL(t.ask_count, 0) askCount,
                 t.num num,
+                t.receive,
                 t1.prod_template_id productTemplateId,
                 t1.is_upstairs_cost isUpstairsCost,
                 IFNULL(t1.move_cost, 0) moveCost,
                 t.is_delivery_install isDeliveryInstall,
                 t.sup_cost supCost,
-                t.supplier_id supId
+                t.supplier_id supId,
+                t.sup_stevedorage_cost supStevedorageCost
         FROM
                 dj_deliver_order_split_item t
         INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id

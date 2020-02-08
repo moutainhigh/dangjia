@@ -30,5 +30,5 @@ public class SplitDeliverDetailDTO {
     private Integer shippingState;
     private Integer applyState;
     private String houseId;
-    private List<OrderSplitItemDTO> orderSplitItemDTOS;
+    private List<OrderSplitItemDTO> orderSplitItemList;
 }
