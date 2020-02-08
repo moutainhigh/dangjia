@@ -1174,7 +1174,7 @@ public class CraftsmanConstructionService {
         if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
             footButton.add(Utils.getButton("审核阶段完工", 3021));
             topButton.add( Utils.getButton("奖罚", 3011));
-            if(houseWorker!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
+            if(houseWorker!=null&&houseWorker.getWorkType()!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
                 topButton.add(Utils.getButton("换人审核中", 3013));
             }else{
                 topButton.add(Utils.getButton("更换工匠", 3012));
@@ -1186,7 +1186,7 @@ public class CraftsmanConstructionService {
         } else {
             topButton.add(Utils.getButton("申请停工", 3010));
             topButton.add(Utils.getButton("奖罚", 3011));
-            if(houseWorker!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
+            if(houseWorker!=null&&houseWorker.getWorkType()!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
                 topButton.add(Utils.getButton("换人审核中", 3013));
             }else{
                 topButton.add(Utils.getButton("更换工匠", 3012));
