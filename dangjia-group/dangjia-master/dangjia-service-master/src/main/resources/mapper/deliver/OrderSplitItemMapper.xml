@@ -272,11 +272,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 t1.prod_template_id productTemplateId,
                 t1.is_upstairs_cost isUpstairsCost,
                 IFNULL(t1.move_cost, 0) moveCost,
-                t.is_delivery_install isDeliveryInstall
+                t.is_delivery_install isDeliveryInstall,
+                t.sup_cost supCost,
+                t.supplier_id supId
         FROM
                 dj_deliver_order_split_item t
         INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
         WHERE  t.order_split_id=#{orderSplitId}
+        <if test="null!=splitDeliverId and ''!=splitDeliverId">
+            and split_deliver_id=#{splitDeliverId}
+        </if>
 
     </select>
 
@@ -288,6 +293,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             t1.is_non_platform_supplier isNonPlatformSupplier,
             t1.`name` supName,
             t1.telephone,
+            t1.transportation_cost transportationCost,
             sum(t.sup_cost*t.num) totalPrice,
             sum(t.sup_stevedorage_cost) supStevedorageCost,
             max(IFNULL(t.is_delivery_install,'0')) isDeliveryInstall
@@ -297,6 +303,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE
             t.order_split_id = #{orderSplitId}
         AND t.supplier_id = t1.id
+        <if test="null!=splitDeliverId and ''!=splitDeliverId">
+            and t.split_deliver_id=#{splitDeliverId}
+        </if>
         GROUP BY
             t.supplier_id
 
@@ -319,7 +328,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--修改发货单号到发货单明细表中去-->
     <update id="updateSplitDeliverIdByInfo">
-        update dj_deliver_order_split_item set split_deliver_id=#{splitDeliverId} where order_split_id=#{orderSplitId} and supplier_id=#{supplierId}
+        update dj_deliver_order_split_item set split_deliver_id=#{splitDeliverId}
+        where order_split_id=#{orderSplitId} and supplier_id=#{supplierId}
+        <if test="null!=oldSplitDeliverId and ''!=oldSplitDeliverId">
+            and t.split_deliver_id=#{oldSplitDeliverId}
+        </if>
     </update>
 </mapper>
 

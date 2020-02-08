@@ -79,22 +79,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             ddos.address_id addressId,
             ddos.house_id houseId,
             ddos.is_reservation_deliver isReservationDeliver,
-           IF (
-            (
-                SELECT
-                    count(1)
-                FROM
-                    dj_deliver_order_split_item osi
-                LEFT JOIN dj_deliver_split_deliver sp ON osi.split_deliver_id = sp.id
-                WHERE
-                    ddos.id = osi.order_split_id
-                AND (
-                    sp.shipping_state IS NULL
-                    OR sp.shipping_state IN (0, 4, 6, 7,9)) > 0),
-                    1,
-                    2
-                ) status,
-           ddos.apply_status applystatus
+            ddos.apply_status applystatus
             FROM
                 dj_deliver_order_split ddos
             WHERE

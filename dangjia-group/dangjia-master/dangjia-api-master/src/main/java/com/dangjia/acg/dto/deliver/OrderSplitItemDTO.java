@@ -27,6 +27,8 @@ public class   OrderSplitItemDTO {
     private Double shopCount;//购买总数
     private Double receive;//收货数量
 
+    private String supId;//供应商ID
+
     private  String orderSplitId;//要货单ID
 
     private  String orderSplitItemId;//要货单详情ID
@@ -74,6 +76,8 @@ public class   OrderSplitItemDTO {
     private int unitType;//单位数值类型 1=整数单位，2=小数单位
 
     private String isDeliveryInstall;//是否施工与安装分开
+
+
 
     private List<Map<String,Object>> supplierIdlist;//供应商列表
 

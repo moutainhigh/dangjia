@@ -59,12 +59,13 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
      */
     List<OrderSplitItemDTO> getOrderItemListByhouseMemberId(@Param("houseId")String houseId,@Param("workerId") String workerId,@Param("searchKey") String searchKey);
 
-    List<OrderSplitItemDTO> getSplitOrderItemBySplitOrderId(@Param("orderSplitId") String orderSplitId);
+    List<OrderSplitItemDTO> getSplitOrderItemBySplitOrderId(@Param("orderSplitId") String orderSplitId,@Param("splitDeliverId") String splitDeliverId);
 
     SupplierProduct getsupplierProductById(@Param("storefrontId") String storefrontId,@Param("supplierId") String supplierId,@Param("productId") String productId);
 
-    List<Map<String,Object>> selectSupListBySplitId(@Param("orderSplitId") String orderSplitId);
+    List<Map<String,Object>> selectSupListBySplitId(@Param("orderSplitId") String orderSplitId,@Param("splitDeliverId") String splitDeliverId);
 
     //修改发货单号到发货单明细表中去
-    void updateSplitDeliverIdByInfo(@Param("splitDeliverId") String splitDeliverId,@Param("orderSplitId") String orderSplitId,@Param("supplierId") String supplierId);
+    void updateSplitDeliverIdByInfo(@Param("splitDeliverId") String splitDeliverId,@Param("orderSplitId") String orderSplitId,
+                                    @Param("supplierId") String supplierId,@Param("oldSplitDeliverId") String oldSplitDeliverId);
 }

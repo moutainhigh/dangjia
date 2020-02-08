@@ -43,9 +43,9 @@ public class SupplierProduct extends GoodsBaseEntity implements Serializable{
 	private String goodsId;//商品id
 
 	@Column(name = "is_cartage_price")
-	@Desc(value = "是否收取上楼费（1是，0否）")
-	@ApiModelProperty("是否收取上楼费（1是，0否）")
-	private String isCartagePrice;//是否收取上楼费（1是，0否）
+	@Desc(value = "是否按1层收取上楼费（1是，0否）")
+	@ApiModelProperty("是否按1层收取上楼费（1是，0否）")
+	private String isCartagePrice;//是否按1层收取上楼费（1是，0否）
 
 	@Column(name = "price")
 	@Desc(value = "价格")
