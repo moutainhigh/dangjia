@@ -93,6 +93,7 @@ public class ConstructionByWorkerIdBean {
         private String workerId;//工匠id
         private String workerName;//工匠名字
         private String workerPhone;//工匠电话
+        private String workerHead;//头像
         private String raiseRate;//好评率
         private BigDecimal overall;//综合分
         private Integer orderTakingNum;//接单数量

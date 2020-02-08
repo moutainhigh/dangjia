@@ -1137,6 +1137,7 @@ public class CraftsmanConstructionService {
         if (worker.getWorkerType() == null || worker.getWorkerType() !=3) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "非大管家，无权访问");
         }
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         HouseFlow hfl = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询该房产下的工序
             ConstructionByWorkerIdBean.WokerFlowListBean wfr = new ConstructionByWorkerIdBean.WokerFlowListBean();
         Example example = new Example(HouseWorker.class);
@@ -1156,6 +1157,7 @@ public class CraftsmanConstructionService {
         wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
         wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
         wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
+        wfr.setWorkerHead(imageAddress + worker2 == null ? "" :worker.getHead());
         wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
         wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
         wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(houseId, worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
