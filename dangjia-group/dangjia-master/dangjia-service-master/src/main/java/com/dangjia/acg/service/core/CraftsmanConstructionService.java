@@ -1192,6 +1192,7 @@ public class CraftsmanConstructionService {
                 topButton.add(Utils.getButton("更换工匠", 3012));
             }
             if (hfl.getWorkType() < 2) {//未发布工种抢单
+                footButton.add(Utils.getButton("提前进场", 3023));
                 wfr.setButtonTitle("未进场");//按钮提示
                 wfr.setState(0);
             } else if (hfl.getWorkType() < 4) {//待抢单和已抢单
