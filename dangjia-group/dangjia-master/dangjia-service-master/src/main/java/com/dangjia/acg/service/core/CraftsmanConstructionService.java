@@ -1174,7 +1174,7 @@ public class CraftsmanConstructionService {
         if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
             footButton.add(Utils.getButton("审核阶段完工", 3021));
             topButton.add( Utils.getButton("奖罚", 3011));
-            if(CommonUtil.isEmpty(houseWorker.getWorkerId())){
+            if(houseWorker!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
                 topButton.add(Utils.getButton("换人审核中", 3013));
             }else{
                 topButton.add(Utils.getButton("更换工匠", 3012));
@@ -1186,7 +1186,7 @@ public class CraftsmanConstructionService {
         } else {
             topButton.add(Utils.getButton("申请停工", 3010));
             topButton.add(Utils.getButton("奖罚", 3011));
-            if(CommonUtil.isEmpty(houseWorker.getWorkerId())){
+            if(houseWorker!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
                 topButton.add(Utils.getButton("换人审核中", 3013));
             }else{
                 topButton.add(Utils.getButton("更换工匠", 3012));
@@ -1196,7 +1196,10 @@ public class CraftsmanConstructionService {
                 wfr.setButtonTitle("未进场");//按钮提示
                 wfr.setState(0);
             } else if (hfl.getWorkType() < 4) {//待抢单和已抢单
-                wfr.setButtonTitle("待审核工匠");//按钮提示
+                wfr.setButtonTitle("待确认工匠");//按钮提示
+                wfr.setState(1);
+            } else if (hfl.getWorkType() == 5) {//业主待支付
+                wfr.setButtonTitle("等待业主支付");//按钮提示
                 wfr.setState(1);
             } else if (hfl.getWorkSteta() == 3) {
                 footButton.add(Utils.getButton("生成二维码", 3010));
