@@ -597,43 +597,15 @@
         h.create_date AS createDate,
         h.construction_date AS constructionDate,
         (
-          SELECT COUNT(1) FROM (
-              SELECT tt.id,tt.address_id,tt.house_id
-              FROM( SELECT
-                        ddos.id,
-                        ddos.address_id,
-                        ddos.house_id,
-                        IFNULL(sp.shipping_state ,-1) shipping_state
-                     FROM
-                        dj_deliver_order_split ddos
-                    INNER JOIN dj_deliver_order_split_item osi ON ddos.id = osi.order_split_id
-                    LEFT JOIN dj_deliver_split_deliver sp ON osi.split_deliver_id = sp.id
-                    WHERE ddos.apply_status IN (1, 2)
-                      AND ddos.storefront_id = #{storefrontId}
-                  ) tt
-              WHERE tt.shipping_state IN (-1, 0, 4, 6, 7,9)
-             GROUP BY tt.id
-             ) tcount
-          WHERE(tcount.house_id = h.id OR tcount.address_id = ord.address_id)
+           SELECT COUNT(1) FROM
+              dj_deliver_order_split tcount
+            where (tcount.house_id = h.id OR tcount.address_id = ord.address_id)
+            and tcount.apply_status='1'
         ) AS wait,
-        (SELECT COUNT(1) FROM(
-                SELECT
-                    ddos.id,
-                    ddos.address_id,
-                    ddos.house_id,
-                    sp.shipping_state
-                FROM
-                   dj_deliver_order_split ddos
-                INNER JOIN dj_deliver_order_split_item osi ON ddos.id = osi.order_split_id
-                INNER JOIN dj_deliver_split_deliver sp ON osi.split_deliver_id = sp.id
-                WHERE
-                   ddos.apply_status IN (1, 2)
-                AND ddos.storefront_id = #{storefrontId}
-                AND sp.shipping_state NOT IN (0, 4, 6, 7,9)
-                GROUP BY
-                   ddos.id) tcount
-                WHERE
-                (tcount.house_id = h.id OR tcount.address_id = ord.address_id)
+        (SELECT COUNT(1) FROM
+             dj_deliver_order_split tcount
+            where (tcount.house_id = h.id OR tcount.address_id = ord.address_id)
+            and tcount.apply_status='2'
         ) AS sent
         FROM
         dj_deliver_order ord

@@ -18,7 +18,6 @@ public class OrderSplitDTO {
     private String orderSplitId;//要货单ID
     private String number ;//要货单号
     private Date createDate;//要货时间
-    private Integer status;//处理状态(1待处理，2已处理）
-    private Integer applyStatus;//要货状态（1,未发货，2已发货）
+    private Integer applyStatus;//要货状态（1,待处理，2已处理）
     private String isReservationDeliver;//是否需要预约发货（1是，0否）
 }

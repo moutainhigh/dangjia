@@ -26,7 +26,7 @@ public interface WebOrderSplitAPI {
     ServerResponse rejectionSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId);
 
     @PostMapping("web/deliver/orderSplit/splitDeliverDetail")
-    @ApiOperation(value = "发货单明细", notes = "发货单明细")
+    @ApiOperation(value = "发货任务--货单详情--清单", notes = "发货任务--货单详情--清单")
     ServerResponse splitDeliverDetail(@RequestParam("splitDeliverId") String splitDeliverId);
 
     @PostMapping("web/deliver/orderSplit/splitDeliverList")
@@ -38,10 +38,24 @@ public interface WebOrderSplitAPI {
     @ApiOperation(value = "从供应商撤回发货单", notes = "从供应商撤回发货单")
     ServerResponse withdrawSupplier(@RequestParam("orderSplitId") String orderSplitId);
 
+    /**
+     * 发送给供应商，分发任务
+     * @param orderSplitId 要货单ID
+     * @param splitDeliverId 发货单ID(重新发货时为必填）
+     * @param splitItemList [{id:”aa”,supplierId:”xx”},{id:”bb”,supplierId:”xx”}] 分发明细 id要货单明细ID，supplierId 供应商ID
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param installName 安装人姓名
+     * @param installMobile 安装人电话
+     * @param deliberyName 送货人姓名
+     * @param deliveryMobile 送货人电话
+     * @return
+     */
     @PostMapping("web/deliver/orderSplit/sentSupplier")
-    @ApiOperation(value = "发送供应商", notes = "发送供应商")
+    @ApiOperation(value = "发送供应商(分发任务)", notes = "发送供应商（分发任务）")
     ServerResponse sentSupplier(
             @RequestParam("orderSplitId") String orderSplitId,
+            @RequestParam("orderSplitId") String splitDeliverId,
             @RequestParam("splitItemList") String splitItemList,
             @RequestParam("cityId") String cityId,
             @RequestParam("userId") String userId,
@@ -55,12 +69,12 @@ public interface WebOrderSplitAPI {
     ServerResponse cancelOrderSplit(@RequestParam("orderSplitId") String orderSplitId);
 
     @PostMapping("web/deliver/orderSplit/cancelSplitDeliver")
-    @ApiOperation(value = "发货单取消打回(仅还原库存)", notes = "发货单取消打回")
+    @ApiOperation(value = "撤回发货单", notes = "撤回发货单")
     ServerResponse cancelSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId);
 
     @PostMapping("web/deliver/orderSplit/orderSplitItemList")
-    @ApiOperation(value = "货单列表--分发任务列表", notes = "货单列表--分发任务列表")
-    ServerResponse orderSplitItemList(@RequestParam("orderSplitId") String orderSplitId);
+    @ApiOperation(value = "货单列表--分发任务/重新发货列表", notes = "货单列表--分发任务/重新发货列表")
+    ServerResponse orderSplitItemList(@RequestParam("orderSplitId") String orderSplitId,@RequestParam("splitDeliverId") String splitDeliverId);
 
     @PostMapping("web/deliver/orderSplit/getOrderSplitDeliverList")
     @ApiOperation(value = "货单列表--货单详情列表 ", notes = "货单列表--货单详情列表")
@@ -68,7 +82,7 @@ public interface WebOrderSplitAPI {
 
 
     @PostMapping("web/deliver/orderSplit/getHouseList")
-    @ApiOperation(value = "材料员看房子列表(列表)", notes = "材料员看房子列表（发货任务列表）")
+    @ApiOperation(value = "货单列表(列表)", notes = "货单列表（发货任务列表）")
     ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("cityId") String cityId,
                                 @RequestParam("pageDTO") PageDTO pageDTO,

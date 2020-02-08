@@ -41,7 +41,7 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     }
 
     /**
-     * 发货单明细
+     * 发货任务--货单详情--清单
      */
     @Override
     @ApiMethod
@@ -65,16 +65,25 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     }
 
     /**
-     * 发送供应商
-     * 分发不同供应商
+     *
+     * @param orderSplitId 要货单ID
+     * @param splitDeliverId 发货单ID(重新发货时为必填）
+     * @param splitItemList [{id:”aa”,supplierId:”xx”},{id:”bb”,supplierId:”xx”}] 分发明细 id要货单明细ID，supplierId 供应商ID
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param installName 安装人姓名
+     * @param installMobile 安装人电话
+     * @param deliveryName
+     * @param deliveryMobile 送货人电话
+     * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse sentSupplier(String orderSplitId, String splitItemList,
+    public ServerResponse sentSupplier(String orderSplitId,String splitDeliverId, String splitItemList,
                                        String cityId, String userId, String installName
                                        , String installMobile, String deliveryName, String deliveryMobile) {
         try{
-            return orderSplitService.sentSupplier(orderSplitId, splitItemList, cityId, userId, installName, installMobile, deliveryName, deliveryMobile);
+            return orderSplitService.sentSupplier(orderSplitId,splitDeliverId, splitItemList, cityId, userId, installName, installMobile, deliveryName, deliveryMobile);
         }catch (Exception e){
             logger.error("发送供应商失败：",e);
             return ServerResponse.createByErrorMessage("发送给供应商失败");
@@ -98,11 +107,13 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
     /**
      * 货单列表--分发任务列表
+     * @param orderSplitId 要货单号
+     * @param splitDeliverId 发货单号
      */
     @Override
     @ApiMethod
-    public ServerResponse orderSplitItemList(String orderSplitId) {
-        return orderSplitService.orderSplitItemList(orderSplitId);
+    public ServerResponse orderSplitItemList(String orderSplitId,String splitDeliverId) {
+        return orderSplitService.orderSplitItemList(orderSplitId,splitDeliverId);
     }
 
     /**
