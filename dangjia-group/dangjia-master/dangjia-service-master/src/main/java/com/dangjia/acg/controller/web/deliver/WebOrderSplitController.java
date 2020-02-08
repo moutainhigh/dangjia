@@ -97,13 +97,25 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
 
     /**
-     * 要货单看明细
+     * 货单列表--分发任务列表
      */
     @Override
     @ApiMethod
     public ServerResponse orderSplitItemList(String orderSplitId) {
         return orderSplitService.orderSplitItemList(orderSplitId);
     }
+
+    /**
+     * 货单列表--货单详情列表
+     * @param orderSplitId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getOrderSplitDeliverList(String orderSplitId){
+        return orderSplitService.getOrderSplitDeliverList(orderSplitId);
+    }
+
 
 
 

@@ -151,18 +151,18 @@
         SELECT
         <include refid="all_w_columns"/>
         from dj_core_house_worker w
-        <if test="nameKey!=null and nameKey=='1'">
+        <if test="nameKey!=null and nameKey!=''">
             LEFT JOIN dj_house h ON w.house_id = h.id
             LEFT JOIN dj_deliver_order o ON o.id = w.business_id
             LEFT JOIN dj_member_address ma on ma.id=o.address_id
         </if>
-        <if test="houseType!=null and houseType=='1'">
+        <if test="houseType!=null and houseType==1">
             INNER JOIN (
             SELECT house_id, MAX(end_date) end_date  FROM
             dj_core_house_flow GROUP BY house_id
             ) a ON a.house_id = w.house_id
         </if>
-        <if test="startTime!=null and startTime=='1'">
+        <if test="startTime!=null and startTime==1">
             INNER JOIN (
                 SELECT
                  house_id,create_date
@@ -175,7 +175,7 @@
                  house_id
             ) b ON b.house_id = w.house_id
         </if>
-        <if test="startTime!=null and startTime=='2'">
+        <if test="startTime!=null and startTime==2">
         INNER JOIN (
             SELECT
               house_id,MIN(create_date) create_date
@@ -187,7 +187,7 @@
               house_id
         ) b ON b.house_id = w.house_id  AND DATE_FORMAT(b.create_date, '%x年-第%v周' ) = DATE_FORMAT( SYSDATE(), '%x年-第%v周' )
         </if>
-        <if test="isPlanWeek!=null and isPlanWeek=='1'">
+        <if test="isPlanWeek!=null and isPlanWeek==1">
             LEFT JOIN (
                 SELECT
                   house_id, create_date
@@ -201,7 +201,7 @@
             ) c ON c.house_id = w.house_id
         </if>
 
-        <if test="isPatrol!=null and isPatrol=='1'">
+        <if test="isPatrol!=null and isPatrol==1">
             INNER JOIN (
                 SELECT
                 house_id, COUNT(id) patrol
@@ -212,7 +212,7 @@
         </if>
         where w.worker_id = #{workerId}
         and w.work_type in(1,6)
-        <if test="nameKey!=null and nameKey=='1'">
+        <if test="nameKey!=null and nameKey!=''">
             AND (
                 CONCAT(
                 h.residential,
@@ -225,22 +225,28 @@
                OR ma.address LIKE CONCAT('%', #{nameKey}, '%')
             )
         </if>
-        <if test="type!=null and type!=''">
+        <if test="type!=null">
             AND w.type =  #{type}
         </if>
-        <if test="houseType!=null and houseType=='1'">
+        <if test="houseType!=null and houseType==1">
             AND a.end_date &lt;= CONCAT(
             DATE_FORMAT(SYSDATE(), '%Y-%m-%d'),
             ' 23:59:59'
             )
         </if>
-        <if test="isPlanWeek!=null and isPlanWeek=='1'">
+        <if test="isPlanWeek!=null and isPlanWeek==1">
             and c.house_id is null
         </if>
-        <if test="isPatrol!=null and isPatrol=='1'">
+        <if test="isPatrol!=null and isPatrol==1">
             AND fa.patrol &lt; w.patrol
         </if>
-        order by modify_date desc
+
+        <if test="orderTakingTime!=null and orderTakingTime==0">
+            order by w.create_date
+        </if>
+        <if test="orderTakingTime!=null and orderTakingTime==1">
+            order by w.create_date desc
+        </if>
     </select>
 
     <!--&lt;!&ndash;查出所有 &ndash;&gt;-->

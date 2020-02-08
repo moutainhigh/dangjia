@@ -31,6 +31,7 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
 
     List<HouseWorker> getDetailHouseWorker(@Param("workerId") String workerId,@Param("nameKey") String nameKey,
                                            @Param("type") Integer type,
+                                           @Param("orderTakingTime") Integer orderTakingTime,
                                            @Param("houseType") Integer houseType,
                                            @Param("startTime") Integer startTime,
                                            @Param("isPlanWeek") Integer isPlanWeek,

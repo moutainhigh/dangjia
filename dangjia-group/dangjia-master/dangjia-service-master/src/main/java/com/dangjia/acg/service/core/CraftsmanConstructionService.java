@@ -134,48 +134,101 @@ public class CraftsmanConstructionService {
         if (worker.getWorkerType() == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "请上传资料");
         }
-        object = getHouseWorker(bean, worker.getId());
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        House house = houseMapper.selectByPrimaryKey(houseId);//查询房产信息
-        if (house == null) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "房产信息不存在");
-        }
+        if(type==0) {
+            House house = houseMapper.selectByPrimaryKey(houseId);//查询房产信息
+            if (house == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "房产信息不存在");
+            }
+            HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(house.getId(), worker.getWorkerTypeId(), null);
+            HouseFlow hf = houseFlowMapper.getByWorkerTypeId(houseId, hw.getWorkerTypeId());//查询自己的任务状态
+            if (hf == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "没有查到该任务");
+            }
+            bean.setHouseId(house.getId());
+            bean.setHouseName(house.getHouseName());
+            bean.setHouseSquare(house.getSquare().doubleValue());
+            Example example = new Example(MemberAddress.class);
+            example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, house.getId());
+            MemberAddress memberAddress = iMasterMemberAddressMapper.selectOneByExample(example);
+            if (memberAddress != null && StringUtils.isNotBlank(memberAddress.getAddress())) {
+                bean.setHouseName(memberAddress.getAddress());
+            }
 
-        HouseWorker hw =houseWorkerMapper.getByWorkerTypeId(house.getId(),worker.getWorkerTypeId(),null);
-        HouseFlow hf = houseFlowMapper.getByWorkerTypeId(houseId, hw.getWorkerTypeId());//查询自己的任务状态
-        if (hf == null) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "没有查到该任务");
-        }
-        bean.setHouseId(house.getId());
-        bean.setHouseName(house.getHouseName());
-        bean.setHouseSquare(house.getSquare().doubleValue());
-        Example example = new Example(MemberAddress.class);
-        example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, house.getId());
-        MemberAddress memberAddress = iMasterMemberAddressMapper.selectOneByExample(example);
-        if (memberAddress != null && StringUtils.isNotBlank(memberAddress.getAddress())) {
-            bean.setHouseName(memberAddress.getAddress());
-        }
-
-        if(house.getSquare()!=null) {
-            DjConfigRuleItemTwo configRuleItemTwo = configRuleUtilService.getApartmentConfig(house.getSquare());
-            if(configRuleItemTwo!=null) {
-                bean.setApartmentName(configRuleItemTwo.getFieldName());
+            if (house.getSquare() != null) {
+                DjConfigRuleItemTwo configRuleItemTwo = configRuleUtilService.getApartmentConfig(house.getSquare());
+                if (configRuleItemTwo != null) {
+                    bean.setApartmentName(configRuleItemTwo.getFieldName());
+                }
+            }
+            switch (worker.getWorkerType()) {
+                case 1://设计师
+                    return getDesignerBean(request, bean, hw, house, hf);
+                case 2://精算师
+                    return getActuariesBean(request, bean, hw, worker, house, hf);
+                case 3://大管家
+                    return getHousekeeperBean(request, bean, hw, worker, house, hf, type);
+                default://工匠
+                    return getCraftsmanBean(request, bean, hw, worker, house, hf, type);
             }
         }
 
-        switch (worker.getWorkerType()) {
-            case 1://设计师
-                return getDesignerBean(request, bean, hw, house, hf);
-            case 2://精算师
-                return getActuariesBean(request, bean, hw, worker, house, hf);
-            case 3://大管家
-                return getHousekeeperBean(request, bean, hw, worker, house, hf,type);
-            default://工匠
-                return getCraftsmanBean(request, bean, hw, worker, house, hf,type);
+        if(type==1) {
+            Order order = iOrderMapper.selectByPrimaryKey(houseId);//查询房产信息
+            if (order == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "体验单不存在");
+            }
+            bean.setHouseId(order.getId());
+            MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
+            if (memberAddress != null && StringUtils.isNotBlank(memberAddress.getAddress())) {
+                bean.setHouseName(memberAddress.getAddress());
+            }
+            bean.setWorkerType(worker.getWorkerType());//0:大管家；1：工匠；2：设计师；3：精算师
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria().andCondition(" work_type in(6,8) ").andEqualTo(HouseWorker.TYPE,type).andEqualTo(HouseWorker.BUSINESS_ID,order.getId());
+            List<HouseWorker> houseWorkers= houseWorkerMapper.selectByExample(example);
+            HouseWorker houseWorker=null;
+            if(houseWorkers.size()>0){
+                houseWorker=houseWorkers.get(0);
+                bean.setHouseFlowId(houseWorker.getId());
+                if(houseWorker.getWorkType()==6){
+                    bean.setAlreadyMoney(new BigDecimal(0));//已得钱
+                    bean.setAlsoMoney(houseWorker.getPrice());//已得钱
+                }else{
+                    bean.setAlreadyMoney(houseWorker.getPrice());//已得钱
+                    bean.setAlsoMoney(new BigDecimal(0));//还可得钱
+                }
+            }
+            Member houseMember = memberMapper.selectByPrimaryKey(order.getMemberId());//业主
+            if (houseMember != null) {
+                bean.setHouseMemberName(houseMember.getNickName());//业主名称
+                bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
+                bean.setUserId(houseMember.getId());//
+            }
+            //查询我的单
+            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(order.getId(), null,type);
+            List<Map<String, Object>> mapDataList = new ArrayList<>();
+            if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
+                    setProductInfo(houseOrderDetailDTO, address);
+                    Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
+                    dataMap.put("totalNodeNumber",1);//总节点数
+                    if(houseWorker!=null && houseWorker.getWorkType()==6) {
+                        dataMap.put("completedNodeNumber",0);//已完成节点数(已完成)
+                        dataMap.put("labelName", "待验房");//节点名称
+                    }else{
+                        dataMap.put("completedNodeNumber",1);//已完成节点数(已完成)
+                        dataMap.put("labelName", "已完成");//节点名称
+                    }
+                    mapDataList.add(dataMap);
+                }
+                //获取维保id
+                bean.setBusinessId(houseOrderDetailDTOList.get(0).getBusinessId());
+            }
+            bean.setDataList(mapDataList);
+            return  ServerResponse.createBySuccess("获取施工列表成功", bean);
         }
-
+        return ServerResponse.createBySuccessMessage("OK" );
     }
 
     /**

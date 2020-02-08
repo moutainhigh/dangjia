@@ -180,7 +180,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<!-- 根据orderId查询 -->
 	<select id="byOrderIdList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.deliver.OrderItem">
 		SELECT
-		<include refid="all_columns"/>,p.value_id_arr valueIdArr,p.value_name_arr valueNameArr
+		<include refid="all_m_columns"/>,p.value_id_arr valueIdArr,p.value_name_arr valueNameArr
 		FROM dj_deliver_order_item m
 		INNER JOIN dj_basics_storefront_product sp ON sp.id = m.product_id
 		INNER JOIN dj_basics_product_template p ON sp.prod_template_id = p.id

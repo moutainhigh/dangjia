@@ -371,7 +371,6 @@ public class OrderSplitService {
                         splitDeliver.setDeliveryMobile(deliveryMobile);//送货人号码
                         splitDeliver.setShippingState(1);//已发货
                         splitDeliver.setSendTime(new Date());//发货时间
-                        splitDeliver.setSupplierTelephone(storefront.getMobile());//非平台供应商的电话为当前店铺的电话
                     }
                     //判断是当前供应商下是否有发货与安装/施工分开的商品，如果是，则添加安装人员
                     if(isDeliveryInstall!=null&&"1".equals(isDeliveryInstall)){
@@ -454,6 +453,34 @@ public class OrderSplitService {
         }
     }
 
+    /**
+     * 发货任务--货单列表--货单详情列表
+     */
+    public ServerResponse getOrderSplitDeliverList(String orderSplitId){
+
+        try{
+            Map<String,Object> resultMap=new HashMap();
+            //1.查询对应的要货单号，判断是否已分发过供应商，若已分发，则返回给提示
+            OrderSplit orderSplit=orderSplitMapper.selectByPrimaryKey(orderSplitId);
+            resultMap.put("memberId",orderSplit.getMemberId());//要货人ID
+            resultMap.put("memberName",orderSplit.getMemberName());//要货人姓名
+            resultMap.put("mobile",orderSplit.getMobile());//要货人联系方式
+            resultMap.put("orderSplitId",orderSplitId);//要货单ID
+            resultMap.put("isReservationDeliver",orderSplit.getIsReservationDeliver());//是否需要预约发货（1是，0否）
+            resultMap.put("reservationDeliverTime",orderSplit.getReservationDeliverTime());//预约发货时间
+
+            Example example=new Example(SplitDeliver.class);
+            example.createCriteria().andEqualTo(SplitDeliver.ORDER_SPLIT_ID,orderSplitId);
+            List<SplitDeliver> splitDeliverList=splitDeliverMapper.selectByExample(example);
+            resultMap.put("splitDeliverList",splitDeliverList);
+
+            return ServerResponse.createBySuccess("查询成功",resultMap);
+
+        } catch (Exception e) {
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
     /**
      * 发货任务--货单列表--分发任务页面
      */
