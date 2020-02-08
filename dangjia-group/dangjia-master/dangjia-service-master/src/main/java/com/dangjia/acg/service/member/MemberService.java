@@ -1249,7 +1249,7 @@ public class MemberService {
             homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : imageAddress + worker.getHead());
             homePageBean.setWorkerName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
             homePageBean.setEvaluation(worker.getEvaluationScore() == null ? new BigDecimal(60) : worker.getEvaluationScore());
-            //homePageBean.setOverall(workerComprehensive.getOverall());
+            homePageBean.setOverall(workerComprehensive.getOverall());
             homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
             StringBuilder stringBuffer = new StringBuilder();
             stringBuffer.append(configRuleUtilService.getMemberRank(worker.getId()));

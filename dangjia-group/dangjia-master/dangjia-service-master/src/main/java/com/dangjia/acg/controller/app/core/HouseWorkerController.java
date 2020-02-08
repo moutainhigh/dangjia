@@ -80,10 +80,14 @@ public class HouseWorkerController implements HouseWorkerAPI {
         return constructionService.getConstructionView(request, userToken,  houseId,type);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId,String houseFlowId){
+        return constructionService.getConstructionInfo(request,userToken,houseId,houseFlowId);
+    }
     /**
      * 获取申请单明细
      */
-
     @Override
     @ApiMethod
     public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId) {

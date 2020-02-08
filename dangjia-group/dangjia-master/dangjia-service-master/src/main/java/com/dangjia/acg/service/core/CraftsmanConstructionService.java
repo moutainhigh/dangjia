@@ -2,7 +2,6 @@ package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
-import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -10,11 +9,9 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.core.ButtonListBean;
-import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
-import com.dangjia.acg.dto.core.NodeDTO;
-import com.dangjia.acg.dto.core.Task;
+import com.dangjia.acg.dto.core.*;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
+import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
@@ -26,6 +23,7 @@ import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
+import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.model.config.DjConfigRuleItemTwo;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.*;
@@ -94,6 +92,8 @@ public class CraftsmanConstructionService {
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
+    @Autowired
+    private IWorkIntegralMapper workIntegralMapper;
     @Autowired
     private ConfigRuleUtilService configRuleUtilService;
     @Autowired
@@ -551,23 +551,34 @@ public class CraftsmanConstructionService {
                 wfr.setHouseFlowId(hfl.getId());//进程id
                 wfr.setWorkerType(workerType.getType());//进程类型
                 wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
-                wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
-                wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
                 wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
-                wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
-                wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(house.getId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
+                wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(house.getId(), hfl == null ? "0" : hfl.getWorkerTypeId()));//工序巡查次数
                 wfr.setPatrolStandard("" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
-                HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
-                if (todayStart == null) {//没有今日开工记录
-                    wfr.setIsStart(0);//今日是否开工0:否；1：是；
-                } else {
-                    wfr.setIsStart(1);//今日是否开工0:否；1：是；
-                    houseIsStart = true;
+
+                if(worker2!=null) {
+                    wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
+                    wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
+                    wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
+                    WorkerComprehensiveDTO workerComprehensive = workIntegralMapper.getComprehensiveWorker(worker.getId());
+                    wfr.setOverall(workerComprehensive.getOverall());
+                    wfr.setRaiseRate(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
+                    example = new Example(HouseFlow.class);
+                    Example.Criteria criteria = example.createCriteria();
+                    criteria.andEqualTo(HouseFlow.WORKER_ID, wfr.getWorkerId());
+                    if (workerType.getType() == 3) {
+                        criteria.andEqualTo(HouseFlow.SUPERVISOR_START, 1);
+                    } else if (workerType.getType() != 1 && workerType.getType() != 2) {
+                        criteria.andCondition(" work_steta not in(0,3)");
+                    }
+                    Integer orderTakingNum = houseWorkerOrderMapper.selectCountByExample(example);
+                    wfr.setOrderTakingNum(orderTakingNum);
+                    HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
+                    if (todayStart == null) {//没有今日开工记录
+                        wfr.setIsStart(0);//今日是否开工0:否；1：是；
+                    } else {
+                        wfr.setIsStart(1);//今日是否开工0:否；1：是；
+                    }
                 }
-                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                        String.format(DjConstants.GJPageAddress.GJMANAGERISOK, house.getHouseName())
-                        + "&houseId=" + house.getId() + "&houseFlowId=" + hfl.getId();
-                wfr.setDetailUrl(url);//进程详情链接
                 HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hfl.getId(), worker2 == null ? "" : worker2.getId());//根据工种任务id和工人id查询此工人待审核
                 if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
                     wfr.setButtonTitle("阶段完工申请");//按钮提示
@@ -1150,5 +1161,134 @@ public class CraftsmanConstructionService {
             houseWorkerMapper.updateByPrimaryKeySelective(hw);
         }
         return hw;
+    }
+
+    /**
+     * 工匠-工地进度详情
+     */
+    public ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId,String houseFlowId){
+        Object object = getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        if (worker.getWorkerType() == null || worker.getWorkerType() !=3) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "非大管家，无权访问");
+        }
+        HouseFlow hfl = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询该房产下的工序
+            ConstructionByWorkerIdBean.WokerFlowListBean wfr = new ConstructionByWorkerIdBean.WokerFlowListBean();
+        Example example = new Example(HouseWorker.class);
+        example.createCriteria()
+                .andEqualTo(HouseWorker.HOUSE_ID, houseId)
+                .andEqualTo(HouseWorker.WORKER_TYPE_ID, hfl.getWorkerTypeId())
+                .andEqualTo(HouseWorker.WORK_TYPE, 6);
+        List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//根据房子id和工匠type查询房子对应的工人
+        HouseWorker houseWorker = new HouseWorker();
+        if (hwList.size() > 0) {
+            houseWorker = hwList.get(0);
+        }
+        Member worker2 = memberMapper.selectByPrimaryKey(hfl.getWorkerId());
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfl.getWorkerTypeId());
+        wfr.setHouseFlowId(hfl.getId());//进程id
+        wfr.setWorkerType(workerType.getType());//进程类型
+        wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
+        wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
+        wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
+        wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
+        wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
+        wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(houseId, worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
+        wfr.setPatrolStandard("" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
+        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseId, worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
+        if (todayStart == null) {//没有今日开工记录
+            wfr.setIsStart(0);//今日是否开工0:否；1：是；
+        } else {
+            wfr.setIsStart(1);//今日是否开工0:否；1：是；
+        }
+        List<ButtonListBean> topButton=new ArrayList<>();//头部按钮
+        List<ButtonListBean> footButton=new ArrayList<>();//底部按钮
+        HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hfl.getId(), worker2 == null ? "" : worker2.getId());//根据工种任务id和工人id查询此工人待审核
+        if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
+            footButton.add(Utils.getButton("审核阶段完工", 3021));
+            topButton.add( Utils.getButton("奖罚", 3011));
+            if(CommonUtil.isEmpty(houseWorker.getWorkerId())){
+                topButton.add(Utils.getButton("换人审核中", 3013));
+            }else{
+                topButton.add(Utils.getButton("更换工匠", 3012));
+            }
+            wfr.setState(4);//装修进度0：未进场；1：待审核工匠；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
+        } else if (houseFlowApp != null && houseFlowApp.getApplyType() == 2) {
+            footButton.add(Utils.getButton("审核整体完工", 3022));
+            wfr.setState(6);
+        } else {
+            topButton.add(Utils.getButton("申请停工", 3010));
+            topButton.add(Utils.getButton("奖罚", 3011));
+            if(CommonUtil.isEmpty(houseWorker.getWorkerId())){
+                topButton.add(Utils.getButton("换人审核中", 3013));
+            }else{
+                topButton.add(Utils.getButton("更换工匠", 3012));
+            }
+            if (hfl.getWorkType() < 2) {//未发布工种抢单
+                wfr.setButtonTitle("未进场");//按钮提示
+                wfr.setState(0);
+            } else if (hfl.getWorkType() < 4) {//待抢单和已抢单
+                wfr.setButtonTitle("待审核工匠");//按钮提示
+                wfr.setState(1);
+            } else if (hfl.getWorkSteta() == 3) {
+                footButton.add(Utils.getButton("生成二维码", 3010));
+                wfr.setButtonTitle("去交底");
+                wfr.setState(2);
+            } else if ((hfl.getWorkType() == 4 && hfl.getWorkSteta() == 0) || hfl.getWorkSteta() == 4) {
+                wfr.setButtonTitle("施工中");
+                wfr.setState(3);
+            } else if (hfl.getWorkSteta() == 1) {
+                wfr.setButtonTitle("已阶段完工");
+                wfr.setState(4);
+            } else if (hfl.getWorkSteta() == 5) {
+                wfr.setButtonTitle("收尾施工中");
+                wfr.setState(5);
+            } else if (hfl.getWorkSteta() == 2 || hfl.getWorkSteta() == 6) {
+                if (hfl.getWorkSteta() == 2) {
+                    wfr.setButtonTitle("已整体完工");
+                } else {
+                    wfr.setButtonTitle("提前竣工");
+                }
+                wfr.setState(6);
+            }
+        }
+        if (houseFlowApp != null && houseFlowApp.getApplyType() == 3) {
+            wfr.setButtonTitle("停工申请");//按钮提示
+        }
+        if (hfl.getPause() == 1) {
+            wfr.setButtonTitle("已停工");//按钮提示
+        }
+        wfr.setTotalNodeNumber(7);
+        if(workerType.getType()==4){//拆除少无阶段完工，减去1节点数
+            wfr.setTotalNodeNumber(6);
+        }
+        wfr.setCompletedNodeNumber(wfr.getState());//当前完成的节点数
+        wfr.setTopButton(topButton);
+        wfr.setFootButton(footButton);
+
+        List<HouseFlowApply> earliestTimeList = houseFlowApplyMapper.getEarliestTimeHouseApply(hfl.getHouseId(), hfl.getWorkerId());
+        HouseFlowApply earliestTime = null;
+        if (earliestTimeList.size() > 0) {
+            earliestTime = earliestTimeList.get(0);
+        }
+        Long suspendDay = houseFlowApplyMapper.getSuspendApply(hfl.getHouseId(), hfl.getWorkerId());//根据房子id和工人id查询暂停天数
+        Long everyEndDay = houseFlowApplyMapper.getEveryDayApply(hfl.getHouseId(), hfl.getWorkerId());//根据房子id和工人id查询每日完工申请天数
+        long totalDay = 0;
+        if (earliestTime != null) {
+            Date EarliestDay = earliestTime.getCreateDate();//最早开工时间
+            Date newDate = new Date();
+            totalDay = 1 + DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+            if (suspendDay != null) {
+                totalDay = totalDay - suspendDay;
+                if (totalDay <= 0) totalDay = 0;
+            }
+        }
+        wfr.setStartDay(totalDay);
+        wfr.setFinishedDay(everyEndDay == null ? 0 : everyEndDay);
+        wfr.setSuspendDay((suspendDay == null ? 0 : suspendDay));
+        return ServerResponse.createBySuccess("获取指定工程进度明细成功", wfr);
     }
 }

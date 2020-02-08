@@ -66,8 +66,8 @@ public class ConstructionByWorkerIdBean {
 
         @Data
         public static class ListMapBean {
-            private String image;
-            private String name;
+            private String image;//按钮图标
+            private String name;//按钮名称
             private String url;
             private int type;//0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图
             private int state;//0无 1有点
@@ -84,15 +84,22 @@ public class ConstructionByWorkerIdBean {
         private String workerTypeName;//进程名称
         private String workerTypeColor;//颜色
         private Integer isStart;//是否开工0:今日未开工；1：今日已开工；
+        private Long finishedDay;//每日完工天数
+        private Long startDay;//开工天数
+        private Long suspendDay;//暂停天数；
         private String patrolSecond;//巡查次数
         private String patrolStandard;//巡查标准
-        private Integer state;//装修进度0：未进场；1：待业主支付；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
+        private Integer state;//工程状态  0：未进场；1：待审核工匠；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
         private String workerId;//工匠id
         private String workerName;//工匠名字
         private String workerPhone;//工匠电话
-
-
+        private String raiseRate;//好评率
+        private BigDecimal overall;//综合分
+        private Integer orderTakingNum;//接单数量
         private Integer totalNodeNumber;//总节点数
         private Integer completedNodeNumber;//当前节点
+
+        List<ButtonListBean> topButton;//头部按钮
+        List<ButtonListBean> footButton;//底部按钮
     }
 }
