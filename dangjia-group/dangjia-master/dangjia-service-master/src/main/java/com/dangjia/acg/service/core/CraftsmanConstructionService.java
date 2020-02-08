@@ -552,8 +552,6 @@ public class CraftsmanConstructionService {
                 wfr.setWorkerType(workerType.getType());//进程类型
                 wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
                 wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
-                wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(house.getId(), hfl == null ? "0" : hfl.getWorkerTypeId()));//工序巡查次数
-                wfr.setPatrolStandard("" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
 
                 if(worker2!=null) {
                     wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
@@ -579,50 +577,20 @@ public class CraftsmanConstructionService {
                         wfr.setIsStart(1);//今日是否开工0:否；1：是；
                     }
                 }
-                HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hfl.getId(), worker2 == null ? "" : worker2.getId());//根据工种任务id和工人id查询此工人待审核
-                if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
-                    wfr.setButtonTitle("阶段完工申请");//按钮提示
-                    promptList.add("我是" + (workerType == null ? "" : workerType.getName()) + "工" +
-                            (worker2 == null ? "" : worker2.getName() + ",我提交了阶段完工申请"));
-                    wfr.setState(4);//装修进度0：未进场；1：待业主支付；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
-                } else if (houseFlowApp != null && houseFlowApp.getApplyType() == 2) {
-                    wfr.setButtonTitle("整体完工申请");//按钮提示
-                    wfr.setState(6);
-                    promptList.add("我是" + (workerType == null ? "" : workerType.getName()) + "工" +
-                            (worker2 == null ? "" : worker2.getName() + ",我提交了整体完工申请"));
-                } else if (hfl.getWorkType() < 2) {//未发布工种抢单
-                    wfr.setButtonTitle("提前进场");//按钮提示
+                if (hfl.getWorkType() < 2) {//未发布工种抢单
                     wfr.setState(0);
                 } else if (hfl.getWorkType() < 4) {//待抢单和已抢单
-                    wfr.setButtonTitle("正在进场");//按钮提示
                     wfr.setState(1);
                 } else if (hfl.getWorkSteta() == 3) {
-                    wfr.setButtonTitle("去交底");
                     wfr.setState(2);
                 } else if ((hfl.getWorkType() == 4 && hfl.getWorkSteta() == 0) || hfl.getWorkSteta() == 4) {
-                    wfr.setButtonTitle("施工中");
                     wfr.setState(3);
                 } else if (hfl.getWorkSteta() == 1) {
-                    wfr.setButtonTitle("已阶段完工");
                     wfr.setState(4);
                 } else if (hfl.getWorkSteta() == 5) {
-                    wfr.setButtonTitle("收尾施工中");
                     wfr.setState(5);
                 } else if (hfl.getWorkSteta() == 2 || hfl.getWorkSteta() == 6) {
-                    if (hfl.getWorkSteta() == 2) {
-                        wfr.setButtonTitle("已整体完工");
-                    } else {
-                        wfr.setButtonTitle("提前竣工");
-                    }
                     wfr.setState(6);
-                }
-                if (houseFlowApp != null && houseFlowApp.getApplyType() == 3) {
-                    wfr.setButtonTitle("停工申请");//按钮提示
-                    promptList.add("我是" + (workerType == null ? "" : workerType.getName()) + "工"
-                            + (worker2 == null ? "" : worker2.getName() + ",我提交了停工申请"));
-                }
-                if (hfl.getPause() == 1) {
-                    wfr.setButtonTitle("已停工");//按钮提示
                 }
                 wfr.setTotalNodeNumber(7);
                 if(workerType.getType()==4){//拆除少无阶段完工，减去1节点数
@@ -839,13 +807,7 @@ public class CraftsmanConstructionService {
                 promptList.add("该房子已提前结束装修,您的工钱已自动入账！");
             }
             bean.setIfBackOut(2);
-            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                    "takeMoneyDetailed" +
-                    "?title=拿钱明细" +
-                    "&houseId=" + house.getId() +
-                    "&houseFlowId=" + hf.getId() +
-                    "&houseName=" + house.getHouseName();
-            buttonList.add(Utils.getButton("查看拿钱明细", url, 4002));
+            buttonList.add(Utils.getButton("查看拿钱明细",  4002));
         } else if (hf.getWorkType() == 4) {
 //            if(!isBX) {
 //                buttonList.add(Utils.getButton("购买保险", 4001));
