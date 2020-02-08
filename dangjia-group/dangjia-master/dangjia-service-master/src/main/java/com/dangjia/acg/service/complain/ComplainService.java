@@ -57,10 +57,13 @@ import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.deliver.OrderSplitService;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
 import com.dangjia.acg.service.house.HouseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,6 +76,7 @@ import java.util.*;
 
 @Service
 public class ComplainService {
+    private static Logger logger = LoggerFactory.getLogger(ComplainService.class);
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -145,23 +149,10 @@ public class ComplainService {
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            Complain complain = new Complain();
-            complain.setMemberId(userId);
-            complain.setComplainType(complainType);
-            complain.setStatus(0);
-            complain.setBusinessId(null);
-            complain.setHouseId(houseId);
-            //complain.setBusinessId(mendOrder.getBusinessOrderNumber());
-            complain.setContent(content);
-            complain.setUserName(storefront.getStorekeeperName());
-            complain.setUserMobile(storefront.getMobile());
-            complain.setImage(images);
-            int i = complainMapper.insertSelective(complain);
-            if(i<=0)
-                return ServerResponse.createByErrorMessage("提交申诉失败");
+            insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),userId,storefront.getId(),houseId,complainType,content,images);
             return ServerResponse.createBySuccessMessage("提交申诉成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("提交异常：",e);
             return ServerResponse.createByErrorMessage("提交失败");
         }
     }
@@ -183,25 +174,38 @@ public class ComplainService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);//补退订单表
-            Complain complain = new Complain();
-            complain.setMemberId(userId);
-            complain.setComplainType(complainType);
-            complain.setStatus(0);
-            complain.setBusinessId(null);
-            complain.setHouseId(mendOrder.getHouseId());
-            complain.setBusinessId(mendOrder.getBusinessOrderNumber());
-            complain.setContent(content);
-            complain.setUserName(storefront.getStorekeeperName());
-            complain.setUserMobile(storefront.getMobile());
-            complain.setImage(images);
-            int i = complainMapper.insertSelective(complain);
-            if(i<=0)
-                return ServerResponse.createByErrorMessage("提交申诉失败");
+            insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),userId,mendOrder.getBusinessOrderNumber(),mendOrder.getHouseId(),complainType,content,images);
             return ServerResponse.createBySuccessMessage("提交申诉成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("提交异常：",e);
             return ServerResponse.createByErrorMessage("提交失败");
         }
+    }
+
+    /**
+     * 添加申诉
+     * @param userName 发起人姓名
+     * @param userMobile 发起人电话
+     * @param userId 发起人ID
+     * @param businessId 业务单ID
+     * @param houseId 房子ID
+     * @param complainType 申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货.8工匠申请部分退货.9工匠报销.10工匠申维保定责
+     * @param content  申诉内容
+     * @param images 申诉图片
+     */
+    public void insertUserComplain(String userName,String userMobile, String userId,String businessId,String houseId, Integer complainType,  String content,String images) {
+        Complain complain = new Complain();
+        complain.setMemberId(userId);
+        complain.setComplainType(complainType);
+        complain.setStatus(0);
+        complain.setBusinessId(null);
+        complain.setHouseId(houseId);
+        complain.setBusinessId(businessId);
+        complain.setContent(content);
+        complain.setUserName(userName);
+        complain.setUserMobile(userMobile);
+        complain.setImage(images);
+        complainMapper.insertSelective(complain);
     }
     /**
      * 添加申诉

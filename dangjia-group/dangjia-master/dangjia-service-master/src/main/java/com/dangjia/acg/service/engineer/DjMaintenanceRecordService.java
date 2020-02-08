@@ -1002,6 +1002,22 @@ public class DjMaintenanceRecordService {
     }
 
     /**
+     * 查询质保提交信息
+     * @param maintenanceRecordId 质保ID
+     * @param type 查询类型： 1:工匠 2:大管家 3：业主
+     * @return
+     */
+    public ServerResponse searchMaintenaceRecordInfo(String maintenanceRecordId,Integer type){
+        try{
+            return ServerResponse.createBySuccess("查询成功",getMaintenaceRecordInfo(maintenanceRecordId,type));
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+    }
+
+    /**
      * 查询结束处理信息
      *
      * @param maintenanceRecordId

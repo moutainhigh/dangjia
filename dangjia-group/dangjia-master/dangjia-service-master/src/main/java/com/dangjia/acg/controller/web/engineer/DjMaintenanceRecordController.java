@@ -241,6 +241,18 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     }
 
     /**
+     * 查询质保提交信息
+     * @param maintenanceRecordId 质保ID
+     * @param type 查询类型： 1:工匠 2:大管家 3：业主
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchMaintenaceRecordInfo(String maintenanceRecordId,Integer type){
+        return djMaintenanceRecordService.searchMaintenaceRecordInfo(maintenanceRecordId,type);
+    }
+
+    /**
      * 查询质保详情记录
      * @param userToken
      * @param maintenanceRecordId
