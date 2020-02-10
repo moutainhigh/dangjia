@@ -10,6 +10,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.complain.ComPlainStopDTO;
@@ -17,6 +18,7 @@ import com.dangjia.acg.dto.complain.ComplainDTO;
 import com.dangjia.acg.dto.complain.ReplaceMemberRecordDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.complain.MemberRecordMapper;
@@ -29,6 +31,7 @@ import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
@@ -50,6 +53,7 @@ import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
@@ -60,6 +64,9 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.service.product.MasterStorefrontService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -88,7 +95,7 @@ public class ComplainService {
     @Autowired
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
-    private ITechnologyRecordMapper technologyRecordMapper;
+    private MasterProductTemplateService masterProductTemplateService;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -123,7 +130,7 @@ public class ComplainService {
     private HouseService houseService;
 
     @Autowired
-    private ForMasterAPI forMasterAPI;
+    private OrderSplitService orderSplitService;
 
     @Autowired
     private DjSupplierAPI djSupplierAPI;
@@ -564,26 +571,8 @@ public class ComplainService {
                             memberMapper.updateByPrimaryKeySelective(member);
                         }
                         break;
-                    case 4:// 4:部分收货申诉
-                        ServerResponse response = splitDeliverService.splitDeliverDetail(complain.getBusinessId());
-                        if (response.isSuccess()) {
-                            SplitDeliverDTO json = (SplitDeliverDTO) response.getResultObj();
-                            List<SplitDeliverItemDTO> list_Map = json.getSplitDeliverItemDTOList();
-                            double applyMoney=0d;
-                            for (SplitDeliverItemDTO tmp : list_Map) {
-                                OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(tmp.getId());
-                                if (orderSplitItem.getReceive() == null || (orderSplitItem.getNum() > orderSplitItem.getReceive())) {
-                                    orderSplitItem.setReceive(orderSplitItem.getNum());
-                                    orderSplitItemMapper.updateByPrimaryKey(orderSplitItem);
-                                }
-                                applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
-                            }
-                            SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(complain.getBusinessId());
-                            splitDeliver.setApplyMoney(applyMoney);
-                            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-                        } else {
-                            return response;
-                        }
+                    case 4:// 4:部分收货申诉，计算金钱给到对应的店铺
+                        orderSplitService.platformComplaint(complain.getBusinessId(),null,3);//部分收货，平台申诉通过
                         break;
                     case 5://提前结束装修
                         House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
@@ -650,6 +639,9 @@ public class ComplainService {
                //对应订单数据退回，订单流水记录生成
                 refundAfterSalesAPI.rejectRepairApplication(complain.getBusinessId(),userId);
             }
+            if(complain.getComplainType()!=null&&complain.getComplainType()==4){
+                orderSplitService.platformComplaint(complain.getBusinessId(),null,4);//部分收货，平台申诉驳回
+            }
 
         }
         complainMapper.updateByPrimaryKeySelective(complain);
@@ -715,37 +707,27 @@ public class ComplainService {
                 SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(complain.getBusinessId());
                 House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
-                splitDeliverDTO.setShipState(splitDeliver.getShippingState());//发货状态
-                splitDeliverDTO.setNumber(splitDeliver.getNumber());
-                splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
-                splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
-                splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
-                splitDeliverDTO.setRecTime(splitDeliver.getRecTime() == null ? splitDeliver.getModifyDate() : splitDeliver.getRecTime());//收货时间
-                splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
-                splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
-                splitDeliverDTO.setSupName(splitDeliver.getSupplierName());
-                splitDeliverDTO.setSupId(splitDeliver.getSupervisorId());
-                splitDeliverDTO.setSupMobile(splitDeliver.getShipMobile());
+                BeanUtils.beanToBean(splitDeliver,splitDeliverDTO);
                 Example example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId())
                         .andEqualTo(OrderSplitItem.SHIPPING_STATE,1);
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
                 for (OrderSplitItem orderSplitItem : orderSplitItemList) {
-                    DjBasicsProductTemplate product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
+                    StorefrontProductDTO storefrontProduct= masterProductTemplateService.getStorefrontProductByTemplateId(orderSplitItem.getProductId());
                     SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
-                    splitDeliverItemDTO.setImage(address + product.getImage());
-                    splitDeliverItemDTO.setProductSn(product.getProductSn());
-                    splitDeliverItemDTO.setProductName(product.getName());
+                    splitDeliverItemDTO.setImage(StringTool.getImageSingle(orderSplitItem.getImage(),address));
+                    splitDeliverItemDTO.setProductSn(storefrontProduct.getProductSn());
+                    splitDeliverItemDTO.setProductName(storefrontProduct.getProductName());
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getTotalPrice());
                     splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
-                    splitDeliverItemDTO.setNum(orderSplitItem.getNum());
+                    splitDeliverItemDTO.setNum(orderSplitItem.getNum());//要货量
                     splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
                     splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
                     splitDeliverItemDTO.setCost(orderSplitItem.getCost());
                     splitDeliverItemDTO.setId(orderSplitItem.getId());
                     splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
-                    splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());
+                    splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());//供应价
                     splitDeliverItemDTO.setAskCount(orderSplitItem.getAskCount());
                     splitDeliverItemDTOList.add(splitDeliverItemDTO);
                 }
