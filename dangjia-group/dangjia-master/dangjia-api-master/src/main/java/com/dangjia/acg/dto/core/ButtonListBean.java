@@ -76,4 +76,5 @@ public class ButtonListBean {
      */
     private int buttonType;//0:跳转URL，主按钮提示1：巡查工地2：申请业主验收；3:确认开工--主按钮提示 1:找大管家交底2:今日开工;3：今日完工;4阶段完工；5整体完工；6装修排期
     private String buttonTypeName;//主按钮提示 巡查工地;申请业主验收;确认开工--主按钮提示 1:找大管家交底2:今日开工;3：今日完工;4阶段完工；5整体完工；5整体完工；6装修排期
+    private String buttonMsg;//按钮弹出描述，跨行使用"\n"
 }

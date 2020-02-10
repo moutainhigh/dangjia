@@ -795,17 +795,36 @@ public class CraftsmanConstructionService {
 
         //查询工序节点
         example = new Example(HouseFlowApply.class);
-        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId());
+        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId())
+                .andCondition(" apply_type in(1,2)")
+                .andNotEqualTo(HouseFlowApply.MEMBER_CHECK, 1);
         example.orderBy(HouseFlowApply.CREATE_DATE).desc();
         List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
         if(houseFlowApplies != null && houseFlowApplies.size() > 0){
-            bean.setTrialNumber(houseFlowApplies.size());
-            //node 0-工匠审核 1-大管家审核通过 2-业主审核通过
-            bean.setNode(0);
-            if(houseFlowApplies.get(0).getSupervisorCheck() == 1){
+            int zhengTiNum=0;
+            int jieDuanNum=0;
+            for (HouseFlowApply houseFlowApply : houseFlowApplies) {
+                if(houseFlowApply.getApplyType()==1){
+                    jieDuanNum++;
+                }
+                if(houseFlowApply.getApplyType()==2){
+                    zhengTiNum++;
+                }
+            }
+            if(houseFlowApplies.get(0).getApplyType()==1){
+                bean.setTrialNumber(jieDuanNum);
+                bean.setNodeTitle("阶段完工审核(第"+CommonUtil.numberToChinese(jieDuanNum)+"次)");
+            }
+            if(houseFlowApplies.get(0).getApplyType()==2){
+                bean.setTrialNumber(zhengTiNum);
+                bean.setNodeTitle("阶段完工审核(第"+CommonUtil.numberToChinese(jieDuanNum)+"次)");
+            }
+            if(houseFlowApplies.get(0).getMemberCheck() != 1){
+                //node 1-工匠发起 2-大管家审核通过 3-业主审核通过
                 bean.setNode(1);
-            }else if(houseFlowApplies.get(0).getMemberCheck() == 1){
-                bean.setNode(2);
+                if(houseFlowApplies.get(0).getSupervisorCheck() == 1){
+                    bean.setNode(2);
+                }
             }
         }
 
