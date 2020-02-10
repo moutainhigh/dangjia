@@ -149,7 +149,7 @@ public class ComplainService {
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),userId,storefront.getId(),houseId,complainType,content,images);
+            insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),userId,storefront.getId(),houseId,complainType,content,images,3);
             return ServerResponse.createBySuccessMessage("提交申诉成功");
         } catch (Exception e) {
             logger.error("提交异常：",e);
@@ -174,7 +174,7 @@ public class ComplainService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);//补退订单表
-            insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),userId,mendOrder.getBusinessOrderNumber(),mendOrder.getHouseId(),complainType,content,images);
+            insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),userId,mendOrder.getBusinessOrderNumber(),mendOrder.getHouseId(),complainType,content,images,3);
             return ServerResponse.createBySuccessMessage("提交申诉成功");
         } catch (Exception e) {
             logger.error("提交异常：",e);
@@ -192,8 +192,9 @@ public class ComplainService {
      * @param complainType 申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货.8工匠申请部分退货.9工匠报销.10工匠申维保定责
      * @param content  申诉内容
      * @param images 申诉图片
+     * @param applicationStatus 申请身份：1工匠，2业主，3店铺，4供应商
      */
-    public void insertUserComplain(String userName,String userMobile, String userId,String businessId,String houseId, Integer complainType,  String content,String images) {
+    public void insertUserComplain(String userName,String userMobile, String userId,String businessId,String houseId, Integer complainType,  String content,String images,Integer applicationStatus) {
         Complain complain = new Complain();
         complain.setMemberId(userId);
         complain.setComplainType(complainType);
@@ -205,6 +206,7 @@ public class ComplainService {
         complain.setUserName(userName);
         complain.setUserMobile(userMobile);
         complain.setImage(images);
+        complain.setApplicationStatus(applicationStatus);
         complainMapper.insertSelective(complain);
     }
     /**

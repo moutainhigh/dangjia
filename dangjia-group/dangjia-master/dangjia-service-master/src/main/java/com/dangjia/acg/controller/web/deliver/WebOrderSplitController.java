@@ -9,6 +9,7 @@ import com.dangjia.acg.service.deliver.OrderSplitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -89,6 +90,24 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
             return ServerResponse.createByErrorMessage("发送给供应商失败");
         }
 
+    }
+
+    /**
+     * 部分收货申诉接口
+     * @param splitDeliverId 发货单ID
+     * @param splitItemList 发货单明细列表
+     * @param type 类型：1.认可部分收货，2申请平台申诉
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse platformComplaint(String splitDeliverId,String splitItemList,Integer type){
+        try{
+            return orderSplitService.platformComplaint(splitDeliverId, splitItemList,type);
+        }catch (Exception e){
+            logger.error("保存失败：",e);
+            return ServerResponse.createByErrorMessage("保存失败");
+        }
     }
 
 

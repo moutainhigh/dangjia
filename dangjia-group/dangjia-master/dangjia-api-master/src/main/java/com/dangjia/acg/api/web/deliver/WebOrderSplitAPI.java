@@ -55,7 +55,7 @@ public interface WebOrderSplitAPI {
     @ApiOperation(value = "发送供应商(分发任务)", notes = "发送供应商（分发任务）")
     ServerResponse sentSupplier(
             @RequestParam("orderSplitId") String orderSplitId,
-            @RequestParam("orderSplitId") String splitDeliverId,
+            @RequestParam("splitDeliverId") String splitDeliverId,
             @RequestParam("splitItemList") String splitItemList,
             @RequestParam("cityId") String cityId,
             @RequestParam("userId") String userId,
@@ -63,6 +63,21 @@ public interface WebOrderSplitAPI {
             @RequestParam("installMobile") String installMobile,
             @RequestParam("deliveryName") String deliberyName,
             @RequestParam("deliveryMobile") String deliveryMobile);
+
+
+    /**
+     * 部分收货申诉接口
+     * @param splitDeliverId 发货单ID
+     * @param splitItemList 发货单明细列表
+     * @param type 类型：1.认可部分收货，2申请平台申诉
+     * @return
+     */
+    @PostMapping("web/deliver/orderSplit/platformComplaint")
+    @ApiOperation(value = "部分收货申诉接口", notes = "部分收货申诉接口")
+    ServerResponse platformComplaint(
+            @RequestParam("splitDeliverId") String splitDeliverId,
+            @RequestParam("splitItemList") String splitItemList,
+            @RequestParam("type") Integer type);
 
     @PostMapping("web/deliver/orderSplit/cancelOrderSplit")
     @ApiOperation(value = "取消打回", notes = "取消打回")

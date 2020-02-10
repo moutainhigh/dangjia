@@ -45,7 +45,9 @@ import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
+import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
+import com.dangjia.acg.service.complain.ComplainService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
@@ -82,7 +84,7 @@ public class OrderSplitService {
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
-    private IMemberMapper memberMapper;
+    private ComplainService complainService;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -96,11 +98,11 @@ public class OrderSplitService {
     @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
-    private IMasterDjSupplierMapper masterDjSupplierMapper ;
+    private MasterAccountFlowRecordService masterAccountFlowRecordService ;
     @Autowired
     private MasterStorefrontService masterStorefrontService;
     @Autowired
-    private DjSupApplicationProductAPI djSupApplicationProductAPI;
+    private IWarehouseMapper iWarehouseMapper;
     @Autowired
     private IOrderItemMapper iOrderItemMapper;
     @Autowired
@@ -299,7 +301,7 @@ public class OrderSplitService {
             JSONArray itemList = JSONArray.parseArray(splitItemList);
             for (int i = 0; i < itemList.size(); i++) {
                 JSONObject obj = itemList.getJSONObject(i);
-                String id = obj.getString("id");
+                String id = obj.getString("id");//发货单详情ID
                 String supplierId = obj.getString("supplierId");
                 OrderSplitItem orderSplitItem=orderSplitItemMapper.selectByPrimaryKey(id);
                 //查询当前商品的供应价格
@@ -313,6 +315,20 @@ public class OrderSplitService {
                 }else{
                     orderSplitItem.setSupCost(0d);//如果是非平台供应商，则供应价设为0
                     orderSplitItem.setSupStevedorageCost(0d);//供应商搬动费为0
+                }
+                String orderItemId=orderSplitItem.getOrderItemId();
+                if(orderItemId!=null){//计算运费，搬运费
+                    OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(orderItemId);
+                    Double transportationCost=orderItem.getTransportationCost();//运费
+                    Double stevedorageCost=orderItem.getStevedorageCost();//搬运费
+                    //计算运费
+                    if(transportationCost>0.0) {//（运费/总数量）*收货量
+                        orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()),orderSplitItem.getNum()));
+                    }
+                    //计算搬运费
+                    if(stevedorageCost>0.0){//（搬运费/总数量）*收货量
+                        orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()),orderSplitItem.getNum()));
+                    }
                 }
                 orderSplitItem.setSupplierId(supplierId);
                 orderSplitItem.setModifyDate(new Date());
@@ -328,22 +344,26 @@ public class OrderSplitService {
                 for(Map<String,Object> supMap:supItemList){
                     String supplierId=(String)supMap.get("supplierId");//供应商ID
                     String isNonPlatformSupplier=(String)supMap.get("isNonPlatformSupplier");//是否非平台供应商，1是，0否
-                    Double totalPrice=(Double)supMap.get("totalPrice");//商品总额
+                    Double supTotalPrice=(Double)supMap.get("supTotalPrice");//供应商品总额
                     Double supStevedorageCost=(Double)supMap.get("supStevedorageCost");//搬运费
                     String supName=(String)supMap.get("supName");//供应商名称
                     String telephone=(String)supMap.get("telephone");//电话
                     String isDeliveryInstall=(String)supMap.get("isDeliveryInstall");//发货与安装/施工分开(1是，0否）
-                    Double transportationCost=(Double)supMap.get("transportationCost");//每单收取运费
+                    Double supTransportationCost=(Double)supMap.get("supTransportationCost");//每单收取运费,供应商
+                    Double totalPrice=(Double)supMap.get("totalPrice");//销售商品总额
+                    Double totalTransportationCost=(Double)supMap.get("totalTransportationCost");//销售商品运费
+                    Double totalStevedorageCost=(Double)supMap.get("totalStevedorageCost");//销售商品搬运费
                     //生成发货单信息
                     example = new Example(SplitDeliver.class);
                     splitDeliver = new SplitDeliver();
                     splitDeliver.setNumber(orderSplit.getNumber() + "00" + splitDeliverMapper.selectCountByExample(example));//发货单号
                     splitDeliver.setHouseId(orderSplit.getHouseId());
                     splitDeliver.setOrderSplitId(orderSplitId);
-                    splitDeliver.setTotalAmount(MathUtil.add(MathUtil.add(totalPrice,supStevedorageCost),transportationCost));//订单总额，包含运费搬运费
-                    splitDeliver.setTotalPrice(totalPrice);//商品总额
-                    splitDeliver.setStevedorageCost(supStevedorageCost);//搬运费
-                    splitDeliver.setDeliveryFee(transportationCost);//运费
+                    splitDeliver.setTotalAmount(MathUtil.add(MathUtil.add(totalPrice,totalTransportationCost),totalStevedorageCost));//订单销售总额，包含运费搬运费
+                    splitDeliver.setApplyMoney(MathUtil.add(MathUtil.add(supTotalPrice,supStevedorageCost),supTransportationCost));//供应商供应总额，包含运费搬运费
+                    splitDeliver.setTotalPrice(supTotalPrice);//供应商供应商品总额
+                    splitDeliver.setStevedorageCost(supStevedorageCost);//供应商总搬运费
+                    splitDeliver.setDeliveryFee(supStevedorageCost);//供应商总运费
                     splitDeliver.setShipName(orderSplit.getMemberName());
                     splitDeliver.setShipMobile(orderSplit.getMobile());
                     splitDeliver.setAddressId(orderSplit.getAddressId());
@@ -385,7 +405,113 @@ public class OrderSplitService {
             return ServerResponse.createBySuccessMessage("分发成功");
 
     }
+    /**
+     * 部分收货申诉接口
+     * @param splitDeliverId 发货单ID
+     * @param splitItemList 发货单明细列表
+     * @param type 类型：1.认可部分收货，2申请平台申诉
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse platformComplaint(String splitDeliverId,String splitItemList,Integer type){
+        SplitDeliver splitDeliver=splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+        if(splitDeliver==null){
+            return ServerResponse.createByErrorMessage("未找到对应的订单信息");
+        }
+        if(splitDeliver.getComplainStatus()!=null&&splitDeliver.getComplainStatus()==2){
+            return ServerResponse.createByErrorMessage("平台处理中，请勿重复申诉");
+        }else if(splitDeliver.getComplainStatus()!=null&&splitDeliver.getComplainStatus()==1&&splitDeliver.getComplainStatus()==3){
+            return ServerResponse.createByErrorMessage("该单已处理完成，请勿重复操作");
+        }
+        Storefront storefront=masterStorefrontService.getStorefrontById(splitDeliver.getStorefrontId());
+        //判断是否为平台申诉
+        if(type==2){//2申请平台申诉,添加申诉信息
+            if(splitItemList==null){
+                return ServerResponse.createByErrorMessage("请选择需要申诉的商品信息");
+            }
+            JSONArray itemList = JSONArray.parseArray(splitItemList);
+            for (int i = 0; i < itemList.size(); i++) {
+                JSONObject obj = itemList.getJSONObject(i);
+                String id = obj.getString("id");//发货单详情ID
+                OrderSplitItem orderSplitItem=orderSplitItemMapper.selectByPrimaryKey(id);
+                if(orderSplitItem!=null){
+                    orderSplitItem.setShippingState(1);//部分收货申诉商品
+                    orderSplitItem.setModifyDate(new Date());
+                    orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);//修改商品的申诉状态
+                }
+            }
+            //添加申诉记录
+            complainService.insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),storefront.getUserId()
+            ,splitDeliverId,splitDeliver.getHouseId(),4,"部分收货申诉",null,3);
+            //修改申诉次数及记录
+            splitDeliver.setComplainCount(splitDeliver.getComplainCount()+1);//申诉资数
 
+        }else if(type==1){//1.认可部分收货,将未收货数量还原到业主仓库上，及对应的订单明细上去
+            Double totalAmount=0d;//计算店铺收货时可得钱
+            Double applyMoney=0d;//供应商可得钱
+            Double totalPrice=0d;//供应商品总额
+            Double totalStevedorageCost=0d;//供应搬运费
+            Example example=new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID,splitDeliver.getOrderSplitId())
+                    .andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID,splitDeliverId);
+            List<OrderSplitItem> itemList=orderSplitItemMapper.selectByExample(example);//获取对应的发货单明细信息
+
+            Double totalReceiverNum=orderSplitItemMapper.getOrderSplitReceiverNum(splitDeliver.getOrderSplitId());//查询当前收货单下的总收货量
+            for(OrderSplitItem orderSplitItem:itemList){
+                Double countNum=MathUtil.sub(orderSplitItem.getNum(),orderSplitItem.getReceive());
+                if(countNum>0){//若发货数据大于你好货数据，则为部分收货
+                    //1.还原业主仓库，当前已要货数-未要货数
+                    //业主仓库数量加减
+                    example = new Example(Warehouse.class);
+                    example.createCriteria()
+                            .andEqualTo(Warehouse.PRODUCT_ID, orderSplitItem.getProductId())
+                            .andEqualTo(Warehouse.HOUSE_ID, orderSplitItem.getHouseId());
+                    Warehouse warehouse = iWarehouseMapper.selectOneByExample(example);
+                    warehouse.setAskCount(MathUtil.sub(warehouse.getAskCount(),countNum));//还原未收货的数量
+                    warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getReceive());
+                    warehouse.setAskTime(warehouse.getAskTime() + 1);//更新要货次数
+                    warehouse.setModifyDate(new Date());
+                    iWarehouseMapper.updateByPrimaryKeySelective(warehouse);
+                    //2.将对应订单的已要货量-未收货的量
+                    String orderItemId=orderSplitItem.getOrderItemId();
+                    if(orderItemId!=null){
+                        OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(orderItemId);
+                        orderItem.setAskCount(MathUtil.sub(orderItem.getAskCount(),countNum));//还原未要货量
+                        orderItem.setModifyDate(new Date());
+                        iOrderItemMapper.updateByPrimaryKeySelective(orderItem);//修改订单明细的要货量
+                    }
+                    //重新计算运费、搬运费
+                    Double stevedorageCost=MathUtil.mul(MathUtil.div(orderSplitItem.getStevedorageCost(),orderSplitItem.getNum()),orderSplitItem.getReceive());
+                    Double transportationCost=MathUtil.mul(MathUtil.div(orderSplitItem.getTransportationCost(),orderSplitItem.getNum()),orderSplitItem.getReceive());
+                    orderSplitItem.setStevedorageCost(stevedorageCost);
+                    orderSplitItem.setTransportationCost(transportationCost);
+                    //供应商搬运费，运费
+                    orderSplitItem.setSupStevedorageCost(MathUtil.mul(MathUtil.div(orderSplitItem.getSupStevedorageCost(),orderSplitItem.getNum()),orderSplitItem.getReceive()));
+                    orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(splitDeliver.getDeliveryFee(),totalReceiverNum),orderSplitItem.getReceive()));
+                    orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);//修改对应的运费，搬运费
+                }
+                totalAmount=MathUtil.add(totalAmount, MathUtil.add(MathUtil.add(MathUtil.mul(orderSplitItem.getPrice(),orderSplitItem.getReceive()),orderSplitItem.getTransportationCost()),orderSplitItem.getStevedorageCost()));
+                applyMoney=MathUtil.add(applyMoney,MathUtil.add(MathUtil.mul(orderSplitItem.getSupCost(),orderSplitItem.getReceive()),orderSplitItem.getSupCost()));
+                totalPrice=MathUtil.add(totalPrice,MathUtil.mul(orderSplitItem.getSupCost(),orderSplitItem.getReceive()));
+                totalStevedorageCost=MathUtil.add(totalStevedorageCost,orderSplitItem.getSupStevedorageCost());
+            }
+            applyMoney=MathUtil.add(applyMoney,splitDeliver.getDeliveryFee());
+            splitDeliver.setTotalAmount(totalAmount);
+            splitDeliver.setApplyMoney(applyMoney);
+            splitDeliver.setTotalPrice(totalPrice);
+            splitDeliver.setStevedorageCost(totalStevedorageCost);
+            splitDeliver.setApplyState(0);
+            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);//修改对应的订单总额
+            //3.将当前订单所得钱给到对应的店铺
+            masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), splitDeliver.getHouseId(),
+                    0, splitDeliver.getId(), totalAmount,"认可部分收货流水记录", storefront.getUserId());
+
+        }
+        //修改申诉状态
+        splitDeliver.setComplainStatus(type);
+        splitDeliver.setModifyDate(new Date());
+        return ServerResponse.createBySuccessMessage("保存成功");
+    }
 
 
     /**
