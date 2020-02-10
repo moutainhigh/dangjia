@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
+import com.dangjia.acg.mapper.supervisor.ISiteMemoMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.model.config.DjConfigRuleItemTwo;
@@ -40,9 +41,9 @@ import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
-import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.supervisor.SiteMemo;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.design.QuantityRoomService;
@@ -74,6 +75,9 @@ import java.util.Map;
 @Service
 public class CraftsmanConstructionService {
     private static Logger logger = Logger.getLogger(CraftsmanConstructionService.class);
+
+    @Autowired
+    private ISiteMemoMapper iSiteMemoMapper;
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
     @Autowired
@@ -162,6 +166,8 @@ public class CraftsmanConstructionService {
         if (hw == null) {
             return ServerResponse.createByErrorMessage("订单不存在");
         }
+        bean.setHouseWorkerId(hw.getId());
+        bean.setHouseWorkerType(hw.getType());
         if(hw.getType()==0) {
             House house = houseMapper.selectByPrimaryKey(hw.getHouseId());//查询房产信息
             if (house == null) {
@@ -297,8 +303,9 @@ public class CraftsmanConstructionService {
                 //获取维保id
                 bean.setBusinessId(hw.getBusinessId());
             }
-            setMenus(bean, house, null);
+            setMenus(bean, house, -1);
             bean.setDataList(mapDataList);
+            return  ServerResponse.createBySuccess("获取施工列表成功", bean);
         }
         return ServerResponse.createBySuccessMessage("OK" );
     }
@@ -318,7 +325,7 @@ public class CraftsmanConstructionService {
             bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
             bean.setUserId(houseMember.getId());//
         }
-        setMenus(bean, house, hf);
+        setMenus(bean, house, hf.getWorkerType());
 //        Map<String, Object> dataMap = HouseUtil.getDesignDatas(house);
 //        bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         //查询设计师的订单数据
@@ -389,7 +396,7 @@ public class CraftsmanConstructionService {
             bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
             bean.setUserId(houseMember.getId());//
         }
-        setMenus(bean, house, hf);
+        setMenus(bean, house, hf.getWorkerType());
         //查询精算师的订单数据
         List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), "2",null);
         bean.setDataList(getBudgetDataList(houseOrderDetailDTOList, house, 2));//查询已购买的精算师的商品
@@ -590,7 +597,7 @@ public class CraftsmanConstructionService {
         bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
 
 
-        setMenus(bean, house, hf);
+        setMenus(bean, house, hf.getWorkerType());
         List<String> promptList = new ArrayList<>();//消息提示list
         List<ButtonListBean> buttonList = new ArrayList<>();
         List<ConstructionByWorkerIdBean.WokerFlowListBean> workerFlowList = new ArrayList<>();
@@ -859,7 +866,7 @@ public class CraftsmanConstructionService {
         } else {
             bean.setIfBackOut(1);
         }
-        setMenus(bean, house, hf);
+        setMenus(bean, house, hf.getWorkerType());
         List<String> promptList = new ArrayList<>();//消息提示list
         List<ButtonListBean> buttonList = new ArrayList<>();
         List<HouseFlowApply> earliestTimeList = houseFlowApplyMapper.getEarliestTimeHouseApply(house.getId(), worker.getId());
@@ -966,17 +973,15 @@ public class CraftsmanConstructionService {
                         }
                     }
                 }
-                if (active != null && !active.equals("pre")) {//TODO 生产没有
-                    if (buttonList.size() <= 0) {
-                        buttonList.add(Utils.getButton("今日开工", 4004));
-                        bean.setFootMessageTitle("今日开工任务");//每日开工事项
-                        bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
-                        List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
-                        for (WorkerEveryday day : listWorDay) {
-                            ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
-                            listMapBean.setName(day.getName());
-                            workerEverydayList.add(listMapBean);
-                        }
+                if (buttonList.size() <= 0) {
+                    buttonList.add(Utils.getButton("今日开工", 4004));
+                    bean.setFootMessageTitle("今日开工任务");//每日开工事项
+                    bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
+                    List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
+                    for (WorkerEveryday day : listWorDay) {
+                        ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
+                        listMapBean.setName(day.getName());
+                        workerEverydayList.add(listMapBean);
                     }
                 }
                 bean.setWorkerEverydayList(workerEverydayList);//每日完工事项
@@ -992,98 +997,50 @@ public class CraftsmanConstructionService {
     /**
      * 设置菜单
      */
-    private void setMenus(ConstructionByWorkerIdBean bean, House house, HouseFlow hf) {
+    private void setMenus(ConstructionByWorkerIdBean bean, House house, Integer workerType) {
         String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
         List<ConstructionByWorkerIdBean.BigListBean> bigList = new ArrayList<>();
-        Example example = new Example(MenuConfiguration.class);
-        Example.Criteria criteria = example.createCriteria()
-                .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
-                .andEqualTo(MenuConfiguration.MENU_TYPE, 0)
-                .andIsNull(MenuConfiguration.PARENT_ID);
-        menuCondition(bean, criteria);
-        example.orderBy(MenuConfiguration.SORT).asc();
-        List<MenuConfiguration> menuConfigurations = iMenuConfigurationMapper.selectByExample(example);
-        for (MenuConfiguration menuConfiguration : menuConfigurations) {
-            ConstructionByWorkerIdBean.BigListBean bigListBean = new ConstructionByWorkerIdBean.BigListBean();
-            bigListBean.setName(menuConfiguration.getName());
-            List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> listMap = new ArrayList<>();
-            example = new Example(MenuConfiguration.class);
-            criteria = example.createCriteria()
-                    .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
-                    .andEqualTo(MenuConfiguration.MENU_TYPE, 0)
-                    .andEqualTo(MenuConfiguration.PARENT_ID, menuConfiguration.getId());
-            if (hf!=null&&hf.getWorkSteta() == 2) {//完工了屏蔽完工禁止显示的
-                criteria.andEqualTo(MenuConfiguration.SHOW_TYPE, 1);
-            }
-//            if (hf.getWorkType() != 4) {//未支付屏蔽未支付禁止显示的
-//                criteria.andEqualTo(MenuConfiguration.SHOW_PAYMENT, 1);
-//            }
-           /* if (house.getDecorationType() == 2) {//如果是自带设计不查询量房
-                criteria.andNotEqualTo(MenuConfiguration.TYPE, 2);
-            }*/
-            //如果已确认过装修信息，则显示量房按钮update fzh 2019/12/14
-            /*ServerResponse serverResponse = quantityRoomService.isConfirmAddress(house.getId());
-            if (serverResponse.getResultObj() != null) {
-                String obj = serverResponse.getResultObj().toString();//0:未确认地址，1：已经确认地址
-                if ("1".equals(obj)) {//如果未确认过地址，则显示确认地址按钮，精算师上传地址
-                    criteria.andNotEqualTo(MenuConfiguration.TYPE, 2);
-                }
-            }*/
-            menuCondition(bean, criteria);
-            example.orderBy(MenuConfiguration.SORT).asc();
-            List<MenuConfiguration> menuConfigurations2 = iMenuConfigurationMapper.selectByExample(example);
-            for (MenuConfiguration configuration : menuConfigurations2) {
-                int profession;
-                switch (bean.getWorkerType()) {//0:大管家；1：工匠；2：设计师；3：精算师
-                    case 0:
-                        profession = 2;//0:设计师；1：精算师；2：大管家；3：工匠
-                        break;
-                    case 1:
-                        profession = 3;//0:设计师；1：精算师；2：大管家；3：工匠
-                        break;
-                    case 2:
-                        profession = 0;//0:设计师；1：精算师；2：大管家；3：工匠
-                        break;
-                    default:
-                        profession = 1;//0:设计师；1：精算师；2：大管家；3：工匠
-                        break;
-                }
-                configuration.initPath(imageAddress, webAddress, house.getId(), hf==null?null:hf.getId(), profession);
-                ConstructionByWorkerIdBean.BigListBean.ListMapBean mapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
-                mapBean.setName(configuration.getName());
-                mapBean.setUrl(configuration.getUrl());
-                mapBean.setImage(configuration.getImage());
-                mapBean.setType(configuration.getType());
-                listMap.add(mapBean);
-            }
-            if (listMap.size() > 0) {
-                bigListBean.setListMap(listMap);
+        ConstructionByWorkerIdBean.BigListBean bigListBean = new ConstructionByWorkerIdBean.BigListBean();
+        bigListBean.setName("我的工具");
+        if(workerType==1){//设计师菜单
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress,bigListBean.sheJi));
+            bigList.add(bigListBean);
+        } else
+        if(workerType==2){//精算师菜单
+            if(house.getDecorationType()==1) {//远程设计菜单
+                bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.jingSuanYc));
                 bigList.add(bigListBean);
             }
+            if(house.getDecorationType()==2) {//自带设计菜单
+                bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.jingSuanZd));
+                bigList.add(bigListBean);
+            }
+        } else
+        if(workerType==3){//大管家菜单
+            Example example = new Example(SiteMemo.class);
+            example.createCriteria().andEqualTo(SiteMemo.TYPE, 1).andEqualTo(SiteMemo.HOUSE_ID, house.getId())
+                    .andCondition(" DATE_FORMAT(create_date, '%x年-第%v周' ) = DATE_FORMAT( SYSDATE(), '%x年-第%v周' ) ");
+            Integer num =iSiteMemoMapper.selectCountByExample(example);//本周是否有周计划
+            if(num>0){//是否设置了本周计划
+                bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.daGuanJiaY));
+                bigList.add(bigListBean);
+            }else{
+                bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.daGuanJiaN));
+                bigList.add(bigListBean);
+            }
+            //工地记录菜单
+            ConstructionByWorkerIdBean.BigListBean bigListBean2 = new ConstructionByWorkerIdBean.BigListBean();
+            bigListBean2.setName("工地记录");
+            bigListBean2.setListMap(bigListBean2.getMenus(imageAddress, bigListBean2.daGuanJiaG));
+            bigList.add(bigListBean2);
+        }else{//工匠菜单
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.gongJiang));
+            bigList.add(bigListBean);
         }
         bean.setBigList(bigList);//添加菜单到返回体中
     }
 
-    /**
-     * 设置菜单查询条件
-     */
-    private void menuCondition(ConstructionByWorkerIdBean bean, Example.Criteria criteria) {
-        switch (bean.getWorkerType()) {//0:大管家；1：工匠；2：设计师；3：精算师
-            case 0:
-                criteria.andEqualTo(MenuConfiguration.SHOW_HOUSEKEEPER, 1);
-                break;
-            case 1:
-                criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
-                break;
-            case 2:
-                criteria.andEqualTo(MenuConfiguration.SHOW_DESIGNER, 1);
-                break;
-            default:
-                criteria.andEqualTo(MenuConfiguration.SHOW_ACTUARIES, 1);
-                break;
-        }
-    }
+
 
     /**
      * 获取已得钱和还可得钱

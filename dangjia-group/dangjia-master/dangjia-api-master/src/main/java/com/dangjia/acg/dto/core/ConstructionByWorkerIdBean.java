@@ -1,8 +1,11 @@
 package com.dangjia.acg.dto.core;
 
+import com.dangjia.acg.util.Utils;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +62,8 @@ public class ConstructionByWorkerIdBean {
     private Integer trialNumber;//审核次数
     private Integer node;//工序申请节点  1-工匠发起 2-大管家审核通过 3-业主审核通过
 
-
+    private Integer houseWorkerType;//0:装修单，1:体验单，2，维修单
+    private String houseWorkerId;//装修单ID
     private Integer retentionType;//0-需缴纳质保金 1-不缴纳质保金
 
     private String businessId;//业务id
@@ -67,13 +71,72 @@ public class ConstructionByWorkerIdBean {
     public static class BigListBean {
         private String name;
         private List<ListMapBean> listMap;
+        public static  String[] sheJi=new String[]{"MT0009","MT0001","MT0003"};//设计师菜单
+        public static  String[] jingSuanYc=new String[]{"MT0009","MT0001","MT0002","MT0003"};//精算师菜单(远程设计)
+        public static  String[] jingSuanZd=new String[]{"MT0001","MT0002","MT0003"};//精算师菜单(自带设计)
+        public static  String[] daGuanJiaN=new String[]{"MT0001","MT0002","MT0003","MT0004","MT0005","MT0006","MT0007","MT0008"};//大管家菜单(未周计划)
+        public static  String[] daGuanJiaY=new String[]{"MT0001","MT0002","MT0003","MT0004","MT0005","MT0006","MT0007"};//大管家菜单(已周计划)
+        public static  String[] daGuanJiaG=new String[]{"MH0001","MH0002","MH0003"};//大管家菜单(工地记录)
+        public static  String[] gongJiang=new String[]{"MT0001","MT0002","MT0003","MT0004","MT0005","MT0006","MT0007","MH0003"};//工匠菜单
+        private HashMap<String, ListMapBean> beanBut = new HashMap<String, ListMapBean>(){
+            {
+                put("MT0001",  new ListMapBean("施工图","iconWork/menus/home_icon_shigongtu@2x.png","","MT0001"));
+                put("MT0002",  new ListMapBean("精算","iconWork/menus/home_icon_jingsuan@2x.png","","MT0002"));
+                put("MT0003",  new ListMapBean("通讯录","iconWork/menus/home_icon_txl@2x.png","","MT0003"));
+                put("MT0004",  new ListMapBean("备忘录","iconWork/menus/home_icon_memo@2x.png","","MT0004"));
+                put("MT0005",  new ListMapBean("装修日历","iconWork/menus/home_icon_zxrili@2x.png","","MT0005"));
+                put("MT0006",  new ListMapBean("要货","iconWork/menus/home_icon_yaohuo@2x.png","","MT0006"));
+                put("MT0007",  new ListMapBean("收货","iconWork/menus/home_icon_shth@2x.png","","MT0007"));
+                put("MT0008",  new ListMapBean("周计划","iconWork/menus/zxy_icon_weekplan@2x.png","","MT0008"));
+                put("MT0009",  new ListMapBean("量房","iconWork/menus/zxy_icon_liangfang@2x.png","","MT0009"));
 
+                put("MH0001",  new ListMapBean("业主仓库","iconWork/menus/zxy_icon_cangku@2x.png","","MH0001"));
+                put("MH0002",  new ListMapBean("要补退记录","iconWork/menus/zxy_icon_record@2x.png","","MH0002"));
+                put("MH0003",  new ListMapBean("审核记录","iconWork/menus/zxy_icon_audit@2x.png","","MH0003"));
+            }
+        };
+        public  List<ListMapBean> getMenus(String imageAddress,String[] menusCodes){
+            this.listMap=new LinkedList<>();
+            for (String menusCode : menusCodes) {
+                ListMapBean listMapBean=beanBut.get(menusCode);
+                listMapBean.setImage(Utils.getImageAddress(imageAddress, listMapBean.getImage()));
+                this.listMap.add(listMapBean);
+            }
+            return this.listMap;
+        }
         @Data
         public static class ListMapBean {
+            public ListMapBean() {
+            }
+            public ListMapBean(String name,String image,String url,String type) {
+                this.name =name;
+                this.image = image;
+                this.url= url;
+                this.type= type;
+            }
             private String image;//按钮图标
             private String name;//按钮名称
             private String url;
-            private int type;//0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图
+            /**
+             *  施工首页-菜单按钮类型说明
+             *
+             *  我的工具：
+             *      MT0001:施工图
+             *      MT0002:精算
+             *      MT0003:通讯录
+             *      MT0004:备忘录
+             *      MT0005:装修日历
+             *      MT0006:要货
+             *      MT0007:收获
+             *      MT0008:周计划
+             *      MT0009:量房
+             *
+             *  工地记录：
+             *      MH0001:业主仓库
+             *      MH0002:要补退记录
+             *      MH0003:审核记录
+             */
+            private String type;//0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图
             private int state;//0无 1有点
             private int number;//点数量
         }

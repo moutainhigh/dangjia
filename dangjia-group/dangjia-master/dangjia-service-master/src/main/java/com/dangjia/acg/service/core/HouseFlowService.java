@@ -405,8 +405,10 @@ public class HouseFlowService {
                     allgrabBean.setSquare( (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
                     allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
-                    Double totalPrice = maintenanceRecordProductMapper.queryTotalPriceByRecordId(record.getId(),1);
-                    allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+                    Double totalPrice = maintenanceRecordProductMapper.getTotalPriceByRecordId(record.getId(),1);
+                    if(totalPrice!=null) {
+                        allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+                    }
                     grabList.add(allgrabBean);
                 }
             }
@@ -468,8 +470,11 @@ public class HouseFlowService {
             allgrabBean.setOrderType(0);
             allgrabBean.setSquare( (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
             allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
-            Double totalPrice = maintenanceRecordProductMapper.queryTotalPriceByRecordId(record.getId(),1);
-            allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+            Double totalPrice = maintenanceRecordProductMapper.getTotalPriceByRecordId(record.getId(),1);
+            allgrabBean.setWorkertotal("¥0");//工钱
+            if(totalPrice!=null) {
+                allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+            }
             //2.查询业主提交的维保信息
             Map<String,Object> dataMap=new HashMap<>();
             dataMap.put("maintenaceRecoreInfo",maintenanceRecordService.getMaintenaceRecordInfo(record.getId(),3));

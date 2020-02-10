@@ -157,15 +157,28 @@
         group by mr.worker_type_id,cwt.`name`,cwt.image
     </select>
 
-     <!-- 查询已支付的维保商品费用-->
+    <!-- 查询已支付的维保商品费用-->
     <select id="queryTotalPriceByRecordId" resultType="java.lang.Double">
         SELECT
-          sum(mrp.total_price) totalPrice
+        sum(mrp.total_price) totalPrice
         FROM
-          dj_maintenance_record_product mrp
+        dj_maintenance_record_product mrp
         WHERE
-            mrp.maintenance_record_id = #{maintenanceRecordId}
+        mrp.maintenance_record_id = #{maintenanceRecordId}
         AND mrp.pay_state = 2
+        <if test="null!=maintenanceRecordType and ''!=maintenanceRecordType">
+            AND mrp.maintenance_product_type =#{maintenanceRecordType}
+        </if>
+    </select>
+    <!-- 查询未支付的维保商品费用-->
+    <select id="getTotalPriceByRecordId" resultType="java.lang.Double">
+        SELECT
+        sum(mrp.total_price) totalPrice
+        FROM
+        dj_maintenance_record_product mrp
+        WHERE
+        mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.pay_state = 1
         <if test="null!=maintenanceRecordType and ''!=maintenanceRecordType">
             AND mrp.maintenance_product_type =#{maintenanceRecordType}
         </if>

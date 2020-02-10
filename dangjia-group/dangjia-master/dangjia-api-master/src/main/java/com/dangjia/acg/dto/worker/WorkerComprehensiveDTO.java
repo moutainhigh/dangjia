@@ -36,6 +36,7 @@ public class WorkerComprehensiveDTO {
 
 
 	public BigDecimal getOverall() {
+		overall=new BigDecimal(0);
 		overall=overall.add(praiseRate==null?new BigDecimal(0):praiseRate);
 		overall=overall.add(approved==null?new BigDecimal(0):approved);
 		overall=overall.add(attendance==null?new BigDecimal(0):attendance);

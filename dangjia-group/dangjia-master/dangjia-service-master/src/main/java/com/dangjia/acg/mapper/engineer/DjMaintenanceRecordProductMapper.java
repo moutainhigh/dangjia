@@ -55,6 +55,13 @@ public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRe
      * @return
      */
     Double queryTotalPriceByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType);
+    /**
+     * 查询维保未支付的商品费用
+     * @param maintenanceRecordId
+     * @param maintenanceRecordType
+     * @return
+     */
+    Double getTotalPriceByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType);
 
     /**
      * 查询工匠所得工钱
