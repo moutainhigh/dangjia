@@ -89,4 +89,9 @@ public class DjSupplier extends BaseEntity {
     @ApiModelProperty("滞留金")
     private Double retentionMoney;
 
+    @Column(name = "transportation_cost")
+    @Desc(value = "每单收取运费")
+    @ApiModelProperty("每单收取运费")
+    private Double transportationCost;
+
 }
