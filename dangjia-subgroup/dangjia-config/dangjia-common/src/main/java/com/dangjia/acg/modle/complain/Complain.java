@@ -4,6 +4,7 @@ import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -126,6 +127,11 @@ public class Complain extends BaseEntity {
     @Desc(value = "实际报销金额")
     @ApiModelProperty("实际报销金额")
     private Double actualMoney;
+
+    @Column(name = "application_status")
+    @Desc(value = "申请身份：1工匠，2业主，3店铺，4供应商")
+    @ApiModelProperty("申请身份：1工匠，2业主，3店铺，4供应商")
+    private Integer applicationStatus;
 
 
 }

@@ -24,6 +24,9 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
     Double getOrderSplitPrice(@Param("orderSplitId")String orderSplitId);
     Double getSplitDeliverSellPrice(@Param("splitDeliverId")String splitDeliverId);
 
+    //查询当前订单下的总收货量，计算运费
+    Double getOrderSplitReceiverNum(@Param("splitDeliverId")String splitDeliverId);
+
 
     void setSupplierId(@Param("id") String id, @Param("splitDeliverId") String splitDeliverId);
 

@@ -20,6 +20,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		where
 	        split_deliver_id = #{splitDeliverId}
 	</select>
+    <select id="getOrderSplitReceiverNum" resultType="java.lang.Double">
+	    select
+		    sum(IFNULL(receive,num)) receive
+		from dj_deliver_order_split_item
+		where
+	        split_deliver_id = #{splitDeliverId}
+	</select>
+
 
     <update id="setSupplierId" >
         update dj_deliver_order_split_item
@@ -295,9 +303,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             t1.is_non_platform_supplier isNonPlatformSupplier,
             t1.`name` supName,
             t1.telephone,
-            t1.transportation_cost transportationCost,
-            sum(t.sup_cost*t.num) totalPrice,
+            t1.transportation_cost supTransportationCost,
+            sum(t.sup_cost*t.num) supTotalPrice,
             sum(t.sup_stevedorage_cost) supStevedorageCost,
+            sum(t.price*t.num) totalPrice,
+            sum(t.transportation_cost) totalTransportationCost,
+            sum(t.stevedorage_cost) totalStevedorageCost,
             max(IFNULL(t.is_delivery_install,'0')) isDeliveryInstall
         FROM
             dj_deliver_order_split_item t,

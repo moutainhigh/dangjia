@@ -9,6 +9,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
@@ -33,6 +34,8 @@ import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,14 +55,14 @@ import java.util.List;
 @Service
 public class SplitDeliverService {
 
+    private static Logger logger = LoggerFactory.getLogger(SplitDeliverService.class);
+
     @Autowired
     private ISplitDeliverMapper splitDeliverMapper;
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
     private ConfigUtil configUtil;
-    @Autowired
-    private ForMasterAPI forMasterAPI;
     @Autowired
     private IWarehouseMapper warehouseMapper;
     @Autowired
@@ -220,47 +223,34 @@ public class SplitDeliverService {
             splitDeliver.setRecTime(new Date());
             splitDeliver.setModifyDate(new Date());//收货时间
             orderSplitItemMapper.affirmSplitDeliver(splitDeliverId);
-            double applyMoney = 0d;
             /*第二步：统计收货数量*/
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            Double totalReceiverNum=orderSplitItemMapper.getOrderSplitReceiverNum(splitDeliver.getOrderSplitId());//查询当前收货单下的总收货量
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                applyMoney += orderSplitItem.getSupCost() * orderSplitItem.getReceive();
-
+                //将发货单的运费平摊到每一个明细上去
+                orderSplitItem.setReceive(orderSplitItem.getNum());//收获量改为发货量
+                orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(splitDeliver.getDeliveryFee(),totalReceiverNum),orderSplitItem.getReceive()));
+                orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);//修改对应的运费，搬运费
             }
-            splitDeliver.setApplyMoney(applyMoney);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
 
             //第三步:订单钱存入店铺账号余额，记录对应的流水信息
-           if (!CommonUtil.isEmpty(splitDeliver.getStorefrontId()))
-               {
-                   /**
-                    * 根据店铺ID,修改店铺的钱，记录对应的流水信息
-                    * @param storefrontId 店铺ID
-                    * @param orderId 订单ID
-                    * @param money 钱数，若为扣减，则为负数
-                    * @param state 0订单收入,1提现,2自定义增加金额,3自定义减少金额
-                    * @param orderId 订单ID
-                    * @param remark 流水记录说明（如：退货退款，自动扣减或店铺同意退货，扣减）
-                    * @param userId 当前操用人（若系统自动生成，则为SYSTEM);
-                    * @return
-                    */
+           if (!CommonUtil.isEmpty(splitDeliver.getStorefrontId())){
                     masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), house.getId(),
-                            0, splitDeliver.getNumber(), applyMoney,"确认收货流水记录", operator.getId());
-               }
-            //第四步：要货单对应的订单明细是否确认收货，以及主订单明细是否收货。 通过房子id+商品id关联
-
+                            0, splitDeliver.getId(), splitDeliver.getTotalAmount(),"确认收货流水记录", operator.getId());
+           }
             //第五步：给业主发送短信
             configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料已收货", String.format
                     (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("操作失败",e);
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }

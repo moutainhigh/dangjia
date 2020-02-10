@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.deliver;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -30,5 +31,7 @@ public class SplitDeliverDetailDTO {
     private Integer shippingState;
     private Integer applyState;
     private String houseId;
+    private Integer complainStatus;// 部分收货申诉状态，0未处理，1已认可部分收货，2已申请平台申诉，3平台申诉已通过，4平台申诉被驳回
+
     private List<OrderSplitItemDTO> orderSplitItemList;
 }
