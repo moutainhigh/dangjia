@@ -23,6 +23,7 @@ public class AllgrabBean {
     private Integer orderType;//0=无 1=新单 2=二手
     private String houseMember;//	业主名称
     private String workerTypeId;//	工种类型的id
+    private String workerTypeName;//	工种类型的id
     private String workertotal;//价格
     private Date releaseTime;//发布时间
     private String butType;//按钮状态  0=抢单  1=已被抢单（灰色）

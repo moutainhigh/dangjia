@@ -14,7 +14,6 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.AllgrabBean;
-import com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO;
 import com.dangjia.acg.dto.group.GroupDTO;
 import com.dangjia.acg.dto.pay.WorkerDTO;
 import com.dangjia.acg.mapper.core.*;
@@ -439,8 +438,10 @@ public class HouseFlowService {
         if(type==1){
             Order order =  orderMapper.selectByPrimaryKey(houseFlowId);
             MemberAddress memberAddress=iMasterMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
             allgrabBean.setHouseFlowId(order.getId());
             allgrabBean.setWorkerTypeId(member.getWorkerTypeId());
+            allgrabBean.setWorkerTypeName(workerType.getName());
             allgrabBean.setCreateDate(order.getCreateDate());
             allgrabBean.setHouseName(memberAddress.getAddress());
             allgrabBean.setType(type);
@@ -530,7 +531,8 @@ public class HouseFlowService {
             }
             example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
-
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            allgrabBean.setWorkerTypeName(workerType.getName());
             allgrabBean.setWorkerTypeId(houseFlow.getWorkerTypeId());
             allgrabBean.setHouseFlowId(houseFlow.getId());
             allgrabBean.setCreateDate(houseFlow.getCreateDate());
