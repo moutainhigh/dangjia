@@ -19,6 +19,28 @@
             over_protection over_protection,
             pay_state payState
     </sql>
+
+    <select id="getBudgetOrderDetailByInFo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+       SELECT
+            mrp.maintenance_record_id orderId,
+            mrp.id orderItemId,
+            mrp.house_id houseId,
+            p.image,
+            p.product_name productName,
+            mrp.price,
+            mrp.total_price totalPrice,
+            mrp.shop_count shopCount,
+            p.prod_template_id productTemplateId,
+            mrp.product_id productId,
+            mrp.maintenance_record_id businessId
+        FROM
+            dj_maintenance_record_product mrp
+        INNER JOIN dj_basics_storefront_product p ON p.id = mrp.product_id
+        WHERE
+            mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.pay_state = 2
+        and mrp.maintenance_product_type = 1
+    </select>
     <select id="queryDjMaintenanceRecordProductList"
             resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO">
         SELECT

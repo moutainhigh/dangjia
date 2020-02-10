@@ -2,8 +2,7 @@ package com.dangjia.acg.mapper.engineer;
 
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO;
-import com.dangjia.acg.dto.product.StorefrontProductDTO;
-import com.dangjia.acg.modle.complain.Complain;
+import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import org.apache.ibatis.annotations.Param;
@@ -23,6 +22,8 @@ import java.util.Map;
 public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRecordProduct> {
 
     List<DjMaintenanceRecordProductDTO> queryDjMaintenanceRecordProductList(@Param("maintenanceRecordId") String maintenanceRecordId);
+    List<HouseOrderDetailDTO> getBudgetOrderDetailByInFo(@Param("maintenanceRecordId") String maintenanceRecordId);
+
 
     /**
      * 判断当前业主维保时所选的商品
