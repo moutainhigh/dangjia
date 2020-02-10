@@ -124,7 +124,7 @@ public class CraftsmanConstructionService {
      * @param userToken userToken
      * @return 施工页面信息
      */
-    public ServerResponse getConstructionView(HttpServletRequest request, String userToken, String houseId,Integer type) {
+    public ServerResponse getConstructionView(HttpServletRequest request, String userToken, String houseWorkerId) {
         ConstructionByWorkerIdBean bean = new ConstructionByWorkerIdBean();//公用返回体
         Object object = getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -134,24 +134,16 @@ public class CraftsmanConstructionService {
         if (worker.getWorkerType() == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "请上传资料");
         }
-        if(CommonUtil.isEmpty(houseId)){
-            object = getHouseWorker(bean, worker.getId());
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            HouseWorker hw = (HouseWorker) object;
-            houseId=hw.getHouseId();
-            if(type==null){
-                type=hw.getType();
-            }
+        HouseWorker hw = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
+        if (hw == null) {
+            return ServerResponse.createByErrorMessage("订单不存在");
         }
-        if(type==0) {
-            House house = houseMapper.selectByPrimaryKey(houseId);//查询房产信息
+        if(hw.getType()==0) {
+            House house = houseMapper.selectByPrimaryKey(hw.getHouseId());//查询房产信息
             if (house == null) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "房产信息不存在");
             }
-            HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(house.getId(), worker.getWorkerTypeId(), null);
-            HouseFlow hf = houseFlowMapper.getByWorkerTypeId(houseId, hw.getWorkerTypeId());//查询自己的任务状态
+            HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hw.getHouseId(), hw.getWorkerTypeId());//查询自己的任务状态
             if (hf == null) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "没有查到该任务");
             }
@@ -177,14 +169,14 @@ public class CraftsmanConstructionService {
                 case 2://精算师
                     return getActuariesBean(request, bean, hw, worker, house, hf);
                 case 3://大管家
-                    return getHousekeeperBean(request, bean, hw, worker, house, hf, type);
+                    return getHousekeeperBean(request, bean, hw, worker, house, hf, hw.getType());
                 default://工匠
-                    return getCraftsmanBean(request, bean, hw, worker, house, hf, type);
+                    return getCraftsmanBean(request, bean, hw, worker, house, hf, hw.getType());
             }
         }
 
-        if(type==1) {
-            Order order = iOrderMapper.selectByPrimaryKey(houseId);//查询房产信息
+        if(hw.getType()==1) {
+            Order order = iOrderMapper.selectByPrimaryKey(hw.getBusinessId());//查询房产信息
             if (order == null) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "体验单不存在");
             }
@@ -195,7 +187,7 @@ public class CraftsmanConstructionService {
             }
             bean.setWorkerType(worker.getWorkerType());//0:大管家；1：工匠；2：设计师；3：精算师
             Example example = new Example(HouseWorker.class);
-            example.createCriteria().andCondition(" work_type in(6,8) ").andEqualTo(HouseWorker.TYPE,type).andEqualTo(HouseWorker.BUSINESS_ID,order.getId());
+            example.createCriteria().andCondition(" work_type in(6,8) ").andEqualTo(HouseWorker.TYPE,hw.getType()).andEqualTo(HouseWorker.BUSINESS_ID,order.getId());
             List<HouseWorker> houseWorkers= houseWorkerMapper.selectByExample(example);
             HouseWorker houseWorker=null;
             if(houseWorkers.size()>0){
@@ -216,7 +208,7 @@ public class CraftsmanConstructionService {
                 bean.setUserId(houseMember.getId());//
             }
             //查询我的单
-            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(order.getId(), null,type);
+            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(order.getId(), null,hw.getType());
             List<Map<String, Object>> mapDataList = new ArrayList<>();
             if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);

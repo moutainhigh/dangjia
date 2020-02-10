@@ -104,9 +104,8 @@ public interface HouseWorkerAPI {
     @ApiOperation(value = "根据工人查询自己的施工界面", notes = "根据工人查询自己的施工界面")
     ServerResponse getConstructionByWorkerId(@RequestParam("request") HttpServletRequest request,
                                              @RequestParam("userToken") String userToken,
-                                             @RequestParam("houseId") String houseId,
-                                             @RequestParam("cityId") String cityId,
-                                             @RequestParam("type") Integer type);
+                                             @RequestParam("houseWorkerId") String houseWorkerId,
+                                             @RequestParam("cityId") String cityId);
 
     @PostMapping("app/core/houseWorker/getConstructionInfo")
     @ApiOperation(value = "大管家查看工地进度详情", notes = "大管家查看工地进度详情")

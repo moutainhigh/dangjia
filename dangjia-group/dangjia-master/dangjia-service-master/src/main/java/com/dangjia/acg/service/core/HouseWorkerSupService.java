@@ -191,6 +191,9 @@ public class HouseWorkerSupService {
                         allgrabBean.setWorkertotal("¥0");//工钱
                         double totalPrice = houseWorker.getPrice().doubleValue();
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+
+                        List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(houseFlow.getHouseId());//查询所有待大管家审核
+                        allgrabBean.setTaskNumber(supervisorCheckList == null ? 0 : supervisorCheckList.size());//任务数量
                     }
                     grabList.add(allgrabBean);
                 }

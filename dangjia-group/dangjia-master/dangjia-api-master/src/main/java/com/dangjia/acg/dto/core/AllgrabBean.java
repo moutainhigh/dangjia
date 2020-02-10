@@ -29,6 +29,7 @@ public class AllgrabBean {
     private Long countDownTime;//倒计时（可抢单时间）
     private Date createDate;// 创建日期
 
+    private int taskNumber;//任务数量
 
     private Integer schedulingDay;//预计工期天数
     private Date startDate;//管家排期的开工开始时间
