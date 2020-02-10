@@ -160,9 +160,7 @@ public class DjBasicsProductTemplateService {
     public DjBasicsProductTemplate queryDataByProductId(String productId) {
         try {
             StorefrontProduct storefrontProduct=iGoodsStorefrontProductMapper.selectByPrimaryKey(productId);
-            Example example = new Example(DjBasicsProductTemplate.class);
-            example.createCriteria().andEqualTo(DjBasicsProductTemplate.ID,storefrontProduct.getProdTemplateId());
-            DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(example); //根据商品编号查询对象
+            DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId()); //根据商品编号查询对象
             return djBasicsProduct;
         } catch (Exception e) {
             return null;

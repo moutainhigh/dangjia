@@ -74,7 +74,7 @@ public class FillWorkerService {
                 pageResult = new PageInfo(budgetWorkerList);
                 for (BudgetMaterial budgetWorker : budgetWorkerList) {
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
-                    DjBasicsProductTemplate workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getProductId());
+                    DjBasicsProductTemplate workerGoods=djBasicsProductService.queryDataByProductId(budgetWorker.getProductId());  //通过商品id去关联规格
                     String valueIdArr=workerGoods.getValueIdArr();
                     if(!CommonUtil.isEmpty(valueIdArr)){
                         String valueNameArr=djBasicsProductService.getNewValueNameArr(valueIdArr);

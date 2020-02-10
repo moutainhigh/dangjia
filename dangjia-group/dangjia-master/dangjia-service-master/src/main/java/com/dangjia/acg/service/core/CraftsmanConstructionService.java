@@ -9,12 +9,17 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.core.*;
+import com.dangjia.acg.dto.core.ButtonListBean;
+import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
+import com.dangjia.acg.dto.core.NodeDTO;
+import com.dangjia.acg.dto.core.Task;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
 import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
@@ -29,6 +34,7 @@ import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -41,6 +47,7 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.design.QuantityRoomService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import org.apache.commons.lang3.StringUtils;
@@ -77,6 +84,14 @@ public class CraftsmanConstructionService {
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IHouseMapper houseMapper;
+
+    @Autowired
+    private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
+    @Autowired
+    private DjMaintenanceRecordProductMapper djMaintenanceRecordProductMapper;
+    @Autowired
+    private WorkerTypeSafeOrderService workerTypeSafeOrderService;
+
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -134,7 +149,16 @@ public class CraftsmanConstructionService {
         if (worker.getWorkerType() == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "请上传资料");
         }
-        HouseWorker hw = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
+        HouseWorker hw =null;
+        if(CommonUtil.isEmpty(houseWorkerId)) {
+            object = getHouseWorker(bean, worker.getId());
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            hw = (HouseWorker) object;
+        }else{
+            hw = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
+        }
         if (hw == null) {
             return ServerResponse.createByErrorMessage("订单不存在");
         }
@@ -230,6 +254,51 @@ public class CraftsmanConstructionService {
             }
             bean.setDataList(mapDataList);
             return  ServerResponse.createBySuccess("获取施工列表成功", bean);
+        }
+
+        if(hw.getType()==2) {
+            DjMaintenanceRecord record=djMaintenanceRecordMapper.selectByPrimaryKey(hw.getBusinessId());
+            House house = houseMapper.selectByPrimaryKey(record.getHouseId());
+            bean.setHouseId(house.getId());
+            bean.setHouseName(house.getHouseName());
+            bean.setWorkerType(worker.getWorkerType());//0:大管家；1：工匠；2：设计师；3：精算师
+            bean.setHouseFlowId(hw.getId());
+            if(hw.getWorkType()==6){
+                bean.setAlreadyMoney(new BigDecimal(0));//已得钱
+                bean.setAlsoMoney(hw.getPrice());//已得钱
+            }else{
+                bean.setAlreadyMoney(hw.getPrice());//已得钱
+                bean.setAlsoMoney(new BigDecimal(0));//还可得钱
+            }
+            Member houseMember = memberMapper.selectByPrimaryKey(house.getMemberId());//业主
+            if (houseMember != null) {
+                bean.setHouseMemberName(houseMember.getNickName());//业主名称
+                bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
+                bean.setUserId(houseMember.getId());//
+            }
+            //查询我的单
+            List<HouseOrderDetailDTO> houseOrderDetailDTOList = djMaintenanceRecordProductMapper.getBudgetOrderDetailByInFo(record.getId());
+            List<Map<String, Object>> mapDataList = new ArrayList<>();
+            if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
+                    setProductInfo(houseOrderDetailDTO, address);
+                    Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
+                    dataMap.put("totalNodeNumber",1);//总节点数
+                    if(hw!=null && hw.getWorkType()==6) {
+                        dataMap.put("completedNodeNumber",0);//已完成节点数(已完成)
+                        dataMap.put("labelName", "未装修");//节点名称
+                    }else{
+                        dataMap.put("completedNodeNumber",1);//已完成节点数(已完成)
+                        dataMap.put("labelName", "已完成");//节点名称
+                    }
+                    mapDataList.add(dataMap);
+                }
+                //获取维保id
+                bean.setBusinessId(hw.getBusinessId());
+            }
+            setMenus(bean, house, null);
+            bean.setDataList(mapDataList);
         }
         return ServerResponse.createBySuccessMessage("OK" );
     }
@@ -584,7 +653,7 @@ public class CraftsmanConstructionService {
                     wfr.setButtonTitle("未进场");//按钮提示
                     wfr.setState(0);
                 } else if (hfl.getWorkType() < 4) {//待抢单和已抢单
-                    wfr.setButtonTitle("待确认工匠");//按钮提示
+                    wfr.setButtonTitle("正在进场");//按钮提示
                     wfr.setState(1);
                 } else if (hfl.getWorkType() == 5) {//业主待支付
                     wfr.setButtonTitle("等待业主支付");//按钮提示
@@ -925,7 +994,7 @@ public class CraftsmanConstructionService {
                     .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
                     .andEqualTo(MenuConfiguration.MENU_TYPE, 0)
                     .andEqualTo(MenuConfiguration.PARENT_ID, menuConfiguration.getId());
-            if (hf.getWorkSteta() == 2) {//完工了屏蔽完工禁止显示的
+            if (hf!=null&&hf.getWorkSteta() == 2) {//完工了屏蔽完工禁止显示的
                 criteria.andEqualTo(MenuConfiguration.SHOW_TYPE, 1);
             }
 //            if (hf.getWorkType() != 4) {//未支付屏蔽未支付禁止显示的
@@ -961,7 +1030,7 @@ public class CraftsmanConstructionService {
                         profession = 1;//0:设计师；1：精算师；2：大管家；3：工匠
                         break;
                 }
-                configuration.initPath(imageAddress, webAddress, house.getId(), hf.getId(), profession);
+                configuration.initPath(imageAddress, webAddress, house.getId(), hf==null?null:hf.getId(), profession);
                 ConstructionByWorkerIdBean.BigListBean.ListMapBean mapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
                 mapBean.setName(configuration.getName());
                 mapBean.setUrl(configuration.getUrl());
@@ -1213,7 +1282,7 @@ public class CraftsmanConstructionService {
                 wfr.setButtonTitle("未进场");//按钮提示
                 wfr.setState(0);
             } else if (hfl.getWorkType() < 4) {//待抢单和已抢单
-                wfr.setButtonTitle("待确认工匠");//按钮提示
+                wfr.setButtonTitle("正在进场");//按钮提示
                 wfr.setState(1);
             } else if (hfl.getWorkType() == 5) {//业主待支付
                 wfr.setButtonTitle("等待业主支付");//按钮提示
