@@ -125,6 +125,7 @@ public class HouseWorkerSupService {
             if (houseWorkers != null)
                 for (HouseWorker houseWorker : houseWorkers) {
                     AllgrabBean allgrabBean = new AllgrabBean();
+                    allgrabBean.setHouseWorkerId(houseWorker.getId());
                     if(houseWorker.getType()==1){ //体验单
                         Order order =  orderMapper.selectByPrimaryKey(houseWorker.getBusinessId());
                         MemberAddress memberAddress=iMasterMemberAddressMapper.selectByPrimaryKey(order.getAddressId());

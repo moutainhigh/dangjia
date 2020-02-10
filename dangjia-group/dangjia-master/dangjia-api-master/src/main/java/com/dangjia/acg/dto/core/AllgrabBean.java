@@ -1,7 +1,6 @@
 package com.dangjia.acg.dto.core;
 
 import lombok.Data;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.util.Date;
 import java.util.List;
@@ -16,6 +15,7 @@ import java.util.List;
 @Data
 public class AllgrabBean {
     private String houseId;
+    private String houseWorkerId;
     private String houseName;
     private String houseFlowId;//任务id
     private String square;//面积

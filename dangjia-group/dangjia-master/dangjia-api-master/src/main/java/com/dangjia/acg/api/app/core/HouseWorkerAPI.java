@@ -188,7 +188,7 @@ public interface HouseWorkerAPI {
     @PostMapping("app/core/houseWorker/setSwitchHouseFlow")
     @ApiOperation(value = "切换工地", notes = "切换工地")
     ServerResponse setSwitchHouseFlow(@RequestParam("userToken") String userToken,
-                                      @RequestParam("houseFlowId") String houseFlowId);
+                                      @RequestParam("houseWorkerId") String houseWorkerId);
 
     @PostMapping("app/core/houseWorker/setSupervisorApply")
     @ApiOperation(value = "大管家申请验收", notes = "大管家申请验收")

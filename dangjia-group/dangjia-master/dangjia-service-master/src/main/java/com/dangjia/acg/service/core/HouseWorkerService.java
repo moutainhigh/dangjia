@@ -1456,13 +1456,12 @@ public class HouseWorkerService {
     /**
      * 切换工地
      */
-    public ServerResponse setSwitchHouseFlow(String userToken, String houseFlowId) {
+    public ServerResponse setSwitchHouseFlow(String userToken, String houseWorkerId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Member worker = (Member) object;
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andCondition("  work_type IN ( 1, 6 ) ")
@@ -1470,7 +1469,7 @@ public class HouseWorkerService {
                     .andEqualTo(HouseWorker.WORKER_TYPE, worker.getWorkerType());
             List<HouseWorker> listHouseWorker = houseWorkerMapper.selectByExample(example);
             for (HouseWorker houseWorker : listHouseWorker) {
-                if (houseWorker.getHouseId().equals(houseFlow.getHouseId())) {//选中的任务isSelect改为1
+                if (houseWorker.getId().equals(houseWorkerId)) {//选中的任务isSelect改为1
                     houseWorker.setIsSelect(1);
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 } else {//其他改为0

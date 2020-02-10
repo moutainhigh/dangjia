@@ -134,6 +134,17 @@ public class CraftsmanConstructionService {
         if (worker.getWorkerType() == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "请上传资料");
         }
+        if(CommonUtil.isEmpty(houseId)){
+            object = getHouseWorker(bean, worker.getId());
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            HouseWorker hw = (HouseWorker) object;
+            houseId=hw.getHouseId();
+            if(type==null){
+                type=hw.getType();
+            }
+        }
         if(type==0) {
             House house = houseMapper.selectByPrimaryKey(houseId);//查询房产信息
             if (house == null) {
@@ -578,18 +589,32 @@ public class CraftsmanConstructionService {
                     }
                 }
                 if (hfl.getWorkType() < 2) {//未发布工种抢单
+                    wfr.setButtonTitle("未进场");//按钮提示
                     wfr.setState(0);
                 } else if (hfl.getWorkType() < 4) {//待抢单和已抢单
+                    wfr.setButtonTitle("待确认工匠");//按钮提示
+                    wfr.setState(1);
+                } else if (hfl.getWorkType() == 5) {//业主待支付
+                    wfr.setButtonTitle("等待业主支付");//按钮提示
                     wfr.setState(1);
                 } else if (hfl.getWorkSteta() == 3) {
+                    wfr.setButtonTitle("去交底");
                     wfr.setState(2);
                 } else if ((hfl.getWorkType() == 4 && hfl.getWorkSteta() == 0) || hfl.getWorkSteta() == 4) {
+                    wfr.setButtonTitle("施工中");
                     wfr.setState(3);
                 } else if (hfl.getWorkSteta() == 1) {
+                    wfr.setButtonTitle("已阶段完工");
                     wfr.setState(4);
                 } else if (hfl.getWorkSteta() == 5) {
+                    wfr.setButtonTitle("收尾施工中");
                     wfr.setState(5);
                 } else if (hfl.getWorkSteta() == 2 || hfl.getWorkSteta() == 6) {
+                    if (hfl.getWorkSteta() == 2) {
+                        wfr.setButtonTitle("已整体完工");
+                    } else {
+                        wfr.setButtonTitle("提前竣工");
+                    }
                     wfr.setState(6);
                 }
                 wfr.setTotalNodeNumber(7);

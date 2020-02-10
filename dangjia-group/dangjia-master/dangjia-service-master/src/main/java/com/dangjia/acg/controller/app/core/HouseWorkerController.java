@@ -132,8 +132,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setSwitchHouseFlow(String userToken, String houseFlowId) {
-        return houseWorkerService.setSwitchHouseFlow(userToken, houseFlowId);
+    public ServerResponse setSwitchHouseFlow(String userToken, String houseWorkerId) {
+        return houseWorkerService.setSwitchHouseFlow(userToken, houseWorkerId);
     }
 
     /**

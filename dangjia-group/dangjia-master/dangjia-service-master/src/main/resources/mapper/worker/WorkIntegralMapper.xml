@@ -270,7 +270,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 							) b
 					) c
 			) punctual
-
+			limit 1
 	</select>
 
 </mapper>
