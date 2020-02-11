@@ -601,11 +601,13 @@
               dj_deliver_order_split tcount
             where (tcount.house_id = h.id OR tcount.address_id = ord.address_id)
             and tcount.apply_status='1'
+            and tcount.storefront_id=#{storefrontId}
         ) AS wait,
         (SELECT COUNT(1) FROM
              dj_deliver_order_split tcount
             where (tcount.house_id = h.id OR tcount.address_id = ord.address_id)
             and tcount.apply_status='2'
+            and tcount.storefront_id=#{storefrontId}
         ) AS sent
         FROM
         dj_deliver_order ord

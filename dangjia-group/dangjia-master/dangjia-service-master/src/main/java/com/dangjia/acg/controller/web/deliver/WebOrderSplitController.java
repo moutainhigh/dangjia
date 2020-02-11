@@ -70,6 +70,24 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      * @param orderSplitId 要货单ID
      * @param splitDeliverId 发货单ID(重新发货时为必填）
      * @param splitItemList [{id:”aa”,supplierId:”xx”},{id:”bb”,supplierId:”xx”}] 分发明细 id要货单明细ID，supplierId 供应商ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse sentSupplier(String orderSplitId,String splitDeliverId, String splitItemList) {
+        try{
+            return orderSplitService.sentSupplier(orderSplitId,splitDeliverId, splitItemList);
+        }catch (Exception e){
+            logger.error("发送供应商失败：",e);
+            return ServerResponse.createByErrorMessage("发送给供应商失败");
+        }
+
+    }
+
+    /**
+     * 分发供应商--生成发货单
+     * @param orderSplitId 要货单ID
+     * @param splitDeliverId 发货单ID(重新发货时为必填）
      * @param cityId 城市ID
      * @param userId 用户ID
      * @param installName 安装人姓名
@@ -80,17 +98,18 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse sentSupplier(String orderSplitId,String splitDeliverId, String splitItemList,
+    public ServerResponse saveSentSupplier(String orderSplitId,String splitDeliverId,
                                        String cityId, String userId, String installName
-                                       , String installMobile, String deliveryName, String deliveryMobile) {
+            , String installMobile, String deliveryName, String deliveryMobile) {
         try{
-            return orderSplitService.sentSupplier(orderSplitId,splitDeliverId, splitItemList, cityId, userId, installName, installMobile, deliveryName, deliveryMobile);
+            return orderSplitService.saveSentSupplier(orderSplitId,splitDeliverId, cityId, userId, installName, installMobile, deliveryName, deliveryMobile);
         }catch (Exception e){
             logger.error("发送供应商失败：",e);
             return ServerResponse.createByErrorMessage("发送给供应商失败");
         }
 
     }
+
 
     /**
      * 部分收货申诉接口

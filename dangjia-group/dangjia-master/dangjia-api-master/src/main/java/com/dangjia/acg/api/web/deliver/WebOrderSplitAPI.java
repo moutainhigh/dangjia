@@ -43,12 +43,7 @@ public interface WebOrderSplitAPI {
      * @param orderSplitId 要货单ID
      * @param splitDeliverId 发货单ID(重新发货时为必填）
      * @param splitItemList [{id:”aa”,supplierId:”xx”},{id:”bb”,supplierId:”xx”}] 分发明细 id要货单明细ID，supplierId 供应商ID
-     * @param cityId 城市ID
-     * @param userId 用户ID
-     * @param installName 安装人姓名
-     * @param installMobile 安装人电话
-     * @param deliberyName 送货人姓名
-     * @param deliveryMobile 送货人电话
+
      * @return
      */
     @PostMapping("web/deliver/orderSplit/sentSupplier")
@@ -56,7 +51,13 @@ public interface WebOrderSplitAPI {
     ServerResponse sentSupplier(
             @RequestParam("orderSplitId") String orderSplitId,
             @RequestParam("splitDeliverId") String splitDeliverId,
-            @RequestParam("splitItemList") String splitItemList,
+            @RequestParam("splitItemList") String splitItemList);
+
+    @PostMapping("web/deliver/orderSplit/saveSentSupplier")
+    @ApiOperation(value = "分发供应商--生成发货单", notes = "分发供应商--生成发货单")
+    ServerResponse saveSentSupplier(
+            @RequestParam("orderSplitId") String orderSplitId,
+            @RequestParam("splitDeliverId") String splitDeliverId,
             @RequestParam("cityId") String cityId,
             @RequestParam("userId") String userId,
             @RequestParam("installName") String installName,

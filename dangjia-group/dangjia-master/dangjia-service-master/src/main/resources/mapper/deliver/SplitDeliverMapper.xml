@@ -126,7 +126,8 @@
             ds.id supId,
             ds.NAME supName,
             0 supPrice,
-            0 supPorterage
+            0 supPorterage,
+            0 transportationCost
         FROM
             dj_supplier ds
         WHERE

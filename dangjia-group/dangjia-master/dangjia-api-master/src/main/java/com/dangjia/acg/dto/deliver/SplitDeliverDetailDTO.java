@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.deliver;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,12 +27,14 @@ public class SplitDeliverDetailDTO {
     private Double totalPrice;//商品总价
     private Double deliveryFee;//运费
     private Double stevedorageCost;//搬运费
-    private Double applyMoney;//结算总价
+    private Double applyMoney;//结算总价（成本总价）
     private int size;//件
-    private Integer shippingState;
+    private Integer shippingState;//0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算,6店铺撤回(只待发货才能撤回)7-待安装 8-已完成）9-拒绝收货 10 -待评价
     private Integer applyState;
     private String houseId;
+    private Date createDate;//分发时间
     private Integer complainStatus;// 部分收货申诉状态，0未处理，1已认可部分收货，2已申请平台申诉，3平台申诉已通过，4平台申诉被驳回
-
+    private String floor;//楼层
+    private Integer elevator;//是否电梯房：0:否，1：是
     private List<OrderSplitItemDTO> orderSplitItemList;
 }
