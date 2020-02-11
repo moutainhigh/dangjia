@@ -221,8 +221,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 									r.shop_count + r.repair_count
 								) > 0
 								AND y.type IN (2, 3)
-								GROUP BY
-									y.id
 							) a,
 							(
 								SELECT

@@ -278,8 +278,8 @@ public class TaskService {
                     reMark = "5";
                 }
                 task.setImage(imageAddress + "icon/burengong.png");
-                task.setHtmlUrl(address + String.format(DjConstants.GJPageAddress.BTPEOPLE + "&workerTypeId=%s&changeOrderId=%s&reMark=%s&houseId=%s",
-                        userToken, house.getCityId(), "填写变更数量", changeOrder.getWorkerTypeId(), changeOrder.getId(), reMark, changeOrder.getHouseId()));
+//                task.setHtmlUrl(address + String.format(DjConstants.GJPageAddress.BTPEOPLE + "&workerTypeId=%s&changeOrderId=%s&reMark=%s&houseId=%s",
+//                        userToken, house.getCityId(), "填写变更数量", changeOrder.getWorkerTypeId(), changeOrder.getId(), reMark, changeOrder.getHouseId()));
                 task.setType(2);
                 task.setTaskId("");
                 taskList.add(task);
