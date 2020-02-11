@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.dto.storefront.*;
@@ -16,6 +18,7 @@ import com.dangjia.acg.dto.supplier.AccountFlowRecordDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTOList;
 import com.dangjia.acg.mapper.storefront.*;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
@@ -83,7 +86,47 @@ public class StorefrontService {
 
     @Autowired
     private IStorefrontMendDeliverMapper iStorefrontMendDeliverMapper;
+    @Autowired
+    private StoreConfigService storeConfigService;
+    @Autowired
+    private IShopSupplierMapper iShopSupplierMapper;
 
+    /**
+     * 获取需缴纳的滞留金
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param type 类型
+     * @return 类型：1店铺，2供应商
+     */
+    public ServerResponse getNeedRetentionMoney(String userId,String cityId,Integer type){
+        Double needRetentionMoney=0d;
+        Double totalRetentionMoney=2000d;
+        Example example;
+        if(type==1){//店铺
+            Storefront storefront =storefrontService.queryStorefrontByUserID(userId,cityId);
+            Config config=storeConfigService.selectConfigInfoByParamKey("SHOP_RETENTION_MONEY");//获取滞留金缴纳金额
+            if(config!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(config.getParamValue())){
+                totalRetentionMoney=Double.parseDouble(config.getParamValue());
+            }
+            if(storefront!=null&&storefront.getRetentionMoney()<totalRetentionMoney){
+                needRetentionMoney= MathUtil.sub(totalRetentionMoney,storefront.getRetentionMoney());
+            }
+        }else if(type==2){//供应商
+            example=new Example(DjSupplier.class);
+            example.createCriteria().andEqualTo(DjSupplier.CITY_ID,cityId)
+                    .andEqualTo(DjSupplier.USER_ID,userId)
+                    .andEqualTo(DjSupplier.DATA_STATUS,0);
+            DjSupplier djSupplier = iShopSupplierMapper.selectOneByExample(example);
+            Config config=storeConfigService.selectConfigInfoByParamKey("STORE_RETENTION_MONEY");//获取滞留金缴纳金额
+            if(config!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(config.getParamValue())){
+                totalRetentionMoney=Double.parseDouble(config.getParamValue());
+            }
+            if(djSupplier!=null&&djSupplier.getRetentionMoney()<totalRetentionMoney){
+                needRetentionMoney= MathUtil.sub(totalRetentionMoney,djSupplier.getRetentionMoney());
+            }
+        }
+        return ServerResponse.createBySuccess("查询成功",needRetentionMoney);
+    }
     /**
      * 根据用户Id查询店铺信息
      * @param userId
@@ -351,14 +394,11 @@ public class StorefrontService {
 
     /**
      *店铺-我的钱包
-     * @param request
-     * @param pageDTO
-     * @param searchKey
      * @param userId
      * @param cityId
      * @return
      */
-    public ServerResponse queryStorefrontWallet(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
+    public ServerResponse queryStorefrontWallet( String userId, String cityId) {
         try {
             Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
             if (storefront == null) {

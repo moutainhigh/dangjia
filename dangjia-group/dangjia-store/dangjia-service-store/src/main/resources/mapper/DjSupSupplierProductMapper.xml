@@ -145,17 +145,16 @@
             dj_basics_storefront_product bsp
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
-        WHERE 1 = 1
-        AND bsp.data_status = 0
+        WHERE bsp.data_status = 0
         AND bsp.is_shelf_status=1
-        <if test="null!=shopId and ''!=shopId">
-            and bsp.storefront_id = #{shopId}
-        </if>
-        <if test="null!=productIds and productIds.size>0">
-            and bsp.id not in
-            <foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
-                #{item}
-            </foreach>
+        and bsp.storefront_id = #{shopId}
+        and not EXISTS (select 1 from dj_sup_application_product ap where ap.data_status=0 and ap.sup_id=#{supId} and ap.shop_id=#{shopId} and ap.product_id=bsp.id and ap.application_status in('0','1','2'))
+        <if test="null!=keyWord and ''!=keyWord">
+            and (
+            bsp.product_name LIKE CONCAT('%',#{keyWord},'%') or
+            bg.name LIKE CONCAT('%',#{keyWord},'%') or
+            bsp.market_name LIKE CONCAT('%',#{keyWord},'%')
+            )
         </if>
     </select>
 

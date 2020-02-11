@@ -13,6 +13,7 @@ import com.dangjia.acg.service.storefront.StorefrontService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +31,19 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Autowired
     private StorefrontService storefrontService;
+
+    /**
+     * 获取需缴纳的滞留金
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param type 类型
+     * @return 类型：1店铺，2供应商
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getNeedRetentionMoney(String userId,String cityId,Integer type){
+        return storefrontService.getNeedRetentionMoney(userId, cityId,type);
+    }
 
     @Override
     @ApiMethod
@@ -82,8 +96,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontWallet(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
-        return storefrontService.queryStorefrontWallet(request,pageDTO,searchKey,userId,cityId);
+    public ServerResponse queryStorefrontWallet( String userId, String cityId) {
+        return storefrontService.queryStorefrontWallet(userId,cityId);
     }
 
     @Override

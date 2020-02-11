@@ -455,10 +455,14 @@ public class DjSupplierServices {
                 return ServerResponse.createByErrorMessage("提现金额不正确");
             }
             MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(djSupplier.getUserId());
+            Double totalRetentionMoney=2000d;
             Example example=new Example(Config.class);
-            example.createCriteria().andEqualTo(Config.PARAM_KEY,"RETENTION_MONEY");
+            example.createCriteria().andEqualTo(Config.PARAM_KEY,"STORE_RETENTION_MONEY");
             Config config = iStoreConfigMapper.selectOneByExample(example);
-            if(djSupplier.getRetentionMoney()<Double.parseDouble(config.getParamValue())) {
+            if(config!=null&&StringUtils.isNotEmpty(config.getParamValue())){
+                totalRetentionMoney=Double.parseDouble(config.getParamValue());
+            }
+            if(djSupplier.getRetentionMoney()<totalRetentionMoney) {
                 return ServerResponse.createByErrorMessage("滞留金不足,请先缴清滞留金");
             }
             if (!DigestUtils.md5Hex(payPassword).equals(mainUser.getPayPassword())) {
