@@ -16,6 +16,7 @@ public class   OrderSplitItemDTO {
     private Double num;//本次发货数量
     private Double cost;// 成本价
     private Double supCost;//选择的供应商提供的单价
+    private Double supPorterage;//选择的搬运费单价
     private Double supStevedorageCost;//搬运费
     private Double supTotalPrice;//供应商品总价
     private String unitName;//单位

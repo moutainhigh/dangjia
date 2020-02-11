@@ -44,6 +44,7 @@ import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -232,6 +233,13 @@ public class OrderSplitService {
                         sd.setSupTotalPrice(MathUtil.mul(sd.getSupCost(),sd.getNum()));//供应商品总价
                         sd.setTotalPrice(MathUtil.mul(sd.getPrice(),sd.getNum()));//销售商品总价
                     }
+                    //查询供应商的搬运费
+                    Double porterage=orderSplitItemMapper.getSupPorterage(splitDeliver.getStorefrontId(),splitDeliver.getSupplierId(),sd.getProductId());
+                    if(porterage!=null){
+                        sd.setSupPorterage(porterage);
+                    }else{
+                        sd.setSupPorterage(0d);
+                    }
 
                     //查询商品单位
                     Unit unit=masterProductTemplateService.getUnitInfoByTemplateId(sd.getProductTemplateId());
@@ -418,7 +426,7 @@ public class OrderSplitService {
                 String supName=(String)supMap.get("supName");//供应商名称
                 String telephone=(String)supMap.get("telephone");//电话
                 String isDeliveryInstall=(String)supMap.get("isDeliveryInstall");//发货与安装/施工分开(1是，0否）
-                Double supTransportationCost=(Double)supMap.get("supTransportationCost");//每单收取运费,供应商
+                Double supTransportationCost=((BigDecimal)supMap.get("supTransportationCost")).doubleValue();//每单收取运费,供应商
                 Double totalPrice=(Double)supMap.get("totalPrice");//销售商品总额
                 Double totalTransportationCost=(Double)supMap.get("totalTransportationCost");//销售商品运费
                 Double totalStevedorageCost=(Double)supMap.get("totalStevedorageCost");//销售商品搬运费

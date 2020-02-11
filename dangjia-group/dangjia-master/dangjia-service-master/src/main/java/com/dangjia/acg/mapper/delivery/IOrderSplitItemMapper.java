@@ -71,4 +71,6 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
     //修改发货单号到发货单明细表中去
     void updateSplitDeliverIdByInfo(@Param("splitDeliverId") String splitDeliverId,@Param("orderSplitId") String orderSplitId,
                                     @Param("supplierId") String supplierId,@Param("oldSplitDeliverId") String oldSplitDeliverId);
+
+    Double getSupPorterage(@Param("storefrontId") String storefrontId,@Param("supId") String supId,@Param("productId") String productId);
 }

@@ -127,7 +127,8 @@
             ds.NAME supName,
             0 supPrice,
             0 supPorterage,
-            0 transportationCost
+            0 transportationCost,
+            ds.is_non_platform_supplier isNonPlatformSupplier
         FROM
             dj_supplier ds
         WHERE
@@ -272,7 +273,8 @@
 
     <select id="getsupplierByProduct" resultType="java.util.Map">
         SELECT
-            ds.id supId,ds.name supName,dsp.price supPrice,dsp.porterage supPorterage,ds.transportation_cost transportationCost
+            ds.id supId,ds.name supName,dsp.price supPrice,dsp.porterage supPorterage,ds.transportation_cost transportationCost,
+            ds.is_non_platform_supplier isNonPlatformSupplier
         FROM
             dj_supplier ds,
             dj_sup_application_product dsp
