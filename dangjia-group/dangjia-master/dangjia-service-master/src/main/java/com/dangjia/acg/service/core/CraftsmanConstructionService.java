@@ -203,6 +203,8 @@ public class CraftsmanConstructionService {
         }
 
         if(hw.getType()==1) {
+
+            List<ButtonListBean> buttonList = new ArrayList<>();
             Order order = iOrderMapper.selectByPrimaryKey(hw.getBusinessId());//查询房产信息
             if (order == null) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "体验单不存在");
@@ -246,6 +248,7 @@ public class CraftsmanConstructionService {
                     if(houseWorker!=null && houseWorker.getWorkType()==6) {
                         dataMap.put("completedNodeNumber",0);//已完成节点数(已完成)
                         dataMap.put("labelName", "待验房");//节点名称
+                        buttonList.add(Utils.getButton("上传验房结果", 7001));
                     }else{
                         dataMap.put("completedNodeNumber",1);//已完成节点数(已完成)
                         dataMap.put("labelName", "已完成");//节点名称
@@ -256,10 +259,12 @@ public class CraftsmanConstructionService {
                 bean.setBusinessId(houseOrderDetailDTOList.get(0).getBusinessId());
             }
             bean.setDataList(mapDataList);
+            bean.setButtonList(buttonList);
             return  ServerResponse.createBySuccess("获取施工列表成功", bean);
         }
 
         if(hw.getType()==2) {
+            List<ButtonListBean> buttonList = new ArrayList<>();
             DjMaintenanceRecord record=djMaintenanceRecordMapper.selectByPrimaryKey(hw.getBusinessId());
             House house = houseMapper.selectByPrimaryKey(record.getHouseId());
             bean.setHouseId(house.getId());
@@ -279,6 +284,18 @@ public class CraftsmanConstructionService {
                 bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
                 bean.setUserId(houseMember.getId());//
             }
+            List<Map<String,Object>> workerTypeList=djMaintenanceRecordProductMapper.selectWorkerTypeListById(record.getId(),2);//查询是否已添加勘查费用的商品
+            if(record.getState()==null&&workerTypeList.size()>0&&worker.getWorkerType()==3){//大管家勘查
+                buttonList.add(Utils.getButton("上传勘查结果", 6001));
+            }
+            if(record.getState()==null) {//工匠开工/结束
+                buttonList.add(Utils.getButton("提前结束", 6002));
+                buttonList.add(Utils.getButton("已确认可开工", 6003));
+            }
+            if(record.getState()==5) {//工匠验收、报销
+                buttonList.add(Utils.getButton("申请报销", 6004));
+                buttonList.add(Utils.getButton("申请验收", 6005));
+            }
             //查询我的单
             List<HouseOrderDetailDTO> houseOrderDetailDTOList = djMaintenanceRecordProductMapper.getBudgetOrderDetailByInFo(record.getId());
             List<Map<String, Object>> mapDataList = new ArrayList<>();
@@ -290,7 +307,7 @@ public class CraftsmanConstructionService {
                     dataMap.put("totalNodeNumber",1);//总节点数
                     if(hw!=null && hw.getWorkType()==6) {
                         dataMap.put("completedNodeNumber",0);//已完成节点数(已完成)
-                        dataMap.put("labelName", "未装修");//节点名称
+                        dataMap.put("labelName", "未维修");//节点名称
                     }else{
                         dataMap.put("completedNodeNumber",1);//已完成节点数(已完成)
                         dataMap.put("labelName", "已完成");//节点名称
@@ -301,7 +318,9 @@ public class CraftsmanConstructionService {
                 bean.setBusinessId(hw.getBusinessId());
             }
             setMenus(bean, house, -1);
+
             bean.setDataList(mapDataList);
+            bean.setButtonList(buttonList);
             return  ServerResponse.createBySuccess("获取施工列表成功", bean);
         }
         return ServerResponse.createBySuccessMessage("OK" );

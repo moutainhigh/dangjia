@@ -119,7 +119,7 @@ public class ConstructionByWorkerIdBean {
             private String url;
             /**
              *  施工首页-菜单按钮类型说明
-             *
+             *      其他：1000：URL跳转
              *  我的工具：
              *      MT0001:施工图
              *      MT0002:精算
