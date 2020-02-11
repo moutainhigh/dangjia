@@ -142,6 +142,8 @@ public class MemberService {
 
 
     @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+    @Autowired
     private ConfigRuleUtilService configRuleUtilService;
 
 
@@ -186,6 +188,12 @@ public class MemberService {
                 HouseDistribution distribution = iHouseDistributionMapper.selectByPrimaryKey(id);
                 if (distribution != null) {
                     mobile = distribution.getPhone();
+                }
+                break;
+            case "6":
+                MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(id);
+                if (memberAddress != null) {
+                    mobile = memberAddress.getMobile();
                 }
                 break;
             default:

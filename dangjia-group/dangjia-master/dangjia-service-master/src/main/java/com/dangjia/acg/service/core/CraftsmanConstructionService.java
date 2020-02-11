@@ -1261,7 +1261,7 @@ public class CraftsmanConstructionService {
                 wfr.setButtonTitle("等待业主支付");//按钮提示
                 wfr.setState(1);
             } else if (hfl.getWorkSteta() == 3) {
-                footButton.add(Utils.getButton("生成二维码", 3010));
+                footButton.add(Utils.getButton("生成二维码", 3020));
                 wfr.setButtonTitle("去交底");
                 wfr.setState(2);
             } else if ((hfl.getWorkType() == 4 && hfl.getWorkSteta() == 0) || hfl.getWorkSteta() == 4) {
