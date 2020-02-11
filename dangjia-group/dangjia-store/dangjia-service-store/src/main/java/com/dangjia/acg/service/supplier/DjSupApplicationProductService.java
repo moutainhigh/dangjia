@@ -8,13 +8,16 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
 import com.dangjia.acg.dto.sup.SupplierDTO;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
+import com.dangjia.acg.mapper.IStoreConfigMapper;
 import com.dangjia.acg.mapper.storefront.IStoreStorefrontMapper;
 import com.dangjia.acg.mapper.supplier.*;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
@@ -60,6 +63,8 @@ public class DjSupApplicationProductService {
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
+    @Autowired
+    private IStoreConfigMapper iStoreConfigMapper;
 
 
     /**
@@ -73,8 +78,15 @@ public class DjSupApplicationProductService {
             DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(supId);
             if (null == djSupplier)
                 return ServerResponse.createByErrorMessage("供应商不存在");
-            if (null == djSupplier.getRetentionMoney() || !(djSupplier.getRetentionMoney() > 0))
-                return ServerResponse.createByErrorMessage("请先交纳滞留金",djSupplier.getRetentionMoney());
+            Double totalRetentionMoney=2000d;
+            Example example=new Example(Config.class);
+            example.createCriteria().andEqualTo(Config.PARAM_KEY,"STORE_RETENTION_MONEY");
+            Config config = iStoreConfigMapper.selectOneByExample(example);
+            if(config!=null&&StringUtils.isNotEmpty(config.getParamValue())){
+                totalRetentionMoney=Double.parseDouble(config.getParamValue());
+            }
+            if (null == djSupplier.getRetentionMoney() || djSupplier.getRetentionMoney() <totalRetentionMoney)
+                return ServerResponse.createByErrorMessage("请先交纳滞留金", MathUtil.sub(totalRetentionMoney,djSupplier.getRetentionMoney()));
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str -> {
                 JSONObject obj = (JSONObject) str;
@@ -345,13 +357,13 @@ public class DjSupApplicationProductService {
     public ServerResponse queryNotForTheGoods(String supId, String shopId, PageDTO pageDTO, String keyWord) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "0,1,2", keyWord);
+            /*List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "0,1,2", keyWord);
             //Stream表达式取出已选商品的id
             List<String> productIds = djSupSupplierProductDTOS.stream()
                     .map(DjSupSupplierProductDTO::getProductId)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList());*/
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS1 = djSupSupplierProductMapper.queryNotForTheGoods(shopId, productIds);
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS1 = djSupSupplierProductMapper.queryNotForTheGoods(shopId,supId,keyWord);
             djSupSupplierProductDTOS1.forEach(djSupSupplierProductDTO -> {
                 djSupSupplierProductDTO.setImage(imageAddress + djSupSupplierProductDTO.getImage());
             });

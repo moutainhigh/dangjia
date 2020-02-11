@@ -35,7 +35,8 @@ public interface DjSupSupplierProductMapper extends Mapper<DjSupSupplierProduct>
                                                            @Param("searchKey") String searchKey);
 
     List<DjSupSupplierProductDTO> queryNotForTheGoods(@Param("shopId") String shopId,
-                                                      @Param("productIds") List<String> productIds);
+                                                      @Param("supId") String supId,
+                                                      @Param("keyWord") String keyWord);
 
 }
 

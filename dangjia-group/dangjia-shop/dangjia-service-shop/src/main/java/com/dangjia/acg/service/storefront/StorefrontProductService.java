@@ -14,6 +14,7 @@ import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
 import com.dangjia.acg.dto.storefront.*;
 import com.dangjia.acg.mapper.storefront.*;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
@@ -43,7 +44,7 @@ public class StorefrontProductService {
     private IStorefrontProductMapper istorefrontProductMapper;
 
     @Autowired
-    private DjBasicsProductAPI djBasicsProductAPI ;
+    private StoreConfigService storeConfigService ;
     @Autowired
     private ConfigUtil configUtil;
 
@@ -433,13 +434,17 @@ public class StorefrontProductService {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
             Storefront storefront=storefrontService.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
+            if(storefront==null){
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
-            //判断是否交了滞留金
-            Double retentionMoney=storefront.getRetentionMoney();
-            if (retentionMoney==0||retentionMoney<0)
+            Double totalRetentionMoney=2000d;
+            //判断滞留金是否达到需要缴纳的滞留金，若不够，则需要缴纳
+            Config config=storeConfigService.selectConfigInfoByParamKey("SHOP_RETENTION_MONEY");//获取滞留金缴纳金额
+            if(config!=null&&StringUtils.isNotEmpty(config.getParamValue())){
+                totalRetentionMoney=Double.parseDouble(config.getParamValue());
+            }
+            Double retentionMoney=storefront.getRetentionMoney();//当前店铺的滞留金
+            if (retentionMoney<totalRetentionMoney)
             {
                 return  ServerResponse.createByErrorMessage("请先缴纳滞留金",retentionMoney);
             }
@@ -477,9 +482,14 @@ public class StorefrontProductService {
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
-            //判断是否交了滞留金
-            Double retentionMoney=storefront.getRetentionMoney();
-            if (retentionMoney==0||retentionMoney<0)
+            Double totalRetentionMoney=2000d;
+            //判断滞留金是否达到需要缴纳的滞留金，若不够，则需要缴纳
+            Config config=storeConfigService.selectConfigInfoByParamKey("SHOP_RETENTION_MONEY");//获取滞留金缴纳金额
+            if(config!=null&&StringUtils.isNotEmpty(config.getParamValue())){
+                totalRetentionMoney=Double.parseDouble(config.getParamValue());
+            }
+            Double retentionMoney=storefront.getRetentionMoney();//当前店铺的滞留金
+            if (retentionMoney<totalRetentionMoney)
             {
                 return  ServerResponse.createByErrorMessage("请先缴纳滞留金",retentionMoney);
             }
