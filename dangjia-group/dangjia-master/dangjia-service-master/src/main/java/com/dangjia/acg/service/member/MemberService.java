@@ -158,7 +158,7 @@ public class MemberService {
      * 获取用户手机号
      *
      * @param id     来源ID
-     * @param idType 1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销
+     * @param idType 1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销, 6=用户地址
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
