@@ -60,10 +60,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ruking.Cheng
@@ -639,15 +636,12 @@ public class CraftsmanConstructionService {
                     WorkerComprehensiveDTO workerComprehensive = workIntegralMapper.getComprehensiveWorker(worker.getId());
                     wfr.setOverall(workerComprehensive.getOverall());
                     wfr.setRaiseRate(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
-                    example = new Example(HouseFlow.class);
-                    Example.Criteria criteria = example.createCriteria();
-                    criteria.andEqualTo(HouseFlow.WORKER_ID, wfr.getWorkerId());
-                    if (workerType.getType() == 3) {
-                        criteria.andEqualTo(HouseFlow.SUPERVISOR_START, 1);
-                    } else if (workerType.getType() != 1 && workerType.getType() != 2) {
-                        criteria.andCondition(" work_steta not in(0,3)");
-                    }
-                    Integer orderTakingNum = houseWorkerOrderMapper.selectCountByExample(example);
+                    example = new Example(HouseWorker.class);
+                    example.createCriteria()
+                            .andEqualTo(HouseWorker.WORKER_ID, wfr.getWorkerId())
+                            .andEqualTo(HouseWorker.TYPE,0)
+                            .andIn(HouseWorker.WORK_TYPE, Arrays.asList(1,6,8));
+                    Integer orderTakingNum = houseWorkerMapper.selectCountByExample(example);
                     wfr.setOrderTakingNum(orderTakingNum);
                     HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
                     if (todayStart == null) {//没有今日开工记录
@@ -1221,6 +1215,9 @@ public class CraftsmanConstructionService {
         wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
         wfr.setWorkerHead(imageAddress + worker2 == null ? "" :worker.getHead());
         wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
+        WorkerComprehensiveDTO workerComprehensive = workIntegralMapper.getComprehensiveWorker(worker.getId());
+        wfr.setOverall(workerComprehensive.getOverall());
+        wfr.setRaiseRate(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
         wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
         wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(houseId, worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
         wfr.setPatrolStandard("" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
