@@ -112,7 +112,8 @@
             address,
             check_people as checkPeople,
             telephone,
-            email
+            email,
+            transportation_cost transportationCost
         FROM dj_supplier
         where city_id=#{cityId}
         and user_id=#{userId}

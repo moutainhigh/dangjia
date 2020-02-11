@@ -155,34 +155,28 @@ public class DjSupplierServices {
      */
     public ServerResponse updateBasicInformation(DjSupplier djSupplier) {
         try {
+            if (CommonUtil.isEmpty(djSupplier.getName()))
+                return ServerResponse.createByErrorMessage("用户名不能为空");
+            if (CommonUtil.isEmpty(djSupplier.getTelephone()))
+                return ServerResponse.createByErrorMessage("电话号码不能为空");
+            if (CommonUtil.isEmpty(djSupplier.getAddress()))
+                return ServerResponse.createByErrorMessage("地址不能为空");
+            if (CommonUtil.isEmpty(djSupplier.getEmail()))
+                return ServerResponse.createByErrorMessage("邮件不能为空");
+            if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
+                return ServerResponse.createByErrorMessage("联系人不能为空");
+
             Example example = new Example(DjSupplier.class);
             example.createCriteria().andEqualTo(DjSupplier.USER_ID, djSupplier.getUserId())
                     .andEqualTo(DjSupplier.CITY_ID, djSupplier.getCityId())
                     .andEqualTo(DjSupplier.DATA_STATUS, 0);
-            if (djSupplierMapper.selectByExample(example).size() > 0) {
-                if (CommonUtil.isEmpty(djSupplier.getName()))
-                    return ServerResponse.createByErrorMessage("用户名不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getTelephone()))
-                    return ServerResponse.createByErrorMessage("电话号码不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getAddress()))
-                    return ServerResponse.createByErrorMessage("地址不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getEmail()))
-                    return ServerResponse.createByErrorMessage("邮件不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
-                    return ServerResponse.createByErrorMessage("联系人不能为空");
+            List<DjSupplier> djSupplierList=djSupplierMapper.selectByExample(example);
+            if (djSupplierList.size() > 0) {
+                DjSupplier djSupplier1=djSupplierList.get(0);
+                djSupplier.setId(djSupplier1.getId());
                 if (djSupplierMapper.updateByPrimaryKeySelective(djSupplier) > 0)
                     return ServerResponse.createBySuccessMessage("编辑成功");
             } else {
-                if (CommonUtil.isEmpty(djSupplier.getName()))
-                    return ServerResponse.createByErrorMessage("用户名不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getTelephone()))
-                    return ServerResponse.createByErrorMessage("电话号码不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getAddress()))
-                    return ServerResponse.createByErrorMessage("地址不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getEmail()))
-                    return ServerResponse.createByErrorMessage("邮件不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
-                    return ServerResponse.createByErrorMessage("联系人不能为空");
                 DjSupplier djSupplier1=new DjSupplier();
                 djSupplier.setId(djSupplier1.getId());
                 djSupplier.setSurplusMoney(0d);
@@ -192,7 +186,7 @@ public class DjSupplierServices {
                     return ServerResponse.createBySuccessMessage("编辑成功");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("编辑失败",e);
             return ServerResponse.createByErrorMessage("编辑失败");
         }
         return ServerResponse.createByErrorMessage("编辑失败");
