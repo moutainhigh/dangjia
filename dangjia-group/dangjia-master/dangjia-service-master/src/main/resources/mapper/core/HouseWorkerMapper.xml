@@ -36,6 +36,7 @@
         w.type,
         w.order_id as orderId,
         w.price
+
     </sql>
 
     <!-- 根据工人id查询所有房子任务-->
@@ -211,6 +212,7 @@
             ) fa ON fa.house_id = w.house_id
         </if>
         where w.worker_id = #{workerId}
+        and w.business_id is not null
         and w.work_type in(1,6)
         <if test="nameKey!=null and nameKey!=''">
             AND (
@@ -390,5 +392,117 @@
 		AND m.evaluation_score >= 60
 
     </select>
+
+
+    <!-- 抢单列表；装修、维保、体验-->
+    <select id="getGrabList" resultType="com.dangjia.acg.dto.core.AllgrabBean">
+        SELECT a.houseName,
+                a.butType,
+                a.workerTypeId,
+                a.houseFlowId,
+                a.createDate,
+                a.type,
+                a.orderType,
+                a.square,
+                a.houseMember,
+                a.workertotal
+         FROM (SELECT
+            IFNULL(
+                CONCAT(
+                    h.residential,
+                    IFNULL(h.building, '*'),
+                    '栋',
+                    IFNULL(CONCAT(h.unit, '单元'), ''),
+                    IFNULL(h.number, '*'),
+                    '号'
+                ),
+                a.address
+            ) houseName,
+            '0' butType,
+            f.worker_type_id workerTypeId,
+            f.id houseFlowId,
+            f.create_date createDate,
+            '0' type,
+            '0' orderType,
+            CONCAT(
+                IFNULL(h.square, '***'),
+                'm²'
+            ) square,
+            IFNULL(m.nick_name, m.`name`) houseMember,
+            f.work_price workertotal
+        FROM
+            `dj_core_house_flow` f
+        INNER JOIN dj_house h ON h.id = f.house_id
+        INNER JOIN dj_member_address a ON a.house_id = f.house_id
+        INNER JOIN dj_member m ON m.id = h.member_id
+        WHERE
+            f.`work_type` = '2'
+        AND f.`state` = '2'
+        AND f.`worker_type_id` = #{workerTypeId}
+        AND f.`city_id` = #{cityId}
+        UNION ALL
+            SELECT
+                a.address houseName,
+                '0' butType,
+                f.worker_type_id workerTypeId,
+                f.id houseFlowId,
+                f.create_date createDate,
+                '1' type,
+                '0' orderType,
+                '' square,
+                a.`name` houseMember,
+                f.total_amount workertotal
+            FROM
+                `dj_deliver_order` f
+            INNER JOIN dj_member_address a ON a.house_id = f.house_id
+            WHERE
+                (
+                    f.worker_id IS NULL
+                    OR f.worker_id = ''
+                )
+            AND f.type = '4'
+            AND f.order_status = '2'
+            AND f.`city_id` = #{cityId}
+            UNION ALL
+                SELECT
+                    CONCAT(
+                        h.residential,
+                        IFNULL(h.building, '*'),
+                        '栋',
+                        IFNULL(CONCAT(h.unit, '单元'), ''),
+                        IFNULL(h.number, '*'),
+                        '号'
+                    ) houseName,
+                    '0' butType,
+                    f.worker_type_id workerTypeId,
+                    f.id houseFlowId,
+                    f.create_date createDate,
+                    '2' type,
+                    '0' orderType,
+                    CONCAT(
+                        IFNULL(h.square, '***'),
+                        'm²'
+                    ) square,
+                    IFNULL(m.nick_name, m.`name`) houseMember,
+                    '0' workertotal
+                FROM
+                    `dj_maintenance_record` f
+                INNER JOIN dj_house h ON h.id = f.house_id
+                INNER JOIN dj_member m ON m.id = f.member_id
+                WHERE
+                <if test="workerType!=null and workerType==3">
+                    f.steward_id IS NULL
+                </if>
+                <if test="workerType!=null and workerType!=3">
+                    ( f.worker_member_id IS NULL  AND f.`worker_type_id` = #{workerTypeId} )
+                </if>
+                AND h.`city_id` = #{cityId}
+        ) a
+        <if test="type!=null and type!=''">
+            a.type = #{type}
+        </if>
+        ORDER BY a.createDate DESC
+    </select>
+
 </mapper>
 

@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.core;
 
+import com.dangjia.acg.dto.core.AllgrabBean;
 import com.dangjia.acg.dto.core.HouseWorkerDTO;
 import com.dangjia.acg.dto.house.MyHouseFlowDTO;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -53,5 +54,7 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
     int changeWorkerByHouseIdWorkerId(@Param("houseId") String houseId, @Param("workerId") String workerId);
 
     List<Map<String, Object>>  getSupWorkerConfInfo( @Param("locationx") String locationx, @Param("locationy") String locationy);
+    List<AllgrabBean>  getGrabList(@Param("workerTypeId") String workerTypeId, @Param("cityId") String cityId, @Param("workerType") Integer workerType, @Param("type") Integer type);
+
 
 }

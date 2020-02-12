@@ -93,7 +93,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			t1.product_type = 2
 		AND t1.house_id = #{houseId}
 		AND t4.worker_type_id =#{workerTypeId}
-		AND t5.id IS NULL
+		<if test="isAll==null or isAll==''">
+			AND t5.id IS NULL
+		</if>
+
 
 	</select>
 </mapper>

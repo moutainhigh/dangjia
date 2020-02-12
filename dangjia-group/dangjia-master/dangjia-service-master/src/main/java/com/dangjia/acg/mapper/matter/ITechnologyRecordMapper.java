@@ -25,6 +25,6 @@ public interface ITechnologyRecordMapper extends Mapper<TechnologyRecord> {
 
     int passNoTecRecord(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
 
-    List<TechnologyRecordDTO> selectWorkerProductInfo(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+    List<TechnologyRecordDTO> selectWorkerProductInfo(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId, @Param("isAll")String isAll);
 }
 
