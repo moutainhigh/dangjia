@@ -103,7 +103,12 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @Override
     @ApiMethod
     public ServerResponse operationStorefrontReflect(String userId, String cityId, String bankCard, Double surplusMoney, String payPassword) {
-        return storefrontService.operationStorefrontReflect( userId,  cityId,  bankCard,  surplusMoney,  payPassword) ;
+       try{
+           return storefrontService.operationStorefrontReflect( userId,  cityId,  bankCard,  surplusMoney,  payPassword) ;
+       } catch (Exception e) {
+           logger.error("店铺提现异常：", e);
+           return ServerResponse.createByErrorMessage("店铺提现异常");
+       }
     }
 
     @Override

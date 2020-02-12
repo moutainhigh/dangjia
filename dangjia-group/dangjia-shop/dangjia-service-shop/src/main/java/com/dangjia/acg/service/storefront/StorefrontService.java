@@ -428,54 +428,50 @@ public class StorefrontService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse operationStorefrontReflect(String userId, String cityId, String bankCard, Double surplusMoney, String payPassword) {
-        try {
-            AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
-            Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
-            if (surplusMoney > storefront.getSurplusMoney()) {
-                return ServerResponse.createByErrorMessage("现金额超过提现金额");
-            }
-            if (surplusMoney <= 0) {
-                return ServerResponse.createByErrorMessage("提现金额不正确");
-            }
-            MainUser mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
-            if (!DigestUtils.md5Hex(payPassword).equals(mainUser.getPayPassword())){
-                return ServerResponse.createByErrorMessage("密码错误");
-            }
-            //提现申请
-            WithdrawDeposit withdrawDeposit = new WithdrawDeposit();
-            withdrawDeposit.setMoney(new BigDecimal(surplusMoney));
-            withdrawDeposit.setName(storefront.getStorekeeperName());
-            withdrawDeposit.setWorkerId(mainUser.getId());
-            withdrawDeposit.setState(0);//0未处理,1同意 2不同意(驳回)
-            withdrawDeposit.setRoleType(5);//1：业主端  2 大管家 3：工匠端 4：供应商 5：店铺
-            withdrawDeposit.setCardNumber(bankCard);
-            BankCard bankCard1 = istorefrontWithdrawDepositMapper.queryBankCard(bankCard, mainUser.getId());
-            withdrawDeposit.setBankName(bankCard1.getBankName());
-            withdrawDeposit.setDataStatus(0);//数据状态 0=正常，1=删除
-            withdrawDeposit.setSourceId(storefront.getId());//来源id(供应商/店铺id)
-            istorefrontWithdrawDepositMapper.insert(withdrawDeposit);
-            //账号金额预扣
-            storefront.setTotalAccount(storefront.getTotalAccount()-surplusMoney);
-            storefront.setSurplusMoney(storefront.getSurplusMoney()-surplusMoney);
-            istorefrontMapper.updateByPrimaryKeySelective(storefront);
-            //生成流水
-            accountFlowRecord.setState(1);//0订单收入,1提现,2自定义增加金额,3自定义减少金额
-            accountFlowRecord.setHouseOrderId(withdrawDeposit.getId());
-            accountFlowRecord.setDefinedAccountId(storefront.getId());//自定义账户流水id
-            accountFlowRecord.setCreateBy(userId);
-            accountFlowRecord.setFlowType("1");//类型:（1店铺，2供应商）
-            accountFlowRecord.setMoney(surplusMoney);//本次金额
-            accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());//入账后金额
-            accountFlowRecord.setDefinedName("店铺提现：" + surplusMoney);//自定义流水说明
-            storefrontAccountFlowRecordMapper.insert(accountFlowRecord);
-            return ServerResponse.createBySuccessMessage("提现成功待处理");
-        } catch (Exception e) {
-            logger.error("店铺提现异常：", e);
-            return ServerResponse.createByErrorMessage("店铺提现异常");
+
+        AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
+        Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
+        if (storefront == null) {
+            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
         }
+        if (surplusMoney > storefront.getSurplusMoney()) {
+            return ServerResponse.createByErrorMessage("提现金额超过可提现金额");
+        }
+        if (surplusMoney <= 0) {
+            return ServerResponse.createByErrorMessage("提现金额不正确");
+        }
+        MainUser mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
+        if (!DigestUtils.md5Hex(payPassword).equals(mainUser.getPayPassword())){
+            return ServerResponse.createByErrorMessage("密码错误");
+        }
+        //提现申请
+        WithdrawDeposit withdrawDeposit = new WithdrawDeposit();
+        withdrawDeposit.setMoney(new BigDecimal(surplusMoney));
+        withdrawDeposit.setName(storefront.getStorekeeperName());
+        withdrawDeposit.setWorkerId(mainUser.getId());
+        withdrawDeposit.setState(0);//0未处理,1同意 2不同意(驳回)
+        withdrawDeposit.setRoleType(5);//1：业主端  2 大管家 3：工匠端 4：供应商 5：店铺
+        withdrawDeposit.setCardNumber(bankCard);
+        BankCard bankCard1 = istorefrontWithdrawDepositMapper.queryBankCard(bankCard, mainUser.getId());
+        withdrawDeposit.setBankName(bankCard1.getBankName());
+        withdrawDeposit.setDataStatus(0);//数据状态 0=正常，1=删除
+        withdrawDeposit.setSourceId(storefront.getId());//来源id(供应商/店铺id)
+        istorefrontWithdrawDepositMapper.insert(withdrawDeposit);
+        //账号金额预扣
+        storefront.setTotalAccount(storefront.getTotalAccount()-surplusMoney);
+        storefront.setSurplusMoney(storefront.getSurplusMoney()-surplusMoney);
+        istorefrontMapper.updateByPrimaryKeySelective(storefront);
+        //生成流水
+        accountFlowRecord.setState(1);//0订单收入,1提现,2自定义增加金额,3自定义减少金额
+        accountFlowRecord.setHouseOrderId(withdrawDeposit.getId());
+        accountFlowRecord.setDefinedAccountId(storefront.getId());//自定义账户流水id
+        accountFlowRecord.setCreateBy(userId);
+        accountFlowRecord.setFlowType("1");//类型:（1店铺，2供应商）
+        accountFlowRecord.setMoney(surplusMoney);//本次金额
+        accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());//入账后金额
+        accountFlowRecord.setDefinedName("店铺提现：" + surplusMoney);//自定义流水说明
+        storefrontAccountFlowRecordMapper.insert(accountFlowRecord);
+        return ServerResponse.createBySuccessMessage("提现申请成功");
     }
 
     /**
