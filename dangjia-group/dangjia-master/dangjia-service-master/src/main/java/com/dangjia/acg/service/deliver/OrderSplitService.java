@@ -244,7 +244,7 @@ public class OrderSplitService {
             }
             detailDTO.setSize(orderSplitItemList.size());
             List<Map<String,Object>> supItemList=orderSplitItemMapper.selectSupListBySplitId(splitDeliver.getOrderSplitId(),splitDeliverId);
-            if(supItemList!=null){
+            if(supItemList!=null&&supItemList.size()>0){
                 Map<String,Object> param=supItemList.get(0);
                 detailDTO.setApplyMoney((Double)param.get("applyMoney"));
                 detailDTO.setTotalAmount((Double)param.get("totalAmount"));
