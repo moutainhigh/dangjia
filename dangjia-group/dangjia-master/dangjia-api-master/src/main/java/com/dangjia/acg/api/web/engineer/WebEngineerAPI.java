@@ -114,6 +114,31 @@ public interface WebEngineerAPI {
                                 @RequestParam("houseId") String houseId,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 
+    /**
+     * 店铺--业主仓库列表（店铺汇总）
+     * @param request
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param addressId 地址ID
+     * @param storefrontId 店铺ID
+     * @param pageDTO 分页
+     * @return
+     */
+    @PostMapping(value = "web/engineer/getStorefrontWareHouse")
+    @ApiOperation(value = "业主仓库列表（店铺汇总）", notes = "仓库列表（店铺汇总）")
+    ServerResponse getStorefrontWareHouse(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("cityId") String cityId,
+                                @RequestParam("houseId") String houseId,
+                                @RequestParam("addressId") String addressId,
+                                @RequestParam("storefrontId") String storefrontId,
+                                @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @GetMapping("/web/engineer/exportStorefrontWareHouse")
+    @ApiOperation(value = "店铺--导出仓库", notes = "店铺--导出仓库", produces = "*/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream")
+    ServerResponse exportStorefrontWareHouse(@RequestParam("response") HttpServletResponse response, @RequestParam("houseId") String houseId,@RequestParam("addressId") String addressId,
+                                             @RequestParam("storefrontId") String storefrontId,@RequestParam("userName") String userName,@RequestParam("address") String address);
+
+
     @GetMapping("/web/engineer/exportWareHouse")
     @ApiOperation(value = "导出仓库", notes = "导出仓库", produces = "*/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream")
     ServerResponse exportWareHouse(@RequestParam("response") HttpServletResponse response, @RequestParam("houseId") String houseId,@RequestParam("userName") String userName,@RequestParam("address") String address);

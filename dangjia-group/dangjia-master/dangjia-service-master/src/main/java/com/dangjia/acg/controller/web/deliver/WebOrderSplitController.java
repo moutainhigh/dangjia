@@ -120,9 +120,9 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse platformComplaint(String splitDeliverId,String splitItemList,Integer type,String  userId){
+    public ServerResponse platformComplaint(String splitDeliverId,String splitItemList,Integer type,String  userId,Integer applicationStatus){
         try{
-            return orderSplitService.platformComplaint(splitDeliverId, splitItemList,type,userId);
+            return orderSplitService.platformComplaint(splitDeliverId, splitItemList,type,userId,applicationStatus);
         }catch (Exception e){
             logger.error("保存失败：",e);
             return ServerResponse.createByErrorMessage("保存失败");

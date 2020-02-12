@@ -202,7 +202,8 @@ public class OrderSplitService {
             detailDTO.setSplitDeliverId(splitDeliverId);//发货单ID
             detailDTO.setSupMobile(splitDeliver.getSupplierTelephone());
             detailDTO.setSupName(splitDeliver.getSupplierName());
-
+            detailDTO.setImage(splitDeliver.getImage());
+            detailDTO.setImageUrl(StringTool.getImage(splitDeliver.getImage(),address));
             QuantityRoom quantityRoom=iQuantityRoomMapper.getQuantityRoom(splitDeliver.getHouseId(),0);
             if(quantityRoom!=null&& StringUtils.isNotBlank(quantityRoom.getFloor())){
                 detailDTO.setFloor(quantityRoom.getFloor());//楼层
@@ -250,6 +251,7 @@ public class OrderSplitService {
                 detailDTO.setTotalPrice((Double)param.get("supTotalPrice"));
                 detailDTO.setStevedorageCost((Double)param.get("supStevedorageCost"));
                 detailDTO.setDeliveryFee((Double)param.get("supTransportationCost"));
+                detailDTO.setIsNonPlatformSupplier((String)param.get("isNonPlatformSupplier"));//是否非平台供应商
             }
             detailDTO.setOrderSplitItemList(orderSplitItemList);
             return ServerResponse.createBySuccess("查询成功", detailDTO);
@@ -483,10 +485,13 @@ public class OrderSplitService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse platformComplaint(String splitDeliverId,String splitItemList,Integer type,String userId){
+    public ServerResponse platformComplaint(String splitDeliverId,String splitItemList,Integer type,String userId,Integer applicationStatus){
         SplitDeliver splitDeliver=splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
         if(splitDeliver==null){
             return ServerResponse.createByErrorMessage("未找到对应的订单信息");
+        }
+        if(splitDeliver.getShippingState()!=4){
+            return ServerResponse.createByErrorMessage("只有部分收货的订单才能进行操作");
         }
         if(splitDeliver.getComplainStatus()!=null&&splitDeliver.getComplainStatus()==2){
             return ServerResponse.createByErrorMessage("平台处理中，请勿重复申诉");
@@ -514,7 +519,7 @@ public class OrderSplitService {
 
             //添加申诉记录
             complainService.insertUserComplain(user.getUsername(),user.getMobile(),userId
-            ,splitDeliverId,splitDeliver.getHouseId(),4,"部分收货申诉",null,4);//供应商申请
+            ,splitDeliverId,splitDeliver.getHouseId(),4,"部分收货申诉",null,applicationStatus);//供应商申请
             //修改申诉次数及记录
             splitDeliver.setComplainCount(splitDeliver.getComplainCount()+1);//申诉资数
 

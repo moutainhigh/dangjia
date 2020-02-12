@@ -10,6 +10,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.engineer.EngineerService;
 import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -188,6 +189,29 @@ public class WebEngineerController implements WebEngineerAPI {
     @ApiMethod
     public ServerResponse getWareHouse( HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO) {
         return engineerService.getWareHouse(request,cityId,houseId, pageDTO);
+    }
+
+    /**
+     * 店铺--业主仓库（店铺汇总）
+     * @param request
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param addressId 地址ID
+     * @param storefrontId 店铺ID
+     * @param pageDTO 分页
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getStorefrontWareHouse(HttpServletRequest request,String cityId,String houseId,String addressId,String storefrontId, PageDTO pageDTO){
+        return engineerService.getStorefrontWareHouse(request,cityId,houseId,addressId,storefrontId, pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse exportStorefrontWareHouse(HttpServletResponse response,String houseId, String addressId,
+                                             String storefrontId, String userName,  String address){
+        return engineerService.exportStorefrontWareHouse(response, houseId,addressId,storefrontId, userName, address);
     }
 
     @Override

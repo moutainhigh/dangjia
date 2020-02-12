@@ -36,5 +36,8 @@ public class SplitDeliverDetailDTO {
     private Integer complainStatus;// 部分收货申诉状态，0未处理，1已认可部分收货，2已申请平台申诉，3平台申诉已通过，4平台申诉被驳回
     private String floor;//楼层
     private Integer elevator;//是否电梯房：0:否，1：是
+    private String image;//收货图片显示
+    private String imageUrl;//收货地址显示
+    private String isNonPlatformSupplier;//是否非平台供应商 1是，0否
     private List<OrderSplitItemDTO> orderSplitItemList;
 }

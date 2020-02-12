@@ -71,6 +71,7 @@ public interface WebOrderSplitAPI {
      * @param splitDeliverId 发货单ID
      * @param splitItemList 发货单明细列表
      * @param type 类型：1.认可部分收货，2申请平台申诉
+     * @param applicationStatus 申请身份：1工匠，2业主，3店铺，4供应商
      * @return
      */
     @PostMapping("web/deliver/orderSplit/platformComplaint")
@@ -79,7 +80,8 @@ public interface WebOrderSplitAPI {
             @RequestParam("splitDeliverId") String splitDeliverId,
             @RequestParam("splitItemList") String splitItemList,
             @RequestParam("type") Integer type,
-            @RequestParam("userId") String userId);
+            @RequestParam("userId") String userId,
+            @RequestParam("applicationStatus") Integer applicationStatus);
 
     @PostMapping("web/deliver/orderSplit/cancelOrderSplit")
     @ApiOperation(value = "取消打回", notes = "取消打回")
