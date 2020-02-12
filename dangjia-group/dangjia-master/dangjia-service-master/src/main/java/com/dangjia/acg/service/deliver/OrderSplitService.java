@@ -250,7 +250,7 @@ public class OrderSplitService {
                 detailDTO.setTotalAmount((Double)param.get("totalAmount"));
                 detailDTO.setTotalPrice((Double)param.get("supTotalPrice"));
                 detailDTO.setStevedorageCost((Double)param.get("supStevedorageCost"));
-                detailDTO.setDeliveryFee((Double)param.get("supTransportationCost"));
+                detailDTO.setDeliveryFee(((BigDecimal)param.get("supTransportationCost")).doubleValue());
                 detailDTO.setIsNonPlatformSupplier((String)param.get("isNonPlatformSupplier"));//是否非平台供应商
             }
             detailDTO.setOrderSplitItemList(orderSplitItemList);
