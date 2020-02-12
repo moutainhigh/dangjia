@@ -2,18 +2,14 @@ package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.BasicsStorefrontAPI;
-import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
-import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
+import com.dangjia.acg.common.pay.domain.UserInfo;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.*;
@@ -26,10 +22,8 @@ import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.mapper.supervisor.IMasterDjSupplierMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.deliver.OrderItem;
@@ -39,15 +33,11 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
-import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.sup.SupplierProduct;
-import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
-import com.dangjia.acg.modle.supplier.DjSupplier;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.complain.ComplainService;
@@ -114,6 +104,8 @@ public class OrderSplitService {
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
     private IQuantityRoomMapper iQuantityRoomMapper;
+    @Autowired
+    private UserMapper userMapper;
 
 
     /**
@@ -491,7 +483,7 @@ public class OrderSplitService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse platformComplaint(String splitDeliverId,String splitItemList,Integer type){
+    public ServerResponse platformComplaint(String splitDeliverId,String splitItemList,Integer type,String userId){
         SplitDeliver splitDeliver=splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
         if(splitDeliver==null){
             return ServerResponse.createByErrorMessage("未找到对应的订单信息");
@@ -501,7 +493,8 @@ public class OrderSplitService {
         }else if(splitDeliver.getComplainStatus()!=null&&splitDeliver.getComplainStatus()==1&&splitDeliver.getComplainStatus()==3){
             return ServerResponse.createByErrorMessage("该单已处理完成，请勿重复操作");
         }
-        Storefront storefront=masterStorefrontService.getStorefrontById(splitDeliver.getStorefrontId());
+        MainUser user=userMapper.selectByPrimaryKey(userId);
+        //Storefront storefront=masterStorefrontService.getStorefrontById(splitDeliver.getStorefrontId());
         //判断是否为平台申诉
         if(type==2){//2申请平台申诉,添加申诉信息
             if(splitItemList==null){
@@ -518,9 +511,10 @@ public class OrderSplitService {
                     orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);//修改商品的申诉状态
                 }
             }
+
             //添加申诉记录
-            complainService.insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),storefront.getUserId()
-            ,splitDeliverId,splitDeliver.getHouseId(),4,"部分收货申诉",null,3);
+            complainService.insertUserComplain(user.getUsername(),user.getMobile(),userId
+            ,splitDeliverId,splitDeliver.getHouseId(),4,"部分收货申诉",null,4);//供应商申请
             //修改申诉次数及记录
             splitDeliver.setComplainCount(splitDeliver.getComplainCount()+1);//申诉资数
 
@@ -585,7 +579,7 @@ public class OrderSplitService {
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);//修改对应的订单总额
             //3.将当前订单所得钱给到对应的店铺
             masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), splitDeliver.getHouseId(),
-                    0, splitDeliver.getId(), totalAmount,"认可部分收货流水记录", storefront.getUserId());
+                    0, splitDeliver.getId(), totalAmount,"认可部分收货流水记录", userId);
 
         }else if(type==3){//平台审核通过
             Example example = new Example(OrderSplitItem.class);
@@ -605,7 +599,7 @@ public class OrderSplitService {
             }
             //3.将当前订单所得钱给到对应的店铺
             masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), splitDeliver.getHouseId(),
-                    0, splitDeliver.getId(), splitDeliver.getTotalAmount(),"申诉部分收货审核通过流水记录", storefront.getUserId());
+                    0, splitDeliver.getId(), splitDeliver.getTotalAmount(),"申诉部分收货审核通过流水记录", userId);
         }
         //修改申诉状态
         splitDeliver.setComplainStatus(type);

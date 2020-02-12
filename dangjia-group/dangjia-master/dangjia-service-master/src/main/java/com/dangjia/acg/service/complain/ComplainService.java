@@ -572,7 +572,7 @@ public class ComplainService {
                         }
                         break;
                     case 4:// 4:部分收货申诉，计算金钱给到对应的店铺
-                        orderSplitService.platformComplaint(complain.getBusinessId(),null,3);//部分收货，平台申诉通过
+                        orderSplitService.platformComplaint(complain.getBusinessId(),null,3,userId);//部分收货，平台申诉通过
                         break;
                     case 5://提前结束装修
                         House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
@@ -640,7 +640,7 @@ public class ComplainService {
                 refundAfterSalesAPI.rejectRepairApplication(complain.getBusinessId(),userId);
             }
             if(complain.getComplainType()!=null&&complain.getComplainType()==4){
-                orderSplitService.platformComplaint(complain.getBusinessId(),null,4);//部分收货，平台申诉驳回
+                orderSplitService.platformComplaint(complain.getBusinessId(),null,4,userId);//部分收货，平台申诉驳回
             }
 
         }

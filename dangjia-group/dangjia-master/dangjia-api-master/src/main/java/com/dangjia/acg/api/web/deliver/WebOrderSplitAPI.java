@@ -78,7 +78,8 @@ public interface WebOrderSplitAPI {
     ServerResponse platformComplaint(
             @RequestParam("splitDeliverId") String splitDeliverId,
             @RequestParam("splitItemList") String splitItemList,
-            @RequestParam("type") Integer type);
+            @RequestParam("type") Integer type,
+            @RequestParam("userId") String userId);
 
     @PostMapping("web/deliver/orderSplit/cancelOrderSplit")
     @ApiOperation(value = "取消打回", notes = "取消打回")
