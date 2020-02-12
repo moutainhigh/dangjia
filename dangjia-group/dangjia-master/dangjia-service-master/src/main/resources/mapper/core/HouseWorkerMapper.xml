@@ -499,7 +499,7 @@
                 AND h.`city_id` = #{cityId}
         ) a
         <if test="type!=null and type!=''">
-            a.type = #{type}
+           where a.type = #{type}
         </if>
         ORDER BY a.createDate DESC
     </select>
