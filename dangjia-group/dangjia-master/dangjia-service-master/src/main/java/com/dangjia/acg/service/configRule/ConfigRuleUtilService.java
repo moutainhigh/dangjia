@@ -235,26 +235,22 @@ public class ConfigRuleUtilService {
      * @return 小时数
      */
     public Integer getGuaranteedQualityTime() {
-        if (active != null && active.equals("pre")) {
-            Integer amount=1;
-            Example example=new Example(DjConfigRuleModule.class);
-            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK019);
-            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+        Integer amount=1;
+        Example example=new Example(DjConfigRuleModule.class);
+        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK019);
+        DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
 
-            example=new Example(DjConfigRuleItemTwo.class);
-            example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
-            example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
-            PageHelper.startPage(1, 1);
-            List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
-            if (configRuleItemTwos.size() > 0) {
-                for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
-                    amount=Integer.parseInt(configRuleItemTwo.getFieldValue());
-                }
+        example=new Example(DjConfigRuleItemTwo.class);
+        example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
+        example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
+        PageHelper.startPage(1, 1);
+        List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
+        if (configRuleItemTwos.size() > 0) {
+            for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                amount=Integer.parseInt(configRuleItemTwo.getFieldValue());
             }
-            return amount;
-        } else {
-            return 90;
         }
+        return amount;
     }
 
     /**

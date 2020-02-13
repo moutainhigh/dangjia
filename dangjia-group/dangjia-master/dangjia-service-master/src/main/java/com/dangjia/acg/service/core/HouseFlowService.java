@@ -278,7 +278,7 @@ public class HouseFlowService {
                 return ServerResponse.createBySuccess("查询成功", map);
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<AllgrabBean> allgrabBeans = houseWorkerMapper.getGrabList(workerTypeId,cityId,member.getWorkerType(),type);//返回的任务list
+            List<AllgrabBean> allgrabBeans = houseWorkerMapper.getGrabList(member.getId(),workerTypeId,cityId,member.getWorkerType(),type);//返回的任务list
             PageInfo pageResult = new PageInfo(allgrabBeans);
             for (AllgrabBean allgrabBean : allgrabBeans) {
                 //装修单
@@ -406,7 +406,21 @@ public class HouseFlowService {
             }
             //2.查询业主提交的维保信息
             Map<String,Object> dataMap=new HashMap<>();
-            dataMap.put("maintenaceRecoreInfo",maintenanceRecordService.getMaintenaceRecordInfo(record.getId(),3));
+            Map mintenaceRecordInfo=maintenanceRecordService.getMaintenaceRecordInfo(record.getId(),3);
+            String isAcceptance="1";//是否等待被接受，0=待接受  1=待抢单
+            if(member.getWorkerType()==3&&!CommonUtil.isEmpty(record.getStewardId())){
+                isAcceptance="0";
+            }
+            if(member.getWorkerType()!=3&&!CommonUtil.isEmpty(record.getWorkerMemberId())){
+                isAcceptance="0";
+            }
+            if("0".equals(isAcceptance)){
+               Integer hourNum= configRuleUtilService.getGuaranteedQualityTime();
+                allgrabBean.setCountDownTime(DateUtil.addDateHours(record.getCreateDate(),hourNum).getTime());
+                mintenaceRecordInfo.put("countDownTime",DateUtil.addDateHours(record.getCreateDate(),hourNum));
+            }
+            mintenaceRecordInfo.put("isAcceptance",isAcceptance);
+            dataMap.put("maintenaceRecoreInfo",mintenaceRecordInfo);
             //判断当前登陆的人员是大管家，还是工匠
             if(mem.getWorkerType()==3){
                 //查询勘查费用商品
