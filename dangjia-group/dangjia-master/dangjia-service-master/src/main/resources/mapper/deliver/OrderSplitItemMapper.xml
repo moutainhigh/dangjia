@@ -254,12 +254,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
         INNER JOIN dj_deliver_split_deliver t2 on t.split_deliver_id=t2.id
         WHERE  t.receive>IFNULL(t.return_count,0)
-        and t2.shipping_state in(2,4,5,7,8)
+        and t2.shipping_state in(2,4,5,7,8,10)
         and ds.house_id=#{houseId}
         and ds.member_id=#{workerId}
         <if test="null!=searchKey and ''!=searchKey">
           AND t.product_name LIKE CONCAT('%',#{searchKey},'%')
         </if>
+        order by t.category_id,t.product_name
     </select>
 
     <select id="getSplitOrderItemBySplitOrderId" resultType="com.dangjia.acg.dto.deliver.OrderSplitItemDTO">
