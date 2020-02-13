@@ -8,7 +8,9 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonDTO;
 import com.dangjia.acg.dto.core.Task;
+import com.dangjia.acg.dto.deliver.BudgetOrderDTO;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -73,6 +75,8 @@ public class TaskService {
     private MyHouseService myHouseService;
 
     @Autowired
+    private IOrderMapper orderMapper;
+    @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
@@ -95,6 +99,7 @@ public class TaskService {
         Member member = (Member) object;
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+
         String houseId = null;
         //大管家
         if (userRole == 2) {
@@ -412,7 +417,7 @@ public class TaskService {
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), DateUtil.FORMAT11));
             task.setName(workerType.getName() + "补材料审核");
             if (workerType.getType() == 3) {
-                task.setName(workerType.getName() + "补包工包料审核");
+                task.setName(workerType.getName() + "补服务审核");
                 productType = "1";
             }
             task.setImage(imageAddress + "icon/buchailiao.png");
@@ -443,6 +448,18 @@ public class TaskService {
                 task.setTaskId(mendOrder.getId());
                 taskList.add(task);
             }
+        }
+
+        BudgetOrderDTO orderInfo=orderMapper.getOrderInfoByHouseId(houseId,"4","2");//查询待补差价的订单
+        if(orderInfo!=null){
+            Task task = new Task();
+            task.setDate(DateUtil.dateToString(orderInfo.getCreateDate(), DateUtil.FORMAT11));
+            task.setName("补差价订单提交");
+            task.setImage(imageAddress + "icon/sheji.png");
+            task.setType(3);
+            task.setHouseId(houseId);
+            task.setTaskId(orderInfo.getOrderId());
+            taskList.add(task);
         }
         //设计审核任务
         boolean isDesigner = false;

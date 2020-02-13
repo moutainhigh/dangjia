@@ -178,7 +178,7 @@ public class HouseWorkerSupService {
                         allgrabBean.setType(0);
                         allgrabBean.setOrderType(0);
                         //是否为新单
-                        if (DateUtil.addDateDays(houseFlow.getReleaseTime(), 1).getTime() < new Date().getTime()) {
+                        if (houseFlow.getReleaseTime()!=null&&DateUtil.addDateDays(houseFlow.getReleaseTime(), 1).getTime() < new Date().getTime()) {
                             allgrabBean.setOrderType(1);
                         }
                         Integer qdjl = houseWorkerMapper.selectCountByExample(example);//查出所有抢单记录

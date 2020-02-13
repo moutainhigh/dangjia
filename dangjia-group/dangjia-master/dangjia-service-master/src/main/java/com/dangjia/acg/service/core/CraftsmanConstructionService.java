@@ -986,17 +986,17 @@ public class CraftsmanConstructionService {
                         }
                     }
                 }
-                if (buttonList.size() <= 0) {
-                    buttonList.add(Utils.getButton("今日开工", 4004));
-                    bean.setFootMessageTitle("今日开工任务");//每日开工事项
-                    bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
-                    List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
-                    for (WorkerEveryday day : listWorDay) {
-                        ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
-                        listMapBean.setName(day.getName());
-                        workerEverydayList.add(listMapBean);
-                    }
-                }
+//                if (buttonList.size() <= 0) {
+//                    buttonList.add(Utils.getButton("今日开工", 4004));
+//                    bean.setFootMessageTitle("今日开工任务");//每日开工事项
+//                    bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
+//                    List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
+//                    for (WorkerEveryday day : listWorDay) {
+//                        ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
+//                        listMapBean.setName(day.getName());
+//                        workerEverydayList.add(listMapBean);
+//                    }
+//                }
                 bean.setWorkerEverydayList(workerEverydayList);//每日完工事项
             }
         }
@@ -1186,13 +1186,14 @@ public class CraftsmanConstructionService {
             if (houseWorkerList == null || houseWorkerList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "您暂无施工中的记录,快去接单吧！");
             }
-            int count = 0;
-            for (HouseWorker houseWorker : houseWorkerList) {//循环所有订单任务
-                List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(houseWorker.getHouseId());//查询所有待大管家审核
-                count += supervisorCheckList.size();
-            }
-            if (bean != null)
+            if (bean != null) {
+                int count = 0;
+                for (HouseWorker houseWorker : houseWorkerList) {//循环所有订单任务
+                    List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(houseWorker.getHouseId());//查询所有待大管家审核
+                    count += supervisorCheckList.size();
+                }
                 bean.setTaskNumber(count);//总任务数量
+            }
             hw = houseWorkerList.get(0);
             hw.setIsSelect(1);//设置成默认
             houseWorkerMapper.updateByPrimaryKeySelective(hw);

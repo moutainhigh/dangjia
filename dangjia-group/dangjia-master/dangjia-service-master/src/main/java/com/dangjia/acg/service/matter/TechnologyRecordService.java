@@ -198,7 +198,7 @@ public class TechnologyRecordService {
             }
         }else{
             //工匠未提交的验收节点
-            List<TechnologyRecordDTO>  productList=technologyRecordMapper.selectWorkerProductInfo(houseFlow.getHouseId(),houseFlow.getWorkerTypeId());
+            List<TechnologyRecordDTO>  productList=technologyRecordMapper.selectWorkerProductInfo(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),null);
             if (productList != null && productList.size() > 0) {
                 {
                     for (TechnologyRecordDTO trd : productList) {
@@ -226,7 +226,17 @@ public class TechnologyRecordService {
        for(String key:trList.keySet()){
            workNodeDTOList.add(trList.get(key));
        }
-        return ServerResponse.createBySuccess("查询成功", workNodeDTOList);
+
+        //已验收节点
+        List<TechnologyRecord> checkList = technologyRecordMapper.allChecked(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+        Map map = new HashMap();
+        map.put("checkNum",checkList.size());
+        //总验收点数
+        List<TechnologyRecordDTO>  productList=technologyRecordMapper.selectWorkerProductInfo(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),"1");
+        map.put("allNum",productList.size());
+        map.put("workNodeDTOList",workNodeDTOList);
+        //已验收节点
+        return ServerResponse.createBySuccess("查询成功", map);
     }
 
     /**
