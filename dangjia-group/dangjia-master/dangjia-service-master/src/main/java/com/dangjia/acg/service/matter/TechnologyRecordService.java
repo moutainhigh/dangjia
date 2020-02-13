@@ -354,6 +354,10 @@ public class TechnologyRecordService {
             Member member = (Member) object;
             String workerId=member.getId();
             PageInfo orderItemList=orderSplitItemService.getOrderItemListByhouseMemberId(pageDTO,houseId,workerId,searchKey);//查询当前工匠已购买的所有材料
+            if(orderItemList.getTotal()==0){
+               return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
+                        ,ServerCode.NO_DATA.getDesc());
+            }
             return ServerResponse.createBySuccess("查询成功",orderItemList);
         }catch (Exception e){
             logger.error("查询失败",e);

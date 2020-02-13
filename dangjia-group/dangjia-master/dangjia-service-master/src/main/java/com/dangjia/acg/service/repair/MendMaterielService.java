@@ -12,6 +12,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.dto.repair.*;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
@@ -30,6 +31,7 @@ import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.netflix.discovery.converters.Auto;
@@ -41,10 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -89,38 +88,52 @@ public class MendMaterielService {
     @Autowired
     private IComplainMapper iComplainMapper;
     /**
-     * 店铺退货分发供应商列表
+     * 售后管理--退货退款--分发供应商列表
      * @param request
      * @param cityId
      * @param userId
-     * @param pageDTO
-     * @param likeAddress
+     * @param mendOrderId 退货申请单ID
      * @return
      */
-    public ServerResponse storeReturnDistributionSupplier(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String likeAddress) {
+    public ServerResponse searchReturnRefundMaterielList(HttpServletRequest request, String cityId, String userId, String mendOrderId) {
         try{
-
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            Map<String,Object> resultMap=new HashMap();
+            MendOrder mendOrder=mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            if(mendOrder==null){
+                return ServerResponse.createByErrorMessage("未找到符合条件的退货单");
             }
-            List<MendOrder> mendOrderList = mendOrderMapper.storeReturnDistributionSupplier(storefront.getId(), likeAddress);
-            PageInfo pageResult = new PageInfo(mendOrderList);
-            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
-            pageResult.setList(mendOrderDTOS);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            if(mendOrder.getType()!=2&&mendOrder.getType()!=5){
+                return ServerResponse.createByErrorMessage("此单不属于退货退款单，不能分发");
+            }
+            if(mendOrder.getState()!=1){
+                return ServerResponse.createByErrorMessage("不是处理中的单，不能操作分发");
+            }
+            String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+            //查询申请退货单明细
+            List<OrderSplitItemDTO> mendMaterialList=mendMaterialMapper.searchReturnRefundMaterielList(mendOrderId);
+            if(mendMaterialList!=null&&mendMaterialList.size()>0){
+                for (OrderSplitItemDTO sd:mendMaterialList){
+                    sd.setImageUrl(StringTool.getImageSingle(sd.getImage(),address));
+                    //2.2给当前店铺当前房子供过此商品的供应商
+                    List<Map<String,Object>> supplierIdlist = mendMaterialMapper.getsupplierInfoList(mendOrder.getStorefrontId(),sd.getProductId(),mendOrder.getHouseId());
+                    if(supplierIdlist==null||supplierIdlist.size()<=0){
+                        //若未查到线上可发货的供应商，则查询非平台供应商给到页面选择
+                        supplierIdlist=splitDeliverMapper.queryNonPlatformSupplier();
+                    }
+                    sd.setSupplierIdlist(supplierIdlist);
+                }
+            }
+            resultMap.put("createDate",mendOrder.getCreateDate());//申请时间
+            resultMap.put("state",mendOrder.getState());//申请状态，1待分配
+            resultMap.put("imageUrl",StringTool.getImage(mendOrder.getImageArr(),address));//退货图片，相关凭证
+            resultMap.put("mendOrderId",mendOrderId);
+            resultMap.put("mendMaterialList",mendMaterialList);//要货单明细表
+            return ServerResponse.createBySuccess("查询成功", resultMap);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("店铺退货分发供应商异常");
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
-
-
-
-
-
 
     /**
      * 店铺退货分发供应商

@@ -48,14 +48,18 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.materialBackState(userId,cityId, pageDTO, state,likeAddress);
     }
 
-
-
-
-
+    /**
+     * 售后管理--退货退款--分发供应商列表
+     * @param request
+     * @param cityId
+     * @param userId
+     * @param mendOrderId 退货申请单ID
+     * @return
+     */
     @Override
     @ApiMethod
-    public ServerResponse storeReturnDistributionSupplier(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String likeAddress) {
-        return mendMaterielService.storeReturnDistributionSupplier(request,cityId,userId,pageDTO,likeAddress);
+    public ServerResponse searchReturnRefundMaterielList(HttpServletRequest request, String cityId, String userId,  String mendOrderId) {
+        return mendMaterielService.searchReturnRefundMaterielList(request,cityId,userId,mendOrderId);
     }
 
    /* @Override
