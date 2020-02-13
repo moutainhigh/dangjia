@@ -47,6 +47,7 @@ import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.mysql.fabric.Server;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -476,6 +477,29 @@ public class OrderSplitService {
         return ServerResponse.createBySuccessMessage("发货成功");
     }
 
+    /**
+     * 上门安装
+     * @param splitDeliverId 发货单ID
+     * @param installName 安装人姓名
+     * @param installMobile 安装人电话
+     * @return
+     */
+    public ServerResponse saveInstallInfo(String splitDeliverId,String installName,String installMobile){
+        try{
+            SplitDeliver splitDeliver=splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            if(splitDeliver==null){
+                return ServerResponse.createByErrorMessage("未找到符合条件的发货单信息");
+            }
+            splitDeliver.setInstallName(installName);
+            splitDeliver.setInstallMobile(installMobile);
+            splitDeliver.setModifyDate(new Date());
+            splitDeliverMapper.updateByPrimaryKey(splitDeliver);
+            return ServerResponse.createBySuccessMessage("保存成功");
+        }catch(Exception e){
+            logger.error("保存失败",e);
+            return ServerResponse.createByErrorMessage("保存失败");
+        }
+    }
 
     /**
      * 部分收货申诉接口
@@ -687,10 +711,20 @@ public class OrderSplitService {
             resultMap.put("isReservationDeliver",orderSplit.getIsReservationDeliver());//是否需要预约发货（1是，0否）
             resultMap.put("reservationDeliverTime",orderSplit.getReservationDeliverTime());//预约发货时间
 
+            List list=new ArrayList();
             Example example=new Example(SplitDeliver.class);
             example.createCriteria().andEqualTo(SplitDeliver.ORDER_SPLIT_ID,orderSplitId);
             List<SplitDeliver> splitDeliverList=splitDeliverMapper.selectByExample(example);
-            resultMap.put("splitDeliverList",splitDeliverList);
+            if(splitDeliverList!=null){
+                for(SplitDeliver sd:splitDeliverList){
+                    Map map=BeanUtils.beanToMap(sd);
+                    //增加是否发货与安装分开的字段
+                    String isDeliveryInstall=orderSplitItemMapper.selectIsDeliveryInstall(sd.getId());
+                    map.put("isDeliveryInstall",isDeliveryInstall);
+                    list.add(map);
+                }
+            }
+            resultMap.put("splitDeliverList",list);
 
             return ServerResponse.createBySuccess("查询成功",resultMap);
 

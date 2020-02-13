@@ -110,7 +110,18 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
     }
 
-
+    /**
+     * 上门安装
+     * @param splitDeliverId 发货单ID
+     * @param installName 安装人姓名
+     * @param installMobile 安装人电话
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveInstallInfo(String splitDeliverId,String installName,String installMobile){
+        return orderSplitService.saveInstallInfo(splitDeliverId,installName,installMobile);
+    }
     /**
      * 部分收货申诉接口
      * @param splitDeliverId 发货单ID

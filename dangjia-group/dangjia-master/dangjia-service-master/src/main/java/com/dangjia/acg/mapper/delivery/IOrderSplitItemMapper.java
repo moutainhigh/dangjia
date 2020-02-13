@@ -73,4 +73,6 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
                                     @Param("supplierId") String supplierId,@Param("oldSplitDeliverId") String oldSplitDeliverId);
 
     Double getSupPorterage(@Param("storefrontId") String storefrontId,@Param("supId") String supId,@Param("productId") String productId);
+
+    String selectIsDeliveryInstall(@Param("splitDeliverId") String splitDeliverId);
 }

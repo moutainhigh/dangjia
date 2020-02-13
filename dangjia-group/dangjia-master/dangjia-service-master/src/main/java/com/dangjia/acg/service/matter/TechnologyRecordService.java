@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -25,9 +26,11 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.OrderSplitItemService;
+import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -340,11 +343,16 @@ public class TechnologyRecordService {
     /**
      * 查询当前工匠在当前房子上的所有已购买材料
      * @param houseId 房子ID
-     * @param workerId 工匠ID
      * @return
      */
-    public ServerResponse getAllProductListByhouseMemberId(PageDTO pageDTO, String houseId, String workerId, String searchKey){
+    public ServerResponse getAllProductListByhouseMemberId(PageDTO pageDTO, String houseId, String userToken, String searchKey){
         try{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return ServerResponse.createByErrorMessage("未找到对应的用户信息");
+            }
+            Member member = (Member) object;
+            String workerId=member.getId();
             PageInfo orderItemList=orderSplitItemService.getOrderItemListByhouseMemberId(pageDTO,houseId,workerId,searchKey);//查询当前工匠已购买的所有材料
             return ServerResponse.createBySuccess("查询成功",orderItemList);
         }catch (Exception e){

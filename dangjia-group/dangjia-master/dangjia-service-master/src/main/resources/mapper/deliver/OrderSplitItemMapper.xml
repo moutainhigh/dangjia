@@ -355,5 +355,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getSupPorterage" resultType="java.lang.Double">
       select IFNULL(porterage,0) from dj_sup_application_product where shop_id=#{storefrontId} and sup_id=#{supId} and product_id=#{productId}
     </select>
+
+    <select id="selectIsDeliveryInstall" resultType="java.lang.String">
+        SELECT
+            max(
+                IFNULL(t.is_delivery_install, '0')
+            ) isDeliveryInstall
+        FROM
+            dj_deliver_order_split_item t
+        WHERE
+            t.split_deliver_id = #{splitDeliverId}
+    </select>
 </mapper>
 

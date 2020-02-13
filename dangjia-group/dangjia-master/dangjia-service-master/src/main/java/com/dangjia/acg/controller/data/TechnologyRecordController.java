@@ -89,12 +89,12 @@ public class TechnologyRecordController implements TechnologyRecordAPI {
     /**
      * 查询当前工匠在当前房子上的所有已购买材料
      * @param houseId 房子ID
-     * @param workerId 工匠ID
+     * @param userToken 工匠ID
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getAllProductListByhouseMemberId(PageDTO pageDTO, String houseId, String workerId, String searchKey){
-        return technologyRecordService.getAllProductListByhouseMemberId(pageDTO,houseId,workerId,searchKey);
+    public ServerResponse getAllProductListByhouseMemberId(PageDTO pageDTO, String houseId, String userToken, String searchKey){
+        return technologyRecordService.getAllProductListByhouseMemberId(pageDTO,houseId,userToken,searchKey);
     }
 }
