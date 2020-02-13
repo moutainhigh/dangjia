@@ -273,7 +273,6 @@ public class HouseFlowService {
                         .andEqualTo(HouseWorker.WORKER_ID, member.getId());
                 map.put(Member.METHODS,houseWorkerMapper.selectCountByExample(example));
                 Integer allMethods=configRuleUtilService.getMethodsCount(member.getWorkerTypeId(),member.getEvaluationScore());
-                map.put(Member.METHODS,houseWorkerMapper.selectCountByExample(example));
                 map.put("allMethods",allMethods);
                 return ServerResponse.createBySuccess("查询成功", map);
             }
