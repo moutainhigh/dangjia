@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -200,5 +201,12 @@ public class SplitDeliver extends BaseEntity {
     @Desc(value = "申诉次数")
     @ApiModelProperty("申诉次数")
     private Integer complainCount;
+
+
+    @Transient
+    private String isDeliveryInstall;//增加是否发货与安装分开的字段
+    @Transient
+    private Integer isNonPlatformSupperlier;//是否非平台供应商（1是，0否）
+
 
 }

@@ -265,8 +265,9 @@ public class HouseFlowService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<AllgrabBean> grabList = new ArrayList<>();
             if(type!=null&&type==0&&member.getWorkerType()==3){
+                Member worker  = memberMapper.selectByPrimaryKey(member.getId());
                 Map map =new HashMap();
-                map.put(Member.AUTO_ORDER,member.getAutoOrder());
+                map.put(Member.AUTO_ORDER,worker.getAutoOrder());
                 Example example = new Example(HouseWorker.class);
                 example.createCriteria().andIn(HouseWorker.WORK_TYPE, Arrays.asList(new String[]{"1","6"}))
                         .andEqualTo(HouseWorker.TYPE, type)

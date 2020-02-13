@@ -111,7 +111,7 @@ public interface WebOrderSplitAPI {
 
     @PostMapping("web/deliver/orderSplit/getOrderSplitDeliverList")
     @ApiOperation(value = "货单列表--货单详情列表 ", notes = "货单列表--货单详情列表")
-    ServerResponse getOrderSplitDeliverList(@RequestParam("orderSplitId") String orderSplitId);
+    ServerResponse getOrderSplitDeliverList(@RequestParam("request") HttpServletRequest request,@RequestParam("orderSplitId") String orderSplitId);
 
 
     @PostMapping("web/deliver/orderSplit/getHouseList")

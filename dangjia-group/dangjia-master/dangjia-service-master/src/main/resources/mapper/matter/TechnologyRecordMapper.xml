@@ -87,7 +87,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		INNER JOIN dj_basics_product_template t3 ON t2.prod_template_id = t3.id
 		INNER JOIN dj_basics_technology t4 ON FIND_IN_SET(t4.id, t3.technology_ids)
 		LEFT JOIN dj_matter_technology_record t5 ON t4.id = t5.technology_Id and t5.house_id=t1.house_id
-		AND t4.worker_type_id = t5.worker_type_id
+		AND t4.worker_type_id = t5.worker_type_id and t5.product_id=t1.product_id
 		AND t5.state != 3
 		WHERE
 			t1.product_type = 2

@@ -6,13 +6,15 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
-import com.dangjia.acg.common.pay.domain.UserInfo;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.deliver.*;
+import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
+import com.dangjia.acg.dto.deliver.OrderSplitDTO;
+import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
+import com.dangjia.acg.dto.deliver.SplitDeliverDetailDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
@@ -37,7 +39,6 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.user.MainUser;
@@ -50,7 +51,6 @@ import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mysql.fabric.Server;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -732,13 +732,12 @@ public class OrderSplitService {
             List<SplitDeliver> splitDeliverList=splitDeliverMapper.selectByExample(example);
             if(splitDeliverList!=null){
                 for(SplitDeliver sd:splitDeliverList){
-                    Map map=BeanUtils.beanToMap(sd);
                     //增加是否发货与安装分开的字段
                     String isDeliveryInstall=orderSplitItemMapper.selectIsDeliveryInstall(sd.getId());
-                    map.put("isDeliveryInstall",isDeliveryInstall);
+                    sd.setIsDeliveryInstall(isDeliveryInstall);
                     DjSupplier supplier=iMasterSupplierMapper.selectByPrimaryKey(sd.getSupplierId());
-                    map.put("isNonPlatformSupplier",supplier.getIsNonPlatformSupperlier());//是否非平台供应商 1是，0否
-                    list.add(map);
+                    sd.setIsNonPlatformSupperlier(supplier.getIsNonPlatformSupperlier());//是否非平台供应商 1是，0否
+                    list.add(sd);
                 }
             }
             resultMap.put("splitDeliverList",list);

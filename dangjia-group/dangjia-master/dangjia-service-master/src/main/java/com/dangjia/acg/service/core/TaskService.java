@@ -368,7 +368,6 @@ public class TaskService {
             task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
             task.setName(workerType.getName() + "待支付");
             task.setImage(imageAddress + workerType.getImage());
-            task.setHtmlUrl("");
             task.setType(1);
             task.setTaskId(houseFlow.getId());
             task.setHouseId(houseId);
@@ -388,7 +387,6 @@ public class TaskService {
                 task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
                 task.setName("审核"+workerType.getName() + "工匠");
                 task.setImage(imageAddress + workerType.getImage());
-                task.setHtmlUrl("");
                 task.setType(5);
                 task.setTaskId(houseFlow.getId());
                 task.setHouseId(houseId);
@@ -399,7 +397,6 @@ public class TaskService {
                 task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
                 task.setName(workerType.getName() + "待支付");
                 task.setImage(imageAddress + workerType.getImage());
-                task.setHtmlUrl("");
                 task.setType(1);
                 task.setTaskId(houseFlow.getId());
                 task.setHouseId(houseId);
@@ -413,18 +410,14 @@ public class TaskService {
                 .andEqualTo(MendOrder.STATE, 1);//补材料审核状态全通过
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
         for (MendOrder mendOrder : mendOrderList) {
-            String productType = "0";
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), DateUtil.FORMAT11));
             task.setName(workerType.getName() + "补材料审核");
             if (workerType.getType() == 3) {
                 task.setName(workerType.getName() + "补服务审核");
-                productType = "1";
             }
             task.setImage(imageAddress + "icon/buchailiao.png");
-            String url = address + String.format(DjConstants.GJPageAddress.REFUNDITEMDETAIL, userToken, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&productType=" + productType + "&roleType=1&state=" + mendOrder.getState();
-            task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId(mendOrder.getId());
             task.setHouseId(houseId);
@@ -443,8 +436,6 @@ public class TaskService {
                 task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), DateUtil.FORMAT11));
                 task.setName(workerType.getName() + "补人工审核");
                 task.setImage(imageAddress + "icon/burengong.png");
-                String url = address + String.format(DjConstants.GJPageAddress.REFUNDITEMDETAIL, userToken, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&roleType=1&state=" + mendOrder.getState();
-                task.setHtmlUrl(url);
                 task.setType(3);
                 task.setHouseId(houseId);
                 task.setTaskId(mendOrder.getId());
@@ -486,25 +477,22 @@ public class TaskService {
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));
             task.setName(house.getDesignerState() == 5 ? "平面图审核" : "施工图审核");
             task.setImage(imageAddress + "icon/sheji.png");
-            String url = address + String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), task.getName()) + "&houseId=" + house.getId();
-            task.setHtmlUrl(url);
             task.setType(3);
-            task.setTaskId("");
+            task.setTaskId(houseId);
             task.setHouseId(houseId);
             taskList.add(task);
         }
         //任务
-       /* if (house.getBudgetState() == 2) {
+        if (house.getBudgetState() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));
             task.setName("精算审核");
             task.setImage(imageAddress + "icon/jingsuan.png");
-            String url = address + String.format(DjConstants.YZPageAddress.CONFIRMACTUARY, userToken, house.getCityId(), "精算审核") + "&houseId=" + house.getId();
-            task.setHtmlUrl(url);
             task.setType(3);
-            task.setTaskId("");
+            task.setHouseId(houseId);
+            task.setTaskId(houseId);
             taskList.add(task);
-        }*/
+        }
         //验收任务
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
         for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
@@ -515,18 +503,14 @@ public class TaskService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), DateUtil.FORMAT11));
-            if (houseFlowApply.getApplyType() == 0) {
-                task.setName(workerType.getName() + "每日完工待验收");
-            } else if (houseFlowApply.getApplyType() == 1) {
+            if (houseFlowApply.getApplyType() == 1) {
                 task.setName(workerType.getName() + "阶段完工待验收");
             } else if (houseFlowApply.getApplyType() == 2) {
                 task.setName(workerType.getName() + "整体完工待验收");
             }
             task.setImage(imageAddress + workerType.getImage());
-            task.setHtmlUrl(address + String.format(DjConstants.YZPageAddress.CONFIRMAPPLY + "&houseFlowApplyId=%s",
-                    userToken, house.getCityId(), "验收工匠完工申请", houseFlowApply.getId()));
             task.setType(3);
-            task.setTaskId("");
+            task.setTaskId(houseFlowApply.getId());
             task.setHouseId(houseId);
             taskList.add(task);
         }
