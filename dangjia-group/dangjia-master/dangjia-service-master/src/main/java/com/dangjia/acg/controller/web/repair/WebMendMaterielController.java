@@ -25,7 +25,6 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     private RedisClient redisClient;
     /**
      * 房子id查询业主退货单列表
-     */
     @Override
     @ApiMethod
     public ServerResponse landlordState(HttpServletRequest request,String userId,String cityId, PageDTO pageDTO, String state,String likeAddress) {
@@ -37,7 +36,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     @ApiMethod
     public ServerResponse landlordStateHandle(HttpServletRequest request, String cityId,  PageDTO pageDTO, String state, String likeAddress) {
         return mendMaterielService.landlordStateHandle(request,cityId,pageDTO,state,likeAddress);
-    }
+    }*/
 
     /**
      * 房子id查询退货单列表
@@ -99,6 +98,23 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     public ServerResponse searchReturnRrefundList(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, Integer state, String likeAddress,Integer type) {
         return mendMaterielService.searchReturnRrefundList(request,cityId,userId,pageDTO,state,likeAddress,type);
     }
+
+    /**
+     *店铺--售后处理--待处理列表
+     * @param request
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param pageDTO
+     * @param state 状态默认：1.已分发供应商 2.已结束
+     * @param likeAddress
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchReturnRefundSplitList(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, Integer state, String likeAddress) {
+        return mendMaterielService.searchReturnRefundSplitList(request,cityId,userId,pageDTO,state,likeAddress);
+    }
+
 
    /* @Override
     @ApiMethod

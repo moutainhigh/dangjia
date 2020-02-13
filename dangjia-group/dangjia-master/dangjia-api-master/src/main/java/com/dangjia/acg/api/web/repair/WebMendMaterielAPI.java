@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface WebMendMaterielAPI {
 
     /**
-     *店铺--售后处理--待处理列表
+     *店铺--售后处理--待处理列表(退货退款/仅退款）
      * @param request
      * @param cityId 城市ID
      * @param userId 用户ID
@@ -42,7 +42,29 @@ public interface WebMendMaterielAPI {
             @RequestParam("likeAddress") String likeAddress,
             @RequestParam("type") Integer type);
 
+
+
     /**
+     *店铺--售后处理--分配供应商、已结束列表
+     * @param request
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param pageDTO
+     * @param state 状态默认：1.已分发供应商 2.已结束
+     * @param likeAddress
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/searchReturnRefundSplitList")
+    @ApiOperation(value = "店铺--售后处理--分配供应商、已结束列表", notes = "店铺--售后处理--分配供应商、已结束列表")
+    ServerResponse searchReturnRefundSplitList(
+            @RequestParam("request") HttpServletRequest request,
+            @RequestParam("cityId") String cityId,
+            @RequestParam("userId") String userId,
+            @RequestParam("pageDTO") PageDTO pageDTO,
+            @RequestParam("state") Integer state,
+            @RequestParam("likeAddress") String likeAddress);
+
+   /* *//**
      * state:0待处理
      * @param request
      * @param cityId
@@ -50,7 +72,7 @@ public interface WebMendMaterielAPI {
      * @param state
      * @param likeAddress
      * @return
-     */
+     *//*
     @PostMapping(value = "web/repair/webMendMateriel/landlordState")
     @ApiOperation(value = "业主仅退款(待处理)", notes = "业主仅退款(待处理)")
     ServerResponse landlordState(@RequestParam("request") HttpServletRequest request,
@@ -59,7 +81,7 @@ public interface WebMendMaterielAPI {
                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("state") String state,
                                  @RequestParam("likeAddress") String likeAddress);
-    /**
+    *//**
      * state:2 已经处理
      * @param request
      * @param cityId
@@ -67,7 +89,7 @@ public interface WebMendMaterielAPI {
      * @param state
      * @param likeAddress
      * @return
-     */
+     *//*
     @PostMapping(value = "web/repair/webMendMateriel/landlordStateHandle")
     @ApiOperation(value = "业主仅退款(已经处理)", notes = "业主仅退款(已经处理)")
     ServerResponse landlordStateHandle(@RequestParam("request") HttpServletRequest request,
@@ -78,7 +100,7 @@ public interface WebMendMaterielAPI {
                                  @RequestParam("likeAddress") String likeAddress);
 
 
-
+*/
 
     /**
      * auther:chenyufeng

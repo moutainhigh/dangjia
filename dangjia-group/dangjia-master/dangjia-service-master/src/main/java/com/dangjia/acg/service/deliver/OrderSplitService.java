@@ -23,6 +23,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.complain.Complain;
@@ -36,7 +37,9 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
@@ -108,6 +111,8 @@ public class OrderSplitService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private IMasterSupplierMapper iMasterSupplierMapper;
 
     /**
      * 修改 供应商结算状态
@@ -577,9 +582,11 @@ public class OrderSplitService {
                     String orderItemId=orderSplitItem.getOrderItemId();
                     if(orderItemId!=null){
                         OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(orderItemId);
-                        orderItem.setAskCount(MathUtil.sub(orderItem.getAskCount(),countNum));//还原未要货量
-                        orderItem.setModifyDate(new Date());
-                        iOrderItemMapper.updateByPrimaryKeySelective(orderItem);//修改订单明细的要货量
+                        if(orderItem!=null){
+                            orderItem.setAskCount(MathUtil.sub(orderItem.getAskCount(),countNum));//还原未要货量
+                            orderItem.setModifyDate(new Date());
+                            iOrderItemMapper.updateByPrimaryKeySelective(orderItem);//修改订单明细的要货量
+                        }
                     }
                     if(orderSplitItem.getReceive()==null){
                         orderSplitItem.setReceive(orderSplitItem.getNum());//收获量改为发货量
@@ -590,6 +597,14 @@ public class OrderSplitService {
                     orderSplitItem.setStevedorageCost(stevedorageCost);
                     orderSplitItem.setTransportationCost(transportationCost);
                     //供应商搬运费，运费
+                    if(orderSplitItem.getSupStevedorageCost()==null){
+                        orderSplitItem.setSupStevedorageCost(0d);
+                    }
+                    if(orderSplitItem.getReceive()==null){
+                        orderSplitItem.setReceive(orderSplitItem.getNum());
+                    }
+                    if(splitDeliver.getDeliveryFee()==0)
+                        splitDeliver.setDeliveryFee(0d);
                     orderSplitItem.setSupStevedorageCost(MathUtil.mul(MathUtil.div(orderSplitItem.getSupStevedorageCost(),orderSplitItem.getNum()),orderSplitItem.getReceive()));
                     orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(splitDeliver.getDeliveryFee(),totalReceiverNum),orderSplitItem.getReceive()));
                     orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);//修改对应的运费，搬运费
@@ -721,6 +736,8 @@ public class OrderSplitService {
                     //增加是否发货与安装分开的字段
                     String isDeliveryInstall=orderSplitItemMapper.selectIsDeliveryInstall(sd.getId());
                     map.put("isDeliveryInstall",isDeliveryInstall);
+                    DjSupplier supplier=iMasterSupplierMapper.selectByPrimaryKey(sd.getSupplierId());
+                    map.put("isNonPlatformSupplier",supplier.getIsNonPlatformSupperlier());//是否非平台供应商 1是，0否
                     list.add(map);
                 }
             }

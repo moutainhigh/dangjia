@@ -334,6 +334,33 @@ public class MendMaterielService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+    /**
+     *店铺--售后处理--待处理列表
+     * @param request
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param pageDTO
+     * @param state 状态默认：1.已分发供应商 2.已结束
+     * @param likeAddress 单号或地址
+     * @return
+     */
+    public ServerResponse searchReturnRefundSplitList(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, Integer state, String likeAddress) {
+       try{
+           //判断是否有维护店铺信息，若未维护，则返回提示
+           Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
+           if (storefront == null) {
+               return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+           }
+           PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+           List<MendDeliverDTO> mendDeliverList = mendDeliverMapper.searchReturnRefundSplitList(storefront.getId(), state, likeAddress);
+           PageInfo pageResult = new PageInfo(mendDeliverList);
+           pageResult.setList(mendDeliverList);
+           return ServerResponse.createBySuccess("查询成功",pageResult);
+       }catch(Exception e){
+           logger.error("查询失败",e);
+           return ServerResponse.createByErrorMessage("查询失败");
+       }
+    }
     //店铺管理—售后管理—业主退货退款(处理中)
    /* public ServerResponse ownerReturnProssing(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
         try {

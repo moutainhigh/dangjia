@@ -305,6 +305,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="state==2"><!--已处理-->
             and t.state=4
         </if>
+        <if test="likeAddress!=null and likeAddress!=''">
+            and (t.number LIKE CONCAT('%',#{likeAddress},'%')
+            or madress.address LIKE CONCAT('%',#{likeAddress},'%'))
+        </if>
         order by t.create_date desc
 
     </select>
