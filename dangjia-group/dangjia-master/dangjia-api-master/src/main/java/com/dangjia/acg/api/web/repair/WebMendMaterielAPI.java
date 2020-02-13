@@ -64,6 +64,22 @@ public interface WebMendMaterielAPI {
             @RequestParam("state") Integer state,
             @RequestParam("likeAddress") String likeAddress);
 
+    /**
+     * 售后管理--退货退款--分发供应商列表
+     * @param request
+     * @param cityId
+     * @param userId
+     * @param mendOrderId 退货申请单ID
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/searchReturnRefundMaterielList")
+    @ApiOperation(value = "售后管理--退货退款--分发供应商列表", notes = "售后管理--退货退款--分发供应商列表")
+    ServerResponse searchReturnRefundMaterielList(
+            @RequestParam("request") HttpServletRequest request,
+            @RequestParam("cityId") String cityId,
+            @RequestParam("userId") String userId,
+            @RequestParam("mendOrderId") String mendOrderId);
+
    /* *//**
      * state:0待处理
      * @param request
@@ -181,6 +197,8 @@ public interface WebMendMaterielAPI {
             @RequestParam("state") String state,
             @RequestParam("likeAddress") String likeAddress);
 
+
+
     /**
      * 确定退货
      * @param mendOrderId
@@ -254,14 +272,7 @@ public interface WebMendMaterielAPI {
 
 
 
-    @PostMapping(value = "web/repair/webMendMateriel/storeReturnDistributionSupplier")
-    @ApiOperation(value = "店铺退货分发供应商列表", notes = "店铺退货分发供应商列表")
-    ServerResponse storeReturnDistributionSupplier(
-            @RequestParam("request") HttpServletRequest request,
-            @RequestParam("cityId") String cityId,
-            @RequestParam("userId") String userId,
-            @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("likeAddress") String likeAddress);
+
 
     /**
      * 店铺退货分发供应商

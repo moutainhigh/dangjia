@@ -30,11 +30,17 @@ public class   OrderSplitItemDTO {
     private Double shopCount;//购买总数
     private Double receive;//收货数量
 
+    private Double actualCount;//实际退货数
+
     private String supId;//供应商ID
 
     private  String orderSplitId;//要货单ID
 
     private  String orderSplitItemId;//要货单详情ID
+
+    private  String mendOrderId;//申请退货单ID
+
+    private  String mendMaterielId;//退货单明细ID
 
     private String storefrontId;//店铺ID
 
