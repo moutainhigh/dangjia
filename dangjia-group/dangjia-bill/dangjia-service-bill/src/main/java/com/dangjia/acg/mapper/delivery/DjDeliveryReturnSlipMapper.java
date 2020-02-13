@@ -37,7 +37,7 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
      */
     List<DjDeliveryReturnSlipDTO> querySupplyDeliverTaskList(@Param("supId") String supId,
                                                              @Param("searchKey") String searchKey,
-                                                             @Param("invoiceStatus") String invoiceStatus,
+                                                             @Param("invoiceStatus") Integer invoiceStatus,
                                                              @Param("cityId") String cityId);
 
     /**

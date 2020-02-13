@@ -32,4 +32,6 @@ public interface IMendMaterialMapper extends Mapper<MendMateriel> {
     List<OrderSplitItemDTO> searchReturnRefundMaterielList(@Param("mendOrderId") String mendOrderId);
 
     List<Map<String,Object>> getsupplierInfoList(@Param("storefrontId") String storefrontId, @Param("productId") String productId, @Param("houseId") String houseId);
+
+    List<Map<String,Object>> selectSupMaterialByMendId(@Param("mendOrderId") String mendOrderId);
 }

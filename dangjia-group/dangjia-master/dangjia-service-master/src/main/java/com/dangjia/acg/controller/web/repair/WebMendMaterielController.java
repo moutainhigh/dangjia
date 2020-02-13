@@ -6,6 +6,8 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.repair.MendMaterielService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,8 +20,10 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestController
 public class WebMendMaterielController implements WebMendMaterielAPI {
+    protected static final Logger logger = LoggerFactory.getLogger(WebMendMaterielController.class);
     @Autowired
     private MendMaterielService mendMaterielService;
+
 
     @Autowired
     private RedisClient redisClient;
@@ -140,8 +144,14 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse returnProductDistributionSupplier(String mendOrderId, String userId,String cityId, String actualCountList) {
-        return mendMaterielService.returnProductDistributionSupplier(mendOrderId,userId,cityId,actualCountList);
+    public ServerResponse saveReturnRefundMaterielSup(String mendOrderId, String userId,String cityId, String materielSupList) {
+        try{
+            return mendMaterielService.saveReturnRefundMaterielSup(mendOrderId,userId,cityId,materielSupList);
+        }catch (Exception e){
+            logger.error("分发异常：",e);
+            return ServerResponse.createByErrorMessage("分发失败");
+        }
+
     }
 
     @Override

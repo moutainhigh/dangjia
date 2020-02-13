@@ -248,5 +248,33 @@
         group by ds.id
         order by dsp.price asc
     </select>
+
+
+    <!--按供应商分组查询对应符合条件的信息-->
+    <select id="selectSupMaterialByMendId" resultType="java.util.Map">
+        SELECT
+            t.supplier_id supplierId,
+            t.mend_order_id mendOrderId,
+            t1.is_non_platform_supplier isNonPlatformSupplier,
+            t1.`name` supName,
+            t1.telephone,
+            t1.transportation_cost supTransportationCost,
+            sum(t.cost * IFNULL(t.actual_count, t.shop_count)) supTotalPrice,
+            sum(IFNULL(t.sup_stevedorage_cost, 0)) supStevedorageCost,
+            sum(t.price * IFNULL(t.actual_count, t.shop_count)) totalPrice,
+            sum(IFNULL(t.transportation_cost,0)) totalTransportationCost,
+            sum(IFNULL(t.stevedorage_cost,0)) totalStevedorageCost,
+            sum(IFNULL(t.price * IFNULL(t.actual_count, t.shop_count), 0)) - sum(IFNULL(t.transportation_cost,0)) - sum(IFNULL(t.stevedorage_cost,0)) totalAmount,
+            sum(IFNULL(t.cost * IFNULL(t.actual_count, t.shop_count), 0)) - sum(IFNULL(t.sup_stevedorage_cost, 0)) - t1.transportation_cost applyMoney
+        FROM
+            dj_repair_mend_materiel t,
+            dj_supplier t1
+        WHERE
+            t.mend_order_id = #{mendOrderId}
+        AND t.supplier_id = t1.id
+        GROUP BY
+        t.supplier_id
+
+    </select>
 </mapper>
 

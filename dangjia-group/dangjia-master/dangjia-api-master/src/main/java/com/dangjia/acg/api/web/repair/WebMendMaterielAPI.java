@@ -80,6 +80,19 @@ public interface WebMendMaterielAPI {
             @RequestParam("userId") String userId,
             @RequestParam("mendOrderId") String mendOrderId);
 
+    /**
+     * 店铺退货分发供应商
+     * @param mendOrderId
+     * @param userId
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/saveReturnRefundMaterielSup")
+    @ApiOperation(value = "退货退款--分发供应商--保存分发", notes = "退货退款--分发供应商--保存分发")
+    ServerResponse saveReturnRefundMaterielSup(@RequestParam("mendOrderId") String mendOrderId,
+                                                 @RequestParam("userId") String userId,
+                                                 @RequestParam("cityId") String cityId,
+                                                 @RequestParam("materielSupList") String materielSupList);
+
    /* *//**
      * state:0待处理
      * @param request
@@ -274,18 +287,7 @@ public interface WebMendMaterielAPI {
 
 
 
-    /**
-     * 店铺退货分发供应商
-     * @param mendOrderId
-     * @param userId
-     * @return
-     */
-    @PostMapping(value = "web/repair/webMendMateriel/returnProductDistributionSupplier")
-    @ApiOperation(value = "店铺退货分发供应商", notes = "店铺退货分发供应商")
-    ServerResponse returnProductDistributionSupplier(@RequestParam("mendOrderId") String mendOrderId,
-                                                     @RequestParam("userId") String userId,
-                                                     @RequestParam("cityId") String cityId,
-                                                     @RequestParam("actualCountList") String actualCountList);
+
 
 
     @PostMapping(value = "app/repair/webMendMateriel/querySurplusMaterial")
