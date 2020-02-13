@@ -264,7 +264,7 @@ public class HouseFlowService {
             String workerTypeId = member.getWorkerTypeId();
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<AllgrabBean> grabList = new ArrayList<>();
-            if(type==0&&member.getWorkerType()==3){
+            if(type!=null&&type==0&&member.getWorkerType()==3){
                 Map map =new HashMap();
                 map.put(Member.AUTO_ORDER,member.getAutoOrder());
                 Example example = new Example(HouseWorker.class);

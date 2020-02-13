@@ -498,7 +498,7 @@
                 </if>
                 AND h.`city_id` = #{cityId}
         ) a
-        <if test="type!=null and type!=''">
+        <if test="type!=null and type!='-1'">
            where a.type = #{type}
         </if>
         ORDER BY a.createDate DESC

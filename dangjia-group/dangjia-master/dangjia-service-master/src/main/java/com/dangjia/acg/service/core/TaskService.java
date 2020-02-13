@@ -101,16 +101,18 @@ public class TaskService {
         String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
 
         String houseId = null;
-        //大管家
+        //工匠端
         if (userRole == 2) {
             object = constructionService.getHouseWorker(null, member.getId());
             if (object instanceof HouseWorker) {
                 HouseWorker hw = (HouseWorker) object;
                 houseId = hw.getHouseId();
                 buttonDTO.setHouseId(houseId);
-                buttonDTO.setTaskList(getWorkerTask(houseId, userToken, member, imageAddress, address));
+                buttonDTO.setTaskList(getWorkerTask(houseId, userToken,  hw, imageAddress, address));
             }
-        } else {
+        }
+        //业主端
+        if (userRole == 1) {
             List<House> houseList = houseMapper.selectByExample(myHouseService.getHouseExample(member.getId()));
             //初始化花费
             for (House house : houseList) {
@@ -205,15 +207,15 @@ public class TaskService {
      * 工匠任务列表 需加上补货补人工任务
      * type 1支付任务,2补货补人工,3其它任务
      */
-    private List<Task> getWorkerTask(String houseId, String userToken, Member worker, String imageAddress, String address) {
+    private List<Task> getWorkerTask(String houseId, String userToken, HouseWorker hw , String imageAddress, String address) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         List<Task> taskList = new ArrayList<>();
-        if (worker.getWorkerType() == null || worker.getWorkerType() < 3) {
+        if (hw.getWorkerType() == null || hw.getWorkerType() < 3) {
             return taskList;
         }
         //查询需工匠处理的任务表
-        taskList = taskStackService.selectTaskStackInfo(houseId,worker.getId());
-        if (worker.getWorkerType() == 3) {
+        taskList = taskStackService.selectTaskStackInfo(houseId,hw.getWorkerId());
+        if (hw.getWorkerType() == 3) {
             //退材料退包工包料
             Example example = new Example(MendDeliver.class);
             example.createCriteria().andEqualTo(MendDeliver.HOUSE_ID, houseId)
@@ -295,7 +297,7 @@ public class TaskService {
             example.createCriteria().andEqualTo(ChangeOrder.HOUSE_ID, houseId)
                     .andEqualTo(ChangeOrder.STATE, 2)
                     .andEqualTo(ChangeOrder.TYPE, 2)
-                    .andEqualTo(ChangeOrder.WORKER_TYPE_ID, worker.getWorkerTypeId());
+                    .andEqualTo(ChangeOrder.WORKER_TYPE_ID, hw.getWorkerTypeId());
             List<ChangeOrder> changeOrders = changeOrderMapper.selectByExample(example);
             for (ChangeOrder changeOrder : changeOrders) {
                 example = new Example(MendOrder.class);

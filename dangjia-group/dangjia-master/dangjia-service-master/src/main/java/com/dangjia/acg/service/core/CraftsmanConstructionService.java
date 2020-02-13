@@ -1218,7 +1218,7 @@ public class CraftsmanConstructionService {
             ConstructionByWorkerIdBean.WokerFlowListBean wfr = new ConstructionByWorkerIdBean.WokerFlowListBean();
         Example example = new Example(HouseWorker.class);
         example.createCriteria()
-                .andEqualTo(HouseWorker.HOUSE_ID, houseId)
+                .andEqualTo(HouseWorker.HOUSE_ID, hfl.getHouseId())
                 .andEqualTo(HouseWorker.WORKER_TYPE_ID, hfl.getWorkerTypeId())
                 .andEqualTo(HouseWorker.WORK_TYPE, 6);
         List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//根据房子id和工匠type查询房子对应的工人
@@ -1239,9 +1239,9 @@ public class CraftsmanConstructionService {
         wfr.setOverall(workerComprehensive.getOverall());
         wfr.setRaiseRate(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
         wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
-        wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(houseId, worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
+        wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(hfl.getHouseId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
         wfr.setPatrolStandard("" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
-        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseId, worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
+        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(hfl.getHouseId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
         if (todayStart == null) {//没有今日开工记录
             wfr.setIsStart(0);//今日是否开工0:否；1：是；
         } else {
