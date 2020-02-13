@@ -333,6 +333,14 @@ public class HouseFlowService {
                 }
                 //维保单
                 if(allgrabBean.getType()==2){
+                    Example example = new Example(HouseWorker.class);
+                    example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
+                            .andEqualTo(HouseWorker.HOUSE_ID, allgrabBean.getHouseId())
+                            .andEqualTo(HouseWorker.BUSINESS_ID, allgrabBean.getHouseFlowId());
+                    List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的是否已抢单
+                    if (hwList.size()>0) {
+                        continue;
+                    }
                     allgrabBean.setWorkertotal("¥0");//工钱
                     Double totalPrice = maintenanceRecordProductMapper.getTotalPriceByRecordId(allgrabBean.getHouseFlowId(),1);
                     if(totalPrice!=null) {
