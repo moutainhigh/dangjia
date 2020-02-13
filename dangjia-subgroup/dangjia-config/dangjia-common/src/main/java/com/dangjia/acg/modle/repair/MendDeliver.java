@@ -115,8 +115,8 @@ public class MendDeliver extends BaseEntity {
 	private Date submitTime;
 
 	@Column(name = "shipping_state")
-	@Desc(value = "退货状态（0供应商待确认,1已确认,2已结算,3取消，4部分退货")
-	@ApiModelProperty("退货状态（0供应商待确认,1已确认,2已结算,3取消，4部分退货")
+	@Desc(value = "退货状态（0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分收货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）")
+	@ApiModelProperty("退货状态（0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分收货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）")
 	private Integer shippingState;
 
 	@Column(name = "storefront_id")

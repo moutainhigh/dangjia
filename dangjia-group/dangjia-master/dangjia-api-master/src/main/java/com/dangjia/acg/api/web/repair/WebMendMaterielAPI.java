@@ -21,6 +21,28 @@ import javax.servlet.http.HttpServletRequest;
 public interface WebMendMaterielAPI {
 
     /**
+     *店铺--售后处理--待处理列表
+     * @param request
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param pageDTO
+     * @param state 状态默认：1待处理，2已处理
+     * @param likeAddress
+     * @param type 查询类型：1退货退款，2仅退款
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/searchReturnRrefundList")
+    @ApiOperation(value = "店铺--售后处理--待处理列表", notes = "店铺--售后处理--待处理列表")
+    ServerResponse searchReturnRrefundList(
+            @RequestParam("request") HttpServletRequest request,
+            @RequestParam("cityId") String cityId,
+            @RequestParam("userId") String userId,
+            @RequestParam("pageDTO") PageDTO pageDTO,
+            @RequestParam("state") Integer state,
+            @RequestParam("likeAddress") String likeAddress,
+            @RequestParam("type") Integer type);
+
+    /**
      * state:0待处理
      * @param request
      * @param cityId
@@ -67,7 +89,7 @@ public interface WebMendMaterielAPI {
      * @param likeAddress 模糊查询参数
      * @return
      */
-    @PostMapping(value = "web/repair/webMendMateriel/materialBackStateProcessing")
+   /* @PostMapping(value = "web/repair/webMendMateriel/materialBackStateProcessing")
     @ApiOperation(value = "工匠申请退货（待审核和已经审核待处理）", notes = "工匠申请退货（待审核和已经审核待处理）")
     ServerResponse materialBackStateProcessing(
             @RequestParam("request") HttpServletRequest request,
@@ -75,7 +97,7 @@ public interface WebMendMaterielAPI {
             @RequestParam("cityId") String cityId,
             @RequestParam("pageDTO") PageDTO pageDTO,
             @RequestParam("state") String state,
-            @RequestParam("likeAddress") String likeAddress);
+            @RequestParam("likeAddress") String likeAddress);*/
 
     /**
      * auther:chenyufeng
@@ -97,6 +119,7 @@ public interface WebMendMaterielAPI {
             @RequestParam("likeAddress") String likeAddress);
 
 
+
     /**
      *
      * @param request
@@ -107,26 +130,7 @@ public interface WebMendMaterielAPI {
      * @param likeAddress
      * @return
      */
-    @PostMapping(value = "web/repair/webMendMateriel/ownerReturnHandleIng")
-    @ApiOperation(value = "店铺管理—售后管理—业主退货退款(待审核)", notes = "店铺管理—售后管理—工匠退货(待审核)")
-    ServerResponse ownerReturnHandleIng(
-            @RequestParam("request") HttpServletRequest request,
-            @RequestParam("cityId") String cityId,
-            @RequestParam("userId") String userId,
-            @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("state") String state,
-            @RequestParam("likeAddress") String likeAddress);
-    /**
-     *
-     * @param request
-     * @param cityId
-     * @param userId
-     * @param pageDTO
-     * @param state
-     * @param likeAddress
-     * @return
-     */
-    @PostMapping(value = "web/repair/webMendMateriel/ownerReturnProssing")
+    /*@PostMapping(value = "web/repair/webMendMateriel/ownerReturnProssing")
     @ApiOperation(value = "店铺管理—售后管理—业主退货退款(已经审核待处理)", notes = "店铺管理—售后管理—工匠退货(已经审核待处理)")
     ServerResponse ownerReturnProssing(
             @RequestParam("request") HttpServletRequest request,
@@ -134,7 +138,7 @@ public interface WebMendMaterielAPI {
             @RequestParam("userId") String userId,
             @RequestParam("pageDTO") PageDTO pageDTO,
             @RequestParam("state") String state,
-            @RequestParam("likeAddress") String likeAddress);
+            @RequestParam("likeAddress") String likeAddress);*/
     /**
      *
      * @param request
