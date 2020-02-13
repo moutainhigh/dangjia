@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.repair;
 
+import com.dangjia.acg.dto.repair.MendOrderDTO;
 import com.dangjia.acg.dto.repair.SurplusMaterialDTO;
 import com.dangjia.acg.modle.repair.MendOrder;
 import org.apache.ibatis.annotations.Param;
@@ -62,10 +63,18 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
             @Param("storefrontId") String storefrontId,
             @Param("likeAddress") String likeAddress);
 
-    List<MendOrder> materialBackStateProcessing(
+    /**
+     * 查询符合条件的退货申请单
+     * @param storefrontId 店铺ID
+     * @param type 查询类型：1退货退款，2仅退款
+     * @param state 状态默认：1待处理，2已处理
+     * @param likeAddress
+     * @return
+     */
+    List<MendOrderDTO> searchReturnRrefundList(
             @Param("storefrontId") String storefrontId,
             @Param("type") Integer type,
-            @Param("state") String state,
+            @Param("state") Integer state,
             @Param("likeAddress") String likeAddress);
 
     /**
