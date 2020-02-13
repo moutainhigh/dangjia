@@ -403,7 +403,7 @@ public class HouseFlowService {
             allgrabBean.setCreateDate(record.getCreateDate());
             allgrabBean.setHouseId(house.getId());
             allgrabBean.setHouseName(house.getHouseName());
-            allgrabBean.setType(3);
+            allgrabBean.setType(type);
             allgrabBean.setOrderType(0);
             allgrabBean.setSquare( (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
             allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
@@ -494,7 +494,7 @@ public class HouseFlowService {
             allgrabBean.setCreateDate(houseFlow.getCreateDate());
             allgrabBean.setHouseName(house.getHouseName());
             allgrabBean.setHouseId(house.getId());
-            allgrabBean.setType(1);
+            allgrabBean.setType(type);
             allgrabBean.setOrderType(0);
             allgrabBean.setSquare((house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
             allgrabBean.setHouseMember((mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
