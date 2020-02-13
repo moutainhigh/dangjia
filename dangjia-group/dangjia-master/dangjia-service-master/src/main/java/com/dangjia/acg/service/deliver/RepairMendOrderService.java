@@ -484,9 +484,14 @@ public class RepairMendOrderService {
             //orderSplitItem.setId(refundOrderItemDTO.getOrderSplitItemId());
             Double price = orderSplitItem.getPrice();//购买单价
             Double shopCount=orderSplitItem.getShopCount();//购买数据
+            Double transportationCost=0.0;
+            Double stevedorageCost=0.0;
             OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(orderSplitItem.getOrderItemId());//原订单信息
-            Double transportationCost=orderItem.getTransportationCost();//运费
-            Double stevedorageCost=orderItem.getStevedorageCost();//搬运费
+            if(orderItem!=null){
+                transportationCost=orderItem.getTransportationCost();//运费
+                stevedorageCost=orderItem.getStevedorageCost();//搬运费
+            }
+
             //计算可退运费
             if(transportationCost>0.0) {
                 Double returnRransportationCost = CommonUtil.getReturnRransportationCost(price, shopCount, returnCount,transportationCost);

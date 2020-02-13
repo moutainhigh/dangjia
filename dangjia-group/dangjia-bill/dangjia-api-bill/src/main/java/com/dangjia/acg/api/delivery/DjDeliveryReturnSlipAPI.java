@@ -29,7 +29,16 @@ public interface DjDeliveryReturnSlipAPI {
                                        @RequestParam("userId") String userId,
                                        @RequestParam("cityId") String cityId,
                                        @RequestParam("searchKey") String searchKey,
-                                       @RequestParam("invoiceStatus") String invoiceStatus);
+                                       @RequestParam("invoiceStatus") Integer invoiceStatus);
+
+    @PostMapping("/delivery/djDeliveryReturnSlip/queryRefundSupplyTaskList")
+    @ApiOperation(value = "退货任务任务列表", notes = "退货任务任务列表")
+    ServerResponse queryRefundSupplyTaskList(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("pageDTO") PageDTO pageDTO,
+                                       @RequestParam("userId") String userId,
+                                       @RequestParam("cityId") String cityId,
+                                       @RequestParam("searchKey") String searchKey,
+                                       @RequestParam("invoiceStatus") Integer invoiceStatus);
 
     @PostMapping("/delivery/djDeliveryReturnSlip/setDeliveryTask")
     @ApiOperation(value = "处理供货任务", notes = "处理供货任务")

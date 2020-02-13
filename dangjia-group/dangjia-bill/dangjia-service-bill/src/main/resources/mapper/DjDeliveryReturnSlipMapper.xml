@@ -28,11 +28,23 @@
             dsd.ship_address LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
-        <if test="null!=invoiceStatus and ''!=invoiceStatus">
+        <if test="invoiceStatus==6">
+            AND dsd.shipping_state=4
+            and dsd.complain_status=1
+        </if>
+        <if test="invoiceStatus==7">
+            AND dsd.shipping_state=4
+            and dsd.complain_status=2
+        </if>
+        <if test="invoiceStatus==8">
+            AND (dsd.shipping_state in(2,4,8,10)
+             or (dsd.shipping_state=4 and dsd.complain_status=3))
+        </if>
+        <if test="invoiceStatus!=-1 and invoiceStatus!=6 and invoiceStatus!=7 and invoiceStatus!=8">
             AND dsd.shipping_state=#{invoiceStatus}
         </if>
         and dsd.city_id=#{cityId}
-        and dsd.shipping_state!=3
+        and dsd.shipping_state in(0,1,2,4,5,7,8,10)
         ORDER BY dsd.create_date desc
     </select>
 

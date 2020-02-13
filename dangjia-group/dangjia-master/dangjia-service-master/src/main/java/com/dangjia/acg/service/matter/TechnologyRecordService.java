@@ -184,8 +184,10 @@ public class TechnologyRecordService {
                     List<TechnologyRecordDTO> technologyRecordDTOS = workNodeDTOA.getTrList();
                     if (CommonUtil.isEmpty(workNodeDTOA.getProductId())) {
                         StorefrontProduct storefrontProduct = masterStorefrontProductMapper.selectByPrimaryKey(pt.getProductId());
-                        workNodeDTOA.setProductName(storefrontProduct.getProductName());//商品名
-                        workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
+                        if(storefrontProduct!=null){
+                            workNodeDTOA.setProductName(storefrontProduct.getProductName());//商品名
+                            workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
+                        }
                     }
 
                     TechnologyRecordDTO trd = new TechnologyRecordDTO();

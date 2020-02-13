@@ -84,10 +84,40 @@ public class DjDeliveryReturnSlipService {
      *
      * @param pageDTO
      * @param searchKey
-     * @param invoiceStatus 0:全部  0,0:代发货  0,1:已发货待收货  0,2:已收货  0,4:部分收货  1,0:待退货  1,1:已确认  1,2:已结算(已退货)  1,3:拒绝退货
+     * @param invoiceStatus 0待发货，1待收货，4部分收货，5.已结算 6已认可部分收货 7，已申诉部分收货 8.已收货待结算（2,7，8，10），
+     * 0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算,6店铺撤回(只待发货才能撤回)7-待安装 8-已完成）9-拒绝收货 10 -待评价
+     *  (0,1,2,4,5,7,8,10)
      * @return
      */
-    public ServerResponse querySupplyTaskList(PageDTO pageDTO, String userId, String cityId, String searchKey, String invoiceStatus) {
+    public ServerResponse querySupplyTaskList(PageDTO pageDTO, String userId, String cityId, String searchKey, Integer invoiceStatus) {
+        try {
+            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
+            if(null==djSupplier)
+                return ServerResponse.createByErrorMessage("未找到符合条件的供应商信息");
+            PageInfo pageResult=null;
+            List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS = null;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyDeliverTaskList(djSupplier.getId(), searchKey, invoiceStatus, cityId);
+            pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
+            this.duplicatedCode(djDeliveryReturnSlipDTOS);
+            if(djDeliveryReturnSlipDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败: " + e);
+        }
+    }
+    /**
+     * 退货任务列表
+     *
+     * @param pageDTO
+     * @param searchKey
+     * @param invoiceStatus 0:全部  0,0:代发货  0,1:已发货待收货  0,2:已收货  0,4:部分收货 0,11已认可
+     *                      1,0:待退货  1,1:已确认  1,2:已结算(已退货)  1,3:拒绝退货
+     * @return
+     */
+    public ServerResponse queryRefundSupplyTaskList(PageDTO pageDTO, String userId, String cityId, String searchKey, Integer invoiceStatus) {
         try {
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
@@ -100,18 +130,11 @@ public class DjDeliveryReturnSlipService {
                 pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                 this.duplicatedCode(djDeliveryReturnSlipDTOS);
             }else if(!CommonUtil.isEmpty(invoiceStatus)){
-                String[] split = invoiceStatus.split(",");
-                if(split[0].equals("0")){
+
                     PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyDeliverTaskList(djSupplier.getId(), searchKey, split[1], cityId);
+                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, "", cityId);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                     this.duplicatedCode(djDeliveryReturnSlipDTOS);
-                }else if(split[0].equals("1")){
-                    PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, split[1], cityId);
-                    pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
-                    this.duplicatedCode(djDeliveryReturnSlipDTOS);
-                }
             }else{
                 return ServerResponse.createByErrorMessage("查询失败: invoiceStatus不能为空");
             }
@@ -123,6 +146,8 @@ public class DjDeliveryReturnSlipService {
             return ServerResponse.createByErrorMessage("查询失败: " + e);
         }
     }
+
+
     private void duplicatedCode(List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS){
         djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
             Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
@@ -176,7 +201,7 @@ public class DjDeliveryReturnSlipService {
                     String repairMendMaterielId = obj.getString("repairMendMaterielId");
                     MendMateriel mendMateriel=new MendMateriel();
                     mendMateriel.setId(repairMendMaterielId);
-                    mendMateriel.setSupActualCount(supActualCount);
+                    mendMateriel.setActualCount(supActualCount);
                     iBillMendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
                 });
                 if(!CommonUtil.isEmpty(reasons)){
