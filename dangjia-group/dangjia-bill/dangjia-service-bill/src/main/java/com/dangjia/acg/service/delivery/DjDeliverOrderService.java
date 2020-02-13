@@ -21,10 +21,7 @@ import com.dangjia.acg.dto.design.CollectDataDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.design.WorkChartListDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
-import com.dangjia.acg.dto.order.DOrderArrFineInfoDTO;
-import com.dangjia.acg.dto.order.DOrderArrInfoDTO;
-import com.dangjia.acg.dto.order.DOrderFineInfoDTO;
-import com.dangjia.acg.dto.order.DOrderInfoDTO;
+import com.dangjia.acg.dto.order.*;
 import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.order.IBillHouseMapper;
 import com.dangjia.acg.mapper.order.IBillQuantityRoomImagesMapper;
@@ -68,6 +65,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DjDeliverOrderService {
@@ -230,7 +228,7 @@ public class DjDeliverOrderService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryOrderNumber(String userToken, String houseId) {
+    public ServerResponse queryOrderNumber(String userToken) {
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
         Object object = memberAPI.getMember(userToken);
@@ -246,7 +244,7 @@ public class DjDeliverOrderService {
         }
 
         House house = (House) object;
-        houseId = house.getId();
+        String houseId = house.getId();
 
 //        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
 
@@ -330,7 +328,7 @@ public class DjDeliverOrderService {
         }
 
         //获取工序信息
-        List<Object> workNodeListDTO = summationMethod(houseFlows, houseId);
+        List<Object> workNodeListDTO = summationMethod(houseFlows, house);
         workInFoDTO.setWorkList(workNodeListDTO);
 
         //获取客服明细
@@ -447,15 +445,15 @@ public class DjDeliverOrderService {
     /**
      * 获取工序信息
      *
-     * @param houseId
+     * @param house
      * @return
      */
-    public List<Object> summationMethod(List<HouseFlow> houseFlows, String houseId) {
+    public List<Object> summationMethod(List<HouseFlow> houseFlows, House house) {
         WorkNodeListDTO workNodeListDTO;
         //查询工序节点
-        List<NodeNumberDTO> nodeNumberDTOS = iBillDjDeliverOrderItemMapper.queryNodeNumber(houseId);
+        List<NodeNumberDTO> nodeNumberDTOS = iBillDjDeliverOrderItemMapper.queryNodeNumber(house.getId());
         //查询材料数量
-        List<MaterialNumberDTO> materialNumberDTOS = iBillDjDeliverOrderItemMapper.queryMaterialNumber(houseId);
+        List<MaterialNumberDTO> materialNumberDTOS = iBillDjDeliverOrderItemMapper.queryMaterialNumber(house.getId());
 
         Example example;
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
@@ -473,50 +471,110 @@ public class DjDeliverOrderService {
             gList = new ArrayList<>();
             listMap = new HashMap<>();
             workNodeListDTO = new WorkNodeListDTO();
-            listMap.put("name", "预计工期");
-            if (houseFlow.getStartDate() == null) {
-                listMap.put("value", 0 + "天");
-            } else {
-                listMap.put("value", DateUtil.getDiffDays(new Date(), houseFlow.getStartDate()) + "天");
-            }
-            gList.add(listMap);
-            listMap = new HashMap<>();
-            listMap.put("name", "实际工期");
-            if (houseFlow.getEndDate() == null) {
-                listMap.put("value", 0 + "天");
-            } else {
-                listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
-            }
-            gList.add(listMap);
 
-            //获取工序已验收节点
-            Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == mapList.get(0).get("i")).count();
-            //获取工序全部节点
-            Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")).count();
-            listMap = new HashMap<>();
-            if (iEnd == 0) {
+            if (houseFlow.getWorkerTypeId().equals("1")) {
+
+                //设计师
+                listMap = new HashMap<>();
+                listMap.put("name", "实际工期");
+                if (houseFlow.getEndDate() != null) {
+                    listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
+                } else {
+                    listMap.put("value", 0 + "天");
+                }
+                gList.add(listMap);
+
+                listMap = new HashMap<>();
                 listMap.put("name", "施工节点");
-                listMap.put("value", 0 + "/" + 0);
+                listMap.put("value", 0 + "/" + 3);
                 workNodeListDTO.setHundred(0);
-            } else {
+                if (house.getDesignerOk() == 9) {
+                    //上传量房 百分比
+                    workNodeListDTO.setHundred(33);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 1 + "/" + 3);
+                } else if (house.getDesignerOk() == 7) {
+                    //平面图通过 百分比
+                    workNodeListDTO.setHundred(66);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 2 + "/" + 3);
+                } else if (house.getDesignerOk() == 3) {
+                    //施工图通过 百分比
+                    workNodeListDTO.setHundred(100);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 3 + "/" + 3);
+                }
+                gList.add(listMap);
+            } else if (houseFlow.getWorkerTypeId().equals("2")) {
+                //精算师 百分比
+                listMap = new HashMap<>();
+                listMap.put("name", "实际工期");
+                if (houseFlow.getEndDate() != null) {
+                    listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
+                } else {
+                    listMap.put("value", 0 + "天");
+                }
+                gList.add(listMap);
+
+                listMap = new HashMap<>();
                 listMap.put("name", "施工节点");
-                listMap.put("value", iEnd + "/" + iStart);
-                workNodeListDTO.setHundred((int) (iStart / iEnd * 100));
+                listMap.put("value", 0 + "/" + 1);
+                workNodeListDTO.setHundred(0);
+                if (house.getBudgetOk() == 3) {
+                    workNodeListDTO.setHundred(100);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 1 + "/" + 1);
+                }
+                gList.add(listMap);
+            } else {
+                listMap.put("name", "预计工期");
+                if (houseFlow.getStartDate() == null) {
+                    listMap.put("value", 0 + "天");
+                } else {
+                    listMap.put("value", DateUtil.getDiffDays(new Date(), houseFlow.getStartDate()) + "天");
+                }
+                gList.add(listMap);
+                listMap = new HashMap<>();
+                listMap.put("name", "实际工期");
+                if (houseFlow.getEndDate() == null) {
+                    listMap.put("value", 0 + "天");
+                } else {
+                    listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
+                }
+                gList.add(listMap);
+
+                //获取工序已验收节点
+                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == mapList.get(0).get("i")).count();
+                //获取工序全部节点
+                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")).count();
+                listMap = new HashMap<>();
+                if (iEnd == 0) {
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 0 + "/" + 0);
+                    workNodeListDTO.setHundred(0);
+                } else {
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", iEnd + "/" + iStart);
+                    workNodeListDTO.setHundred((int) (iStart / iEnd * 100));
+                }
+                gList.add(listMap);
+
+                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
+                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO::getShopCount).sum();
+                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
+                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO::getAskCount).sum();
+                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
+                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO::getReturnCount).sum();
+                listMap = new HashMap<>();
+                listMap.put("name", "材料使用");//全部节点
+                listMap.put("value", aa + rr + "/" + ss);//全部节点
+                gList.add(listMap);
             }
-            gList.add(listMap);
-
-            int ss = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
-                    && x.getShopCount() != null).mapToInt(MaterialNumberDTO::getShopCount).sum();
-            int aa = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
-                    && x.getAskCount() != null).mapToInt(MaterialNumberDTO::getAskCount).sum();
-            int rr = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
-                    && x.getReturnCount() != null).mapToInt(MaterialNumberDTO::getReturnCount).sum();
-            listMap = new HashMap<>();
-            listMap.put("name", "材料使用");//全部节点
-            listMap.put("value", aa + rr + "/" + ss);//全部节点
-            gList.add(listMap);
             workNodeListDTO.setLists(gList);
-
             workNodeListDTO.setImage(address + workerType.get(0).getImage());
             workNodeListDTO.setWorkName((String) mapList.get(0).get("name"));
             workList.add(workNodeListDTO);
@@ -1066,7 +1124,7 @@ public class DjDeliverOrderService {
      * @return
      */
     public ServerResponse queryOrderInfo(PageDTO pageDTO, String userId, String cityId,
-                                         String orderKey, int state) {
+                                         String orderKey, Integer state) {
 
         Example example = new Example(Storefront.class);
         example.createCriteria().andEqualTo(Storefront.USER_ID, userId).
@@ -1953,6 +2011,7 @@ public class DjDeliverOrderService {
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("删除失败", e);
             return ServerResponse.createByErrorMessage("删除失败");
         }
     }
@@ -1969,6 +2028,9 @@ public class DjDeliverOrderService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<OrderStorefrontDTO> orderStorefrontDTOS = null;
+            if (StringUtils.isBlank(state)) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
             if (state.equals("2") || state.equals("4")) {
                 orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(houseId, state);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
@@ -2023,8 +2085,8 @@ public class DjDeliverOrderService {
     public Member queryWorker(String houseId, String workerTypeId) {
         try {
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID)
-                    .andEqualTo(HouseFlow.WORKER_TYPE_ID)
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
+                    .andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(HouseFlow.DATA_STATUS, 0);
             HouseFlow houseFlow = iBillHouseFlowMapper.selectOneByExample(example);
             Member member = iBillMemberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
@@ -2096,16 +2158,17 @@ public class DjDeliverOrderService {
     /**
      * 查询订单人工商品
      * orderStatus 3待收货，4已完成
+     *
      * @param houseId
      * @return
      */
-    public ServerResponse queryWorkerGoods(String houseId,Integer orderStatus) {
+    public ServerResponse queryWorkerGoods(String houseId, Integer orderStatus) {
         try {
 
             List<WorkerGoodsInFoDTO> workerGoodsInFoDTOS = iBillDjDeliverOrderMapper.queryWorkerGoods(houseId, orderStatus);
-            if(workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0){
+            if (workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0) {
                 String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-                workerGoodsInFoDTOS.forEach(a->{
+                workerGoodsInFoDTOS.forEach(a -> {
                     a.setImage(imageAddress + a.getImage());
                 });
             }
@@ -2115,6 +2178,7 @@ public class DjDeliverOrderService {
             return ServerResponse.createBySuccess("查询成功", workerGoodsInFoDTOS);
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -2122,25 +2186,26 @@ public class DjDeliverOrderService {
     /**
      * 查询订单人工商品详情
      * orderStatus 3待收货，4已完成
+     *
      * @param id
      * @return
      */
     public ServerResponse queryWorkerGoodsInFo(String id) {
         try {
             List<WorkerGoodsInFoDTO> workerGoodsInFoDTOS = iBillDjDeliverOrderMapper.queryWorkerGoodsInFo(id);
-            List<Map<String,Object>> list = new ArrayList<>();
-            Map<String,Object> map = new HashMap<>();
-            if(workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0){
+            List<Map<String, Object>> list = new ArrayList<>();
+            Map<String, Object> map = new HashMap<>();
+            if (workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0) {
                 House house = iBillHouseMapper.selectByPrimaryKey(workerGoodsInFoDTOS.get(0).getHouseId());
                 String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
-                map.put("houseName",houseName);
+                map.put("houseName", houseName);
                 map.put("createDate", workerGoodsInFoDTOS.get(0).getCreateDate());
                 map.put("totalAmount", workerGoodsInFoDTOS.get(0).getTotalAmount());
                 String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
 
-                workerGoodsInFoDTOS.forEach(a->{
+                workerGoodsInFoDTOS.forEach(a -> {
                     a.setTotalNodeNumber(iBillDjDeliverOrderMapper.queryArrNumber(a.getProductTemplateId()));//查询总节点数
-                    a.setCompletedNodeNumber( iBillDjDeliverOrderMapper.queryTestNumber(a.getProductTemplateId(),a.getHouseId(),a.getWorkerId()));//已完成节点
+                    a.setCompletedNodeNumber(iBillDjDeliverOrderMapper.queryTestNumber(a.getProductTemplateId(), a.getHouseId(), a.getWorkerId()));//已完成节点
                     a.setImage(imageAddress + a.getImage());
                 });
             }
@@ -2153,6 +2218,27 @@ public class DjDeliverOrderService {
             return ServerResponse.createBySuccess("查询成功", list);
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 完工后-花费明细
+     *
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryCostDetailsAfterCompletion(String houseId) {
+        try {
+            List<DecorationCostDTO> decorationCostDTOS = iBillDjDeliverOrderMapper.queryCostDetailsAfterCompletion(houseId);
+            Map<String, List<DecorationCostDTO>> collect = decorationCostDTOS.stream()
+                    .collect(Collectors.groupingBy(DecorationCostDTO::getWorkerTypeId));
+            return ServerResponse.createBySuccess("查询成功", collect);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }

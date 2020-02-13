@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.delivery.IOrderItemMapper">
 
-    <sql id="all_columns">
+	<sql id="all_columns">
 		id,
 		order_id as orderId,
 		house_id as houseId,
@@ -40,6 +40,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		order_status as orderStatus,
 		worker_type_id as workerTypeId,
 		cancellation_time as cancellationTime
+	</sql>
+	<sql id="all_m_columns">
+		m.id,
+		m.order_id as orderId,
+		m.house_id as houseId,
+		m.product_id as productId,
+		m.product_sn as productSn,
+		m.product_name as productName,
+		m.product_nick_name as productNickName,
+		m.price,
+		m.cost,
+		m.shop_count as shopCount,
+		m.ask_count as askCount,
+		m.unit_name as unitName,
+		m.total_price as totalPrice,
+		m.product_type as productType,
+		m.category_id as categoryId,
+		m.worker_goods_name as workerGoodsName,
+		m.worker_goods_sn as workerGoodsSn,
+		m.worker_goods_id as workerGoodsId,
+		m.image,
+		m.data_status as dataStatus,
+		m.create_date as createDate,
+		m.modify_date as modifyDate,
+		m.storefont_id as storefontId,
+		m.activity_red_pack_id as activityRedPackId,
+		m.discount_price as discountPrice,
+		m.actual_payment_price as actualPaymentPrice,
+		m.stevedorage_cost as stevedorageCost,
+		m.transportation_cost as transportationCost,
+		m.return_count as returnCount,
+		m.receive_count as receiveCount,
+		m.is_reservation_deliver as isReservationDeliver,
+		m.reservation_deliver_time as reservationDeliverTime,
+		m.order_status as orderStatus,
+		m.worker_type_id as workerTypeId,
+		m.cancellation_time as cancellationTime
 	</sql>
 	<select id="queryShopGoods" resultType="com.dangjia.acg.dto.actuary.ShopGoodsDTO">
 		SELECT
@@ -143,11 +180,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<!-- 根据orderId查询 -->
 	<select id="byOrderIdList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.deliver.OrderItem">
 		SELECT
-		<include refid="all_columns"/>
-		FROM dj_deliver_order_item
+		<include refid="all_m_columns"/>,p.value_id_arr valueIdArr,p.value_name_arr valueNameArr
+		FROM dj_deliver_order_item m
+		INNER JOIN dj_basics_storefront_product sp ON sp.id = m.product_id
+		INNER JOIN dj_basics_product_template p ON sp.prod_template_id = p.id
 		where
-			order_id = #{orderId}
-		ORDER BY create_date desc
+		m.order_id = #{orderId}
+		ORDER BY m.create_date desc
 	</select>
 	<!--更新名称-->
 
@@ -161,5 +200,39 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 
+	<select id="searchCountItemByInfo" resultType="java.util.Map">
+		SELECT
+			IFNULL(sum(t2.shop_count),0) shopCount,
+			IFNULL(sum(t2.ask_count),0) askCount
+		FROM
+			dj_deliver_order t1,
+			dj_deliver_order_item t2
+		WHERE
+			t1.id = t2.order_id
+		AND t1.storefont_id = #{storefrontId}
+		AND (
+			t1.address_id = #{addressId}
+			OR t1.house_id = #{houseId}
+		)
+		AND t2.product_id = #{productId}
+
+	</select>
+	<!--查询是否存在预约商品-->
+	<select id="getReservationDeliverState" resultType="com.dangjia.acg.modle.deliver.OrderItem">
+		SELECT
+		<include refid="all_m_columns"/>
+		FROM
+			dj_deliver_order t1
+		INNER JOIN dj_deliver_order_item m ON t1.id = m.order_id
+		AND m.is_reservation_deliver = '1'
+		WHERE
+			t1.id = #{orderId}
+		AND t1.data_status = 0
+		AND m.is_reservation_deliver = '1'
+		AND (
+			m.reservation_deliver_time IS NULL
+			OR m.reservation_deliver_time = ''
+		)
+    </select>
 </mapper>
 

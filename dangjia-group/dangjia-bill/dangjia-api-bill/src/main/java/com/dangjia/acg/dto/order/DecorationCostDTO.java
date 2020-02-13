@@ -50,6 +50,12 @@ public class DecorationCostDTO {
     @ApiModelProperty("自购商品花费")
     private Double purchaseTotalPrice;
 
+    @ApiModelProperty("商品名称")
+    private String productName;
+
+    @ApiModelProperty("时间")
+    private Date createDate;
+
     List<DecorationCostItemDTO> decorationCostItemList;//当前花费详情商品信息
 
 }

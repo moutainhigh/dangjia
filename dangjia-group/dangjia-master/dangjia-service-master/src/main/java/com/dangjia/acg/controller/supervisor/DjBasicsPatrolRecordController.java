@@ -18,32 +18,26 @@ public class DjBasicsPatrolRecordController implements DjBasicsPatrolRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addDjBasicsPatrolRecord(HttpServletRequest request, String userToken, String houseId, String images, String content) {
-        return patrolRecordServices.addDjBasicsPatrolRecord(request, userToken, houseId, images, content);
-    }
-
-
-    @Override
-    @ApiMethod
-    public ServerResponse queryDjBasicsPatrolRecord(HttpServletRequest request, String userToken, PageDTO pageDTO) {
-        return patrolRecordServices.queryDjBasicsPatrolRecord(request, userToken, pageDTO);
+    public ServerResponse addPatrolRecord(HttpServletRequest request, String userToken, String houseId, String content, String images) {
+        return patrolRecordServices.addPatrolRecord(userToken, houseId, content, images);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryWorkerRewardPunishRecord(HttpServletRequest request, PageDTO pageDTO, String type, String keyWord) {
-        return patrolRecordServices.queryWorkerRewardPunishRecord(request, pageDTO, type, keyWord);
+    public ServerResponse getPatrolRecordList(HttpServletRequest request, PageDTO pageDTO, Integer type, String searchKey) {
+        return patrolRecordServices.getPatrolRecordList(pageDTO, type, searchKey);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryPatrolRecordDetail(HttpServletRequest request, @RequestParam("rewordPunishCorrelationId") String rewordPunishCorrelationId) {
-        return patrolRecordServices.queryPatrolRecordDetail(request, rewordPunishCorrelationId);
+    public ServerResponse getAppPatrolRecordList(HttpServletRequest request, String userToken, PageDTO pageDTO, Integer type) {
+        return patrolRecordServices.getAppPatrolRecordList(userToken, pageDTO, type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryRewardPunishRecordDetail(HttpServletRequest request, String id) {
-        return patrolRecordServices.queryRewardPunishRecordDetail(request, id);
+    public ServerResponse getPatrolRecordDetails(HttpServletRequest request, String userToken, String patrolRecordId) {
+        return patrolRecordServices.getPatrolRecordDetails(userToken, patrolRecordId);
     }
+
 }

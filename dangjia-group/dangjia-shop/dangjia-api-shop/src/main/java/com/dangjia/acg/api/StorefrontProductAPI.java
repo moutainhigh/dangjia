@@ -52,9 +52,10 @@ public interface StorefrontProductAPI {
 
     @PostMapping("/web/queryStorefrontProductGroundByKeyWord")
     @ApiOperation(value = "供货设置-已选商品-通过货品或者商品名称查询", notes = "供货设置-已选商品-通过货品或者商品名称查询")
-    ServerResponse queryStorefrontProductGroundByKeyWord(
-            @RequestParam("keyWord") String keyWord,@RequestParam("userId") String userId,
-            @RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("cityId") String cityId);
+    ServerResponse queryStorefrontProductGroundByKeyWord(@RequestParam("keyWord") String keyWord,
+                                                         @RequestParam("userId") String userId,
+                                                         @RequestParam("pageDTO") PageDTO pageDTO,
+                                                         @RequestParam("cityId") String cityId);
 
 
     @PostMapping("/web/queryProductAdjustmentPriceListByKeyWord")

@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.model.PageBean;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -13,6 +12,7 @@ import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IProductWorkerMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
 import com.dangjia.acg.service.product.app.GoodsProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -41,6 +41,8 @@ public class FillWorkerService {
     private IProductWorkerMapper workerGoodsMapper;
 
     @Autowired
+    private DjBasicsProductTemplateService djBasicsProductService;
+    @Autowired
     private GoodsProductTemplateService goodsProductTemplateService;
     @Autowired
     private ConfigUtil configUtil;
@@ -51,7 +53,7 @@ public class FillWorkerService {
      *             <p>
      *             补人工,退人工共用此接口(精算内)
      */
-    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, String name, PageDTO pageDTO,String cityId) {
+    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, PageDTO pageDTO,String cityId, String orderSource) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         if (StringUtil.isEmpty(workerTypeId)) {
             return ServerResponse.createByErrorMessage("workerTypeId不能为空");
@@ -60,7 +62,7 @@ public class FillWorkerService {
         List<BudgetWorkerDTO> budgetWorkerDTOList = new ArrayList<>();
         PageInfo pageResult;
         try {
-            if (type == 0) {//精算内
+            if (type == 0 && !"1".equals(workerTypeId) && !"2".equals(workerTypeId)) {//精算内
                 Example example = new Example(BudgetMaterial.class);
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(BudgetMaterial.WORKER_TYPE_ID, workerTypeId);
@@ -68,15 +70,16 @@ public class FillWorkerService {
                 criteria.andEqualTo(BudgetMaterial.PRODUCT_TYPE, "2");
                 criteria.andNotEqualTo(BudgetMaterial.DELETE_STATE, "1");
                 criteria.andEqualTo(BudgetMaterial.CITY_ID,cityId);
-                criteria.andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ");
-                if (!CommonUtil.isEmpty(name)) {
-                    criteria.andLike(BudgetMaterial.PRODUCT_NAME, "%" + name + "%");
-                }
                 List<BudgetMaterial> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
                 for (BudgetMaterial budgetWorker : budgetWorkerList) {
-                    DjBasicsProductTemplate workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getProductId());
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
+                    DjBasicsProductTemplate workerGoods=djBasicsProductService.queryDataByProductId(budgetWorker.getProductId());  //通过商品id去关联规格
+                    String valueIdArr=workerGoods.getValueIdArr();
+                    if(!CommonUtil.isEmpty(valueIdArr)){
+                        String valueNameArr=djBasicsProductService.getNewValueNameArr(valueIdArr);
+                        budgetWorkerDTO.setValueNameArr(valueNameArr);
+                    }
                     budgetWorkerDTO.setWorkerGoodsId(budgetWorker.getProductId());
                     budgetWorkerDTO.setWorkerTypeId(budgetWorker.getWorkerTypeId());
                     budgetWorkerDTO.setWorkerGoodsSn(budgetWorker.getProductSn());
@@ -88,19 +91,20 @@ public class FillWorkerService {
                     budgetWorkerDTOList.add(budgetWorkerDTO);
                 }
             } else {
-               /* Example example = new Example(DjBasicsProductWorker.class);
-                Example.Criteria criteria = example.createCriteria();
-                criteria.andEqualTo(DjBasicsProductWorker.WORKER_TYPE_ID, workerTypeId);
-                criteria.andEqualTo(WorkerGoods.SHOW_GOODS, 1);
-                if (!CommonUtil.isEmpty(name)) {
-                    criteria.andLike(WorkerGoods.NAME, "%" + name + "%");
-                }*/
 
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId,name,cityId);
+                List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId,houseId,  orderSource);
                 pageResult = new PageInfo(workerGoodsList);
                 for (ProductWorkerDTO  workerGoods : workerGoodsList) {
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
+                    DjBasicsProductTemplate djBasicsProduct=djBasicsProductService.queryDataByProductId(workerGoods.getId());  //通过商品id去关联规格
+                    if(djBasicsProduct!=null) {
+                        String valueIdArr = djBasicsProduct.getValueIdArr();
+                        if(!CommonUtil.isEmpty(valueIdArr)) {
+                            String valueNameArr = djBasicsProductService.getNewValueNameArr(valueIdArr);
+                            budgetWorkerDTO.setValueNameArr(valueNameArr);
+                        }
+                    }
                     budgetWorkerDTO.setWorkerGoodsId(workerGoods.getId());
                     budgetWorkerDTO.setWorkerTypeId(workerGoods.getWorkerTypeId());
                     budgetWorkerDTO.setWorkerGoodsSn(workerGoods.getProductSn());

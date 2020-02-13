@@ -5,7 +5,7 @@
     <!--查询精算总价-->
      <select id="selectTotalPriceByHouseId" resultType="java.lang.Double">
         SELECT
-            sum(tt.total_price) totalPrice
+            IFNULL(sum(tt.total_price),0) totalPrice
         FROM
             (
                SELECT
@@ -30,6 +30,9 @@
                 AND t.state = 3
              <if test = "workerTypeId!=null and workerTypeId!=''">
                  and bm.worker_type_id = #{workerTypeId}
+             </if>
+             <if test = "steta!=null and steta!=''">
+                 and bm.steta = #{steta}
              </if>
              <if test = "categoryTopId!=null and categoryTopId!=''">
                  and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
@@ -236,6 +239,7 @@
             bm.product_name productName,
             pt.product_sn productSn,
             sp.image image,
+            bm.unit_name unitName,
             bm.price,
             bm.shop_count shopCount,
             bm.total_price actualPaymentPrice,

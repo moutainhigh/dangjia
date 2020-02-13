@@ -55,7 +55,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     /*更新单位*/
     void updateProductValueId(@Param("valueId") String valueId);
 
-    List<DjBasicsProductTemplateDTO>  queryProductTemplateByGoodsId(@Param("categoryId") String  categoryId,@Param("storefontId") String  storefontId,@Param("bgtype") String bgtype,@Param("name") String name);
+    List<DjBasicsProductTemplateDTO>  queryProductTemplateByGoodsId(@Param("categoryId") String  categoryId,@Param("storefontId") String  storefontId,@Param("bgtype") String bgtype,@Param("name") String name,@Param("cityId") String cityId,@Param("type") Integer type);
     //根据商品Id查货品
     List<DjBasicsProductTemplate> queryByGoodsId(@Param("goodsId") String goodsId);
 
@@ -76,7 +76,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      */
    // void deleteProductWorker(@Param("goodsId") String goodsId);
 
-    List<DjBasicsProductTemplate> queryProductByCategoryId(@Param("categoryId") String categoryId,@Param("cityId") String cityId);
+    List<DjBasicsProductTemplate> queryProductByCategoryId(@Param("categoryId") String categoryId,@Param("cityId") String cityId,@Param("searchKey") String searchKey);
 
     List<ActuarialProductAppDTO> serchCategoryProduct(@Param("categoryId") String categoryId,@Param("goodsId") String goodsId ,@Param("name")String[]   name, @Param("brandVal") String[] brandVal, @Param("attributeVal") String[] attributeVal, @Param("orderKey") String orderKey);
 
@@ -137,6 +137,8 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      * @param searchKey 商品名称
      * @return
      */
-    List<ActuarialProductAppDTO>  queryMaintenanceRecordProduct(@Param("cityId") String cityId,@Param("workerTypeId") String workerTypeId
-            ,@Param("topCategoryId") String topCategoryId,@Param("searchKey") String searchKey);
+    List<ActuarialProductAppDTO>  queryMaintenanceRecordProduct(@Param("cityId") String cityId,
+                                                                @Param("workerTypeId") String workerTypeId,
+                                                                @Param("topCategoryId") String topCategoryId,
+                                                                @Param("searchKey") String searchKey);
 }

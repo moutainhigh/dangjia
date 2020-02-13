@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -248,6 +247,10 @@ public class Member extends BaseEntity {
     @ApiModelProperty("设计师装修风格,ID")
     private String styles;// 手机
 
+    @Column(name = "auto_order")
+    @Desc(value = "是否自动接单 0=接单  1=不接单")
+    @ApiModelProperty("是否自动接单 0=接单  1=不接单")
+    private String autoOrder;
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address) {
         this.qrcode = StringUtils.isEmpty(this.qrcode) ? null : address + this.qrcode;//二维码

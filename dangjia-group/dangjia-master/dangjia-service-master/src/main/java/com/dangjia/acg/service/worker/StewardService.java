@@ -33,7 +33,6 @@ import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.util.LocationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -290,6 +289,8 @@ public class StewardService {
             }
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                     String.format(DjConstants.GJPageAddress.READPROJECTINFO, userToken, hf.getCityId(), "交底详情") + "&houseFlowId=" + houseFlowId;
+            //直接交底
+            confirmProjectInfo(houseFlowId);
             return ServerResponse.createBySuccess("交底成功", url);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("扫码失败");

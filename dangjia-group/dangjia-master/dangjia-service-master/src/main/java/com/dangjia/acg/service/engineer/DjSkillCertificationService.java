@@ -113,7 +113,7 @@ public class DjSkillCertificationService {
                     DjSkillCertification djSkillCertification=new DjSkillCertification();
                     djSkillCertification.setSkillCertificationId(skillCertificationId);
                     djSkillCertification.setType(1);
-                    djSkillCertification.setProductType(obj.getInteger("type"));
+                    djSkillCertification.setProductType(obj.getInteger("productType"));
                     djSkillCertification.setProdTemplateId(obj.getString("id"));
                     djSkillCertification.setProductName(obj.getString("name"));
                     djSkillCertification.setProductSn(obj.getString("productSn"));
@@ -142,7 +142,11 @@ public class DjSkillCertificationService {
             example.createCriteria().andEqualTo(WorkerType.DATA_STATUS,0);
             List<WorkerType> workerTypes = iWorkerTypeMapper.selectByExample(example);
             workerTypes.forEach(workerType -> {
+                workerType.setImageUrl(workerType.getImage());
                 workerType.setImage(imageAddress+workerType.getImage());
+                if(StringUtils.isEmpty(workerType.getSkillPackName())){
+                    workerType.setSkillPackName("");
+                }
             });
             return ServerResponse.createBySuccess("查询成功",workerTypes);
         } catch (Exception e) {
@@ -157,10 +161,11 @@ public class DjSkillCertificationService {
      * @param workerTypeId
      * @return
      */
-    public ServerResponse queryWorkerTypeSkillPackConfigurationDetail(Integer workerTypeId) {
+    public ServerResponse queryWorkerTypeSkillPackConfigurationDetail(String workerTypeId) {
         try {
             WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(workerTypeId);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            workerType.setImageUrl(workerType.getImage());
             workerType.setImage(imageAddress+workerType.getImage());
             return ServerResponse.createBySuccess("查询成功",workerType);
         } catch (Exception e) {
@@ -190,6 +195,11 @@ public class DjSkillCertificationService {
                 }
                 iWorkerTypeMapper.updateByPrimaryKeySelective(workerType);
             }else{
+                Example example=new Example(WorkerType.class);
+                example.createCriteria().andEqualTo(WorkerType.DATA_STATUS,0);
+                example.orderBy(WorkerType.TYPE).desc();
+                WorkerType workerType1 = iWorkerTypeMapper.selectOneByExample(example);
+                workerType.setType(workerType1.getType()+1);
                 iWorkerTypeMapper.insert(workerType);
             }
             JSONArray jsonArray = JSONArray.parseArray(jsonStr);
@@ -198,7 +208,7 @@ public class DjSkillCertificationService {
                 DjSkillCertification djSkillCertification=new DjSkillCertification();
                 djSkillCertification.setSkillCertificationId(workerType.getId());
                 djSkillCertification.setType(2);
-                djSkillCertification.setProductType(obj.getInteger("type"));
+                djSkillCertification.setProductType(obj.getInteger("productType"));
                 djSkillCertification.setProdTemplateId(obj.getString("id"));
                 djSkillCertification.setProductName(obj.getString("name"));
                 djSkillCertification.setProductSn(obj.getString("productSn"));
@@ -210,6 +220,22 @@ public class DjSkillCertificationService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createBySuccessMessage("操作失败");
+        }
+    }
+
+
+    /**
+     * 技能删除
+     * @param id
+     * @return
+     */
+    public ServerResponse deleteSkillCertification(String id) {
+        try {
+            djSkillCertificationMapper.deleteByPrimaryKey(id);
+            return ServerResponse.createBySuccessMessage("删除成功 ");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除失败 ");
         }
     }
 }

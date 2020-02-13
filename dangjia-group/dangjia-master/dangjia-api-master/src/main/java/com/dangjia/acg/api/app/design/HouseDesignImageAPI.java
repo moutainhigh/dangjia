@@ -143,7 +143,7 @@ public interface HouseDesignImageAPI {
      * @param houseId   必选 string 房子ID
      * @param userId    可选 string 可以为空
      * @param image     必选 string 图片只上传一张
-     * @param type 1设计师上传，2精算师上传
+     * @param type      1设计师上传，2精算师上传
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/设计模块
      * @title 添加平面图
@@ -216,6 +216,8 @@ public interface HouseDesignImageAPI {
      * @return_param storefrontId string 店铺ID
      * @return_param storefrontName string 店铺名称
      * @return_param storefrontIcon string 店铺图标
+     * @return_param valueNameArr string 商品属性规格名称
+     * @return_param valueIdArr string 商品属性规格ID
      * @return_param unitId string 单位ID
      * @return_param unitName string 商品单位名称
      * @remark 更多返回错误代码请看首页的错误代码描述

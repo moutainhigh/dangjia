@@ -29,9 +29,12 @@ import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.netflix.discovery.converters.Auto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +53,7 @@ import java.util.Map;
  */
 @Service
 public class MendMaterielService {
+    protected static final Logger logger = LoggerFactory.getLogger(MendMaterielService.class);
     @Autowired
     private IMendOrderMapper mendOrderMapper;
     @Autowired
@@ -71,7 +75,7 @@ public class MendMaterielService {
     @Autowired
     private RedisClient redisClient;
     @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI;
+    private MasterStorefrontService masterStorefrontService;
 
     @Autowired
     private IMendTypeRoleMapper mendTypeRoleMapper;
@@ -97,7 +101,7 @@ public class MendMaterielService {
         try{
 
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
@@ -128,7 +132,7 @@ public class MendMaterielService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse returnProductDistributionSupplier(String mendOrderId, String userId,String cityId, String actualCountList) {
         try {
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
@@ -267,7 +271,7 @@ public class MendMaterielService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
@@ -287,7 +291,7 @@ public class MendMaterielService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         //通过缓存查询店铺信息
         String userId = request.getParameter("userId");
-        Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+        Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
         if (storefront == null) {
             return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
         }
@@ -301,38 +305,41 @@ public class MendMaterielService {
         return ServerResponse.createByErrorMessage("查询失败");
     }
     }
-    //店铺管理—售后管理—业主退货退款(待处理)
-    public ServerResponse ownerReturnHandleIng(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
-        try {
-            try {
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 
-                //通过缓存查询店铺信息
-                Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
-                if (storefront == null) {
-                    return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-                }
-                List<MendOrder> mendOrderList = mendOrderMapper.materialBackStateProcessing(storefront.getId(), 5, state, likeAddress);
-                PageInfo pageResult = new PageInfo(mendOrderList);
-                List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
-                pageResult.setList(mendOrderDTOS);
-                return ServerResponse.createBySuccess("查询成功", pageResult);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ServerResponse.createByErrorMessage("查询失败");
+    /**
+     *店铺--售后处理--待处理列表
+     * @param request
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param pageDTO
+     * @param state 状态默认：1待处理，2已处理
+     * @param likeAddress
+     * @param type 查询类型：1退货退款，2仅退款
+     * @return
+     */
+    public ServerResponse searchReturnRrefundList(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, Integer state, String likeAddress,Integer type) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            //判断是否有维护店铺信息，若未维护，则返回提示
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
+            List<MendOrderDTO> mendOrderList = mendOrderMapper.searchReturnRrefundList(storefront.getId(), type, state, likeAddress);
+            PageInfo pageResult = new PageInfo(mendOrderList);
+            pageResult.setList(mendOrderList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
     //店铺管理—售后管理—业主退货退款(处理中)
-    public ServerResponse ownerReturnProssing(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
+   /* public ServerResponse ownerReturnProssing(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
         try {
             try {
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                //通过缓存查询店铺信息
-                Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+                Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
                 if (storefront == null) {
                     return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
                 }
@@ -349,13 +356,13 @@ public class MendMaterielService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
-    }
+    }*/
     //店铺管理—售后管理—业主退货退款(已经处理)
     public ServerResponse ownerReturnHandle(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
@@ -384,7 +391,7 @@ public class MendMaterielService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
@@ -406,12 +413,12 @@ public class MendMaterielService {
      * @param state       状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭 7已审核待处理）
      * @param likeAddress 模糊查询参数
      * @return
-     */
+     *//*
     public ServerResponse materialBackStateProcessing(String userId, String cityId, PageDTO pageDTO, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
@@ -424,7 +431,7 @@ public class MendMaterielService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
-    }
+    }*/
 
     /**
      * 房子id查询退货单列表
@@ -435,7 +442,7 @@ public class MendMaterielService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
@@ -557,7 +564,7 @@ public class MendMaterielService {
      */
     public ServerResponse materialOrderState(String userId, String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
         try {
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }

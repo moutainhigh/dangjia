@@ -132,7 +132,8 @@ public interface DjBasicsProductAPI {
     ServerResponse<PageInfo> queryProduct(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("pageDTO") PageDTO pageDTO,
                                           @RequestParam("categoryId") String categoryId,
-                                          @RequestParam("cityId") String cityId);
+                                          @RequestParam("cityId") String cityId,
+                                          @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/product/djBasicsProduct/queryUnit")
     @ApiOperation(value = "查询所有单位", notes = "查询所有单位")
@@ -196,7 +197,7 @@ public interface DjBasicsProductAPI {
                                                     @RequestParam("type") Integer type);
 
     @PostMapping("/product/djBasicsProduct/queryGoodsListStorefront")
-    @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
+    @ApiOperation(value = "上架商品--选取商品列表", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
     ServerResponse queryGoodsListStorefront(@RequestParam("request") HttpServletRequest request,
                                             @RequestParam("pageDTO") PageDTO pageDTO,
                                             @RequestParam("categoryId") String categoryId,

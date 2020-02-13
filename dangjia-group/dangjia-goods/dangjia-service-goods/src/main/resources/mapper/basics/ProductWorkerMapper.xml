@@ -36,42 +36,27 @@
     </select>
 
     <select id="getProductWorker" resultType="com.dangjia.acg.dto.product.ProductWorkerDTO">
+
         SELECT
-            t.id AS id,
-            t.NAME AS NAME,
-            t.goods_id AS goodsId,
-            t.category_id AS categoryId,
-            t.product_sn AS productSn,
-            t.image AS image,
-            t.unit_id AS unitId,
-            t.label_id AS labelId,
-            t.unit_name AS unitName,
-            t.type AS type,
-            t.istop,
-            t.price AS price,
-            t.other_name AS otherName,
-            t.create_date AS createDate,
-            t.modify_date AS modifyDate,
-            t.work_explain AS workExplain,
-            t.worker_dec AS workerDec,
-            t.worker_standard AS workerStandard,
-            t.worker_type_id AS workerTypeId,
-            t.adjusted_price AS adjustedPrice,
-            t.modity_price_time as modityPriceTime,
-            t.technology_ids AS technologyIds,
-            t.considerations,
-            t.calculate_content calculateContent,
-            t.build_content buildContent,
-            t.is_agency_purchase isAgencyPurchase
+            abw.product_id AS id,
+            abw.worker_type_id AS workerTypeId,
+            abw.product_sn AS productSn,
+            abw.product_name AS name,
+            abw.price AS price,
+            abw.unit_name AS unitName,
+            abw.image AS image
         FROM
-            dj_basics_product_template t
-        WHERE t.maket = 1
-        AND t.worker_type_id = #{workerTypeId}
-        and t.city_id=#{cityId}
-        <if test="name!=null and name!=''">
-            AND t.`name` LIKE CONCAT('%', #{name}, '%')
+        dj_deliver_order_item abw
+        INNER JOIN dj_deliver_order o on o.id=abw.order_id
+        WHERE
+        o.house_id = #{houseId}
+        and abw.product_type='2'
+        AND o.payment != 0
+        <if test="orderSource!=null and orderSource!=''">
+            AND o.order_source = #{orderSource}
         </if>
 
+        AND abw.worker_type_id = #{workerTypeId}
     </select>
 
     <!--更新单位-->

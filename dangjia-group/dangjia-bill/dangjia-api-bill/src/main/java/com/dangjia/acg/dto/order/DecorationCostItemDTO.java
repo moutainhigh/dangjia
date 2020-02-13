@@ -1,6 +1,7 @@
 package com.dangjia.acg.dto.order;
 
 import com.dangjia.acg.dto.refund.DeliverOrderAddedProductDTO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -45,6 +46,8 @@ public class DecorationCostItemDTO {
     private Double actualPaymentPrice;//商品花费
 
     private Integer steta;//商品类型 （1我们购，2自购商品）
+
+    private String unitName;//商品单位名称
 
     private String actuaryBudgetId;//精算商品ID（自购商品才有）
 

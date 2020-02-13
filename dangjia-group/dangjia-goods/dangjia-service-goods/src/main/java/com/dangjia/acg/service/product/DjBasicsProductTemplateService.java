@@ -13,16 +13,16 @@ import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.product.*;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
-import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductAddedRelationMapper;
+import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductMapper;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.storefront.StorefrontProductAddedRelation;
-import com.dangjia.acg.service.basics.TechnologyService;
 import com.dangjia.acg.service.storefront.GoodsStorefrontProductService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -75,6 +75,8 @@ public class DjBasicsProductTemplateService {
     @Autowired
     private ILabelMapper iLabelMapper;
 
+    @Autowired
+    private IGoodsStorefrontProductMapper iGoodsStorefrontProductMapper;
     @Autowired
     private GoodsStorefrontProductService   goodsStorefrontProductService;
     @Autowired
@@ -134,6 +136,7 @@ public class DjBasicsProductTemplateService {
 
     /**
      * 根据类型查询同级货品
+     * 根据类型查询同级货品
      * @param categoryId
      * @return
      */
@@ -156,9 +159,8 @@ public class DjBasicsProductTemplateService {
      */
     public DjBasicsProductTemplate queryDataByProductId(String productId) {
         try {
-            Example example = new Example(DjBasicsProductTemplate.class);
-            example.createCriteria().andEqualTo(DjBasicsProductTemplate.ID,productId);
-            DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(example); //根据商品编号查询对象
+            StorefrontProduct storefrontProduct=iGoodsStorefrontProductMapper.selectByPrimaryKey(productId);
+            DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId()); //根据商品编号查询对象
             return djBasicsProduct;
         } catch (Exception e) {
             return null;
@@ -323,7 +325,12 @@ public class DjBasicsProductTemplateService {
         product.setProductSn(productSn);//商品编号
         product.setImage(imgStr.toString());//图片地址
         product.setUnitId(basicsProductDTO.getUnitId());//单位
-        product.setUnitName(basicsProductDTO.getUnitName());//单位
+        if(basicsProductDTO.getUnitId()!=null){
+            Unit unit=iUnitMapper.selectByPrimaryKey(basicsProductDTO.getUnitId());
+            if(unit!=null){
+                product.setUnitName(unit.getName());//单位
+            }
+        }
         product.setType(basicsProductDTO.getType()==null?1:basicsProductDTO.getType());//是否禁用0：禁用；1不禁用
         product.setMaket(basicsProductDTO.getMaket()==null?1:basicsProductDTO.getMaket());//是否上架0：不上架；1：上架
         product.setPrice(basicsProductDTO.getPrice());//销售价
@@ -356,7 +363,7 @@ public class DjBasicsProductTemplateService {
         product.setCost(basicsProductDTO.getCost());
         product.setProfit(basicsProductDTO.getProfit());
         product.setConvertQuality(basicsProductDTO.getConvertQuality());
-        product.setConvertUnit(basicsProductDTO.getConvertUnit());
+        product.setConvertUnit(CommonUtil.isEmpty(basicsProductDTO.getConvertUnit())?basicsProductDTO.getUnitId():basicsProductDTO.getConvertUnit());
         product.setIsInflueWarrantyPeriod(basicsProductDTO.getIsInflueWarrantyPeriod());
         product.setWorkerTypeId(basicsProductDTO.getWorkerTypeId());
         product.setMaxWarrantyPeriodYear(basicsProductDTO.getMaxWarrantyPeriodYear());
@@ -825,11 +832,11 @@ public class DjBasicsProductTemplateService {
      * @param categoryId
      * @return
      */
-    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId,String cityId) {
+    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId,String cityId,String searchKey) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryProductByCategoryId(categoryId,cityId);
+            List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryProductByCategoryId(categoryId,cityId, searchKey);
             PageInfo pageResult = new PageInfo(productList);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (DjBasicsProductTemplate p : productList) {
@@ -842,7 +849,13 @@ public class DjBasicsProductTemplateService {
                 StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 p.setImage(imgStr.toString());
                 Map<String, Object> map = BeanUtils.beanToMap(p);
-                map.put("imageUrl", imgUrlStr.toString());
+                map.put("imageUrl", StringTool.getImage(p.getImage(),address));
+                map.put("detailImageUrl", StringTool.getImage(p.getDetailImage(),address));
+                if(StringUtils.isNoneBlank(p.getConvertUnit())){
+                    map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
+                }
+
+                map.put("newValueNameArr", djbasicsgoodsService.getValueNameArr(p.getValueIdArr()));
                 mapList.add(map);
             }
             pageResult.setList(mapList);

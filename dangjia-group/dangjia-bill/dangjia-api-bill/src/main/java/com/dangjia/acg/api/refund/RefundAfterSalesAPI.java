@@ -170,7 +170,7 @@ public interface RefundAfterSalesAPI {
                                                              @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/app/refund/refundOrder/queryRetrunWorkerHistoryList")
-    @ApiOperation(value = "查询退人工历史记录列表", notes = "查询退人工历史记录列表")
+    @ApiOperation(value = "查询补，退人工历史记录列表", notes = "查询补，退人工历史记录列表")
     ServerResponse<PageInfo> queryRetrunWorkerHistoryList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                           @RequestParam("userToken") String userToken,
                                                           @RequestParam("cityId") String cityId,
@@ -182,15 +182,23 @@ public interface RefundAfterSalesAPI {
     ServerResponse queryRetrunWorkerHistoryDetail(@RequestParam("cityId") String cityId,
                                                           @RequestParam("repairWorkOrderId") String repairWorkOrderId);
 
+    @PostMapping("/app/refund/ownerAudit/searchWorkerHistoryInfobyChangeOrderId")
+    @ApiOperation(value = "查询补退人工历史详情（大管家）", notes = "查询补退人工历史详情（大管家）")
+    ServerResponse searchWorkerHistoryInfobyChangeOrderId(@RequestParam("cityId") String cityId,
+                                                @RequestParam("repairWorkOrderId") String repairWorkOrderId);
+
+
     @PostMapping("/app/refund/refundOrder/cancelWorkerApplication")
     @ApiOperation(value = "撤销退人工申请", notes = "撤销退人工申请")
     ServerResponse cancelWorkerApplication(@RequestParam("cityId") String cityId,
                                            @RequestParam("repairWorkOrderId") String repairWorkOrderId);
 
-    @PostMapping("/app/refund/ownerAudit/searchAuditInfoByTaskId")
-    @ApiOperation(value = "查询待审核的补人工订单", notes = "查询待审核的补人工订单")
-    ServerResponse searchAuditInfoByTaskId(@RequestParam("cityId") String cityId,
+    @PostMapping("/app/refund/ownerAudit/searchAuditInfoByMendOrderId")
+    @ApiOperation(value = "查询补退人工待审核页面", notes = "查询待审核的补人工订单")
+    ServerResponse searchAuditInfoByMendOrderId(@RequestParam("cityId") String cityId,
                                            @RequestParam("mendOrderId") String mendOrderId);
+
+
 
 
     /**

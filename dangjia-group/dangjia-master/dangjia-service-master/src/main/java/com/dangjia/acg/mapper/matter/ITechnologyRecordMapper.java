@@ -1,6 +1,6 @@
 package com.dangjia.acg.mapper.matter;
 
-import com.dangjia.acg.dto.product.ProductAppDTO;
+import com.dangjia.acg.dto.matter.TechnologyRecordDTO;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -25,6 +25,6 @@ public interface ITechnologyRecordMapper extends Mapper<TechnologyRecord> {
 
     int passNoTecRecord(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
 
-    List<ProductAppDTO> selectWorkerProductInfo(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
+    List<TechnologyRecordDTO> selectWorkerProductInfo(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId, @Param("isAll")String isAll);
 }
 

@@ -8,17 +8,39 @@
             modify_date modifyDate,
             house_id houseId,
             product_id productId,
+            storefront_id storefrontId,
             maintenance_record_id maintenanceRecordId,
             shop_count shopCount,
             price,
-            worker_type_id workerTypeId,
             maintenance_member_id maintenanceMemberId,
-            maintenance_member_type maintenanceMemberType,
+            maintenance_product_type maintenanceProductType,
             total_price totalPrice,
             pay_price payPrice,
             over_protection over_protection,
             pay_state payState
     </sql>
+
+    <select id="getBudgetOrderDetailByInFo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+       SELECT
+            mrp.maintenance_record_id orderId,
+            mrp.id orderItemId,
+            mrp.house_id houseId,
+            p.image,
+            p.product_name productName,
+            mrp.price,
+            mrp.total_price totalPrice,
+            mrp.shop_count shopCount,
+            p.prod_template_id productTemplateId,
+            mrp.product_id productId,
+            mrp.maintenance_record_id businessId
+        FROM
+            dj_maintenance_record_product mrp
+        INNER JOIN dj_basics_storefront_product p ON p.id = mrp.product_id
+        WHERE
+            mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.pay_state = 2
+        and mrp.maintenance_product_type = 1
+    </select>
     <select id="queryDjMaintenanceRecordProductList"
             resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO">
         SELECT
@@ -52,10 +74,10 @@
         INNER JOIN dj_basics_goods_category bgc1 ON bgc1.id = bgc.parent_top
         WHERE 1=1
         <if test="null!=maintenanceMemberId and ''!=maintenanceMemberId">
-            mrp.maintenance_member_id =#{maintenanceMemberId}
+            AND mrp.maintenance_member_id =#{maintenanceMemberId}
         </if>
-        <if test="null!=maintenanceMemberType and ''!=maintenanceMemberType">
-            AND mrp.maintenance_member_type =#{maintenanceMemberType}
+        <if test="null!=maintenanceProductType and ''!=maintenanceProductType">
+            AND mrp.maintenance_product_type =#{maintenanceProductType}
         </if>
         <if test="null!=maintenanceRecordId and ''!=maintenanceRecordId">
             AND mrp.maintenance_record_id =#{maintenanceRecordId}
@@ -64,6 +86,7 @@
             AND mrp.house_id =#{houseId}
         </if>
         AND mrp.data_status = 0
+        AND mrp.pay_state=1
         GROUP BY bgc1.name,bgc1.id
     </select>
 
@@ -80,8 +103,21 @@
         INNER JOIN dj_basics_storefront_product bsp ON mrp.product_id = bsp.id
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
         INNER JOIN dj_basics_goods_category bgc ON bgc.id = bpt.category_id
-        WHERE
-            bgc.parent_top =#{parentTop}
+        WHERE bgc.parent_top =#{parentTop}
+        <if test="null!=maintenanceMemberId and ''!=maintenanceMemberId">
+            AND mrp.maintenance_member_id =#{maintenanceMemberId}
+        </if>
+        <if test="null!=maintenanceProductType and ''!=maintenanceProductType">
+            AND mrp.maintenance_product_type =#{maintenanceProductType}
+        </if>
+        <if test="null!=maintenanceRecordId and ''!=maintenanceRecordId">
+            AND mrp.maintenance_record_id =#{maintenanceRecordId}
+        </if>
+        <if test="null!=houseId and ''!=houseId">
+            AND mrp.house_id =#{houseId}
+        </if>
+        AND mrp.data_status = 0
+        AND mrp.pay_state=1
     </select>
 
     <select id="selectMaintenanceProductByMemberId" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct">
@@ -92,7 +128,7 @@
         WHERE
             mrp.maintenance_member_id = #{memberId}
         AND mrp.house_id = #{houseId}
-        and mrp.maintenance_member_type = #{maintenanceRecordType}
+        and mrp.maintenance_product_type = #{maintenanceRecordType}
         and mrp.worker_type_id = #{workerTypeId}
         AND (
             mrp.maintenance_record_id IS NULL
@@ -102,7 +138,7 @@
 
     <select id="selectWorkerTypeListById" resultType="java.util.Map">
        SELECT
-            mrp.worker_type_id workerTypeId,
+            mr.worker_type_id workerTypeId,
             cwt.`name` workerTypeName,
             cwt.image workerTypeImage,
             mrp.over_protection overProtection,
@@ -110,15 +146,43 @@
             sum(mrp.pay_price) payPrice
         FROM
             dj_maintenance_record_product mrp,
-            dj_core_worker_type cwt
+            dj_core_worker_type cwt,
+            dj_maintenance_record mr
         WHERE
-            mrp.worker_type_id = cwt.id
+            mrp.maintenance_record_id=mr.id
+        and  mr.worker_type_id = cwt.id
         AND mrp.maintenance_record_id = #{maintenanceRecordId}
-        AND mrp.maintenance_member_type = #{maintenanceRecordType}
+        AND mrp.maintenance_product_type = #{maintenanceRecordType}
         and mrp.pay_state = 1
-        group by mrp.worker_type_id,cwt.`name`,cwt.image
+        group by mr.worker_type_id,cwt.`name`,cwt.image
     </select>
 
+    <!-- 查询已支付的维保商品费用-->
+    <select id="queryTotalPriceByRecordId" resultType="java.lang.Double">
+        SELECT
+        sum(mrp.total_price) totalPrice
+        FROM
+        dj_maintenance_record_product mrp
+        WHERE
+        mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.pay_state = 2
+        <if test="null!=maintenanceRecordType and ''!=maintenanceRecordType">
+            AND mrp.maintenance_product_type =#{maintenanceRecordType}
+        </if>
+    </select>
+    <!-- 查询未支付的维保商品费用-->
+    <select id="getTotalPriceByRecordId" resultType="java.lang.Double">
+        SELECT
+        sum(mrp.total_price) totalPrice
+        FROM
+        dj_maintenance_record_product mrp
+        WHERE
+        mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.pay_state = 1
+        <if test="null!=maintenanceRecordType and ''!=maintenanceRecordType">
+            AND mrp.maintenance_product_type =#{maintenanceRecordType}
+        </if>
+    </select>
     <!-- 查询已支付的商品总价 -->
     <select id="queryMaintenanceRecordMoney" resultType="java.lang.Double">
         SELECT
@@ -127,9 +191,53 @@
             dj_maintenance_record_product mrp
         WHERE
             mrp.maintenance_record_id = #{maintenanceRecordId}
-        AND mrp.maintenance_member_type = #{maintenanceRecordType}
         AND mrp.pay_state = 2
+        <if test="null!=maintenanceRecordType and ''!=maintenanceRecordType">
+            AND mrp.maintenance_product_type =#{maintenanceProductType}
+        </if>
     </select>
+
+    <!--查询所有需报销的维保商品费用-->
+    <select id="selectTotalPayPriceByRecordId" resultType="java.lang.Double">
+        SELECT
+            sum(mrp.total_price) payPrice
+        FROM
+            dj_maintenance_record_product mrp
+        WHERE
+            mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.pay_state = 2
+        and mrp.maintenance_product_type in(1,3,4)
+    </select>
+
+    <!--查询工匠可得工钱-->
+    <select id="selectWorkerPriceByRecordId" resultType="java.lang.Double">
+         SELECT
+            sum(mrp.total_price) payPrice
+        FROM
+            dj_maintenance_record_product mrp
+        WHERE
+            mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.pay_state = 2
+        and mrp.maintenance_product_type in(1,4)
+    </select>
+    <!-- 查询需报销维保商品的运费，搬运费-->
+    <select id="selectProductCostByRecordId" resultType="java.util.Map">
+        SELECT
+            sum(IFNULL(t.total_stevedorage_cost,0)) stevedorageCost,
+          sum(IFNULL(t.total_transportation_cost,0)) transportationCost
+        FROM
+            dj_maintenance_record_product mrp,
+            dj_deliver_order t,
+            dj_deliver_order_item t1
+        WHERE
+            mrp.business_order_number = t.business_order_number
+        AND mrp.product_id = t1.product_id
+        AND t.id = t1.order_id
+        AND mrp.maintenance_record_id =  #{maintenanceRecordId}
+        AND mrp.pay_state = 2
+        AND mrp.maintenance_product_type = 3
+    </select>
+
 
     <select id="queryPayMaintenanceRecordProduct" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct">
         SELECT
@@ -138,10 +246,195 @@
         dj_maintenance_record_product mrp
         WHERE
         mrp.maintenance_record_id = #{maintenanceRecordId}
-        and mrp.maintenance_member_type = #{maintenanceRecordType}
+        and mrp.maintenance_product_type = #{maintenanceRecordType}
         and mrp.pay_state=#{payState}
         <if test="null!=workerTypeId and ''!=workerTypeId">
             and mrp.worker_type_id=#{workerTypeId}
         </if>
+        <if test="null!=storefrontId and ''!=storefrontId">
+            and mrp.storefront_id=#{storefrontId}
+        </if>
+    </select>
+
+    <select id="selectStorefrontIdByTypeId" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct">
+        select storefront_id storefrontId,sum(total_price) totalPrice
+          from dj_maintenance_record_product mrp
+        WHERE
+          mrp.maintenance_record_id = #{maintenanceRecordId}
+        and mrp.maintenance_product_type = #{maintenanceRecordType}
+        and mrp.pay_state=#{payState}
+         group by storefront_id
+    </select>
+
+    <select id="selectCategoryByRecordId" resultType="java.util.Map">
+
+        SELECT
+            mrp.storefront_id storefrontId,
+            bgc.id categoryId,
+            bgc.`name` categoryName,
+            sum(total_price) totalPrice
+        FROM
+            dj_maintenance_record_product mrp,
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt,
+            dj_basics_goods_category bgc
+        WHERE
+            mrp.product_id = bsp.id
+        AND bsp.prod_template_id = bpt.id
+        AND bpt.category_id = bgc.id
+        AND mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.maintenance_product_type = #{maintenanceRecordType}
+        AND mrp.pay_state = 1
+        and mrp.storefront_id=#{storefrontId}
+        GROUP BY
+            mrp.storefront_id,
+            bgc.id,
+            bgc. NAME
+    </select>
+
+    <select id="selectMaintenaceProductByCategoryId" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+
+        SELECT
+            bsp.id productId,
+            bsp.storefront_id storefrontId,
+            bsp.id productTemplateId,
+            bpt.product_sn productSn,
+            bsp.product_name productName,
+            bpt.goods_id goodsId,
+            mrp.price price,
+            mrp.shop_count shopCount,
+            bsp.image,
+            bpt.unit_id unit,
+            bpt.unit_name unitName,
+            bpt.value_id_arr valueIdArr,
+            bpt.value_name_arr valueNameArr,
+            mrp.total_price totalPrice
+        FROM
+            dj_maintenance_record_product mrp,
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt
+        WHERE
+            mrp.product_id = bsp.id
+        AND bsp.prod_template_id = bpt.id
+        AND mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.maintenance_product_type = #{maintenanceRecordType}
+        AND mrp.pay_state = 1
+        and mrp.storefront_id=#{storefrontId}
+        and bpt.category_id=#{categoryId}
+    </select>
+
+
+    <!-- 维保商品信息-->
+    <select id="selectMaintenanceProductList"  resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        SELECT
+            bsp.id productId,
+            bsp.storefront_id storefrontId,
+            bsp.id productTemplateId,
+            bpt.product_sn productSn,
+            bsp.product_name productName,
+            bpt.goods_id goodsId,
+            mrp.price price,
+            mrp.shop_count shopCount,
+            bsp.image,
+            bpt.unit_id unit,
+            bpt.unit_name unitName,
+            bpt.value_id_arr valueIdArr,
+            bpt.value_name_arr valueNameArr,
+            mrp.total_price totalPrice
+        FROM
+            dj_maintenance_record_product mrp,
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt
+        WHERE
+            mrp.product_id = bsp.id
+        AND bsp.prod_template_id = bpt.id
+        AND mrp.maintenance_record_id = #{maintenanceRecordId}
+        <if test="type == 1">
+            AND mrp.maintenance_product_type IN (1, 2, 3)
+        </if>
+        <if test="type == 2">
+            AND mrp.maintenance_product_type IN (1, 3)
+        </if>
+        AND mrp.pay_state = 2
+    </select>
+
+    <select id="selectStorefrontIdByHouseId" resultType="java.lang.String">
+        SELECT
+        t1.storefont_id storefrontId
+        FROM
+        dj_deliver_order t1,
+        dj_deliver_order_item t2,
+        dj_basics_storefront_product bsp,
+        dj_basics_product_template bpt
+        WHERE
+        t1.id = t2.order_id
+        AND t1.storefont_id = bsp.storefront_id
+        AND t2.product_id = bsp.id
+        AND bsp.prod_template_id = bpt.id
+        AND t1.house_id = #{houseId}
+        AND bpt.category_id = #{categoryId}
+        <![CDATA[
+        and t1.create_date<(select h.completed_date from dj_house h where id=#{houseId})
+        ]]>
+        ORDER BY
+        t1.modify_date DESC
+        limit 1
+    </select>
+
+    <!--修改当前单的业务支付订单号-->
+    <update id="updateRecordProductInfo" >
+        update dj_maintenance_record_product
+        set business_order_number= #{businessOrderNumber},pay_state=#{payState},modify_date=now()
+        where maintenance_record_id=#{maintenanceRecordId}
+        and maintenance_product_type=#{maintenanceRecordType}
+        and pay_state=1
+    </update>
+
+    <!--修改当前单的状态为已支付-->
+    <update id="updateRecordProductInfoByBusinessNumber" >
+        update dj_maintenance_record_product
+        set pay_state=2,modify_date=now()
+        where maintenance_record_id=#{maintenanceRecordId}
+        and business_order_number=#{businessOrderNumber}
+    </update>
+
+    <!--修改已支付单的状态为已退款-->
+    <update id="updateRecordProductInfoByRecordId">
+        update dj_maintenance_record_product
+        set pay_state=3,modify_date=now()
+        where maintenance_record_id=#{maintenanceRecordId}
+        and pay_state=2
+        and maintenance_product_type in(1,2)
+    </update>
+
+    <update id="setWorkerMaintenanceGoods">
+        UPDATE dj_maintenance_record_product
+        SET
+        <if test="null!=totalPrice and ''!=totalPrice">
+            pay_price = total_price,
+        </if>
+         pay_state = #{payState}
+        WHERE
+        house_id =#{houseId}
+        AND maintenance_member_id =#{maintenanceMemberId}
+        AND maintenance_record_id =#{maintenanceRecordId}
+        AND maintenance_product_type = 3
+        AND pay_state = 1
+    </update>
+
+    <select id="selectClaimExpensesProductList" resultType="java.util.Map">
+        SELECT
+            t1.pay_price payPrice,
+            t1.total_price totalPrice,
+            t2.description,
+            t2.image
+        FROM
+            dj_maintenance_record_product t1,
+            dj_complain t2
+        WHERE
+            t1.complain_id = t2.id
+        AND t1.pay_state = 2
+        AND t1.maintenance_record_id = #{maintenanceRecordId}
+        AND t1.maintenance_product_type = 4
     </select>
 </mapper>

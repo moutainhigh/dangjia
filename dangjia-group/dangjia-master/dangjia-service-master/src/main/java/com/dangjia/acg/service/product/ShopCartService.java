@@ -418,6 +418,11 @@ public class ShopCartService {
     public ServerResponse delCheckCart(String shopCartIds) {
         try {
             List<String> stringList = Arrays.asList(shopCartIds.split(","));
+            Example example = new Example(ShoppingCart.class);
+            example.createCriteria().andIn(ShoppingCart.ID, stringList);
+            List<ShoppingCart> shoppingCarts = iShoppingCartmapper.selectByExample(example);
+            if(shoppingCarts.size()<0)
+                return ServerResponse.createBySuccessMessage("商品不存在!");
             if (stringList.size() > 0) {
                 for (String shoppingCartId : stringList) {
                     Example example1 = new Example(DeliverOrderAddedProduct.class);
@@ -425,9 +430,6 @@ public class ShopCartService {
                     masterDeliverOrderAddedProductMapper.deleteByExample(example1);
                 }
             }
-
-            Example example = new Example(ShoppingCart.class);
-            example.createCriteria().andIn(ShoppingCart.ID, stringList);
             int i = iShoppingCartmapper.deleteByExample(example);
             if (i >= 0) {
                 return ServerResponse.createBySuccessMessage("删除已选商品成功!");
@@ -449,10 +451,19 @@ public class ShopCartService {
      */
     public ServerResponse replaceShoppingCart(String shoppingCartId, String productId, Double shopCount, String addedProductIds) {
         try {
+            ShoppingCart shoppingCart = iShoppingCartmapper.selectByPrimaryKey(shoppingCartId);
             StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+            //判断去重,如果有的话就购买数量加1
+            Example example = new Example(ShoppingCart.class);
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, shoppingCart.getMemberId())
+                    .andEqualTo(ShoppingCart.PRODUCT_ID, productId)
+                    .andEqualTo(ShoppingCart.STOREFRONT_ID, storefrontProduct.getStorefrontId());
+            List<ShoppingCart> list = iShoppingCartmapper.selectByExample(example);
+            if(list.size()>0)
+                return ServerResponse.createByErrorMessage("购物车已存在该商品");
             DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
             BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
-            ShoppingCart shoppingCart = new ShoppingCart();
+            Unit unit = iMasterUnitMapper.selectByPrimaryKey(djBasicsProductTemplate.getUnitId());
             shoppingCart.setId(shoppingCartId);
             shoppingCart.setProductId(productId);
             shoppingCart.setProductSn(djBasicsProductTemplate.getProductSn());
@@ -463,11 +474,33 @@ public class ShopCartService {
             shoppingCart.setUnitName(djBasicsProductTemplate.getUnitName());
             shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
             shoppingCart.setShopCount(shopCount);
+            shoppingCart.setValueIdArr(djBasicsProductTemplate.getValueIdArr());
+            shoppingCart.setUnitType(unit.getType());
             iShoppingCartmapper.updateByPrimaryKeySelective(shoppingCart);
 
             //更新或添加增值商品
             setAddedProduct(shoppingCartId, addedProductIds);
-            return ServerResponse.createBySuccessMessage("更换成功!");
+            ShoppingCartListDTO shoppingCartListDTO = iShoppingCartmapper.querySingleCartList(shoppingCartId);
+            if (!CommonUtil.isEmpty(shoppingCartListDTO.getValueIdArr())) {
+                String strNewValueNameArr = "";
+                String[] newValueNameArr = shoppingCartListDTO.getValueIdArr().split(",");
+                for (int i = 0; i < newValueNameArr.length; i++) {
+                    String valueId = newValueNameArr[i];
+                    if (StringUtils.isNotBlank(valueId)) {
+                        AttributeValue attributeValue = iMasterAttributeValueMapper.selectByPrimaryKey(valueId);
+                        if (attributeValue != null && StringUtils.isNotBlank(attributeValue.getName())) {
+                            if (StringUtils.isBlank(strNewValueNameArr)) {
+                                strNewValueNameArr = attributeValue.getName();
+                                System.out.println();
+                            } else {
+                                strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
+                            }
+                        }
+                    }
+                }
+                shoppingCartListDTO.setValueNameArr(strNewValueNameArr);
+            }
+            return ServerResponse.createBySuccess("更换成功!",shoppingCartListDTO);
         } catch (Exception e) {
             logger.info("系统报错,更换失败!", e);
             return ServerResponse.createByErrorMessage("系统报错,更换失败!");
@@ -548,7 +581,7 @@ public class ShopCartService {
                     OrderSplitItem orderSplitItem = iOrderSplitItemMapper.selectByPrimaryKey(orderItemId);
                     productId.append(orderSplitItem.getProductId());
                 }
-                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId.toString());
                 if (null == storefrontProduct)
                     return ServerResponse.createByErrorMessage("店铺商品不存在");
                 DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());

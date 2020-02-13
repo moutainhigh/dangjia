@@ -14,4 +14,6 @@ public interface IMasterOrderProgressMapper extends Mapper<OrderProgress> {
     void updateOrderStatusByNodeCode(@Param("repairMendOrderId") String repairMendOrderId,
                                      @Param("nodeType") String nodeType,
                                      @Param("nodeCode") String nodeCode);
+
+    List<OrderProgressDTO> queryProgressListByOrderId(@Param("progressOrderId") String progressOrderId);
 }

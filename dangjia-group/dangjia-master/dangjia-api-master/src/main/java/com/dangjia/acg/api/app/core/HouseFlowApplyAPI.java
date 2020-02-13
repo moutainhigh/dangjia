@@ -47,7 +47,7 @@ public interface HouseFlowApplyAPI {
                                @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 
     @PostMapping("app/core/houseFlowApply/stewardCheckDetail")
-    @ApiOperation(value = "大管家端验收详情", notes = "大管家端验收详情")
+    @ApiOperation(value = "管家验收详情", notes = "管家验收详情")
     ServerResponse stewardCheckDetail(@RequestParam("userToken") String userToken,
                                       @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 }

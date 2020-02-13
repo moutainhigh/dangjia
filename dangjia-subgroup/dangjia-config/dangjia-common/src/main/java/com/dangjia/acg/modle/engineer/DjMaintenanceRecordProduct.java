@@ -34,6 +34,12 @@ public class DjMaintenanceRecordProduct extends BaseEntity {
     @ApiModelProperty("商品ID")
     private String productId;
 
+
+    @Column(name = "storefront_id")
+    @Desc(value = "店铺ID")
+    @ApiModelProperty("店铺ID")
+    private String storefrontId;
+
     @Column(name = "maintenance_record_id")
     @Desc(value = "维保记录表id")
     @ApiModelProperty("维保记录表id")
@@ -55,8 +61,8 @@ public class DjMaintenanceRecordProduct extends BaseEntity {
     private String maintenanceMemberId;
 
     @Column(name = "maintenance_product_type")
-    @Desc(value = "维保商品类型：1业主维保商品 2管家勘查费用商品 3工匠维保材料商品")
-    @ApiModelProperty("维保商品类型：1业主维保商品 2管家勘查费用商品 3工匠维保材料商品")
+    @Desc(value = "维保商品类型：1业主维保商品 2管家勘查费用商品 3工匠维保材料商品 4工匠申请报销")
+    @ApiModelProperty("维保商品类型：1业主维保商品 2管家勘查费用商品 3工匠维保材料商品 4工匠申请报销")
     private Integer  maintenanceProductType;
 
     @Column(name = "total_price")
@@ -83,4 +89,10 @@ public class DjMaintenanceRecordProduct extends BaseEntity {
     @Desc(value = "业务支付单号")
     @ApiModelProperty("业务支付单号")
     private String businessOrderNumber;
+
+    @Column(name = "complain_id")
+    @Desc(value = "申诉id(工匠申请报销用)")
+    @ApiModelProperty("申诉id(工匠申请报销用)")
+    private String complainId;
+
 }

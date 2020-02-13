@@ -1,7 +1,6 @@
 package com.dangjia.acg.dto.core;
 
 import lombok.Data;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.util.Date;
 import java.util.List;
@@ -15,6 +14,8 @@ import java.util.List;
  */
 @Data
 public class AllgrabBean {
+    private String houseId;
+    private String houseWorkerId;
     private String houseName;
     private String houseFlowId;//任务id
     private String square;//面积
@@ -22,12 +23,14 @@ public class AllgrabBean {
     private Integer orderType;//0=无 1=新单 2=二手
     private String houseMember;//	业主名称
     private String workerTypeId;//	工种类型的id
+    private String workerTypeName;//	工种类型的id
     private String workertotal;//价格
-    private String releaseTime;//发布时间
+    private Date releaseTime;//发布时间
     private String butType;//按钮状态  0=抢单  1=已被抢单（灰色）
     private Long countDownTime;//倒计时（可抢单时间）
     private Date createDate;// 创建日期
 
+    private int taskNumber;//任务数量
 
     private Integer schedulingDay;//预计工期天数
     private Date startDate;//管家排期的开工开始时间

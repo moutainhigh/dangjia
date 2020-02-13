@@ -94,6 +94,7 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 
 	//	<!--查询工种材料未支付所有商品的标签-->
 	List<BudgetLabelDTO>  queryBudgetLabel(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId, @Param("storefontId")String storefontId);
+	BudgetLabelDTO  getBudgetLabel(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId, @Param("storefontId")String storefontId, @Param("labelId")String labelId);
 
 //	<!--查询工种材料未支付所有商品-->
 	List<BudgetLabelGoodsDTO>  queryBudgetLabelGoods(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId, @Param("storefontId")String storefontId);

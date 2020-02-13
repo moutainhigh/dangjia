@@ -15,9 +15,12 @@ import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.mapper.storefront.IGoodsStorefrontMapper;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.service.product.app.GoodsProductTemplateService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -58,7 +61,7 @@ public class DjBasicsGoodsService {
     @Autowired
     private IAttributeValueMapper iAttributeValueMapper;
     @Autowired
-    private IAttributeMapper iAttributeMapper ;
+    private GoodsProductTemplateService goodsProductTemplateService ;
     @Autowired
     private ILabelMapper iLabelMapper;
     @Autowired
@@ -67,6 +70,8 @@ public class DjBasicsGoodsService {
     private IProductAddedRelationMapper iProductAddedRelationMapper;
     @Autowired
     private IProductTemplateRatioMapper iProductTemplateRatioMapper;
+    @Autowired
+    private IGoodsStorefrontMapper iGoodsStorefrontMapper;
 
     /**
      * 货品打标签
@@ -237,71 +242,52 @@ public class DjBasicsGoodsService {
      * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
      * @return
      */
-    public ServerResponse queryGoodsListStorefront(String storefontId,String ifDjselfManage ,PageDTO pageDTO, String categoryId, String name, Integer type) {
+    public ServerResponse queryGoodsListStorefront(PageDTO pageDTO, String categoryId, String name, Integer type,String cityId,String userId) {
         try {
+
+            Example example=new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,userId)
+                    .andEqualTo(Storefront.CITY_ID,cityId)
+                    .andEqualTo(Storefront.DATA_STATUS,0);
+            //查询店铺信息
+            List<Storefront> storefrontList = iGoodsStorefrontMapper.selectByExample(example);
+            if(storefrontList==null||storefrontList.size()<=0){
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            Storefront storefront=storefrontList.get(0);
+            String storefontId=storefront.getId();
+            String ifDjselfManage=storefront.getIfDjselfManage();
+
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             String bgtype=null;
-            if (ifDjselfManage.equals("0"))
-            {
+            if (ifDjselfManage.equals("0")){//非当家自营店铺，只卖实物商品
                 bgtype="0,1";//删选0：实物商品；1：服务商品
             }
-
-            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId,bgtype,name);
+            //查询可选择商品信息
+            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId,bgtype,name,cityId,type);
             if (productList == null || productList.size() <= 0) {
                 return ServerResponse.createByErrorMessage("查无数据！");
             }
-
             for (DjBasicsProductTemplateDTO p : productList) {
-                //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
-                if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
-                {
-                    continue;
-                }
                 //图片路径+前缀
-                StringBuilder imgUrlStr = new StringBuilder();
-                StringBuilder imgStr = new StringBuilder();
-                if (!CommonUtil.isEmpty(p.getImage())) {
-                    String[] imgArr = p.getImage().split(",");
-                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-                }
-                p.setImage(imgStr.toString());
-                p.setImageUrl(imgUrlStr.toString());
-                //初始化单元名称
+
+                p.setImageUrl(StringTool.getImageSingle(p.getImage(),address));
+                //初始化单位名称
                 if (StringUtils.isNoneBlank(p.getConvertUnit())) {
                     p.setConvertUnitName(iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
                 }
-
                 String valueIdArr=p.getValueIdArr();
-                String strNewValueNameArr = "";
-                if (StringUtil.isNotEmpty(valueIdArr)) {
-                    String[] newValueNameArr = valueIdArr.split(",");
-                    for (int i = 0; i < newValueNameArr.length; i++) {
-                        String valueId = newValueNameArr[i];
-                        if (StringUtils.isNotBlank(valueId)) {
-                            AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
-                            if (attributeValue != null && StringUtils.isNotBlank(attributeValue.getName())) {
-                                Attribute attribute = iAttributeMapper.selectByPrimaryKey(attributeValue.getAttributeId());
-                                if (attribute != null && attribute.getType() == 2 && StringUtils.isNotBlank(strNewValueNameArr)) {
-                                    strNewValueNameArr = attributeValue.getName();
-                                } else if (attribute != null && attribute.getType() == 2) {
-                                    strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
-                                }
-                            }
-
-                        }
-                    }
-                }
-                p.setNewValueNameArr(strNewValueNameArr.replaceAll(",", " "));
+                p.setNewValueNameArr(goodsProductTemplateService.getNewValueNameArr(valueIdArr));
                 //初始化标签名称
-                if (!StringUtils.isNotBlank(p.getLabelId())) {
+                /*if (!StringUtils.isNotBlank(p.getLabelId())) {
                     p.setLabelId("");
                     p.setLabelName("");
                 } else {
                     DjBasicsLabelValue label = djBasicsLabelValueMapper.selectByPrimaryKey(p.getLabelId());
                     if (label != null && label.getName() != null)
                         p.setLabelName(label.getName());
-                }
+                }*/
 
             }
 

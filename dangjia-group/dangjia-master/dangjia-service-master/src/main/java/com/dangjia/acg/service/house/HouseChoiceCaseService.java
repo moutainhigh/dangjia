@@ -45,7 +45,7 @@ public class HouseChoiceCaseService {
     @Autowired
     private ConfigUtil configUtil;
 
-    public ServerResponse getHouseChoiceCases(PageDTO pageDTO, Integer from, Integer state,String cityId) {
+    public ServerResponse getHouseChoiceCases(PageDTO pageDTO, Integer from, Integer state, String cityId) {
         String jdAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HouseChoiceCase.class);
         Example.Criteria criteria = example.createCriteria();
@@ -118,8 +118,8 @@ public class HouseChoiceCaseService {
                 map.put("textContent", textContentDTOS);
             }
             example = new Example(WebsiteVisit.class);
-            example.createCriteria().andEqualTo(WebsiteVisit.ROUTE,v.getId());
-           int websiteCount= websiteVisitMapper.selectCountByExample(example);
+            example.createCriteria().andEqualTo(WebsiteVisit.ROUTE, v.getId());
+            int websiteCount = websiteVisitMapper.selectCountByExample(example);
             map.put("websiteCount", websiteCount);
             listmap.add(map);
         }
@@ -149,8 +149,8 @@ public class HouseChoiceCaseService {
      * @param houseChoiceCase
      * @return
      */
-    public ServerResponse editHouseChoiceCase(HouseChoiceCase houseChoiceCase) {
-        return setHouseChoiceCase(1, houseChoiceCase);
+    public ServerResponse editHouseChoiceCase(HouseChoiceCase houseChoiceCase, String cityId) {
+        return setHouseChoiceCase(1, houseChoiceCase, cityId);
     }
 
     /**
@@ -159,14 +159,15 @@ public class HouseChoiceCaseService {
      * @param houseChoiceCase
      * @return
      */
-    public ServerResponse addHouseChoiceCase(HouseChoiceCase houseChoiceCase) {
-        return setHouseChoiceCase(0, houseChoiceCase);
+    public ServerResponse addHouseChoiceCase(HouseChoiceCase houseChoiceCase, String cityId) {
+        return setHouseChoiceCase(0, houseChoiceCase, cityId);
     }
 
-    private ServerResponse setHouseChoiceCase(int type, HouseChoiceCase houseChoiceCase) {
+    private ServerResponse setHouseChoiceCase(int type, HouseChoiceCase houseChoiceCase, String cityId) {
         Example example = new Example(HouseChoiceCase.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle());
+        criteria.andEqualTo(HouseChoiceCase.CITY_ID, cityId);
         if (type == 1) {
             criteria.andNotEqualTo(HouseChoiceCase.ID, houseChoiceCase.getId());
         }

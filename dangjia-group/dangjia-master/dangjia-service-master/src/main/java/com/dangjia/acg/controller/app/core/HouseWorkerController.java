@@ -76,14 +76,18 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getConstructionByWorkerId(HttpServletRequest request, String userToken, String cityId,Integer type) {
-        return constructionService.getConstructionView(request, userToken,type);
+    public ServerResponse getConstructionByWorkerId(HttpServletRequest request, String userToken,  String houseWorkerId,String cityId) {
+        return constructionService.getConstructionView(request, userToken,  houseWorkerId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId,String houseFlowId){
+        return constructionService.getConstructionInfo(request,userToken,houseId,houseFlowId);
+    }
     /**
      * 获取申请单明细
      */
-
     @Override
     @ApiMethod
     public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId) {
@@ -128,8 +132,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setSwitchHouseFlow(String userToken, String houseFlowId) {
-        return houseWorkerService.setSwitchHouseFlow(userToken, houseFlowId);
+    public ServerResponse setSwitchHouseFlow(String userToken, String houseWorkerId) {
+        return houseWorkerService.setSwitchHouseFlow(userToken, houseWorkerId);
     }
 
     /**
@@ -139,5 +143,14 @@ public class HouseWorkerController implements HouseWorkerAPI {
     @ApiMethod
     public ServerResponse setSupervisorApply(String userToken, String houseFlowId) {
         return houseWorkerService.setSupervisorApply(userToken, houseFlowId);
+    }
+
+    /**
+     * 大管家申请验收
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse autoDistributeHandle(String houseFlowId) {
+        return houseWorkerService.autoDistributeHandle(houseFlowId);
     }
 }

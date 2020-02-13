@@ -14,9 +14,13 @@ import java.util.Map;
 
 @Repository
 public interface IRewardPunishCorrelationMapper extends Mapper<RewardPunishCorrelation> {
-    List<RewardPunishCorrelationDTO> queryCorrelation(@Param("name") String name, @Param("state") Integer state);
+    List<RewardPunishCorrelationDTO> queryCorrelation(@Param("name") String name, @Param("type") Integer type);
+
     List<Map<String, Object>> queryCorrelationList(@Param("type") String type);
+
     List<CraftsmenListDTO> queryCraftsmenList(@Param("houseId") String houseId);
+
     List<RewardPunishRecordListDTO> queryPunishRecordList(@Param("houseId") String houseId);
+
     RewardPunishRecordDetailDTO queryPunishRecordDetailList(@Param("id") String id);
 }

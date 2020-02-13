@@ -31,8 +31,8 @@ public class OrderProgress extends BaseEntity {
     private String progressOrderId;
 
     @Column(name = "progress_type")
-    @Desc(value = "订单类型（1订单，2退货单，3补货单，4其它）")
-    @ApiModelProperty("订单类型（1订单，2退货单，3补货单，4其它）")
+    @Desc(value = "订单类型（1订单，2退货单，3补货单，4其它，5维保）")
+    @ApiModelProperty("订单类型（1订单，2退货单，3补货单，4其它，5维保）")
     private String progressType;
 
     @Column(name = "node_type")

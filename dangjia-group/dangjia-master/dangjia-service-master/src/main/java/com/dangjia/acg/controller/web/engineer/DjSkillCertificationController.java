@@ -48,7 +48,7 @@ public class DjSkillCertificationController implements DjSkillCertificationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryWorkerTypeSkillPackConfigurationDetail(Integer workerTypeId) {
+    public ServerResponse queryWorkerTypeSkillPackConfigurationDetail(String workerTypeId) {
         return djSkillCertificationService.queryWorkerTypeSkillPackConfigurationDetail(workerTypeId);
     }
 
@@ -56,5 +56,11 @@ public class DjSkillCertificationController implements DjSkillCertificationAPI {
     @ApiMethod
     public ServerResponse insertWorkerTypeSkillPackConfiguration(String jsonStr, WorkerType workerType, String cityId) {
         return djSkillCertificationService.insertWorkerTypeSkillPackConfiguration(jsonStr, workerType, cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse deleteSkillCertification(String id) {
+        return djSkillCertificationService.deleteSkillCertification(id);
     }
 }

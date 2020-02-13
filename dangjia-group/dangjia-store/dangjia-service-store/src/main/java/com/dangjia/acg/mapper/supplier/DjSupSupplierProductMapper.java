@@ -25,13 +25,18 @@ public interface DjSupSupplierProductMapper extends Mapper<DjSupSupplierProduct>
                                                  @Param("applicationStatus") String applicationStatus,
                                                  @Param("keyWord")String keyWord);
 
+    List<DjSupSupplierProductDTO> searchHaveGoodsSize(@Param("supId") String supId,
+                                                      @Param("shopId") String shopId,
+                                                      @Param("applicationStatus") String applicationStatus);
+
     String queryAttributeNameByIds(@Param("ids") String [] ids);
 
     List<SupplyDimensionDTO> queryDjSupSupplierProductList(@Param("supId") String supId,
                                                            @Param("searchKey") String searchKey);
 
     List<DjSupSupplierProductDTO> queryNotForTheGoods(@Param("shopId") String shopId,
-                                                      @Param("productIds") List<String> productIds);
+                                                      @Param("supId") String supId,
+                                                      @Param("keyWord") String keyWord);
 
 }
 

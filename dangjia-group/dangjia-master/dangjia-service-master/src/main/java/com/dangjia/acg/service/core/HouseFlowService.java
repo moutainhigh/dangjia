@@ -14,7 +14,6 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.AllgrabBean;
-import com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO;
 import com.dangjia.acg.dto.group.GroupDTO;
 import com.dangjia.acg.dto.pay.WorkerDTO;
 import com.dangjia.acg.mapper.core.*;
@@ -47,7 +46,9 @@ import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
+import com.dangjia.acg.service.engineer.DjMaintenanceRecordService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -95,6 +96,8 @@ public class HouseFlowService {
     private IMemberMapper memberMapper;
 
     @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
+    @Autowired
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
@@ -116,9 +119,6 @@ public class HouseFlowService {
 
     @Autowired
     private IHouseAddressMapper iHouseAddressMapper;
-    @Autowired
-    private ConfigRuleUtilService configRuleUtilService;
-
 
     @Autowired
     private IOrderMapper orderMapper;
@@ -133,7 +133,11 @@ public class HouseFlowService {
 
 
     @Autowired
+    private MasterProductTemplateService masterProductTemplateService;
+    @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+    @Autowired
+    private DjMaintenanceRecordService maintenanceRecordService;
 
     private static Logger LOG = LoggerFactory.getLogger(HouseFlowService.class);
 
@@ -153,11 +157,10 @@ public class HouseFlowService {
         }
         return false;
     }
-
     /**
-     * 抢单列表
+     * 抢单播报
      */
-    public ServerResponse getGrabList(HttpServletRequest request, PageDTO pageDTO, String userToken, String cityId,Integer type) {
+    public ServerResponse getGrabBroadcast(String userToken, Integer type) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -167,130 +170,174 @@ public class HouseFlowService {
             if (member == null) {
                 return ServerResponse.createbyUserTokenError();
             }
+            List<Map> grabList = new ArrayList<>();//返回的任务list
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 1)
+//                    .andGreaterThan(HouseWorker.CREATE_DATE, DateUtil.delDateMinutes(new Date(),30));
+                    .andGreaterThan(HouseWorker.CREATE_DATE, DateUtil.delDateDays(new Date(),30));
+            List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
+            for (HouseWorker houseWorker : hwList) {
+                Map map =new HashMap();
+                if(houseWorker.getType()!=1){
+                    House house = houseMapper.selectByPrimaryKey(houseWorker.getHouseId());
+                    map.put("name",house.getNoNumberHouseName()+"已被抢单");
+                }else{
+                    Order order =  orderMapper.selectByPrimaryKey(houseWorker.getBusinessId());
+                    MemberAddress memberAddress=iMasterMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
+                    map.put("name",memberAddress.getName()+"已被抢单");
+                }
+                map.put("minutes",DateUtil.daysBetweenMinutes(houseWorker.getCreateDate(),new Date())+"分钟前");
+                grabList.add(map);
+            }
+            return ServerResponse.createBySuccess("查询成功", grabList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,查询失败");
+        }
+    }
+
+    /**
+     * 抢单列表-单量总数
+     */
+    public ServerResponse getGrabNumber(String userToken,String cityId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member =(Member) object;
+            if (member == null) {
+                return ServerResponse.createbyUserTokenError();
+            }
+            Map grab = new HashMap();//返回的任务list
+            grab.put("renovation",0);//装修数
+            grab.put("experience",0);//体验数
+            grab.put("repair",0);//维修数
+            if(member.getWorkerType()<3){
+                Example example = new Example(Order.class);
+                example.createCriteria().andIsNull(Order.WORKER_ID).andEqualTo(Order.TYPE, 4)
+                        .andEqualTo(Order.ORDER_STATUS, 2);
+                Integer hfList = houseFlowMapper.selectCountByExample(example);
+                grab.put("experience",hfList);//体验数
+
+                 example = new Example(DjMaintenanceRecord.class);
+                if(member.getWorkerType()==3) {
+                    example.createCriteria().andIsNull(DjMaintenanceRecord.STEWARD_ID);
+                }else{
+                    example.createCriteria().andIsNull(DjMaintenanceRecord.WORKER_MEMBER_ID).andEqualTo(DjMaintenanceRecord.WORKER_TYPE_ID,member.getWorkerTypeId());
+                }
+                hfList = djMaintenanceRecordMapper.selectCountByExample(example);
+                grab.put("repair",hfList);//维修数
+            }
+            if(member.getWorkerType()!=3) {
+                /*装修单*/
+                Example example = new Example(HouseFlow.class);
+                example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, member.getWorkerTypeId())
+                        .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE, 2);
+                Integer hfList = houseFlowMapper.selectCountByExample(example);
+                grab.put("renovation",hfList);//装修数
+            }
+
+            return ServerResponse.createBySuccess("查询成功", grab);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,查询失败");
+        }
+    }
+    /**
+     * 抢单列表
+     */
+    public ServerResponse getGrabList(HttpServletRequest request, PageDTO pageDTO, String userToken, String cityId,Integer type) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member =(Member) object;
+            if (member == null) {
+                return ServerResponse.createbyUserTokenError();
+            }
             //工匠没有实名认证不应该展示数据
             if (CommonUtil.isEmpty(member.getWorkerTypeId()) || member.getCheckType() != 2 || member.getRealNameState() != 3) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            List<AllgrabBean> grabList = new ArrayList<>();//返回的任务list
             String workerTypeId = member.getWorkerTypeId();
-            PageInfo pageResult =null;
-            if (type == 0) {
-                /*待抢单*/
-                Example example = new Example(HouseFlow.class);
-                example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
-                        .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE, 2);
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
-                pageResult = new PageInfo(hfList);
-                if (hfList != null) {
-                    for (HouseFlow houseFlow : hfList) {
-                        example = new Example(HouseWorker.class);
-                        example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
-                                .andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
-                        List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
-                        if (isHouseWorker(hwList, houseFlow)) {
-                            continue;
-                        }
-                        if (houseFlow.getGrabLock() == 1 && !houseFlow.getNominator().equals(member.getId())) {
-                            continue;
-                        }
-                        House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-                        if (house == null) continue;
-                        if (house.getVisitState() == 2 || house.getVisitState() == 3 || house.getVisitState() == 4) {
-                            continue;
-                        }
-                        AllgrabBean allgrabBean = new AllgrabBean();
-
-                        Member mem = memberMapper.selectByPrimaryKey(house.getMemberId());
-                        if (mem == null) {
-                            continue;
-                        }
-                        allgrabBean.setButType("0");
-                        if (houseFlow.getWorkType() == 3) {
-                            allgrabBean.setButType("1");
-                        }
-                        example = new Example(HouseWorker.class);
-                        example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
-
-                        allgrabBean.setWorkerTypeId(workerTypeId);
-                        allgrabBean.setHouseFlowId(houseFlow.getId());
-                        allgrabBean.setCreateDate(houseFlow.getCreateDate());
-                        allgrabBean.setHouseName(house.getHouseName());
-                        allgrabBean.setType(type);
-                        allgrabBean.setOrderType(0);
-                        //是否为新单
-                        if (DateUtil.addDateDays(houseFlow.getReleaseTime(), 1).getTime() < new Date().getTime()) {
-                            allgrabBean.setOrderType(1);
-                        }
-                        Integer qdjl = houseWorkerMapper.selectCountByExample(example);//查出所有抢单记录
-                        //是否为二手商品
-                        if (qdjl > 0) {
-                            allgrabBean.setOrderType(2);
-                        }
-
-                        allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                        allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
-                        allgrabBean.setWorkertotal("¥0");//工钱
-                        double totalPrice = 0;
-                        ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(house.getCityId(), houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
-                        if (serverResponse.isSuccess()) {
-                            if (serverResponse.getResultObj() != null) {
-                                JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
-                                totalPrice = Double.parseDouble(obj.getString("totalPrice"));
-                            }
-                        }
-                        allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
-                        grabList.add(allgrabBean);
-                    }
-                }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<AllgrabBean> grabList = new ArrayList<>();
+            if(type!=null&&type==0&&member.getWorkerType()==3){
+                Map map =new HashMap();
+                map.put(Member.AUTO_ORDER,member.getAutoOrder());
+                Example example = new Example(HouseWorker.class);
+                example.createCriteria().andIn(HouseWorker.WORK_TYPE, Arrays.asList(new String[]{"1","6"}))
+                        .andEqualTo(HouseWorker.TYPE, type)
+                        .andEqualTo(HouseWorker.WORKER_ID, member.getId());
+                map.put(Member.METHODS,houseWorkerMapper.selectCountByExample(example));
+                Integer allMethods=configRuleUtilService.getMethodsCount(member.getWorkerTypeId(),member.getEvaluationScore());
+                map.put(Member.METHODS,houseWorkerMapper.selectCountByExample(example));
+                map.put("allMethods",allMethods);
+                return ServerResponse.createBySuccess("查询成功", map);
             }
-            //体验抢单列表
-            if (type == 1) {
-                Example example = new Example(Order.class);
-                example.createCriteria().andIsNull(Order.WORKER_ID).andEqualTo(Order.TYPE, 4)
-                        .andEqualTo(Order.ORDER_STATUS, 2);
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<Order> hfList = orderMapper.selectByExample(example);
-                pageResult = new PageInfo(hfList);
-                for (Order order : hfList) {
-                    AllgrabBean allgrabBean = new AllgrabBean();
-                    MemberAddress memberAddress=iMasterMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
-                    allgrabBean.setHouseFlowId(order.getId());
-                    allgrabBean.setWorkerTypeId(workerTypeId);
-                    allgrabBean.setCreateDate(order.getCreateDate());
-                    allgrabBean.setHouseName(memberAddress.getAddress());
-                    allgrabBean.setType(type);
-                    allgrabBean.setOrderType(0);
-                    allgrabBean.setHouseMember("业主 " + memberAddress.getName());//业主名称
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<AllgrabBean> allgrabBeans = houseWorkerMapper.getGrabList(workerTypeId,cityId,member.getWorkerType(),type);//返回的任务list
+            PageInfo pageResult = new PageInfo(allgrabBeans);
+            for (AllgrabBean allgrabBean : allgrabBeans) {
+                //装修单
+                if(allgrabBean.getType()==0){
+                    HouseFlow houseFlow =houseFlowMapper.selectByPrimaryKey(allgrabBean.getHouseFlowId());
+                    Example example = new Example(HouseWorker.class);
+                    example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
+                            .andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
+                    List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
+                    if (isHouseWorker(hwList, houseFlow)) {
+                        continue;
+                    }
+                    if (houseFlow.getGrabLock() == 1 && !houseFlow.getNominator().equals(member.getId())) {
+                        continue;
+                    }
+                    House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+                    if (house == null) continue;
+                    if (house.getVisitState() == 2 || house.getVisitState() == 3 || house.getVisitState() == 4) {
+                        continue;
+                    }
+                    if (houseFlow.getWorkType() == 3) {
+                        allgrabBean.setButType("1");
+                    }
+                    //是否为新单
+                    if (DateUtil.addDateDays(houseFlow.getReleaseTime(), 1).getTime() < new Date().getTime()) {
+                        allgrabBean.setOrderType(1);
+                    }
+                    example = new Example(HouseWorker.class);
+                    example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId())
+                            .andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
+                    Integer qdjl = houseWorkerMapper.selectCountByExample(example);//查出所有抢单记录
+                    //是否为二手商品
+                    if (qdjl > 0) {
+                        allgrabBean.setOrderType(2);
+                    }
                     allgrabBean.setWorkertotal("¥0");//工钱
-                    double totalPrice = order.getTotalAmount().doubleValue();
+                    double totalPrice = 0;
+                    ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(house.getCityId(), houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+                    if (serverResponse.isSuccess()) {
+                        if (serverResponse.getResultObj() != null) {
+                            JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
+                            totalPrice = Double.parseDouble(obj.getString("totalPrice"));
+                        }
+                    }
                     allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
                     grabList.add(allgrabBean);
                 }
-            }
-            //维保抢单列表
-            if (type == 2) {
-                Example example = new Example(DjMaintenanceRecord.class);
-                example.createCriteria().andIsNull(DjMaintenanceRecord.STEWARD_ID).andEqualTo(Order.TYPE, 4)
-                        .andEqualTo(Order.ORDER_STATUS, 2);
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<DjMaintenanceRecord> hfList = djMaintenanceRecordMapper.selectByExample(example);
-                pageResult = new PageInfo(hfList);
-                for (DjMaintenanceRecord record : hfList) {
-                    AllgrabBean allgrabBean = new AllgrabBean();
-                    House house = houseMapper.selectByPrimaryKey(record.getHouseId());
-                    Member mem = memberMapper.selectByPrimaryKey(house.getMemberId());
-                    allgrabBean.setWorkerTypeId(record.getWorkerTypeId());
-                    allgrabBean.setHouseFlowId(record.getId());
-                    allgrabBean.setCreateDate(record.getCreateDate());
-                    allgrabBean.setHouseName(house.getHouseName());
-                    allgrabBean.setType(3);
-                    allgrabBean.setOrderType(0);
-                    allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                    allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+                //体验单
+                if(allgrabBean.getType()==1){
+                    allgrabBean.setWorkertotal("¥" + String.format("%.2f", allgrabBean.getWorkertotal()));//工钱
+                    grabList.add(allgrabBean);
+                }
+                //维保单
+                if(allgrabBean.getType()==2){
                     allgrabBean.setWorkertotal("¥0");//工钱
-                //    double totalPrice = record.getSincePurchaseAmount();
-                  //  allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+                    Double totalPrice = maintenanceRecordProductMapper.getTotalPriceByRecordId(allgrabBean.getHouseFlowId(),1);
+                    if(totalPrice!=null) {
+                        allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+                    }
                     grabList.add(allgrabBean);
                 }
             }
@@ -322,19 +369,21 @@ public class HouseFlowService {
         if(type==1){
             Order order =  orderMapper.selectByPrimaryKey(houseFlowId);
             MemberAddress memberAddress=iMasterMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
             allgrabBean.setHouseFlowId(order.getId());
             allgrabBean.setWorkerTypeId(member.getWorkerTypeId());
+            allgrabBean.setWorkerTypeName(workerType.getName());
             allgrabBean.setCreateDate(order.getCreateDate());
             allgrabBean.setHouseName(memberAddress.getAddress());
             allgrabBean.setType(type);
             allgrabBean.setOrderType(0);
-            allgrabBean.setHouseMember("业主 " + memberAddress.getName());//业主名称
+            allgrabBean.setHouseMember( memberAddress.getName());//业主名称
             allgrabBean.setWorkertotal("¥0");//工钱
             double totalPrice = order.getTotalAmount().doubleValue();
             allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
             List<OrderItem> orderItems=orderItemMapper.byOrderIdList(order.getId());
             for (OrderItem orderItem : orderItems) {
-                orderItem.setImage(address + orderItem.getImage());
+                orderItem.setImageUrl(address + orderItem.getImage());
             }
             allgrabBean.setGoodsData(orderItems);
         }else if(type==2){
@@ -344,21 +393,31 @@ public class HouseFlowService {
             allgrabBean.setWorkerTypeId(record.getWorkerTypeId());
             allgrabBean.setHouseFlowId(record.getId());
             allgrabBean.setCreateDate(record.getCreateDate());
+            allgrabBean.setHouseId(house.getId());
             allgrabBean.setHouseName(house.getHouseName());
             allgrabBean.setType(3);
             allgrabBean.setOrderType(0);
-            allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-            allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+            allgrabBean.setSquare( (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+            allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+            Double totalPrice = maintenanceRecordProductMapper.getTotalPriceByRecordId(record.getId(),1);
             allgrabBean.setWorkertotal("¥0");//工钱
-           // double totalPrice = record.getSincePurchaseAmount();
-          //  allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
-
-            //维保商品列表
-            List<DjMaintenanceRecordProductDTO> maintenanceRecordProducts = maintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(record.getId());
-            maintenanceRecordProducts.forEach(djMaintenanceRecordProductDTO -> {
-                djMaintenanceRecordProductDTO.setImage(address + djMaintenanceRecordProductDTO.getImage());
-            });
-            allgrabBean.setGoodsData(maintenanceRecordProducts);
+            if(totalPrice!=null) {
+                allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+            }
+            //2.查询业主提交的维保信息
+            Map<String,Object> dataMap=new HashMap<>();
+            dataMap.put("maintenaceRecoreInfo",maintenanceRecordService.getMaintenaceRecordInfo(record.getId(),3));
+            //判断当前登陆的人员是大管家，还是工匠
+            if(mem.getWorkerType()==3){
+                //查询勘查费用商品
+                dataMap.put("maintenanceRecordProductList",maintenanceRecordService.getMaintenanceProductList(record.getId(),2));//勘查费用商品
+            }else{
+                //查询质保商品
+                dataMap.put("maintenanceRecordProductList",maintenanceRecordService.getMaintenanceProductList(record.getId(),1));//业主提交的质保商品
+            }
+            List list=new ArrayList();
+            list.add(dataMap);
+            allgrabBean.setGoodsData(list);
         }else {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
@@ -406,15 +465,17 @@ public class HouseFlowService {
             }
             example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
-
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            allgrabBean.setWorkerTypeName(workerType.getName());
             allgrabBean.setWorkerTypeId(houseFlow.getWorkerTypeId());
             allgrabBean.setHouseFlowId(houseFlow.getId());
             allgrabBean.setCreateDate(houseFlow.getCreateDate());
             allgrabBean.setHouseName(house.getHouseName());
+            allgrabBean.setHouseId(house.getId());
             allgrabBean.setType(1);
             allgrabBean.setOrderType(0);
-            allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-            allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+            allgrabBean.setSquare((house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+            allgrabBean.setHouseMember((mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
             allgrabBean.setWorkertotal("¥0");//工钱
             double totalPrice = 0;
             ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(house.getCityId(), houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
@@ -426,8 +487,7 @@ public class HouseFlowService {
             }
             allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
 
-            allgrabBean.setReleaseTime("时间 " + (houseFlow.getReleaseTime() == null ? "" :
-                    DateUtil.getDateString(houseFlow.getReleaseTime().getTime())));//发布时间
+            allgrabBean.setReleaseTime(houseFlow.getReleaseTime());//发布时间
             long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
             allgrabBean.setCountDownTime(countDownTime);//可接单时间
 
@@ -821,7 +881,7 @@ public class HouseFlowService {
                     houseWorker.setWorkerType(member.getWorkerType());
                     houseWorker.setWorkType(5);//拒单
                     houseWorker.setIsSelect(0);
-                  //  houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
+                    //  houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
                     houseWorker.setType(type);
                     houseWorker.setBusinessId(record.getId());
                     houseWorkerMapper.insert(houseWorker);
@@ -833,7 +893,7 @@ public class HouseFlowService {
                 }
                 if(member.getWorkerType()==3){
                     record.setStewardId(null);
-                   // record.setStewardState(null);
+                    // record.setStewardState(null);
                     record.setStewardOrderTime(null);
                     djMaintenanceRecordMapper.updateByPrimaryKey(record);
                 }else{
@@ -848,7 +908,26 @@ public class HouseFlowService {
                 Example example = new Example(HouseWorker.class);
                 example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId()).andEqualTo(HouseWorker.TYPE, type);
                 List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的
-                HouseWorker houseWorker = hwList.get(0);
+                HouseWorker houseWorker ;
+                if(hwList.size()==0){
+                    houseWorker = new HouseWorker();
+                    houseWorker.setHouseId(hf.getHouseId());
+                    houseWorker.setWorkerId(member.getId());
+                    houseWorker.setWorkerTypeId(member.getWorkerTypeId());
+                    houseWorker.setWorkerType(member.getWorkerType());
+                    houseWorker.setPrice(hf.getWorkPrice());
+                    houseWorker.setWorkType(5);//拒单
+                    houseWorker.setIsSelect(0);
+                    houseWorker.setType(type);
+                    houseWorker.setBusinessId(houseFlowId);
+                    houseWorkerMapper.insert(houseWorker);
+                }else{
+                    houseWorker = hwList.get(0); //修改此单为放弃
+                    houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                    houseWorker.setIsSelect(0);
+                    houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+                }
+
                 if (member.getWorkerType() == 3) {//大管家
                     if (hf.getWorkType() == 3 && hf.getSupervisorStart() == 0) {//已抢单待支付，并且未开工(无责取消)
                         hf.setWorkType(2);//抢s单状态更改为待抢单
@@ -890,7 +969,7 @@ public class HouseFlowService {
                         hf.setWorkerId("");
                         houseFlowMapper.updateByPrimaryKeySelective(hf);
                     } else {
-                        if (hf.getWorkSteta() != 3 || hf.getWorkSteta() != 0) {//已开工的状态不可放弃
+                        if (hf.getWorkSteta() != 3 && hf.getWorkSteta() != 0) {//已开工的状态不可放弃
                             return ServerResponse.createByErrorMessage("您已在施工，不可放弃！");
                         } else {
                             if (hf.getWorkType() == 4) {//已支付（有责取消）
@@ -908,16 +987,14 @@ public class HouseFlowService {
                             }
                         }
                     }
-                    //修改此单为放弃
-                    houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
-                    houseWorker.setIsSelect(0);
-                    houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-                    House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
-                    HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠放弃",
-                            String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
+                    if (member.getWorkerType() > 3) {
+                        House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+                        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
+                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
+                        HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠放弃",
+                                String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
+                    }
 
                 }
             }
@@ -952,26 +1029,31 @@ public class HouseFlowService {
             if (house.getMoney() == null) {
                 house.setMoney(new BigDecimal(0));
             }
-            Example example = new Example(BusinessOrder.class);
-            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseFlow.getId());
-            List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-            BusinessOrder businessOrder = null;
-            if(businessOrderList.size()>0){
-                businessOrder = businessOrderList.get(0);
-                if(businessOrder.getState()!=3){
+            if(houseFlow.getPayStatus()!=1){
+                Example example = new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseFlow.getId());
+                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+                BusinessOrder businessOrder = null;
+                if(businessOrderList.size()>0){
+                    businessOrder = businessOrderList.get(0);
+                    if(businessOrder.getState()!=3){
+                        return ServerResponse.createByErrorMessage("该工序未支付，请确保已经支付！");
+                    }
+                }
+                if(businessOrder==null){
                     return ServerResponse.createByErrorMessage("该工序未支付，请确保已经支付！");
                 }
             }
-            if(businessOrder==null){
-                return ServerResponse.createByErrorMessage("该工序未支付，请确保已经支付！");
-            }
+
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-            houseWorker.setWorkType(6);
-            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+            if(houseWorker!=null){
+                houseWorker.setWorkType(6);
+                houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+            }
             /*
              * 工匠订单
              */
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getHouseId(), houseFlow.getWorkerTypeId());
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
             if (hwo != null) {
                 hwo.setWorkerId(houseWorker.getWorkerId());
                 hwo.setPayState(1);
@@ -1013,6 +1095,11 @@ public class HouseFlowService {
         workerDTO.setHouseWorkerId(houseWorker.getId());//换人参数
         workerDTO.setHead(imageAddress + worker.getHead());
         workerDTO.setWorkerTypeName(workerType.getName());
+        workerDTO.setWorkerType(workerType.getType());
+        workerDTO.setWorkerTypeId(workerType.getId());
+        workerDTO.setWorkerTypeColor(workerType.getColor());
+        workerDTO.setWorkerTypeImage(imageAddress + workerType.getImage());
+        workerDTO.setWorkerType(workerType.getType());
         workerDTO.setName(worker.getName());
         workerDTO.setWorkerId(houseWorker.getWorkerId());
         workerDTO.setMobile(worker.getMobile());

@@ -132,7 +132,7 @@ public class DesignDataService {
                     .andEqualTo(PayConfiguration.DATA_STATUS, 0);
             String message;
             if (house.getVisitState() != 3) {
-                designDTO.addButton(Utils.getButton("需要修改设计", 1));
+                designDTO.addButton(Utils.getButton("需要修改设计", 5001));
                 if (house.getDesignerState() == 5) {
                     ServerResponse serverResponse = getPlaneMap(houseId);
                     if (!serverResponse.isSuccess()) {
@@ -142,7 +142,7 @@ public class DesignDataService {
                     message = "温馨提示:您需要修改平面图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
                     QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                     designDTO.setData(quantityRoomDTO.getImages());
-                    designDTO.addButton(Utils.getButton("确认平面图", 2));
+                    designDTO.addButton(Utils.getButton("确认平面图", 5002));
                 } else {
                     ServerResponse serverResponse = getConstructionPlans(houseId);
                     if (!serverResponse.isSuccess()) {
@@ -152,7 +152,7 @@ public class DesignDataService {
                     message = "温馨提示:您需要修改施工图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
                     QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                     designDTO.setData(quantityRoomDTO.getImages());
-                    designDTO.addButton(Utils.getButton("确认施工图", 2));
+                    designDTO.addButton(Utils.getButton("确认施工图", 5003));
                 }
                 List<PayConfiguration> payConfigurations = payConfigurationMapper.selectByExample(example);
                 if (payConfigurations != null && payConfigurations.size() > 0) {
@@ -210,11 +210,11 @@ public class DesignDataService {
                 if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
                     DesignBusinessOrder order = designBusinessOrders.get(0);
                     if (order.getOperationState() == 1) {
-                        designDTO.addButton(Utils.getButton("需要修改设计", 4));
-                        designDTO.addButton(Utils.getButton("确认设计", 5));
+                        designDTO.addButton(Utils.getButton("需要修改设计", 5001));
+                        designDTO.addButton(Utils.getButton("确认设计", 5004));
                     }
                 } else {
-                    designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
+                    designDTO.addButton(Utils.getButton("申请额外修改设计", 5005));
                 }
             }
         }

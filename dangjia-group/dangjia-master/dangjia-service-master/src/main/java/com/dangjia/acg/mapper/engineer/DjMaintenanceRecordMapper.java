@@ -1,8 +1,8 @@
 package com.dangjia.acg.mapper.engineer;
 
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO;
-import com.dangjia.acg.dto.supervisor.*;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.house.TaskStack;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -21,18 +21,14 @@ public interface DjMaintenanceRecordMapper extends Mapper<DjMaintenanceRecord> {
     List<DjMaintenanceRecordDTO> queryDjMaintenanceRecordList(@Param("searchKey") String searchKey,
                                                               @Param("state") Integer state);
 
-
     DjMaintenanceRecordDTO queryDjMaintenanceRecordDetail(@Param("id") String id);
-
-    List<DjResponsiblePartyDTO> queryDvResponsibility(@Param("houseId") String houseId);
-
-    List<StoreMaintenanceDTO> queryStoreMaintenance(@Param("responsiblePartyType")String responsiblePartyType ,@Param("responsiblePartyId") String responsiblePartyId);
-
-    List<MemberMaintenanceDTO> queryMemberMaintenance(@Param("responsiblePartyType")String responsiblePartyType ,@Param("responsiblePartyId") String responsiblePartyId);
-
-    List<DjMaintenanceRecord> queryMaintenanceRecord(@Param("memberId") String memberId,@Param("houseId") String houseId);
 
     //判断是否有正在处理中的质保
     List<DjMaintenanceRecord> selectMaintenanceRecoredByHouseId(@Param("houseId") String houseId,@Param("workerTypeSafeOrderId") String workerTypeSafeOrderId);
 
+    /**
+     * 查询符合条件的，需要处理的任务
+     * @return
+     */
+    List<TaskStack> queryDjMaintenanceRecordListByStateTime();
 }

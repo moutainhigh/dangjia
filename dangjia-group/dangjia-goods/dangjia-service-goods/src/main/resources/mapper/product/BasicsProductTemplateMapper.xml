@@ -247,10 +247,10 @@
         IFNULL(dsap.supplied_num,0) AS suppliedNum,
         IFNULL(dsap.is_shelf_status,0)  AS isShelfStatus
         FROM dj_basics_product_template bpt
-        LEFT  JOIN dj_basics_goods dbg ON dbg.id=bpt.goods_id
+        INNER  JOIN dj_basics_goods dbg ON dbg.id=bpt.goods_id
         LEFT JOIN (select * from  dj_basics_storefront_product t where t.storefront_id=#{storefontId})dsap  ON dsap.prod_template_id=bpt.id
-        WHERE
-        1=1
+        WHERE bpt.city_id=#{cityId}
+        and bpt.type=#{type}
         <if test="bgtype!=null and bgtype!=''">
             and FIND_IN_SET(dbg.type,#{bgtype})
         </if>
@@ -265,7 +265,6 @@
            and  bpt.category_id=#{categoryId}
         </if>
         AND bpt.data_status = 0
-
         ORDER BY bpt.istop DESC,bpt.create_date DESC
 
     </select>
@@ -319,6 +318,9 @@
            and category_id=#{categoryId}
            and city_id=#{cityId}
         </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and name LIKE CONCAT('%',#{searchKey},'%')
+        </if>
         ORDER BY istop DESC,create_date desc
     </select>
 
@@ -346,7 +348,6 @@
 
         bp.id productTemplateId,
         bp.category_id categoryId,
-        bp.id productId,
         bp.product_sn productSn,
         bp.name productName,
         bp.goods_id goodsId,
@@ -720,15 +721,21 @@
         WHERE
             p.is_shelf_status = 1
         AND bg.data_status = 0
-        AND bg.type = 5
+        <choose>
+            <when test="null!=workerTypeId and ''!=workerTypeId">
+                AND bg.type = 5
+                and bp.worker_type_id=#{workerTypeId}
+            </when>
+            <otherwise>
+                and bg.type=0
+            </otherwise>
+        </choose>
         and bg.city_id= #{cityId}
-        and bp.worker_type_id=#{workerTypeId}
         <if test="topCategoryId!=null and topCategoryId!=''">
             and gc.parent_top=#{topCategoryId}
         </if>
         <if test="searchKey!=null and searchKey!=''">
             and t.name like CONCAT('%',#{searchKey},'%')
         </if>
-
     </select>
 </mapper>

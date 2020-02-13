@@ -2,7 +2,7 @@ package com.dangjia.acg.mapper.supervisor;
 
 import com.dangjia.acg.dto.supervisor.AuthorityDTO;
 import com.dangjia.acg.dto.supervisor.PatrolRecordIndexDTO;
-import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
+import com.dangjia.acg.modle.supervisor.SupervisorAuthority;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -10,7 +10,7 @@ import tk.mybatis.mapper.common.Mapper;
 import java.util.List;
 
 @Repository
-public interface ISupervisorAuthorityMapper extends Mapper<DjBasicsSupervisorAuthority> {
+public interface ISupervisorAuthorityMapper extends Mapper<SupervisorAuthority> {
 
     List<AuthorityDTO> getStayAuthorityList(@Param("cityId") String cityId, @Param("visitState") Integer visitState, @Param("searchKey") String searchKey);
 

@@ -568,7 +568,7 @@ public class HouseService {
                     houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
 //                    houseChoiceCase.setLabel(srcHouse.getStyle());
                     houseChoiceCase.setSource("房源来自当家装修精选推荐");
-                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
+                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase,srcHouse.getCityId());
                 } else {
                     houseChoiceCaseService.delHouseChoiceCase(house.getId());
                 }
@@ -1939,6 +1939,7 @@ public class HouseService {
                 houseFlow.setWorkType(1);//设置待业主支付
                 houseFlow.setModifyDate(new Date());
                 houseFlow.setPayStatus(0);
+                houseFlow.setStartDate(new Date());
                 houseFlowMapper.insert(houseFlow);
             }
             house.setDesignerOk(0);
@@ -1959,6 +1960,7 @@ public class HouseService {
                 houseFlow.setModifyDate(new Date());
                 houseFlow.setPayStatus(0);
                 houseFlow.setCityId(house.getCityId());
+                houseFlow.setStartDate(new Date());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             } else {
                 houseFlow = new HouseFlow(true);
@@ -1972,6 +1974,7 @@ public class HouseService {
                 houseFlow.setModifyDate(new Date());
                 houseFlow.setCityId(house.getCityId());
                 houseFlow.setPayStatus(0);
+                houseFlow.setStartDate(new Date());
                 houseFlowMapper.insert(houseFlow);
             }
         }
@@ -2031,7 +2034,7 @@ public class HouseService {
 
                     Example example=new Example(DjActuarialTemplateConfig.class);
                     example.createCriteria().andEqualTo(DjActuarialTemplateConfig.SERVICE_TYPE_ID,house.getHouseType())
-                            .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,1);
+                            .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,configType);
                     DjActuarialTemplateConfig djActuarialTemplateConfig=iMasterActuarialTemplateConfigMapper.selectOneByExample(example);
 
 
@@ -2156,7 +2159,7 @@ public class HouseService {
                         .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,workerTypeId);
                 DjActuarialTemplateConfig djActuarialTemplateConfig=iMasterActuarialTemplateConfigMapper.selectOneByExample(example);
 
-                 example = new Example(DjActuarialProductConfig.class);
+                example = new Example(DjActuarialProductConfig.class);
                 example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID, workerTypeId)
                         .andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,djActuarialTemplateConfig.getId())
                         .andEqualTo(DjActuarialProductConfig.PRODUCT_ID, productTemplateId);
@@ -2546,7 +2549,7 @@ public class HouseService {
      * 修改房子精算状态
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
+    public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk,String taskId) {
         try {
             House house = iHouseMapper.selectByPrimaryKey(houseId);
             if (house == null) {
@@ -2560,6 +2563,9 @@ public class HouseService {
                 Double price = iMasterBudgetMapper.getMasterBudgetWorkerPrice(houseId, "3");
                 if (price == 0) {
                     return ServerResponse.createByErrorMessage("大管家没有精算人工费,请重新添加");
+                }else{
+                    //精算审核任务
+                    taskStackService.insertTaskStackInfo(houseId,house.getMemberId(),"精算审核","icon/jingsuan.png",16,houseId);
                 }
             }
             if (house.getBudgetState() == 2 && budgetOk == 2) {
@@ -2603,11 +2609,14 @@ public class HouseService {
                 houseFlow.setWorkType(2);//待业主支付
                 houseFlow.setModifyDate(new Date());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
-                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+                //生成任务
+                taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),"大管家待支付",workerType.getImage(),1,houseFlow.getId());
+//                configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
+//                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
                 //推送消息给业主等待大管家抢单
                 configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
-                        "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
+                        "0", "大管家待支付", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
                                 house.getHouseName()), "");
 //                //告知工程部精算已通过
 //                Map<String, String> temp_para = new HashMap();
@@ -2674,9 +2683,23 @@ public class HouseService {
                 hfa.setIsReadType(0);
                 houseFlowApplyMapper.insert(hfa);
                 insertConstructionRecord(hfa);
+                //增加精算完成时间
+                houseFlow.setEndDate(new Date());
+                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
             }
             house.setBudgetOk(budgetOk);//精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过
             iHouseMapper.updateByPrimaryKeySelective(house);
+
+            if(taskId!=null){//如果任务不为空，则修改任务
+                TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
+                if(taskStack!=null){
+                    taskStack.setState(1);
+                    taskStack.setModifyDate(new Date());
+                    taskStackService.updateTaskStackInfo(taskStack);
+                }
+            }
+
             return ServerResponse.createBySuccessMessage("修改房子精算状态成功");
         } catch (Exception e) {
             e.printStackTrace();

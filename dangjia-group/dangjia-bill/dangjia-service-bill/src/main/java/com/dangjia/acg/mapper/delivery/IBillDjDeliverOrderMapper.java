@@ -30,7 +30,8 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      * @param houseId
      * @return
      */
-    List<OrderStorefrontDTO> queryDjDeliverOrderStorefront(@Param("houseId") String houseId,@Param("memberId") String memberId);
+    List<OrderStorefrontDTO> queryDjDeliverOrderStorefront(@Param("houseId") String houseId,
+                                                           @Param("memberId") String memberId);
 
 
     /**
@@ -52,7 +53,8 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      * @param houseId
      * @return
      */
-    List<OrderStorefrontDTO> queryReservedStorefront(@Param("houseId") String houseId);
+    List<OrderStorefrontDTO> queryReservedStorefront(@Param("houseId") String houseId,
+                                                     @Param("memberId") String memberId);
 
     /**
      * 已预约发货商品
@@ -184,4 +186,7 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
     int queryTestNumber(@Param("id") String id,
                         @Param("houseId") String houseId,
                         @Param("workerId") String workerId);
+
+    List<DecorationCostDTO> queryCostDetailsAfterCompletion(@Param("houseId") String houseId);
+
 }

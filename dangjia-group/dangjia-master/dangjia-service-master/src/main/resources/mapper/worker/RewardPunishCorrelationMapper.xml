@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.worker.IRewardPunishCorrelationMapper">
-    <resultMap id="findCorrelationPerms" type="com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO" >
-        <id column="id" property="id" />
+    <resultMap id="findCorrelationPerms" type="com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO">
+        <id column="id" property="id"/>
         <result column="create_date" property="createDate"/>
         <result column="modify_date" property="modifyDate"/>
         <result column="data_status" property="dataStatus"/>
@@ -13,7 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result column="type" property="type"/>
         <result column="state" property="state"/>
         <collection property="conditionList" ofType="com.dangjia.acg.modle.worker.RewardPunishCondition">
-            <id column="mid" property="id" />
+            <id column="mid" property="id"/>
             <result column="mreward_punish_correlation_id" property="rewardPunishCorrelationId"/>
             <result column="mname" property="name"/>
             <result column="mtype" property="type"/>
@@ -58,17 +58,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="name!=null and name!=''">
             AND r.name LIKE CONCAT('%',#{name},'%')
         </if>
-        <if test="state!=null">
-            AND r.state=#{state}
+        <if test="type!=null">
+            AND r.type=#{type}
         </if>
     </select>
 
     <select id="queryCorrelationList" resultType="java.util.Map">
         SELECT
-            id,
-            NAME
+        id,
+        NAME
         FROM
-            dj_worker_reward_punish_correlation
+        dj_worker_reward_punish_correlation
         WHERE 1=1
         <if test="type!=null and type!=''">
             and type = #{type}

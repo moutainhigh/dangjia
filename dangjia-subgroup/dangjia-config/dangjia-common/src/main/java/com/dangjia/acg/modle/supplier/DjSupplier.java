@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 /**
  * Created with IntelliJ IDEA.
@@ -88,5 +89,10 @@ public class DjSupplier extends BaseEntity {
     @Desc(value = "滞留金")
     @ApiModelProperty("滞留金")
     private Double retentionMoney;
+
+    @Column(name = "transportation_cost")
+    @Desc(value = "每单收取运费")
+    @ApiModelProperty("每单收取运费")
+    private BigDecimal transportationCost;
 
 }

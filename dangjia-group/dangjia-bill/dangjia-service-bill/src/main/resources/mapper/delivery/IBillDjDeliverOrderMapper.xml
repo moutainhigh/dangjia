@@ -103,30 +103,43 @@
 
     <select id="queryReservedStorefront" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
         SELECT
-            t1.storefront_id storefrontId,
-            t1.id orderSplitId,
-            t1.address_id addressId,
-            t1.house_id houseId,
-            t4.storefront_name storefrontName,
-            t1.order_id orderId,
-            t1.id as orderSplitId
+             t1.house_id,
+             t1.storefront_id storefrontId,
+             t1.id orderSplitId,
+             t1.address_id addressId,
+             t1.house_id houseId,
+             t4.storefront_name storefrontName,
+             t1.order_id orderId
         FROM
-            dj_deliver_order_split t1,
-            dj_basics_storefront t4
-        WHERE
-            t1.storefront_id = t4.id
-        AND t1.house_id=#{houseId}
-        AND EXISTS (
-            SELECT
-                1
-            FROM
-                dj_deliver_order_split_item t2
-            WHERE
-                t1.id = t2.order_split_id
-            AND t2.data_status = 0
-            AND t2.is_reservation_deliver = 1
-            AND t2.reservation_deliver_time IS NOT NULL
-        )
+         dj_deliver_order_split t1,
+         dj_basics_storefront t4,
+         dj_deliver_order_split_item t2
+        WHERE t4.id = t1.storefront_id
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND t1.house_id=#{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                    1
+                    FROM
+                    dj_member_address t5
+                    WHERE
+                    t5.member_id = #{memberId}
+                    AND t5.data_status = 0
+                    AND (
+                    t1.house_id = t5.house_id
+                    OR t1.address_id = t5.id
+                    )
+                )
+            </otherwise>
+        </choose>
+          and t1.id = t2.order_split_id
+          AND t2.data_status = 0
+          AND t2.is_reservation_deliver = 1
+          AND t2.reservation_deliver_time IS NOT NULL
+        GROUP BY t1.id
     </select>
 
 
@@ -336,6 +349,7 @@
           t4.id productTemplateId,
           t2.product_name productName,
           t4.product_sn productSn,
+          t2.unit_name unitName,
           t4.image,
           t2.price price,
           t2.shop_count shopCount,
@@ -801,8 +815,15 @@
             dj_pay_business_order t2
         WHERE
             t1.business_order_number = t2.number
-            AND t1.id = t1.parent_order_id
-            AND t2.state=#{state}
+            AND (t1.id = t1.parent_order_id or t1.parent_order_id is null)
+        <choose>
+            <when test="state==2">
+                AND t2.state in(1,2)
+            </when>
+            <otherwise>
+                AND t2.state=#{state}
+            </otherwise>
+        </choose>
             AND t1.house_id=#{houseId}
             AND t1.data_status=0
     </select>
@@ -871,8 +892,7 @@
             dj_deliver_order t1,
             dj_basics_storefront t4
         WHERE
-            t1.parent_order_id = #{orderId}
-        AND t1.id!= t1.parent_order_id
+            (t1.parent_order_id = #{orderId} or t1.id=#{orderId})
         AND t1.data_status=0
         AND t1.storefont_id=t4.id
     </select>
@@ -1156,5 +1176,47 @@
         and t1.type in(2,3)
     </select>
 
+    <select id="queryCostDetailsAfterCompletion" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+        SELECT
+            t3.product_name productName,
+            t2.create_date createDate,
+            (
+                IFNULL(
+                    t2.actual_payment_price,
+                    IFNULL(
+                        t2.total_price,
+                        t2.price * t2.shop_count
+                    )
+                ) + IFNULL(
+                    (
+                        SELECT
+                            price
+                        FROM
+                            dj_deliver_order_added_product tt
+                        WHERE
+                            tt.any_order_id = t2.id
+                    ),
+                    0
+                ) * t2.shop_count
+            ) actualPaymentPrice,
+        IF (
+            t1.worker_type_id IS NULL
+            OR t1.worker_type_id = '',
+            0,
+            t1.worker_type_id
+        ) workerTypeId
+        FROM
+            dj_deliver_order t1,
+            dj_deliver_order_item t2,
+            dj_basics_storefront_product t3,
+            dj_basics_product_template t4,
+            dj_basics_goods_category t5
+        WHERE
+            t1.id = t2.order_id
+        AND t2.product_id = t3.id
+        AND t3.prod_template_id = t4.id
+        AND t4.category_id = t5.id
+        AND t1.house_id = #{houseId}
+    </select>
 
 </mapper>

@@ -121,5 +121,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</if>
 	</select>
 
+	<update id="updateStorefrontIdByHouseId">
+		UPDATE dj_house_warehouse  hw
+		   set storefront_id=(select storefront_id from dj_basics_storefront_product bsp where hw.product_id=bsp.id)
+		where ( house_id=#{houseId}
+		 or house_id=(select house_id from dj_member_address where id=#{addressId}))
+		and storefront_id is null
+	</update>
+
+	<select id="selectWareHouseInfoByStorefrontId" resultType="com.dangjia.acg.modle.house.Warehouse">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_house_warehouse
+		WHERE
+		( house_id=#{houseId}
+		or house_id=(select house_id from dj_member_address where id=#{addressId}))
+		and storefront_id=#{storefrontId}
+	</select>
+
 </mapper>
 

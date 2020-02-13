@@ -21,6 +21,19 @@ import java.util.List;
 @FeignClient("dangjia-service-shop")
 public interface BasicsStorefrontAPI {
 
+    /**
+     * 获取需缴纳的滞留金
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param type 类型：1店铺，2供应商
+     * @return
+     */
+    @PostMapping("/web/getNeedRetentionMoney")
+    @ApiOperation(value = "获取需缴纳的滞留金", notes = "获取需缴纳的滞留金")
+    ServerResponse getNeedRetentionMoney(@RequestParam("userId") String userId,
+                                         @RequestParam("cityId") String cityId,
+                                         @RequestParam("type") Integer type);
+
     @PostMapping("/web/queryStorefrontByUserID")
     @ApiOperation(value = "通过用户ID查询店铺", notes = "通过用户ID查询店铺")
     Storefront queryStorefrontByUserID(@RequestParam("userId") String userId,
@@ -69,10 +82,7 @@ public interface BasicsStorefrontAPI {
      */
     @PostMapping("/web/queryStorefrontWallet")
     @ApiOperation(value = "店铺-我的钱包", notes = "店铺-我的钱包")
-    ServerResponse queryStorefrontWallet(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("pageDTO") PageDTO pageDTO,
-                                         @RequestParam("searchKey") String searchKey,
-                                         @RequestParam("userId") String userId,
+    ServerResponse queryStorefrontWallet(@RequestParam("userId") String userId,
                                          @RequestParam("cityId") String cityId);
 
 

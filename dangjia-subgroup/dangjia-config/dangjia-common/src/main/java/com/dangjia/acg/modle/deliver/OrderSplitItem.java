@@ -67,6 +67,28 @@ public class OrderSplitItem extends BaseEntity {
 	@Column(name = "sup_cost")
 	private Double supCost;//选择的供应商提供的单价
 
+	@Column(name = "sup_stevedorage_cost")
+	@Desc(value = "供应商搬运费")
+	@ApiModelProperty("供应商搬运费")
+	private Double supStevedorageCost;
+
+	@Column(name = "sup_transportation_cost")
+	@Desc(value = "供应商运费")
+	@ApiModelProperty("供应商运费")
+	private Double supTransportationCost;
+
+	@Column(name = "stevedorage_cost")
+	@Desc(value = "店铺搬运费")
+	@ApiModelProperty("店铺搬运费")
+	private Double stevedorageCost;
+
+
+	@Column(name = "transportation_cost")
+	@Desc(value = "店铺运费")
+	@ApiModelProperty("店铺运费")
+	private Double transportationCost;
+
+
 	@Column(name = "shop_count")
 	private Double shopCount;//购买总数
 

@@ -181,6 +181,7 @@ public interface SupervisorAuthorityAPI {
      * @return_param constructionPeriod string 工期
      * @return_param address string 地址
      * @return_param price string 价格
+     * @return_param maintenanceRecordId string 质保申请ID
      * @return_param type int 0:施工,1:维保
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 6
@@ -202,8 +203,9 @@ public interface SupervisorAuthorityAPI {
     /**
      * showdoc
      *
-     * @param userToken 必选 string userToken
-     * @param houseId   必选 string 房子ID
+     * @param userToken           必选 string userToken
+     * @param houseId             必选 string 房子ID
+     * @param maintenanceRecordId 可选 string 质保申请ID
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/中台/督导
      * @title （APP）督导获取工地详情
@@ -217,17 +219,55 @@ public interface SupervisorAuthorityAPI {
      * @return_param longitude string 经度
      * @return_param type Integer 0:施工,1:维保
      * @return_param buttonType Integer 0:显示底部按钮,1:不显示底部按钮
-     * @return_param flowDatas List<SupHouseFlowDTO> 记录集合
-     * @return_param flowDatas-memberName string 工匠名称
-     * @return_param flowDatas-memberId string 工匠ID
-     * @return_param flowDatas-workerTypeName string 工种名称
-     * @return_param flowDatas-workerTypeId string workertyid
-     * @return_param flowDatas-workerType string workertype
-     * @return_param flowDatas-image string 工种图片
-     * @return_param flowDatas-completion string 进程名称，为空不显示
-     * @return_param flowDatas-mapList List<WorkerMapDTO> 进程数据集合
-     * @return_param flowDatas-mapList-keyName string 键，如：工期
-     * @return_param flowDatas-mapList-valueName string 值，如：35/75
+     * @return_param flowDatas List<> 记录集合
+     * @return_param dataMap Map 维保数据集
+     * @return_param ---- flowDatas ----
+     * @return_param memberName string 工匠名称
+     * @return_param memberId string 工匠ID
+     * @return_param workerTypeName string 工种名称
+     * @return_param workerTypeId string workertyid
+     * @return_param workerType string workertype
+     * @return_param image string 工种图片
+     * @return_param completion string 进程名称，为空不显示
+     * @return_param mapList List<> 进程数据集合
+     * @return_param ---- flowDatas-mapList ----
+     * @return_param keyName string 键，如：工期
+     * @return_param valueName string 值，如：35/75
+     * @return_param ---- dataMap ----
+     * @return_param orderProgressList List<> 节点流水记录
+     * @return_param workerList List<> 维修参与人员
+     * @return_param productList List<> 维保商品列表
+     * @return_param ---- dataMap-orderProgressList ----
+     * @return_param id string 节点id
+     * @return_param createDate string 创建时间
+     * @return_param progressOrderId string 订单ID（各种订单）
+     * @return_param progressType string 订单类型
+     * @return_param nodeCode string 节点编码
+     * @return_param nodeName string 节点名称
+     * @return_param nodeDescribe string 节点描述
+     * @return_param associatedOperation String 按钮编码
+     * @return_param associatedOperationName string 按钮描述(有就显示）
+     * @return_param nodeStatus int 节点显示状态(1黑勾，2黑叉，3红叉，4灰掉，5红点，6白点）
+     * @return_param ---- dataMap-workerList ----
+     * @return_param workerId string 工人ID
+     * @return_param workerName string 工人名称
+     * @return_param labelName string 工种名
+     * @return_param headImage string 工人头像
+     * @return_param mobile string 工人手机
+     * @return_param ---- dataMap-productList ----
+     * @return_param productId string 商品ID
+     * @return_param productName string 商品名称
+     * @return_param productTemplateId string 商品模板ID
+     * @return_param image string 商品图片
+     * @return_param imageSingle string 商品图片(单张)
+     * @return_param price double 商品单价
+     * @return_param storefrontId string 店铺ID
+     * @return_param storefrontName string 店铺名称
+     * @return_param storefrontIcon string 店铺图标
+     * @return_param valueNameArr string 商品属性规格名称
+     * @return_param valueIdArr string 商品属性规格ID
+     * @return_param unitId string 单位ID
+     * @return_param unitName string 商品单位名称
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 7
      * @Author: Ruking 18075121944
@@ -237,6 +277,7 @@ public interface SupervisorAuthorityAPI {
     @ApiOperation(value = "督导获取工地详情", notes = "督导获取工地详情")
     ServerResponse getSupHouseDetails(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("userToken") String userToken,
-                                      @RequestParam("houseId") String houseId);
+                                      @RequestParam("houseId") String houseId,
+                                      @RequestParam("maintenanceRecordId") String maintenanceRecordId);
 
 }

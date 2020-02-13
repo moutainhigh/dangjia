@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: zmj
@@ -29,4 +30,7 @@ public interface IOrderItemMapper extends Mapper<OrderItem> {
     List<BudgetLabelDTO>  queryBudgetLabel(@Param("orderId")String orderId ,@Param("storefontId")String storefontId,@Param("productType")Integer productType);
     List<BudgetLabelGoodsDTO>  queryBudgetLabelGoods(@Param("orderId")String orderId ,@Param("storefontId")String storefontId,@Param("productType")Integer productType);
 
+    Map<String,Object> searchCountItemByInfo(@Param("storefrontId") String storefrontId, @Param("addressId") String addressId, @Param("houseId") String houseId, @Param("productId") String productId);
+
+    List<OrderItem> getReservationDeliverState(@Param("orderId") String orderId);
 }

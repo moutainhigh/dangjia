@@ -306,7 +306,9 @@ public class DesignerOperationService {
             return ServerResponse.createByErrorMessage("您无权操作此房产");
         }
         Example examples = new Example(HouseFlow.class);
-        examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE, "1");
+        examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
+                .andEqualTo(HouseFlow.WORKER_TYPE, "1");
+        examples.orderBy(HouseFlow.CREATE_DATE).desc();
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(examples);
         HouseWorkerOrder hwo = null;
         if (houseFlows.size() > 0) {
@@ -346,6 +348,11 @@ public class DesignerOperationService {
                     quantityRoomMapper.insert(quantityRoom);
 
                     house.setDesignerOk(3);
+
+                    //设计结束时间
+                    HouseFlow houseFlow = houseFlows.get(0);
+                    houseFlow.setEndDate(new Date());
+                    houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
                     if (hwo != null) {
                         //订单拿钱更新
@@ -407,8 +414,9 @@ public class DesignerOperationService {
             if(StringUtils.isNotBlank(houseFlow.getWorkerId())){//若已有工匠，则通知精算工匠继续进行精算
                 configMessageService.addConfigMessage(null,AppType.GONGJIANG,houseFlow.getWorkerId(),"0","设计图纸已完成",String.format(DjConstants.PushMessage.GZ_T_WORK, house.getHouseName()),"");
             }else{//若没有工匠，但有流程，则将其流程改为抢单状态，让对应的工匠抢单
-                houseFlow.setState(2);//已支付待工匠抢单
+                houseFlow.setWorkSteta(2);//已支付待工匠抢单
                 houseFlow.setModifyDate(new Date());
+                houseFlow.setReleaseTime(new Date());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             }
 

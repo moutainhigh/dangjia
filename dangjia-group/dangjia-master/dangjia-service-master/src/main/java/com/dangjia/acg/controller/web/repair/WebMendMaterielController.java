@@ -59,12 +59,12 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.storeReturnDistributionSupplier(request,cityId,userId,pageDTO,likeAddress);
     }
 
-    @Override
+   /* @Override
     @ApiMethod
     public ServerResponse materialBackStateProcessing(HttpServletRequest request,String userId, String cityId, PageDTO pageDTO, String state, String likeAddress) {
         return mendMaterielService.materialBackStateProcessing(userId,cityId, pageDTO, state,likeAddress);
     }
-
+*/
 
 
     /**
@@ -83,18 +83,28 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     }
 
 
-
+    /**
+     *店铺--售后处理--待处理列表
+     * @param request
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param pageDTO
+     * @param state 状态默认：1待处理，2已处理
+     * @param likeAddress
+     * @param type 查询类型：1退货退款，2仅退款
+     * @return
+     */
     @Override
     @ApiMethod
-    public ServerResponse ownerReturnHandleIng(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.ownerReturnHandleIng(request,cityId,userId,pageDTO,state,likeAddress);
+    public ServerResponse searchReturnRrefundList(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, Integer state, String likeAddress,Integer type) {
+        return mendMaterielService.searchReturnRrefundList(request,cityId,userId,pageDTO,state,likeAddress,type);
     }
 
-    @Override
+   /* @Override
     @ApiMethod
     public ServerResponse ownerReturnProssing(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
         return mendMaterielService.ownerReturnProssing(request,cityId,userId,pageDTO,state,likeAddress);
-    }
+    }*/
 
     @Override
     @ApiMethod

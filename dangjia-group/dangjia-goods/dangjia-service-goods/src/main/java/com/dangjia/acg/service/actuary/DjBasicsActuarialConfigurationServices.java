@@ -273,7 +273,7 @@ public class DjBasicsActuarialConfigurationServices {
         DjSimulationTemplateConfig djSimulationTemplateConfig = editSimulateTemplateInfo(userId,configId,configName,configType,cityId,serviceTypeId);
        //编辑（添加修改标题 下的选项值详情信息）
         JSONArray jsonArr = JSONArray.parseArray(configDetailArr);
-        editSimulateTemplateDetailList(jsonArr,djSimulationTemplateConfig,cityId);
+        editSimulateTemplateDetailList(jsonArr,djSimulationTemplateConfig,cityId,serviceTypeId);
         return  ServerResponse.createBySuccessMessage("保存成功");
     }
 
@@ -318,7 +318,7 @@ public class DjBasicsActuarialConfigurationServices {
      * @param jsonArr  标题 详情列表信息（id 详情ID，simulationTemplateId 标题ID，name名称,image图片，labelName多个逗号分隔）
      * @param djSimulationTemplateConfig  标题对应的基本信息
      */
-    private void editSimulateTemplateDetailList(JSONArray jsonArr,DjSimulationTemplateConfig djSimulationTemplateConfig,String cityId){
+    private void editSimulateTemplateDetailList(JSONArray jsonArr,DjSimulationTemplateConfig djSimulationTemplateConfig,String cityId,String serviceTypeId){
         for (int i = 0; i < jsonArr.size(); i++) {
             JSONObject obj = jsonArr.getJSONObject(i);
             String id=obj.getString("id");
@@ -332,6 +332,7 @@ public class DjBasicsActuarialConfigurationServices {
             djSimulationTemplateConfigDetail.setLabelName(obj.getString("labelName"));
             djSimulationTemplateConfigDetail.setSimulationTemplateId(djSimulationTemplateConfig.getId());
             djSimulationTemplateConfigDetail.setCityId(cityId);
+            djSimulationTemplateConfigDetail.setServiceTypeId(serviceTypeId);
             //判断是添加还是修改
             if(id!=null&&StringUtils.isNotBlank(id)){
                 djSimulationTemplateConfigDetail.setId(id);
@@ -653,6 +654,9 @@ public class DjBasicsActuarialConfigurationServices {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveSimulateAssemblyInfo(String assemblyInfoAttr,String userId,String cityId,String serviceTypeId){
+        if(serviceTypeId==null||StringUtils.isBlank(serviceTypeId)){
+            return ServerResponse.createByErrorMessage("服务类型不能为空");
+        }
         if(assemblyInfoAttr!=null&&StringUtils.isNotBlank(assemblyInfoAttr)){
             logger.info("开始进入saveSimulateAssemblyInfo：========start==========");
             //1.获取需要保存的组合列表

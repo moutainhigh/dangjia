@@ -72,6 +72,36 @@ public class MasterCostAcquisitionService {
         }
     }
 
+    /**
+     * 计算供应商的搬运费
+     * @param houseId 房子ID
+     * @param porterage 搬运费
+     * @param count //数量
+     * @return
+     */
+    public Double getSupStevedorageCost(String houseId,String isUpstairsCost,Double porterage,Double count){
+        try{
+            //查询房子信息，获取房子对应的楼层
+            QuantityRoom quantityRoom=iQuantityRoomMapper.getQuantityRoom(houseId,0);
+            Integer elevator= 1;//是否电梯房
+            String floor="1";
+            if(quantityRoom!=null&& StringUtils.isNotBlank(quantityRoom.getFloor())){
+                floor=quantityRoom.getFloor();//楼层
+                elevator=quantityRoom.getElevator();//是否电梯房
+            }
+            //计算楼层数
+            Double floorCount=1.0;//楼层数
+            if("0".equals(isUpstairsCost)&&elevator==0){//判断是否按1层收取上楼费，若为否//若不为电梯房，则楼层数设置为实际楼层数
+                floorCount=new Double(floor).doubleValue();
+            }
+            //计算楼层数
+            return MathUtil.mul(MathUtil.mul(floorCount,porterage),count);
+        }catch (Exception e){
+            logger.error("搬运费计算异常",e);
+            return 0.0;
+        }
+    }
+
 
 
 }

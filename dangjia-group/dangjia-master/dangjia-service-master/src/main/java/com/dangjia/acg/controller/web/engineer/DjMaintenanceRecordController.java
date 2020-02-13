@@ -50,12 +50,14 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     }
 
     /**
-     * 消息弹窗--需勘查维保商品
+     * 消息弹窗--维保商品订单
      * @param userToken
      * @param houseId
      * @param taskId
      * @return
      */
+    @Override
+    @ApiMethod
     public ServerResponse searchMaintenanceProduct(String userToken,String houseId,String taskId){
         try{
             return djMaintenanceRecordService.searchMaintenanceProduct(userToken,houseId,taskId);
@@ -65,6 +67,202 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         }
     }
 
+    /**
+     * 消息弹窗--报销商品订单
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchExpenseMaintenanceProduct(String userToken,String houseId,String taskId){
+         return djMaintenanceRecordService.searchExpenseMaintenanceProduct(userToken,houseId,taskId);
+    }
+
+    /**
+     * 消息弹窗--验收申请单
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchAcceptanceApplication(String userToken,String houseId,String taskId){
+          return djMaintenanceRecordService.searchAcceptanceApplication(userToken,houseId,taskId);
+    }
+
+    /**
+     * 消息弹窗--提交维保商品
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveMaintenanceProduct(String userToken,String houseId,String taskId,String cityId){
+        try{
+            return djMaintenanceRecordService.saveMaintenanceProduct(userToken,houseId,taskId,cityId);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
+     * 消息弹窗--提交报销商品
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveExpenseMaintenanceProduct(String userToken,String houseId,String taskId,String cityId){
+        try{
+
+            return djMaintenanceRecordService.saveExpenseMaintenanceProduct(userToken,houseId,taskId,cityId);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
+     * 消息弹窗--提交验收申请结果
+     * @param userToken 用户token
+     * @param houseId 房子ID
+     * @param taskId 任务ID
+     * @param auditResult 审核结果1通过，2不通过
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveAcceptanceApplication(String userToken,String houseId,String taskId,Integer auditResult){
+        try{
+            return djMaintenanceRecordService.saveAcceptanceApplication(userToken,houseId,taskId,auditResult);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+    @Override
+    @ApiMethod
+    public void saveAcceptanceApplicationJob(){
+         djMaintenanceRecordService.saveAcceptanceApplicationJob();
+    }
+
+
+    /**
+     * 质保申请，提交订单
+     * @param userToken
+     * @param houseId
+     * @param maintenanceRecordId
+     * @param maintenanceRecordType
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveMaintenanceRecordOrder(String userToken,String houseId,String maintenanceRecordId,Integer maintenanceRecordType,String cityId){
+        try{
+            return djMaintenanceRecordService.saveMaintenanceRecordOrder(userToken,houseId,maintenanceRecordId,maintenanceRecordType,cityId);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse  workerEndMaintenanceRecord(String userToken,String maintenanceRecordId,String image,String remark,String cityId){
+        return djMaintenanceRecordService.workerEndMaintenanceRecord(userToken,maintenanceRecordId,image,remark,cityId);
+    }
+
+
+    /**
+     * 提前结束--勘查费用商品页面
+     * @param userToken
+     * @param houseId
+     * @param maintenanceRecordId
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse endMaintenanceSearchProduct(String userToken,String houseId,String maintenanceRecordId,String cityId){
+        return djMaintenanceRecordService.endMaintenanceSearchProduct(userToken,houseId,maintenanceRecordId,cityId);
+    }
+
+    /**
+     * 提前结束，结束维保
+     * @param userToken
+     * @param houseId
+     * @param maintenanceRecordId
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse endMaintenanceRecord(String userToken,String houseId,String maintenanceRecordId,String cityId){
+        try{
+            return djMaintenanceRecordService.endMaintenanceRecord(userToken,houseId,maintenanceRecordId,cityId,3);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
+     * 质保管理--发表评价
+     * @param userToken
+     * @param houseId 房子ID
+     * @param maintenanceRecordId 质保ID
+     * @param workerId 工匠ID
+     * @param start 星级
+     * @param content 评价内容
+     * @param image 评价图片
+     * @param cityId 城市ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse evaluationMaintenanceRecord(String userToken,String houseId,String maintenanceRecordId,String workerId,
+                                               Integer start,String content,String image,String cityId){
+        try{
+            return djMaintenanceRecordService.evaluationMaintenanceRecord( userToken, houseId, maintenanceRecordId, workerId,
+                     start, content, image, cityId);
+        }catch (Exception e){
+            logger.error("评价失败",e);
+            return ServerResponse.createByErrorMessage("评价失败");
+        }
+    }
+
+    /**
+     * 查询质保提交信息
+     * @param maintenanceRecordId 质保ID
+     * @param type 查询类型： 1:工匠 2:大管家 3：业主
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchMaintenaceRecordInfo(String maintenanceRecordId,Integer type){
+        return djMaintenanceRecordService.searchMaintenaceRecordInfo(maintenanceRecordId,type);
+    }
+
+    /**
+     * 查询质保详情记录
+     * @param userToken
+     * @param maintenanceRecordId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public  ServerResponse queryMaintenanceRecordDetail(String userToken,String maintenanceRecordId){
+        return djMaintenanceRecordService.queryMaintenanceRecordDetail(userToken,maintenanceRecordId);
+    }
     @Override
     @ApiMethod
     public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {
@@ -87,19 +285,6 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     @ApiMethod
     public ServerResponse queryMemberList(PageDTO pageDTO,String name) {
         return djMaintenanceRecordService.queryMemberList(pageDTO,name);
-    }
-
-
-    @Override
-    @ApiMethod
-    public ServerResponse upDateMaintenanceInFo(String supervisorId,
-                                                  Integer stewardSubsidy,
-                                                  String serviceRemark,
-                                                  String userId,
-                                                  String id,
-                                                  Integer handleType) {
-        return djMaintenanceRecordService.upDateMaintenanceInFo(supervisorId,stewardSubsidy
-                ,serviceRemark,userId,id,handleType);
     }
 
     @Override
@@ -145,19 +330,6 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.queryRobOrderInFo(userToken,workerId,houseId,data);
     }
 
-
-//    @Override
-//    @ApiMethod
-//    public ServerResponse applicationAcceptance(String houseId) {
-//        return djMaintenanceRecordService.applicationAcceptance(houseId);
-//    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse queryGuaranteeMoneyList(PageDTO pageDTO,String userId,String cityId) {
-        return  djMaintenanceRecordService.queryGuaranteeMoneyList(pageDTO,userId,cityId);
-    }
-
     @Override
     @ApiMethod
     public ServerResponse queryGuaranteeMoneyDetail(String userId,String cityId,String id) {
@@ -166,44 +338,11 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse resolved(String userToken, String remark,String houseId,String image,String id,String workerTypeSafeOrderId ) {
-        return djMaintenanceRecordService.resolved(userToken, remark,houseId,image, id, workerTypeSafeOrderId);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse sendingOwners(String userToken,String houseId,String remark ,String enoughAmount) {
-        return djMaintenanceRecordService.sendingOwners(userToken,houseId,remark,enoughAmount);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse auditMaintenance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
-        return djMaintenanceRecordService.auditMaintenance(userToken, remark, houseId, image, id, state, workerTypeSafeOrderId);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse submitQualityAssurance(String userToken, String houseId,
-                                                 String remark,String image,
-                                                 String id, Integer state,
-                                                 String productId,
-                                                 Double price,
-                                                 Double shopCount,
-                                                 String workerTypeSafeOrderId) {
-        return djMaintenanceRecordService.submitQualityAssurance(userToken, houseId, remark, image, id, state, productId, price,
-                shopCount, workerTypeSafeOrderId);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse addApplyNewspaper(String userToken,
-                                         String memberId,
-                                         Double money,
-                                         String description,
-                                         String image,
-                                         String houseId) {
-        return djMaintenanceRecordService.addApplyNewspaper(userToken, memberId, money, description, image, houseId);
+    public ServerResponse addApplyNewspaper(Double money,
+                                             String description,
+                                             String image,
+                                            String businessId) {
+        return djMaintenanceRecordService.addApplyNewspaper( money, description, image,businessId);
     }
 
     @Override
@@ -230,14 +369,20 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse workerApplyCollect(String id,String remarks,String image){
-        return djMaintenanceRecordService.workerApplyCollect(id,remarks,image);
+    public ServerResponse workerApplyCollect(String id,String remark,String image){
+        return djMaintenanceRecordService.workerApplyCollect(id,remark,image);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse insertMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId,String productId) {
-        return djMaintenanceRecordService.insertMaintenanceRecordProduct(userToken,houseId,maintenanceRecordId,productId);
+    public ServerResponse insertMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId,String productId,Double shopCount) {
+        try {
+            return djMaintenanceRecordService.insertMaintenanceRecordProduct(userToken,houseId,maintenanceRecordId,productId,shopCount);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("操作失败", e);
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
     @Override
@@ -272,10 +417,36 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.deleteMaintenanceRecordProduct(id);
     }
 
-//    @Override
-//    public ServerResponse setMaintenanceHandlesSubmissions(String maintenanceRecordId, String remark, String image) {
-//        return null;
-//    }
+    @Override
+    @ApiMethod
+    public ServerResponse confirmStart(String businessId) {
+        return djMaintenanceRecordService.confirmStart(businessId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setWorkerMaintenanceGoods(String userToken, String maintenanceRecordId, String houseId) {
+        try {
+            return djMaintenanceRecordService.setWorkerMaintenanceGoods(userToken,maintenanceRecordId,houseId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("操作失败",e);
+            return ServerResponse.createByErrorMessage("操作成功");
+        }
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse setMaintenanceHandlesSubmissions(String userToken,String maintenanceRecordId, String remark, String image) {
+        try {
+            return djMaintenanceRecordService.setMaintenanceHandlesSubmissions(userToken,maintenanceRecordId,remark,image);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("操作失败",e);
+            return ServerResponse.createByErrorMessage("操作成功");
+        }
+    }
 
 }
 

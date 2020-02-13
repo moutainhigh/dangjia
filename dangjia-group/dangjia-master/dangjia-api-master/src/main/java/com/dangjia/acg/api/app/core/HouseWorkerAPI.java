@@ -104,8 +104,12 @@ public interface HouseWorkerAPI {
     @ApiOperation(value = "根据工人查询自己的施工界面", notes = "根据工人查询自己的施工界面")
     ServerResponse getConstructionByWorkerId(@RequestParam("request") HttpServletRequest request,
                                              @RequestParam("userToken") String userToken,
-                                             @RequestParam("cityId") String cityId,
-                                             @RequestParam("type") Integer type);
+                                             @RequestParam("houseWorkerId") String houseWorkerId,
+                                             @RequestParam("cityId") String cityId);
+
+    @PostMapping("app/core/houseWorker/getConstructionInfo")
+    @ApiOperation(value = "大管家查看工地进度详情", notes = "大管家查看工地进度详情")
+    ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId,String houseFlowId);
 
     @PostMapping("app/core/houseWorker/getHouseFlowApply")
     @ApiOperation(value = "获取申请单明细", notes = "获取申请单明细")
@@ -183,11 +187,15 @@ public interface HouseWorkerAPI {
     @PostMapping("app/core/houseWorker/setSwitchHouseFlow")
     @ApiOperation(value = "切换工地", notes = "切换工地")
     ServerResponse setSwitchHouseFlow(@RequestParam("userToken") String userToken,
-                                      @RequestParam("houseFlowId") String houseFlowId);
+                                      @RequestParam("houseWorkerId") String houseWorkerId);
 
     @PostMapping("app/core/houseWorker/setSupervisorApply")
     @ApiOperation(value = "大管家申请验收", notes = "大管家申请验收")
     ServerResponse setSupervisorApply(@RequestParam("userToken") String userToken,
                                       @RequestParam("houseFlowId") String houseFlowId);
 
+    @PostMapping("app/core/houseWorker/autoDistributeHandle")
+    @ApiOperation(value = "大管家自动派单", notes = "大管家自动派单")
+    ServerResponse autoDistributeHandle(
+            @RequestParam("houseFlowId") String houseFlowId);
 }

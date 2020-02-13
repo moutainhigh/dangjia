@@ -19,7 +19,21 @@
             dj_sup_supplier_product ssp
         INNER JOIN dj_basics_goods bg ON ssp.goods_id = bg.id
         INNER JOIN dj_basics_product_template bpt ON ssp.product_id = bpt.id
-        WHERE 1=1   and ssp.data_status=0 and ssp.supplier_id=#{supId}
+        WHERE ssp.data_status=0 and ssp.supplier_id=#{supId}
+    </select>
+
+    <select id="searchHaveGoodsSize" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
+        SELECT
+            sap.id,
+            sap.goods_id AS goodsId,
+            sap.product_id AS productId
+        FROM
+            dj_sup_application_product sap
+        WHERE
+            sap.sup_id = #{supId}
+        AND sap.data_status = 0
+        AND sap.shop_id = #{shopId}
+        AND sap.application_status =#{applicationStatus}
     </select>
 
     <select id="queryHaveGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
@@ -39,34 +53,43 @@
             bpt.cartage_price AS cartagePrice,
             sap.is_cartage_price AS isCartagePrice,
             sap.supply_relationship AS supplyRelationship,
-            if(ar.adjust_time is not null and ar.adjust_time!="",ar.adjust_time,current_timestamp()) as adjustTime,
-            if(ar.adjust_price is not null and ar.adjust_price!="",ar.adjust_price,0) as adjustprice,
+            if(ar.adjust_time is not null and ar.adjust_time!="",ar.adjust_time,null ) as adjustTime,
+            if(ar.adjust_price is not null and ar.adjust_price!="",ar.adjust_price,null ) as adjustprice,
             if(sap.porterage is not null and sap.porterage!="",sap.porterage,0) as porterage
         FROM
             dj_sup_application_product sap
         INNER JOIN dj_basics_goods bg ON sap.goods_id = bg.id
         INNER JOIN dj_basics_storefront_product bsp ON bsp.id = sap.product_id
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
-        LEFT JOIN (SELECT * FROM (select * from dj_adjust_record  order by create_date DESC) b GROUP BY b.application_product_id) ar ON ar.application_product_id=sap.id
-        WHERE 1=1
-            and  sap.sup_id = #{supId}
-            and sap.data_status=0
-            and sap.shop_id = #{shopId}
-            <if test="null!=keyWord and ''!=keyWord">
-                and (
-                bg.NAME LIKE CONCAT('%',#{keyWord},'%') or
-                bpt.name LIKE CONCAT('%',#{keyWord},'%') or
-                bsp.market_name LIKE CONCAT('%',#{keyWord},'%')
-                )
-            </if>
-            <choose>
-                <when test='applicationStatus.contains(",")'>
-                    and sap.application_status in(${applicationStatus})
-                </when>
-                <otherwise>
-                    and sap.application_status=#{applicationStatus}
-                </otherwise>
-            </choose>
+        LEFT JOIN (SELECT art.application_product_id,art.adjust_price,art.adjust_time FROM
+                dj_adjust_record art,
+                dj_sup_application_product ap
+          WHERE
+                art.application_product_id = ap.id
+                AND ap.sup_id = #{supId}
+                AND ap.data_status = 0
+                AND ap.shop_id = #{shopId}
+                and art.create_date=(select max(create_date) from dj_adjust_record t where t.application_product_id=art.application_product_id)
+                group by art.application_product_id) ar ON ar.application_product_id=sap.id
+        WHERE sap.sup_id = #{supId}
+          and sap.data_status=0
+          and sap.shop_id = #{shopId}
+        <if test="null!=keyWord and ''!=keyWord">
+            and (
+            bg.NAME LIKE CONCAT('%',#{keyWord},'%') or
+            bpt.name LIKE CONCAT('%',#{keyWord},'%') or
+            bsp.market_name LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+        <choose>
+            <when test='applicationStatus.contains(",")'>
+                and sap.application_status in(${applicationStatus})
+            </when>
+            <otherwise>
+                and sap.application_status=#{applicationStatus}
+            </otherwise>
+        </choose>
+        order by sap.create_date desc
     </select>
 
 
@@ -122,17 +145,16 @@
             dj_basics_storefront_product bsp
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
-        WHERE 1 = 1
-        AND bsp.data_status = 0
+        WHERE bsp.data_status = 0
         AND bsp.is_shelf_status=1
-        <if test="null!=shopId and ''!=shopId">
-            and bsp.storefront_id = #{shopId}
-        </if>
-        <if test="null!=productIds and productIds.size>0">
-            and bsp.id not in
-            <foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
-                #{item}
-            </foreach>
+        and bsp.storefront_id = #{shopId}
+        and not EXISTS (select 1 from dj_sup_application_product ap where ap.data_status=0 and ap.sup_id=#{supId} and ap.shop_id=#{shopId} and ap.product_id=bsp.id and ap.application_status in('0','1','2'))
+        <if test="null!=keyWord and ''!=keyWord">
+            and (
+            bsp.product_name LIKE CONCAT('%',#{keyWord},'%') or
+            bg.name LIKE CONCAT('%',#{keyWord},'%') or
+            bsp.market_name LIKE CONCAT('%',#{keyWord},'%')
+            )
         </if>
     </select>
 

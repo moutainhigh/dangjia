@@ -38,17 +38,17 @@ public class SplitDeliver extends BaseEntity {
     private String orderSplitId;
 
     @Column(name = "total_amount")
-    @Desc(value = "发货单总额")
+    @Desc(value = "发货单总额(销售总额，包含运费、搬运费)")
     @ApiModelProperty("发货单总额")
     private Double totalAmount;
 
     @Column(name = "delivery_fee")
-    @Desc(value = "配送费用可编辑")
-    @ApiModelProperty("配送费用可编辑")
+    @Desc(value = "供应运费")
+    @ApiModelProperty("供应商运费")
     private Double deliveryFee;
 
     @Column(name = "apply_money")
-    @Desc(value = "供应商申请结算的价格")
+    @Desc(value = "供应商申请结算的价格（供应商成本总额，包含运费、搬运费）")
     @ApiModelProperty("供应商申请结算的价格")
     private Double applyMoney;
 
@@ -124,7 +124,7 @@ public class SplitDeliver extends BaseEntity {
 
     @Column(name = "shipping_state")
     @Desc(value = "配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算," +
-            "6材料员撤回(只待发货才能撤回)7-待安装 8-已完成）9-拒绝收货 10 -待评价")
+            "6店铺撤回(只待发货才能撤回)7-待安装 8-已完成）9-拒绝收货 10 -待评价")
     @ApiModelProperty("配送状态")
     private Integer shippingState;
 
@@ -173,4 +173,32 @@ public class SplitDeliver extends BaseEntity {
     @Desc(value = "供应商结算单号")
     @ApiModelProperty("供应商结算单号")
     private String receiptNum;
+
+    @Column(name = "address_id")
+    @Desc(value = "地址ID")
+    @ApiModelProperty("地址ID")
+    private String addressId;
+
+
+    @Column(name = "total_price")
+    @Desc(value = "供应商供应商品总额")
+    @ApiModelProperty("供应商供应商品总额")
+    private Double totalPrice;
+
+    @Column(name = "stevedorage_cost")
+    @Desc(value = "供应商搬运费总额")
+    @ApiModelProperty("供应商搬运费总额")
+    private Double stevedorageCost;
+
+    @Column(name = "complain_status")
+    @Desc(value = "部分收货申诉状态，0未处理，1已认可部分收货，2已申请平台申诉，3平台申诉已通过，4平台申诉被驳回")
+    @ApiModelProperty("部分收货申诉状态，0未处理，1已认可部分收货，2已申请平台申诉，3平台申诉已通过，4平台申诉被驳回")
+    private Integer complainStatus;
+
+
+    @Column(name = "complain_count")
+    @Desc(value = "申诉次数")
+    @ApiModelProperty("申诉次数")
+    private Integer complainCount;
+
 }

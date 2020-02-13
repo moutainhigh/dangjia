@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.delivery;
 
+import com.dangjia.acg.dto.deliver.OrderSplitDTO;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -21,4 +22,5 @@ public interface IOrderSplitMapper extends Mapper<OrderSplit> {
 
     List<String> getOrderCategory(@Param("houseId") String houseId, @Param("productType") String productType, @Param("workerTypeId") String workerTypeId, @Param("memberId") String memberId);
 
+    List<OrderSplitDTO> searchOrderSplistByAddressId(@Param("addressId") String addressId,@Param("houseId") String houseId,@Param("storefrontId") String storefrontId);
 }

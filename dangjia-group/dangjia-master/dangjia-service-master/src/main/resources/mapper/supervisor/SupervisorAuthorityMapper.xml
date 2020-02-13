@@ -317,13 +317,14 @@
         dj_basics_supervisor_authority sa
         INNER JOIN dj_house h ON sa.house_id = h.id
         INNER JOIN dj_maintenance_record dmr ON dmr.house_id = h.id
+        INNER JOIN DJ_maintenance_record_product mrp on dmr.id=mrp.maintenance_record_id
         WHERE
         h.data_status = 0
         AND sa.member_id = #{memberId}
+        AND mrp.maintenance_product_type = 1
         <if test="cityId!=null and cityId!=''">
             AND h.city_id = #{cityId}
         </if>
-        GROUP BY dmr.house_id
     </select>
 
     <select id="getSupHouseList" resultType="com.dangjia.acg.dto.supervisor.AuthorityDTO">
@@ -343,7 +344,8 @@
         h.start_date AS startDate,
         h.end_date AS endDate,
         <if test="sortNum!=null and sortNum ==8">
-            dmr.since_purchase_amount AS price,
+            mrp.total_price AS price,
+            mrp.maintenance_record_id maintenanceRecordId,
         </if>
         <if test="type!=null and type ==1">
             ROUND(
@@ -413,13 +415,14 @@
         </if>
         <if test="sortNum!=null and sortNum ==8">
             INNER JOIN dj_maintenance_record dmr ON dmr.house_id = h.id
+            INNER JOIN DJ_maintenance_record_product mrp on dmr.id=mrp.maintenance_record_id
         </if>
         WHERE
         h.data_status = 0
         AND
         sa.member_id = #{memberId}
         <if test="cityId!=null and cityId!=''">
-            and h.city_id = #{cityid}
+            and h.city_id = #{cityId}
         </if>
         <if test="sortNum!=null and sortNum ==2">
             AND f.supervisor_start = 1
@@ -436,8 +439,12 @@
         <if test="sortNum!=null and sortNum ==5">
             AND h.visit_state = 1
         </if>
+        <!--查询维保商品-->
+        <if test="sortNum!=null and sortNum ==8">
+            and mrp.maintenance_product_type = 1
+        </if>
         <if test="searchKey!=null and searchKey!=''">
-            and CONCAT(
+            and (CONCAT(
             h.residential,
             IFNULL(h.building, '*'),
             '栋',
@@ -447,9 +454,6 @@
             ) LIKE CONCAT('%',#{searchKey},'%')
             or ma.address like CONCAT('%',#{searchKey},'%')
             )
-        </if>
-        <if test="sortNum!=null and sortNum ==8">
-            GROUP BY dmr.house_id
         </if>
         <if test="type!=null and type ==1">
             ORDER BY
@@ -461,11 +465,11 @@
         </if>
         <if test="sortNum!=null and sortNum ==8 and type !=null and type ==2">
             ORDER BY
-            dmr.since_purchase_amount DESC
+            mrp.total_price DESC
         </if>
         <if test="sortNum!=null and sortNum ==8 and type !=null and type ==3">
             ORDER BY
-            dmr.since_purchase_amount ASC
+            mrp.total_price ASC
         </if>
     </select>
 

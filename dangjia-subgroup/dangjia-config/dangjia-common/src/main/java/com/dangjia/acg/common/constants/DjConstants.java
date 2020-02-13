@@ -282,7 +282,7 @@ public class DjConstants {
         public final static String CRAFTSMAN_ABSENTEEISM = "工匠您好！系统检测到您的工地【%s】今日未开工，将扣除您100元，请知晓！";
 
 
-        public final static String ACTUARIAL_COMPLETION = "业主您好！您的美宅【%s】精算已完成，请等待大管家抢单。";
+        public final static String ACTUARIAL_COMPLETION = "业主您好！您的美宅【%s】精算已完成，请查看并支付。";
         public final static String REPLACEMENT_OF_CRAFTSMEN = "工匠您好！经多方协调，【%s】已更换工匠，请查看!";
 
         public final static String LIANGFANGWANCHENG = "业主您好！您的美宅【%s】已完成量房，请查看。";
@@ -293,6 +293,8 @@ public class DjConstants {
         public final static String YEZHUTUIHUO = "业主您好！您发起的退材料操作成功，退款即将进入您的钱包，请注意查收";
 
         public final static String YEZHUTUIKUAN = "业主您好！您发起的补人工申请工匠未同意，退款即将进入您的钱包，请注意查收";
+
+        public final static String YEZHUENDMAINTENANCE = "业主您好！您发起的提前结束维保操作成功，退款即将进入您的钱包，请注意查收";
 
 
         public final static String STEWARD_Y_SERVER = "业主您好！【%s】大管家已为您安排了包工包料，请知晓。";
@@ -360,8 +362,8 @@ public class DjConstants {
     }
 
     public static class CommonMessage {
-        public final static String GJ_KC_MSG = "您所选择的维保项需上门勘察后才能确认维修方案，请购买“维保勘察及验收”服务后，等待服务人员上门。";
-        public final static String GJ_ZB_TK = "经大管家/工匠实地勘察后，您选择的维保商品费用高于实际所需费用，确认后将退款至您的钱包。";
-        public final static String GJ_ZB_BK = "经大管家/工匠实地勘察后，您选择的维保商品有需要付费/维保期外的商品，请提交订单支付后继续维保。";
+        public final static String YEZHU_ACCEPT = "业主【%s】审核通过了质保验收，请注意查看。";
+        public final static String YEZHU_REFUSE = "业主【%s】拒绝了当前申请的质保验收，请注意查看。";
+
     }
 }

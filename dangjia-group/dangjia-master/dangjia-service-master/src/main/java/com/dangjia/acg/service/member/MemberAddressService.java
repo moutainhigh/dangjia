@@ -14,6 +14,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -50,8 +51,9 @@ public class MemberAddressService {
      * @param latitude       纬度
      * @return ServerResponse
      */
-    public ServerResponse insertAddress(String userToken, int renovationType,
-                                        int defaultType, String name, String mobile, String cityId, String cityName,
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse insertAddress(String userToken, Integer renovationType,
+                                        Integer defaultType, String name, String mobile, String cityId, String cityName,
                                         String address, BigDecimal inputArea, String longitude, String latitude) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -63,20 +65,22 @@ public class MemberAddressService {
         if (CommonUtil.isEmpty(mobile)) {
             return ServerResponse.createByErrorMessage("业主手机未录入");
         }
-        if (CommonUtil.isEmpty(cityName)) {
+        if (CommonUtil.isEmpty(cityId) || CommonUtil.isEmpty(cityName)) {
             return ServerResponse.createByErrorMessage("业主城市未录入");
         }
         if (CommonUtil.isEmpty(address)) {
             return ServerResponse.createByErrorMessage("业主详细地址未录入");
         }
-        if (renovationType == 1 && inputArea == null) {
-            return ServerResponse.createByErrorMessage("房子面积未录入");
-        }
-        if (CommonUtil.isEmpty(longitude) || CommonUtil.isEmpty(latitude)) {
-            return ServerResponse.createByErrorMessage("业主地址信息未录入");
-        }
-        if (inputArea.doubleValue() < 70) {
-            inputArea = new BigDecimal(70);
+        if (renovationType == 1) {
+            if (inputArea == null) {
+                return ServerResponse.createByErrorMessage("房子面积未录入");
+            }
+            if (CommonUtil.isEmpty(longitude) || CommonUtil.isEmpty(latitude)) {
+                return ServerResponse.createByErrorMessage("业主地址信息未录入");
+            }
+            if (inputArea.doubleValue() < 70) {
+                inputArea = new BigDecimal(70);
+            }
         }
         Member member = (Member) object;
         MemberAddress memberAddress = new MemberAddress();
@@ -86,9 +90,11 @@ public class MemberAddressService {
         memberAddress.setCityId(cityId);
         memberAddress.setCityName(cityName);
         memberAddress.setAddress(address);
-        memberAddress.setInputArea(inputArea);
-        memberAddress.setLatitude(latitude);
-        memberAddress.setLongitude(longitude);
+        if (renovationType == 1) {
+            memberAddress.setInputArea(inputArea);
+            memberAddress.setLatitude(latitude);
+            memberAddress.setLongitude(longitude);
+        }
         memberAddress.setRenovationType(renovationType);
         memberAddress.setDefaultType(defaultType);
         setAddressDefaultType(defaultType, member.getId());
@@ -116,14 +122,14 @@ public class MemberAddressService {
     /**
      * 业主修改地址
      *
-     * @param userToken   userToken
-     * @param addressId   地址ID
-     * @param defaultType 是否是默认地址:0：否，1：是
-     * @param name        业主姓名
-     * @param mobile      业主手机
+     * @param userToken userToken
      * @return ServerResponse
+     * @Param memberAddress
      */
-    public ServerResponse updataAddress(String userToken, String addressId, int defaultType, String name, String mobile) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updataAddress(String userToken, String addressId, Integer defaultType,
+                                        String name, String mobile, String cityId, String cityName,
+                                        String address) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -142,6 +148,17 @@ public class MemberAddressService {
         memberAddress.setDefaultType(defaultType);
         memberAddress.setName(name);
         memberAddress.setMobile(mobile);
+        if (memberAddress.getRenovationType() == 0) {
+            if (CommonUtil.isEmpty(cityId) || CommonUtil.isEmpty(cityName)) {
+                return ServerResponse.createByErrorMessage("请选择所在地区");
+            }
+            if (CommonUtil.isEmpty(address)) {
+                return ServerResponse.createByErrorMessage("请录入详细地址");
+            }
+            memberAddress.setCityId(cityId);
+            memberAddress.setCityName(cityName);
+            memberAddress.setAddress(address);
+        }
         memberAddress.setModifyDate(new Date());
         setAddressDefaultType(defaultType, member.getId());
         iMasterMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
@@ -172,6 +189,7 @@ public class MemberAddressService {
      * @param addressId 地址ID
      * @return ServerResponse
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse deleteAddress(String userToken, String addressId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {

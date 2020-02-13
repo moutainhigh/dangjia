@@ -155,34 +155,28 @@ public class DjSupplierServices {
      */
     public ServerResponse updateBasicInformation(DjSupplier djSupplier) {
         try {
+            if (CommonUtil.isEmpty(djSupplier.getName()))
+                return ServerResponse.createByErrorMessage("用户名不能为空");
+            if (CommonUtil.isEmpty(djSupplier.getTelephone()))
+                return ServerResponse.createByErrorMessage("电话号码不能为空");
+            if (CommonUtil.isEmpty(djSupplier.getAddress()))
+                return ServerResponse.createByErrorMessage("地址不能为空");
+            if (CommonUtil.isEmpty(djSupplier.getEmail()))
+                return ServerResponse.createByErrorMessage("邮件不能为空");
+            if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
+                return ServerResponse.createByErrorMessage("联系人不能为空");
+
             Example example = new Example(DjSupplier.class);
             example.createCriteria().andEqualTo(DjSupplier.USER_ID, djSupplier.getUserId())
                     .andEqualTo(DjSupplier.CITY_ID, djSupplier.getCityId())
                     .andEqualTo(DjSupplier.DATA_STATUS, 0);
-            if (djSupplierMapper.selectByExample(example).size() > 0) {
-                if (CommonUtil.isEmpty(djSupplier.getName()))
-                    return ServerResponse.createByErrorMessage("用户名不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getTelephone()))
-                    return ServerResponse.createByErrorMessage("电话号码不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getAddress()))
-                    return ServerResponse.createByErrorMessage("地址不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getEmail()))
-                    return ServerResponse.createByErrorMessage("邮件不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
-                    return ServerResponse.createByErrorMessage("联系人不能为空");
+            List<DjSupplier> djSupplierList=djSupplierMapper.selectByExample(example);
+            if (djSupplierList.size() > 0) {
+                DjSupplier djSupplier1=djSupplierList.get(0);
+                djSupplier.setId(djSupplier1.getId());
                 if (djSupplierMapper.updateByPrimaryKeySelective(djSupplier) > 0)
                     return ServerResponse.createBySuccessMessage("编辑成功");
             } else {
-                if (CommonUtil.isEmpty(djSupplier.getName()))
-                    return ServerResponse.createByErrorMessage("用户名不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getTelephone()))
-                    return ServerResponse.createByErrorMessage("电话号码不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getAddress()))
-                    return ServerResponse.createByErrorMessage("地址不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getEmail()))
-                    return ServerResponse.createByErrorMessage("邮件不能为空");
-                if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
-                    return ServerResponse.createByErrorMessage("联系人不能为空");
                 DjSupplier djSupplier1=new DjSupplier();
                 djSupplier.setId(djSupplier1.getId());
                 djSupplier.setSurplusMoney(0d);
@@ -192,7 +186,7 @@ public class DjSupplierServices {
                     return ServerResponse.createBySuccessMessage("编辑成功");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("编辑失败",e);
             return ServerResponse.createByErrorMessage("编辑失败");
         }
         return ServerResponse.createByErrorMessage("编辑失败");
@@ -276,18 +270,18 @@ public class DjSupplierServices {
             }
             for (DjSupplierDTO djSupplierDTO : list) {
                 String contract = djSupplierDTO.getContract();
-                if (StringUtil.isEmpty(contract)) {
+                if (StringUtil.isEmpty(contract)) {//是否显示查看合同
                     djSupplierDTO.setContractState("0");
                 } else {
                     djSupplierDTO.setContractState("1");
                 }
-                Integer i = djSupApplicationProductService.queryHaveGoodsSize(djSupplierDTO.getSupId(), djSupplierDTO.getShopId(), "0");
-                djSupplierDTO.setListSize(i);//是否有供应商的供应商品
+                Integer i = djSupApplicationProductService.searchHaveGoodsSize(djSupplierDTO.getSupId(), djSupplierDTO.getShopId(), "0");
+                djSupplierDTO.setListSize(i);//是否有待审核的供应商品
             }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -347,26 +341,20 @@ public class DjSupplierServices {
                 return ServerResponse.createByErrorMessage("审核状态不能为空");
             }
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createByErrorMessage("主键不能为空");
+                return ServerResponse.createByErrorMessage("申请单ID不能为空");
             }
-
-            String[] iditem = id.split(",");
+            /*String[] iditem = id.split(",");
             Example example = new Example(DjSupApplication.class);
             example.createCriteria().andIn(DjSupApplication.ID, Arrays.asList(iditem));
-
-            DjSupApplication djSupApplication = new DjSupApplication();
-            djSupApplication.setId(null);
+*/
+            DjSupApplication djSupApplication = djSupApplicationMapper.selectByPrimaryKey(id);
             djSupApplication.setApplicationStatus(applicationStatus);
-            djSupApplication.setCreateDate(null);
-            int i = djSupApplicationMapper.updateByExampleSelective(djSupApplication, example);
-
-            if (i <= 0) {
-                ServerResponse.createByErrorMessage("审核失败");
-            }
+            djSupApplication.setModifyDate(new Date());
+            djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
             return ServerResponse.createBySuccessMessage("审核成功");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("供应商申请异常");
+            logger.error("审核失败",e);
+            return ServerResponse.createByErrorMessage("审核通过保存失败");
         }
     }
 
@@ -390,18 +378,14 @@ public class DjSupplierServices {
             Example example = new Example(DjSupApplication.class);
             example.createCriteria().andIn(DjSupApplication.ID, Arrays.asList(iditem));
 
-            DjSupApplication djSupApplication = new DjSupApplication();
-            djSupApplication.setId(null);
+            DjSupApplication djSupApplication = djSupApplicationMapper.selectByPrimaryKey(id);
             djSupApplication.setApplicationStatus(applicationStatus);
+            djSupApplication.setModifyDate(new Date());
             djSupApplication.setFailReason(failReason);
-            djSupApplication.setCreateDate(null);
-            int i = djSupApplicationMapper.updateByExampleSelective(djSupApplication, example);
-            if (i <= 0) {
-                return ServerResponse.createByErrorMessage("驳回失败");
-            }
+            djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
             return ServerResponse.createBySuccessMessage("驳回成功");
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("驳回异常：",e);
             return ServerResponse.createByErrorMessage("驳回供应商申请异常");
         }
     }
@@ -471,10 +455,14 @@ public class DjSupplierServices {
                 return ServerResponse.createByErrorMessage("提现金额不正确");
             }
             MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(djSupplier.getUserId());
+            Double totalRetentionMoney=2000d;
             Example example=new Example(Config.class);
-            example.createCriteria().andEqualTo(Config.PARAM_KEY,"RETENTION_MONEY");
+            example.createCriteria().andEqualTo(Config.PARAM_KEY,"STORE_RETENTION_MONEY");
             Config config = iStoreConfigMapper.selectOneByExample(example);
-            if(djSupplier.getRetentionMoney()<Double.parseDouble(config.getParamValue())) {
+            if(config!=null&&StringUtils.isNotEmpty(config.getParamValue())){
+                totalRetentionMoney=Double.parseDouble(config.getParamValue());
+            }
+            if(djSupplier.getRetentionMoney()<totalRetentionMoney) {
                 return ServerResponse.createByErrorMessage("滞留金不足,请先缴清滞留金");
             }
             if (!DigestUtils.md5Hex(payPassword).equals(mainUser.getPayPassword())) {

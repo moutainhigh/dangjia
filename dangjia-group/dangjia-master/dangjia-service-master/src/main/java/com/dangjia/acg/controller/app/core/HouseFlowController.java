@@ -23,6 +23,17 @@ public class HouseFlowController implements HouseFlowAPI {
     @Autowired
     private HouseFlowService houseFlowService;
 
+    @Override
+    @ApiMethod
+    public ServerResponse getGrabBroadcast(String userToken, Integer type){
+        return houseFlowService.getGrabBroadcast(userToken,  type);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getGrabNumber(String userToken,String cityId){
+        return houseFlowService.getGrabNumber(userToken,  cityId);
+    }
     /**
      * 抢单列表
      *

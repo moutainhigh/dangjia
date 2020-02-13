@@ -283,10 +283,17 @@
             WHERE
                 g.category_id = gcp.id
                 AND gcp.parent_top = gc.id
-                and g.type=5
                 and g.city_id=#{cityId}
                 and g.id=pt.goods_id
-                and pt.worker_type_id=#{workerTypeId}
+                <choose>
+                    <when test="null!=workerTypeId and ''!=workerTypeId">
+                        and g.type=5
+                        and pt.worker_type_id=#{workerTypeId}
+                    </when>
+                    <otherwise>
+                        and g.type=0
+                    </otherwise>
+                </choose>
                 and gcp.id=pt.category_id
         )
     </select>

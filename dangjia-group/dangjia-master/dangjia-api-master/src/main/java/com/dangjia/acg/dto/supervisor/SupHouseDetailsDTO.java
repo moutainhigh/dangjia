@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.supervisor;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ruking.Cheng
@@ -21,6 +22,7 @@ public class SupHouseDetailsDTO {
     private Integer type;//0:施工,1:维保
     private Integer buttonType;//0:显示底部按钮,1:不显示底部按钮
     private List<SupHouseFlowDTO> flowDatas;//记录集合
+    private Map<String, Object> dataMap;//维保数据集
 
     @Data
     public static class SupHouseFlowDTO {

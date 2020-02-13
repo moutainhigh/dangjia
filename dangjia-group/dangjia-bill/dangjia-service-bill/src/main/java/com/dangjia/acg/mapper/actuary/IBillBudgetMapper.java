@@ -19,7 +19,7 @@ import java.util.List;
 public interface IBillBudgetMapper extends Mapper<BudgetMaterial> {
 
     //查询已支付精算的总费用
-    Double selectTotalPriceByHouseId(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId,@Param("categoryTopId") String categoryTopId);
+    Double selectTotalPriceByHouseId(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId,@Param("categoryTopId") String categoryTopId,@Param("steta") Integer steta);
 
     /**
      * 查询按工序汇总后的类别

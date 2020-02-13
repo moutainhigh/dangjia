@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  *  工艺节点记录
@@ -28,6 +29,18 @@ public class TechnologyRecord extends BaseEntity {
     @Desc(value = "进程申请表id")
     @ApiModelProperty("进程申请表id")
     private String houseFlowApplyId;
+
+
+    @Column(name = "steward_house_flow_apply_id")
+    @Desc(value = "巡查验收申请id")
+    @ApiModelProperty("巡查验收申请id")
+    private String stewardHouseFlowApplyId;
+
+    @Column(name = "steward_check_time")
+    @Desc(value = "管家巡查验收时间")
+    @ApiModelProperty("管家巡查验收时间")
+    private Date stewardCheckTime;
+
 
     @Column(name = "technology_id")
     private String technologyId;//工艺id

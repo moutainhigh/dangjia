@@ -44,14 +44,34 @@ public class DjMaintenanceRecordResponsibleParty extends BaseEntity {
     @ApiModelProperty("维保责任方类型 1:店铺 2:工匠")
     private Integer responsiblePartyType;
 
-    @Column(name = "product_id")
-    @Desc(value = "商品ID")
-    @ApiModelProperty("商品ID")
-    private String productId;
+    @Column(name = "total_price")
+    @Desc(value = "维保商品总额(包含运费，搬运费）")
+    @ApiModelProperty("维保商品总额(包含运费，搬运费）")
+    private Double totalPrice;
 
-    @Column(name = "responsible_party_type")
+    @Column(name = "stevedorage_cost")
+    @Desc(value = "搬运费")
+    @ApiModelProperty("搬运费")
+    private Double stevedorageCost;
+
+    @Column(name = "transportation_cost")
+    @Desc(value = "运费")
+    @ApiModelProperty("运费")
+    private Double transportationCost;
+
+    @Column(name = "maintenance_total_price")
     @Desc(value = "维保分摊总额")
     @ApiModelProperty("维保分摊总额")
     private Double maintenanceTotalPrice;
+
+    @Column(name = "appeal_proportion")
+    @Desc(value = "申诉后维保责任方占比")
+    @ApiModelProperty("申诉后维保责任方占比")
+    private Double appealProportion;
+
+    @Column(name = "appeal_maintenance_total_price")
+    @Desc(value = "申诉后的维保分摊总额")
+    @ApiModelProperty("申诉后的维保分摊总额")
+    private Double appealMaintenanceTotalPrice;
 
 }

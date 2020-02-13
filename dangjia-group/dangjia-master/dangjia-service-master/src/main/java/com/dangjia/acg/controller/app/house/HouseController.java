@@ -158,20 +158,21 @@ public class HouseController implements HouseAPI {
     @Override
     @ApiMethod
     public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
-        return houseService.setHouseBudgetOk(houseId, budgetOk);
+        return houseService.setHouseBudgetOk(houseId, budgetOk,null);
     }
 
     /**
      * app修改房子精算状态
-     *
-     * @param houseId
+     * @param userToken
+     * @param houseId 来源ID
      * @param budgetOk
+     * @param taskId 任务ID
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setHouseBudgetOk(String userToken, String houseId, Integer budgetOk) {
-        return houseService.setHouseBudgetOk(houseId, budgetOk);
+    public ServerResponse setHouseBudgetOk(String userToken, String houseId, Integer budgetOk,String taskId) {
+        return houseService.setHouseBudgetOk(houseId, budgetOk,taskId);
     }
 
 

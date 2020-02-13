@@ -255,7 +255,8 @@ public interface HouseAPI {
     @ApiOperation(value = "APP修改精算状态", notes = "APP修改精算状态")
     ServerResponse setHouseBudgetOk(@RequestParam("userToken") String userToken,
                                     @RequestParam("houseId") String houseId,
-                                    @RequestParam("budgetOk") Integer budgetOk);
+                                    @RequestParam("budgetOk") Integer budgetOk,
+                                    @RequestParam("taskId") String taskId);
 
     @PostMapping("app/house/house/getHouseById")
     @ApiOperation(value = "根据id查询房子信息", notes = "根据id查询房子信息")

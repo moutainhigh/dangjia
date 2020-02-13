@@ -13,6 +13,7 @@ public class Task {
 
     private String taskStackId;//任务表ID
     private String memberId;//用户ID
+    private String houseId;//房子ID
     private String date;
     private String htmlUrl;//审核验收页面
     private String name;

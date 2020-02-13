@@ -14,11 +14,9 @@ import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.mapper.delivery.*;
-import com.dangjia.acg.mapper.member.IBillMemberAddressMapper;
 import com.dangjia.acg.mapper.storeFront.BillStoreFrontProductMapper;
 import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -81,6 +79,7 @@ public class BillAppointmentService {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryDjDeliverOrderStorefront(houseId,member.getId());
+            PageInfo pageResult = new PageInfo(orderStorefrontDTOS);
             List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
@@ -97,7 +96,7 @@ public class BillAppointmentService {
             });
             if (appointmentListDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            PageInfo pageResult = new PageInfo(appointmentListDTOS);
+            pageResult.setList(appointmentListDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.info("查询失败", e);
@@ -193,6 +192,7 @@ public class BillAppointmentService {
                     orderSplit.setCityId(djDeliverOrder.getCityId());
                     orderSplit.setOrderId(orderId);
                     orderSplit.setIsReservationDeliver("1");
+                    orderSplit.setAddressId(djDeliverOrder.getAddressId());
                     orderSplit.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                     billDjDeliverOrderSplitMapper.insert(orderSplit);
                     for (String orderItemsId : orderItemsIds) {
@@ -242,11 +242,17 @@ public class BillAppointmentService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryReserved(PageDTO pageDTO, String houseId) {
+    public ServerResponse queryReserved(PageDTO pageDTO, String houseId, String userToken) {
         try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryReservedStorefront(houseId);
+            List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryReservedStorefront(houseId,member.getId());
             List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());

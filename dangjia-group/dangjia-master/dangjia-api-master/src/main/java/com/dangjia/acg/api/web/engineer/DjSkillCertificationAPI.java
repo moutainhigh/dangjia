@@ -5,7 +5,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.core.WorkerType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,7 +36,7 @@ public interface DjSkillCertificationAPI {
                                                        @RequestParam("cityId") String cityId);
 
     @PostMapping(value = "web/engineer/insertSkillCertification")
-    @ApiOperation(value = "工匠技能认证", notes = "技能认证")
+    @ApiOperation(value = "工匠技能认证", notes = "工匠技能认证")
     ServerResponse insertSkillCertification(@RequestParam("jsonStr") String jsonStr,
                                             @RequestParam("skillCertificationId") String skillCertificationId,
                                             @RequestParam("cityId") String cityId);
@@ -48,12 +47,16 @@ public interface DjSkillCertificationAPI {
 
     @PostMapping(value = "web/engineer/queryWorkerTypeSkillPackConfigurationDetail")
     @ApiOperation(value = "工种技能包配置详情", notes = "工种技能包配置详情")
-    ServerResponse queryWorkerTypeSkillPackConfigurationDetail(@RequestParam("workerTypeId") Integer workerTypeId);
+    ServerResponse queryWorkerTypeSkillPackConfigurationDetail(@RequestParam("workerTypeId") String workerTypeId);
 
     @PostMapping(value = "web/engineer/insertWorkerTypeSkillPackConfiguration")
     @ApiOperation(value = "工种技能包配置", notes = "工种技能包配置")
     ServerResponse insertWorkerTypeSkillPackConfiguration(@RequestParam("jsonStr") String jsonStr,
                                                           @RequestParam("workerType") WorkerType workerType,
                                                           @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "web/engineer/deleteSkillCertification")
+    @ApiOperation(value = "技能删除", notes = "技能删除")
+    ServerResponse deleteSkillCertification(@RequestParam("id") String id);
 
 }

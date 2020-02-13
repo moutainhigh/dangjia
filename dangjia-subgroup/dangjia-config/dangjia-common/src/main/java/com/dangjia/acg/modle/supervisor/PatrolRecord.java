@@ -17,29 +17,42 @@ import javax.persistence.Transient;
 @Table(name = "dj_basics_patrol_record")
 @ApiModel(description = "巡查记录表")
 @FieldNameConstants(prefix = "")
-public class DjBasicsPatrolRecord extends BaseEntity {
+public class PatrolRecord extends BaseEntity {
+
 
     @Column(name = "member_id")
     @Desc(value = "用户ID(记录人或者督导人)")
     @ApiModelProperty("用户ID(记录人或者督导人)")
-    private String memberId ;
+    private String memberId;
+
 
     @Column(name = "house_id")
     @Desc(value = "房子ID")
     @ApiModelProperty("房子ID")
-    private String houseId ;
+    private String houseId;
+
 
     @Column(name = "images")
     @Desc(value = "巡查图片")
     @ApiModelProperty("巡查图片")
-    private String images ;
+    private String images;
+
 
     @Column(name = "content")
     @Desc(value = "巡查工作及处置情况")
     @ApiModelProperty("巡查工作及处置情况")
-    private String content ;
+    private String content;
 
-    @Transient
-    private String name;
+
+    @Column(name = "type")
+    @Desc(value = "0:奖励;1:处罚,2:巡查")
+    @ApiModelProperty("0:奖励;1:处罚,2:巡查")
+    private Integer type;
+
+
+    @Column(name = "reward_punish_id")
+    @Desc(value = "奖罚ID")
+    @ApiModelProperty("奖罚ID")
+    private String rewardPunishId;
 
 }

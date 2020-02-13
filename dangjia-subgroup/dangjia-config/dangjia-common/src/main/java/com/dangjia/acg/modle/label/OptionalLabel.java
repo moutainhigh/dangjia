@@ -28,4 +28,10 @@ public class OptionalLabel extends BaseEntity {
     @Desc(value = "标签名称")
     @ApiModelProperty("标签名称")
     private String labelName;
+
+
+    @Column(name = "parent_id")
+    @Desc(value = "父id")
+    @ApiModelProperty("父id")
+    private String parentId;
 }

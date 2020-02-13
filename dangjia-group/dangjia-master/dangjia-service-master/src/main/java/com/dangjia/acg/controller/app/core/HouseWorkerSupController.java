@@ -32,8 +32,10 @@ public class HouseWorkerSupController implements HouseWorkerSupAPI {
      * @param isPatrol 巡查：1=巡查未完成  暂无其他
      * @return
      */
-    public ServerResponse getHouseOrderList(HttpServletRequest request, PageDTO pageDTO, String userToken,String nameKey, Integer type, Integer houseType, Integer startTime, Integer isPlanWeek, Integer isPatrol){
-        return houseWorkerSupService.getHouseOrderList( request,  pageDTO,  userToken, nameKey,type,houseType,startTime,isPlanWeek,isPatrol);
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseOrderList(HttpServletRequest request, PageDTO pageDTO, String userToken,String nameKey, Integer type, Integer orderTakingTime,Integer houseType, Integer startTime, Integer isPlanWeek, Integer isPatrol){
+        return houseWorkerSupService.getHouseOrderList( request,  pageDTO,  userToken, nameKey,type, orderTakingTime,houseType,startTime,isPlanWeek,isPatrol);
     }
 
     @Override
@@ -68,4 +70,5 @@ public class HouseWorkerSupController implements HouseWorkerSupAPI {
     public ServerResponse getShutdownWorkerType(String houseId){
         return houseWorkerSupService.getShutdownWorkerType(houseId);
     }
+
 }

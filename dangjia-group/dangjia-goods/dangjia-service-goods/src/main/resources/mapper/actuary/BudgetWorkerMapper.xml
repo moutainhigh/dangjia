@@ -291,12 +291,12 @@ SELECT
 			 IFNULL(sum(abw.price * abw.shop_count),0) AS totalPrice
 		FROM
 			dj_deliver_order_item abw
-		INNER JOIN dj_deliver_order o on o.id=abw.city_id
+		INNER JOIN dj_deliver_order o on o.id=abw.order_id
 		WHERE
-			abw.house_id = #{houseId}
+			o.house_id = #{houseId}
 		and abw.product_type='2'
 		AND o.payment != 0
-		AND o.type = 3
+		AND o.order_source = 1
 		AND abw.worker_type_id = #{workerTypeId}
 
     </select>

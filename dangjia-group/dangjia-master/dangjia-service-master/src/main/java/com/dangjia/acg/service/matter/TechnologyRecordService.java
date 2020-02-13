@@ -28,6 +28,7 @@ import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.OrderSplitItemService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,42 +163,80 @@ public class TechnologyRecordService {
         }
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<WorkNodeDTO> workNodeDTOList = new ArrayList<>();
-        Example example = new Example(TechnologyRecord.class);
-        example.createCriteria().andEqualTo(TechnologyRecord.STATE, 0);
-        example.orderBy(TechnologyRecord.CREATE_DATE).desc();
-        List<TechnologyRecord>  productList = technologyRecordMapper.selectByExample(example);
-        Map<String,WorkNodeDTO> trList = new HashMap<>();
-       if(productList!=null&&productList.size()>0){
-           for (TechnologyRecord pt:productList) {
-               if(trList.get(pt.getProductId())==null){
-                   trList.put(pt.getProductId(),new WorkNodeDTO());
-               }
-               WorkNodeDTO workNodeDTOA =trList.get(pt.getProductId());
-               if(workNodeDTOA.getTrList()==null){
-                   workNodeDTOA.setTrList(new ArrayList<>());
-               }
-               List<TechnologyRecordDTO> technologyRecordDTOS = workNodeDTOA.getTrList();
-               if(CommonUtil.isEmpty(workNodeDTOA.getProductId())) {
-                   StorefrontProduct storefrontProduct = masterStorefrontProductMapper.selectByPrimaryKey(pt.getProductId());
-                   workNodeDTOA.setProductName(storefrontProduct.getProductName());//商品名
-                   workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
-               }
-               TechnologyRecordDTO trd = new TechnologyRecordDTO();
-               trd.setId(pt.getId());
-               trd.setName(pt.getName());
-               trd.setState(pt.getState());
-               trd.setWorkerTypeId(pt.getWorkerTypeId());
-               trd.setImage(address + pt.getImage());
-               technologyRecordDTOS.add(trd);
-               workNodeDTOA.setTrList(technologyRecordDTOS);
-               trList.put(pt.getProductId(),workNodeDTOA);
-           }
-       }
+        Map<String, WorkNodeDTO> trList = new HashMap<>();
+        if (houseFlow.getWorkerType() == 3) { //管家查询管家应验收节点
+            Example example = new Example(TechnologyRecord.class);
+            example.createCriteria().andEqualTo(TechnologyRecord.STATE, 0);
+            example.orderBy(TechnologyRecord.CREATE_DATE).desc();
+            List<TechnologyRecord> productList = technologyRecordMapper.selectByExample(example);
+            if (productList != null && productList.size() > 0) {
+                for (TechnologyRecord pt : productList) {
+                    if (trList.get(pt.getProductId()) == null) {
+                        trList.put(pt.getProductId(), new WorkNodeDTO());
+                    }
+                    WorkNodeDTO workNodeDTOA = trList.get(pt.getProductId());
+                    if (workNodeDTOA.getTrList() == null) {
+                        workNodeDTOA.setTrList(new ArrayList<>());
+                    }
+                    List<TechnologyRecordDTO> technologyRecordDTOS = workNodeDTOA.getTrList();
+                    if (CommonUtil.isEmpty(workNodeDTOA.getProductId())) {
+                        StorefrontProduct storefrontProduct = masterStorefrontProductMapper.selectByPrimaryKey(pt.getProductId());
+                        workNodeDTOA.setProductName(storefrontProduct.getProductName());//商品名
+                        workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
+                    }
 
+                    TechnologyRecordDTO trd = new TechnologyRecordDTO();
+                    trd.setId(pt.getId());
+                    trd.setName(pt.getName());
+                    trd.setState(pt.getState());
+                    trd.setWorkerTypeId(pt.getWorkerTypeId());
+                    trd.setImage(Utils.getImageAddress(address, pt.getImage()));
+                    technologyRecordDTOS.add(trd);
+                    workNodeDTOA.setTrList(technologyRecordDTOS);
+                    trList.put(pt.getProductId(), workNodeDTOA);
+                }
+            }
+        }else{
+            //工匠未提交的验收节点
+            List<TechnologyRecordDTO>  productList=technologyRecordMapper.selectWorkerProductInfo(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),null);
+            if (productList != null && productList.size() > 0) {
+                {
+                    for (TechnologyRecordDTO trd : productList) {
+                        if (trList.get(trd.getProductId()) == null) {
+                            trList.put(trd.getProductId(), new WorkNodeDTO());
+                        }
+                        WorkNodeDTO workNodeDTOA = trList.get(trd.getProductId());
+                        if (workNodeDTOA.getTrList() == null) {
+                            workNodeDTOA.setTrList(new ArrayList<>());
+                        }
+                        List<TechnologyRecordDTO> technologyRecordDTOS = workNodeDTOA.getTrList();
+                        if (CommonUtil.isEmpty(workNodeDTOA.getProductId())) {
+                            StorefrontProduct storefrontProduct = masterStorefrontProductMapper.selectByPrimaryKey(trd.getProductId());
+                            workNodeDTOA.setProductName(storefrontProduct.getProductName());//商品名
+                            workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
+                        }
+                        trd.setImage(address + trd.getImage());
+                        technologyRecordDTOS.add(trd);
+                        workNodeDTOA.setTrList(technologyRecordDTOS);
+                        trList.put(trd.getProductId(), workNodeDTOA);
+                    }
+                }
+            }
+        }
        for(String key:trList.keySet()){
            workNodeDTOList.add(trList.get(key));
        }
-        return ServerResponse.createBySuccess("查询成功", workNodeDTOList);
+
+        //已验收节点
+        List<TechnologyRecord> checkList = technologyRecordMapper.allChecked(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+        Map map = new HashMap();
+        map.put("checkNum",checkList.size());
+        //总验收点数
+        List<TechnologyRecordDTO>  productList=technologyRecordMapper.selectWorkerProductInfo(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),"1");
+        map.put("allNum",productList.size());
+        map.put("workNodeDTOList",workNodeDTOList);
+        //已验收节点
+        return ServerResponse.createBySuccess("查询成功", map);
     }
 
     /**

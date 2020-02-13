@@ -10,7 +10,10 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.storefront.StorefrontService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,9 +27,23 @@ import java.util.List;
  */
 @RestController
 public class StorefrontController implements BasicsStorefrontAPI {
+    private static Logger logger = LoggerFactory.getLogger(StorefrontController.class);
 
     @Autowired
     private StorefrontService storefrontService;
+
+    /**
+     * 获取需缴纳的滞留金
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param type 类型
+     * @return 类型：1店铺，2供应商
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getNeedRetentionMoney(String userId,String cityId,Integer type){
+        return storefrontService.getNeedRetentionMoney(userId, cityId,type);
+    }
 
     @Override
     @ApiMethod
@@ -56,7 +73,13 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @Override
     @ApiMethod
     public ServerResponse updateStorefront(StorefrontDTO storefrontDTO) {
-        return storefrontService.updateStorefront(storefrontDTO);
+        try {
+            return storefrontService.updateStorefront(storefrontDTO);
+        } catch (Exception e) {
+          logger.error("修改失败：", e);
+          return ServerResponse.createByErrorMessage("修改失败");
+        }
+
     }
 
     @Override
@@ -73,14 +96,19 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontWallet(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
-        return storefrontService.queryStorefrontWallet(request,pageDTO,searchKey,userId,cityId);
+    public ServerResponse queryStorefrontWallet( String userId, String cityId) {
+        return storefrontService.queryStorefrontWallet(userId,cityId);
     }
 
     @Override
     @ApiMethod
     public ServerResponse operationStorefrontReflect(String userId, String cityId, String bankCard, Double surplusMoney, String payPassword) {
-        return storefrontService.operationStorefrontReflect( userId,  cityId,  bankCard,  surplusMoney,  payPassword) ;
+       try{
+           return storefrontService.operationStorefrontReflect( userId,  cityId,  bankCard,  surplusMoney,  payPassword) ;
+       } catch (Exception e) {
+           logger.error("店铺提现异常：", e);
+           return ServerResponse.createByErrorMessage("店铺提现异常");
+       }
     }
 
     @Override

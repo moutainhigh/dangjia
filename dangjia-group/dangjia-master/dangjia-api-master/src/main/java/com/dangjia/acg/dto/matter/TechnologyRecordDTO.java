@@ -16,6 +16,7 @@ public class TechnologyRecordDTO {
     private Integer state;//验收状态0:未验收;1:已验收,2:已退, 3:勾选中
 
 
+    private String productId;
 
     @Column(name = "worker_type_id")
     private String workerTypeId;//工种id 如果是人工工艺有工种id

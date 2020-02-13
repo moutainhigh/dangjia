@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.house;
 
+import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
@@ -40,6 +41,16 @@ public interface IHouseMapper extends Mapper<House> {
     List<HouseOrderDetailDTO> getBudgetOrderDetailByHouseId(@Param("houseId") String houseId,
                                                             @Param("workerTypeId") String workerTypeId);
 
+    /**
+     * 查询房子订单信息
+     * @param houseId 房子信息
+     * @param workerTypeId 订单类型（1设计，2精算）
+     * @return
+     */
+    List<HouseOrderDetailDTO> getOrderDetailByHouseId(@Param("houseId") String houseId,
+                                                            @Param("workerTypeId") String workerTypeId);
+
+
 
     /**
      * 查询房子订单信息
@@ -52,13 +63,35 @@ public interface IHouseMapper extends Mapper<House> {
                                                             @Param("type") Integer type);
 
 
-
-
+    /**
+     * 已完成的节点
+     * @param id
+     * @param houseId
+     * @param workerId
+     * @return
+     */
     int queryTestNumber(@Param("id") String id,
                         @Param("houseId") String houseId,
                         @Param("workerId") String workerId);
 
+    /**
+     * 所有的节点
+     * @param id
+     * @return
+     */
     int queryArrNumber(@Param("id") String id);
+
+    /**
+     * 未完成的节点
+     * @param id
+     * @param houseId
+     * @param workerId
+     * @return
+     */
+    String getNoTechnologyName(@Param("id") String id,
+                        @Param("houseId") String houseId,
+                        @Param("workerId") String workerId);
+
     /**
      * 判断当前订单是否为已退款状态
      * @param houseId
@@ -90,6 +123,7 @@ public interface IHouseMapper extends Mapper<House> {
      */
     List<House> getAllHouseByVisitState(@Param("visitState") Integer visitState);
 
+    List<DeliverHouseDTO> getHouseAddrssByAddress(@Param("storefrontId") String storefrontId, @Param("cityId") String cityId, @Param("likeAddress") String likeAddress, @Param("startDate") String startDate, @Param("endDate") String endDate);
     List<House> getByLikeAddress(@Param("storefrontId") String storefrontId,@Param("cityId") String cityId,@Param("likeAddress") String likeAddress,@Param("startDate") String startDate, @Param("endDate") String endDate);
 
     List<DesignDTO> getDesignList(@Param("designerType") int designerType,

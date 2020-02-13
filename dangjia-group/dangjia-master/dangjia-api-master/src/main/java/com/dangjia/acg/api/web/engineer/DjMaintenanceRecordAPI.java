@@ -41,16 +41,108 @@ public interface DjMaintenanceRecordAPI {
                                          @RequestParam("productId") String productId);
 
     @PostMapping(value = "app/engineer/searchMaintenanceProduct")
-    @ApiOperation(value = "消息弹窗--需勘查维保商品", notes = "消息弹窗--需勘查维保商品")
+    @ApiOperation(value = "消息弹窗--维保商品订单", notes = "消息弹窗--维保商品订单")
     ServerResponse searchMaintenanceProduct(@RequestParam("userToken") String userToken,
-                                         @RequestParam("houseId") String houseId,
-                                         @RequestParam("taskId") String taskId);
+                                            @RequestParam("houseId") String houseId,
+                                            @RequestParam("taskId") String taskId);
+
+    @PostMapping(value = "app/engineer/searchExpenseMaintenanceProduct")
+    @ApiOperation(value = "消息弹窗--报销商品订单", notes = "消息弹窗--报销商品订单")
+    ServerResponse searchExpenseMaintenanceProduct(@RequestParam("userToken") String userToken,
+                                            @RequestParam("houseId") String houseId,
+                                            @RequestParam("taskId") String taskId);
+
+    @PostMapping(value = "app/engineer/searchAcceptanceApplication")
+    @ApiOperation(value = "消息弹窗--验收申请单", notes = "消息弹窗--验收申请单")
+    ServerResponse searchAcceptanceApplication(@RequestParam("userToken") String userToken,
+                                            @RequestParam("houseId") String houseId,
+                                            @RequestParam("taskId") String taskId);
+
+    @PostMapping(value = "app/engineer/saveMaintenanceProduct")
+    @ApiOperation(value = "消息弹窗提交--提交维保商品订单", notes = "消息弹窗--维保商品订单")
+    ServerResponse saveMaintenanceProduct(@RequestParam("userToken") String userToken,
+                                          @RequestParam("houseId") String houseId,
+                                          @RequestParam("taskId") String taskId,
+                                          @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "app/engineer/saveExpenseMaintenanceProduct")
+    @ApiOperation(value = "消息弹窗提交--提交报销商品订单", notes = "消息弹窗--报销商品订单")
+    ServerResponse saveExpenseMaintenanceProduct(@RequestParam("userToken") String userToken,
+                                                 @RequestParam("houseId") String houseId,
+                                                 @RequestParam("taskId") String taskId,
+                                                 @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "app/engineer/saveAcceptanceApplication")
+    @ApiOperation(value = "消息弹窗提交--提交验收申请单", notes = "消息弹窗--验收申请单")
+    ServerResponse saveAcceptanceApplication(@RequestParam("userToken") String userToken,
+                                             @RequestParam("houseId") String houseId,
+                                             @RequestParam("taskId") String taskId,
+                                             @RequestParam("auditResult") Integer auditResult);
+
+    @PostMapping(value = "app/engineer/saveAcceptanceApplicationJob")
+    @ApiOperation(value = "定时任务--工匠维保申请验收，业主到期自动处理任务", notes = "定时任务--工匠维保申请验收，业主到期自动处理任务")
+    void saveAcceptanceApplicationJob();
+
+    @PostMapping(value = "app/engineer/searchMaintenaceRecordInfo")
+    @ApiOperation(value = "查询质保详情", notes = "查询质保详情（按提交人类型查询）")
+    ServerResponse searchMaintenaceRecordInfo(String maintenanceRecordId,Integer type);
+
+    @PostMapping(value = "app/engineer/saveMaintenanceRecordOrder")
+    @ApiOperation(value = "质保申请--提交订单", notes = "质保申请--提交订单")
+    ServerResponse saveMaintenanceRecordOrder(@RequestParam("userToken") String userToken,
+                                              @RequestParam("houseId") String houseId,
+                                              @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                              @RequestParam("maintenanceRecordType") Integer maintenanceRecordType,
+                                              @RequestParam("cityId") String cityId);
+
+
+    @PostMapping(value = "app/engineer/workerEndMaintenanceRecord")
+    @ApiOperation(value = "工匠结束维保", notes = "工匠结束维保")
+    ServerResponse workerEndMaintenanceRecord(@RequestParam("userToken") String userToken,
+                                              @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                               @RequestParam("image") String image,
+                                               @RequestParam("remark") String remark,
+                                              @RequestParam("cityId") String cityId);
+
+
+
+    @PostMapping(value = "app/engineer/endMaintenanceSearchProduct")
+    @ApiOperation(value = "提前结束--勘查费用商品页面", notes = "提前结束--勘查费用商品页面")
+    ServerResponse endMaintenanceSearchProduct(@RequestParam("userToken") String userToken,
+                                              @RequestParam("houseId") String houseId,
+                                              @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                              @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "app/engineer/endMaintenanceRecord")
+    @ApiOperation(value = "提前结束--结束维保", notes = "提前结束--结束维保")
+    ServerResponse endMaintenanceRecord(@RequestParam("userToken") String userToken,
+                                       @RequestParam("houseId") String houseId,
+                                       @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                       @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "app/engineer/evaluationMaintenanceRecord")
+    @ApiOperation(value = "质保管理--发表评价", notes = "质保管理--发表评价")
+    ServerResponse evaluationMaintenanceRecord(@RequestParam("userToken") String userToken,
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                        @RequestParam("workerId") String workerId,
+                                        @RequestParam("start") Integer start,
+                                        @RequestParam("content") String content,
+                                        @RequestParam("image") String image,
+                                        @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "web/engineer/queryMaintenanceRecordDetail")
+    @ApiOperation(value = "查询质保详情信息", notes = "查询质保详情信息")
+    ServerResponse queryMaintenanceRecordDetail(@RequestParam("userToken") String userToken,
+                                                @RequestParam("maintenanceRecordId") String maintenanceRecordId);
+
 
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordList")
     @ApiOperation(value = "查询质保审核列表", notes = "查询质保审核列表")
     ServerResponse queryDjMaintenanceRecordList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                 @RequestParam("searchKey") String searchKey,
                                                 @RequestParam("state") Integer state);
+
 
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordDetail")
     @ApiOperation(value = "查询质保审核详情", notes = "查询质保审核详情")
@@ -67,14 +159,7 @@ public interface DjMaintenanceRecordAPI {
     ServerResponse queryMemberList(@RequestParam("pageDTO") PageDTO pageDTO,
                                    @RequestParam("name") String name);
 
-    @PostMapping(value = "web/engineer/upDateMaintenanceInFo")
-    @ApiOperation(value = "处理申诉", notes = "处理申诉")
-    ServerResponse upDateMaintenanceInFo(@RequestParam("supervisorId") String supervisorId,
-                                         @RequestParam("stewardSubsidy") Integer stewardSubsidy,
-                                         @RequestParam("serviceRemark") String serviceRemark,
-                                         @RequestParam("userId") String userId,
-                                         @RequestParam("id") String id,
-                                         @RequestParam("handleType") Integer handleType);
+
 
 
     @PostMapping(value = "app/engineer/updateTaskStackData")
@@ -115,71 +200,27 @@ public interface DjMaintenanceRecordAPI {
                                      @RequestParam("data") String data);
 
 
-//    @PostMapping(value = "app/engineer/applicationAcceptance")
-//    @ApiOperation(value = "确认申请验收", notes = "确认申请验收")
-//    ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
 
-
-    @PostMapping("/web/queryGuaranteeMoneyList")
-    @ApiOperation(value = "店铺-缴纳质保金列表", notes = "质保金缴纳列表")
-    ServerResponse queryGuaranteeMoneyList(@RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("userId") String userId, @RequestParam("cityId") String cityId);
 
     @PostMapping("/web/queryGuaranteeMoneyDetail")
     @ApiOperation(value = "店铺-缴纳质保金详情", notes = "缴纳质保金详情")
-    ServerResponse queryGuaranteeMoneyDetail(@RequestParam("userId") String userId, @RequestParam("cityId") String cityId, @RequestParam("id") String id);
+    ServerResponse queryGuaranteeMoneyDetail(@RequestParam("userId") String userId,
+                                             @RequestParam("cityId") String cityId,
+                                             @RequestParam("id") String id);
 
 
-    @PostMapping(value = "app/engineer/resolved")
-    @ApiOperation(value = "已解决", notes = "已解决")
-    ServerResponse resolved(@RequestParam("userToken") String userToken,
-                            @RequestParam("remark") String remark,
-                            @RequestParam("houseId") String houseId,
-                            @RequestParam("image") String image,
-                            @RequestParam("id") String id,
-                            @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
-    );
 
-    @PostMapping(value = "app/engineer/sendingOwners")
-    @ApiOperation(value = "(自购金额确认)发送给业主", notes = "(自购金额确认)发送给业主")
-    ServerResponse sendingOwners(@RequestParam("userToken") String userToken,
-                                 @RequestParam("houseId") String houseId,
-                                 @RequestParam("remark") String remark,
-                                 @RequestParam("enoughAmount") String enoughAmount
-    );
 
-    //确定维保工序（已有）
-    //选择责任方（已有）
-    //确定责任占比（已有）
-    @PostMapping(value = "app/auditMaintenance")
-    @ApiOperation(value = "管家审核维修", notes = "管家审核维修")
-    ServerResponse auditMaintenance(@RequestParam("userToken") String userToken,
-                                    @RequestParam("remark") String remark,
-                                    @RequestParam("houseId") String houseId,
-                                    @RequestParam("image") String image,
-                                    @RequestParam("id") String id,
-                                    @RequestParam("state") Integer state,
-                                    @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
-    );
 
-    @PostMapping(value = "app/submitQualityAssurance")
-    @ApiOperation(value = "提交质保处理", notes = "提交质保处理")
-    ServerResponse submitQualityAssurance(@RequestParam("userToken") String userToken,
-                                          @RequestParam("houseId") String houseId,
-                                          @RequestParam("remark") String remark,
-                                          @RequestParam("image") String image,
-                                          @RequestParam("id") String id,
-                                          @RequestParam("state") Integer state,
-                                          @RequestParam("productId") String productId,
-                                          @RequestParam("price") Double price,
-                                          @RequestParam("shopCount") Double shopCount,
-                                          @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId);
+
 
     @PostMapping(value = "app/engineer/insertMaintenanceRecordProduct")
     @ApiOperation(value = "添加维保商品到购物篮", notes = "添加维保商品到购物篮")
     ServerResponse insertMaintenanceRecordProduct(@RequestParam("userToken") String userToken,
                                                   @RequestParam("houseId") String houseId,
                                                   @RequestParam("maintenanceRecordId") String maintenanceRecordId,
-                                                  @RequestParam("productId") String productId);
+                                                  @RequestParam("productId") String productId,
+                                                  @RequestParam("shopCount") Double shopCount);
 
     @PostMapping(value = "app/engineer/setMaintenanceRecordProduct")
     @ApiOperation(value = "管家/工匠维保购物篮处理", notes = "管家/工匠维保购物篮处理")
@@ -205,44 +246,54 @@ public interface DjMaintenanceRecordAPI {
     @ApiOperation(value = "删除购物篮商品", notes = "删除购物篮商品")
     ServerResponse deleteMaintenanceRecordProduct(@RequestParam("id") String id);
 
-//    @PostMapping(value = "app/engineer/setMaintenanceHandlesSubmissions")
-//    @ApiOperation(value = "管家质保处理提交", notes = "管家质保处理提交")
-//    ServerResponse setMaintenanceHandlesSubmissions(@RequestParam("maintenanceRecordId") String maintenanceRecordId,
-//                                                    @RequestParam("remark") String remark,
-//                                                    @RequestParam("image") String image);
+    @PostMapping(value = "app/engineer/setMaintenanceHandlesSubmissions")
+    @ApiOperation(value = "管家质保处理提交", notes = "管家质保处理提交")
+    ServerResponse setMaintenanceHandlesSubmissions(@RequestParam("userToken") String userToken,
+                                                    @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                                    @RequestParam("remark") String remark,
+                                                    @RequestParam("image") String image);
 
     @PostMapping(value = "app/engineer/addApplyNewspaper")
     @ApiOperation(value = "工匠申请报销", notes = "工匠申请报销")
-    ServerResponse addApplyNewspaper(@RequestParam("userToken") String userToken,
-                                          @RequestParam("memberId") String memberId,
-                                          @RequestParam("money")  Double money,
-                                          @RequestParam("description") String description,
-                                          @RequestParam("image") String image,
-                                          @RequestParam("houseId")  String houseId);
+    ServerResponse addApplyNewspaper(@RequestParam("money") Double money,
+                                     @RequestParam("description") String description,
+                                     @RequestParam("image") String image,
+                                     @RequestParam("businessId") String businessId);
 
 
     @PostMapping(value = "app/engineer/queryComplain")
     @ApiOperation(value = "查询报销记录", notes = "查询报销记录")
-    ServerResponse  queryComplain(@RequestParam("userToken")String userToken,
-                                  @RequestParam("memberId")String memberId);
+    ServerResponse queryComplain(@RequestParam("userToken") String userToken,
+                                 @RequestParam("memberId") String memberId);
 
     @PostMapping(value = "app/engineer/queryComplainInFo")
     @ApiOperation(value = "查询报销记录详情", notes = "查询报销记录详情")
-    ServerResponse  queryComplainInFo(@RequestParam("id")String id);
+    ServerResponse queryComplainInFo(@RequestParam("id") String id);
 
     @PostMapping(value = "web/engineer/handleAppeal")
     @ApiOperation(value = "处理工匠报销申诉", notes = "处理工匠报销申诉")
-    ServerResponse  handleAppeal(@RequestParam("id")String id,
-                                 @RequestParam("type")Integer type,
-                                 @RequestParam("actualMoney") Double actualMoney,
-                                 @RequestParam("operateId")String operateId,
-                                 @RequestParam("rejectReason")String rejectReason);
+    ServerResponse handleAppeal(@RequestParam("id") String id,
+                                @RequestParam("type") Integer type,
+                                @RequestParam("actualMoney") Double actualMoney,
+                                @RequestParam("operateId") String operateId,
+                                @RequestParam("rejectReason") String rejectReason);
 
 
     @PostMapping(value = "web/engineer/workerApplyCollect")
     @ApiOperation(value = "工匠申请维保验收", notes = "工匠申请维保验收")
-    ServerResponse  workerApplyCollect(@RequestParam("id")String id,
-                                 @RequestParam("remarks")String remarks,
-                                 @RequestParam("image") String image);
+    ServerResponse workerApplyCollect(@RequestParam("id") String id,
+                                      @RequestParam("remark") String remark,
+                                      @RequestParam("image") String image);
+
+
+    @PostMapping(value = "web/engineer/confirmStart")
+    @ApiOperation(value = "已确认可开工", notes = "已确认可开工")
+    ServerResponse confirmStart(@RequestParam("businessId") String businessId);
+
+    @PostMapping(value = "web/engineer/setWorkerMaintenanceGoods")
+    @ApiOperation(value = "工匠维保要货", notes = "工匠维保要货")
+    ServerResponse setWorkerMaintenanceGoods(@RequestParam("userToken") String userToken,
+                                             @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                             @RequestParam("houseId") String houseId);
 
 }

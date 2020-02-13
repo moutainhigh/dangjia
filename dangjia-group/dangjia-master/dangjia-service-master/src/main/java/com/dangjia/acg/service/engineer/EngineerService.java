@@ -39,10 +39,14 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.core.HouseWorkerService;
+import com.dangjia.acg.service.deliver.OrderSplitService;
+import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +67,7 @@ import java.util.*;
  */
 @Service
 public class EngineerService {
+    private static Logger logger = LoggerFactory.getLogger(EngineerService.class);
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
@@ -908,6 +913,92 @@ public class EngineerService {
         }
         pageResult.setList(warehouseMap);
         return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
+
+    /**
+     * 店铺--业主仓库（店铺汇总）
+     * @param request
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param addressId 地址ID
+     * @param storefrontId 店铺ID
+     * @param pageDTO 分页
+     * @return
+     */
+    public ServerResponse getStorefrontWareHouse(HttpServletRequest request,String cityId,String houseId,String addressId,String storefrontId, PageDTO pageDTO){
+       try{
+           //1.将业主仓库中，不存在店铺ID的商品补上店铺ID
+           iWarehouseMapper.updateStorefrontIdByHouseId(houseId,addressId);
+           //2.查询对应的数据
+           PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+           List<Warehouse> warehouseList = iWarehouseMapper.selectWareHouseInfoByStorefrontId(houseId,addressId,storefrontId);
+           if (warehouseList == null) {
+               return ServerResponse.createByErrorMessage("查无数据");
+           }
+           PageInfo pageResult = new PageInfo(warehouseList);
+           List<WareDTO> warehouseMap = getWareList(warehouseList,houseId,null,null);
+           pageResult.setList(warehouseMap);
+           return ServerResponse.createBySuccess("查询成功",pageResult);
+       }catch (Exception e){
+           logger.error("查询异常：",e);
+           return ServerResponse.createByErrorMessage("查询异常");
+       }
+    }
+
+    private List<WareDTO> getWareList(List<Warehouse> warehouseList,String houseId,String userName,String address){
+        List<WareDTO> warehouseMap=new ArrayList<>();
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        for (Warehouse warehouse : warehouseList) {
+            List<RepairMendDTO> repairMends = houseMapper.getRepairMend(houseId, warehouse.getProductId());
+            warehouse.setWorkBack(0.0);
+            warehouse.setOwnerBack(0.0);
+            for (RepairMendDTO r : repairMends) {
+                if (r.getType() == 4) {//仅退款数
+                    warehouse.setOwnerBack(warehouse.getOwnerBack() + r.getShopCount());
+                }else {//退货退款数
+                    warehouse.setWorkBack(warehouse.getWorkBack() + r.getShopCount());
+                }
+            }
+            warehouse.setImage(StringTool.getImageSingle(warehouse.getImage(),imageAddress));
+            WareDTO wareDTO = new WareDTO();
+            BeanUtils.beanToBean(warehouse, wareDTO);
+            wareDTO.setNoSend(warehouse.getShopCount() - warehouse.getAskCount());
+            wareDTO.setUserName(userName);
+            wareDTO.setAddress(address);
+            wareDTO.setLeftAskCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getOwnerBack());
+            wareDTO.setUseCount(warehouse.getReceive() - warehouse.getWorkBack());
+            warehouseMap.add(wareDTO);
+        }
+        return warehouseMap;
+    }
+
+
+    /**
+     * 店铺--导出业主仓库
+     * @param response
+     * @param houseId
+     * @param addressId
+     * @param storefrontId
+     * @param userName
+     * @param address
+     * @return
+     */
+    public ServerResponse exportStorefrontWareHouse(HttpServletResponse response,String houseId, String addressId,
+                                                    String storefrontId, String userName,  String address){
+        try {
+            List<Warehouse> warehouseList = iWarehouseMapper.selectWareHouseInfoByStorefrontId(houseId,addressId,storefrontId);
+            if (warehouseList == null) {
+                return ServerResponse.createByErrorMessage("查无数据");
+            }
+            List<WareDTO> warehouseMap = getWareList(warehouseList,houseId,userName,address);
+            ExportExcel exportExcel = new ExportExcel();//创建表格实例
+            exportExcel.setDataList("业主仓库", WareDTO.class, warehouseMap);
+            exportExcel.write(response, houseId + ".xlsx");
+            return ServerResponse.createBySuccessMessage("导出Excel成功");
+        } catch (Exception e) {
+            logger.error("导出失败",e);
+            return ServerResponse.createByErrorMessage("导出Excel失败");
+        }
     }
 
     public ServerResponse exportWareHouse(HttpServletResponse response, String houseId, String userName, String address) {

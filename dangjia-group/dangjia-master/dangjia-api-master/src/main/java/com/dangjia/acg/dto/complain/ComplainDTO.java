@@ -38,6 +38,7 @@ public class ComplainDTO {
     private String rejectReason;//驳回原因
     List<String> images;//图片list
     private String handleType;//处理状态0-待处理 1-已处理
+    private Integer applicationStatus;//申请身份：1工匠，2业主，3店铺，4供应商
 
 
 }

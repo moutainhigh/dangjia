@@ -24,10 +24,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--统计总收入钱 -->
     <select id="incomeMoney" resultType="java.lang.Double">
-        select sum(money)
+        select IFNULL(sum(money),0)
         from dj_worker_worker_detail
         where worker_id=#{workerId}
-        <if test="states!=null or states!=''">
+        <if test="null!=states and states.length > 0">
         AND state IN
             <foreach collection="states" item="item" index="index"
                      separator="," open="(" close=")">
@@ -35,7 +35,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             </foreach>
         </if>
         <if test="time!=null and time!=''">
-            AND create_date &lt;= #{time}
+            AND date_format(create_date, '%Y-%m') = #{time}
         </if>
         AND  state not in (1,3,7,11,13)
     </select>
@@ -126,10 +126,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--统计总支出钱 -->
     <select id="outMoney" resultType="java.lang.Double">
-        select sum(money)
+        select IFNULL(sum(money),0)
         from dj_worker_worker_detail
         where worker_id=#{workerId}
-        <if test="states!=null or states!=''">
+        <if test="null!=states and states.length > 0">
           AND state IN
             <foreach collection="states" item="item" index="index"
                      separator="," open="(" close=")">
@@ -137,7 +137,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             </foreach>
         </if>
         <if test="time!=null and time!=''">
-            AND create_date &lt;= #{time}
+            AND date_format(create_date, '%Y-%m') = #{time}
         </if>
         and  state in (1,3,7,11,13)
     </select>
@@ -154,16 +154,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--查询有记录的历史月 -->
     <select id="getHistoryMonth" resultType="java.util.Map">
-        select
-           DATE_FORMAT(d.create_date, '%m月') month,
-           sum(money) money
-        from
-			dj_worker_worker_detail as d
-		where d.worker_id=#{workerId}
-        and  d.state not in (1,3,7,11,13)
-		and  DATE_FORMAT(d.create_date, '%Y') =#{time}
-		GROUP BY month
-		ORDER BY d.create_date
+        SELECT
+            mo.months month,
+            IFNULL(a.money, 0) money
+        FROM
+            (
+                SELECT
+                    CASE
+                WHEN length(mon) = 1 THEN
+                    concat('0', mon, '月')
+                ELSE
+                    concat(mon, '月')
+                END months
+                FROM
+                    (
+                        SELECT
+                            @m :=@m + 1 mon
+                        FROM
+                            dj_worker_worker_detail,
+                            (SELECT @m := 0) a
+                    ) aa
+                LIMIT 12
+            ) mo
+        LEFT JOIN (
+            SELECT
+                DATE_FORMAT(d.create_date, '%m月') months,
+                sum(d.money) money
+            FROM
+                dj_worker_worker_detail AS d
+            WHERE
+                d.worker_id = #{workerId}
+            AND d.state NOT IN (1, 3, 7, 11, 13)
+            AND DATE_FORMAT(d.create_date, '%Y') = #{time}
+            GROUP BY
+                months
+        ) a ON a.months = mo.months
+        GROUP BY
+            mo.months
     </select>
     <!--根据年月查询对应历史月流水 -->
     <select id="getHistoryMonthByWorkerId" resultType="com.dangjia.acg.modle.worker.WorkerDetail">

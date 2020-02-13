@@ -161,7 +161,7 @@ public class ForMasterService {
     public ProductWorkerDTO getWorkerGoods(String workerGoodsId){
         DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(workerGoodsId);
         ProductWorkerDTO productWorkerDTO = JSON.parseObject(JSON.toJSONString(djBasicsProduct),new TypeReference<ProductWorkerDTO>() {});
-         productWorkerDTO.setWorkerDec(djBasicsProduct.getWorkerDec());
+        productWorkerDTO.setWorkerDec(djBasicsProduct.getWorkerDec());
         productWorkerDTO.setWorkerTypeId(djBasicsProduct.getWorkerTypeId());
         productWorkerDTO.setShowGoods(djBasicsProduct.getMaket());
         return productWorkerDTO;
@@ -186,12 +186,12 @@ public class ForMasterService {
                     .andEqualTo(BudgetMaterial.STETA,1);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterialList){
-                    budgetMaterial.setPrice(budgetMaterial.getPrice());
-                    budgetMaterial.setCost(budgetMaterial.getCost());
-                    budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * budgetMaterial.getPrice());//已支付 记录总价
-                    budgetMaterial.setDeleteState(3);//已支付
-                    budgetMaterial.setModifyDate(new Date());
-                    budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                budgetMaterial.setPrice(budgetMaterial.getPrice());
+                budgetMaterial.setCost(budgetMaterial.getCost());
+                budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * budgetMaterial.getPrice());//已支付 记录总价
+                budgetMaterial.setDeleteState(3);//已支付
+                budgetMaterial.setModifyDate(new Date());
+                budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
             }
             return budgetMaterialList;
         }catch (Exception e){
@@ -267,8 +267,11 @@ public class ForMasterService {
     /*********************商品3.0改造 **************************/
 
     public List<ShopGoodsDTO> queryShopGoods(String houseId, String workerTypeId){
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         List<ShopGoodsDTO> budgetLabelDTOS =  budgetMaterialMapper.queryShopGoods(houseId,workerTypeId);
         for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
+            budgetLabelDTO.setShopLogo(CommonUtil.isEmpty(budgetLabelDTO.getShopLogo())?"":imageAddress+budgetLabelDTO.getShopLogo());
+            budgetLabelDTO.setSystemLogo(CommonUtil.isEmpty(budgetLabelDTO.getSystemLogo())?"":imageAddress+budgetLabelDTO.getSystemLogo());
             budgetLabelDTO.setLabelDTOS(queryBudgetLabel(houseId,workerTypeId,budgetLabelDTO.getShopId()));
             BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
             for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
@@ -287,6 +290,8 @@ public class ForMasterService {
         List<BudgetLabelDTO> budgetLabelDTOS =  budgetMaterialMapper.queryBudgetLabel(houseId,workerTypeId,storefontId);//精算工钱
         List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = queryBudgetLabelGoods(houseId,workerTypeId,storefontId);//精算工钱
         for (BudgetLabelDTO budgetLabelDTO : budgetLabelDTOS) {
+            budgetLabelDTO.setStorefontId(storefontId);
+            budgetLabelDTO.setWorkerTypeId(workerTypeId);
             BigDecimal totalZPrice = new BigDecimal(0);//组总价
             String[] array = budgetLabelDTO.getCategoryIds().split(",");
             List<BudgetLabelGoodsDTO> budgetLabelGoodss= new ArrayList<>();

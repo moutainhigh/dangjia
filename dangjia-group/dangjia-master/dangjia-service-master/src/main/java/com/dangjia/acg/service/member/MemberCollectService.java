@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.member;
 
-import com.dangjia.acg.api.StorefrontProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -10,7 +9,6 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
@@ -84,7 +82,10 @@ public class MemberCollectService {
                 List<MemberCollectDTO> memberCollectDTOS = iMasterStorefrontProductMapper.queryCollectGood(memberCollect.getCollectId());
                 memberCollectDTOS.forEach(memberCollectDTO -> {
                     memberCollectDTO.setId(memberCollect.getId());
+                    memberCollectDTO.setSystemLogo(imageAddress+memberCollectDTO.getSystemLogo());
                     memberCollectDTO.setImage(imageAddress + memberCollectDTO.getImage());
+                    memberCollectDTO.setCollectId(memberCollect.getCollectId());
+                    memberCollectDTO.setConditionType(memberCollect.getConditionType());
                     //当前时间小于调价的时间时则展示调价预告信息
                     if (memberCollectDTO.getAdjustedPrice() == null
                             || memberCollectDTO.getModityPriceTime() == null
@@ -147,6 +148,7 @@ public class MemberCollectService {
             if (!CommonUtil.isEmpty(house.getBuildSquare())) {
                 dianList.add(house.getBuildSquare() + "㎡");
             }
+            map.put("collectId",house.getId());
             map.put("dianList", dianList);
             map.put("houseName", house.getHouseName());
             map.put("imageUrl", address + house.getImage());

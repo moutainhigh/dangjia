@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * 实体类 - 工种类
@@ -70,4 +71,7 @@ public class WorkerType extends BaseEntity {
 	@Desc(value = "技能包名称")
 	@ApiModelProperty("技能包名称")
 	private String skillPackName;
+
+	@Transient
+    private String imageUrl;
 }

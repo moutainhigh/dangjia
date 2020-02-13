@@ -130,8 +130,8 @@ public interface WalletAPI {
     @PostMapping("app/member/wallet/workerDetail")
     @ApiOperation(value = "资产流水", notes = "资产流水")
     ServerResponse workerDetail(@RequestParam("userToken") String userToken,
-                                @RequestParam("time") String time,
-                                @RequestParam("type") Integer type,
+                                @RequestParam("time") String time, @RequestParam("timeMark") String timeMark,
+                                @RequestParam("type") Integer type,@RequestParam("state") Integer state,
                                 @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**

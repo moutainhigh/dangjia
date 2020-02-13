@@ -142,6 +142,8 @@ public class MemberService {
 
 
     @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+    @Autowired
     private ConfigRuleUtilService configRuleUtilService;
 
 
@@ -156,7 +158,7 @@ public class MemberService {
      * 获取用户手机号
      *
      * @param id     来源ID
-     * @param idType 1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销
+     * @param idType 1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销, 6=用户地址
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
@@ -186,6 +188,12 @@ public class MemberService {
                 HouseDistribution distribution = iHouseDistributionMapper.selectByPrimaryKey(id);
                 if (distribution != null) {
                     mobile = distribution.getPhone();
+                }
+                break;
+            case "6":
+                MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(id);
+                if (memberAddress != null) {
+                    mobile = memberAddress.getMobile();
                 }
                 break;
             default:
@@ -891,9 +899,17 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse setMember(Member member) {
+    public ServerResponse setMember(String userToken,Member member) {
         try {
-            Member srcMember = memberMapper.selectByPrimaryKey(member.getId());
+            if(CommonUtil.isEmpty(userToken)){
+                userToken=member.getId();
+            }
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member srcMember = (Member)object;
+
             if (srcMember == null)
                 return ServerResponse.createByErrorMessage("该业主不存在");
             if (StringUtils.isNotBlank(member.getNickName()))
@@ -902,6 +918,8 @@ public class MemberService {
                 srcMember.setMobile(member.getMobile());
             if (StringUtils.isNotBlank(member.getRemarks()))
                 srcMember.setRemarks(member.getRemarks());
+            if (StringUtils.isNotBlank(member.getAutoOrder()))
+                srcMember.setAutoOrder(member.getAutoOrder());
             if (srcMember.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");

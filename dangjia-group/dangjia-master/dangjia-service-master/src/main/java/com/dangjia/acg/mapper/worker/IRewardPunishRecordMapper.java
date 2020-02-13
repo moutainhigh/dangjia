@@ -12,6 +12,7 @@ import java.util.List;
 
 @Repository
 public interface IRewardPunishRecordMapper extends Mapper<RewardPunishRecord> {
+
     List<RewardPunishRecordDTO> queryRewardPunishRecord(RewardPunishRecordDTO rewardPunishRecordDTO);
 
     RewardPunishRecordDTO getRewardPunishRecord(@Param("rewardPunishRecordId") String rewardPunishRecordId);

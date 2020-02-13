@@ -63,7 +63,6 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -495,9 +494,7 @@ public class HouseWorkerService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            ServerResponse serverResponse = houseFlowService.setGrabVerification(userToken, cityId, houseFlowId);
-            if (!serverResponse.isSuccess())
-                return serverResponse;
+
             if(type==1){
                 Order order =  orderMapper.selectByPrimaryKey(houseFlowId);
                 Example example = new Example(HouseWorker.class);
@@ -509,6 +506,7 @@ public class HouseWorkerService {
                 houseWorkerMapper.doModifyAllByWorkerId(worker.getId());//将所有houseWorker的选中状态IsSelect改为0未选中
                 HouseWorker houseWorker = new HouseWorker();
                 houseWorker.setWorkerId(worker.getId());
+                houseWorker.setOrderId(order.getId());
                 houseWorker.setWorkerTypeId(worker.getWorkerTypeId());
                 houseWorker.setWorkerType(worker.getWorkerType());
                 houseWorker.setWorkType(1);//已抢单
@@ -542,6 +540,7 @@ public class HouseWorkerService {
                 houseWorker.setWorkerTypeId(worker.getWorkerTypeId());
                 houseWorker.setWorkerType(worker.getWorkerType());
                 houseWorker.setWorkType(1);//已抢单
+                houseWorker.setHouseId(record.getHouseId());
                 houseWorker.setIsSelect(1);
              //   houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
                 houseWorker.setType(type);
@@ -566,13 +565,22 @@ public class HouseWorkerService {
                 h.setText(text);
                 return ServerResponse.createBySuccess("抢单成功");
             }else {
+                ServerResponse serverResponse = houseFlowService.setGrabVerification(userToken, cityId, houseFlowId);
+                if (!serverResponse.isSuccess())
+                    return serverResponse;
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
                 if (houseFlow.getWorkType() == 3) {
                     return ServerResponse.createByErrorMessage("该订单已被抢");
                 }
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
                 houseFlow.setGrabNumber(houseFlow.getGrabNumber() + 1);
-                houseFlow.setWorkType(3);//等待支付
+                if(worker.getWorkerType()==3){
+                    houseFlow.setWorkType(4);//等待支付
+                    houseFlow.setWorkSteta(3);//待交底
+                }else {
+                    houseFlow.setWorkType(3);//等待支付
+                }
+                houseFlow.setModifyDate(new Date());
                 houseFlow.setWorkerId(worker.getId());
                 grabSheet(worker, house, houseFlow);
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
@@ -582,13 +590,24 @@ public class HouseWorkerService {
                 houseWorker.setWorkerId(worker.getId());
                 houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
                 houseWorker.setWorkerType(houseFlow.getWorkerType());
-                houseWorker.setWorkType(1);//已抢单
+                if(houseFlow.getWorkType()==4){
+                    houseWorker.setWorkType(6);//大管家自动采纳
+                }else {
+                    houseWorker.setWorkType(1);//已抢单
+                }
                 houseWorker.setIsSelect(1);
                 houseWorker.setPrice(houseFlow.getWorkPrice());
                 houseWorker.setType(0);
                 houseWorker.setBusinessId(houseFlow.getId());
                 houseWorkerMapper.insert(houseWorker);
-
+                /*
+                 * 工匠订单
+                 */
+                HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+                if (hwo != null) {
+                    hwo.setWorkerId(houseWorker.getWorkerId());
+                    houseWorkerOrderMapper.updateByPrimaryKey(hwo);
+                }
                 Example example = new Example(MemberCity.class);
                 example.createCriteria()
                         .andEqualTo(MemberCity.MEMBER_ID, worker.getId())
@@ -1243,9 +1262,23 @@ public class HouseWorkerService {
             for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片
                 JSONObject imageObj = imageObjArr.getJSONObject(i);
                 int imageType = Integer.parseInt(imageObj.getString("imageType"));
-                String imageTypeName = imageObj.getString("imageTypeName");
                 String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
-                if (imageType == 3) {//节点图
+                if (hfa.getApplyType()==5 && imageType == 3) {//节点图
+                    String imageTypeId = imageObj.getString("imageTypeId");
+                    String imageState = imageObj.getString("imageState");
+                    TechnologyRecord technologyRecord = technologyRecordMapper.selectByPrimaryKey(imageTypeId);
+                    if (technologyRecord == null) continue;
+                    technologyRecord.setImage(imageUrl);
+                    technologyRecord.setStewardCheckTime(new Date());
+                    technologyRecord.setStewardHouseFlowApplyId(hfa.getId());
+                    technologyRecord.setState(Integer.parseInt(imageState));//未验收
+                    technologyRecord.setModifyDate(new Date());
+                    technologyRecordMapper.updateByPrimaryKey(technologyRecord);
+                    strbfr.append(technologyRecord.getName());
+                    strbfr.append("<br/>");
+                }
+                if (hfa.getApplyType()!=5 && imageType == 3) {//节点图
+                    String imageTypeName = imageObj.getString("imageTypeName");
                     String imageTypeId = imageObj.getString("imageTypeId");
                     Technology technology = iMasterTechnologyMapper.selectByPrimaryKey(imageTypeId);
                    // forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
@@ -1267,18 +1300,19 @@ public class HouseWorkerService {
                     technologyRecordMapper.insert(technologyRecord);
                     strbfr.append(technology.getName());
                     strbfr.append("<br/>");
-                } else {
-                    String[] imageArr = imageUrl.split(",");
-                    for (String anImageArr : imageArr) {
-                        HouseFlowApplyImage houseFlowApplyImage = new HouseFlowApplyImage();
-                        houseFlowApplyImage.setHouseFlowApplyId(hfa.getId());
-                        houseFlowApplyImage.setHouseId(house.getId());
-                        houseFlowApplyImage.setImageUrl(anImageArr);
-                        houseFlowApplyImage.setImageType(imageType);//图片类型 0：材料照片；1：进度照片；2:现场照片；3:其他
-                        houseFlowApplyImage.setImageTypeName(imageObj.getString("imageTypeName"));//图片类型名称 例如：材料照片；进度照片
-                        houseFlowApplyImageMapper.insert(houseFlowApplyImage);
-                    }
                 }
+
+                String[] imageArr = imageUrl.split(",");
+                for (String anImageArr : imageArr) {
+                    HouseFlowApplyImage houseFlowApplyImage = new HouseFlowApplyImage();
+                    houseFlowApplyImage.setHouseFlowApplyId(hfa.getId());
+                    houseFlowApplyImage.setHouseId(house.getId());
+                    houseFlowApplyImage.setImageUrl(anImageArr);
+                    houseFlowApplyImage.setImageType(imageType);//图片类型 0：材料照片；1：进度照片；2:现场照片；3:其他
+                    houseFlowApplyImage.setImageTypeName(imageObj.getString("imageTypeName"));//图片类型名称 例如：材料照片；进度照片
+                    houseFlowApplyImageMapper.insert(houseFlowApplyImage);
+                }
+
             }
         }
         return strbfr.toString();
@@ -1365,9 +1399,10 @@ public class HouseWorkerService {
             houseFlow.setWorkType(5);
             houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            configMessageService.addConfigMessage(AppType.GONGJIANG,
-                    DigestUtils.md5Hex("wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId()),
-                    "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
+
+//            configMessageService.addConfigMessage(AppType.GONGJIANG,
+//                    DigestUtils.md5Hex("wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId()),
+//                    "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             return ServerResponse.createBySuccessMessage("提前进场成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -1421,13 +1456,12 @@ public class HouseWorkerService {
     /**
      * 切换工地
      */
-    public ServerResponse setSwitchHouseFlow(String userToken, String houseFlowId) {
+    public ServerResponse setSwitchHouseFlow(String userToken, String houseWorkerId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Member worker = (Member) object;
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andCondition("  work_type IN ( 1, 6 ) ")
@@ -1435,7 +1469,7 @@ public class HouseWorkerService {
                     .andEqualTo(HouseWorker.WORKER_TYPE, worker.getWorkerType());
             List<HouseWorker> listHouseWorker = houseWorkerMapper.selectByExample(example);
             for (HouseWorker houseWorker : listHouseWorker) {
-                if (houseWorker.getHouseId().equals(houseFlow.getHouseId())) {//选中的任务isSelect改为1
+                if (houseWorker.getId().equals(houseWorkerId)) {//选中的任务isSelect改为1
                     houseWorker.setIsSelect(1);
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 } else {//其他改为0
@@ -1502,20 +1536,22 @@ public class HouseWorkerService {
         }
     }
 
-
+    public ServerResponse autoDistributeHandle(String houseFlowId) {
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        return autoDistributeHandle(houseFlow);
+    }
     /**
      * 管家自动派单分值计算
-     * @param houseFlowId
+     * @param houseFlow
      * @return
      */
-    public ServerResponse autoDistributeHandle(String houseFlowId) {
+    public ServerResponse autoDistributeHandle(HouseFlow houseFlow) {
         /*大管家所有待抢单*/
         Example example = new Example(HouseFlow.class);
         example.createCriteria()
                 .andEqualTo(HouseFlow.WORK_TYPE, 2)
                 .andEqualTo(HouseFlow.WORKER_TYPE_ID, 3)
                 .andNotEqualTo(HouseFlow.STATE, 2);
-        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         if(houseFlow.getWorkType()!=2){
             return ServerResponse.createByErrorMessage("状态错误，无法自动派单！");
         }
@@ -1526,7 +1562,7 @@ public class HouseWorkerService {
         ModelingVillage modelingVillage =modelingVillageMapper.selectByPrimaryKey(house.getVillageId());
         List<Map<String, Object>> list = houseWorkerMapper.getSupWorkerConfInfo(modelingVillage.getLocationx(),modelingVillage.getLocationy());
         for (Map<String, Object> stringObjectMap : list) {
-            Double  score = configRuleUtilService.getautoDistributeHandleConfig((Double) stringObjectMap.get("juli"),(Double) stringObjectMap.get(Member.EVALUATION_SCORE),(Integer) stringObjectMap.get(Member.METHODS));
+            Double  score = configRuleUtilService.getautoDistributeHandleConfig((Double) stringObjectMap.get("juli"),(BigDecimal) stringObjectMap.get(Member.EVALUATION_SCORE),(Long) stringObjectMap.get(Member.METHODS));
             stringObjectMap.put("score",score);
         }
         //重新排序
@@ -1539,9 +1575,8 @@ public class HouseWorkerService {
             }
         });
         for (Map<String, Object> stringObjectMap : list) {
-            String userRoleText = "role2:" + stringObjectMap.get(HouseWorker.WORKER_ID);
-            String userToken = redisClient.getCache(userRoleText, String.class);
-            ServerResponse serverResponse = setWorkerGrab(userToken,  houseFlow.getCityId(), houseFlowId,0);
+            String userToken = String.valueOf(stringObjectMap.get(HouseWorker.WORKER_ID));
+            ServerResponse serverResponse = setWorkerGrab(userToken,  houseFlow.getCityId(), houseFlow.getId(),0);
             //如果已指派则无需继续遍历
             if(serverResponse.isSuccess()){
                 break;

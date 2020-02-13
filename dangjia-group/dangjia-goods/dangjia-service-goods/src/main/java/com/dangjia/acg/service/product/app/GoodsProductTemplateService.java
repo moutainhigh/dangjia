@@ -47,7 +47,7 @@ public class GoodsProductTemplateService {
                 AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
                 if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
                     Attribute attribute=iAttributeMapper.selectByPrimaryKey(attributeValue.getAttributeId());
-                    if (attribute!=null&&attribute.getType()==2&&StringUtils.isNotBlank(strNewValueNameArr)) {
+                    if (attribute!=null&&attribute.getType()==2&&StringUtils.isBlank(strNewValueNameArr)) {
                         strNewValueNameArr = attributeValue.getName();
                     } else if (attribute!=null&&attribute.getType()==2){
                         strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();

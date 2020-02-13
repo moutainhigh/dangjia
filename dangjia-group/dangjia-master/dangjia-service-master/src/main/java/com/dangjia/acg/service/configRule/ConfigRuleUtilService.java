@@ -1,6 +1,9 @@
 package com.dangjia.acg.service.configRule;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.configRule.*;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -48,6 +51,8 @@ public class ConfigRuleUtilService {
     @Autowired
     private IOperationFlowMapper operationFlowMapper;
 
+    @Autowired
+    private RedisClient redisClient;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -148,7 +153,7 @@ public class ConfigRuleUtilService {
                 example=new Example(DjConfigRuleModule.class);
                 example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK011);
                 DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
-                ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),configRuleModule.getTypeId(),null);
+                ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),workerTypeId,null);
                 if(serverResponse.isSuccess()){
                     List<Map> returnData = (List<Map>) serverResponse.getResultObj();
                     if(returnData.size()>0){
@@ -259,7 +264,7 @@ public class ConfigRuleUtilService {
      * @param methods 持单量
      * @return
      */
-    public Double getautoDistributeHandleConfig(Double juli,Double evaluationScore,Integer methods) {
+    public Double getautoDistributeHandleConfig(Double juli,BigDecimal evaluationScore,Long methods) {
         Double amount = 0d;
         Example example = new Example(DjConfigRuleModule.class);
         example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID, ConfigRuleService.MK017);
@@ -300,17 +305,17 @@ public class ConfigRuleUtilService {
                 //积分
                 if(configRuleItemThree.getParamType().equals(ConfigRuleService.CS007)){
                     for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
-                        if(configRuleItemLadder.getPhaseStart()<=evaluationScore&&configRuleItemLadder.getPhaseEnd()>=evaluationScore){
+                        if(configRuleItemLadder.getPhaseStart()<=evaluationScore.doubleValue()&&configRuleItemLadder.getPhaseEnd()>=evaluationScore.doubleValue()){
                             b=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
                             break;
                         }
                     }
                     if(a==0){
                         for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
-                            if(configRuleItemLadder.getPhaseStart()>evaluationScore){
+                            if(configRuleItemLadder.getPhaseStart()>evaluationScore.doubleValue()){
                                 a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
                             }
-                            if(configRuleItemLadder.getPhaseEnd()<evaluationScore){
+                            if(configRuleItemLadder.getPhaseEnd()<evaluationScore.doubleValue()){
                                 a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
                             }
                         }
@@ -363,6 +368,22 @@ public class ConfigRuleUtilService {
                 if(Double.parseDouble(fieldValues[0])<=square.doubleValue()&&Double.parseDouble(fieldValues[1])>=square.doubleValue()){
                     configRuleItemTwoNew= configRuleItemTwo;
                     break;
+                }
+            }
+            if(configRuleItemTwoNew==null){
+                for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                    String[] fieldValues=configRuleItemTwo.getFieldValue().split(",");
+                    if(Double.parseDouble(fieldValues[1])<=square.doubleValue()){
+                        configRuleItemTwoNew= configRuleItemTwo;
+                    }
+                }
+            }
+            if(configRuleItemTwoNew==null){
+                for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                    String[] fieldValues=configRuleItemTwo.getFieldValue().split(",");
+                    if(Double.parseDouble(fieldValues[0])>=square.doubleValue()){
+                        configRuleItemTwoNew= configRuleItemTwo;
+                    }
                 }
             }
         }
@@ -445,4 +466,316 @@ public class ConfigRuleUtilService {
         houseMapper.updateByPrimaryKeySelective(house);
     }
 
+    /**
+     * 补、退人工排期设置
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param workPrice 总工钱
+     * @param type 0=补人工  1=退人工
+     */
+    public void setAutoSchedulingWorkerType(String houseId,  String workerTypeId, BigDecimal workPrice,Integer type) {
+        HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,workerTypeId);
+        House house= houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+        DjConfigRuleItemTwo configRuleItemTwo= getApartmentConfig(house.getSquare());
+        List<Map> averageLabourPrice = getAutoSchedulingConfig(ConfigRuleService.PQ102);//平均工价
+        List<Map> defaultNumber = getAutoSchedulingConfig(ConfigRuleService.PQ103);//默认人数
+
+        BigDecimal gongJia=new BigDecimal(0);
+        Integer renShu=0;
+        for (Map map : averageLabourPrice) {
+            if(houseFlow.getWorkerTypeId().equals(map.get(DjConfigRuleItemOne.RANK_ID))){
+                gongJia=new BigDecimal(map.get(configRuleItemTwo.getFieldCode()).toString());
+            }
+        }
+        for (Map map : defaultNumber) {
+            if(houseFlow.getWorkerTypeId().equals(map.get(DjConfigRuleItemOne.RANK_ID))){
+                renShu=Integer.parseInt(map.get("number").toString());
+            }
+        }
+        //工期 = 工序工价 / （户型平均工价（工序）* 默认工人人数）
+        Integer dayNum=(workPrice.intValue()/(gongJia.intValue()*renShu))-1;
+        if(type==0){
+            Date endDate=DateUtil.addDateDays(houseFlow.getEndDate(),dayNum);
+            //如果不包含周末，则加上周末的天数
+            if(house.getIsWeekend()){
+                dayNum = dayNum + DateUtil.getWeekendDay(houseFlow.getEndDate(),endDate);
+            }
+            houseFlow.setEndDate(DateUtil.addDateDays(houseFlow.getEndDate(),dayNum));
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+            house.setEndDate(DateUtil.addDateDays(house.getEndDate(),dayNum));
+            houseMapper.updateByPrimaryKeySelective(house);
+        }else{
+            Date endDate=DateUtil.delDateDays(houseFlow.getEndDate(),dayNum);
+            //如果不包含周末，则加上周末的天数
+            if(house.getIsWeekend()){
+                dayNum = dayNum + DateUtil.getWeekendDay(endDate,houseFlow.getEndDate());
+            }
+            houseFlow.setEndDate(DateUtil.delDateDays(houseFlow.getEndDate(),dayNum));
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+            house.setEndDate(DateUtil.delDateDays(house.getEndDate(),dayNum));
+            houseMapper.updateByPrimaryKeySelective(house);
+        }
+    }
+
+    /**
+     * 旷工扣积分
+     *
+     * @param evaluationScore 积分
+     * @return
+     */
+    public Double getAbsenteeismCount(BigDecimal evaluationScore) {
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Double amount=0d;
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK001);
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),null,null);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            amount=(Double) returnDatum.get("integral");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
+
+    /**
+     * 延期扣积分
+     *
+     * @param type 0=工匠延期扣分(每天)  1=大管家延期扣分(每天)
+     * @return
+     */
+    public Double getDelayCount(Integer type) {
+        Double amount=0d;
+        Example example=new Example(DjConfigRuleModule.class);
+        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK002);
+        DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+        example=new Example(DjConfigRuleItemTwo.class);
+        example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
+        example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
+        PageHelper.startPage(1, 2);
+        List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
+        String keyVal="workerDelay";
+        if(type==1){
+            keyVal="stewardDelay";
+        }
+        if (configRuleItemTwos.size() > 0) {
+            for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                if(keyVal.equals(configRuleItemTwo.getFieldCode())){
+                    amount=Double.parseDouble(configRuleItemTwo.getFieldValue());
+                    break;
+                }
+            }
+        }
+        return amount;
+    }
+
+
+    /**
+     * 放弃抢(派)单扣分
+     *
+     * @param type 0=工匠  1=大管
+     * @return
+     */
+    public String[] getAbandonedCount(Integer type) {
+        String[] amount= new String[]{"0","0"};
+        Example example=new Example(DjConfigRuleModule.class);
+        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK005);
+        DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+        example=new Example(DjConfigRuleItemTwo.class);
+        example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
+        example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
+        PageHelper.startPage(1, 2);
+        List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
+        String keyVal="worker";
+        if(type==1){
+            keyVal="steward";
+        }
+        if (configRuleItemTwos.size() > 0) {
+            for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                if(keyVal.equals(configRuleItemTwo.getFieldCode())){
+                    amount=configRuleItemTwo.getFieldValue().split(",");
+                    break;
+                }
+            }
+        }
+        return amount;
+    }
+
+    /**
+     * 获取施工积分
+     * @param houseId 房子ID
+     * @param typeId 类型：
+     *                  SG001 = 管家周计划
+     *                  SG002 = 管家巡查
+     *                  SG003 = 管家验收
+     *                  SG004 = 管家竣工
+     *                  SG005 = 工匠每日完工
+     *                  SG006 = 工匠被评价
+     * @param evaluationScore 工匠/管家的当前积分
+     * @param star 星级（SG003/SG004/SG006时必传）
+     * @return
+     */
+    public Double getWerkerIntegral(String houseId,String typeId,BigDecimal evaluationScore,Integer star) {
+        String batchCode = redisClient.getCache(Constants.HOUSE_BATCH + houseId+"-"+typeId, String.class);
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Double amount=0d;
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            String[] typeIds= new String[]{ConfigRuleService.MK003,ConfigRuleService.MK004};
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andIn(DjConfigRuleModule.TYPE_ID,Arrays.asList(typeIds));
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),typeId,batchCode);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(CommonUtil.isEmpty(batchCode)){
+                            batchCode=(String)returnDatum.get(DjConfigRuleItemOne.BATCH_CODE);
+                            redisClient.put(Constants.HOUSE_BATCH + houseId+"-"+typeId,batchCode);
+                        }
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            String keyVal;
+                            switch (star) {
+                                case 1:
+                                    keyVal="starOne";
+                                    break;
+                                case 2:
+                                    keyVal="starTwo";
+                                    break;
+                                case 3:
+                                    keyVal="starThree";
+                                    break;
+                                case 4:
+                                    keyVal="starFour";
+                                    break;
+                                case 5:
+                                    keyVal="starFive";
+                                    break;
+                                default:
+                                    keyVal="integral";
+                                    break;
+                            }
+                            amount=(Double) returnDatum.get(keyVal);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
+
+
+    /**
+     * 月提现次数上限
+     *
+     * @param evaluationScore 积分
+     * @return
+     */
+    public Integer getWithdrawDepositCount(BigDecimal evaluationScore) {
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Integer amount=1;
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK006);
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),null,null);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            amount=(Integer) returnDatum.get("integral");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
+
+
+    /**
+     * 滞留金每单比例
+     *
+     * @param evaluationScore 积分
+     * @return
+     */
+    public Double getRetentionRatio(BigDecimal evaluationScore) {
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Double amount=0d;
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK007);
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),null,null);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            amount=(Double) returnDatum.get("integral");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
+
+    /**
+     * 指定工种的滞留金上限
+     *
+     * @param evaluationScore 积分
+     * @return
+     */
+    public Double getRetentionUpperLimit(String workerTypeId,BigDecimal evaluationScore) {
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Double amount=0d;
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK008);
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),workerTypeId,null);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            amount=(Double) returnDatum.get("integral");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
 }

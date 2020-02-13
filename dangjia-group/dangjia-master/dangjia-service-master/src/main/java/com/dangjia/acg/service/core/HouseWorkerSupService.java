@@ -30,6 +30,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.house.HouseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -77,6 +78,8 @@ public class HouseWorkerSupService {
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
     @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
+    @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
     @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
@@ -99,7 +102,7 @@ public class HouseWorkerSupService {
      */
     public ServerResponse getHouseOrderList(HttpServletRequest request, PageDTO pageDTO, String userToken,
                                             String nameKey,
-                                            Integer type,
+                                            Integer type,Integer orderTakingTime,
                                             Integer houseType,
                                             Integer startTime,
                                             Integer isPlanWeek,
@@ -117,21 +120,22 @@ public class HouseWorkerSupService {
             String workerTypeId = member.getWorkerTypeId();
             /*大管家所有订单*/
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<HouseWorker>  houseWorkers = houseWorkerMapper.getDetailHouseWorker(member.getId(),nameKey,type,houseType,startTime,isPlanWeek,isPatrol);
+            List<HouseWorker>  houseWorkers = houseWorkerMapper.getDetailHouseWorker(member.getId(),nameKey,type,orderTakingTime,houseType,startTime,isPlanWeek,isPatrol);
             PageInfo pageResult = new PageInfo(houseWorkers);
             if (houseWorkers != null)
                 for (HouseWorker houseWorker : houseWorkers) {
                     AllgrabBean allgrabBean = new AllgrabBean();
+                    allgrabBean.setHouseWorkerId(houseWorker.getId());
                     if(houseWorker.getType()==1){ //体验单
                         Order order =  orderMapper.selectByPrimaryKey(houseWorker.getBusinessId());
                         MemberAddress memberAddress=iMasterMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
                         allgrabBean.setHouseFlowId(order.getId());
                         allgrabBean.setWorkerTypeId(workerTypeId);
-                        allgrabBean.setCreateDate(order.getCreateDate());
+                        allgrabBean.setCreateDate(houseWorker.getCreateDate());
                         allgrabBean.setHouseName(memberAddress.getAddress());
-                        allgrabBean.setType(2);
+                        allgrabBean.setType(1);
                         allgrabBean.setOrderType(0);
-                        allgrabBean.setHouseMember("业主 " + memberAddress.getName());//业主名称
+                        allgrabBean.setHouseMember(memberAddress.getName());//业主名称
                         allgrabBean.setWorkertotal("¥0");//工钱
                         double totalPrice = houseWorker.getPrice().doubleValue();
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
@@ -145,12 +149,13 @@ public class HouseWorkerSupService {
                         }
                         allgrabBean.setWorkerTypeId(record.getWorkerTypeId());
                         allgrabBean.setHouseFlowId(record.getId());
-                        allgrabBean.setCreateDate(record.getCreateDate());
+                        allgrabBean.setCreateDate(houseWorker.getCreateDate());
                         allgrabBean.setHouseName(house.getHouseName());
-                        allgrabBean.setType(3);
+                        allgrabBean.setHouseId(house.getId());
+                        allgrabBean.setType(2);
                         allgrabBean.setOrderType(0);
-                        allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                        allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+                        allgrabBean.setSquare((house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+                        allgrabBean.setHouseMember((mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                         allgrabBean.setWorkertotal("¥0");//工钱
                         double totalPrice = houseWorker.getPrice().doubleValue();
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
@@ -167,12 +172,13 @@ public class HouseWorkerSupService {
 
                         allgrabBean.setWorkerTypeId(workerTypeId);
                         allgrabBean.setHouseFlowId(houseFlow.getId());
-                        allgrabBean.setCreateDate(houseFlow.getCreateDate());
+                        allgrabBean.setCreateDate(houseWorker.getCreateDate());
                         allgrabBean.setHouseName(house.getHouseName());
-                        allgrabBean.setType(1);
+                        allgrabBean.setHouseId(house.getId());
+                        allgrabBean.setType(0);
                         allgrabBean.setOrderType(0);
                         //是否为新单
-                        if (DateUtil.addDateDays(houseFlow.getReleaseTime(), 1).getTime() < new Date().getTime()) {
+                        if (houseFlow.getReleaseTime()!=null&&DateUtil.addDateDays(houseFlow.getReleaseTime(), 1).getTime() < new Date().getTime()) {
                             allgrabBean.setOrderType(1);
                         }
                         Integer qdjl = houseWorkerMapper.selectCountByExample(example);//查出所有抢单记录
@@ -180,11 +186,14 @@ public class HouseWorkerSupService {
                         if (qdjl > 0) {
                             allgrabBean.setOrderType(2);
                         }
-                        allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                        allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+                        allgrabBean.setSquare((house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+                        allgrabBean.setHouseMember( (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                         allgrabBean.setWorkertotal("¥0");//工钱
                         double totalPrice = houseWorker.getPrice().doubleValue();
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+
+                        List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(houseFlow.getHouseId());//查询所有待大管家审核
+                        allgrabBean.setTaskNumber(supervisorCheckList == null ? 0 : supervisorCheckList.size());//任务数量
                     }
                     grabList.add(allgrabBean);
                 }
@@ -435,5 +444,7 @@ public class HouseWorkerSupService {
         }
         return ServerResponse.createBySuccess("查询成功", listtype);
     }
+
+
 
 }
