@@ -1,6 +1,8 @@
 package com.dangjia.acg.service.repair;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -41,11 +43,14 @@ import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.deliver.OrderSplitService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.JsonArray;
 import com.netflix.discovery.converters.Auto;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -91,9 +96,9 @@ public class MendMaterielService {
     private MasterStorefrontService masterStorefrontService;
 
     @Autowired
-    private IMendTypeRoleMapper mendTypeRoleMapper;
+    private TaskStackService taskStackService;
     @Autowired
-    private IMendOrderCheckMapper mendOrderCheckMapper;
+    private MendOrderCheckService mendOrderCheckService;
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
@@ -106,6 +111,8 @@ public class MendMaterielService {
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
     private MasterProductTemplateService masterProductTemplateService;
+    @Autowired
+    private OrderSplitService orderSplitService;
     /**
      * 售后管理--退货退款--分发供应商列表
      * @param request
@@ -321,75 +328,95 @@ public class MendMaterielService {
 
 
     /**
-     * 确认退货
-     * @param mendOrderId
-     * @param userId
-     * @param type
+     * 退货退款—确认退货/部分退货
+     * @param mendDeliverId 退货单ID
+     * @param userId 用户id
+     * @param type 类型：1确认退货，2部分退货
+     * @param mendMaterialList 退货详情列表 [{“mendMaterielId”:”退货明细ID”,”actualCount”:9（实退货量）}]
+     * @param partialReturnReason 部分退货原因
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse confirmReturnMendMaterial(String mendOrderId, String userId, Integer type, String actualCountList,String returnReason,String supplierId) {
-        try {
-            if (type == 0) {
-                //String aa="[{\"mendOrderId\":\"865634841567998628778\",\"actualCount\":9}]";
-                List<Map<String,Object>> list= JSON.parseObject(actualCountList, List.class);
-                for (Map<String, Object> stringStringMap : list) {
-                    String id=stringStringMap.get("id").toString();
-                    String actualCount=stringStringMap.get("actualCount").toString();
-                    //全部退货
-                    MendOrder mendOrder = new MendOrder();
-                    mendOrder.setId(mendOrderId);
-                    mendOrder.setState(3);//（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
-                    mendOrder.setModifyDate(new Date());//更新时间
-                    Integer i = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-                    if (i <= 0)
-                        return ServerResponse.createBySuccessMessage("全部退货失败");
-                    MendMateriel mendMateriel=new MendMateriel();
-                    mendMateriel.setId(id);
-                    mendMateriel.setActualCount(Double.parseDouble(actualCount));
-                    mendMaterialMapper.updateByPrimaryKey(mendMateriel);
-                    return ServerResponse.createBySuccessMessage("全部退货成功");
-                }
-
-            } else {
-                List<Map<String,Object>> list= JSON.parseObject(actualCountList, List.class);
-                for (Map<String, Object> stringStringMap : list) {
-                    String id=stringStringMap.get("id").toString();
-                    String actualCount=stringStringMap.get("actualCount").toString();
-                    //部分退货
-                    MendOrder mendOrder = new MendOrder();
-                    mendOrder.setId(mendOrderId);
-                    mendOrder.setState(8);//状态（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
-                    mendOrder.setReturnReason(returnReason);
-                    mendOrder.setModifyDate(new Date());//更新时间
-                    Integer j = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-                    if (j <= 0)
-                        return ServerResponse.createBySuccessMessage("全部退货失败");
-                    MendMateriel mendMateriel=new MendMateriel();
-                    mendMateriel.setId(id);
-                    mendMateriel.setActualCount(Double.parseDouble(actualCount));
-                    mendMaterialMapper.updateByPrimaryKey(mendMateriel);
-                    if (j > 0) {
-                        MendOrder myMendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-                        MendTypeRole mendTypeRole = mendTypeRoleMapper.getByType(myMendOrder.getType());
-                        String[] roleArr = mendTypeRole.getRoleArr().split(",");
-                        for (int i = 0; i < roleArr.length; i++) {
-                            MendOrderCheck mendOrderCheck = new MendOrderCheck();
-                            mendOrderCheck.setMendOrderId(myMendOrder.getId());
-                            mendOrderCheck.setRoleType(roleArr[i]);
-                            mendOrderCheck.setState(0);
-                            mendOrderCheck.setSort(i + 1);//顺序
-                            mendOrderCheckMapper.insert(mendOrderCheck);
-                        }
-                        return ServerResponse.createBySuccessMessage("部分退货成功");
-                    }
-                }
-            }
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("退货失败");
+    public ServerResponse confirmReturnMendMaterial(String mendDeliverId, String userId,Integer type,String mendMaterialList,String partialReturnReason) {
+        MendDeliver mendDeliver=mendDeliverMapper.selectByPrimaryKey(mendDeliverId);
+        if(mendDeliver==null){
+            return ServerResponse.createByErrorMessage("未找到符合条件的发货单");
         }
+        if(StringUtils.isBlank(mendMaterialList)){
+            return ServerResponse.createByErrorMessage("确认退单明细商品不能为空");
+        }
+        if(type==2&&StringUtils.isBlank(partialReturnReason)){
+            return ServerResponse.createByErrorMessage("确认退货时，收货原因不能为空");
+        }
+        if(mendDeliver.getShippingState()!=0){
+            return ServerResponse.createByErrorMessage("已确认过退货，请勿重复确认");
+        }
+        //修改实退货数
+        JSONArray jsonArray = JSONArray.parseArray(mendMaterialList);
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject obj = jsonArray.getJSONObject(i);
+            String mendMaterielId=(String)obj.get("mendMaterielId");
+            Double actualCount=Double.parseDouble((String) obj.get("actualCount"));
+             MendMateriel mendMateriel=mendMaterialMapper.selectByPrimaryKey(mendMaterielId);
+             if(mendMateriel!=null){
+                 if(mendMateriel.getShopCount()<actualCount){
+                     actualCount=mendMateriel.getShopCount();
+                 }
+                 mendMateriel.setActualCount(actualCount);
+                 mendMateriel.setModifyDate(new Date());
+                 //如果是部分退，则重新计算运费搬运费
+                 String orderItemId=mendMateriel.getOrderItemId();
+                 if(mendMateriel.getShopCount()>actualCount){
+                     mendMateriel.setTransportationCost(0d);
+                     mendMateriel.setStevedorageCost(0d);
+                     mendMateriel.setSupStevedorageCost(0d);
+                     mendMateriel.setSupTransportationCost(0d);
+                     //重新计算店铺的运费，搬运费，供应商的运费，搬运费
+                     OrderSplitItem orderSplitItem=orderSplitItemMapper.selectByPrimaryKey(orderItemId);//获取发货单是的运费，搬运费
+                     if(StringUtils.isNotBlank(orderItemId)&&orderSplitItem!=null){
+                         Double transportationCost=orderSplitItem.getTransportationCost();//运费
+                         Double stevedorageCost=orderSplitItem.getStevedorageCost();//搬运费
+                         if(orderSplitItem.getReceive()==null)
+                             orderSplitItem.setReceive(orderSplitItem.getNum());
+                         //计算运费(店铺）
+                         if(transportationCost>0.0) {//（搬运费/收货量）*退货量
+                             mendMateriel.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderSplitItem.getReceive()),actualCount));
+                         }else{
+                             mendMateriel.setTransportationCost(0d);
+                         }
+                         //计算搬运费（店铺）
+                         if(stevedorageCost>0.0){//（搬运费/收货量）*退货量
+                             mendMateriel.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderSplitItem.getReceive()),actualCount));
+                         }else{
+                             mendMateriel.setStevedorageCost(0d);
+                         }
+                     }
+
+                     //计算供应商的搬运费
+                     mendMateriel.setSupStevedorageCost(orderSplitService.getSupProductStevedorageCost(mendDeliver.getStorefrontId(),mendDeliver.getSupplierId(),mendMateriel.getProductId(),mendDeliver.getHouseId(),actualCount));
+                 }
+                 mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
+             }
+        }
+
+        if (type == 1) {//1确认全部退货
+            mendDeliver.setShippingState(1);//已确认全部退货
+            //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
+            mendOrderCheckService.setMendMoneyOrder(mendDeliverId,userId);
+        } else if (type == 2){//确认部分退货
+           mendDeliver.setShippingState(4);//部分退货
+            House house=houseMapper.selectByPrimaryKey(mendDeliver.getHouseId());
+            //增加部分退货任务
+            String image="";
+            Storefront storefront=masterStorefrontService.getStorefrontById(mendDeliver.getStorefrontId());
+            if(storefront!=null){
+                image=storefront.getSystemLogo();
+            }
+            taskStackService.insertTaskStackInfo(mendDeliver.getHouseId(),house.getMemberId(),"业主审核部分退货",image,17,mendDeliverId);
+        }
+        mendDeliver.setModifyDate(new Date());
+        mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+        return ServerResponse.createBySuccessMessage("确认退货成功");
     }
 
     /**

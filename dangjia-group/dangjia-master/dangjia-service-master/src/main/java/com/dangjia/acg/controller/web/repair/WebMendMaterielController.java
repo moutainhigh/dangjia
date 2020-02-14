@@ -137,10 +137,25 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.ownerReturnHandle(request,cityId,userId,pageDTO,state,likeAddress);
     }
 
+    /**
+     * 退货退款—确认退货/部分退货
+     * @param mendDeliverId 退货单ID
+     * @param userId 用户id
+     * @param type 类型：1确认退货，2部分退货
+     * @param mendMaterialList 退货详情列表 [{“mendMaterielId”:”退货明细ID”,”actualCount”:9（实退货量）}]
+     * @param partialReturnReason 部分退货原因
+     * @return
+     */
     @Override
     @ApiMethod
-    public ServerResponse confirmReturnMendMaterial(String mendOrderId, String userId,Integer type,String actualCountList,String returnReason,String supplierId) {
-        return mendMaterielService.confirmReturnMendMaterial(mendOrderId,userId,type,actualCountList,returnReason,supplierId);
+    public ServerResponse confirmReturnMendMaterial(String mendDeliverId, String userId,Integer type,String mendMaterialList,String partialReturnReason) {
+       try{
+           return mendMaterielService.confirmReturnMendMaterial(mendDeliverId,userId,type,mendMaterialList,partialReturnReason);
+       }catch (Exception e){
+           logger.error("确认退货失败",e);
+           return ServerResponse.createByErrorMessage("确认退货失败");
+       }
+
     }
 
     /**

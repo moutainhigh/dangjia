@@ -534,6 +534,14 @@ public class OrderSplitService {
             if(splitItemList==null){
                 return ServerResponse.createByErrorMessage("请选择需要申诉的商品信息");
             }
+            //先将旧的申诉商品改为款申诉，重新申诉
+            Example example=new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID,splitDeliverId);
+            OrderSplitItem sItem=new OrderSplitItem();
+            sItem.setShippingState(0);
+            sItem.setId(null);
+            sItem.setCreateDate(null);
+            orderSplitItemMapper.updateByExampleSelective(sItem,example);
             JSONArray itemList = JSONArray.parseArray(splitItemList);
             for (int i = 0; i < itemList.size(); i++) {
                 JSONObject obj = itemList.getJSONObject(i);
@@ -586,26 +594,26 @@ public class OrderSplitService {
                             orderItem.setAskCount(MathUtil.sub(orderItem.getAskCount(),countNum));//还原未要货量
                             orderItem.setModifyDate(new Date());
                             iOrderItemMapper.updateByPrimaryKeySelective(orderItem);//修改订单明细的要货量
+                            //重新计算店铺的运费，搬运费
+                            Double transportationCost=orderItem.getTransportationCost();//运费
+                            Double stevedorageCost=orderItem.getStevedorageCost();//搬运费
+                            //计算运费
+                            if(transportationCost>0.0) {//（运费/总数量）*收货量
+                                orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()),orderSplitItem.getReceive()));
+                            }else{
+                                orderSplitItem.setTransportationCost(0d);
+                            }
+                            //计算搬运费
+                            if(stevedorageCost>0.0){//（搬运费/总数量）*收货量
+                                orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()),orderSplitItem.getReceive()));
+                            }else{
+                                orderSplitItem.setStevedorageCost(0d);
+                            }
                         }
                     }
-                    if(orderSplitItem.getReceive()==null){
-                        orderSplitItem.setReceive(orderSplitItem.getNum());//收获量改为发货量
-                    }
-                    //重新计算运费、搬运费
-                    Double stevedorageCost=MathUtil.mul(MathUtil.div(orderSplitItem.getStevedorageCost(),orderSplitItem.getNum()),orderSplitItem.getReceive());
-                    Double transportationCost=MathUtil.mul(MathUtil.div(orderSplitItem.getTransportationCost(),orderSplitItem.getNum()),orderSplitItem.getReceive());
-                    orderSplitItem.setStevedorageCost(stevedorageCost);
-                    orderSplitItem.setTransportationCost(transportationCost);
-                    //供应商搬运费，运费
-                    if(orderSplitItem.getSupStevedorageCost()==null){
-                        orderSplitItem.setSupStevedorageCost(0d);
-                    }
-                    if(orderSplitItem.getReceive()==null){
-                        orderSplitItem.setReceive(orderSplitItem.getNum());
-                    }
-                    if(splitDeliver.getDeliveryFee()==0)
-                        splitDeliver.setDeliveryFee(0d);
-                    orderSplitItem.setSupStevedorageCost(MathUtil.mul(MathUtil.div(orderSplitItem.getSupStevedorageCost(),orderSplitItem.getNum()),orderSplitItem.getReceive()));
+
+                    //重新计算供应商的运费，搬运费
+                    orderSplitItem.setStevedorageCost(getSupProductStevedorageCost(splitDeliver.getStorefrontId(),splitDeliver.getSupplierId(),orderSplitItem.getProductId(),splitDeliver.getHouseId(),orderSplitItem.getReceive()));
                     if(totalReceiverNum>0){
                         orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(splitDeliver.getDeliveryFee(),totalReceiverNum),orderSplitItem.getReceive()));
                     }
@@ -631,13 +639,37 @@ public class OrderSplitService {
 
         }else if(type==3){//平台审核通过
             Example example = new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
+            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId)
+            .andEqualTo(OrderSplitItem.SHIPPING_STATE,1);//只有部分申诉的商品，才修改对应的信息
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             Double totalReceiverNum=orderSplitItemMapper.getOrderSplitReceiverNum(splitDeliver.getOrderSplitId());//查询当前收货单下的总收货量
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                String orderItemId=orderSplitItem.getOrderItemId();
+                if(orderItemId!=null){
+                    OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(orderItemId);
+                    if(orderItem!=null){
+                        //重新计算店铺的运费，搬运费
+                        Double transportationCost=orderItem.getTransportationCost();//运费
+                        Double stevedorageCost=orderItem.getStevedorageCost();//搬运费
+                        //计算运费
+                        if(transportationCost>0.0) {//（运费/总数量）*收货量
+                            orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()),orderSplitItem.getNum()));
+                        }else{
+                            orderSplitItem.setTransportationCost(0d);
+                        }
+                        //计算搬运费
+                        if(stevedorageCost>0.0){//（搬运费/总数量）*收货量
+                            orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()),orderSplitItem.getNum()));
+                        }else{
+                            orderSplitItem.setStevedorageCost(0d);
+                        }
+                    }
+                }
+                //重新计算供应商的运费，搬运费
+                orderSplitItem.setSupStevedorageCost(getSupProductStevedorageCost(splitDeliver.getStorefrontId(),splitDeliver.getSupplierId(),orderSplitItem.getProductId(),splitDeliver.getHouseId(),orderSplitItem.getNum()));
                 //将发货单的运费平摊到每一个明细上去
                 if(orderSplitItem.getReceive()==null){
                     orderSplitItem.setReceive(orderSplitItem.getNum());//收获量改为发货量
@@ -659,6 +691,17 @@ public class OrderSplitService {
         return ServerResponse.createBySuccessMessage("保存成功");
     }
 
+    //获取供应商的搬运费
+    public Double getSupProductStevedorageCost(String storefrontId,String supId,String productId,String houseId,Double number){
+        Double supTransCost=0d;
+        SupplierProduct supplierProduct=orderSplitItemMapper.getsupplierProductById(storefrontId,supId,productId);
+        if(supplierProduct!=null&&supplierProduct.getPrice()!=null){
+            if(supplierProduct.getPorterage()!=null&&supplierProduct.getPorterage()>0){//需要收取搬运费(供应商的搬运费)
+               supTransCost= masterCostAcquisitionService.getSupStevedorageCost(houseId,supplierProduct.getIsCartagePrice(),supplierProduct.getPorterage(),number);
+            }
+        }
+        return supTransCost;
+    }
 
     /**
      * 取消(打回)

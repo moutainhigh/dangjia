@@ -14,7 +14,7 @@
             dsd.ship_mobile as shipMobile,
             (case when (dsd.shipping_state=4 and dsd.complain_status=1) then 6
             when (dsd.shipping_state=4 and dsd.complain_status=2) then 7
-            when ((dsd.shipping_state=4 and dsd.complain_status=3) or dsd.shipping_state in(2,4,8,10)) then 8
+            when ((dsd.shipping_state=4 and dsd.complain_status=3) or dsd.shipping_state in(2,8,10)) then 8
             else dsd.shipping_state end) as shippingState,
             dsd.total_amount as totalAmount,
             1 as invoiceType,
@@ -39,8 +39,12 @@
             AND dsd.shipping_state=4
             and dsd.complain_status=2
         </if>
+        <if test="invoiceStatus==4">
+            AND dsd.shipping_state=4
+            and dsd.complain_status in(0,4)
+        </if>
         <if test="invoiceStatus==8">
-            AND (dsd.shipping_state in(2,4,8,10)
+            AND (dsd.shipping_state in(2,8,10)
              or (dsd.shipping_state=4 and dsd.complain_status=3))
         </if>
         <if test="invoiceStatus!=-1 and invoiceStatus!=6 and invoiceStatus!=7 and invoiceStatus!=8">

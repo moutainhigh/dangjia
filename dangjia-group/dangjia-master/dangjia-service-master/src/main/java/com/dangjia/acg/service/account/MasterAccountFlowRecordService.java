@@ -36,8 +36,17 @@ public class MasterAccountFlowRecordService {
     public ServerResponse updateStoreAccountMoney(String storefrontId,String houseId,Integer state,String orderId,Double money,String remark,String  userId){
         Storefront storefront=iMasterStorefrontMapper.selectByPrimaryKey(storefrontId);
         //1.修改店铺的账户总额
-        Double totalAccount = storefront.getTotalAccount();//账户当前总额
+        //1.扣减店铺的总额和可提现余额
+        Double totalAccount=storefront.getTotalAccount();//账户总额
+        Double surplusMoney = storefront.getSurplusMoney();//可提现余额
+        //Double retentionMoney = storefront.getRetentionMoney();//账户滞留金额
+        //storefront.setRetentionMoney(MathUtil.add(retentionMoney,money));
         storefront.setTotalAccount(MathUtil.add(totalAccount,money));
+        if(MathUtil.add(surplusMoney,money)<0){//如果小于0，则可提现余额改为0
+            storefront.setSurplusMoney(0d);
+        }else{
+            storefront.setSurplusMoney(MathUtil.add(surplusMoney,money));
+        }
         storefront.setModifyDate(new Date());
         iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
         //2.记录账户流水

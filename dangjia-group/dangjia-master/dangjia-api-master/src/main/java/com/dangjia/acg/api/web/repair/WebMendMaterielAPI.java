@@ -116,6 +116,23 @@ public interface WebMendMaterielAPI {
     @ApiOperation(value = "退货退款—退货详情列表", notes = "退货退款—退货详情列表")
     ServerResponse queryMendMaterialList(@RequestParam("mendDeliverId") String mendDeliverId);
 
+
+    /**
+     * 退货退款—确认退货/部分退货
+     * @param mendDeliverId 退货单ID
+     * @param userId 用户id
+     * @param type 类型：1确认退货，2部分退货
+     * @param mendMaterialList 退货详情列表 [{“mendMaterielId”:”退货明细ID”,”actualCount”:9（实退货量）}]
+     * @param partialReturnReason 部分退货原因
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/confirmReturnMendMaterial")
+    @ApiOperation(value = "退货退款—确认退货/部分退货", notes = "退货退款—确认退货/部分退货")
+    ServerResponse confirmReturnMendMaterial(@RequestParam("mendDeliverId") String mendDeliverId,
+                                             @RequestParam("userId") String userId,
+                                             @RequestParam("type") Integer type,
+                                             @RequestParam("mendMaterialList") String mendMaterialList,
+                                             @RequestParam("partialReturnReason") String partialReturnReason);
    /* *//**
      * state:0待处理
      * @param request
@@ -235,20 +252,7 @@ public interface WebMendMaterielAPI {
 
 
 
-    /**
-     * 确定退货
-     * @param mendOrderId
-     * @param userId
-     * @return
-     */
-    @PostMapping(value = "web/repair/webMendMateriel/confirmReturnMendMaterial")
-    @ApiOperation(value = "确定退货", notes = "确定退货")
-    ServerResponse confirmReturnMendMaterial(@RequestParam("mendOrderId") String mendOrderId,
-                                             @RequestParam("userId") String userId,
-                                             @RequestParam("type") Integer type,
-                                             @RequestParam("actualCountList") String actualCountList,
-                                             @RequestParam("returnReason") String returnReason,
-                                             @RequestParam("supplierId") String supplierId);
+
 
 
 
