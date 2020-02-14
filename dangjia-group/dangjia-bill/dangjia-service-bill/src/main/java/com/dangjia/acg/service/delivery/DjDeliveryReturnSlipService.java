@@ -113,31 +113,21 @@ public class DjDeliveryReturnSlipService {
      *
      * @param pageDTO
      * @param searchKey
-     * @param invoiceStatus 0:全部  0,0:代发货  0,1:已发货待收货  0,2:已收货  0,4:部分收货 0,11已认可
-     *                      1,0:待退货  1,1:已确认  1,2:已结算(已退货)  1,3:拒绝退货
+     * @param invoiceStatus 0待退货 1正常退货（1，6） 4待业主处理 5待平台处理 7按业主申请退 8按供应商同意退 2已结算
+     *                   退货状态（0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分退货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）
      * @return
      */
     public ServerResponse queryRefundSupplyTaskList(PageDTO pageDTO, String userId, String cityId, String searchKey, Integer invoiceStatus) {
         try {
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
-                return ServerResponse.createByErrorMessage("暂无店铺信息");
+                return ServerResponse.createByErrorMessage("未找到符合条件的供应商信息");
             PageInfo pageResult=null;
             List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS = null;
-            if(!CommonUtil.isEmpty(invoiceStatus)&&invoiceStatus.equals("0")){
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyTaskList(djSupplier.getId(), searchKey, cityId);
-                pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
-                this.duplicatedCode(djDeliveryReturnSlipDTOS);
-            }else if(!CommonUtil.isEmpty(invoiceStatus)){
-
-                    PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, "", cityId);
-                    pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
-                    this.duplicatedCode(djDeliveryReturnSlipDTOS);
-            }else{
-                return ServerResponse.createByErrorMessage("查询失败: invoiceStatus不能为空");
-            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, invoiceStatus, cityId);
+            pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
+            this.duplicatedCode(djDeliveryReturnSlipDTOS);
             if(djDeliveryReturnSlipDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("查询成功", pageResult);
