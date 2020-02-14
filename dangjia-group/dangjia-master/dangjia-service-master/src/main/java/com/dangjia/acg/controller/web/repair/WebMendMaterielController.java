@@ -9,6 +9,7 @@ import com.dangjia.acg.service.repair.MendMaterielService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -142,6 +143,14 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.confirmReturnMendMaterial(mendOrderId,userId,type,actualCountList,returnReason,supplierId);
     }
 
+    /**
+     * 退货退款--分发供应商--保存分发
+     * @param mendOrderId 退货申请单ID
+     * @param userId
+     * @param cityId
+     * @param materielSupList [{“mendMaterielId”:”退货单明细ID”,supplierId：“供应商ID”}]
+     * @return
+     */
     @Override
     @ApiMethod
     public ServerResponse saveReturnRefundMaterielSup(String mendOrderId, String userId,String cityId, String materielSupList) {
@@ -154,10 +163,33 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
     }
 
+    /**
+     * 退货退款--分发供应商--生成退货单
+     * @param mendOrderId 退货申请单ID
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @return
+     */
     @Override
     @ApiMethod
-    public ServerResponse queryMendMaterialList(String mendOrderId, String userId) {
-        return mendMaterielService.queryMendMaterialList(mendOrderId,userId);
+    public ServerResponse generateMendDeliverorder(String mendOrderId,String userId,String cityId){
+        try{
+            return mendMaterielService.generateMendDeliverorder(mendOrderId,userId,cityId);
+        }catch (Exception e){
+            logger.error("保存失败：",e);
+            return ServerResponse.createByErrorMessage("保存失败");
+        }
+    }
+
+    /**
+     * 退货退款—退货详情列表
+     * @param mendDeliverId 退货单ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryMendMaterialList(String mendDeliverId) {
+        return mendMaterielService.queryMendMaterialList(mendDeliverId);
     }
 
     /**

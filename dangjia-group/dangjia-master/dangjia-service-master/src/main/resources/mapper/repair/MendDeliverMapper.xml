@@ -89,9 +89,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                   m.mobile memberMobile,
                   md.supplier_id supId,
                   md.supplier_name supName,
-                  md.shipping_state state,
                   md.id mendDeliverId,
-                  md.number mendDeliverNumber
+                  md.number mendDeliverNumber,
+                 (case when rmd.shipping_state=6 then 1 else rmd.shipping_state end) as state
             FROM
                 dj_repair_mend_order t,
                 dj_member m,
@@ -106,10 +106,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 )
             and t.storefront_id=#{storefrontId}
           <if test="state==1"><!--已分配供应商-->
-              and md.shipping_state in(1,4,5)
+              and md.shipping_state in(0,4,5)
           </if>
           <if test="state==2"><!--已结束-->
-              and md.shipping_state in(2,6,7,8)
+              and md.shipping_state in(1,2,6,7,8)
           </if>
           <if test="likeAddress!=null and likeAddress!=''">
               and (t.number LIKE CONCAT('%',#{likeAddress},'%')

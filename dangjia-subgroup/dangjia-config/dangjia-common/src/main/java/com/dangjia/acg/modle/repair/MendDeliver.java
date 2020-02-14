@@ -134,4 +134,20 @@ public class MendDeliver extends BaseEntity {
 	@ApiModelProperty("部分退货原因")
 	private String reasons;
 
+	@Column(name = "total_price")
+	@Desc(value = "供应商供应商品总额")
+	@ApiModelProperty("供应商供应商品总额")
+	private Double totalPrice;
+
+	@Column(name = "stevedorage_cost")
+	@Desc(value = "供应商搬运费总额")
+	@ApiModelProperty("供应商搬运费总额")
+	private Double stevedorageCost;
+
+	@Column(name = "address_id")
+	@Desc(value = "地址ID")
+	@ApiModelProperty("地址ID")
+	private String addressId;
+
+
 }

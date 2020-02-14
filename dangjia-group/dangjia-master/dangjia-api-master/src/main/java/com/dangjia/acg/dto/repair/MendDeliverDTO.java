@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.repair;
 
+import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import lombok.Data;
 
@@ -43,5 +44,14 @@ public class MendDeliverDTO {
     private Integer count;//退货商品件数
 
     private Double sumprice;//退货商品价格
+
+    private Double totalAmount;//退业主（包含运费、搬运费)
+    private Double totalPrice;//供应商总价
+    private Double deliveryFee;//运费
+    private Double stevedorageCost;//供应商品搬运费
+    private Double applyMoney;//退供应商（成本总价）
+    private String isNonPlatformSupplier;//是否非平台供应商 1是，0否
+
+    private List<OrderSplitItemDTO> mendMaterielList;//退货商品列表
 
 }

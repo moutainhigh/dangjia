@@ -23,7 +23,7 @@ public class SplitDeliverDetailDTO {
     private String memo;//须知
     private String reason;//备注
     private String totalSplitPrice;//销售总价
-    private Double totalAmount;//成本总价（包含运费、搬运费)
+    private Double totalAmount;//销售总价（包含运费、搬运费)
     private Double totalPrice;//商品总价
     private Double deliveryFee;//运费
     private Double stevedorageCost;//搬运费

@@ -606,7 +606,9 @@ public class OrderSplitService {
                     if(splitDeliver.getDeliveryFee()==0)
                         splitDeliver.setDeliveryFee(0d);
                     orderSplitItem.setSupStevedorageCost(MathUtil.mul(MathUtil.div(orderSplitItem.getSupStevedorageCost(),orderSplitItem.getNum()),orderSplitItem.getReceive()));
-                    orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(splitDeliver.getDeliveryFee(),totalReceiverNum),orderSplitItem.getReceive()));
+                    if(totalReceiverNum>0){
+                        orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(splitDeliver.getDeliveryFee(),totalReceiverNum),orderSplitItem.getReceive()));
+                    }
                     orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);//修改对应的运费，搬运费
                 }
                 totalAmount=MathUtil.add(totalAmount, MathUtil.add(MathUtil.add(MathUtil.mul(orderSplitItem.getPrice(),orderSplitItem.getReceive()),orderSplitItem.getTransportationCost()),orderSplitItem.getStevedorageCost()));
@@ -622,8 +624,10 @@ public class OrderSplitService {
             splitDeliver.setApplyState(0);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);//修改对应的订单总额
             //3.将当前订单所得钱给到对应的店铺
-            masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), splitDeliver.getHouseId(),
-                    0, splitDeliver.getId(), totalAmount,"认可部分收货流水记录", userId);
+            if(StringUtils.isNotBlank(splitDeliver.getStorefrontId())){
+                masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), splitDeliver.getHouseId(),
+                        0, splitDeliver.getId(), totalAmount,"认可部分收货流水记录", userId);
+            }
 
         }else if(type==3){//平台审核通过
             Example example = new Example(OrderSplitItem.class);
@@ -641,9 +645,12 @@ public class OrderSplitService {
                 orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(splitDeliver.getDeliveryFee(),totalReceiverNum),orderSplitItem.getReceive()));
                 orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);//修改对应的运费，搬运费
             }
-            //3.将当前订单所得钱给到对应的店铺
-            masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), splitDeliver.getHouseId(),
-                    0, splitDeliver.getId(), splitDeliver.getTotalAmount(),"申诉部分收货审核通过流水记录", userId);
+            if(StringUtils.isNotBlank(splitDeliver.getStorefrontId())){
+                //3.将当前订单所得钱给到对应的店铺
+                masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), splitDeliver.getHouseId(),
+                        0, splitDeliver.getId(), splitDeliver.getTotalAmount(),"申诉部分收货审核通过流水记录", userId);
+            }
+
         }
         //修改申诉状态
         splitDeliver.setComplainStatus(type);

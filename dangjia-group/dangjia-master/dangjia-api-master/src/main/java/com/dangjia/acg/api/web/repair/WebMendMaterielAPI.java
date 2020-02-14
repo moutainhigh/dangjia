@@ -81,7 +81,7 @@ public interface WebMendMaterielAPI {
             @RequestParam("mendOrderId") String mendOrderId);
 
     /**
-     * 店铺退货分发供应商
+     * 退货退款--分发供应商--保存分发
      * @param mendOrderId
      * @param userId
      * @return
@@ -92,6 +92,29 @@ public interface WebMendMaterielAPI {
                                                  @RequestParam("userId") String userId,
                                                  @RequestParam("cityId") String cityId,
                                                  @RequestParam("materielSupList") String materielSupList);
+
+    /**
+     * 退货退款--分发供应商--生成退货单
+     * @param mendOrderId 退货申请单ID
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/generateMendDeliverorder")
+    @ApiOperation(value = "退货退款--分发供应商--生成退货单", notes = "退货退款--分发供应商--生成退货单")
+    ServerResponse generateMendDeliverorder(@RequestParam("mendOrderId") String mendOrderId,
+                                               @RequestParam("userId") String userId,
+                                               @RequestParam("cityId") String cityId);
+
+
+    /**
+     *  退货退款—退货详情列表
+     * @param mendDeliverId 退货单ID
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/queryMendMaterialList")
+    @ApiOperation(value = "退货退款—退货详情列表", notes = "退货退款—退货详情列表")
+    ServerResponse queryMendMaterialList(@RequestParam("mendDeliverId") String mendDeliverId);
 
    /* *//**
      * state:0待处理
@@ -229,17 +252,7 @@ public interface WebMendMaterielAPI {
 
 
 
-    /**
-     *  date:2019.11.23
-     * author:chenyufeng
-     * 新版查看补退单明细
-     * @param mendOrderId
-     * @param userId
-     * @return
-     */
-    @PostMapping(value = "web/repair/webMendMateriel/queryMendMaterialList")
-    @ApiOperation(value = "售后管理-补退单查明细(退货详情)", notes = "售后管理-补退单查明细(退货详情)")
-    ServerResponse queryMendMaterialList(@RequestParam("mendOrderId") String mendOrderId, @RequestParam("userId") String userId);
+
 
     /**
      * 查看补退单明细

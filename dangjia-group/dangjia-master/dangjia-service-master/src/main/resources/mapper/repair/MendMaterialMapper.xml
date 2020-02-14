@@ -224,6 +224,10 @@
             dj_repair_mend_materiel t
         INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
         WHERE  t.mend_order_id=#{mendOrderId}
+        <if test = "mendDeliverId!=null and mendDeliverId!=''">
+            and t.repair_mend_deliver_id=#{mendDeliverId}
+        </if>
+        order by t.product_name desc
     </select>
 
     <select id="getsupplierInfoList" resultType="java.util.Map">
@@ -272,9 +276,17 @@
         WHERE
             t.mend_order_id = #{mendOrderId}
         AND t.supplier_id = t1.id
+        <if test = "mendDeliverId!=null and mendDeliverId!=''">
+            and t.repair_mend_deliver_id=#{mendDeliverId}
+        </if>
         GROUP BY
         t.supplier_id
 
     </select>
+
+    <update id="updateMendDeliverIdByInfo">
+        update dj_repair_mend_materiel set repair_mend_deliver_id=#{mendDeliverId}
+        where mend_order_id=#{mendOrderId} and supplier_id=#{supplierId}
+    </update>
 </mapper>
 
