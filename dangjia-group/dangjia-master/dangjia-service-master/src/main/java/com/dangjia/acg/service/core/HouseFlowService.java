@@ -19,6 +19,7 @@ import com.dangjia.acg.dto.pay.WorkerDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderMapper;
+import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.house.IHouseAddressMapper;
@@ -138,6 +139,10 @@ public class HouseFlowService {
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
     private DjMaintenanceRecordService maintenanceRecordService;
+
+
+    @Autowired
+    private IQuantityRoomImagesMapper quantityRoomImagesMapper;
 
     private static Logger LOG = LoggerFactory.getLogger(HouseFlowService.class);
 
@@ -286,6 +291,7 @@ public class HouseFlowService {
                     HouseFlow houseFlow =houseFlowMapper.selectByPrimaryKey(allgrabBean.getHouseFlowId());
                     Example example = new Example(HouseWorker.class);
                     example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
+                            .andEqualTo(HouseWorker.TYPE, type)
                             .andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
                     List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
                     if (isHouseWorker(hwList, houseFlow)) {
@@ -336,10 +342,24 @@ public class HouseFlowService {
                     Example example = new Example(HouseWorker.class);
                     example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
                             .andEqualTo(HouseWorker.HOUSE_ID, allgrabBean.getHouseId())
+                            .andEqualTo(HouseWorker.TYPE, type)
                             .andEqualTo(HouseWorker.BUSINESS_ID, allgrabBean.getHouseFlowId());
                     List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的是否已抢单
                     if (hwList.size()>0) {
                         continue;
+                    }
+                    //是否为新单
+                    if (DateUtil.addDateDays(allgrabBean.getCreateDate(), 1).getTime() < new Date().getTime()) {
+                        allgrabBean.setOrderType(1);
+                    }
+                    example = new Example(HouseWorker.class);
+                    example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, allgrabBean.getHouseId())
+                            .andEqualTo(HouseWorker.TYPE, type)
+                            .andEqualTo(HouseWorker.BUSINESS_ID, allgrabBean.getHouseFlowId());
+                    Integer qdjl = houseWorkerMapper.selectCountByExample(example);//查出所有抢单记录
+                    //是否为二手商品
+                    if (qdjl > 0) {
+                        allgrabBean.setOrderType(2);
                     }
                     allgrabBean.setWorkertotal("¥0");//工钱
                     Double totalPrice = maintenanceRecordProductMapper.getTotalPriceByRecordId(allgrabBean.getHouseFlowId(),1);
@@ -427,6 +447,7 @@ public class HouseFlowService {
                 allgrabBean.setCountDownTime(DateUtil.addDateHours(record.getCreateDate(),hourNum).getTime());
                 mintenaceRecordInfo.put("countDownTime",DateUtil.addDateHours(record.getCreateDate(),hourNum));
             }
+            allgrabBean.setIsAcceptance(isAcceptance);
             mintenaceRecordInfo.put("isAcceptance",isAcceptance);
             dataMap.put("maintenaceRecoreInfo",mintenaceRecordInfo);
             //判断当前登陆的人员是大管家，还是工匠
@@ -440,10 +461,23 @@ public class HouseFlowService {
             List list=new ArrayList();
             list.add(dataMap);
             allgrabBean.setGoodsData(list);
+
+            //是否为新单
+            if (DateUtil.addDateDays(record.getCreateDate(), 1).getTime() < new Date().getTime()) {
+                allgrabBean.setOrderType(1);
+            }
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, record.getHouseId()).andEqualTo(HouseWorker.TYPE, type)
+                    .andEqualTo(HouseWorker.BUSINESS_ID, record.getId());
+            Integer qdjl = houseWorkerMapper.selectCountByExample(example);//查出所有抢单记录
+            //是否为二手商品
+            if (qdjl > 0) {
+                allgrabBean.setOrderType(2);
+            }
         }else {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
+            example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.TYPE, type)
                     .andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
             List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
@@ -484,6 +518,18 @@ public class HouseFlowService {
             allgrabBean.setButType("0");
             if (houseFlow.getWorkType() == 3) {
                 allgrabBean.setButType("1");
+            }
+            //是否为新单
+            if (DateUtil.addDateDays(houseFlow.getReleaseTime(), 1).getTime() < new Date().getTime()) {
+                allgrabBean.setOrderType(1);
+            }
+            example = new Example(HouseWorker.class);
+            example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId()).andEqualTo(HouseWorker.TYPE, type)
+                    .andEqualTo(HouseWorker.BUSINESS_ID, houseFlow.getId());
+            Integer qdjl = houseWorkerMapper.selectCountByExample(example);//查出所有抢单记录
+            //是否为二手商品
+            if (qdjl > 0) {
+                allgrabBean.setOrderType(2);
             }
             example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
@@ -532,6 +578,9 @@ public class HouseFlowService {
                 allgrabBean.setLatitude(houseAddressInfo.getLatitude());
                 allgrabBean.setLongitude(houseAddressInfo.getLongitude());
             }
+
+            String quantityRoomImages = quantityRoomImagesMapper.getBillQuantityRoom(allgrabBean.getHouseId());
+            allgrabBean.setIsQuantityRoom(CommonUtil.isEmpty(quantityRoomImages)?1:0);
         }
         return ServerResponse.createBySuccess("查询成功", allgrabBean);
     }

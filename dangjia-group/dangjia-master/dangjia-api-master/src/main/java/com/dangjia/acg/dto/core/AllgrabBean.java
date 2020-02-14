@@ -37,6 +37,9 @@ public class AllgrabBean {
     private Date endDate;//管家排期的阶段结束/整体（仅拆除）结束时间
 
 
+    private int isQuantityRoom;//是否有施工图 0=是  1=否
+    private String isAcceptance;//是否等待被接受，0=待接受  1=待抢单
+
     private String latitude;//纬度
     private String longitude;//经度
 
