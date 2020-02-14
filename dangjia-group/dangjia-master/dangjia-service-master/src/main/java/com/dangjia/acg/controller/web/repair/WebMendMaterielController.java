@@ -67,28 +67,6 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.searchReturnRefundMaterielList(request,cityId,userId,mendOrderId);
     }
 
-   /* @Override
-    @ApiMethod
-    public ServerResponse materialBackStateProcessing(HttpServletRequest request,String userId, String cityId, PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.materialBackStateProcessing(userId,cityId, pageDTO, state,likeAddress);
-    }
-*/
-
-
-    /**
-     *
-     * @param request
-     * @param cityId
-     * @param pageDTO
-     * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
-     * @param likeAddress 模糊查询参数
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse materialBackStateHandle(HttpServletRequest request,String userId, String cityId, PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.materialBackStateHandle(request,userId,cityId,pageDTO,state,likeAddress);
-    }
 
 
     /**
@@ -125,17 +103,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     }
 
 
-   /* @Override
-    @ApiMethod
-    public ServerResponse ownerReturnProssing(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.ownerReturnProssing(request,cityId,userId,pageDTO,state,likeAddress);
-    }*/
 
-    @Override
-    @ApiMethod
-    public ServerResponse ownerReturnHandle(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.ownerReturnHandle(request,cityId,userId,pageDTO,state,likeAddress);
-    }
 
     /**
      * 退货退款—确认退货/部分退货
@@ -157,6 +125,39 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
        }
 
     }
+
+    /**
+     * 售后管理--仅退款--退货单详情列表
+     * @param cityId
+     * @param userId
+     * @param mendOrderId 退货申请单ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchRefundMaterielList(String cityId,String userId,String mendOrderId){
+        return mendMaterielService.searchRefundMaterielList(cityId,userId,mendOrderId);
+    }
+
+    /**
+     * 售后管理--仅退款--确认退款
+     * @param cityId
+     * @param userId
+     * @param mendOrderId 退货申请单ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveRefundMaterielInfo(String cityId,String userId,String mendOrderId){
+        try{
+            return mendMaterielService.saveRefundMaterielInfo(cityId,userId,mendOrderId);
+        }catch (Exception e){
+            logger.error("确认失败",e);
+            return ServerResponse.createByErrorMessage("确认失败");
+        }
+    }
+
+
 
     /**
      * 退货退款--分发供应商--保存分发

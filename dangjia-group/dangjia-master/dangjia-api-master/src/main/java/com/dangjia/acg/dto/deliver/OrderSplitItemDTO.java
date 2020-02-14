@@ -22,7 +22,6 @@ public class   OrderSplitItemDTO {
     private String unitName;//单位
     private Double totalPrice; //总价
     private String brandName;//品牌名
-
     private String brandSeriesName;//品牌系列
 
     private String image;
@@ -62,9 +61,9 @@ public class   OrderSplitItemDTO {
 
     private Double surplusCount;//剩余量（可退量）
 
-    private Double stevedorageCost;//搬运费
+    private Double stevedorageCost;//销售商品搬运费
 
-    private Double transportationCost;//运费
+    private Double transportationCost;//销售商品运费
 
     private String unitId;//单位ID
 

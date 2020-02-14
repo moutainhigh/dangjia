@@ -219,7 +219,9 @@
             t1.is_upstairs_cost isUpstairsCost,
             IFNULL(t.cost,0) supCost,
             t.supplier_id supId,
-            IFNULL(t.sup_stevedorage_cost,0) supStevedorageCost
+            IFNULL(t.sup_stevedorage_cost,0) supStevedorageCost,
+            IFNULL(t.stevedorage_cost,0) stevedorageCost,
+            IFNULL(t.transportation_cost,0) transportationCost
         FROM
             dj_repair_mend_materiel t
         INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id

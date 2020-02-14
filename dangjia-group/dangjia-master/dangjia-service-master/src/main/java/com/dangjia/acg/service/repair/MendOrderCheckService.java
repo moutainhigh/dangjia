@@ -637,7 +637,7 @@ public class MendOrderCheckService {
                 BigDecimal surplusMoney = member.getSurplusMoney().add(new BigDecimal(mendOrder.getTotalAmount()));
                 //记录流水
                 WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("业主退材料退款");
+                workerDetail.setName("业主仅退款");
                 workerDetail.setWorkerId(member.getId());
                 workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                 workerDetail.setHouseId(mendOrder.getHouseId());

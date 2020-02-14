@@ -401,6 +401,7 @@ public class MendMaterielService {
 
         if (type == 1) {//1确认全部退货
             mendDeliver.setShippingState(1);//已确认全部退货
+            mendDeliver.setApplyState(0);//供应商结算状态
             //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
             mendOrderCheckService.setMendMoneyOrder(mendDeliverId,userId);
         } else if (type == 2){//确认部分退货
@@ -428,48 +429,68 @@ public class MendMaterielService {
     }
 
     /**
-     * 房子id查询业主退货单列表
-     * landlordState
-     * 0生成中,1平台审核中,2不通过,3通过
+     * 售后管理--仅退款--退货单详情列表
+     * @param cityId
+     * @param userId
+     * @param mendOrderId 退货申请单ID
+     * @return
      */
-    public ServerResponse landlordState(String userId, String cityId, PageDTO pageDTO, String state, String likeAddress) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-//            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
-            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(), 4, state, likeAddress);
-            PageInfo pageResult = new PageInfo(mendOrderList);
-            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
-            pageResult.setList(mendOrderDTOS);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+    public ServerResponse searchRefundMaterielList(String cityId,String userId,String mendOrderId){
+       try{
+           Map<String,Object> resultMap=new HashMap();
+           MendOrder mendOrder=mendOrderMapper.selectByPrimaryKey(mendOrderId);
+           if(mendOrder==null){
+               return ServerResponse.createByErrorMessage("未找到符合条件的退货单");
+           }
+           String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+           //查询申请退货单明细
+           List<OrderSplitItemDTO> mendMaterialList=mendMaterialMapper.searchReturnRefundMaterielList(mendOrderId,null);
+           if(mendMaterialList!=null&&mendMaterialList.size()>0){
+               for (OrderSplitItemDTO sd:mendMaterialList){
+                   sd.setImageUrl(StringTool.getImageSingle(sd.getImage(),address));
+               }
+           }
+           resultMap.put("state",mendOrder.getState());
+           resultMap.put("totalAmount",mendOrder.getTotalAmount());//总价（包含运费，搬运费）
+           resultMap.put("actualTotalAmount",mendOrder.getActualTotalAmount());//商品总额
+           resultMap.put("totalStevedorageCost",mendOrder.getTotalStevedorageCost());
+           resultMap.put("carriage",mendOrder.getCarriage());
+           resultMap.put("mendOrderId",mendOrderId);
+           resultMap.put("mendMaterialList",mendMaterialList);//要货单明细表
+           return ServerResponse.createBySuccess("查询成功", resultMap);
+       }catch(Exception e){
+           logger.error("查询失败");
+           return ServerResponse.createByErrorMessage("查询失败");
+       }
+    }
+
+    /**
+     * 售后管理--仅退款--确认退款
+     * @param cityId
+     * @param userId
+     * @param mendOrderId 退货申请单ID
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse saveRefundMaterielInfo(String cityId,String userId,String mendOrderId){
+
+        MendOrder mendOrder=mendOrderMapper.selectByPrimaryKey(mendOrderId);
+        if(mendOrder==null||mendOrder.getType()!=4){
+            return ServerResponse.createByErrorMessage("未找到符合条件的退货申请单");
         }
-    }
-    //业主仅退款(已经处理)
-    public ServerResponse landlordStateHandle(HttpServletRequest request, String cityId,  PageDTO pageDTO, String state, String likeAddress) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        //通过缓存查询店铺信息
-        String userId = request.getParameter("userId");
-        Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
-        if (storefront == null) {
-            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+        if(mendOrder.getState()!=1){
+            return ServerResponse.createByErrorMessage("此订单已处理，请勿重复处理");
         }
-        List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddressHandle(storefront.getId(), 4, state, likeAddress);
-        PageInfo pageResult = new PageInfo(mendOrderList);
-        List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
-        pageResult.setList(mendOrderDTOS);
-       return ServerResponse.createBySuccess("查询成功", pageResult);
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ServerResponse.createByErrorMessage("查询失败");
+        //1.退钱给业主，修改材料仓库
+        mendOrderCheckService.settleMendOrder(mendOrder);
+        //2.修改退款申请单信息
+        mendOrder.setState(4);//已结算
+        mendOrder.setModifyDate(new Date());
+        mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+        return ServerResponse.createByErrorMessage("确认成功");
     }
-    }
+
+
 
     /**
      *店铺--售后处理--待处理列表
@@ -526,56 +547,6 @@ public class MendMaterielService {
            return ServerResponse.createByErrorMessage("查询失败");
        }
     }
-
-    //店铺管理—售后管理—业主退货退款(已经处理)
-    public ServerResponse ownerReturnHandle(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            //通过缓存查询店铺信息
-            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
-//            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddressHandle(storefront.getId(), 5, state, likeAddress);
-            PageInfo pageResult = new PageInfo(mendOrderList);
-            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
-            pageResult.setList(mendOrderDTOS);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-
-    /**
-             * @param request
-             * @param cityId
-             * @param pageDTO
-             * @param state       状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
-             * @param likeAddress 模糊查询参数
-             * @return
-             */
-    public ServerResponse materialBackStateHandle(HttpServletRequest request, String userId,String cityId, PageDTO pageDTO, String state, String likeAddress) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            //通过缓存查询店铺信息
-            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddressHandle(storefront.getId(), 2, state, likeAddress);
-            PageInfo pageResult = new PageInfo(mendOrderList);
-            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
-            pageResult.setList(mendOrderDTOS);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
 
 
     /**

@@ -133,122 +133,40 @@ public interface WebMendMaterielAPI {
                                              @RequestParam("type") Integer type,
                                              @RequestParam("mendMaterialList") String mendMaterialList,
                                              @RequestParam("partialReturnReason") String partialReturnReason);
-   /* *//**
-     * state:0待处理
-     * @param request
-     * @param cityId
-     * @param pageDTO
-     * @param state
-     * @param likeAddress
-     * @return
-     *//*
-    @PostMapping(value = "web/repair/webMendMateriel/landlordState")
-    @ApiOperation(value = "业主仅退款(待处理)", notes = "业主仅退款(待处理)")
-    ServerResponse landlordState(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("userId") String userId,
-                                 @RequestParam("cityId") String cityId,
-                                 @RequestParam("pageDTO") PageDTO pageDTO,
-                                 @RequestParam("state") String state,
-                                 @RequestParam("likeAddress") String likeAddress);
-    *//**
-     * state:2 已经处理
-     * @param request
-     * @param cityId
-     * @param pageDTO
-     * @param state
-     * @param likeAddress
-     * @return
-     *//*
-    @PostMapping(value = "web/repair/webMendMateriel/landlordStateHandle")
-    @ApiOperation(value = "业主仅退款(已经处理)", notes = "业主仅退款(已经处理)")
-    ServerResponse landlordStateHandle(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("cityId") String cityId,
-                                 @RequestParam("pageDTO") PageDTO pageDTO,
-
-                                 @RequestParam("state") String state,
-                                 @RequestParam("likeAddress") String likeAddress);
-
-
-*/
-
-    /**
-     * auther:chenyufeng
-     * date:2019.11.01
-     * @param request
-     * @param pageDTO
-     * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
-     * @param likeAddress 模糊查询参数
-     * @return
-     */
-   /* @PostMapping(value = "web/repair/webMendMateriel/materialBackStateProcessing")
-    @ApiOperation(value = "工匠申请退货（待审核和已经审核待处理）", notes = "工匠申请退货（待审核和已经审核待处理）")
-    ServerResponse materialBackStateProcessing(
-            @RequestParam("request") HttpServletRequest request,
-            @RequestParam("userId") String userId,
-            @RequestParam("cityId") String cityId,
-            @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("state") String state,
-            @RequestParam("likeAddress") String likeAddress);*/
-
-    /**
-     * auther:chenyufeng
-     * date:2019.11.01
-     * @param request
-     * @param pageDTO
-     * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭 7已审核待处理）
-     * @param likeAddress 模糊查询参数
-     * @return
-     */
-    @PostMapping(value = "web/repair/webMendMateriel/materialBackStateHandle")
-    @ApiOperation(value = "店铺管理—售后管理—工匠退货(已结束)", notes = "店铺管理—售后管理—工匠退货(已结束)")
-    ServerResponse materialBackStateHandle(
-            @RequestParam("request") HttpServletRequest request,
-            @RequestParam("userId") String userId,
-            @RequestParam("cityId") String cityId,
-            @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("state") String state,
-            @RequestParam("likeAddress") String likeAddress);
-
 
 
     /**
-     *
-     * @param request
+     * 售后管理--仅退款--退货单详情列表
      * @param cityId
      * @param userId
-     * @param pageDTO
-     * @param state
-     * @param likeAddress
+     * @param mendOrderId 退货申请单ID
      * @return
      */
-    /*@PostMapping(value = "web/repair/webMendMateriel/ownerReturnProssing")
-    @ApiOperation(value = "店铺管理—售后管理—业主退货退款(已经审核待处理)", notes = "店铺管理—售后管理—工匠退货(已经审核待处理)")
-    ServerResponse ownerReturnProssing(
-            @RequestParam("request") HttpServletRequest request,
+    @PostMapping(value = "web/repair/webMendMateriel/searchRefundMaterielList")
+    @ApiOperation(value = "售后管理--仅退款--退货单详情列表", notes = "售后管理--仅退款--退货单详情列表")
+    ServerResponse searchRefundMaterielList(
             @RequestParam("cityId") String cityId,
             @RequestParam("userId") String userId,
-            @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("state") String state,
-            @RequestParam("likeAddress") String likeAddress);*/
+            @RequestParam("mendOrderId") String mendOrderId);
+
+
+
     /**
-     *
-     * @param request
+     * 售后管理--仅退款--确认退款
      * @param cityId
      * @param userId
-     * @param pageDTO
-     * @param state
-     * @param likeAddress
+     * @param mendOrderId 退货申请单ID
      * @return
      */
-    @PostMapping(value = "web/repair/webMendMateriel/ownerReturnHandle")
-    @ApiOperation(value = "店铺管理—售后管理—业主退货退款(已结束)", notes = "店铺管理—售后管理—工匠退货(已结束)")
-    ServerResponse ownerReturnHandle(
-            @RequestParam("request") HttpServletRequest request,
+    @PostMapping(value = "web/repair/webMendMateriel/saveRefundMaterielInfo")
+    @ApiOperation(value = "售后管理--仅退款--确认退款", notes = "售后管理--仅退款--确认退款")
+    ServerResponse saveRefundMaterielInfo(
             @RequestParam("cityId") String cityId,
             @RequestParam("userId") String userId,
-            @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("state") String state,
-            @RequestParam("likeAddress") String likeAddress);
+            @RequestParam("mendOrderId") String mendOrderId);
+
+
+
 
 
 
