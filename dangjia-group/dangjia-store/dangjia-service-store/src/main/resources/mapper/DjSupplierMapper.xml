@@ -136,16 +136,38 @@
         INNER JOIN (
             SELECT
                 supplier_id,
-                IFNULL(sum(total_amount), 0) AS surplus_money
+                surplus_money
             FROM
-                dj_deliver_split_deliver
-            WHERE
-                apply_state =2
-            AND TIMESTAMPDIFF(DAY, send_time, SYSDATE())<![CDATA[<]]>7
+                (
+                    SELECT
+                        supplier_id,
+                        IFNULL(sum(total_amount), 0) AS surplus_money
+                    FROM
+                        dj_deliver_split_deliver
+                    WHERE
+                        apply_state = 2
+                    AND TIMESTAMPDIFF(DAY, send_time, SYSDATE())<![CDATA[<]]> 7
+                    GROUP BY
+                        supplier_id
+                    UNION
+                    SELECT
+                        defined_account_id AS supplier_id,
+                        IFNULL(sum(money), 0) AS surplus_money
+                    FROM
+                        dj_account_flow_record
+                    WHERE
+                        flow_type = 2
+                    AND state = 4
+                    AND TIMESTAMPDIFF(DAY, create_date, SYSDATE())<![CDATA[<]]> 7
+                    GROUP BY
+                        defined_account_id
+                ) c
             GROUP BY
                 supplier_id
         ) b ON a.id = b.supplier_id
-        SET a.surplus_money = (a.total_account-b.surplus_money)
+        SET a.surplus_money = (
+            a.total_account - b.surplus_money
+        )
     </update>
 
     <select id="queryLikeSupplier" resultType="com.dangjia.acg.dto.supplier.SupplierLikeDTO">

@@ -300,7 +300,7 @@ public class WebSplitDeliverService {
                     //扣除店铺余额
                     //入账前金额
                     accountFlowRecord2.setAmountBeforeMoney(storefront.getTotalAccount());
-                    storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
+//                    storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
                     storefront.setTotalAccount(storefront.getTotalAccount()-settlementAmount);
                     //入账后金额
                     accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());
@@ -315,7 +315,7 @@ public class WebSplitDeliverService {
                     DjSupplier djSupplier = iMasterSupplierMapper.selectByPrimaryKey(supplierId);
                     //入账前金额
                     accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());
-                    djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+settlementAmount);
+//                    djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+settlementAmount);
                     djSupplier.setTotalAccount(CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount()+settlementAmount);
                     //入账后金额
                     accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());
