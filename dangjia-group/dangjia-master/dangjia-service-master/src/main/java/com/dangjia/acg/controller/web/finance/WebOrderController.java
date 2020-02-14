@@ -7,7 +7,6 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.finance.WebOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,12 +37,8 @@ public class WebOrderController implements WebOrderAPI {
         String userID = request.getParameter(Constants.USERID);
         //通过缓存查询店铺信息
         //StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID, StorefrontDTO.class);
-        Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
-        if(storefront==null)
-        {
-            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-        }
-        return webOrderService.getAllOrders(pageDTO,cityId, state, searchKey,storefront.getId(),  beginDate, endDate);
+//        Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
+        return webOrderService.getAllOrders(pageDTO,cityId, state, searchKey,null,  beginDate, endDate);
     }
 
     @Override

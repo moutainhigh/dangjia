@@ -737,7 +737,7 @@ public class HouseWorkerService {
      * materialProductArr 可退材料列表
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId,
-                                            String applyDec, String imageList, String houseFlowId2,
+                                            String applyDec, String imageList,
                                             String latitude, String longitude,String returnableMaterial,
                                             String materialProductArr) {
         if (CommonUtil.isEmpty(applyType)) {
@@ -774,7 +774,7 @@ public class HouseWorkerService {
             case 5:
             case 6:
             case 7:
-                return setPatrol(worker, hf, house, applyType, applyDec, imageList, houseFlowId2);
+                return setPatrol(worker, hf, house, applyType, applyDec, imageList);
         }
         return ServerResponse.createByErrorMessage("未找审核类型");
     }
@@ -1113,46 +1113,33 @@ public class HouseWorkerService {
     /**
      * 巡查
      */
-    private ServerResponse setPatrol(Member supervisor, HouseFlow supervisorHF, House house, Integer applyType, String applyDec, String imageList, String houseFlowId2) {
+    private ServerResponse setPatrol(Member supervisor, HouseFlow supervisorHF, House house, Integer applyType, String applyDec, String imageList) {
         if (house.getPause() != null && house.getPause() == 1) {
             return ServerResponse.createByErrorMessage("该房子已暂停施工,请勿提交申请！");
         }
 
         HouseFlowApply hfa;
         if (applyType == 5) {//有人巡
-            HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId2);
-            if (hf == null) {
-                return ServerResponse.createByErrorMessage("被巡查的工序不存在");
-            }
-            Member worker = memberMapper.selectByPrimaryKey(hf.getWorkerId());//查询对应的工人
-            if (worker == null) {
-                return ServerResponse.createByErrorMessage("被巡查的工序暂无工匠");
-            }
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
-            if (hf.getPause() == 1) {
-                return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
-            }
             if (active != null && active.equals("pre")) {
-                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), applyType, worker.getId(), new Date());
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(supervisorHF.getId(), applyType, supervisor.getId(), new Date());
                 if (houseFlowApplyList.size() > 0) {
                     return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
                 }
             }
-            hfa = getHouseFlowApply(hf, applyType, supervisorHF);
+            hfa = getHouseFlowApply(supervisorHF, applyType, supervisorHF);
 
             hfa.setApplyDec("尊敬的业主，您好！\n" +
-                    "当家大管家【" + supervisor.getName() + "】为您新家质量保驾护航，工地现为【" + workerType.getName() + "】阶段，今日巡查房屋现场情况如下：" + applyDec + "，未发现施工不合格情况，请您查收。");//描述
-//            hfa.setApplyDec("业主您好，我已巡查了" + workerType.getName() + "，现场情况如下：" + applyDec);//描述
+                    "当家大管家【" + supervisor.getName() + "】为您新家质量保驾护航，今日巡查房屋现场情况如下：" + applyDec + "，未发现施工不合格情况，请您查收。");//描述
             //描述
             hfa.setMemberCheck(1);//默认业主审核状态通过
             hfa.setSupervisorCheck(1);//默认大管家审核状态通过
             Example example2 = new Example(HouseFlowApply.class);
             example2.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId())
-                    .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId())
+                    .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, supervisorHF.getWorkerTypeId())
                     .andEqualTo(HouseFlowApply.APPLY_TYPE, 5);
             List<HouseFlowApply> hfalist = houseFlowApplyMapper.selectByExample(example2);
             //工人houseflow
-            if (hfalist.size() < hf.getPatrol()) {//该工种没有巡查够，每次要拿钱
+            if (supervisorHF.getPatrol()!=null&&hfalist.size() < supervisorHF.getPatrol()) {//该工种没有巡查够，每次要拿钱
                 HouseWorkerOrder supervisorHWO = houseWorkerOrderMapper.getHouseWorkerOrder(supervisorHF.getHouseId(), supervisor.getId(), supervisorHF.getWorkerTypeId());
                 if (supervisorHWO.getCheckMoney() == null) {
                     supervisorHWO.setCheckMoney(new BigDecimal(0));
@@ -1182,7 +1169,7 @@ public class HouseWorkerService {
                 memberMapper.updateByPrimaryKeySelective(supervisor);
                 //记录到管家流水
                 WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName(workerType.getName() + "巡查收入");
+                workerDetail.setName("大管家-巡查收入");
                 workerDetail.setWorkerId(supervisor.getId());
                 workerDetail.setWorkerName(supervisor.getName());
                 workerDetail.setHouseId(hfa.getHouseId());
@@ -1278,8 +1265,8 @@ public class HouseWorkerService {
                     strbfr.append("<br/>");
                 }
                 if (hfa.getApplyType()!=5 && imageType == 3) {//节点图
-                    String imageTypeName = imageObj.getString("imageTypeName");
                     String imageTypeId = imageObj.getString("imageTypeId");
+                    String productId = imageObj.getString("productId");
                     Technology technology = iMasterTechnologyMapper.selectByPrimaryKey(imageTypeId);
                    // forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
                     if (technology == null) continue;
@@ -1287,7 +1274,8 @@ public class HouseWorkerService {
                     technologyRecord.setHouseId(house.getId());
                     technologyRecord.setHouseFlowApplyId(hfa.getId());
                     technologyRecord.setTechnologyId(technology.getId());
-                    technologyRecord.setName(imageTypeName);//工艺节点名
+                    technologyRecord.setProductId(productId);
+                    technologyRecord.setName(technology.getName());//工艺节点名
                     technologyRecord.setMaterialOrWorker(technology.getMaterialOrWorker());
                     if (technology.getMaterialOrWorker() == 0) {
                         technologyRecord.setWorkerTypeId("3");//暂时放管家那里看这些节点

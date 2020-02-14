@@ -17,6 +17,7 @@ public class TechnologyRecordDTO {
 
 
     private String productId;
+    private String url;
 
     @Column(name = "worker_type_id")
     private String workerTypeId;//工种id 如果是人工工艺有工种id

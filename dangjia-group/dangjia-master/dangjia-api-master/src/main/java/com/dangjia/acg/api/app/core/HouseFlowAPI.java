@@ -62,7 +62,9 @@ public interface HouseFlowAPI {
     @ApiOperation(value = "业主确认此单", notes = "业主确认此单")
     ServerResponse setConfirm(@RequestParam("request") HttpServletRequest request,
                               @RequestParam("userToken") String userToken,
-                              @RequestParam("houseFlowId") String houseFlowId);
+                              @RequestParam("houseFlowId") String houseFlowId,
+                              @RequestParam("type") Integer type
+    );
 
     @PostMapping("app/core/houseFlow/setCraftsmanInfo")
     @ApiOperation(value = "审核工序工匠信息界面", notes = "审核工序工匠信息界面")

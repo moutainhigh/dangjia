@@ -2659,6 +2659,7 @@ public class HouseService {
                     checkMoney = moneySup * 0.3 / time;
                 }
                 //保存到大管家的houseFlow
+                houseFlow.setPatrol(check);
                 houseFlow.setPatrolMoney(new BigDecimal(patrolMoney));
                 houseFlow.setCheckMoney(new BigDecimal(checkMoney));
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);

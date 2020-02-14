@@ -80,8 +80,8 @@ public class HouseFlowController implements HouseFlowAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setConfirm(HttpServletRequest request, String userToken, String houseFlowId) {
-        return houseFlowService.setConfirm(request, userToken, houseFlowId);
+    public ServerResponse setConfirm(HttpServletRequest request, String userToken, String houseFlowId,Integer type) {
+        return houseFlowService.setConfirm(request, userToken, houseFlowId, type);
     }
 
     @Override

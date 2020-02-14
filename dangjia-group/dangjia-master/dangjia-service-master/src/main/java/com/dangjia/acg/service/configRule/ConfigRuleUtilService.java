@@ -438,7 +438,7 @@ public class ConfigRuleUtilService {
                 startDate=DateUtil.addDateDays(startDate,1);
             }
             //工期 = 工序工价 / （户型平均工价（工序）* 默认工人人数）
-            Integer dayNum=(houseFlow.getWorkPrice().intValue()/(gongJia.intValue()*renShu))-1;
+            Integer dayNum=(houseFlow.getWorkPrice().intValue()/(gongJia.intValue()*renShu));
             houseFlow.setStartDate(startDate);
             houseFlow.setEndDate(DateUtil.addDateDays(startDate,dayNum));
             //如果不包含周末，则加上周末的天数
