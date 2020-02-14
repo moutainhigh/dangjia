@@ -229,9 +229,14 @@ public interface WebMendMaterielAPI {
     @ApiOperation(value = "业主清点剩余材料", notes = "业主清点剩余材料")
     ServerResponse querySurplusMaterial(@RequestParam("data") String data);
 
+    /**
+     * 消息弹窗--业主审核部分退货列表
+     * @param taskId 任务ID
+     * @return
+     */
     @PostMapping(value = "app/repair/webMendMateriel/queryTrialRetreatMaterial")
-    @ApiOperation(value = "业主审核部分退货", notes = "业主审核部分退货")
-    ServerResponse queryTrialRetreatMaterial(@RequestParam("data") String data);
+    @ApiOperation(value = "消息弹窗--业主审核部分退货列表", notes = "消息弹窗--业主审核部分退货列表")
+    ServerResponse queryTrialRetreatMaterial(@RequestParam("taskId") String taskId);
 
     @PostMapping(value = "app/repair/webMendMateriel/addPlatformComplain")
     @ApiOperation(value = "业主申请平台介入", notes = "业主申请平台介入")

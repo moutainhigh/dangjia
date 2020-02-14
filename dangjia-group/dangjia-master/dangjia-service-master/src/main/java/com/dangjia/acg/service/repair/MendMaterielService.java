@@ -15,6 +15,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.core.Task;
 import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.dto.repair.*;
@@ -33,6 +34,7 @@ import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -53,6 +55,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.gson.JsonArray;
 import com.netflix.discovery.converters.Auto;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -406,6 +409,7 @@ public class MendMaterielService {
             mendOrderCheckService.setMendMoneyOrder(mendDeliverId,userId);
         } else if (type == 2){//确认部分退货
            mendDeliver.setShippingState(4);//部分退货
+            mendDeliver.setReasons(partialReturnReason);//退货原因
             House house=houseMapper.selectByPrimaryKey(mendDeliver.getHouseId());
             //增加部分退货任务
             String image="";
@@ -777,29 +781,59 @@ public class MendMaterielService {
 
     /**
      * 业主审核部分退货
-     * @param data
+     * @param taskId
      * @return
      */
-    public ServerResponse queryTrialRetreatMaterial(String data) {
+    public ServerResponse queryTrialRetreatMaterial(String taskId) {
         try {
-            ArrSurplusMaterialDTO arrSurplusMaterialDTO = new ArrSurplusMaterialDTO();
-            List<SurplusMaterialDTO> surplusMaterialDTOS = mendOrderMapper.queryTrialRetreatMaterial(data);
-            if(surplusMaterialDTOS != null && surplusMaterialDTOS.size() >0){
-                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-                for (SurplusMaterialDTO surplusMaterialDTO : surplusMaterialDTOS) {
-                    surplusMaterialDTO.setImage(imageAddress + surplusMaterialDTO.getImage());
-                }
-                arrSurplusMaterialDTO.setList(surplusMaterialDTOS);
-                arrSurplusMaterialDTO.setMendOrderId(surplusMaterialDTOS.get(0).getMendOrderId());
-                arrSurplusMaterialDTO.setStorefrontName(surplusMaterialDTOS.get(0).getStorefrontName());
-                arrSurplusMaterialDTO.setStorefrontMobile(surplusMaterialDTOS.get(0).getStorefrontMobile());
-                arrSurplusMaterialDTO.setReturnReason(surplusMaterialDTOS.get(0).getReturnReason());
-                arrSurplusMaterialDTO.setBusinessOrderNumber(surplusMaterialDTOS.get(0).getBusinessOrderNumber());
-                arrSurplusMaterialDTO.setType(surplusMaterialDTOS.get(0).getType());
+            TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
+            if(taskStack==null){
+                return ServerResponse.createByErrorMessage("未找到符合条件的信息");
             }
-            return ServerResponse.createBySuccess("查询成功", arrSurplusMaterialDTO);
+            if(taskStack.getState()==1){
+                return ServerResponse.createByErrorMessage("当前任务已处理，请勿重复处理");
+            }
+            MendDeliver mendDeliver=mendDeliverMapper.selectByPrimaryKey(taskStack.getData());
+            MendDeliverDTO mendDeliverDTO=new MendDeliverDTO();
+            BeanUtils.beanToBean(mendDeliver,mendDeliverDTO);
+            mendDeliverDTO.setMendDeliverId(mendDeliver.getId());
+            mendDeliverDTO.setMendDeliverNumber(mendDeliver.getNumber());//退货单号
+            mendDeliverDTO.setState(mendDeliver.getShippingState());//状态 4部分退货
+            mendDeliverDTO.setReasons(mendDeliver.getReasons());//退货原因
+            if(mendDeliver.getShippingState()==6){;//若状态为6，则合并为1返回给前端
+                mendDeliverDTO.setState(1);
+            }
+            //查询店铺电话
+            Storefront storefront=masterStorefrontService.getStorefrontById(mendDeliver.getStorefrontId());
+            if(storefront!=null){
+               mendDeliverDTO.setStorefrontId(storefront.getId());
+               mendDeliverDTO.setStorefrontName(storefront.getStorefrontName());
+               mendDeliverDTO.setStorefrontMobile(storefront.getMobile());
+            }
+            //2.获取对应的发货单明细信息
+            List<OrderSplitItemDTO> mendMaterialList=mendMaterialMapper.searchReturnRefundMaterielList(mendDeliver.getMendOrderId(),mendDeliver.getId());
+            if(mendMaterialList!=null&&mendMaterialList.size()>0){
+                String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                for (OrderSplitItemDTO sd:mendMaterialList){
+                    if(sd.getActualCount()==null){
+                        sd.setActualCount(sd.getShopCount());
+                    }
+                    //2.1查询当前订单对应的
+                    if(StringUtils.isNotBlank(sd.getImage())){
+                        sd.setImageUrl(StringTool.getImageSingle(sd.getImage(),address));
+                    }
+                    //查询商品单位
+                    Unit unit=masterProductTemplateService.getUnitInfoByTemplateId(sd.getProductTemplateId());
+                    if(unit!=null){
+                        sd.setUnitId(unit.getId());
+                        sd.setUnitName(unit.getName());
+                    }
+                }
+            }
+            mendDeliverDTO.setMendMaterielList(mendMaterialList);//退货详情列表
+            return ServerResponse.createBySuccess("查询成功", mendDeliverDTO);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }

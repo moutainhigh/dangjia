@@ -235,8 +235,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryTrialRetreatMaterial(String data) {
-        return mendMaterielService.queryTrialRetreatMaterial(data);
+    public ServerResponse queryTrialRetreatMaterial(String taskId) {
+        return mendMaterielService.queryTrialRetreatMaterial(taskId);
     }
 
     @Override

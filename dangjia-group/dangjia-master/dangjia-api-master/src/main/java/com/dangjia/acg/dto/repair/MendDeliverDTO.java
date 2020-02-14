@@ -35,6 +35,11 @@ public class MendDeliverDTO {
     private String supName;//供应商名称
     private Integer state;//状态
 
+    private String reasons;//退货原因
+
+    private String storefrontId;//店铺ID
+    private String storefrontName;//店铺名称
+    private String storefrontMobile;//店铺电话
 
     private String applicantName;//申请人名称
     private String applicantMobile;//申请人手机号
