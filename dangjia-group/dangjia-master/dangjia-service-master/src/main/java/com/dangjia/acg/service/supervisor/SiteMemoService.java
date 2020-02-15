@@ -245,6 +245,12 @@ public class SiteMemoService {
             if (member != null) {
                 map.put("memberName", CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                 map.put("memberImage", imageAddress + member.getHead());
+                if(!CommonUtil.isEmpty(member.getWorkerTypeId())) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                    if (workerType != null) {
+                        map.put("workerTypeColor", workerType.getColor());
+                    }
+                }
             }
             dataMaps.add(map);
         }
