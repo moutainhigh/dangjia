@@ -143,16 +143,18 @@
     </select>
 
     <select id="queryGuaranteeMoneyList" resultType="com.dangjia.acg.dto.engineer.ResponsiblePartyDTO">
-        select
-        rrp.id,
-        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,-- 房子地址
-        IFNULL(dmr.create_date,'') as createDate -- 时间
-        from dj_maintenance_record dmr
-        inner join dj_maintenance_record_responsible_party rrp on
-        rrp.maintenance_record_id=dmr.id
-        inner join dj_house dh on dmr.house_id=dh.id
-        inner join dj_member dm on dm.id=dmr.worker_member_id
-        where rrp.responsible_party_id=#{storefrontId} and dmr.state=1
+        SELECT
+            t.id accountflowRecordId,
+            t.house_order_id maintenanceRecordId,
+            IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,-- 房子地址
+            t.create_date as createDate -- 时间
+        FROM
+            dj_account_flow_record t,
+            dj_house dh
+        WHERE
+            t.state = 6
+        AND t.house_id = dh.id
+        and t.defined_account_id=#{storefrontId}
     </select>
 
     <select id="queryGuaranteeMoneyDetail" resultType="com.dangjia.acg.dto.engineer.ResponsiblePartyDetailDTO">
