@@ -32,6 +32,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
+import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
@@ -50,6 +51,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.ReplaceMemberRecord;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -66,6 +68,7 @@ import com.dangjia.acg.service.deliver.SplitDeliverService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
+import com.dangjia.acg.service.repair.MendMaterielService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -117,7 +120,7 @@ public class ComplainService {
     @Autowired
     private IWorkIntegralMapper iWorkIntegralMapper;
     @Autowired
-    private SplitDeliverService splitDeliverService;
+    private MendMaterielService mendMaterielService;
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
@@ -607,11 +610,9 @@ public class ComplainService {
                             houseFlowApplyMapper.updateByPrimaryKeySelective(flowApply);
                         }
                         break;
-                    case 7://业主申请退货(同意后的处理）
+                    case 7://业主申诉部分退货(同意后的处理）
                         String businessId = complain.getBusinessId();//业务订单号
-                        //修改订单状态为已同意
-                        refundAfterSalesAPI.agreeRepairApplication(businessId,userId);
-                        //将店铺的钱转到对应的业主钱包中
+                        mendMaterielService.updatePlatformComplainInfo(businessId,userId,7);
                         break;
                 }
             }
@@ -637,7 +638,7 @@ public class ComplainService {
             }
             if (complain.getComplainType() != null && complain.getComplainType() == 7) {//业主申请退货，不同意后的处理
                //对应订单数据退回，订单流水记录生成
-                refundAfterSalesAPI.rejectRepairApplication(complain.getBusinessId(),userId);
+                mendMaterielService.updatePlatformComplainInfo(complain.getBusinessId(),userId,8);
             }
             if(complain.getComplainType()!=null&&complain.getComplainType()==4){
                 orderSplitService.platformComplaint(complain.getBusinessId(),null,4,userId,complain.getApplicationStatus());//部分收货，平台申诉驳回

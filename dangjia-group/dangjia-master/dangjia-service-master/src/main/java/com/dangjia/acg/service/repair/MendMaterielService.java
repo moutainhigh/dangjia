@@ -932,4 +932,27 @@ public class MendMaterielService {
         return ServerResponse.createByErrorMessage("提交成功");
     }
 
+    /**
+     * 修改申诉结果处理
+     * @param mendDeliverId
+     * @param type 7平台同意业主申诉（按申请退） 8，平台驳回（按确认退）
+     */
+    public  void updatePlatformComplainInfo(String mendDeliverId,String userId,Integer type){
+        MendDeliver mendDeliver=mendDeliverMapper.selectByPrimaryKey(mendDeliverId);
+        if(type==7){
+            updateNewMendMaterialList(mendDeliver,1);
+            //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
+            mendOrderCheckService.setMendMoneyOrder(mendDeliver.getId(),userId);
+            mendDeliver.setShippingState(7);//按业主申请退货
+            mendDeliver.setApplyState(0);//供应商结算状态
+        }else{
+            updateNewMendMaterialList(mendDeliver,2);
+            //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
+            mendOrderCheckService.setMendMoneyOrder(mendDeliver.getId(),userId);
+            mendDeliver.setShippingState(8);//按平台同意退货
+            mendDeliver.setApplyState(0);//供应商结算状态
+        }
+        mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+    }
+
 }
