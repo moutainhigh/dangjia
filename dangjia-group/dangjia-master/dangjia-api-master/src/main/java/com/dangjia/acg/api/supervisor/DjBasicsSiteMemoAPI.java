@@ -70,6 +70,28 @@ public interface DjBasicsSiteMemoAPI {
      * showdoc
      *
      * @param userToken 必选 string userToken
+     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 工匠端升级/备忘录
+     * @title 备忘录全部已读
+     * @description 备忘录全部已读
+     * @method POST
+     * @url master/app/memo/setAllSiteMemo
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 2
+     * @Author: QiYuXiang 13755051550
+     * @Date: 2020/2/14 5:37 PM
+     */
+    @PostMapping("app/memo/setAllSiteMemo")
+    @ApiOperation(value = "备忘录全部已读", notes = "备忘录全部已读")
+    ServerResponse setAllSiteMemo(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("houseId") String houseId,
+                                  @RequestParam("userToken") String userToken);
+
+
+    /**
+     * showdoc
+     *
+     * @param userToken 必选 string userToken
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/备忘录
      * @title 获取备忘录消息数量
@@ -86,6 +108,7 @@ public interface DjBasicsSiteMemoAPI {
     @PostMapping("app/memo/getMemoMessage")
     @ApiOperation(value = "获取备忘录消息数量", notes = "获取备忘录消息数量")
     ServerResponse getMemoMessage(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("houseId") String houseId,
                                   @RequestParam("userToken") String userToken);
 
     /**
@@ -122,6 +145,7 @@ public interface DjBasicsSiteMemoAPI {
     @ApiOperation(value = "获取备忘录消息列表", notes = "获取备忘录消息列表")
     ServerResponse getMemoMessageList(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("houseId") String houseId,
                                       @RequestParam("userToken") String userToken);
 
     /**
@@ -158,6 +182,7 @@ public interface DjBasicsSiteMemoAPI {
     @ApiOperation(value = "获取备忘录列表", notes = "获取备忘录列表")
     ServerResponse getMemoList(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("pageDTO") PageDTO pageDTO,
+                               @RequestParam("houseId") String houseId,
                                @RequestParam("userToken") String userToken);
 
     /**

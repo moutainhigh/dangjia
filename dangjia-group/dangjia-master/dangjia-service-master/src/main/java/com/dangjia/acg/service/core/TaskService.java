@@ -306,7 +306,28 @@ public class TaskService {
                     task.setHouseId(mendOrder.getHouseId());
 
                     task.setTaskId(mendOrder.getId());
-                    task.setDate(changeOrder.getId());
+                    taskList.add(task);
+                }
+            }
+
+            //查询待验收的维保申请
+            Example example1 = new Example(DjMaintenanceRecord.class);
+            example1.createCriteria()
+                    .andEqualTo(DjMaintenanceRecord.DATA_STATUS, 0)
+                    .andEqualTo(DjMaintenanceRecord.HOUSE_ID, house.getId())
+                    .andEqualTo(DjMaintenanceRecord.WORKER_MEMBER_ID, hw.getWorkerId())
+                    .andIsNull(DjMaintenanceRecord.WORKER_CREATE_DATE);
+            List<DjMaintenanceRecord> designBusinessOrders = djMaintenanceRecordMapper.selectByExample(example1);
+            for (DjMaintenanceRecord designBusinessOrder : designBusinessOrders) {
+                Double totalPrice = maintenanceRecordProductMapper.queryTotalPriceByRecordId(designBusinessOrder.getId(),1);
+                if(totalPrice>0){//存在待勘查费用，需要大管家接受
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(designBusinessOrder.getWorkerTypeId());
+                    Task task = new Task();
+                    task.setDate(DateUtil.dateToString(designBusinessOrder.getModifyDate(), DateUtil.FORMAT11));
+                    task.setName("在"+workerType.getName() + "保质期内有维修单");
+                    task.setImage(imageAddress + workerType.getImage());
+                    task.setType(1018);
+                    task.setTaskId(designBusinessOrder.getId());
                     taskList.add(task);
                 }
             }

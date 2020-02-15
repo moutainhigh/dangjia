@@ -129,6 +129,30 @@ public class SiteMemoService {
     }
 
     /**
+     * 备忘录全部已读
+     *
+     * @param userToken userToken
+     * @return ServerResponse
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setAllSiteMemo(String houseId,String userToken) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        Example example =new Example(SiteMemo.class);
+        example.createCriteria().andEqualTo(SiteMemo.REMIND_MEMBER_ID,worker.getId()).andEqualTo(SiteMemo.HOUSE_ID,houseId);
+        SiteMemo siteMemo=new SiteMemo();
+        siteMemo.setId(null);
+        siteMemo.setCreateDate(null);
+        siteMemo.setModifyDate(new Date());
+        siteMemo.setState(1);
+        iSiteMemoMapper.updateByExample(siteMemo,example);
+        return ServerResponse.createBySuccessMessage("已读成功");
+    }
+
+    /**
      * 删除备忘录
      *
      * @param userToken userToken
@@ -156,7 +180,7 @@ public class SiteMemoService {
      * @param userToken userToken
      * @return ServerResponse
      */
-    public ServerResponse getMemoMessage(String userToken) {
+    public ServerResponse getMemoMessage(String houseId,String userToken) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -165,6 +189,7 @@ public class SiteMemoService {
         Example example = new Example(SiteMemo.class);
         example.createCriteria()
                 .andEqualTo(SiteMemo.REMIND_MEMBER_ID, worker.getId())
+                .andEqualTo(SiteMemo.HOUSE_ID,houseId)
                 .andEqualTo(SiteMemo.STATE, 0);
         List<SiteMemo> siteMemoList = iSiteMemoMapper.selectByExample(example);
         if (siteMemoList.size() <= 0) {
@@ -188,7 +213,7 @@ public class SiteMemoService {
      * @param type      1查询未读
      * @return ServerResponse
      */
-    public ServerResponse getMemoList(PageDTO pageDTO, String userToken, int type) {
+    public ServerResponse getMemoList(PageDTO pageDTO, String userToken,String houseId, int type) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -197,7 +222,8 @@ public class SiteMemoService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(SiteMemo.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SiteMemo.REMIND_MEMBER_ID, worker.getId());
+        criteria.andEqualTo(SiteMemo.REMIND_MEMBER_ID, worker.getId())
+                .andEqualTo(SiteMemo.HOUSE_ID,houseId);
         if (type == 1) {
             criteria.andEqualTo(SiteMemo.STATE, 0);
         }

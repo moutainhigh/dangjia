@@ -903,28 +903,28 @@ public class CraftsmanConstructionService {
         bean.setTotalDay("总开工天数" + totalDay);
         bean.setEveryDay("每日完工天数" + (everyEndDay == null ? "0" : everyEndDay));
         bean.setSuspendDay("暂停天数" + (suspendDay == null ? "0" : suspendDay));
-//        if (hw.getWorkType() == 1) {
-//            bean.setIfDisclose(0);
-//        } else if (hf.getWorkSteta() == 3) {
-//            bean.setIfDisclose(1);
-//        } else {
-//            bean.setIfDisclose(2);
-//        }
-//        if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
-//            if (isBX) {
-//                promptList.add("请联系业主支付您的工匠费用");
-//            } else {
-//                Date d = DateUtil.addDateMinutes(hw.getCreateDate(), 30);
-//                Date d2 = new Date();
-//                promptList.add("剩余支付保险时间：" + DateUtil.getDiffTime2(d.getTime(), d2.getTime()) + ",超过时间则自动放弃");
-//                buttonList.add(Utils.getButton("购买保险", 4001));
-//            }
-//            bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
-//        } else if (hf.getPause() == 1) {
-//            promptList.add("您已停工");
-//        } else if (hf.getWorkSteta() == 1) {
-//            promptList.add("您已阶段完工");
-//        }
+        if (hw.getWorkType() == 1) {
+            bean.setIfDisclose(0);
+        } else if (hf.getWorkSteta() == 3) {
+            bean.setIfDisclose(1);
+        } else {
+            bean.setIfDisclose(2);
+        }
+        if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
+            if (isBX) {
+                promptList.add("请联系业主支付您的工匠费用");
+            } else {
+                Date d = DateUtil.addDateMinutes(hw.getCreateDate(), 30);
+                Date d2 = new Date();
+                promptList.add("剩余支付保险时间：" + DateUtil.getDiffTime2(d.getTime(), d2.getTime()) + ",超过时间则自动放弃");
+                buttonList.add(Utils.getButton("购买保险", 4001));
+            }
+            bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
+        } else if (hf.getPause() == 1) {
+            promptList.add("您已停工");
+        } else if (hf.getWorkSteta() == 1) {
+            promptList.add("您已阶段完工");
+        }
         if (hf.getWorkSteta() == 2 || hf.getWorkSteta() == 6) {
             if (hf.getWorkSteta() == 2) {
                 promptList.add("您已整体完工");
