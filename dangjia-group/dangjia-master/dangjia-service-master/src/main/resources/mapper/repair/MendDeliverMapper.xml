@@ -78,6 +78,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 where a.id=#{id}
         </select>
 
+    <select id="searchReturnRefundSplitCount" resultType="java.lang.Integer">
+        SELECT
+         count(t.id)
+        FROM
+            dj_repair_mend_order t,
+            dj_member m,
+            dj_member_address madress,
+            dj_repair_mend_deliver md
+        WHERE t.apply_member_id=m.id
+        and t.id=md.mend_order_id
+        and
+        (
+        t.house_id = madress.house_id
+        OR t.address_id = madress.id
+        )
+        and t.storefront_id=#{storefrontId}
+        <if test="state==1"><!--已分配供应商-->
+            and md.shipping_state in(0,4,5)
+        </if>
+        <if test="state==2"><!--已结束-->
+            and md.shipping_state in(1,2,6,7,8)
+        </if>
+    </select>
       <select id="searchReturnRefundSplitList" resultType="com.dangjia.acg.dto.repair.MendDeliverDTO">
             SELECT
                   t.id mendOrderId,
@@ -105,10 +128,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     OR t.address_id = madress.id
                 )
             and t.storefront_id=#{storefrontId}
-          <if test="state==1"><!--已分配供应商-->
+          <if test="state==2"><!--已分配供应商-->
               and md.shipping_state in(0,4,5)
           </if>
-          <if test="state==2"><!--已结束-->
+          <if test="state==3"><!--已结束-->
               and md.shipping_state in(1,2,6,7,8)
           </if>
           <if test="likeAddress!=null and likeAddress!=''">

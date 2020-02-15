@@ -152,7 +152,7 @@
         rrp.maintenance_record_id=dmr.id
         inner join dj_house dh on dmr.house_id=dh.id
         inner join dj_member dm on dm.id=dmr.worker_member_id
-        where rrp.responsible_party_id=#{storefrontId} and dmr.state=2
+        where rrp.responsible_party_id=#{storefrontId} and dmr.state=1
     </select>
 
     <select id="queryGuaranteeMoneyDetail" resultType="com.dangjia.acg.dto.engineer.ResponsiblePartyDetailDTO">

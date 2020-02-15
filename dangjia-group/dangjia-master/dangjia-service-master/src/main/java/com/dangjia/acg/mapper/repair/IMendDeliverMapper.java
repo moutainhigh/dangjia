@@ -35,4 +35,6 @@ public interface IMendDeliverMapper extends Mapper<MendDeliver> {
     List<MendMateriel> mendDeliverDetail(@Param("id") String id);
 
     List<MendDeliverDTO> searchReturnRefundSplitList(@Param("storefrontId") String storefrontId,@Param("state") Integer state,@Param("likeAddress") String likeAddress);
+
+    Integer searchReturnRefundSplitCount(@Param("storefrontId") String storefrontId,@Param("state") Integer state);
 }
