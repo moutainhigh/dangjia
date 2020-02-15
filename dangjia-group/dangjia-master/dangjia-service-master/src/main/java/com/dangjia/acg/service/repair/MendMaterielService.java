@@ -337,7 +337,7 @@ public class MendMaterielService {
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject obj = jsonArray.getJSONObject(i);
             String mendMaterielId=(String)obj.get("mendMaterielId");
-            Double actualCount=Double.parseDouble((String) obj.get("actualCount"));
+            Double actualCount=obj.getDouble("actualCount");
             MendMateriel mendMateriel=mendMaterialMapper.selectByPrimaryKey(mendMaterielId);
             if (mendMateriel.getShopCount() < actualCount) {
                 actualCount = mendMateriel.getShopCount();
@@ -397,16 +397,19 @@ public class MendMaterielService {
                     } else {
                         mendMateriel.setStevedorageCost(0d);
                     }
+                    //计算供应商的搬运费
+                    mendMateriel.setSupStevedorageCost(orderSplitService.getSupProductStevedorageCost(mendDeliver.getStorefrontId(), mendDeliver.getSupplierId(), mendMateriel.getProductId(), mendDeliver.getHouseId(), actualCount));
+                    if(totalReceiverNum>0){//运费
+                        mendMateriel.setSupTransportationCost(MathUtil.mul(MathUtil.div(mendDeliver.getDeliveryFee(),totalReceiverNum),actualCount));
+                    }
+
                 }
-                //计算供应商的搬运费
-                mendMateriel.setSupStevedorageCost(orderSplitService.getSupProductStevedorageCost(mendDeliver.getStorefrontId(), mendDeliver.getSupplierId(), mendMateriel.getProductId(), mendDeliver.getHouseId(), actualCount));
-                if(totalReceiverNum>0){//运费
-                    orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(mendDeliver.getDeliveryFee(),totalReceiverNum),actualCount));
-                }
-                totalAmount=MathUtil.add(totalAmount, MathUtil.sub(MathUtil.sub(MathUtil.mul(orderSplitItem.getPrice(),orderSplitItem.getReceive()),orderSplitItem.getTransportationCost()),orderSplitItem.getStevedorageCost()));
-                applyMoney=MathUtil.add(applyMoney,MathUtil.sub(MathUtil.mul(orderSplitItem.getSupCost(),actualCount),orderSplitItem.getSupCost()));
-                totalPrice=MathUtil.add(totalPrice,MathUtil.mul(orderSplitItem.getSupCost(),actualCount));
-                totalStevedorageCost=MathUtil.add(totalStevedorageCost,orderSplitItem.getSupStevedorageCost());
+                if(mendMateriel.getSupStevedorageCost()==null)
+                    mendMateriel.setSupStevedorageCost(0d);
+                totalAmount=MathUtil.add(totalAmount, MathUtil.sub(MathUtil.sub(MathUtil.mul(mendMateriel.getPrice(),actualCount),mendMateriel.getTransportationCost()),mendMateriel.getStevedorageCost()));
+                applyMoney=MathUtil.add(applyMoney,MathUtil.sub(MathUtil.mul(mendMateriel.getCost(),actualCount),mendMateriel.getSupStevedorageCost()));
+                totalPrice=MathUtil.add(totalPrice,MathUtil.mul(mendMateriel.getCost(),actualCount));
+                totalStevedorageCost=MathUtil.add(totalStevedorageCost,mendMateriel.getSupStevedorageCost());
             }
             mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
         }
