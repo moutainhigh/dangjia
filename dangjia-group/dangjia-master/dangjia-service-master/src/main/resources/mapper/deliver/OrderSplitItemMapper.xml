@@ -8,6 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--查询要货单总价-->
     <select id="getOrderSplitPrice" resultType="java.lang.Double">
 	    select
+
 		    IFNULL(sum(price*num),0)
 		from dj_deliver_order_split_item
 		where
@@ -22,7 +23,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
     <select id="getOrderSplitReceiverNum" resultType="java.lang.Double">
 	    select
-		    sum(IFNULL(receive,num)) receive
+	       <if test="type==1">
+               sum(num) receive
+           </if>
+        <if test="type==2">
+            sum(IFNULL(receive,num)) receive
+        </if>
 		from dj_deliver_order_split_item
 		where
 	        split_deliver_id = #{splitDeliverId}

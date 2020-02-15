@@ -290,5 +290,19 @@
         update dj_repair_mend_materiel set repair_mend_deliver_id=#{mendDeliverId}
         where mend_order_id=#{mendOrderId} and supplier_id=#{supplierId}
     </update>
+
+    <select id="getMendMaterialReceiverNum" resultType="java.lang.Double">
+        select
+        <if test="type==1">
+            sum(shop_count) receive
+        </if>
+        <if test="type==2">
+            sum(IFNULL(actual_count,shop_count)) receive
+        </if>
+        from dj_repair_mend_materiel
+        where
+          repair_mend_deliver_id =#{mendDeliverId}
+    </select>
+
 </mapper>
 

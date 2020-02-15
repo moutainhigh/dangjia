@@ -238,10 +238,17 @@ public interface WebMendMaterielAPI {
     @ApiOperation(value = "消息弹窗--业主审核部分退货列表", notes = "消息弹窗--业主审核部分退货列表")
     ServerResponse queryTrialRetreatMaterial(@RequestParam("taskId") String taskId);
 
+    /**
+     * 业主审核部分退货--申请平台介入/接受商家退货
+     * @param taskId 任务ID
+     * @param description 平台介入原因
+     * @param type 审核结果：1申请平台介入 2接受商家退货数
+     * @return
+     */
     @PostMapping(value = "app/repair/webMendMateriel/addPlatformComplain")
-    @ApiOperation(value = "业主申请平台介入", notes = "业主申请平台介入")
-    ServerResponse addPlatformComplain(@RequestParam("userToken") String userToken,
-                                       @RequestParam("mendOrderId") String mendOrderId,
-                                       @RequestParam("description") String description);
+    @ApiOperation(value = "业主审核部分退货--申请平台介入/接收商家退货", notes = "业主审核部分退货--申请平台介入/接收商家退货")
+    ServerResponse addPlatformComplain(@RequestParam("taskId") String userToken,@RequestParam("taskId") String taskId,
+                                       @RequestParam("description") String description,
+                                       @RequestParam("type") Integer type);
 
 }
