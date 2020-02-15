@@ -8,6 +8,19 @@ import java.util.Map;
  * 公共应用常量类
  */
 public class DjConstants {
+
+    public static  HashMap<Integer, String> applyTypeMap = new HashMap<Integer, String>(){
+        {
+            put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工");
+            put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工");
+            put(DjConstants.ApplyType.ZHENGTI_WANGONG, "整体完工");
+            put(DjConstants.ApplyType.TINGGONG, "停工");
+            put(DjConstants.ApplyType.MEIRI_KAIGONG, "每日开工");
+            put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");
+            put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
+            put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
+        }
+    };
     /**
      * PageAddress 工匠端页面跳转地址
      */

@@ -56,7 +56,6 @@ public interface EvaluateAPI {
     ServerResponse checkOk(@RequestParam("userToken") String userToken,
                            @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                            @RequestParam("content") String content,
-                           @RequestParam("star") Integer star,
                            @RequestParam("imageList") String imageList,
                            @RequestParam("latitude") String latitude,
                            @RequestParam("longitude") String longitude);

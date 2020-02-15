@@ -148,7 +148,7 @@ public class SiteMemoService {
         siteMemo.setCreateDate(null);
         siteMemo.setModifyDate(new Date());
         siteMemo.setState(1);
-        iSiteMemoMapper.updateByExample(siteMemo,example);
+        iSiteMemoMapper.updateByExampleSelective(siteMemo,example);
         return ServerResponse.createBySuccessMessage("已读成功");
     }
 
@@ -363,7 +363,7 @@ public class SiteMemoService {
                     map.put("memberId", member.getId());
                     map.put("memberName", CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                     map.put("memberImage", imageAddress + member.getHead());
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
                     if (workerType != null) {
                         map.put("workerTypeName", workerType.getName());
                     }

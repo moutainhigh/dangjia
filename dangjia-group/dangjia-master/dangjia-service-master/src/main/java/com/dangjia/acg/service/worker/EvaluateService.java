@@ -32,7 +32,6 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
-import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
@@ -332,7 +331,7 @@ public class EvaluateService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
-        return checkOk(houseFlowApplyId, content, star, imageList, latitude, longitude);
+        return checkOk(houseFlowApplyId, content,  imageList, latitude, longitude);
     }
 
     /**
@@ -340,7 +339,7 @@ public class EvaluateService {
      * 1.30
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse checkOk(String houseFlowApplyId, String content, int star, String imageList, String latitude, String longitude) {
+    public ServerResponse checkOk(String houseFlowApplyId, String content,  String imageList, String latitude, String longitude) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
@@ -382,9 +381,9 @@ public class EvaluateService {
              * 大管家每次审核拿钱 新算法 2018.08.03
              */
             if (houseFlowApply.getApplyType() == 1 || houseFlowApply.getApplyType() == 2) {
-                Example example = new Example(HouseFlowApplyImage.class);
-                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
-                List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
+//                Example example = new Example(HouseFlowApplyImage.class);
+//                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
+//                List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
                 //算管家每次审核该拿的钱数
                 //大管家的hf
                 HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
@@ -403,6 +402,7 @@ public class EvaluateService {
                 hfa.setApplyMoney(new BigDecimal(0));//申请得钱
                 hfa.setSupervisorMoney(new BigDecimal(0));
                 hfa.setOtherMoney(new BigDecimal(0));
+                hfa.setHouseFlowApplyId(houseFlowApplyId);
                 hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
                 hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
                 hfa.setPayState(0);//是否付款

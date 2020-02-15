@@ -99,6 +99,7 @@ public interface WorkerAPI {
     @ApiOperation(value = "奖罚记录", notes = "奖罚记录")
     ServerResponse queryRewardPunishRecord(@RequestParam("userToken") String userToken,
                                            @RequestParam("workerId") String workerId,
+                                           @RequestParam("houseId") String houseId,
                                            @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("/app/rewardPunish/get")

@@ -28,6 +28,14 @@ public class RewardPunishRecordDTO {
 	@ApiModelProperty("账户名称")
 	private String memberName;
 
+
+	@ApiModelProperty("工种名称")
+	private String workerTypeName;
+
+	@ApiModelProperty("工种颜色")
+	private String workerTypeColor;
+
+
 	@ApiModelProperty("奖罚条件id")
 	private String rewardPunishCorrelationId;
 

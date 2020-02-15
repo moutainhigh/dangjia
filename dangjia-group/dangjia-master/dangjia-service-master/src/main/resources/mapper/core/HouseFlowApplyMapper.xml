@@ -483,6 +483,28 @@
     </select>
 
 
+
+    <select id="getApplyCheckInfo" resultType="map">
+        SELECT
+            a.id houseFlowApplyId,
+            a.house_flow_id houseFlowId,
+            a.house_id houseId,
+            t. NAME workerTypeName,
+            t.color workerTypeColor,
+            a.worker_id workerId,
+            w. NAME workerName,
+            a.apply_dec applyDec,
+            GROUP_CONCAT(i.image_url) imageList
+        FROM
+            `dj_core_house_flow_apply` a
+        INNER JOIN dj_core_worker_type t ON t.id = a.worker_type_id
+        INNER JOIN dj_member w ON w.id = a.worker_id
+        LEFT JOIN dj_core_house_flow_apply_image i ON i.house_flow_apply_id = a.id
+        WHERE
+            (a.`id` = =#{houseFlowApplyId}) or  (a.house_flow_apply_id==#{houseFlowApplyId})
+        ORDER BY a.create_date
+    </select>
+
     <select id="queryApplyComplaints" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         SELECT
             chfa.id,

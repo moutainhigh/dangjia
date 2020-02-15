@@ -361,7 +361,7 @@ public class RewardPunishService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryRewardPunishRecord(String userToken, String workerId, PageDTO pageDTO) {
+    public ServerResponse queryRewardPunishRecord(String userToken, String workerId,String houseId, PageDTO pageDTO) {
         try {
 
             Example example = new Example(RewardPunishRecord.class);
@@ -372,10 +372,12 @@ public class RewardPunishService {
                     return (ServerResponse) object;
                 }
                 Member member = (Member) object;
-                criteria.andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
+                criteria.andNotEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
             }
             if (!CommonUtil.isEmpty(workerId)) {
                 criteria.andEqualTo(RewardPunishRecord.MEMBER_ID, workerId);
+            }if (!CommonUtil.isEmpty(houseId)) {
+                criteria.andEqualTo(RewardPunishRecord.HOUSE_ID, houseId);
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             example.orderBy(RewardPunishRecord.CREATE_DATE).desc();

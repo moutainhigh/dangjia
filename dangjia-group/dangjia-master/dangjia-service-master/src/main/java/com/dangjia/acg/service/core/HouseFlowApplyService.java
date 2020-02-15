@@ -46,6 +46,7 @@ import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,15 +127,7 @@ public class HouseFlowApplyService {
     public ServerResponse houseRecord(String userToken, String houseId, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Map<Integer, String> applyTypeMap = new HashMap<>();
-            applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工");
-            applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工");
-            applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG, "整体完工");
-            applyTypeMap.put(DjConstants.ApplyType.TINGGONG, "停工");
-            applyTypeMap.put(DjConstants.ApplyType.MEIRI_KAIGONG, "每日开工");
-            applyTypeMap.put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");
-            applyTypeMap.put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
-            applyTypeMap.put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
+
             List<HouseFlowApplyDTO> houseFlowApplyDTOList = new ArrayList<>();
             HouseWorker gjhouseWorker = houseWorkerMapper.getHwByHidAndWtype(houseId, 3);
             Member worker2 = memberMapper.selectByPrimaryKey(gjhouseWorker.getWorkerId());//根据工匠id查询工匠信息详情
@@ -155,7 +148,7 @@ public class HouseFlowApplyService {
                     Map map = new HashMap();
                     map.put(HouseFlowApply.CREATE_DATE, hfa.getCreateDate());
                     map.put(Member.NAME, worker2.getName());
-                    map.put(HouseFlowApply.APPLY_TYPE + "Name", applyTypeMap.get(hfa.getApplyType()));
+                    map.put(HouseFlowApply.APPLY_TYPE + "Name", DjConstants.applyTypeMap.get(hfa.getApplyType()));
                     mapList.add(map);
                 }
                 houseFlowApplyDTO.setList(mapList);
@@ -1030,63 +1023,26 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            if (houseFlowApply.getWorkerType() == 3) {//是管家发起的
-                houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
-                houseFlowApplyDTO.setWorkerId(worker.getId());
-                houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
-                houseFlowApplyDTO.setApplyType(3);//管家提交的整体完工申请
-                houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
-                houseFlowApplyDTO.setHeadA(address + worker.getHead());
-                houseFlowApplyDTO.setNameA(worker.getName());
-                houseFlowApplyDTO.setMobileA(worker.getMobile());
-                houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId()).getName());
-                houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
-                houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
-                Example example = new Example(HouseFlowApplyImage.class);
-                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
-                List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
-                List<String> imageList = new ArrayList<>();
-                for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
-                    imageList.add(address + houseFlowApplyImage.getImageUrl());
-                }
-                if (houseFlowApply.getEndDate() != null) {
-                    houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
-                }
-                setImageList(houseFlowApply.getId(), address, imageList);
-                houseFlowApplyDTO.setImageList(imageList);
-                houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
-                return ServerResponse.createBySuccess("查询管家整体申请成功", houseFlowApplyDTO);
-            }
-            //查询管家houseFLow
-            HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
-            Member steward = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());//管家
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
             houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
             houseFlowApplyDTO.setWorkerId(worker.getId());
-            houseFlowApplyDTO.setManagerId(steward.getId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
+            houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
             houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
-            houseFlowApplyDTO.setHeadA(address + worker.getHead());
-            houseFlowApplyDTO.setNameA(worker.getName());
-            houseFlowApplyDTO.setMobileA(worker.getMobile());
-            houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId()).getName());
-            houseFlowApplyDTO.setHeadB(address + steward.getHead());
-            houseFlowApplyDTO.setNameB(steward.getName());
-            houseFlowApplyDTO.setMobileB(steward.getMobile());
             houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
             houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
             if (houseFlowApply.getEndDate() != null) {
                 houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
             }
-            Example example = new Example(HouseFlowApplyImage.class);
-            example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
-            List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
-            List<String> imageList = new ArrayList<>();
-            for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
-                imageList.add(address + houseFlowApplyImage.getImageUrl());
+            //工匠的进程明细
+            List<Map> list  = houseFlowApplyMapper.getApplyCheckInfo(houseFlowApplyId);
+            for (Map map : list) {
+                if(map.get("imageList")!=null) {
+                    map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
+                }
             }
-            setImageList(houseFlowApply.getId(), address, imageList);
-            houseFlowApplyDTO.setImageList(imageList);
+            houseFlowApplyDTO.setList(list);
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
             return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTO);
         } catch (Exception e) {
@@ -1118,6 +1074,7 @@ public class HouseFlowApplyService {
         try {
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);//大管家的hf
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
@@ -1127,24 +1084,23 @@ public class HouseFlowApplyService {
             if (house != null) {
                 houseFlowApplyDTO.setHouseName(house.getHouseName());
             }
-            Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
-            houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
-            houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId()).getName());
-            Example example = new Example(HouseFlowApplyImage.class);
-            example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
-            List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
-            List<String> imageList = new ArrayList<>();
-            for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
-                imageList.add(address + houseFlowApplyImage.getImageUrl());
-            }
-            setImageList(houseFlowApply.getId(), address, imageList);
-            houseFlowApplyDTO.setImageList(imageList);
+            houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
+            houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
+            houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
             if (houseFlowApply.getStartDate() != null) {
                 houseFlowApplyDTO.setStartDate(houseFlowApply.getStartDate().getTime() - new Date().getTime()); //自动审核时间
             }
+            //工匠的进程明细
+            List<Map> list  = houseFlowApplyMapper.getApplyCheckInfo(houseFlowApplyId);
+            for (Map map : list) {
+                if(map.get("imageList")!=null) {
+                    map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
+                }
+            }
+            houseFlowApplyDTO.setList(list);
             return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTO);
         } catch (Exception e) {
             e.printStackTrace();

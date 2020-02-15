@@ -106,4 +106,7 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
 
     HouseFlowApply queryApplyComplaints(@Param("houseFlowApplyId") String houseFlowApplyId);
 
+    List<Map> getApplyCheckInfo(@Param("houseFlowApplyId") String houseFlowApplyId);
+
+
 }
