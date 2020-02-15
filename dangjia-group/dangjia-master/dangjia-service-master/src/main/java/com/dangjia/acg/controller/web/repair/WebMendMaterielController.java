@@ -28,20 +28,20 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
     @Autowired
     private RedisClient redisClient;
+
     /**
-     * 房子id查询业主退货单列表
+     *店铺--售后处理--获取统计数量
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param type 查询类型：1退货退款，2仅退款
+     * @return
+     */
     @Override
     @ApiMethod
-    public ServerResponse landlordState(HttpServletRequest request,String userId,String cityId, PageDTO pageDTO, String state,String likeAddress) {
-        //通过缓存查询店铺信息
-        return mendMaterielService.landlordState(userId,cityId, pageDTO,state, likeAddress);
+    public ServerResponse searchRefundCountNumber(String cityId,String userId,Integer type){
+        return mendMaterielService.searchRefundCountNumber(cityId,userId, type);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse landlordStateHandle(HttpServletRequest request, String cityId,  PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.landlordStateHandle(request,cityId,pageDTO,state,likeAddress);
-    }*/
 
     /**
      * 房子id查询退货单列表
@@ -92,7 +92,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      * @param cityId 城市ID
      * @param userId 用户ID
      * @param pageDTO
-     * @param state 状态默认：1.已分发供应商 2.已结束
+     * @param state 状态默认：2.已分发供应商 3.已结束
      * @param likeAddress
      * @return
      */

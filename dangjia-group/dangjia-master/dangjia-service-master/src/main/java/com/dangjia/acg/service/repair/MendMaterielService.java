@@ -545,7 +545,35 @@ public class MendMaterielService {
         return ServerResponse.createByErrorMessage("确认成功");
     }
 
+    /**
+     *店铺--售后处理--获取统计数量
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param type 查询类型：1退货退款，2仅退款
+     * @return
+     */
+    public ServerResponse searchRefundCountNumber(String cityId,String userId,Integer type){
+        try{
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            Map<String,Object> resultMap=new HashMap<>();
+            if(type==1){
+                resultMap.put("needNumber",mendOrderMapper.searchReturnRrefundCount(storefront.getId(), type, 1));//待分配
+                resultMap.put("assignedNumber",mendDeliverMapper.searchReturnRefundSplitCount(storefront.getId(), 1));//已分配供应商
+                resultMap.put("completeNumber",mendDeliverMapper.searchReturnRefundSplitCount(storefront.getId(), 2));//已完成
+            }else if(type==2){
+                resultMap.put("needNumber",mendOrderMapper.searchReturnRrefundCount(storefront.getId(), type, 1));//待处理
+                resultMap.put("completeNumber",mendOrderMapper.searchReturnRrefundCount(storefront.getId(), type, 2));//已处理
+            }
 
+            return ServerResponse.createBySuccess("查询成功",resultMap);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     /**
      *店铺--售后处理--待处理列表
@@ -581,7 +609,7 @@ public class MendMaterielService {
      * @param cityId 城市ID
      * @param userId 用户ID
      * @param pageDTO
-     * @param state 状态默认：1.已分发供应商 2.已结束
+     * @param state 状态默认：2.已分发供应商 3.已结束
      * @param likeAddress 单号或地址
      * @return
      */

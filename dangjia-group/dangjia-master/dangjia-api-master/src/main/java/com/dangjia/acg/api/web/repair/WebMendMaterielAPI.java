@@ -20,6 +20,18 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "Web端补退货", description = "Web端补退货")
 public interface WebMendMaterielAPI {
 
+
+    /**
+     *店铺--售后处理--获取统计数量
+     * @param cityId 城市ID
+     * @param userId 用户ID
+     * @param type 查询类型：1退货退款，2仅退款
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/searchRefundCountNumber")
+    @ApiOperation(value = "店铺--售后处理--获取统计数量", notes = "店铺--售后处理--获取统计数量")
+    ServerResponse searchRefundCountNumber(@RequestParam("cityId") String cityId,@RequestParam("userId") String userId,@RequestParam("type") Integer type);
+
     /**
      *店铺--售后处理--待处理列表(退货退款/仅退款）
      * @param request
@@ -50,7 +62,7 @@ public interface WebMendMaterielAPI {
      * @param cityId 城市ID
      * @param userId 用户ID
      * @param pageDTO
-     * @param state 状态默认：1.已分发供应商 2.已结束
+     * @param state 状态默认：2.已分发供应商 3.已结束
      * @param likeAddress
      * @return
      */

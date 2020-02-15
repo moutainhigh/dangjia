@@ -68,6 +68,7 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.node.NodeProgressService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import com.dangjia.acg.util.StringTool;
@@ -79,6 +80,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -138,7 +140,7 @@ public class DjMaintenanceRecordService {
     @Autowired
     private TaskStackService taskStackService;
     @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI;
+    private MasterStorefrontService masterStorefrontService;
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
@@ -1268,7 +1270,7 @@ public class DjMaintenanceRecordService {
                     Double amountDeducted =0d;// (djMaintenanceRecordResponsibleParty.getProportion() / 100) * (djMaintenanceRecord1.getSincePurchaseAmount() + djMaintenanceRecord1.getEnoughAmount());
                     if (djMaintenanceRecordResponsibleParty.getResponsiblePartyType() == 1) {
                         AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
-                        accountFlowRecord.setState(3);
+                        accountFlowRecord.setState(6);
                         accountFlowRecord.setDefinedAccountId(djMaintenanceRecordResponsibleParty.getResponsiblePartyId());
                         accountFlowRecord.setCreateBy(userId);
                         accountFlowRecord.setHouseOrderId(djMaintenanceRecordResponsibleParty.getId());
@@ -1642,11 +1644,33 @@ public class DjMaintenanceRecordService {
     }
 
     /**
+     * 质保金变动记录查询
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse queryGuaranteeMoneyList(PageDTO pageDTO,String userId,String cityId){
+        try{
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
+            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<ResponsiblePartyDTO> list=djMaintenanceRecordResponsiblePartyMapper.queryGuaranteeMoneyList(storefront.getId());
+            PageInfo pageInfo = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功",pageInfo);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    /**
      * 缴纳质保金详情
      */
     public ServerResponse queryGuaranteeMoneyDetail(String userId, String cityId, String id) {
         try {
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
@@ -2338,13 +2362,13 @@ public class DjMaintenanceRecordService {
     public void maintenanceMinusStorefront( String maintenanceRecordId, String houseId,String storefrontId,Double sumPrice) {
         if(storefrontId!=null&&StringUtils.isNotBlank(storefrontId)){
             AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
-            accountFlowRecord.setState(3);
+            accountFlowRecord.setState(6);//滞留金扣除
             accountFlowRecord.setHouseOrderId(houseId);
-            accountFlowRecord.setDefinedAccountId(maintenanceRecordId);
+            accountFlowRecord.setDefinedAccountId(storefrontId);
+            accountFlowRecord.setDefinedName("质保金扣除");
             accountFlowRecord.setCreateBy("SYSTEM");
             accountFlowRecord.setHouseOrderId(maintenanceRecordId);
-            Storefront storefront =
-                    iMasterStorefrontMapper.selectByPrimaryKey(storefrontId);
+            Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(storefrontId);
             accountFlowRecord.setAmountBeforeMoney(storefront.getRetentionMoney());//入账前金额
             storefront.setRetentionMoney(MathUtil.sub(storefront.getRetentionMoney(),sumPrice));
             //扣除店铺占比金额

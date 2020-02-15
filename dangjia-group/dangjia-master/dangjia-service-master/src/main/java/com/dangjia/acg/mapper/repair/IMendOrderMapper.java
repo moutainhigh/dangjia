@@ -77,6 +77,7 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
             @Param("state") Integer state,
             @Param("likeAddress") String likeAddress);
 
+    Integer searchReturnRrefundCount(@Param("storefrontId") String storefrontId,@Param("type") Integer type,@Param("state") Integer state);
     /**
      * 按state 和 收货地址 搜索
      * @param type   0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
