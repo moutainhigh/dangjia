@@ -36,4 +36,7 @@ public interface IMendMaterialMapper extends Mapper<MendMateriel> {
     List<Map<String,Object>> selectSupMaterialByMendId(@Param("mendOrderId") String mendOrderId,@Param("mendDeliverId") String mendDeliverId);
 
     void updateMendDeliverIdByInfo(@Param("mendDeliverId") String mendDeliverId,@Param("mendOrderId") String mendOrderId,@Param("supplierId") String supplierId);
+
+    //查询当前订单下的总收货量，计算运费
+    Double getMendMaterialReceiverNum(@Param("mendDeliverId")String splitDeliverId,@Param("type") Integer type);
 }

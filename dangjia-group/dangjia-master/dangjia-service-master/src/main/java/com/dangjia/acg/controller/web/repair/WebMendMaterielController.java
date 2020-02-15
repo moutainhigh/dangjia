@@ -239,10 +239,18 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.queryTrialRetreatMaterial(taskId);
     }
 
+    /**
+     * 业主审核部分退货--申请平台介入/接受商家退货
+     * @param userToken
+     * @param taskId 任务ID
+     * @param description 平台介入原因
+     * @param type 审核结果：1申请平台介入 2接受商家退货数
+     * @return
+     */
     @Override
     @ApiMethod
-    public ServerResponse addPlatformComplain(String userToken,String mendOrderId,String description) {
-        return mendMaterielService.addPlatformComplain(userToken,mendOrderId,description);
+    public ServerResponse addPlatformComplain(String userToken,String taskId,String description,Integer type) {
+        return mendMaterielService.addPlatformComplain(userToken,taskId,description,type);
     }
 
 }

@@ -227,7 +227,7 @@ public class SplitDeliverService {
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-            Double totalReceiverNum=orderSplitItemMapper.getOrderSplitReceiverNum(splitDeliver.getOrderSplitId());//查询当前收货单下的总收货量
+            Double totalReceiverNum=orderSplitItemMapper.getOrderSplitReceiverNum(splitDeliver.getOrderSplitId(),1);//查询当前收货单下的总收货量
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());

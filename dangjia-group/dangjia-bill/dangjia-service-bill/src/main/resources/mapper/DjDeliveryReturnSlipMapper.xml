@@ -66,6 +66,7 @@
         rmd.ship_name as shipName,
         (case when rmd.shipping_state=6 then 1 else rmd.shipping_state end) as shippingState,
         rmd.total_amount as totalAmount,
+        rmd.apply_money applyMoney,
         2 as invoiceType,
         rmd.house_id as houseId,
         rmd.supplier_id as supId
@@ -78,7 +79,7 @@
             rmd.ship_address LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
-        <if test='invoiceStatus!=1'>
+        <if test='invoiceStatus==1'>
             AND rmd.shipping_state in(1,6)
         </if>
         <if test='invoiceStatus!=-1 and invoiceStatus!=1'>
