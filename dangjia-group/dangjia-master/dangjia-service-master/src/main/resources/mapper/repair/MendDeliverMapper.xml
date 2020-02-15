@@ -114,7 +114,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                   md.supplier_name supName,
                   md.id mendDeliverId,
                   md.number mendDeliverNumber,
-                 (case when rmd.shipping_state=6 then 1 else rmd.shipping_state end) as state
+                 (case when md.shipping_state=6 then 1 else md.shipping_state end) as state
             FROM
                 dj_repair_mend_order t,
                 dj_member m,
