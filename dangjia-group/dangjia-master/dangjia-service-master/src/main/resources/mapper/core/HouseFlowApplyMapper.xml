@@ -494,6 +494,7 @@
             a.worker_id workerId,
             w. NAME workerName,
             a.apply_dec applyDec,
+            a.create_date createDate,
             GROUP_CONCAT(i.image_url) imageList
         FROM
             `dj_core_house_flow_apply` a

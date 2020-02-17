@@ -1,5 +1,6 @@
 package com.dangjia.acg.common.util.nimserver;
 
+import com.dangjia.acg.common.wechat.HttpClientUtil;
 import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -42,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  * 带连接池的HTTP
  */
 
-public class HttpClientUtil {
+public class HttpClientWyUtil {
 
     private static final String TAG_CHARSET = "charset=";
 
@@ -59,36 +60,36 @@ public class HttpClientUtil {
     private String resCharset = DEFAULT_CHARSET;
     private String agentHeader = "Netease/0.1";
 
-    public HttpClientUtil() {
+    public HttpClientWyUtil() {
 
     }
 
-    public HttpClientUtil(int conntimeout, int sotimeout) {
+    public HttpClientWyUtil(int conntimeout, int sotimeout) {
         this.sotimeout = sotimeout;
         this.conntimeout = conntimeout;
     }
 
-    public HttpClientUtil(int maxConnection, int conntimeout, int sotimeout) {
+    public HttpClientWyUtil(int maxConnection, int conntimeout, int sotimeout) {
         this(conntimeout, sotimeout);
         this.maxConnection = maxConnection;
     }
 
-    public HttpClientUtil(int maxConnection, String charset, int conntimeout, int sotimeout) {
+    public HttpClientWyUtil(int maxConnection, String charset, int conntimeout, int sotimeout) {
         this(conntimeout, sotimeout);
         this.maxConnection = maxConnection;
         this.reqCharset = charset;
     }
 
-    public HttpClientUtil(int maxConnection) {
+    public HttpClientWyUtil(int maxConnection) {
         this.maxConnection = maxConnection;
     }
 
-    public HttpClientUtil(int maxConnection, String charset) {
+    public HttpClientWyUtil(int maxConnection, String charset) {
         this.maxConnection = maxConnection;
         this.reqCharset = charset;
     }
 
-    public HttpClientUtil(int maxConnection, String charset, String resCharset) {
+    public HttpClientWyUtil(int maxConnection, String charset, String resCharset) {
         this.maxConnection = maxConnection;
         this.reqCharset = charset;
         this.resCharset = resCharset;

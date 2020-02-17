@@ -30,17 +30,17 @@ public class NIMPost {
 
     public static String postNIMServer(String url, final HttpEntity entity, String appKey, String appSecret)
             throws IOException {
-        HttpClientUtil httpClientUtil = new HttpClientUtil();
+        HttpClientWyUtil httpClientUtil = new HttpClientWyUtil();
         HttpPost post = httpClientUtil.createPost(url, entity, null);
 
         // addHeader
-        HttpClientUtil.addHeader(post, "AppKey", appKey);
+        HttpClientWyUtil.addHeader(post, "AppKey", appKey);
         String nonce = UUIDUtil.getUUID();
         String curTime = String.valueOf(System.currentTimeMillis() / 1000);
-        HttpClientUtil.addHeader(post, "Nonce", nonce);
-        HttpClientUtil.addHeader(post, "CurTime", curTime);
+        HttpClientWyUtil.addHeader(post, "Nonce", nonce);
+        HttpClientWyUtil.addHeader(post, "CurTime", curTime);
         String checksum = getCheckSum(nonce, curTime, appSecret);
-        HttpClientUtil.addHeader(post, "CheckSum", checksum);
+        HttpClientWyUtil.addHeader(post, "CheckSum", checksum);
 
         // logger
         logger.info("Nonce {} | CurlTime {} | CheckSum {}", new Object[]{nonce, curTime, checksum});

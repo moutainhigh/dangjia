@@ -1024,11 +1024,16 @@ public class HouseFlowApplyService {
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+            Example example = new Example(HouseFlowApply.class);
+            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowApply.getHouseFlowId())
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, houseFlowApply.getApplyType())
+                    .andEqualTo(HouseFlowApply.WORKER_ID, houseFlowApply.getWorkerId());
+            Integer yanShouNum =  houseFlowApplyMapper.selectCountByExample(example);
             houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
             houseFlowApplyDTO.setWorkerId(worker.getId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
-            houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
+            houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType())+"(第"+CommonUtil.numberToChinese(yanShouNum)+"次申请)");
             houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
             houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
             houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
@@ -1040,6 +1045,9 @@ public class HouseFlowApplyService {
             for (Map map : list) {
                 if(map.get("imageList")!=null) {
                     map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
+                }
+                if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
+
                 }
             }
             houseFlowApplyDTO.setList(list);
@@ -1077,6 +1085,12 @@ public class HouseFlowApplyService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);//大管家的hf
+
+            Example example = new Example(HouseFlowApply.class);
+            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowApply.getHouseFlowId())
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, houseFlowApply.getApplyType())
+                    .andEqualTo(HouseFlowApply.WORKER_ID, houseFlowApply.getWorkerId());
+            Integer yanShouNum =  houseFlowApplyMapper.selectCountByExample(example);
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
             if (supervisorHF != null) {
                     houseFlowApplyDTO.setSupervisorHouseFlowId(supervisorHF.getId());
@@ -1086,7 +1100,7 @@ public class HouseFlowApplyService {
             }
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
-            houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
+            houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType())+"(第"+CommonUtil.numberToChinese(yanShouNum)+"次申请)");
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
             houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
             houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
