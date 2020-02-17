@@ -226,7 +226,7 @@ public class HttpClientWyUtil {
     }
 
     public String postData(String url, final HttpEntity entity) throws IOException {
-        return fetchData(this.createPost(url, entity, null));
+        return fetchData(this. createPost(url, entity, null));
     }
 
     public String postData(String url, final List<NameValuePair> params) throws IOException {
