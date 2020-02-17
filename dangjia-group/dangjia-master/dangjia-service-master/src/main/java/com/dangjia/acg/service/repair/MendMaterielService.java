@@ -157,7 +157,7 @@ public class MendMaterielService {
             resultMap.put("state",mendOrder.getState());//申请状态，1待分配
             resultMap.put("imageUrl",StringTool.getImage(mendOrder.getImageArr(),address));//退货图片，相关凭证
             resultMap.put("mendOrderId",mendOrderId);
-            resultMap.put("mendMaterialList",mendMaterialList);//要货单明细表
+            resultMap.put("mendMaterielList",mendMaterialList);//要货单明细表
             return ServerResponse.createBySuccess("查询成功", resultMap);
         } catch (Exception e) {
             logger.error("查询失败",e);
@@ -511,7 +511,7 @@ public class MendMaterielService {
            resultMap.put("totalStevedorageCost",mendOrder.getTotalStevedorageCost());
            resultMap.put("carriage",mendOrder.getCarriage());
            resultMap.put("mendOrderId",mendOrderId);
-           resultMap.put("mendMaterialList",mendMaterialList);//要货单明细表
+           resultMap.put("mendMaterielList",mendMaterialList);//要货单明细表
            return ServerResponse.createBySuccess("查询成功", resultMap);
        }catch(Exception e){
            logger.error("查询失败");
@@ -661,7 +661,7 @@ public class MendMaterielService {
      * @param mendDeliverId 退货单ID
      * @return
      */
-    public ServerResponse queryMendMaterialList(String mendDeliverId) {
+    public ServerResponse queryMendMaterielList(String mendDeliverId) {
         try{
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             MendDeliver mendDeliver = mendDeliverMapper.selectByPrimaryKey(mendDeliverId);//补退订单表
@@ -677,9 +677,9 @@ public class MendMaterielService {
                 mendDeliverDTO.setState(1);
             }
             //2.获取对应的发货单明细信息
-            List<OrderSplitItemDTO> mendMaterialList=mendMaterialMapper.searchReturnRefundMaterielList(mendDeliver.getMendOrderId(),mendDeliverId);
-            if(mendMaterialList!=null&&mendMaterialList.size()>0){
-                for (OrderSplitItemDTO sd:mendMaterialList){
+            List<OrderSplitItemDTO> mendMaterielList=mendMaterialMapper.searchReturnRefundMaterielList(mendDeliver.getMendOrderId(),mendDeliverId);
+            if(mendMaterielList!=null&&mendMaterielList.size()>0){
+                for (OrderSplitItemDTO sd:mendMaterielList){
                     if(sd.getActualCount()==null){
                         sd.setActualCount(sd.getShopCount());
                     }
@@ -717,7 +717,7 @@ public class MendMaterielService {
             }else{
                 mendDeliverDTO.setIsNonPlatformSupplier("0");//是否非平台供应商
             }
-            mendDeliverDTO.setMendMaterielList(mendMaterialList);
+            mendDeliverDTO.setMendMaterielList(mendMaterielList);
             return ServerResponse.createBySuccess("查询成功", mendDeliverDTO);
         }catch (Exception e){
           logger.error("查询失败",e);
@@ -891,10 +891,10 @@ public class MendMaterielService {
                mendDeliverDTO.setStorefrontMobile(storefront.getMobile());
             }
             //2.获取对应的发货单明细信息
-            List<OrderSplitItemDTO> mendMaterialList=mendMaterialMapper.searchReturnRefundMaterielList(mendDeliver.getMendOrderId(),mendDeliver.getId());
-            if(mendMaterialList!=null&&mendMaterialList.size()>0){
+            List<OrderSplitItemDTO> mendMaterielList=mendMaterialMapper.searchReturnRefundMaterielList(mendDeliver.getMendOrderId(),mendDeliver.getId());
+            if(mendMaterielList!=null&&mendMaterielList.size()>0){
                 String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-                for (OrderSplitItemDTO sd:mendMaterialList){
+                for (OrderSplitItemDTO sd:mendMaterielList){
                     if(sd.getActualCount()==null){
                         sd.setActualCount(sd.getShopCount());
                     }
@@ -910,7 +910,7 @@ public class MendMaterielService {
                     }
                 }
             }
-            mendDeliverDTO.setMendMaterielList(mendMaterialList);//退货详情列表
+            mendDeliverDTO.setMendMaterielList(mendMaterielList);//退货详情列表
             return ServerResponse.createBySuccess("查询成功", mendDeliverDTO);
         } catch (Exception e) {
             logger.error("查询失败",e);

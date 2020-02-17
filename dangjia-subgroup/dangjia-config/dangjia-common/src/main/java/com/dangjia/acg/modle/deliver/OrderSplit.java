@@ -23,6 +23,12 @@ import java.util.Date;
 @FieldNameConstants(prefix = "")
 public class OrderSplit extends BaseEntity {
 
+
+	@Column(name = "split_parent_id")
+	@Desc(value = "父订单ID")
+	@ApiModelProperty("父订单ID")
+	private String splitParentId;
+
 	@Column(name = "number")
 	@Desc(value = "订单号")
 	@ApiModelProperty("订单号")

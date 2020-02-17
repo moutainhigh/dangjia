@@ -124,9 +124,9 @@ public interface WebMendMaterielAPI {
      * @param mendDeliverId 退货单ID
      * @return
      */
-    @PostMapping(value = "web/repair/webMendMateriel/queryMendMaterialList")
+    @PostMapping(value = "web/repair/webMendMateriel/queryMendMaterielList")
     @ApiOperation(value = "退货退款—退货详情列表", notes = "退货退款—退货详情列表")
-    ServerResponse queryMendMaterialList(@RequestParam("mendDeliverId") String mendDeliverId);
+    ServerResponse queryMendMaterielList(@RequestParam("mendDeliverId") String mendDeliverId);
 
 
     /**

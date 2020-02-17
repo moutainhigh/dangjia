@@ -204,8 +204,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryMendMaterialList(String mendDeliverId) {
-        return mendMaterielService.queryMendMaterialList(mendDeliverId);
+    public ServerResponse queryMendMaterielList(String mendDeliverId) {
+        return mendMaterielService.queryMendMaterielList(mendDeliverId);
     }
 
     /**

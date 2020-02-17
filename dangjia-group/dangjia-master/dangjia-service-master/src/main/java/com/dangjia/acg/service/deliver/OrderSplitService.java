@@ -481,6 +481,13 @@ public class OrderSplitService {
         orderSplit.setModifyDate(new Date());
         orderSplitMapper.updateByPrimaryKeySelective(orderSplit);//修改要货单信息
 
+        OrderSplit orderSplitParent=orderSplitMapper.selectByPrimaryKey(orderSplit.getSplitParentId());
+        if(orderSplitParent!=null&&orderSplitParent.getApplyStatus()==1){
+            orderSplitParent.setApplyStatus(2);
+            orderSplitParent.setModifyDate(new Date());
+            orderSplitMapper.updateByPrimaryKeySelective(orderSplitParent);
+        }
+
         if(StringUtils.isNotBlank(splitDeliverId)){//如果发货单ID不为空，则删除旧的发货单
             splitDeliverMapper.deleteByPrimaryKey(splitDeliverId);
         }
