@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.core;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -1249,9 +1251,11 @@ public class CraftsmanConstructionService {
         }
         List<ButtonListBean> topButton=new ArrayList<>();//头部按钮
         List<ButtonListBean> footButton=new ArrayList<>();//底部按钮
+        JSONObject paramVal=new JSONObject();
         HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hfl.getId(), worker2 == null ? "" : worker2.getId());//根据工种任务id和工人id查询此工人待审核
         if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
-            footButton.add(Utils.getButton("审核阶段完工", 3021));
+            paramVal.put("houseFlowApplyId",houseFlowApp.getId());
+            footButton.add(Utils.getButton("审核阶段完工", JSON.toJSONString(paramVal), 3021));
             topButton.add( Utils.getButton("奖罚", 3011));
             if(houseWorker!=null&&houseWorker.getWorkType()!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
                 topButton.add(Utils.getButton("换人审核中", 3013));
@@ -1260,7 +1264,8 @@ public class CraftsmanConstructionService {
             }
             wfr.setState(4);//装修进度0：未进场；1：待审核工匠；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
         } else if (houseFlowApp != null && houseFlowApp.getApplyType() == 2) {
-            footButton.add(Utils.getButton("审核整体完工", 3022));
+            paramVal.put("houseFlowApplyId",houseFlowApp.getId());
+            footButton.add(Utils.getButton("审核整体完工", JSON.toJSONString(paramVal),3022));
             wfr.setState(6);
         } else {
             topButton.add(Utils.getButton("申请停工", 3010));

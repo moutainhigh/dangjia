@@ -13,6 +13,7 @@ import lombok.Data;
 @Data
 public class ButtonListBean {
     private String url;
+    private String paramVal;//其他所需参数值，统一为JSON对象格式
     /**
      * 按钮类型： 1000：URL跳转
      * 设计师：

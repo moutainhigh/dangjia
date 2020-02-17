@@ -503,7 +503,7 @@
         INNER JOIN dj_member w ON w.id = a.worker_id
         LEFT JOIN dj_core_house_flow_apply_image i ON i.house_flow_apply_id = a.id
         WHERE
-            (a.`id` = =#{houseFlowApplyId}) or  (a.house_flow_apply_id==#{houseFlowApplyId})
+            (a.`id` = #{houseFlowApplyId}) or  (a.house_flow_apply_id=#{houseFlowApplyId})
         ORDER BY a.create_date
     </select>
 
