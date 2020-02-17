@@ -49,6 +49,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -1040,13 +1041,17 @@ public class HouseFlowApplyService {
             if (houseFlowApply.getEndDate() != null) {
                 houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
             }
+            List<String> imageList=new ArrayList<>();
+            setImageList(houseFlowApply.getId(),address,imageList);
             //工匠的进程明细
             List<Map> list  = houseFlowApplyMapper.getApplyCheckInfo(houseFlowApplyId);
             for (Map map : list) {
                 if(map.get("imageList")!=null) {
                     map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
                 }
+
                 if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
+                    map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList")))+","+StringUtils.join(imageList.toArray(),"."));
                     map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
                 }else if(Integer.parseInt((String)map.get("workerType"))==3){
                     map.put("applyTypeName", "审核不通过");
@@ -1117,6 +1122,8 @@ public class HouseFlowApplyService {
             if (houseFlowApply.getStartDate() != null) {
                 houseFlowApplyDTO.setStartDate(houseFlowApply.getStartDate().getTime() - new Date().getTime()); //自动审核时间
             }
+            List<String> imageList=new ArrayList<>();
+            setImageList(houseFlowApply.getId(),address,imageList);
             //工匠的进程明细
             List<Map> list  = houseFlowApplyMapper.getApplyCheckInfo(houseFlowApplyId);
             for (Map map : list) {
@@ -1125,6 +1132,7 @@ public class HouseFlowApplyService {
                 }
                 if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
                     map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
+                    map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList")))+","+StringUtils.join(imageList.toArray(),"."));
                 }else if(Integer.parseInt((String)map.get("workerType"))==3){
                     map.put("applyTypeName", "审核不通过");
                     if(houseFlowApplyDTO.getSupervisorCheck()==1){
