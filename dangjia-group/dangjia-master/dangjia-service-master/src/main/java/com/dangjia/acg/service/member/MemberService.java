@@ -1304,7 +1304,7 @@ public class MemberService {
             }
 
             //查询技能徽章
-            example = new Example(Insurance.class);
+            example = new Example(DjSkillCertification.class);
             example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, worker.getId())
                     .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
             List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
