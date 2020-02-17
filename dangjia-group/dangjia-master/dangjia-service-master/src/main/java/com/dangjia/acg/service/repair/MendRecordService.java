@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -186,12 +187,12 @@ public class MendRecordService {
                 /*
                 计算要货单钱
                  */
-                mendOrderDetail.setTotalAmount(orderSplitItemMapper.getOrderSplitPrice(mendOrderId));
+                mendOrderDetail.setTotalAmount(orderSplit.getTotalAmount().doubleValue());
 
                 List<Map<String, Object>> mapList = new ArrayList<>();
-                Example example = new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
-                List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+                /*Example example = new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());*/
+                List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectSplitItemList(orderSplit.getId(),null);
 
                 for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                     Map<String, Object> map = new HashMap<>();
@@ -533,11 +534,12 @@ public class MendRecordService {
     }
 
     private void getOrderSplitList(String houseId, Integer type, String queryId, List<Map<String, Object>> returnMap) {
-        Example example = new Example(OrderSplit.class);
+       /* Example example = new Example(OrderSplit.class);
         example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId)
                 .andNotEqualTo(OrderSplit.APPLY_STATUS, 0);
-        example.orderBy(OrderSplit.CREATE_DATE).desc();
-        List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+        example.orderBy(OrderSplit.CREATE_DATE).desc();*/
+        Example example;
+        List<OrderSplit> orderSplitList = orderSplitMapper.selectOrderSplitList(houseId);//selectByExample(example);
         for (OrderSplit orderSplit : orderSplitList) {
             Map<String, Object> map = new HashMap<>();
             map.put("mendOrderId", orderSplit.getId());
@@ -547,11 +549,11 @@ public class MendRecordService {
             map.put("createDate", orderSplit.getCreateDate());
             map.put("type", type);
             if (!CommonUtil.isEmpty(queryId)) {
-                example = new Example(OrderSplitItem.class);
+                /*example = new Example(OrderSplitItem.class);
                 example.createCriteria()
                         .andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId())
-                        .andEqualTo(OrderSplitItem.PRODUCT_ID, queryId);
-                List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);
+                        .andEqualTo(OrderSplitItem.PRODUCT_ID, queryId);*/
+                List<OrderSplitItem> orderSplitItems  = orderSplitItemMapper.selectSplitItemList(orderSplit.getId(),queryId);
                 if (orderSplitItems.size() > 0) {
                     returnMap.add(map);
                 }
@@ -736,9 +738,9 @@ public class MendRecordService {
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
             //后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过, 4待业主支付,5已撤回
             Integer applyStatus = orderSplit.getApplyStatus();
-            Example example = new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
-            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            /*Example example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());*/
+            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectSplitItemList(orderSplit.getId(),null);
             //无补货且在申请中
             if (orderSplit.getMendNumber() == null && applyStatus == 1) {
                 updateWarehouseList(orderSplit, orderSplitItemList);
@@ -852,6 +854,8 @@ public class MendRecordService {
     }
 
     private void updateWarehouseList(OrderSplit orderSplit, List<OrderSplitItem> orderSplitItemList) {
+        //修改要货子单的状态也为已撤回
+        orderSplitMapper.updateOrderSplitStatus(orderSplit.getId());
         for (OrderSplitItem orderSplitItem : orderSplitItemList) {
             Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
             warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());//更新仓库已要总数

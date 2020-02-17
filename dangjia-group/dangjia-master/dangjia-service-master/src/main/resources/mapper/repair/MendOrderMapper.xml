@@ -309,7 +309,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             t.apply_member_id memberId,
             madress.address address,
             m.`name` memberName,
-            m.mobile memberMobile
+            m.mobile memberMobile,
+            t.state
         FROM
             dj_repair_mend_order t,
           dj_member m,

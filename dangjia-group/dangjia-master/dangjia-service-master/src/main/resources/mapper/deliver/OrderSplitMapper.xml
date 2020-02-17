@@ -91,5 +91,39 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             )
 
     </select>
+
+    <select id="selectOrderSplitList" resultType="com.dangjia.acg.modle.deliver.OrderSplit">
+        SELECT
+            t.id,
+            t.split_parent_id splitParentId,
+            t.create_date createDate,
+            t.modify_date modifyDate,
+            t.number,
+            t.house_id houseId,
+            t.apply_status applyStatus,
+            t.member_id memberId,
+            t.member_name memberName,
+            t.mobile,
+            t.worker_type_id workerTypeId,
+            t.mend_number mendNumber,
+            t.storefront_id storefrontId,
+            t.address_id addressId,
+            t.city_id cityId,
+            t.order_id orderId
+        FROM
+            dj_deliver_order_split t
+        WHERE
+            t.house_id =#{houseId}
+        AND NOT EXISTS (
+            SELECT
+                1 from dj_deliver_order_split d
+            WHERE
+                t.id = d.split_parent_id
+        )
+    </select>
+
+    <update id="updateOrderSplitStatus">
+        update dj_deliver_order_split set apply_status=5 where split_parent_id=#{orderSplitId} or id=#{orderSplitId}
+    </update>
 </mapper>
 
