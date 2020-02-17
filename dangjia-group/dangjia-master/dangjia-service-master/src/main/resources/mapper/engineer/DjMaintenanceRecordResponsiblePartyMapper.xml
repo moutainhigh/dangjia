@@ -146,32 +146,46 @@
         SELECT
             t.id accountflowRecordId,
             t.house_order_id maintenanceRecordId,
+            t.state,
             IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,-- 房子地址
             t.create_date as createDate -- 时间
         FROM
             dj_account_flow_record t,
             dj_house dh
         WHERE
-            t.state = 6
+            t.state in(6,7)
         AND t.house_id = dh.id
         and t.defined_account_id=#{storefrontId}
+        order by t.create_date desc
     </select>
 
     <select id="queryGuaranteeMoneyDetail" resultType="com.dangjia.acg.dto.engineer.ResponsiblePartyDetailDTO">
-        select
-        dmr.house_id as houseId,
-        IFNULL(dmr.create_date,'') as createDate, -- 时间
-        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
-        dmr.since_purchase_amount+dmr.enough_amount as totalAmount,-- 维保总金额
-        rrp.proportion as proportion,-- 维保责任方占比
-        dm.worker_type_id as workerTypeId -- 工匠类型
-        from dj_maintenance_record dmr
-        inner join dj_maintenance_record_responsible_party rrp on
-        rrp.maintenance_record_id=dmr.id
-        inner join dj_house dh on dmr.house_id=dh.id
-        inner join dj_member dm on dm.id=dmr.worker_member_id
-        where rrp.responsible_party_id='0001' and dmr.state=2 and rrp.id=#{id}
-
+        SELECT
+            rrp.id responsiblePartyId,
+            dmr.house_id AS houseId,
+            IFNULL(dmr.create_date, '') AS createDate,	-- 时间
+            IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+            rrp.maintenance_total_price totalAmount,-- 维保总金额
+            rrp.proportion AS proportion,-- 维保责任方占比
+            dm.worker_type_id AS workerTypeId, -- 工匠类型
+            rrp.create_date responsiblePartyDate, -- 责任划分时间
+            DATE_ADD(rrp.create_date,INTERVAL 3 DAY) endResponsiblePartyDate,-- 可申诉截止时间
+            IFNULL(c.`status`,-1) complainStatus, -- 申诉状态
+            c.id complainId,
+            c.reject_reason complainReason,
+            c.image complainImage,
+            c.content complainContent,
+            (case when rrp.complain_id is null and DATE_ADD(rrp.create_date,INTERVAL 3 DAY)>NOW() then 1 else 2 end ) isComplain
+        FROM
+            dj_maintenance_record dmr
+        INNER JOIN dj_maintenance_record_responsible_party rrp ON rrp.maintenance_record_id = dmr.id
+        INNER JOIN dj_house dh ON dmr.house_id = dh.id
+        INNER JOIN dj_member dm ON dm.id = dmr.worker_member_id
+        LEFT JOIN dj_complain c on rrp.complain_id=c.id
+        WHERE
+            rrp.responsible_party_type = 1
+        AND dmr.state = 2
+        AND dmr.id = #{maintenanceRecordId}
     </select>
 
 </mapper>

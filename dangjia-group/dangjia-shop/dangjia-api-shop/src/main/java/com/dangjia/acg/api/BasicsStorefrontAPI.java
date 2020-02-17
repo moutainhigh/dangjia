@@ -34,6 +34,20 @@ public interface BasicsStorefrontAPI {
                                          @RequestParam("cityId") String cityId,
                                          @RequestParam("type") Integer type);
 
+    /**
+     * 获取需缴纳的滞留金
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param type 类型：1店铺，2供应商
+     * @return
+     */
+    @PostMapping("/web/getRetentionMoneyInfo")
+    @ApiOperation(value = "获取当前滞留金信息", notes = "获取当前滞留金信息")
+    ServerResponse getRetentionMoneyInfo(@RequestParam("userId") String userId,
+                                         @RequestParam("cityId") String cityId,
+                                         @RequestParam("type") Integer type);
+
+
     @PostMapping("/web/queryStorefrontByUserID")
     @ApiOperation(value = "通过用户ID查询店铺", notes = "通过用户ID查询店铺")
     Storefront queryStorefrontByUserID(@RequestParam("userId") String userId,

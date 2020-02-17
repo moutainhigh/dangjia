@@ -200,7 +200,7 @@ public class OrderSplitService {
      */
     public ServerResponse splitDeliverDetail(String splitDeliverId) {
         try {
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
             if(splitDeliver==null){
                 return ServerResponse.createByErrorMessage("未找到符合条件的订单");
@@ -808,7 +808,7 @@ public class OrderSplitService {
             //2.查询对应的需要分发的要货单明细
             List<OrderSplitItemDTO> orderSplitItemList=orderSplitItemMapper.getSplitOrderItemBySplitOrderId(orderSplitId,splitDeliverId);
             if(orderSplitItemList!=null&&orderSplitItemList.size()>0){
-                String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+                String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
                 for (OrderSplitItemDTO sd:orderSplitItemList){
                   //2.1查询当前订单对应的购买总量，已要货量
                     Map<String,Object> countItemMap=iOrderItemMapper.searchCountItemByInfo(orderSplit.getStorefrontId(),orderSplit.getAddressId(),orderSplit.getHouseId(),sd.getProductId());

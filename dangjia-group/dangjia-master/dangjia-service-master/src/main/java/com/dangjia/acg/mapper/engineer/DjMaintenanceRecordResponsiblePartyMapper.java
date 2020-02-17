@@ -29,5 +29,5 @@ public interface DjMaintenanceRecordResponsiblePartyMapper extends Mapper<DjMain
 
     List<ResponsiblePartyDTO> queryGuaranteeMoneyList(@Param("storefrontId") String storefrontId);
 
-    ResponsiblePartyDetailDTO queryGuaranteeMoneyDetail(@Param("id") String id);
+    ResponsiblePartyDetailDTO queryGuaranteeMoneyDetail(@Param("maintenanceRecordId") String maintenanceRecordId);
 }

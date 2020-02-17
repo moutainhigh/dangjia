@@ -127,6 +127,60 @@ public class StorefrontService {
         }
         return ServerResponse.createBySuccess("查询成功",needRetentionMoney);
     }
+
+    /**
+     * 获取当前滞留金信息
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param type 类型
+     * @return 类型：1店铺，2供应商
+     */
+    public ServerResponse getRetentionMoneyInfo(String userId,String cityId,Integer type){
+        try{
+            Map<String,Object> resultMap=new HashMap<>();
+            Double needRetentionMoney=0d;//所需滞留金
+            Double totalRetentionMoney=2000d;//应滞留金
+            Example example;
+            if(type==1){//店铺
+                Storefront storefront =storefrontService.queryStorefrontByUserID(userId,cityId);
+                Config config=storeConfigService.selectConfigInfoByParamKey("SHOP_RETENTION_MONEY");//获取滞留金缴纳金额
+                if(config!=null&& StringUtils.isNotBlank(config.getParamValue())){
+                    totalRetentionMoney=Double.parseDouble(config.getParamValue());
+                }
+                if(storefront!=null&&storefront.getRetentionMoney()<totalRetentionMoney){
+                    needRetentionMoney= MathUtil.sub(totalRetentionMoney,storefront.getRetentionMoney());
+                }
+                resultMap.put("needRetentionMoney",needRetentionMoney);
+                resultMap.put("totalRetentionMoney",totalRetentionMoney);
+                resultMap.put("retentionMoney",storefront.getRetentionMoney());//当前滞留金
+
+            }else if(type==2){//供应商
+                example=new Example(DjSupplier.class);
+                example.createCriteria().andEqualTo(DjSupplier.CITY_ID,cityId)
+                        .andEqualTo(DjSupplier.USER_ID,userId)
+                        .andEqualTo(DjSupplier.DATA_STATUS,0);
+                DjSupplier djSupplier = iShopSupplierMapper.selectOneByExample(example);
+                Config config=storeConfigService.selectConfigInfoByParamKey("STORE_RETENTION_MONEY");//获取滞留金缴纳金额
+                if(config!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(config.getParamValue())){
+                    totalRetentionMoney=Double.parseDouble(config.getParamValue());
+                }
+                if(djSupplier!=null&&djSupplier.getRetentionMoney()<totalRetentionMoney){
+                    needRetentionMoney= MathUtil.sub(totalRetentionMoney,djSupplier.getRetentionMoney());
+                }
+                resultMap.put("needRetentionMoney",needRetentionMoney);
+                resultMap.put("totalRetentionMoney",totalRetentionMoney);
+                resultMap.put("retentionMoney",djSupplier.getRetentionMoney());//当前滞留金
+            }
+            return ServerResponse.createBySuccess("查询成功",resultMap);
+
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+
+    }
+
     /**
      * 根据用户Id查询店铺信息
      * @param userId

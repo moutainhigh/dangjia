@@ -136,6 +136,14 @@ public class DateUtil implements AutoCloseable, Serializable {
         return threadLocal.get().format(date);
     }
 
+    public static String getDateFormat(Date date,String partten){
+        Long curr = date.getTime();//获取当前时间戳 (毫秒)
+        System.out.println(curr); //1540202972921
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(partten);
+        System.out.println(simpleDateFormat.format(curr)); //2018-10-22 18:09:32
+        return simpleDateFormat.format(curr);
+    }
+
     /***
      * 返回枚举指定的日期类型
      *
