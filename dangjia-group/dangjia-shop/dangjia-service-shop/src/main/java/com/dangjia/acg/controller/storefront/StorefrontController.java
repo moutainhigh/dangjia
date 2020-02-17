@@ -45,6 +45,19 @@ public class StorefrontController implements BasicsStorefrontAPI {
         return storefrontService.getNeedRetentionMoney(userId, cityId,type);
     }
 
+    /**
+     * 获取当前滞留金信息
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param type 类型
+     * @return 类型：1店铺，2供应商
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getRetentionMoneyInfo(String userId,String cityId,Integer type){
+        return storefrontService.getRetentionMoneyInfo(userId, cityId,type);
+    }
+
     @Override
     @ApiMethod
     public Storefront queryStorefrontByUserID(String userId, String cityId) {
@@ -157,8 +170,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public Integer setStorefrontSurplusMoney() {
-        return storefrontService.setStorefrontSurplusMoney();
+    public void setStorefrontSurplusMoney() {
+         storefrontService.setStorefrontSurplusMoney();
     }
 
     /**

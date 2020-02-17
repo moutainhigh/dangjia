@@ -138,7 +138,7 @@ public class MendMaterielService {
             if(mendOrder.getState()!=1){
                 return ServerResponse.createByErrorMessage("不是处理中的单，不能操作分发");
             }
-            String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             //查询申请退货单明细
             List<OrderSplitItemDTO> mendMaterialList=mendMaterialMapper.searchReturnRefundMaterielList(mendOrderId,null);
             if(mendMaterialList!=null&&mendMaterialList.size()>0){
@@ -497,7 +497,7 @@ public class MendMaterielService {
            if(mendOrder==null){
                return ServerResponse.createByErrorMessage("未找到符合条件的退货单");
            }
-           String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+           String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
            //查询申请退货单明细
            List<OrderSplitItemDTO> mendMaterialList=mendMaterialMapper.searchReturnRefundMaterielList(mendOrderId,null);
            if(mendMaterialList!=null&&mendMaterialList.size()>0){
@@ -663,7 +663,7 @@ public class MendMaterielService {
      */
     public ServerResponse queryMendMaterialList(String mendDeliverId) {
         try{
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             MendDeliver mendDeliver = mendDeliverMapper.selectByPrimaryKey(mendDeliverId);//补退订单表
             if (mendDeliver == null) {
                 return ServerResponse.createByErrorMessage("未找到符合条件订单");
