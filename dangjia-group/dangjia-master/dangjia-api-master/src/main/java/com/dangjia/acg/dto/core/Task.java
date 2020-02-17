@@ -49,5 +49,6 @@ public class Task {
      */
     private int type;//1支付任务,2补货补人工,3审核验收任务,4大管家审核退,5审核工匠
     private String taskId;//houseFlowId,mendOrderId,houseFlowApplyId
+    private String paramVal;//其他所需参数值，统一为JSON对象格式
 
 }
