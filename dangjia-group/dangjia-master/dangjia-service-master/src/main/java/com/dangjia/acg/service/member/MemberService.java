@@ -19,6 +19,7 @@ import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
@@ -34,10 +35,10 @@ import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
-import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.store.Store;
@@ -127,6 +128,13 @@ public class MemberService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
+
+
+    @Autowired
+    private IInsuranceMapper iInsuranceMapper;
+
+    @Autowired
+    private DjSkillCertificationMapper djSkillCertificationMapper;
 
     /****
      * 注入配置
@@ -1236,9 +1244,11 @@ public class MemberService {
      * @return 我的页面
      */
     public ServerResponse getMyHomePage(String userToken, Integer userRole) {
+
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         if (userRole == 1) {
             HomePageBean homePageBean = new HomePageBean();
-            homePageBean.setList(getMyMenuList(userRole, null));
+//            homePageBean.setList(getMyMenuList(userRole, null));
             return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
         } else {
             Object object = constructionService.getMember(userToken);
@@ -1272,52 +1282,45 @@ public class MemberService {
             example1.createCriteria().andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId());
             Integer orderTakingNum = houseWorkerOrderMapper.selectCountByExample(example1);
             homePageBean.setOrderTakingNum(orderTakingNum);
-            homePageBean.setList(getMyMenuList(userRole, worker.getWorkerType()));
+
+            //查询保险徽章
+            Example example = new Example(Insurance.class);
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID,worker.getId())
+                    .andEqualTo(Insurance.DATA_STATUS, 0);
+            example.orderBy(Insurance.CREATE_DATE).desc();
+            List<Insurance> insurance = iInsuranceMapper.selectByExample(example);
+            List<Map<String, Object>> list = new ArrayList<>();
+            Map<String, Object> map = new HashMap<>();
+            if(insurance != null && insurance.size() >0){
+                if (new Date().getTime() <= insurance.get(0).getEndDate().getTime()) {
+                    map.put("type",0);//保险期内
+                }else{
+                    map.put("type",1);//保险期外
+                }
+                map.put("name","保险详情");
+                map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
+                map.put("id",insurance.get(0).getId());
+                list.add(map);
+            }
+
+            //查询技能徽章
+            example = new Example(Insurance.class);
+            example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, worker.getId())
+                    .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+            List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+            if(djSkillCertifications != null && djSkillCertifications.size() >0){
+                map = new HashMap<>();
+                map.put("name","技能培训");
+                map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
+                map.put("id",worker.getId());
+                list.add(map);
+            }
+            //他的徽章
+            homePageBean.setList(list);
             return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
         }
     }
 
-    private List<HomePageBean.ListBean> getMyMenuList(Integer userRole, Integer workerType) {
-        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-        Example example = new Example(MenuConfiguration.class);
-        Example.Criteria criteria = example.createCriteria()
-                .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
-                .andEqualTo(MenuConfiguration.MENU_TYPE, 1);
-        if (userRole == 1) {
-            criteria.andEqualTo(MenuConfiguration.SHOW_PROPRIETOR, 1);
-        } else if (workerType == null) {
-            criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
-        } else {
-            switch (workerType) {
-                case 1://设计师
-                    criteria.andEqualTo(MenuConfiguration.SHOW_DESIGNER, 1);
-                    break;
-                case 2://精算师
-                    criteria.andEqualTo(MenuConfiguration.SHOW_ACTUARIES, 1);
-                    break;
-                case 3://大管家
-                    criteria.andEqualTo(MenuConfiguration.SHOW_HOUSEKEEPER, 1);
-                    break;
-                default://工匠
-                    criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
-                    break;
-            }
-        }
-        example.orderBy(MenuConfiguration.SORT).asc();
-        List<MenuConfiguration> menuConfigurations = iMenuConfigurationMapper.selectByExample(example);
-        List<HomePageBean.ListBean> list = new ArrayList<>();
-        for (MenuConfiguration configuration : menuConfigurations) {
-            configuration.initPath(imageAddress, webAddress);
-            HomePageBean.ListBean listBean = new HomePageBean.ListBean();
-            listBean.setName(configuration.getName());
-            listBean.setUrl(configuration.getUrl());
-            listBean.setImageUrl(configuration.getImage());
-            listBean.setType(configuration.getType());
-            list.add(listBean);
-        }
-        return list;
-    }
 
     /**
      * 更新工匠保险信息

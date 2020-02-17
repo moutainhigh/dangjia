@@ -1079,7 +1079,7 @@ public class HouseFlowApplyService {
             HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);//大管家的hf
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
             if (supervisorHF != null) {
-                houseFlowApplyDTO.setSupervisorHouseFlowId(supervisorHF.getId());
+                    houseFlowApplyDTO.setSupervisorHouseFlowId(supervisorHF.getId());
             }
             if (house != null) {
                 houseFlowApplyDTO.setHouseName(house.getHouseName());

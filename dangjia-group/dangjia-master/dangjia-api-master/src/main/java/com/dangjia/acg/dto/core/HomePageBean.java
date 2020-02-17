@@ -25,13 +25,13 @@ public class HomePageBean {
     private Integer orderTakingNum;//接单数量
 
 
-    private List<ListBean> list;
-
-    @Data
-    public static class ListBean {
-        private String imageUrl;//菜单图片地址
-        private String name;//菜单名称
-        private String url;//点击URL
-        private int type;//0:h5;1:我的资料
-    }
+    private List list;//徽章
+//
+//    @Data
+//    public static class ListBean {
+//        private String imageUrl;//菜单图片地址
+//        private String name;//菜单名称
+//        private String url;//点击URL
+//        private int type;//0:h5;1:我的资料
+//    }
 }
