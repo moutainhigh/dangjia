@@ -1047,7 +1047,17 @@ public class HouseFlowApplyService {
                     map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
                 }
                 if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
-
+                    map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
+                }else if(Integer.parseInt((String)map.get("workerType"))==3){
+                    map.put("applyTypeName", "审核不通过");
+                    if(houseFlowApplyDTO.getSupervisorCheck()==1){
+                        map.put("applyTypeName", "审核通过");
+                    }
+                }else{
+                    map.put("applyTypeName", "审核不通过");
+                    if(houseFlowApplyDTO.getMemberCheck()==1){
+                        map.put("applyTypeName", "审核通过");
+                    }
                 }
             }
             houseFlowApplyDTO.setList(list);
@@ -1112,6 +1122,19 @@ public class HouseFlowApplyService {
             for (Map map : list) {
                 if(map.get("imageList")!=null) {
                     map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
+                }
+                if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
+                    map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
+                }else if(Integer.parseInt((String)map.get("workerType"))==3){
+                    map.put("applyTypeName", "审核不通过");
+                    if(houseFlowApplyDTO.getSupervisorCheck()==1){
+                        map.put("applyTypeName", "审核通过");
+                    }
+                }else{
+                    map.put("applyTypeName", "审核不通过");
+                    if(houseFlowApplyDTO.getMemberCheck()==1){
+                        map.put("applyTypeName", "审核通过");
+                    }
                 }
             }
             houseFlowApplyDTO.setList(list);
