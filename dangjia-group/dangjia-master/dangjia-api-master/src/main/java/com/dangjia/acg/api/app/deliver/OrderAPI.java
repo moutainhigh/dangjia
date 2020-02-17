@@ -129,4 +129,12 @@ public interface OrderAPI {
                                            @RequestParam("taskId") String taskId,
                                            @RequestParam("productArr") String productArr);
 
+    @PostMapping("app/order/checkExperience")
+    @ApiOperation(value = "体验单验收", notes = "体验单验收")
+    ServerResponse checkExperience(@RequestParam("userToken") String userToken,
+                                   @RequestParam("orderItemId") String orderItemId,
+                                   @RequestParam("remark") String remark,
+                                   @RequestParam("images") String images,
+                                   @RequestParam("orderStatus") String orderStatus);
+
 }

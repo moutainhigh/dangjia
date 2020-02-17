@@ -8,7 +8,6 @@ import com.dangjia.acg.service.deliver.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -193,5 +192,18 @@ public class OrderController implements OrderAPI {
             logger.error("提交异常",e);
             return ServerResponse.createByErrorMessage("提交失败");
         }
+    }
+
+    /**
+     * 体验单验收
+     * @param userToken 当前token
+     * @param orderItemId 子单ID
+     * @param remark 备注
+     * @param images 图片，多个逗号分隔
+     * @param orderStatus 状态 4=已上传验收  5=结束
+     * @return
+     */
+    public ServerResponse checkExperience(String userToken, String orderItemId,String remark,String images,String orderStatus){
+        return orderService.checkExperience(userToken, orderItemId, remark, images,orderStatus);
     }
 }

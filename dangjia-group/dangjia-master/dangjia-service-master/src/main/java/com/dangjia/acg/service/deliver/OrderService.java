@@ -19,10 +19,7 @@ import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.mapper.config.IMasterActuarialProductConfigMapper;
 import com.dangjia.acg.mapper.config.IMasterActuarialTemplateConfigMapper;
-import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IMasterBasicsGoodsMapper;
-import com.dangjia.acg.mapper.core.IMasterUnitMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
@@ -41,13 +38,12 @@ import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
 import com.dangjia.acg.modle.actuary.DjActuarialTemplateConfig;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
-import com.dangjia.acg.modle.design.DesignQuantityRoomProduct;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
-import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
@@ -64,7 +60,6 @@ import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.repair.MendOrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +98,8 @@ public class OrderService {
     private IOrderMapper orderMapper;
     @Autowired
     private IOrderItemMapper orderItemMapper;
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
@@ -1396,7 +1393,7 @@ public class OrderService {
                 return (ServerResponse) object;
             }
             Map returnMap=new HashMap();
-          //  House house=houseMapper.selectByPrimaryKey(houseId);
+            //  House house=houseMapper.selectByPrimaryKey(houseId);
             Example example = new Example(MemberAddress.class);
             example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, houseId);
             MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
@@ -1567,7 +1564,7 @@ public class OrderService {
             houseMapper.updateByPrimaryKeySelective(house);
 
         }else if(type==3){//结束精算
-             //1.将当前精算订单结束掉，生成退货单
+            //1.将当前精算订单结束掉，生成退货单
             Example example=new Example(Order.class);
             example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER,taskStack.getData());
             Order order=orderMapper.selectOneByExample(example);
@@ -1577,9 +1574,9 @@ public class OrderService {
             String productStr=getAccordWithProduct(orderItemDTOList);
             if(productStr!=null&& org.apache.commons.lang3.StringUtils.isNotBlank(productStr)) {
                 //自动生成退款单，且退款同意
-                 repairMendOrderService.saveRefundInfoRecord(house.getCityId(), houseId, order.getId(), productStr, new BigDecimal(0));
+                repairMendOrderService.saveRefundInfoRecord(house.getCityId(), houseId, order.getId(), productStr, new BigDecimal(0));
             }
-         }
+        }
         //2.判断是否有已待支付的订单，若有，则改为取消状态
         if(StringUtils.isNotEmpty(taskStack.getData())&&!houseId.equals(taskStack.getData())){
             //取消订单
@@ -1778,5 +1775,55 @@ public class OrderService {
         }
 
         return "";
+    }
+
+
+    /**
+     * 体验单验收
+     * @param userToken 当前token
+     * @param orderItemId 子单ID
+     * @param remark 备注
+     * @param images 图片，多个逗号分隔
+     * @param orderStatus 状态 4=已上传验收  5=结束
+     * @return
+     */
+    public ServerResponse checkExperience(String userToken, String orderItemId,String remark,String images,String orderStatus) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+
+            OrderItem orderItem = orderItemMapper.selectByPrimaryKey(orderItemId);
+            if(!CommonUtil.isEmpty(images)){
+                orderItem.setImages(images);
+                orderItem.setRemark(remark);
+                orderItem.setModifyDate(new Date());
+                orderItemMapper.updateByPrimaryKey(orderItem);
+            }
+
+            Order order=orderMapper.selectByPrimaryKey(orderItem.getOrderId());
+            order.setOrderStatus(orderStatus);
+            order.setUpdateBy(member.getId());
+            order.setModifyDate(new Date());
+            orderMapper.updateByPrimaryKey(order);
+
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria().andCondition(" work_type in(6,8) ").andEqualTo(HouseWorker.TYPE,1).andEqualTo(HouseWorker.BUSINESS_ID,order.getId());
+            List<HouseWorker> houseWorkers= houseWorkerMapper.selectByExample(example);
+            HouseWorker houseWorker=null;
+            if(houseWorkers.size()>0) {
+                houseWorker = houseWorkers.get(0);
+                houseWorker.setWorkType(8);
+                houseWorker.setModifyDate(new Date());
+                houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+            }
+            return ServerResponse.createBySuccess("体验单处理完成");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("体验单处理异常");
+        }
+
     }
 }

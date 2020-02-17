@@ -250,6 +250,11 @@ public class CraftsmanConstructionService {
                     if(houseWorker!=null && houseWorker.getWorkType()==6) {
                         dataMap.put("completedNodeNumber",0);//已完成节点数(已完成)
                         dataMap.put("labelName", "待验房");//节点名称
+
+
+                        JSONObject paramVal=new JSONObject();
+                        paramVal.put("orderItemId",houseOrderDetailDTO.getOrderItemId());
+                        paramVal.put("orderStatus",4);
                         buttonList.add(Utils.getButton("上传验房结果", 7001));
                     }else{
                         dataMap.put("completedNodeNumber",1);//已完成节点数(已完成)

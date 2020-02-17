@@ -177,4 +177,15 @@ public class OrderItem extends BaseEntity {
 	@Desc(value = "订单取消时间")
 	@ApiModelProperty("订单取消时间")
 	private Date cancellationTime;//修改人
+
+	@Column(name = "remark")
+	@Desc(value = "体验单备注	")
+	@ApiModelProperty("体验单备注")
+	private String remark;
+
+
+	@Column(name = "images")
+	@Desc(value = "体验单图片，逗号分隔")
+	@ApiModelProperty("体验单图片，逗号分隔")
+	private String images;
 }
