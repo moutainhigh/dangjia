@@ -419,22 +419,20 @@
     </select>
 
     <select id="setStorefrontSurplusMoney">
+     <![CDATA[
         UPDATE dj_basics_storefront a
-        INNER JOIN (
-        SELECT
-        storefront_id,
-        IFNULL(sum(total_amount), 0) AS surplus_money -- 总价
-        FROM
-        dj_deliver_split_deliver
-        WHERE
-        apply_state = 2
-        AND TIMESTAMPDIFF(DAY, send_time, SYSDATE())<![CDATA[<]]>7
-        GROUP BY
-        storefront_id
-        ) b ON a.id = b.storefront_id
         SET a.surplus_money = (
-        a.total_account - b.surplus_money - a.retention_money
-        )
+        case when (a.total_account - IFNULL((select sum(fr.money) from dj_account_flow_record fr where fr.state in(0,2,4) and fr.defined_account_id=a.id and fr.create_date>ADDDATE(NOW(),-7)),0))<0 then 0
+        else (a.total_account - IFNULL((select sum(fr.money) from dj_account_flow_record fr where fr.state in(0,2,4) and fr.defined_account_id=a.id and fr.create_date>ADDDATE(NOW(),-7)),0)) end
+        ),
+        a.modify_date=now()
+        where a.city_id=#{cityId}
+     ]]>
+
+    </select>
+
+    <select id="selectCityList" resultType="java.lang.String">
+        select city_id from dj_basics_storefront group by city_id
     </select>
 
     <select id="selectShopStoreByTypeCityId" resultType="com.dangjia.acg.modle.storefront.Storefront">

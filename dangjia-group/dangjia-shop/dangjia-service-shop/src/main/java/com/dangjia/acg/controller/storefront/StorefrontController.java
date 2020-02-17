@@ -170,8 +170,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public Integer setStorefrontSurplusMoney() {
-        return storefrontService.setStorefrontSurplusMoney();
+    public void setStorefrontSurplusMoney() {
+         storefrontService.setStorefrontSurplusMoney();
     }
 
     /**

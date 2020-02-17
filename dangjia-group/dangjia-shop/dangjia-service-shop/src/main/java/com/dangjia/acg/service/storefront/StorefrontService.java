@@ -22,6 +22,7 @@ import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.receipt.Receipt;
 import com.dangjia.acg.modle.repair.MendDeliver;
@@ -896,9 +897,25 @@ public class StorefrontService {
 
     /**
      * 店铺-计算可提现金额
+     * 1.提现限制：每笔收入限制7天才可提现
+     * 2.提现金额不可超过可提现金额
+     * 3.全部提现：点击默认输入全部可提现金额
+     * 4.验证支付密码才可提现（6位数字）
      */
-    public Integer setStorefrontSurplusMoney() {
-       return  istorefrontMapper.setStorefrontSurplusMoney();
+    public void setStorefrontSurplusMoney() {
+        try{
+            //1.按城市划分有多少个城市的店铺
+            List<String> cityList=istorefrontMapper.selectCityList();
+            if(cityList!=null&&cityList.size()>0){
+                for(String cityId:cityList){
+                    //根据城市修改店铺的可提现余额
+                    istorefrontMapper.setStorefrontSurplusMoney(cityId);
+                }
+            }
+
+        }catch (Exception e){
+          logger.error("计算可提现金额异常：");
+        }
     }
 
     /**
