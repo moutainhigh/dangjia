@@ -542,7 +542,12 @@ public class WalletService {
         }
 
         if (detailDTOList.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            DetailDTO detailDTO2 = new DetailDTO();
+            detailDTO2.setOutMoneyTotal(0d);
+            detailDTO2.setInMoneyTotal(0d);
+            detailDTO2.setType(0);
+            detailDTO2.setTime(CommonUtil.isEmpty(time)?"本月":time);
+            detailDTOList.add(detailDTO2);
         }
         pageResult.setList(detailDTOList);
         return ServerResponse.createBySuccess("获取成功", pageResult);
