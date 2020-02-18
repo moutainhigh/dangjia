@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.activity.DjStoreActivityMapper">
+
+    <select id="queryActivitiesByStorefront" resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
+        SELECT
+            a.activity_type AS activityType,
+            a.state,
+            if(b.store_activity_id IS NULL OR b.store_activity_id="",0,b.attended) AS attended
+        FROM
+            dj_store_activity a
+        LEFT JOIN dj_store_participate_activities b ON a.id = b.store_activity_id
+        WHERE
+            a.activity_type = #{activityType}
+        AND b.storefront_id = #{storefrontId}
+    </select>
+
+    <select id="queryActivitiesSessionByStorefront"
+            resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
+        SELECT
+            b.session,
+            d.name,
+            a.activity_start_time AS activityStartTime,
+            a.end_time AS endTime,
+            a.registration_start_time AS registrationStartTime,
+            a.end_time_registration AS endTimeRegistration,
+            b.end_session AS endSession,
+            b.session_start_time AS sessionStartTime,
+            IF (
+                c.store_activity_id IS NULL
+                OR c.store_activity_id = "",
+                0,
+                c.attended
+            ) AS attended
+        FROM
+            dj_store_activity a
+        INNER JOIN dj_activity_session b ON a.id = b.store_activity_id
+        LEFT JOIN dj_store_participate_activities c ON c.store_activity_id = a.id
+        INNER JOIN dj_other_city d ON d.id = a.city_id
+        WHERE
+            c.storefront_id =#{storefrontId}
+        AND a.id =#{id}
+    </select>
+</mapper>
