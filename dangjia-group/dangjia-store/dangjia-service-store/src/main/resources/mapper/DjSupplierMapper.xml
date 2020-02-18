@@ -136,7 +136,7 @@
         INNER JOIN (
             SELECT
                 supplier_id,
-                surplus_money
+                IFNULL(sum(surplus_money), 0) AS surplus_money
             FROM
                 (
                     SELECT

@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.label;
 
 import com.dangjia.acg.api.web.label.OptionalLabelAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.label.OptionalLabel;
 import com.dangjia.acg.service.label.OptionalLabelServices;
@@ -27,8 +28,14 @@ public class OptionalLabelController implements OptionalLabelAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryOptionalLabel(String id) {
-        return optionalLabelServices.queryOptionalLabel(id);
+    public ServerResponse queryOptionalLabel(PageDTO pageDTO) {
+        return optionalLabelServices.queryOptionalLabel(pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryOptionalLabelById(String id) {
+        return optionalLabelServices.queryOptionalLabelById(id);
     }
 
 
@@ -40,7 +47,12 @@ public class OptionalLabelController implements OptionalLabelAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse editOptionalLabel(OptionalLabel optionalLabel) {
-        return optionalLabelServices.editOptionalLabel(optionalLabel);
+    public ServerResponse editOptionalLabel(String jsonStr) {
+        try {
+            return optionalLabelServices.editOptionalLabel(jsonStr);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("标题已存在");
+        }
     }
 }

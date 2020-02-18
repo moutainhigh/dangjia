@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.product;
 
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
 import org.springframework.beans.factory.annotation.Autowired;

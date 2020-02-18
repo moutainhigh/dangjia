@@ -691,7 +691,6 @@ public class OrderService {
             return ServerResponse.createByErrorMessage("提交失败：原因：" + e.getMessage());
         }
     }
-
     /**
      * 补货提交订单回调接口根据businessOrderNumber
      *
@@ -723,8 +722,6 @@ public class OrderService {
         List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);*/
         return ServerResponse.createBySuccessMessage("提交成功");
     }
-
-
     /**
      * 补货提交订单回调接口根据orderSplitId
      *
