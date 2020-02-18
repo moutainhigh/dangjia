@@ -1810,7 +1810,7 @@ public class OrderService {
             orderMapper.updateByPrimaryKey(order);
 
             Example example = new Example(HouseWorker.class);
-            example.createCriteria().andCondition(" work_type in(6,8) ").andEqualTo(HouseWorker.TYPE,1).andEqualTo(HouseWorker.BUSINESS_ID,order.getId());
+            example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE,6).andEqualTo(HouseWorker.TYPE,1).andEqualTo(HouseWorker.BUSINESS_ID,order.getId());
             List<HouseWorker> houseWorkers= houseWorkerMapper.selectByExample(example);
             HouseWorker houseWorker=null;
             if(houseWorkers.size()>0) {

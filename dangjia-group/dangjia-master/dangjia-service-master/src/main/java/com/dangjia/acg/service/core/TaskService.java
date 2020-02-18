@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.core;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -270,6 +272,10 @@ public class TaskService {
                    task.setImage(imageAddress + workerType.getImage());
                    task.setType(1018);
                    task.setTaskId(designBusinessOrder.getId());
+                   JSONObject paramVal=new JSONObject();
+                   paramVal.put("houseFlowId",designBusinessOrder.getId());
+                   paramVal.put("type","2");
+                   task.setParamVal(JSON.toJSONString(paramVal));
                    taskList.add(task);
                }
             }
@@ -328,6 +334,10 @@ public class TaskService {
                     task.setImage(imageAddress + workerType.getImage());
                     task.setType(1018);
                     task.setTaskId(designBusinessOrder.getId());
+                    JSONObject paramVal=new JSONObject();
+                    paramVal.put("houseFlowId",designBusinessOrder.getId());
+                    paramVal.put("type","2");
+                    task.setParamVal(JSON.toJSONString(paramVal));
                     taskList.add(task);
                 }
             }
