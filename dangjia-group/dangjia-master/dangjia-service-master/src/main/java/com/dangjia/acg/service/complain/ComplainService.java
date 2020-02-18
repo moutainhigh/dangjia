@@ -25,6 +25,8 @@ import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordResponsiblePartyMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
@@ -41,6 +43,8 @@ import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -56,6 +60,7 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.service.repair.MendMaterielService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -92,7 +97,9 @@ public class ComplainService {
     @Autowired
     private IWorkerTypeMapper iWorkerTypeMapper;
     @Autowired
-    private RefundAfterSalesAPI refundAfterSalesAPI;
+    private DjMaintenanceRecordResponsiblePartyMapper responsiblePartyMapper;
+    @Autowired
+    private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -127,6 +134,8 @@ public class ComplainService {
     private BasicsStorefrontAPI basicsStorefrontAPI;
     @Autowired
     private IMendOrderMapper mendOrderMapper;
+    @Autowired
+    private MasterStorefrontService masterStorefrontService;
 
     /**
      *
@@ -151,6 +160,35 @@ public class ComplainService {
             logger.error("提交异常：",e);
             return ServerResponse.createByErrorMessage("提交失败");
         }
+    }
+
+    /**
+     * 店铺申诉维保责任占比
+     * @param request
+     * @param userId
+     * @param cityId
+     * @param responsiblePartyId
+     * @param content
+     * @param images
+     * @return
+     */
+    public ServerResponse complainResponsibleParty(HttpServletRequest request, String userId, String cityId, String responsiblePartyId, String content, String images) {
+       try{
+           DjMaintenanceRecordResponsibleParty rrp=responsiblePartyMapper.selectByPrimaryKey(responsiblePartyId);
+           if(rrp==null){
+               return ServerResponse.createByErrorMessage("未找到符合条件的数据");
+           }
+           Storefront storefront=masterStorefrontService.getStorefrontById(rrp.getResponsiblePartyId());
+           DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(rrp.getMaintenanceRecordId());
+           String complainId=insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),userId,responsiblePartyId,djMaintenanceRecord.getHouseId(),12,content,images,3);
+           rrp.setComplainId(complainId);
+           rrp.setModifyDate(new Date());
+           responsiblePartyMapper.updateByPrimaryKeySelective(rrp);//修改对应的申诉单号到维保中去
+           return ServerResponse.createBySuccessMessage("申诉成功");
+       }catch (Exception e){
+           logger.error("申诉保存失败",e);
+           return ServerResponse.createByErrorMessage("申诉失败");
+       }
     }
 
     /**
@@ -190,12 +228,11 @@ public class ComplainService {
      * @param images 申诉图片
      * @param applicationStatus 申请身份：1工匠，2业主，3店铺，4供应商
      */
-    public void insertUserComplain(String userName,String userMobile, String userId,String businessId,String houseId, Integer complainType,  String content,String images,Integer applicationStatus) {
+    public String insertUserComplain(String userName,String userMobile, String userId,String businessId,String houseId, Integer complainType,  String content,String images,Integer applicationStatus) {
         Complain complain = new Complain();
         complain.setMemberId(userId);
         complain.setComplainType(complainType);
         complain.setStatus(0);
-        complain.setBusinessId(null);
         complain.setHouseId(houseId);
         complain.setBusinessId(businessId);
         complain.setContent(content);
@@ -204,6 +241,7 @@ public class ComplainService {
         complain.setImage(images);
         complain.setApplicationStatus(applicationStatus);
         complainMapper.insertSelective(complain);
+        return complain.getId();
     }
     /**
      * 添加申诉

@@ -38,7 +38,15 @@ public interface ComplainAPI {
                                   @RequestParam("content") String content,
                                   @RequestParam("images") String images);
 
-
+    @PostMapping("/complain/complainResponsibleParty")
+    @ApiOperation(value = "店铺--申诉维保定责", notes = "店铺--申诉维保定责")
+    ServerResponse complainResponsibleParty(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("userId") String userId,
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("responsiblePartyId") String responsiblePartyId,
+                                  @RequestParam("content") String content,
+                                  @RequestParam("images") String images
+    );
 
     @PostMapping("/complain/addComplain")
     @ApiOperation(value = "添加申诉", notes = "添加申诉")

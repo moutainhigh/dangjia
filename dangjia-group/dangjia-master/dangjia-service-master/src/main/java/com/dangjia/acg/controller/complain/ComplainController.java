@@ -30,6 +30,12 @@ public class ComplainController implements ComplainAPI {
         return complainService.insertGroundComplain(request,userId,cityId,complainType,houseId,content,images);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse complainResponsibleParty(HttpServletRequest request, String userId, String cityId, String responsiblePartyId, String content, String images) {
+        return complainService.complainResponsibleParty(request,userId,cityId,responsiblePartyId,content,images);
+    }
+
 
     //添加申诉
     @Override
