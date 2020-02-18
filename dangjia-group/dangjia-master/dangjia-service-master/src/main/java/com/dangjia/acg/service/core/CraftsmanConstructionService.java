@@ -1240,7 +1240,7 @@ public class CraftsmanConstructionService {
         wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
         wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
         wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
-        wfr.setWorkerHead(imageAddress + worker2 == null ? "" :worker.getHead());
+        wfr.setWorkerHead(imageAddress + worker2 == null ? "" :worker2.getHead());
         wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
         WorkerComprehensiveDTO workerComprehensive = workIntegralMapper.getComprehensiveWorker(worker.getId());
         wfr.setOverall(workerComprehensive.getOverall());
