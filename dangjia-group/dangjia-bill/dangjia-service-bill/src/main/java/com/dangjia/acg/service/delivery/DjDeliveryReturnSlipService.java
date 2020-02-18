@@ -25,6 +25,7 @@ import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.mapper.repair.IBillMendDeliverMapper;
+import com.dangjia.acg.service.storefront.BillStorefrontService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -78,6 +79,8 @@ public class DjDeliveryReturnSlipService {
     private IBillMendDeliverMapper iBillMendDeliverMapper;
     @Autowired
     private IBillMendMaterialMapper iBillMendMaterialMapper;
+    @Autowired
+    private BillStorefrontService billStorefrontService;
 
     /**
      * 供货任务列表
@@ -426,30 +429,16 @@ public class DjDeliveryReturnSlipService {
     public ServerResponse supplierDimension(PageDTO pageDTO, Date startTime, Date endTime, String userId, String cityId, String searchKey) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
+            Storefront storefront=billStorefrontService.getStorefrontByUserId(userId,cityId);
+            if(storefront==null){
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<SupplierLikeDTO > supplierList=djSupplierAPI.queryLikeSupplier(searchKey);
-            List<StoreSupplierDimensionDTO> StoreSupplierDimensionDTOList=new  ArrayList<StoreSupplierDimensionDTO>();
-            if(supplierList==null)
-            {
-                return ServerResponse.createByErrorMessage("模糊查询没有检索到数据");
-            }
-            for (SupplierLikeDTO supplierLikeDTO  : supplierList) {
-                List<StoreSupplierDimensionDTO> list=djDeliveryReturnSlipMapper.supplierDimension(supplierLikeDTO .getId(), storefront.getId(),cityId);
-                list.forEach(storeSupplierDimensionDTO -> {
-                    storeSupplierDimensionDTO.setName(supplierLikeDTO.getName()); //供应商名称
-                    storeSupplierDimensionDTO.setCheckPeople(supplierLikeDTO.getCheckPeople());  //联系人
-                    storeSupplierDimensionDTO.setTelephone(supplierLikeDTO.getTelephone());//联系号码
-                });
-                StoreSupplierDimensionDTOList.addAll(list);
-            }
-            if (StoreSupplierDimensionDTOList.size() <= 0)
+            List<StoreSupplierDimensionDTO> list=djDeliveryReturnSlipMapper.supplierDimension(storefront.getId(),startTime,endTime,searchKey);
+
+            if (list==null||list.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            PageInfo pageResult = new PageInfo(StoreSupplierDimensionDTOList);
+            PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("店铺利润统计供应商维度异常", e);

@@ -526,18 +526,36 @@
     <!--店铺利润-供应商维度-->
     <select id="supplierDimension" resultType="com.dangjia.acg.dto.delivery.StoreSupplierDimensionDTO">
         SELECT
-            dsd.storefront_id AS storefrontId,-- 店铺id
-            IFNULL(sum(dsd.total_amount),'') AS income, -- 收入
-            IFNULL(sum(dsd.apply_money),'') AS expenditure,-- 支出
-            IFNULL(sum(dsd.total_amount)-sum(dsd.apply_money),'') AS profit, -- 利润
-            dsd.supplier_id AS supId -- 供应商id
+            dsd.storefront_id AS storefrontId,
+            sum(IFNULL(dsd.total_amount, 0)) AS income,
+            sum(IFNULL(dsd.apply_money, 0)) AS expenditure,
+            sum(IFNULL(dsd.total_amount, 0)) - sum(IFNULL(dsd.apply_money, 0)) AS profit,
+            dsd.supplier_id AS supId,
+            t.`name` NAME,
+            t.telephone,
+            t.check_people checkPeople
         FROM
-            dj_deliver_split_deliver dsd
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+            dj_deliver_split_deliver dsd,
+            dj_supplier t
         WHERE
-            dsd.supplier_id = #{supId} AND dsd.storefront_id = #{storefrontId} AND dsd.city_id = #{cityId}
+            dsd.supplier_id = t.id
+        AND dsd.storefront_id = #{storefrontId}
+        <if test = "null!=startTime and ''!=startTime" >
+            and dsd.create_date>=#{startTime}
+        </if>
+        <if test = "null!=endTime and ''!=endTime" >
+        <![CDATA[   and dsd.create_date<=#{endTime} ]]>
+        </if>
+        <if test = "null!=searchKey and ''!=searchKey" >
+            AND (
+            t.name LIKE CONCAT('%',#{searchKey},'%') or
+            t.telephone LIKE CONCAT('%', #{searchKey},'%') or
+            t.check_people LIKE CONCAT('%', #{searchKey},'%')
+            )
+        </if>
         GROUP BY
-            dsd.supplier_id
+           dsd.supplier_id
+        order by	dsd.create_date DESC
     </select>
 
     <!--店铺利润-买家维度    -->

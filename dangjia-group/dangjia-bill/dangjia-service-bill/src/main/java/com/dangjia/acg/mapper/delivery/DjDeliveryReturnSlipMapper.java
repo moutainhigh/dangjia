@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -127,12 +128,13 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
 
     /**
      * 店铺利润统计-供应商维度
-     * @param supId
      * @param storefrontId
-     * @param cityId
      * @return
      */
-    List<StoreSupplierDimensionDTO>  supplierDimension (@Param("supId") String supId,@Param("storefrontId") String storefrontId, @Param("cityId") String cityId);
+    List<StoreSupplierDimensionDTO>  supplierDimension (@Param("storefrontId") String storefrontId,
+                                                        @Param("startTime") Date startTime,
+                                                        @Param("endTime") Date endTime,
+                                                        @Param("searchKey") String searchKey);
 
 
     /**
