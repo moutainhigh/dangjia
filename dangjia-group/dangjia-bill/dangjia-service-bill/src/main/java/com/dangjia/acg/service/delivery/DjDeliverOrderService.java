@@ -1178,11 +1178,9 @@ public class DjDeliverOrderService {
             Map<String, Object> map =iBillDjDeliverOrderMapper.selectDeliverOrderInfoById(orderId);
             //查询房子信息，获取房子对应的楼层
             QuantityRoom quantityRoom=iQuantityRoomMapper.getBillQuantityRoom(order.getHouseId(),0);
-            Integer elevator= 1;//是否电梯房
-            String floor="1";
             if(quantityRoom!=null&& StringUtils.isNotBlank(quantityRoom.getId())){
-                elevator=quantityRoom.getElevator();//是否电梯房
-                floor=quantityRoom.getFloor();//楼层
+                Integer elevator=quantityRoom.getElevator();//是否电梯房
+                String floor=quantityRoom.getFloor();//楼层
                 map.put("floor", elevator);//楼层
                 map.put("elevator", floor);//是否电梯房
             }
