@@ -1032,7 +1032,6 @@ public class HouseFlowApplyService {
             Integer yanShouNum =  houseFlowApplyMapper.selectCountByExample(example);
             houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
             houseFlowApplyDTO.setWorkerId(worker.getId());
-            houseFlowApplyDTO.setManagerId(steward.getId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
             houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType())+"(第"+CommonUtil.numberToChinese(yanShouNum)+"次申请)");
@@ -1112,7 +1111,7 @@ public class HouseFlowApplyService {
             Integer yanShouNum =  houseFlowApplyMapper.selectCountByExample(example);
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
             if (supervisorHF != null) {
-                    houseFlowApplyDTO.setSupervisorHouseFlowId(supervisorHF.getId());
+                houseFlowApplyDTO.setSupervisorHouseFlowId(supervisorHF.getId());
             }
             if (house != null) {
                 houseFlowApplyDTO.setHouseName(house.getHouseName());
