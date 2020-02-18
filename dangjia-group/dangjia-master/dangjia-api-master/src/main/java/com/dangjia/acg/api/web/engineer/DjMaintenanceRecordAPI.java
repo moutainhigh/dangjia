@@ -201,12 +201,18 @@ public interface DjMaintenanceRecordAPI {
 
 
 
+    @PostMapping("/web/queryGuaranteeMoneyList")
+    @ApiOperation(value = "店铺-质保金变动记录查询", notes = "店铺-质保金变动记录查询")
+    ServerResponse queryGuaranteeMoneyList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                           @RequestParam("userId") String userId,
+                                           @RequestParam("cityId") String cityId);
+
 
     @PostMapping("/web/queryGuaranteeMoneyDetail")
     @ApiOperation(value = "店铺-缴纳质保金详情", notes = "缴纳质保金详情")
     ServerResponse queryGuaranteeMoneyDetail(@RequestParam("userId") String userId,
                                              @RequestParam("cityId") String cityId,
-                                             @RequestParam("id") String id);
+                                             @RequestParam("accountflowRecordId") String accountflowRecordId);
 
 
 

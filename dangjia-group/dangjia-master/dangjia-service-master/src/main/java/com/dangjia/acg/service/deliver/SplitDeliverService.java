@@ -227,7 +227,7 @@ public class SplitDeliverService {
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-            Double totalReceiverNum=orderSplitItemMapper.getOrderSplitReceiverNum(splitDeliver.getOrderSplitId());//查询当前收货单下的总收货量
+            Double totalReceiverNum=orderSplitItemMapper.getOrderSplitReceiverNum(splitDeliver.getOrderSplitId(),1);//查询当前收货单下的总收货量
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());
@@ -236,6 +236,18 @@ public class SplitDeliverService {
                 orderSplitItem.setReceive(orderSplitItem.getNum());//收获量改为发货量
                 orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(splitDeliver.getDeliveryFee(),totalReceiverNum),orderSplitItem.getReceive()));
                 orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);//修改对应的运费，搬运费
+                if(orderSplitItem.getOrderItemId()!=null){
+                    OrderItem orderItem=orderItemMapper.selectByPrimaryKey(orderSplitItem.getOrderItemId());
+                    if(orderItem!=null){
+                        if(orderItem.getReturnCount()==null)
+                            orderItem.setReceiveCount(0d);
+                        if(orderItem.getReturnCount()<orderItem.getAskCount()){
+                            orderItem.setReceiveCount(MathUtil.add(orderItem.getReceiveCount(),orderSplitItem.getReceive()));
+                            orderItem.setModifyDate(new Date());
+                            orderItemMapper.updateByPrimaryKeySelective(orderItem);
+                        }
+                    }
+                }
             }
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());

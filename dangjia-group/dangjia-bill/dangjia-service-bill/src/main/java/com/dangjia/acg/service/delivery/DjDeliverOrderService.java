@@ -13,6 +13,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.HouseResult;
@@ -51,6 +52,7 @@ import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.product.BillProductTemplateService;
 import com.dangjia.acg.util.HouseUtil;
+import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +129,8 @@ public class DjDeliverOrderService {
 
     @Autowired
     private IBillShoppingCartMapper iBillShoppingCartMapper;
+    @Autowired
+    private IBillQuantityRoomMapper iQuantityRoomMapper;
 
 
     public Object getHouse(String memberId, HouseResult houseResult) {
@@ -1115,98 +1119,83 @@ public class DjDeliverOrderService {
     }
 
     /**
-     * 查询全部订单
-     *
-     * @param userId
-     * @param cityId
-     * @param orderKey
-     * @param state
+     * 店铺--订单管理--列表
+     * @param pageDTO 查询分页
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param orderKey 查询
+     * @param state 状态：3已支付
      * @return
      */
     public ServerResponse queryOrderInfo(PageDTO pageDTO, String userId, String cityId,
                                          String orderKey, Integer state) {
+        try{
+            Example example = new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.USER_ID, userId).
+                    andEqualTo(Storefront.CITY_ID, cityId);
+            List<Storefront> storefrontList = iBillStorefrontMapper.selectByExample(example);
+            if (storefrontList == null && storefrontList.size() == 0) {
+                return ServerResponse.createByErrorMessage("未找到符合条件的店铺，请先维护店铺信息");
+            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Map<String, Object> map = new HashMap<>();
+            map.put("orderKey", orderKey);
+            map.put("state", 3);//只查已支付的
+            map.put("storefontId", storefrontList.get(0).getId());
+            List<DOrderInfoDTO> orderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);
+            PageInfo orderInfoDTOSs = new PageInfo(orderInfoDTOS);
+            /*map = new HashMap<>();
+            map.put("storefontId", storefrontList.get(0).getId());
+            List<DOrderInfoDTO> arrOrderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);*/
 
-        Example example = new Example(Storefront.class);
-        example.createCriteria().andEqualTo(Storefront.USER_ID, userId).
-                andEqualTo(Storefront.CITY_ID, cityId);
-        List<Storefront> storefrontList = iBillStorefrontMapper.selectByExample(example);
-        if (storefrontList == null && storefrontList.size() == 0) {
-            return ServerResponse.createByErrorMessage("门店不存在");
+            return ServerResponse.createBySuccess("查询成功", orderInfoDTOSs);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        DOrderArrInfoDTO dOrderArrInfoDTO = new DOrderArrInfoDTO();
-        Map<String, Object> map = new HashMap<>();
-        map.put("orderKey", orderKey);
-        map.put("state", state);
-        map.put("storefontId", storefrontList.get(0).getId());
-        List<DOrderInfoDTO> orderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);
-        PageInfo orderInfoDTOSs = new PageInfo(orderInfoDTOS);
-        map = new HashMap<>();
-        map.put("storefontId", storefrontList.get(0).getId());
-        List<DOrderInfoDTO> arrOrderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);
-        dOrderArrInfoDTO.setNoPaymentNumber((int) arrOrderInfoDTOS.stream().filter(x -> x.getState() == 2 || x.getState() == 1).count());
-        dOrderArrInfoDTO.setYesPaymentNumber((int) arrOrderInfoDTOS.stream().filter(x -> x.getState() == 3).count());
-        dOrderArrInfoDTO.setYesCancel((int) arrOrderInfoDTOS.stream().filter(x -> x.getState() == 4).count());
-        dOrderArrInfoDTO.setList(orderInfoDTOSs);
-
-        return ServerResponse.createBySuccess("查询成功", dOrderArrInfoDTO);
     }
 
 
     /**
-     * 查询订单详情
+     * 店铺--订单管理--查看详情
      *
      * @param orderId
      * @return
      */
     public ServerResponse queryOrderFineInfo(PageDTO pageDTO, String orderId) {
-        if (CommonUtil.isEmpty(orderId)) {
-            return ServerResponse.createByErrorMessage("订单id不能为空");
-        }
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        DOrderArrFineInfoDTO dOrderArrFineInfoDTO = new DOrderArrFineInfoDTO();
-        List<DOrderFineInfoDTO> dOrderArrInfoDTO = iBillDjDeliverOrderMapper.queryOrderFineInfo(orderId);
-
-        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        for (DOrderFineInfoDTO dOrderFineInfoDTO : dOrderArrInfoDTO) {
-            if (dOrderFineInfoDTO.getImage().contains(",")) {
-                List<String> result = Arrays.asList(dOrderFineInfoDTO.getImage().split(","));
-                dOrderFineInfoDTO.setImage(imageAddress + result.get(0));
-            } else {
-                dOrderFineInfoDTO.setImage(imageAddress + dOrderFineInfoDTO.getImage());
+        try{
+            if (CommonUtil.isEmpty(orderId)) {
+                return ServerResponse.createByErrorMessage("订单id不能为空");
             }
-        }
-        PageInfo orderInfoDTOSs = new PageInfo(dOrderArrInfoDTO);
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", orderId);
-        List<DOrderInfoDTO> orderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);
-        if (orderInfoDTOS != null && orderInfoDTOS.size() > 0) {
-            dOrderArrFineInfoDTO.setActualPaymentPrice(orderInfoDTOS.get(0).getActualPaymentPrice());
-            dOrderArrFineInfoDTO.setHouseName(orderInfoDTOS.get(0).getHouseName());
-            dOrderArrFineInfoDTO.setOrderNumber(orderInfoDTOS.get(0).getOrderNumber());
-            dOrderArrFineInfoDTO.setOrderPayTime(orderInfoDTOS.get(0).getOrderPayTime());
-            dOrderArrFineInfoDTO.setPboId(orderInfoDTOS.get(0).getPboId());
-            if (orderInfoDTOS.get(0).getState() == 1 || orderInfoDTOS.get(0).getState() == 2) {
-                dOrderArrFineInfoDTO.setState(0);
-            } else if (orderInfoDTOS.get(0).getState() == 3) {
-                dOrderArrFineInfoDTO.setState(1);
+            Order order=iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DOrderFineInfoDTO> dOrderArrInfoDTO = iBillDjDeliverOrderMapper.queryOrderFineInfo(orderId);
+
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (DOrderFineInfoDTO dOrderFineInfoDTO : dOrderArrInfoDTO) {
+                dOrderFineInfoDTO.setImage(StringTool.getImage(dOrderFineInfoDTO.getImage(),imageAddress));
             }
-
-            if (orderInfoDTOS.get(0).getPboImage() != null && orderInfoDTOS.get(0).getPboImage() != "") {
-                List<String> result = Arrays.asList(orderInfoDTOS.get(0).getPboImage().split(","));
-                List<String> strList = new ArrayList<>();
-                for (int i = 0; i < result.size(); i++) {
-                    String str = imageAddress + result.get(i);
-                    strList.add(str);
-                }
-                dOrderArrFineInfoDTO.setImageList(strList);
+            PageInfo orderInfoDTOSs = new PageInfo(dOrderArrInfoDTO);
+            Map<String, Object> map =iBillDjDeliverOrderMapper.selectDeliverOrderInfoById(orderId);
+            //查询房子信息，获取房子对应的楼层
+            QuantityRoom quantityRoom=iQuantityRoomMapper.getBillQuantityRoom(order.getHouseId(),0);
+            if(quantityRoom!=null&& StringUtils.isNotBlank(quantityRoom.getId())){
+                Integer elevator=quantityRoom.getElevator();//是否电梯房
+                String floor=quantityRoom.getFloor();//楼层
+                map.put("floor", elevator);//楼层
+                map.put("elevator", floor);//是否电梯房
             }
-
-
+            //查询优惠卷信息
+            map.put("discountType", "");//优惠卷类型
+            map.put("discountNumber", "");//优惠卷编号
+            map.put("discountName", "");//优惠卷名称
+            map.put("list",orderInfoDTOSs);//订单商品明细
+            return ServerResponse.createBySuccess("查询成功", map);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-        dOrderArrFineInfoDTO.setList(orderInfoDTOSs);
-        return ServerResponse.createBySuccess("查询成功", dOrderArrFineInfoDTO);
+
     }
 
 
@@ -2145,10 +2134,21 @@ public class DjDeliverOrderService {
                 orderSplitItem.setReceive(orderSplitItem.getNum());
                 orderSplitItem.setModifyDate(new Date());
                 billDjDeliverOrderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+                if(orderSplitItem.getOrderItemId()!=null){
+                    OrderItem orderItem=iBillDjDeliverOrderItemMapper.selectByPrimaryKey(orderSplitItem.getOrderItemId());
+                    if(orderItem!=null){
+                        if(orderItem.getReturnCount()==null)
+                            orderItem.setReceiveCount(0d);
+                        if(orderItem.getReturnCount()<orderItem.getAskCount()){
+                            orderItem.setReceiveCount(MathUtil.add(orderItem.getReceiveCount(),orderSplitItem.getReceive()));
+                            orderItem.setModifyDate(new Date());
+                            iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                        }
+                    }
+                }
             });
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("操作失败：", e);
             return ServerResponse.createByErrorMessage("操作失败");
         }

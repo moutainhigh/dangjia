@@ -60,6 +60,6 @@ public interface TechnologyRecordAPI {
     @ApiOperation(value = "查询当前工匠在当前房子上的所有已购买材料", notes = "查询当前工匠在当前房子上的所有已购买材料")
     ServerResponse getAllProductListByhouseMemberId(@RequestParam("pageDTO") PageDTO pageDTO,
                                                     @RequestParam("houseId") String houseId,
-                                                    @RequestParam("workerId") String workerId,
+                                                    @RequestParam("userToken") String userToken,
                                                     @RequestParam("searchKey") String searchKey);
 }

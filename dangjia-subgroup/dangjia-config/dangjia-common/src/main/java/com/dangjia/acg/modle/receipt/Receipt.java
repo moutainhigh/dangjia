@@ -41,8 +41,8 @@ public class Receipt extends BaseEntity {
     private String supplierId;
 
     @Column(name = "total_amount")
-    @Desc(value = "合併結算金额")
-    @ApiModelProperty("合併結算金额")
+    @Desc(value = "合并结算金额")
+    @ApiModelProperty("合并结算金额")
     private Double totalAmount;
 
     @Column(name = "number")

@@ -28,7 +28,7 @@ public interface DjSupplierMapper extends Mapper<DjSupplier> {
 
     Double myWallet(@Param("supId") String supId);
 
-    int setSurplusMoney();
+    Integer setSurplusMoney();
 
     List<SupplierLikeDTO> queryLikeSupplier(@Param("searchKey") String searchKey);
 

@@ -15,25 +15,33 @@ public class ExpenseRecordOrderDetailDTO {
     private String productSn;
     //图片
     private String image;
+    private String imageUrl;
+
     private String imageDetail;
     //购买数量
-    private String shopCount;
+    private Double shopCount;
+    //剩余量
+    private Double surplusCount;
     //要货数量
-    private String askCount;
+    private Double askCount;
     //发货数量
-    private String num;
+    private Double num;
     //收货数量
-    private String receive;
-    //退货数量
-    private String returnCount;
+    private Double receive;
+    //仅退款
+    private Double returnCount;
+    //退货退款
+    private Double returnRefundCount;
     //供应单价
-    private String cost;
+    private Double cost;
     //供应总价
-    private String totalCost;
+    private Double totalCost;
     //销售单价
-    private String price ;
+    private Double price ;
+    //搬运费
+    private Double moveCost ;
     //销售总价
-    private String totalPrice ;
+    private Double totalPrice ;
     //订单id
     private String orderId ;
 

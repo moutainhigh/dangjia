@@ -78,5 +78,68 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 where a.id=#{id}
         </select>
 
+    <select id="searchReturnRefundSplitCount" resultType="java.lang.Integer">
+        SELECT
+         count(t.id)
+        FROM
+            dj_repair_mend_order t,
+            dj_member m,
+            dj_member_address madress,
+            dj_repair_mend_deliver md
+        WHERE t.apply_member_id=m.id
+        and t.id=md.mend_order_id
+        and
+        (
+        t.house_id = madress.house_id
+        OR t.address_id = madress.id
+        )
+        and t.storefront_id=#{storefrontId}
+        <if test="state==1"><!--已分配供应商-->
+            and md.shipping_state in(0,4,5)
+        </if>
+        <if test="state==2"><!--已结束-->
+            and md.shipping_state in(1,2,6,7,8)
+        </if>
+    </select>
+      <select id="searchReturnRefundSplitList" resultType="com.dangjia.acg.dto.repair.MendDeliverDTO">
+            SELECT
+                  t.id mendOrderId,
+                  t.number mendOrderNumber,
+                  t.create_date createDate,
+                  t.apply_member_id memberId,
+                  madress.address address,
+                  m.`name` memberName,
+                  m.mobile memberMobile,
+                  md.supplier_id supId,
+                  md.supplier_name supName,
+                  md.id mendDeliverId,
+                  md.number mendDeliverNumber,
+                 (case when md.shipping_state=6 then 1 else md.shipping_state end) as state
+            FROM
+                dj_repair_mend_order t,
+                dj_member m,
+                dj_member_address madress,
+                dj_repair_mend_deliver md
+            WHERE t.apply_member_id=m.id
+            and t.id=md.mend_order_id
+            and
+                (
+                    t.house_id = madress.house_id
+                    OR t.address_id = madress.id
+                )
+            and t.storefront_id=#{storefrontId}
+          <if test="state==2"><!--已分配供应商-->
+              and md.shipping_state in(0,4,5)
+          </if>
+          <if test="state==3"><!--已结束-->
+              and md.shipping_state in(1,2,6,7,8)
+          </if>
+          <if test="likeAddress!=null and likeAddress!=''">
+              and (t.number LIKE CONCAT('%',#{likeAddress},'%')
+              or madress.address LIKE CONCAT('%',#{likeAddress},'%')
+              or md.number like CONCAT('%',#{likeAddress},'%'))
+          </if>
+          order by t.create_date desc
+      </select>
 </mapper>
 

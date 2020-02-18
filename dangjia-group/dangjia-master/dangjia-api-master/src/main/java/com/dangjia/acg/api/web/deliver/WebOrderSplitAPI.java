@@ -65,6 +65,20 @@ public interface WebOrderSplitAPI {
             @RequestParam("deliveryName") String deliberyName,
             @RequestParam("deliveryMobile") String deliveryMobile);
 
+    /**
+     * 发货列表--保存上门安装信息
+     * @param splitDeliverId 发货单ID
+     * @param installName 安装人姓名
+     * @param installMobile 安装人电话
+     * @return
+     */
+    @PostMapping("web/deliver/orderSplit/saveInstallInfo")
+    @ApiOperation(value = "发货列表--保存上门安装信息", notes = "发货列表--保存上门安装信息")
+    ServerResponse saveInstallInfo(
+            @RequestParam("splitDeliverId") String splitDeliverId,
+            @RequestParam("installName") String installName,
+            @RequestParam("installMobile") String installMobile);
+
 
     /**
      * 部分收货申诉接口
@@ -97,7 +111,7 @@ public interface WebOrderSplitAPI {
 
     @PostMapping("web/deliver/orderSplit/getOrderSplitDeliverList")
     @ApiOperation(value = "货单列表--货单详情列表 ", notes = "货单列表--货单详情列表")
-    ServerResponse getOrderSplitDeliverList(@RequestParam("orderSplitId") String orderSplitId);
+    ServerResponse getOrderSplitDeliverList(@RequestParam("request") HttpServletRequest request,@RequestParam("orderSplitId") String orderSplitId);
 
 
     @PostMapping("web/deliver/orderSplit/getHouseList")

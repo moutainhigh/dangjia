@@ -4,7 +4,11 @@ import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO;
 import com.dangjia.acg.dto.deliver.SplitReportSupplierDTO;
+import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.deliver.OrderItem;
+import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -25,7 +29,7 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
     Double getSplitDeliverSellPrice(@Param("splitDeliverId")String splitDeliverId);
 
     //查询当前订单下的总收货量，计算运费
-    Double getOrderSplitReceiverNum(@Param("splitDeliverId")String splitDeliverId);
+    Double getOrderSplitReceiverNum(@Param("splitDeliverId")String splitDeliverId,@Param("type") Integer type);
 
 
     void setSupplierId(@Param("id") String id, @Param("splitDeliverId") String splitDeliverId);
@@ -73,4 +77,12 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
                                     @Param("supplierId") String supplierId,@Param("oldSplitDeliverId") String oldSplitDeliverId);
 
     Double getSupPorterage(@Param("storefrontId") String storefrontId,@Param("supId") String supId,@Param("productId") String productId);
+
+    String selectIsDeliveryInstall(@Param("splitDeliverId") String splitDeliverId);
+
+    List<Storefront> selectStorefrontIdByOrderSplitId(@Param("orderSplitId") String orderSplitId);
+
+    List<OrderSplitItem> selectOrderSplitItemList(@Param("orderSplitId") String orderSplitId,@Param("storefrontId") String storefrontId);
+
+    List<OrderSplitItem> selectSplitItemList(@Param("orderSplitId") String orderSplitId,@Param("productId") String productId);
 }

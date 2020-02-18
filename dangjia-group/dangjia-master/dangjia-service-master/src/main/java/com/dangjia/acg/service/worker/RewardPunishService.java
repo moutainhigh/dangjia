@@ -361,7 +361,7 @@ public class RewardPunishService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryRewardPunishRecord(String userToken, String workerId, PageDTO pageDTO) {
+    public ServerResponse queryRewardPunishRecord(String userToken, String workerId,String houseId, PageDTO pageDTO) {
         try {
 
             Example example = new Example(RewardPunishRecord.class);
@@ -372,10 +372,12 @@ public class RewardPunishService {
                     return (ServerResponse) object;
                 }
                 Member member = (Member) object;
-                criteria.andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
+                criteria.andNotEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
             }
             if (!CommonUtil.isEmpty(workerId)) {
                 criteria.andEqualTo(RewardPunishRecord.MEMBER_ID, workerId);
+            }if (!CommonUtil.isEmpty(houseId)) {
+                criteria.andEqualTo(RewardPunishRecord.HOUSE_ID, houseId);
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             example.orderBy(RewardPunishRecord.CREATE_DATE).desc();
@@ -407,11 +409,17 @@ public class RewardPunishService {
      */
     public ServerResponse getRewardPunishRecord(String recordId) {
         try {
+
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             RewardPunishRecordDTO example = new RewardPunishRecordDTO();
             example.setId(recordId);
             List<RewardPunishRecordDTO> recordList = rewardPunishRecordMapper.queryRewardPunishRecord(example);
             if (recordList != null && recordList.size() > 0) {
-                return ServerResponse.createBySuccess("ok", recordList.get(0));
+                RewardPunishRecordDTO rewardPunishRecordDTO=recordList.get(0);
+                if(!CommonUtil.isEmpty(rewardPunishRecordDTO.getImages())){
+                    rewardPunishRecordDTO.setImages(imageAddress+rewardPunishRecordDTO.getImages());
+                }
+                return ServerResponse.createBySuccess("ok", rewardPunishRecordDTO);
             } else {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }

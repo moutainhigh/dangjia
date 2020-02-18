@@ -34,8 +34,8 @@ public class AccountFlowRecord extends BaseEntity {
     private Double money;//实拿
 
     @Column(name = "state")
-    @Desc(value = "0订单收入,1提现,2自定义增加金额,3自定义减少金额")
-    @ApiModelProperty("0订单收入,1提现,2自定义增加金额,3自定义减少金额")
+    @Desc(value = "0订单收入,1提现,2自定义增加金额,3自定义减少金额 4:充值 5:交纳滞留金,6质保金扣除，7质保金返还,8退货退款，9结算")
+    @ApiModelProperty("0订单收入,1提现,2自定义增加金额,3自定义减少金额 4:充值 5:交纳滞留金，6质保金扣除，7质保金返还,8退货退款，9结算")
     private Integer state;
 
     @Column(name = "defined_account_id")

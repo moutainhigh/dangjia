@@ -138,4 +138,10 @@ public class HouseFlowApply extends BaseEntity {
 	@Desc(value = "验收任务表id")
 	@ApiModelProperty("验收任务表id")
 	private String acceptanceTaskId;//acceptance_task_id
+
+
+	@Column(name = "house_flow_apply_id")
+	@Desc(value = "关联的验收申请ID,大管家验收时使用")
+	@ApiModelProperty("关联的验收申请ID,大管家验收时使用")
+	private String houseFlowApplyId;
 }

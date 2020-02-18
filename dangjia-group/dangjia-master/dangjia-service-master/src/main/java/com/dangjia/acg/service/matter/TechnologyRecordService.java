@@ -1,10 +1,12 @@
 package com.dangjia.acg.service.matter;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -25,6 +27,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.OrderSplitItemService;
@@ -109,6 +112,7 @@ public class TechnologyRecordService {
                 map.put("imageTypeId", "");
                 map.put("imageTypeName", "现场照片");
                 map.put("imageType", 2);
+                map.put("productId", "");
                 listMap.add(0, map);
                 returnMap.put("listMap", listMap);
                 return ServerResponse.createBySuccess("查询成功", returnMap);
@@ -117,15 +121,27 @@ public class TechnologyRecordService {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             if (StringUtil.isNotEmpty(nodeArr)) {
-                String[] idArr = nodeArr.split(",");
+                JSONArray imageObjArr = JSON.parseArray(nodeArr);
                 String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-                for (String id : idArr) {
-                    Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), id);
+                for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片
+                    JSONObject imageObj = imageObjArr.getJSONObject(i);
+                    String imageTypeName = imageObj.getString("imageTypeName");
+                    String imageTypeId = imageObj.getString("imageTypeId");
+                    String productId = imageObj.getString("productId");
+                    if(CommonUtil.isEmpty(imageTypeName)) {
+                        Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
+                        imageTypeName=technology.getName();
+                    }
+                    if(!CommonUtil.isEmpty(productId)) {
+                        StorefrontProduct storefrontProduct = masterStorefrontProductMapper.selectByPrimaryKey(productId);
+                        imageTypeName=storefrontProduct.getProductName()+"-"+imageTypeName;
+                    }
                     map = new HashMap<>();
-                    map.put("imageTypeId", id);
-                    map.put("imageTypeName", technology.getName());
+                    map.put("imageTypeId", imageTypeId);
+                    map.put("imageTypeName",imageTypeName);
+                    map.put("productId", productId);
                     map.put("imageType", 3);  //节点照片
-                    map.put("url", webAddress + "gyDetail?title=工艺详情&technologyId=" + id);  //节点照片
+                    map.put("url", webAddress + "gyDetail?title=工艺详情&technologyId=" + imageTypeId);  //节点照片
                     listMap.add(map);
                 }
             } else {
@@ -133,12 +149,14 @@ public class TechnologyRecordService {
                 map.put("imageTypeId", "");
                 map.put("imageTypeName", "现场照片");
                 map.put("imageType", 2);
+                map.put("productId", "");
                 listMap.add(0, map);
             }
             map = new HashMap<>();
             map.put("imageTypeId", "");
             map.put("imageTypeName", "材料照片");
             map.put("imageType", 0);
+            map.put("productId", "");
             listMap.add(listMap.size(), map);
 
             returnMap.put("listMap", listMap);
@@ -154,6 +172,8 @@ public class TechnologyRecordService {
      * 管家待巡查的节点
      */
     public ServerResponse workNodeList(String userToken, String houseFlowId) {
+
+        String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
         if (house.getPause() != null) {
@@ -166,11 +186,15 @@ public class TechnologyRecordService {
         Map<String, WorkNodeDTO> trList = new HashMap<>();
         if (houseFlow.getWorkerType() == 3) { //管家查询管家应验收节点
             Example example = new Example(TechnologyRecord.class);
-            example.createCriteria().andEqualTo(TechnologyRecord.STATE, 0);
+            example.createCriteria().andEqualTo(TechnologyRecord.STATE, 0).andEqualTo(TechnologyRecord.HOUSE_ID, house.getId());
             example.orderBy(TechnologyRecord.CREATE_DATE).desc();
             List<TechnologyRecord> productList = technologyRecordMapper.selectByExample(example);
             if (productList != null && productList.size() > 0) {
                 for (TechnologyRecord pt : productList) {
+                    Technology technology = iMasterTechnologyMapper.selectByPrimaryKey(pt.getTechnologyId());
+                    if(technology.getType()==0){//普通节点直接跳过
+                        continue;
+                    }
                     if (trList.get(pt.getProductId()) == null) {
                         trList.put(pt.getProductId(), new WorkNodeDTO());
                     }
@@ -181,8 +205,10 @@ public class TechnologyRecordService {
                     List<TechnologyRecordDTO> technologyRecordDTOS = workNodeDTOA.getTrList();
                     if (CommonUtil.isEmpty(workNodeDTOA.getProductId())) {
                         StorefrontProduct storefrontProduct = masterStorefrontProductMapper.selectByPrimaryKey(pt.getProductId());
-                        workNodeDTOA.setProductName(storefrontProduct.getProductName());//商品名
-                        workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
+                        if(storefrontProduct!=null){
+                            workNodeDTOA.setProductName(storefrontProduct.getProductName());//商品名
+                            workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
+                        }
                     }
 
                     TechnologyRecordDTO trd = new TechnologyRecordDTO();
@@ -190,8 +216,13 @@ public class TechnologyRecordService {
                     trd.setName(pt.getName());
                     trd.setState(pt.getState());
                     trd.setWorkerTypeId(pt.getWorkerTypeId());
+                    trd.setProductId(pt.getProductId());
+                    trd.setUrl( webAddress + "gyDetail?title=工艺详情&technologyId=" + pt.getId());
                     trd.setImage(Utils.getImageAddress(address, pt.getImage()));
                     technologyRecordDTOS.add(trd);
+                    if(CommonUtil.isEmpty(workNodeDTOA.getProductId())){
+                        workNodeDTOA.setProductName("其他");//商品名
+                    }
                     workNodeDTOA.setTrList(technologyRecordDTOS);
                     trList.put(pt.getProductId(), workNodeDTOA);
                 }
@@ -216,6 +247,7 @@ public class TechnologyRecordService {
                             workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
                         }
                         trd.setImage(address + trd.getImage());
+                        trd.setUrl( webAddress + "gyDetail?title=工艺详情&technologyId=" + trd.getId());
                         technologyRecordDTOS.add(trd);
                         workNodeDTOA.setTrList(technologyRecordDTOS);
                         trList.put(trd.getProductId(), workNodeDTOA);
@@ -340,12 +372,21 @@ public class TechnologyRecordService {
     /**
      * 查询当前工匠在当前房子上的所有已购买材料
      * @param houseId 房子ID
-     * @param workerId 工匠ID
      * @return
      */
-    public ServerResponse getAllProductListByhouseMemberId(PageDTO pageDTO, String houseId, String workerId, String searchKey){
+    public ServerResponse getAllProductListByhouseMemberId(PageDTO pageDTO, String houseId, String userToken, String searchKey){
         try{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return ServerResponse.createByErrorMessage("未找到对应的用户信息");
+            }
+            Member member = (Member) object;
+            String workerId=member.getId();
             PageInfo orderItemList=orderSplitItemService.getOrderItemListByhouseMemberId(pageDTO,houseId,workerId,searchKey);//查询当前工匠已购买的所有材料
+            if(orderItemList.getTotal()==0){
+               return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
+                        ,ServerCode.NO_DATA.getDesc());
+            }
             return ServerResponse.createBySuccess("查询成功",orderItemList);
         }catch (Exception e){
             logger.error("查询失败",e);

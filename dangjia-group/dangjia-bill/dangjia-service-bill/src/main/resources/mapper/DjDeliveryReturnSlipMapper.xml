@@ -5,21 +5,24 @@
 
     <select id="querySupplyDeliverTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
-        dsd.id as splitId,
-        dsd.storefront_id as shopId,
-        dsd.number as number,
-        dsd.create_date as createDate,
-        dsd.ship_address as shipAddress,
-        dsd.ship_name as shipName,
-        dsd.ship_mobile as shipMobile,
-        dsd.shipping_state as shippingState,
-        dsd.total_amount as totalAmount,
-        1 as invoiceType,
-        c.status,
-        dsd.house_id as houseId,
-        dsd.supplier_id as supId
+            dsd.id as splitId,
+            dsd.storefront_id as shopId,
+            dsd.number as number,
+            dsd.create_date as createDate,
+            dsd.ship_address as shipAddress,
+            dsd.ship_name as shipName,
+            dsd.ship_mobile as shipMobile,
+            (case when (dsd.shipping_state=4 and dsd.complain_status=1) then 6
+            when (dsd.shipping_state=4 and dsd.complain_status=2) then 7
+            when ((dsd.shipping_state=4 and dsd.complain_status=3) or dsd.shipping_state in(2,8,10)) then 8
+            else dsd.shipping_state end) as shippingState,
+            dsd.total_amount as totalAmount,
+            1 as invoiceType,
+            c.status,
+            dsd.house_id as houseId,
+            dsd.supplier_id as supId
         FROM
-        dj_deliver_split_deliver dsd
+             dj_deliver_split_deliver dsd
         LEFT JOIN dj_complain c on c.business_id=dsd.id
         WHERE dsd.supplier_id =#{supId}
         <if test="null!=searchKey and ''!=searchKey">
@@ -28,11 +31,27 @@
             dsd.ship_address LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
-        <if test="null!=invoiceStatus and ''!=invoiceStatus">
+        <if test="invoiceStatus==6">
+            AND dsd.shipping_state=4
+            and dsd.complain_status=1
+        </if>
+        <if test="invoiceStatus==7">
+            AND dsd.shipping_state=4
+            and dsd.complain_status=2
+        </if>
+        <if test="invoiceStatus==4">
+            AND dsd.shipping_state=4
+            and dsd.complain_status in(0,4)
+        </if>
+        <if test="invoiceStatus==8">
+            AND (dsd.shipping_state in(2,8,10)
+             or (dsd.shipping_state=4 and dsd.complain_status=3))
+        </if>
+        <if test="invoiceStatus!=-1 and invoiceStatus!=6 and invoiceStatus!=7 and invoiceStatus!=8">
             AND dsd.shipping_state=#{invoiceStatus}
         </if>
         and dsd.city_id=#{cityId}
-        and dsd.shipping_state!=3
+        and dsd.shipping_state in(0,1,2,4,5,7,8,10)
         ORDER BY dsd.create_date desc
     </select>
 
@@ -45,8 +64,9 @@
         rmd.ship_address as shipAddress,
         rmd.ship_mobile as shipMobile,
         rmd.ship_name as shipName,
-        rmd.shipping_state as shippingState,
+        (case when rmd.shipping_state=6 then 1 else rmd.shipping_state end) as shippingState,
         rmd.total_amount as totalAmount,
+        rmd.apply_money applyMoney,
         2 as invoiceType,
         rmd.house_id as houseId,
         rmd.supplier_id as supId
@@ -59,15 +79,13 @@
             rmd.ship_address LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
-        <if test='null!=invoiceStatus and ""!=invoiceStatus and invoiceStatus!="0"'>
+        <if test='invoiceStatus==1'>
+            AND rmd.shipping_state in(1,6)
+        </if>
+        <if test='invoiceStatus!=-1 and invoiceStatus!=1'>
             AND rmd.shipping_state=#{invoiceStatus}
         </if>
-        <if test='invoiceStatus=="0"'>
-            AND (
-            rmd.shipping_state=0 or
-            rmd.shipping_state=1
-            )
-        </if>
+        and rmd.shipping_state in(0,1,2,4,5,6,7,8)
         and rmd.city_id=#{cityId}
         ORDER BY rmd.create_date desc
     </select>

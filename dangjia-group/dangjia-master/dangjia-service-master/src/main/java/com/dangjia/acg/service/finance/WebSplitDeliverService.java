@@ -264,7 +264,7 @@ public class WebSplitDeliverService {
                         splitDeliver.setApplyState(2);
                         splitDeliver.setReceiptNum(receipt.getNumber());
                         this.setSplitDeliver(splitDeliver);
-                        splitDeliverPrice += iSplitDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
+                        splitDeliverPrice += iSplitDeliverMapper.selectByPrimaryKey(id).getApplyMoney();
                     } else if (deliverType == 2) {
                         //退货单结算通过
                         MendDeliver mendDeliver = new MendDeliver();
@@ -273,7 +273,7 @@ public class WebSplitDeliverService {
                         mendDeliver.setShippingState(2);
                         mendDeliver.setReceiptNum(receipt.getNumber());
                         iMendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
-                        mendDeliverPrice += iMendDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
+                        mendDeliverPrice += iMendDeliverMapper.selectByPrimaryKey(id).getApplyMoney();
                     }
                 }
                 //添加回执
@@ -300,14 +300,14 @@ public class WebSplitDeliverService {
                     //扣除店铺余额
                     //入账前金额
                     accountFlowRecord2.setAmountBeforeMoney(storefront.getTotalAccount());
-                    storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
+//                    storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
                     storefront.setTotalAccount(storefront.getTotalAccount()-settlementAmount);
                     //入账后金额
                     accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());
                     iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
                     accountFlowRecord2.setFlowType("1");
                     accountFlowRecord2.setMoney(settlementAmount);
-                    accountFlowRecord2.setState(0);
+                    accountFlowRecord2.setState(9);
                     accountFlowRecord2.setDefinedAccountId(storefront.getId());
                     accountFlowRecord2.setDefinedName("合并結算");
                     accountFlowRecord2.setCreateBy(userId);
@@ -315,7 +315,7 @@ public class WebSplitDeliverService {
                     DjSupplier djSupplier = iMasterSupplierMapper.selectByPrimaryKey(supplierId);
                     //入账前金额
                     accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());
-                    djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+settlementAmount);
+//                    djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+settlementAmount);
                     djSupplier.setTotalAccount(CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount()+settlementAmount);
                     //入账后金额
                     accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());

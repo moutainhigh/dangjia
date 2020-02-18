@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.repair;
 
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
+import com.dangjia.acg.dto.repair.MendDeliverDTO;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import org.apache.ibatis.annotations.Param;
@@ -33,4 +34,7 @@ public interface IMendDeliverMapper extends Mapper<MendDeliver> {
      */
     List<MendMateriel> mendDeliverDetail(@Param("id") String id);
 
+    List<MendDeliverDTO> searchReturnRefundSplitList(@Param("storefrontId") String storefrontId,@Param("state") Integer state,@Param("likeAddress") String likeAddress);
+
+    Integer searchReturnRefundSplitCount(@Param("storefrontId") String storefrontId,@Param("state") Integer state);
 }

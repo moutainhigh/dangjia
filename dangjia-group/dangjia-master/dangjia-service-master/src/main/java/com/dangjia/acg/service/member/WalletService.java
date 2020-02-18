@@ -542,7 +542,13 @@ public class WalletService {
         }
 
         if (detailDTOList.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            String timeYear = DateUtil.dateToString(DateUtil.toDate(time), DateUtil.FORMAT);
+            DetailDTO detailDTO2 = new DetailDTO();
+            detailDTO2.setOutMoneyTotal(0d);
+            detailDTO2.setInMoneyTotal(0d);
+            detailDTO2.setType(0);
+            detailDTO2.setTime(CommonUtil.isEmpty(timeYear)?"本月":timeYear);
+            detailDTOList.add(detailDTO2);
         }
         pageResult.setList(detailDTOList);
         return ServerResponse.createBySuccess("获取成功", pageResult);

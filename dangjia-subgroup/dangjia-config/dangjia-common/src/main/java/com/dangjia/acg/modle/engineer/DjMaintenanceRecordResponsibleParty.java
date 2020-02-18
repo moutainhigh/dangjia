@@ -74,4 +74,9 @@ public class DjMaintenanceRecordResponsibleParty extends BaseEntity {
     @ApiModelProperty("申诉后的维保分摊总额")
     private Double appealMaintenanceTotalPrice;
 
+    @Column(name = "complain_id")
+    @Desc(value = "申诉单ID")
+    @ApiModelProperty("申诉单ID")
+    private String complainId;
+
 }

@@ -115,8 +115,8 @@ public class MendDeliver extends BaseEntity {
 	private Date submitTime;
 
 	@Column(name = "shipping_state")
-	@Desc(value = "退货状态（0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分收货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）")
-	@ApiModelProperty("退货状态（0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分收货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）")
+	@Desc(value = "退货状态（0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分退货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）")
+	@ApiModelProperty("退货状态（0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分退货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）")
 	private Integer shippingState;
 
 	@Column(name = "storefront_id")
@@ -133,5 +133,21 @@ public class MendDeliver extends BaseEntity {
 	@Desc(value = "部分退货原因")
 	@ApiModelProperty("部分退货原因")
 	private String reasons;
+
+	@Column(name = "total_price")
+	@Desc(value = "供应商供应商品总额")
+	@ApiModelProperty("供应商供应商品总额")
+	private Double totalPrice;
+
+	@Column(name = "stevedorage_cost")
+	@Desc(value = "供应商搬运费总额")
+	@ApiModelProperty("供应商搬运费总额")
+	private Double stevedorageCost;
+
+	@Column(name = "address_id")
+	@Desc(value = "地址ID")
+	@ApiModelProperty("地址ID")
+	private String addressId;
+
 
 }

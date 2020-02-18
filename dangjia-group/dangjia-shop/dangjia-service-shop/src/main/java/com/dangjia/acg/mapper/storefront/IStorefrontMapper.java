@@ -25,9 +25,9 @@ public interface IStorefrontMapper extends Mapper<Storefront> {
 
     List<WebSplitDeliverItemDTO> queryStoreSupplierSettlement(@Param("storefrontId") String storefrontId,@Param("searchKey") String searchKey);
 
-    List<StoreExpenseRecordDTO> selectStoreExpenseRecord(@Param("orderNumber") String orderNumber,@Param("storefrontId") String storefrontId);
+    List<StoreExpenseRecordDTO> selectStoreExpenseRecord(@Param("orderNumber") String orderNumber,@Param("storefrontId") String storefrontId,@Param("orderId") String orderId);
 
-    List<ExpenseRecordOrderDetailDTO> storeExpenseRecordOrderDetail(@Param("storefrontId") String storefrontId,@Param("orderId") String orderId);
+    List<ExpenseRecordOrderDetailDTO> storeExpenseRecordOrderDetail(@Param("orderId") String orderId);
 
     List<StoreOrderSplitItemDTO>  queryStoreOrderSplitItem(@Param("storefrontId") String storefrontId,@Param("houseId") String houseId,@Param("productId") String productId);
 
@@ -42,8 +42,9 @@ public interface IStorefrontMapper extends Mapper<Storefront> {
 
     List<StoreRepairMendOrderDetailDTO> queryMendOrderDetail(@Param("mendOrderId") String mendOrderId);
 
-    Integer setStorefrontSurplusMoney();
+    void setStorefrontSurplusMoney(@Param("cityId") String cityId);
 
+    List<String> selectCityList();
     //根据店铺类型，查询店铺信息
     public Storefront selectShopStoreByTypeCityId(@Param("cityId") String cityId, @Param("storefrontType") String storefrontType);
 }

@@ -41,6 +41,7 @@ import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -55,6 +56,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -68,7 +70,7 @@ public class MendOrderCheckService {
 
 
     @Autowired
-    private HouseFlowScheduleService houseFlowScheduleService;
+    private MasterAccountFlowRecordService masterAccountFlowRecordService;
     @Autowired
     private ConfigRuleUtilService configRuleUtilService;
     @Autowired
@@ -635,7 +637,7 @@ public class MendOrderCheckService {
                 BigDecimal surplusMoney = member.getSurplusMoney().add(new BigDecimal(mendOrder.getTotalAmount()));
                 //记录流水
                 WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("业主退材料退款");
+                workerDetail.setName("业主仅退款");
                 workerDetail.setWorkerId(member.getId());
                 workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                 workerDetail.setHouseId(mendOrder.getHouseId());
@@ -657,7 +659,7 @@ public class MendOrderCheckService {
                         "0", "退货退款通知", String.format(DjConstants.PushMessage.YEZHUTUIHUO), "");
 
             }
-            if (mendOrder.getType() == 2) {//工匠退剩余材料管家退服务
+            if (mendOrder.getType() == 2||mendOrder.getType() == 5) {//工匠退剩余材料管家退服务
                 MendDeliver mendDeliver = mendDeliverMapper.selectByPrimaryKey(mendOrder.getBusinessOrderNumber());
                 BigDecimal totalAmount = new BigDecimal(0);
                 /*审核通过修改仓库数量,记录流水*/
@@ -697,7 +699,9 @@ public class MendOrderCheckService {
                     member.setSurplusMoney(surplusMoney);
                     memberMapper.updateByPrimaryKeySelective(member);
 
+
                 }
+
                 mendDeliver.setShippingState(1);
                 mendDeliver.setModifyDate(new Date());
                 mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
@@ -724,6 +728,87 @@ public class MendOrderCheckService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("流程全部通过后异常");
+        }
+    }
+
+    /**
+     * 退货申请单ID
+     * @param mendDeliverId 退货单ID
+     * @return
+     */
+    public void setMendMoneyOrder(String mendDeliverId,String userId) {
+        if(StringUtils.isNotBlank(mendDeliverId)){//按发货单确认退款
+            MendDeliver mendDeliver=mendDeliverMapper.selectByPrimaryKey(mendDeliverId);
+            BigDecimal totalAmount = BigDecimal.valueOf(mendDeliver.getTotalAmount());//店铺退给业主的钱
+            /*审核通过修改仓库数量,记录流水*/
+            Example example = new Example(MendMateriel.class);
+            example.createCriteria().andEqualTo(MendMateriel.REPAIR_MEND_DELIVER_ID, mendDeliverId);
+            List<MendMateriel> mendMaterielList = mendMaterialMapper.selectByExample(example);
+            for (MendMateriel mendMateriel : mendMaterielList) {
+                if (mendMateriel.getActualCount() != null && mendMateriel.getActualCount() > 0) {
+                    Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendDeliver.getHouseId());
+                    if(warehouse!=null){
+                        warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getActualCount());//更新退数量
+                        warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
+                        warehouse.setWorkBack(warehouse.getWorkBack() == null ? mendMateriel.getActualCount() : (warehouse.getWorkBack() + mendMateriel.getActualCount())); //收货数量+工匠退数量
+                        warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                    }
+                }
+            }
+
+            if (totalAmount.doubleValue() > 0) {
+                /*退钱给业主*/
+                Member member = memberMapper.selectByPrimaryKey(houseMapper.selectByPrimaryKey(mendDeliver.getHouseId()).getMemberId());
+                BigDecimal haveMoney = member.getHaveMoney().add(totalAmount);
+                BigDecimal surplusMoney = member.getSurplusMoney().add(totalAmount);
+                //记录流水
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName("工匠退材料退款");
+                workerDetail.setWorkerId(member.getId());
+                workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+                workerDetail.setHouseId(mendDeliver.getHouseId());
+                workerDetail.setMoney(totalAmount);
+                workerDetail.setApplyMoney(totalAmount);
+                workerDetail.setWalletMoney(surplusMoney);
+                workerDetail.setState(5);//进钱//工匠退 登记剩余
+                workerDetail.setHouseWorkerOrderId(mendDeliverId);
+                workerDetailMapper.insert(workerDetail);
+
+                member.setHaveMoney(haveMoney);
+                member.setSurplusMoney(surplusMoney);
+                memberMapper.updateByPrimaryKeySelective(member);
+                // 扣除店铺的钱
+                if(mendDeliver.getStorefrontId()!=null){
+                    masterAccountFlowRecordService.updateStoreAccountMoney(mendDeliver.getStorefrontId(), mendDeliver.getHouseId(),
+                            8, mendDeliver.getId(), MathUtil.mul(totalAmount.doubleValue(),-1),"供应商确认退货流水", userId);
+                }
+                //推送消息给业主退货退款通知
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, member.getId(),
+                        "0", "退货退款通知", String.format(DjConstants.PushMessage.YEZHUTUIHUO), "");
+
+
+            }
+
+            mendDeliver.setShippingState(2);
+            mendDeliver.setModifyDate(new Date());
+            mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+
+            example = new Example(MendDeliver.class);
+            example.createCriteria().andEqualTo(MendDeliver.MEND_ORDER_ID, mendDeliver.getMendOrderId()).andIn(MendDeliver.SHIPPING_STATE, Arrays.asList(new Integer[]{0,4}));
+            int mendDeliverList = mendDeliverMapper.selectCountByExample(example);
+
+
+            //如果没有待确认的退货单则更新结算
+            if (mendDeliverList == 0) {
+                WarehouseDetail warehouseDetail = new WarehouseDetail();
+                warehouseDetail.setHouseId(mendDeliver.getHouseId());
+                warehouseDetail.setRelationId(mendDeliver.getMendOrderId());
+                warehouseDetail.setRecordType(3);//工匠退 登记剩余
+                warehouseDetailMapper.insert(warehouseDetail);
+                MendOrder mendOrder=mendOrderMapper.selectByPrimaryKey(mendDeliver.getMendOrderId());
+                mendOrder.setState(4);
+                mendOrder.setModifyDate(new Date());
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -20,17 +21,21 @@ import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTOList;
 import com.dangjia.acg.mapper.storefront.*;
 import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.receipt.Receipt;
 import com.dangjia.acg.modle.repair.MendDeliver;
+import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontConfig;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -82,7 +87,7 @@ public class StorefrontService {
     private IStorefrontAccountFlowRecordMapper storefrontAccountFlowRecordMapper ;
 
     @Autowired
-    private IStorefrontSplitDeliverMapper iStorefrontSplitDeliverMapper;
+    private IShopReceiptMapper iReceiptMapper;
 
     @Autowired
     private IStorefrontMendDeliverMapper iStorefrontMendDeliverMapper;
@@ -90,6 +95,8 @@ public class StorefrontService {
     private StoreConfigService storeConfigService;
     @Autowired
     private IShopSupplierMapper iShopSupplierMapper;
+    @Autowired
+    private IStoreOrderMapper iStoreOrderMapper;
 
     /**
      * 获取需缴纳的滞留金
@@ -127,6 +134,60 @@ public class StorefrontService {
         }
         return ServerResponse.createBySuccess("查询成功",needRetentionMoney);
     }
+
+    /**
+     * 获取当前滞留金信息
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param type 类型
+     * @return 类型：1店铺，2供应商
+     */
+    public ServerResponse getRetentionMoneyInfo(String userId,String cityId,Integer type){
+        try{
+            Map<String,Object> resultMap=new HashMap<>();
+            Double needRetentionMoney=0d;//所需滞留金
+            Double totalRetentionMoney=2000d;//应滞留金
+            Example example;
+            if(type==1){//店铺
+                Storefront storefront =storefrontService.queryStorefrontByUserID(userId,cityId);
+                Config config=storeConfigService.selectConfigInfoByParamKey("SHOP_RETENTION_MONEY");//获取滞留金缴纳金额
+                if(config!=null&& StringUtils.isNotBlank(config.getParamValue())){
+                    totalRetentionMoney=Double.parseDouble(config.getParamValue());
+                }
+                if(storefront!=null&&storefront.getRetentionMoney()<totalRetentionMoney){
+                    needRetentionMoney= MathUtil.sub(totalRetentionMoney,storefront.getRetentionMoney());
+                }
+                resultMap.put("needRetentionMoney",needRetentionMoney);
+                resultMap.put("totalRetentionMoney",totalRetentionMoney);
+                resultMap.put("retentionMoney",storefront.getRetentionMoney());//当前滞留金
+
+            }else if(type==2){//供应商
+                example=new Example(DjSupplier.class);
+                example.createCriteria().andEqualTo(DjSupplier.CITY_ID,cityId)
+                        .andEqualTo(DjSupplier.USER_ID,userId)
+                        .andEqualTo(DjSupplier.DATA_STATUS,0);
+                DjSupplier djSupplier = iShopSupplierMapper.selectOneByExample(example);
+                Config config=storeConfigService.selectConfigInfoByParamKey("STORE_RETENTION_MONEY");//获取滞留金缴纳金额
+                if(config!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(config.getParamValue())){
+                    totalRetentionMoney=Double.parseDouble(config.getParamValue());
+                }
+                if(djSupplier!=null&&djSupplier.getRetentionMoney()<totalRetentionMoney){
+                    needRetentionMoney= MathUtil.sub(totalRetentionMoney,djSupplier.getRetentionMoney());
+                }
+                resultMap.put("needRetentionMoney",needRetentionMoney);
+                resultMap.put("totalRetentionMoney",totalRetentionMoney);
+                resultMap.put("retentionMoney",djSupplier.getRetentionMoney());//当前滞留金
+            }
+            return ServerResponse.createBySuccess("查询成功",resultMap);
+
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+
+    }
+
     /**
      * 根据用户Id查询店铺信息
      * @param userId
@@ -600,11 +661,11 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StoreExpenseRecordDTO>  list=istorefrontMapper.selectStoreExpenseRecord(orderNumber,storefront.getId());
+            List<StoreExpenseRecordDTO>  list=istorefrontMapper.selectStoreExpenseRecord(orderNumber,storefront.getId(),null);
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -628,39 +689,26 @@ public class StorefrontService {
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StoreRevenueRecordDTO> list=istorefrontMapper.queryStoreRevenueRecord(storefront.getId(),orderNumber);
-
-            list.forEach(storeRevenueRecordDTO->{
-             String type=  storeRevenueRecordDTO.getType();
-             if (type.equals("3"))
-             {
-                 Double totalAmount=0d;
-                 //合并结算，计算价钱
-                  String merge= storeRevenueRecordDTO.getMerge();
-                 JSONArray itemObjArr = JSON.parseArray(merge);
-                 for (int i = 0; i < itemObjArr.size(); i++) {
-                     JSONObject jsonObject = itemObjArr.getJSONObject(i);
-                     String id = jsonObject.getString("id");
-                     int deliverType = jsonObject.getInteger("deliverType");
-                     if (deliverType == 1) {
-                         SplitDeliver splitDeliver = iStorefrontSplitDeliverMapper.selectByPrimaryKey(id);
-                         if (null != splitDeliver) {
-                             totalAmount+=splitDeliver.getTotalAmount();
-                         }
-                     } else if (deliverType == 2) {
-                         MendDeliver mendDeliver = iStorefrontMendDeliverMapper.selectByPrimaryKey(id);
-                         if (null != mendDeliver) {
-                             totalAmount+=mendDeliver.getTotalAmount();
-                         }
-                     }
-                 }
-                 storeRevenueRecordDTO.setTotalAmount(totalAmount+"");
-             }
-            });
+            if(list!=null){
+                list.forEach(storeRevenueRecordDTO->{
+                    String type=  storeRevenueRecordDTO.getState();
+                    String anyOrderId=storeRevenueRecordDTO.getAnyOrderId();
+                    if (type.equals("8")){//退货单ID
+                        MendDeliver mendDeliver=ishopMendDeliverMapper.selectByPrimaryKey(anyOrderId);
+                        if(mendDeliver!=null)
+                            storeRevenueRecordDTO.setNumber(mendDeliver.getNumber());
+                    }else if(type.equals(9)){//回执单号
+                        Receipt receipt=iReceiptMapper.selectByPrimaryKey(anyOrderId);
+                        if(receipt!=null)
+                            storeRevenueRecordDTO.setNumber(receipt.getNumber());
+                    }
+                });
+            }
 
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -675,25 +723,29 @@ public class StorefrontService {
      */
     public ServerResponse storeExpenseRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId,String orderId) {
         try {
-            Storefront storefront = this.queryStorefrontByUserID(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<ExpenseRecordOrderDetailDTO> list=istorefrontMapper.storeExpenseRecordOrderDetail(storefront.getId(),orderId);
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<ExpenseRecordOrderDetailDTO> list=istorefrontMapper.storeExpenseRecordOrderDetail(orderId);
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            Double totalPrice=0.0;
             for (ExpenseRecordOrderDetailDTO expenseRecordOrderDetailDTO :list) {
-                expenseRecordOrderDetailDTO.setImageDetail(address+expenseRecordOrderDetailDTO.getImage());
-              String productId=  expenseRecordOrderDetailDTO.getProductId();
-              String houseId=expenseRecordOrderDetailDTO.getHouseId();
-              //要货详情
-              List<StoreOrderSplitItemDTO> storeOrderSplitItemlist=  istorefrontMapper.queryStoreOrderSplitItem(storefront.getId(),houseId,productId);
-              expenseRecordOrderDetailDTO.setStoreOrderSplitItemlist(storeOrderSplitItemlist);
+                expenseRecordOrderDetailDTO.setImageDetail(StringTool.getImage(expenseRecordOrderDetailDTO.getImage(),address));
+                expenseRecordOrderDetailDTO.setSurplusCount(MathUtil.sub(MathUtil.sub(expenseRecordOrderDetailDTO.getShopCount(),expenseRecordOrderDetailDTO.getAskCount()),expenseRecordOrderDetailDTO.getReturnCount()));//剩余量=购买量-要货量-仅退款量
+                totalPrice=MathUtil.add(totalPrice,expenseRecordOrderDetailDTO.getTotalPrice());
             }
             PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            //查询对应的汇总费用信息
+            Order order=iStoreOrderMapper.selectByPrimaryKey(orderId);
+            List<StoreExpenseRecordDTO>  recordDTOList=istorefrontMapper.selectStoreExpenseRecord(order.getOrderNumber(),order.getStorefontId(),orderId);;
+            Map<String,Object> map=new HashMap<>();
+            if(recordDTOList!=null){
+                StoreExpenseRecordDTO storeExpenseRecordDTO=recordDTOList.get(0);
+                map=BeanUtils.beanToMap(storeExpenseRecordDTO);
+            }
+            map.put("totalPrice",totalPrice);//商品小计
+            map.put("orderItemList",pageResult);
+            return ServerResponse.createBySuccess("查询成功",map);
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -726,48 +778,24 @@ public class StorefrontService {
      *店铺铺-支出记录-查看货单详情
      * @param request
      * @param pageDTO
-     * @param userId
-     * @param cityId
-     * @param orderNumber
+     * @param accountFlowRecordId
+     * @param type 1提现，9结算
      * @return
      */
-    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String orderNumber,Integer type) {
+    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String accountFlowRecordId,Integer type) {
         try {
-            Storefront storefront = this.queryStorefrontByUserID(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
-            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId,cityId);
 
-            /*1:  业主仅退款2：业主退货退款 3：合并结算4：体现*/
-            if (type==null)
-            {
+           // DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId,cityId);
+            /*1: 提现 9：合并结算4：体现*/
+            if (type==null){
                 return ServerResponse.createByErrorMessage("类型参数不能为空");
             }
-            if(type==1||type==2)
-            {
-                //1:  业主仅退款2：业主退货退款
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<StoreRepairMendOrderDTO> list= istorefrontMapper.queryMendOrder(storefront.getId(),orderNumber);
-                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-                Double sumPrice = 0d;
-                for (StoreRepairMendOrderDTO storeRepairMendOrderDTO:list) {
-                    String mid=storeRepairMendOrderDTO.getMid();
-                    List<StoreRepairMendOrderDetailDTO> list2=istorefrontMapper.queryMendOrderDetail(mid);
-                    for (StoreRepairMendOrderDetailDTO storeRepairMendOrderDetailDTO: list2) {
-                        storeRepairMendOrderDetailDTO.setImageDetail(address+storeRepairMendOrderDetailDTO.getImage());
-                        sumPrice+= storeRepairMendOrderDetailDTO.getTotalPrice()!=null?Double.parseDouble(storeRepairMendOrderDetailDTO.getTotalPrice()):0d;
-                    }
-                    storeRepairMendOrderDTO.setSumPrice(sumPrice);
-                    storeRepairMendOrderDTO.setMendOrderDetaillist(list2);
-                }
-                PageInfo pageResult = new PageInfo(list);
-                return ServerResponse.createBySuccess("查询成功",pageResult);
+            if(type==1){//提现，查询回执
+                //Receipt receipt=iShopReceiptMapper.selectByPrimaryKey();
             }
-             if(type==3)
-             {
+             if(type==3){
                 // 3：合并结算
-                 Receipt receipt = iShopReceiptMapper.selectByPrimaryKey(orderNumber);
+                 Receipt receipt = iShopReceiptMapper.selectByPrimaryKey("");
                  if (receipt==null)
                      return ServerResponse.createByErrorMessage("没有查询到结算回执");
                  JSONArray jsonArr = JSONArray.parseArray(receipt.getMerge());
@@ -780,12 +808,7 @@ public class StorefrontService {
                      String id = obj.getString("id");
                      Integer deliverType = obj.getInteger("deliverType");
                      DjSupplierDeliverDTO djSupplierDeliverDTO = new DjSupplierDeliverDTO();
-                     if(djSupplier!=null)
-                     {
-                         djSupplierDeliverDTOList.setName(djSupplier.getName()!=null?djSupplier.getName():"");//供应商名称
-                         djSupplierDeliverDTOList.setTelephone(djSupplier.getTelephone()!=null?djSupplier.getTelephone():"");//供应商电话
-                         djSupplierDeliverDTOList.setImage(receipt.getImage());
-                     }
+
                      //发货单
                      if (deliverType == 1) {
                          SplitDeliver splitDeliver = ishopSplitDeliverMapper.selectByPrimaryKey(id);
@@ -818,21 +841,7 @@ public class StorefrontService {
                  djSupplierDeliverDTOList.setDjSupplierDeliverDTOList(djSupplierDeliverDTOS);
                  return ServerResponse.createBySuccess("查询成功", djSupplierDeliverDTOList);
              }
-            if(type==4)
-            {
-                //4：体现
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<AccountFlowRecordDTO> accountFlowRecordDTOList=  istorefrontMapper.storeAccountFlowRecordDTO(storefront.getId(),orderNumber);
-                if(accountFlowRecordDTOList.size()<=0)
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-                for (AccountFlowRecordDTO accountFlowRecordDTO: accountFlowRecordDTOList ) {
-                    if(StringUtil.isNotEmpty(accountFlowRecordDTO.getImage()))
-                        accountFlowRecordDTO.setImage(imageAddress+accountFlowRecordDTO.getImage());
-                }
-                PageInfo pageResult = new PageInfo(accountFlowRecordDTOList);
-                return ServerResponse.createBySuccess("查询成功",pageResult);
-            }
+
             return null;
         } catch (Exception e) {
             e.printStackTrace();
@@ -842,9 +851,25 @@ public class StorefrontService {
 
     /**
      * 店铺-计算可提现金额
+     * 1.提现限制：每笔收入限制7天才可提现
+     * 2.提现金额不可超过可提现金额
+     * 3.全部提现：点击默认输入全部可提现金额
+     * 4.验证支付密码才可提现（6位数字）
      */
-    public Integer setStorefrontSurplusMoney() {
-       return  istorefrontMapper.setStorefrontSurplusMoney();
+    public void setStorefrontSurplusMoney() {
+        try{
+            //1.按城市划分有多少个城市的店铺
+            List<String> cityList=istorefrontMapper.selectCityList();
+            if(cityList!=null&&cityList.size()>0){
+                for(String cityId:cityList){
+                    //根据城市修改店铺的可提现余额
+                    istorefrontMapper.setStorefrontSurplusMoney(cityId);
+                }
+            }
+
+        }catch (Exception e){
+          logger.error("计算可提现金额异常：");
+        }
     }
 
     /**

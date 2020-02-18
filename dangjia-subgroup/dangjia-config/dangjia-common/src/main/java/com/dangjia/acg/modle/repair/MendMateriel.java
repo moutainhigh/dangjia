@@ -55,11 +55,13 @@ public class MendMateriel extends BaseEntity {
 	private String productNickName;//货品昵称
 
 	@Column(name = "price")
-	@Desc(value = "单价")
-	@ApiModelProperty("单价")
+	@Desc(value = "销售单价")
+	@ApiModelProperty("销售单价")
 	private Double price;
 
 	@Column(name = "cost")
+	@Desc(value = "成本单价（供应单价）")
+	@ApiModelProperty("成本单价（供应单价）")
 	private Double cost;// 成本价
 
 	@Column(name = "unit_name")
@@ -106,8 +108,8 @@ public class MendMateriel extends BaseEntity {
 
 
 	@Column(name = "actual_count")
-	@Desc(value = "实际总数")
-	@ApiModelProperty("实际总数")
+	@Desc(value = "实际(收、退货数）")
+	@ApiModelProperty("实际(收、退货数")
 	private Double actualCount;//
 
 	@Column(name = "actual_price")
@@ -152,9 +154,14 @@ public class MendMateriel extends BaseEntity {
 	@Transient
 	private String isNonPlatformSupplier;
 
-	@Column(name = "sup_actual_count")
-	@Desc(value = "供应商实际退货数")
-	@ApiModelProperty("供应商实际退货数")
-	private Double supActualCount;
+	@Column(name = "sup_stevedorage_cost")
+	@Desc(value = "供应商搬运费")
+	@ApiModelProperty("供应商搬运费")
+	private Double supStevedorageCost;
+
+	@Column(name = "sup_transportation_cost")
+	@Desc(value = "供应商运费")
+	@ApiModelProperty("供应商运费")
+	private Double supTransportationCost;
 
 }

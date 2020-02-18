@@ -199,5 +199,110 @@
         and t1.data_status = 0
         order by t1.create_date,t2.code
     </select>
+
+
+    <select id="searchReturnRefundMaterielList" resultType="com.dangjia.acg.dto.deliver.OrderSplitItemDTO">
+        SELECT
+            t.mend_order_id mendOrderId,
+            t.product_id productId,
+            t.id mendMaterielId,
+            t.storefront_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            t.unit_name unitName,
+            IFNULL(t.image, t1.image) image,
+            t.shop_count shopCount,
+            t.actual_count actualCount,
+            t1.prod_template_id productTemplateId,
+            t1.is_upstairs_cost isUpstairsCost,
+            IFNULL(t.cost,0) supCost,
+            t.supplier_id supId,
+            IFNULL(t.sup_stevedorage_cost,0) supStevedorageCost,
+            IFNULL(t.stevedorage_cost,0) stevedorageCost,
+            IFNULL(t.transportation_cost,0) transportationCost
+        FROM
+            dj_repair_mend_materiel t
+        INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
+        WHERE  t.mend_order_id=#{mendOrderId}
+        <if test = "mendDeliverId!=null and mendDeliverId!=''">
+            and t.repair_mend_deliver_id=#{mendDeliverId}
+        </if>
+        order by t.product_name desc
+    </select>
+
+    <select id="getsupplierInfoList" resultType="java.util.Map">
+        SELECT
+            ds.id supId,ds.name supName,dsp.price supPrice,dsp.porterage supPorterage,ds.transportation_cost transportationCost,
+            ds.is_non_platform_supplier isNonPlatformSupplier
+        FROM
+            dj_supplier ds,
+            dj_sup_application_product dsp,
+            dj_deliver_split_deliver dsd,
+            dj_deliver_order_split_item dos
+        WHERE
+            ds.id = dsp.sup_id
+        and dsp.application_status='1'
+        and ds.id=dsd.supplier_id
+        and dsd.id=dos.split_deliver_id
+        and dos.product_id=dsp.product_id
+        and dos.house_id=#{houseId}
+        and dsp.shop_id=#{storefrontId}
+        and dsp.product_id=#{productId}
+        and supply_relationship='0'
+        group by ds.id
+        order by dsp.price asc
+    </select>
+
+
+    <!--按供应商分组查询对应符合条件的信息-->
+    <select id="selectSupMaterialByMendId" resultType="java.util.Map">
+        SELECT
+            t.supplier_id supplierId,
+            t.mend_order_id mendOrderId,
+            t1.is_non_platform_supplier isNonPlatformSupplier,
+            t1.`name` supName,
+            t1.telephone,
+            t1.transportation_cost supTransportationCost,
+            sum(t.cost * IFNULL(t.actual_count, t.shop_count)) supTotalPrice,
+            sum(IFNULL(t.sup_stevedorage_cost, 0)) supStevedorageCost,
+            sum(t.price * IFNULL(t.actual_count, t.shop_count)) totalPrice,
+            sum(IFNULL(t.transportation_cost,0)) totalTransportationCost,
+            sum(IFNULL(t.stevedorage_cost,0)) totalStevedorageCost,
+            sum(IFNULL(t.price * IFNULL(t.actual_count, t.shop_count), 0)) - sum(IFNULL(t.transportation_cost,0)) - sum(IFNULL(t.stevedorage_cost,0)) totalAmount,
+            sum(IFNULL(t.cost * IFNULL(t.actual_count, t.shop_count), 0)) - sum(IFNULL(t.sup_stevedorage_cost, 0)) - t1.transportation_cost applyMoney
+        FROM
+            dj_repair_mend_materiel t,
+            dj_supplier t1
+        WHERE
+            t.mend_order_id = #{mendOrderId}
+        AND t.supplier_id = t1.id
+        <if test = "mendDeliverId!=null and mendDeliverId!=''">
+            and t.repair_mend_deliver_id=#{mendDeliverId}
+        </if>
+        GROUP BY
+        t.supplier_id
+
+    </select>
+
+    <update id="updateMendDeliverIdByInfo">
+        update dj_repair_mend_materiel set repair_mend_deliver_id=#{mendDeliverId}
+        where mend_order_id=#{mendOrderId} and supplier_id=#{supplierId}
+    </update>
+
+    <select id="getMendMaterialReceiverNum" resultType="java.lang.Double">
+        select
+        <if test="type==1">
+            sum(shop_count) receive
+        </if>
+        <if test="type==2">
+            sum(IFNULL(actual_count,shop_count)) receive
+        </if>
+        from dj_repair_mend_materiel
+        where
+          repair_mend_deliver_id =#{mendDeliverId}
+    </select>
+
 </mapper>
 

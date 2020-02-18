@@ -121,16 +121,6 @@
         </if>
     </select>
 
-    <select id="queryMemberRecord" resultType="com.dangjia.acg.dto.complain.ReplaceMemberRecordDTO">
-        SELECT
-            rmr.create_date AS createDate,
-            m.mobile AS mobile,
-            m.name AS name
-        FROM
-         dj_replace_member_record rmr
-        INNER JOIN dj_member m ON rmr.member_id = m.id
-        WHERE rmr.member_id = #{memberId}
-    </select>
 
 
 

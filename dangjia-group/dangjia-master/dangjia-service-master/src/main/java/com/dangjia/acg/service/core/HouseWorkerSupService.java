@@ -17,6 +17,7 @@ import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -81,6 +82,9 @@ public class HouseWorkerSupService {
     private ConfigRuleUtilService configRuleUtilService;
     @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
+
+    @Autowired
+    private DjMaintenanceRecordProductMapper maintenanceRecordProductMapper;
     @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
@@ -157,8 +161,10 @@ public class HouseWorkerSupService {
                         allgrabBean.setSquare((house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
                         allgrabBean.setHouseMember((mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                         allgrabBean.setWorkertotal("¥0");//工钱
-                        double totalPrice = houseWorker.getPrice().doubleValue();
-                        allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+                        Double totalPrice = maintenanceRecordProductMapper.getTotalPriceByRecordId(record.getId(),1);
+                        if(totalPrice!=null) {
+                            allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+                        }
                     }else {//装修单
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseWorker.getBusinessId());
                         House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());

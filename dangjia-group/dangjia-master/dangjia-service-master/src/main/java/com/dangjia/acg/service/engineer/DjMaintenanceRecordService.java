@@ -68,17 +68,20 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.node.NodeProgressService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -138,7 +141,7 @@ public class DjMaintenanceRecordService {
     @Autowired
     private TaskStackService taskStackService;
     @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI;
+    private MasterStorefrontService masterStorefrontService;
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
@@ -420,7 +423,7 @@ public class DjMaintenanceRecordService {
                 DjMaintenanceRecordProduct recordProduct = djMaintenanceRecordProductMapper.selectByPrimaryKey(taskStack.getData());
                 Complain complain=iComplainMapper.selectByPrimaryKey(recordProduct.getComplainId());
                 Map<String,Object> resultMap=BeanUtils.beanToMap(complain);
-                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
                 resultMap.put("imageUrl",StringTool.getImage(complain.getImage(),address));
                 return ServerResponse.createBySuccess("查询成功",resultMap);
             }
@@ -443,7 +446,7 @@ public class DjMaintenanceRecordService {
         try{
             TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
             if(taskStack!=null&&taskStack.getState()==0){
-                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
                 Map<String,Object> map=new HashMap();
                 DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
                 if(djMaintenanceRecord!=null&& !("2".equals(djMaintenanceRecord.getState())||"4".equals(djMaintenanceRecord.getState()))&&StringUtils.isNotBlank(djMaintenanceRecord.getWorkerMemberId())){
@@ -586,6 +589,7 @@ public class DjMaintenanceRecordService {
             if(djMaintenanceRecord!=null&&auditResult==2){
               //验收不通过，改状态需要工匠重新申请
               djMaintenanceRecord.setState(3);
+              djMaintenanceRecord.setEndCollectTime(new Date());
               djMaintenanceRecord.setModifyDate(new Date());
               djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
               //发送消息给工匠，需要重新处理
@@ -596,6 +600,7 @@ public class DjMaintenanceRecordService {
                 //验收通过，修改状态为验收通过
                 djMaintenanceRecord.setState(2);
                 djMaintenanceRecord.setModifyDate(new Date());
+                djMaintenanceRecord.setEndCollectTime(new Date());
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
                 //质保期内的维保，分担责任给到对应的工匠和店铺
                 if(djMaintenanceRecord.getOverProtection()==0){
@@ -611,7 +616,7 @@ public class DjMaintenanceRecordService {
                 configMessageService.addConfigMessage( AppType.GONGJIANG, djMaintenanceRecord.getWorkerMemberId(),
                         "0", "业主审核通过", String.format(DjConstants.CommonMessage.YEZHU_ACCEPT,member.getName()),2, "业主审核通过");
 
-                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
                 WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
                 map.put("workerId",worker.getId());
                 map.put("workerName",worker.getName());
@@ -1040,6 +1045,11 @@ public class DjMaintenanceRecordService {
                  WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecordContent.getWorkerTypeId());
                  resultMap.putAll(getWokerMemberInfo(djMaintenanceRecordContent.getMemberId(),workerType.getName(),workerType.getColor()));
              }
+             if(type==1){
+                 DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+                 resultMap.put("state",djMaintenanceRecord.getState());//验收状态：2验收通过，3验收不通过
+                 resultMap.put("endCollectTime",djMaintenanceRecord.getEndCollectTime());//验收时间
+             }
 
          }
          //查询业主评分，及业主评价
@@ -1268,7 +1278,7 @@ public class DjMaintenanceRecordService {
                     Double amountDeducted =0d;// (djMaintenanceRecordResponsibleParty.getProportion() / 100) * (djMaintenanceRecord1.getSincePurchaseAmount() + djMaintenanceRecord1.getEnoughAmount());
                     if (djMaintenanceRecordResponsibleParty.getResponsiblePartyType() == 1) {
                         AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
-                        accountFlowRecord.setState(3);
+                        accountFlowRecord.setState(6);
                         accountFlowRecord.setDefinedAccountId(djMaintenanceRecordResponsibleParty.getResponsiblePartyId());
                         accountFlowRecord.setCreateBy(userId);
                         accountFlowRecord.setHouseOrderId(djMaintenanceRecordResponsibleParty.getId());
@@ -1642,39 +1652,55 @@ public class DjMaintenanceRecordService {
     }
 
     /**
-     * 缴纳质保金详情
+     * 质保金变动记录查询
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @return
      */
-    public ServerResponse queryGuaranteeMoneyDetail(String userId, String cityId, String id) {
-        try {
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+    public ServerResponse queryGuaranteeMoneyList(PageDTO pageDTO,String userId,String cityId){
+        try{
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
-            ResponsiblePartyDetailDTO responsiblePartyDetailDTO = djMaintenanceRecordResponsiblePartyMapper.queryGuaranteeMoneyDetail(id);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<ResponsiblePartyDTO> list=djMaintenanceRecordResponsiblePartyMapper.queryGuaranteeMoneyList(storefront.getId());
+            PageInfo pageInfo = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功",pageInfo);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    /**
+     * 缴纳质保金详情
+     */
+    public ServerResponse queryGuaranteeMoneyDetail(String userId, String cityId, String accountflowRecordId) {
+        try {
+            //查询扣除记录信息
+            AccountFlowRecord accountFlowRecord=iMasterAccountFlowRecordMapper.selectByPrimaryKey(accountflowRecordId);
+            if(accountFlowRecord==null){
+                return ServerResponse.createByErrorMessage("未找到会合条件的数据");
+            }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            ResponsiblePartyDetailDTO responsiblePartyDetailDTO = djMaintenanceRecordResponsiblePartyMapper.queryGuaranteeMoneyDetail(accountFlowRecord.getHouseOrderId());
             if (responsiblePartyDetailDTO != null) {
-                responsiblePartyDetailDTO.setRetentionMoney(storefront.getRetentionMoney());//现有滞留金
-
-                responsiblePartyDetailDTO.setPaidRetentionMoney((responsiblePartyDetailDTO.getTotalAmount() *
-                        Double.parseDouble(responsiblePartyDetailDTO.getProportion())) / 100 - storefront.getRetentionMoney());//需交滞留金
-
-                String workerTypeId = responsiblePartyDetailDTO.getWorkerTypeId();
-                String workerTypeName = null;
-                if (workerTypeId != null) {
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
-                    workerTypeName = workerType != null ? workerType.getName() : "";
-                    responsiblePartyDetailDTO.setWorkerTypeName(workerTypeName);//工种名称
+                WorkerType workerType=workerTypeMapper.selectByPrimaryKey(responsiblePartyDetailDTO.getWorkerTypeId());
+                if(accountFlowRecord.getState()==6){//质保金扣除
+                    responsiblePartyDetailDTO.setTitleName(responsiblePartyDetailDTO.getAddress() +"于"+ DateUtil.getDateFormat(responsiblePartyDetailDTO.getCreateDate(),"yyyy-MM-dd")+"进行了"+workerType.getName()+"质保，作为责任方您的质保金被扣除相应金额用以支付质保费用；当质保金余额为负数时您无法进行除充值外的任何操作，请知晓；有任何疑问请及时联系当家客服。");
+                }else if(accountFlowRecord.getState()==7){//质保金返还
+                    responsiblePartyDetailDTO.setTitleName(responsiblePartyDetailDTO.getAddress() +"于"+ DateUtil.getDateFormat(responsiblePartyDetailDTO.getCreateDate(),"yyyy-MM-dd")+"进行了"+workerType.getName()+"质保，作为责任方您的质保金被扣除相应金额用以支付质保费用；您在申诉期内申诉成功，返还部分质保金。");
                 }
-                StringBuffer str = new StringBuffer();
-                str.append(responsiblePartyDetailDTO.getAddress() + "于").
-                        append(responsiblePartyDetailDTO.getCreateDate() + "申请了" + workerTypeName + "质保，经大管家实地勘察后，确认你责任占比")
-                        .append(responsiblePartyDetailDTO.getProportion() + "%，您需要缴纳质保金后才能进行店铺的其他操作，有任何疑问请及时联系当家客服。");
-                responsiblePartyDetailDTO.setContent(str.toString());//缴纳详情
-                responsiblePartyDetailDTO.setNeedRetentionMoney(responsiblePartyDetailDTO.getTotalAmount() * Double.parseDouble(responsiblePartyDetailDTO.getProportion()) / 100);
-                responsiblePartyDetailDTO.setProportion(responsiblePartyDetailDTO.getProportion() + "%");//责任占比
+                responsiblePartyDetailDTO.setComplainImageUrl(StringTool.getImage(responsiblePartyDetailDTO.getComplainImage(),address));
+                responsiblePartyDetailDTO.setCreateDate(accountFlowRecord.getCreateDate());//扣除/返还时间
+                responsiblePartyDetailDTO.setAmountBeforeMoney(accountFlowRecord.getAmountBeforeMoney());
+                responsiblePartyDetailDTO.setAmountAfterMoney(accountFlowRecord.getAmountAfterMoney());
+                responsiblePartyDetailDTO.setMoney(accountFlowRecord.getMoney());
             }
             return ServerResponse.createBySuccess("查询成功", responsiblePartyDetailDTO);//所需质保金
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -2338,13 +2364,13 @@ public class DjMaintenanceRecordService {
     public void maintenanceMinusStorefront( String maintenanceRecordId, String houseId,String storefrontId,Double sumPrice) {
         if(storefrontId!=null&&StringUtils.isNotBlank(storefrontId)){
             AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
-            accountFlowRecord.setState(3);
+            accountFlowRecord.setState(6);//滞留金扣除
             accountFlowRecord.setHouseOrderId(houseId);
-            accountFlowRecord.setDefinedAccountId(maintenanceRecordId);
+            accountFlowRecord.setDefinedAccountId(storefrontId);
+            accountFlowRecord.setDefinedName("质保金扣除");
             accountFlowRecord.setCreateBy("SYSTEM");
             accountFlowRecord.setHouseOrderId(maintenanceRecordId);
-            Storefront storefront =
-                    iMasterStorefrontMapper.selectByPrimaryKey(storefrontId);
+            Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(storefrontId);
             accountFlowRecord.setAmountBeforeMoney(storefront.getRetentionMoney());//入账前金额
             storefront.setRetentionMoney(MathUtil.sub(storefront.getRetentionMoney(),sumPrice));
             //扣除店铺占比金额

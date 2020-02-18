@@ -51,8 +51,8 @@ public class EvaluateController implements EvaluateAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse checkOk(String userToken,String houseFlowApplyId,String content,Integer star,String imageList,String latitude,String longitude){
-        return evaluateService.checkOk(houseFlowApplyId,content,star, imageList, latitude, longitude);
+    public ServerResponse checkOk(String userToken,String houseFlowApplyId,String content,String imageList,String latitude,String longitude){
+        return evaluateService.checkOk(houseFlowApplyId,content,imageList, latitude, longitude);
     }
 
     @Override

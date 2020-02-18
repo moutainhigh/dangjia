@@ -34,6 +34,20 @@ public interface BasicsStorefrontAPI {
                                          @RequestParam("cityId") String cityId,
                                          @RequestParam("type") Integer type);
 
+    /**
+     * 获取需缴纳的滞留金
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param type 类型：1店铺，2供应商
+     * @return
+     */
+    @PostMapping("/web/getRetentionMoneyInfo")
+    @ApiOperation(value = "获取当前滞留金信息", notes = "获取当前滞留金信息")
+    ServerResponse getRetentionMoneyInfo(@RequestParam("userId") String userId,
+                                         @RequestParam("cityId") String cityId,
+                                         @RequestParam("type") Integer type);
+
+
     @PostMapping("/web/queryStorefrontByUserID")
     @ApiOperation(value = "通过用户ID查询店铺", notes = "通过用户ID查询店铺")
     Storefront queryStorefrontByUserID(@RequestParam("userId") String userId,
@@ -203,25 +217,21 @@ public interface BasicsStorefrontAPI {
      *
      * @param request
      * @param pageDTO
-     * @param userId
-     * @param cityId
-     * @param type
-     * @param orderNumber
+     * @param type 查询类型：1提现，9结算
+     * @param accountFlowRecordId 支出流水ID
      * @return
      */
     @PostMapping("/web/storeRevenueRecordOrderDetail")
     @ApiOperation(value = "店铺-支出记录-查看货单详情", notes = "店铺-支出记录-查看货单详情")
     ServerResponse storeRevenueRecordOrderDetail(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("pageDTO") PageDTO pageDTO,
-                                                 @RequestParam("userId") String userId,
-                                                 @RequestParam("cityId") String cityId,
-                                                 @RequestParam("orderNumber") String orderNumber,
+                                                 @RequestParam("accountFlowRecordId") String accountFlowRecordId,
                                                  @RequestParam("type") Integer type);
 
 
     @PostMapping("/sup/setStorefrontSurplusMoney")
     @ApiOperation(value = "店铺-计算可提现金额", notes = "店铺-计算可提现金额")
-    Integer setStorefrontSurplusMoney();
+    void setStorefrontSurplusMoney();
 
 
     @PostMapping("/web/storefront/queryWorkerShopByCityId")

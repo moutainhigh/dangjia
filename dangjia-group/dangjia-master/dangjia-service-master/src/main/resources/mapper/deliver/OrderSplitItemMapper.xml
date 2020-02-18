@@ -8,6 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--查询要货单总价-->
     <select id="getOrderSplitPrice" resultType="java.lang.Double">
 	    select
+
 		    IFNULL(sum(price*num),0)
 		from dj_deliver_order_split_item
 		where
@@ -22,7 +23,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
     <select id="getOrderSplitReceiverNum" resultType="java.lang.Double">
 	    select
-		    sum(IFNULL(receive,num)) receive
+	       <if test="type==1">
+               sum(num) receive
+           </if>
+        <if test="type==2">
+            sum(IFNULL(receive,num)) receive
+        </if>
 		from dj_deliver_order_split_item
 		where
 	        split_deliver_id = #{splitDeliverId}
@@ -254,12 +260,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
         INNER JOIN dj_deliver_split_deliver t2 on t.split_deliver_id=t2.id
         WHERE  t.receive>IFNULL(t.return_count,0)
-        and t2.shipping_state in(2,4,5,7,8)
+        and t2.shipping_state in(2,4,5,7,8,10)
         and ds.house_id=#{houseId}
         and ds.member_id=#{workerId}
         <if test="null!=searchKey and ''!=searchKey">
           AND t.product_name LIKE CONCAT('%',#{searchKey},'%')
         </if>
+        order by t.category_id,t.product_name
     </select>
 
     <select id="getSplitOrderItemBySplitOrderId" resultType="com.dangjia.acg.dto.deliver.OrderSplitItemDTO">
@@ -298,22 +305,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--按供应商分组查询对应符合条件的信息-->
     <select id="selectSupListBySplitId" resultType="java.util.Map">
         SELECT
-        t.supplier_id supplierId,
-        t.order_split_id orderSplitId,
-        t1.is_non_platform_supplier isNonPlatformSupplier,
-        t1.`name` supName,
-        t1.telephone,
-        t1.transportation_cost supTransportationCost,
-        sum(t.sup_cost * IFNULL(t.receive, t.num)) supTotalPrice,
-        sum(IFNULL(t.sup_stevedorage_cost, 0)) supStevedorageCost,
-        sum(t.price * IFNULL(t.receive, t.num)) totalPrice,
-        sum(t.transportation_cost) totalTransportationCost,
-        sum(t.stevedorage_cost) totalStevedorageCost,
-        max(
-        IFNULL(t.is_delivery_install, '0')
-        ) isDeliveryInstall,
-        sum(IFNULL(t.price * IFNULL(t.receive, t.num), 0)) + sum(t.transportation_cost) + sum(t.stevedorage_cost) totalAmount,
-        sum(IFNULL(t.sup_cost * IFNULL(t.receive, t.num), 0)) + sum(IFNULL(t.sup_stevedorage_cost, 0)) + t1.transportation_cost applyMoney
+            t.supplier_id supplierId,
+            t.order_split_id orderSplitId,
+            t1.is_non_platform_supplier isNonPlatformSupplier,
+            t1.`name` supName,
+            t1.telephone,
+            t1.transportation_cost supTransportationCost,
+            sum(t.sup_cost * IFNULL(t.receive, t.num)) supTotalPrice,
+            sum(IFNULL(t.sup_stevedorage_cost, 0)) supStevedorageCost,
+            sum(t.price * IFNULL(t.receive, t.num)) totalPrice,
+            sum(IFNULL(t.transportation_cost,0)) totalTransportationCost,
+            sum(IFNULL(t.stevedorage_cost,0)) totalStevedorageCost,
+            max(
+            IFNULL(t.is_delivery_install, '0')
+            ) isDeliveryInstall,
+            sum(IFNULL(t.price * IFNULL(t.receive, t.num), 0)) + sum(IFNULL(t.transportation_cost,0)) + sum(IFNULL(t.stevedorage_cost,0)) totalAmount,
+            sum(IFNULL(t.sup_cost * IFNULL(t.receive, t.num), 0)) + sum(IFNULL(t.sup_stevedorage_cost, 0)) + t1.transportation_cost applyMoney
         FROM
             dj_deliver_order_split_item t,
             dj_supplier t1
@@ -354,6 +361,98 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="getSupPorterage" resultType="java.lang.Double">
       select IFNULL(porterage,0) from dj_sup_application_product where shop_id=#{storefrontId} and sup_id=#{supId} and product_id=#{productId}
+    </select>
+
+    <select id="selectIsDeliveryInstall" resultType="java.lang.String">
+        SELECT
+            max(
+                IFNULL(t.is_delivery_install, '0')
+            ) isDeliveryInstall
+        FROM
+            dj_deliver_order_split_item t
+        WHERE
+            t.split_deliver_id = #{splitDeliverId}
+    </select>
+
+    <select id="selectStorefrontIdByOrderSplitId" resultType="com.dangjia.acg.modle.storefront.Storefront">
+        SELECT
+            bs.`id`,
+            bs.`user_id` AS userId,
+            bs.`city_id` AS cityId,
+            bs.`storefront_name` AS storefrontName,
+            bs.`storefront_address` AS storefrontAddress,
+            bs.`storefront_desc` AS storefrontDesc,
+            bs.`storefront_logo` AS storefrontLogo,
+            bs.`storekeeper_name` AS storekeeperName,
+            bs.`mobile`,
+            bs.`email`
+        FROM
+            dj_deliver_order_split_item item,
+            dj_basics_storefront_product product,
+            dj_basics_storefront bs
+        WHERE
+            item.product_id = product.id
+        AND product.storefront_id = bs.id
+        AND item.order_split_id = #{orderSplitId}
+        GROUP BY
+            bs.id
+    </select>
+
+    <select id="selectOrderSplitItemList" resultType="com.dangjia.acg.modle.deliver.OrderSplitItem">
+        SELECT
+            t.order_split_id orderSplitId,
+            t.product_id productId,
+            t.id id,
+            t.storefront_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            t.unit_name unitName,
+            IFNULL(t.image, product.image) image,
+            t.shop_count shopCount,
+            IFNULL(t.ask_count, 0) askCount,
+            t.num num,
+            t.receive,
+            t.is_delivery_install isDeliveryInstall,
+            IFNULL(t.sup_stevedorage_cost,0) supStevedorageCost
+        FROM
+            dj_deliver_order_split_item t,
+            dj_basics_storefront_product product,
+            dj_basics_storefront bs
+        WHERE
+            t.product_id = product.id
+        AND product.storefront_id = bs.id
+        AND t.order_split_id = #{orderSplitId}
+        and bs.id=#{storefrontId}
+    </select>
+
+    <select id="selectSplitItemList" resultType="com.dangjia.acg.modle.deliver.OrderSplitItem">
+         SELECT
+            t.order_split_id orderSplitId,
+            t.product_id productId,
+            t.id id,
+            t.storefront_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            t.unit_name unitName,
+            t.image image,
+            t.shop_count shopCount,
+            IFNULL(t.ask_count, 0) askCount,
+            t.num num,
+            t.receive,
+            t.is_delivery_install isDeliveryInstall,
+            IFNULL(t.sup_stevedorage_cost, 0) supStevedorageCost
+        FROM
+            dj_deliver_order_split_item t,
+          dj_deliver_order_split t1
+        WHERE t.order_split_id=t1.id
+        and (t1.id=#{orderSplitId} or t1.split_parent_id=#{orderSplitId})
+        <if test="null!=productId and ''!=productId">
+            and t.product_id=#{productId}
+        </if>
     </select>
 </mapper>
 

@@ -126,7 +126,6 @@ public interface HouseWorkerAPI {
      * @param houseFlowId
      * @param applyDec
      * @param imageList
-     * @param houseFlowId2
      * @param latitude
      * @param longitude
      * @param returnableMaterial 是否有可退材料（1是，0否）
@@ -140,7 +139,6 @@ public interface HouseWorkerAPI {
                                      @RequestParam("houseFlowId") String houseFlowId,
                                      @RequestParam("applyDec") String applyDec,
                                      @RequestParam("imageList") String imageList,
-                                     @RequestParam("houseFlowId2") String houseFlowId2,
                                      @RequestParam("latitude") String latitude,
                                      @RequestParam("longitude") String longitude,
                                      @RequestParam("returnableMaterial") String returnableMaterial,

@@ -30,18 +30,31 @@ public class Utils {
     public static ButtonListBean getButton(String name, int type) {
         return getButton(name, null, type);
     }
-
+    /**
+     * 获取按钮对象
+     *
+     * @param name 按钮名称
+     * @param paramVal  跳转的URL
+     * @param type 按钮类型
+     * @return 按钮对象
+     */
+    public static ButtonListBean getButton(String name, String paramVal, int type) {
+        ButtonListBean buttonListBean = new ButtonListBean();
+        buttonListBean.setButtonType(type);
+        buttonListBean.setParamVal(paramVal);
+        buttonListBean.setButtonTypeName(name);
+        return buttonListBean;
+    }
     /**
      * 获取按钮对象
      *
      * @param name 按钮名称
      * @param url  跳转的URL
-     * @param type 按钮类型
      * @return 按钮对象
      */
-    public static ButtonListBean getButton(String name, String url, int type) {
+    public static ButtonListBean getButton(String name, String url) {
         ButtonListBean buttonListBean = new ButtonListBean();
-        buttonListBean.setButtonType(type);
+        buttonListBean.setButtonType(1000);
         buttonListBean.setUrl(url);
         buttonListBean.setButtonTypeName(name);
         return buttonListBean;

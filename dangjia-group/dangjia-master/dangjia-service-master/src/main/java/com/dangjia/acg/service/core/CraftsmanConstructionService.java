@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.core;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -248,6 +250,11 @@ public class CraftsmanConstructionService {
                     if(houseWorker!=null && houseWorker.getWorkType()==6) {
                         dataMap.put("completedNodeNumber",0);//已完成节点数(已完成)
                         dataMap.put("labelName", "待验房");//节点名称
+
+
+                        JSONObject paramVal=new JSONObject();
+                        paramVal.put("orderItemId",houseOrderDetailDTO.getOrderItemId());
+                        paramVal.put("orderStatus",4);
                         buttonList.add(Utils.getButton("上传验房结果", 7001));
                     }else{
                         dataMap.put("completedNodeNumber",1);//已完成节点数(已完成)
@@ -903,28 +910,28 @@ public class CraftsmanConstructionService {
         bean.setTotalDay("总开工天数" + totalDay);
         bean.setEveryDay("每日完工天数" + (everyEndDay == null ? "0" : everyEndDay));
         bean.setSuspendDay("暂停天数" + (suspendDay == null ? "0" : suspendDay));
-//        if (hw.getWorkType() == 1) {
-//            bean.setIfDisclose(0);
-//        } else if (hf.getWorkSteta() == 3) {
-//            bean.setIfDisclose(1);
-//        } else {
-//            bean.setIfDisclose(2);
-//        }
-//        if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
-//            if (isBX) {
-//                promptList.add("请联系业主支付您的工匠费用");
-//            } else {
-//                Date d = DateUtil.addDateMinutes(hw.getCreateDate(), 30);
-//                Date d2 = new Date();
-//                promptList.add("剩余支付保险时间：" + DateUtil.getDiffTime2(d.getTime(), d2.getTime()) + ",超过时间则自动放弃");
-//                buttonList.add(Utils.getButton("购买保险", 4001));
-//            }
-//            bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
-//        } else if (hf.getPause() == 1) {
-//            promptList.add("您已停工");
-//        } else if (hf.getWorkSteta() == 1) {
-//            promptList.add("您已阶段完工");
-//        }
+        if (hw.getWorkType() == 1) {
+            bean.setIfDisclose(0);
+        } else if (hf.getWorkSteta() == 3) {
+            bean.setIfDisclose(1);
+        } else {
+            bean.setIfDisclose(2);
+        }
+        if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
+            if (isBX) {
+                promptList.add("请联系业主支付您的工匠费用");
+            } else {
+                Date d = DateUtil.addDateMinutes(hw.getCreateDate(), 30);
+                Date d2 = new Date();
+                promptList.add("剩余支付保险时间：" + DateUtil.getDiffTime2(d.getTime(), d2.getTime()) + ",超过时间则自动放弃");
+                buttonList.add(Utils.getButton("购买保险", 4001));
+            }
+            bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
+        } else if (hf.getPause() == 1) {
+            promptList.add("您已停工");
+        } else if (hf.getWorkSteta() == 1) {
+            promptList.add("您已阶段完工");
+        }
         if (hf.getWorkSteta() == 2 || hf.getWorkSteta() == 6) {
             if (hf.getWorkSteta() == 2) {
                 promptList.add("您已整体完工");
@@ -1233,7 +1240,7 @@ public class CraftsmanConstructionService {
         wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
         wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
         wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
-        wfr.setWorkerHead(imageAddress + worker2 == null ? "" :worker.getHead());
+        wfr.setWorkerHead(imageAddress + worker2 == null ? "" :worker2.getHead());
         wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
         WorkerComprehensiveDTO workerComprehensive = workIntegralMapper.getComprehensiveWorker(worker.getId());
         wfr.setOverall(workerComprehensive.getOverall());
@@ -1249,9 +1256,11 @@ public class CraftsmanConstructionService {
         }
         List<ButtonListBean> topButton=new ArrayList<>();//头部按钮
         List<ButtonListBean> footButton=new ArrayList<>();//底部按钮
+        JSONObject paramVal=new JSONObject();
         HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hfl.getId(), worker2 == null ? "" : worker2.getId());//根据工种任务id和工人id查询此工人待审核
         if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
-            footButton.add(Utils.getButton("审核阶段完工", 3021));
+            paramVal.put("houseFlowApplyId",houseFlowApp.getId());
+            footButton.add(Utils.getButton("审核阶段完工", JSON.toJSONString(paramVal), 3021));
             topButton.add( Utils.getButton("奖罚", 3011));
             if(houseWorker!=null&&houseWorker.getWorkType()!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
                 topButton.add(Utils.getButton("换人审核中", 3013));
@@ -1260,7 +1269,8 @@ public class CraftsmanConstructionService {
             }
             wfr.setState(4);//装修进度0：未进场；1：待审核工匠；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
         } else if (houseFlowApp != null && houseFlowApp.getApplyType() == 2) {
-            footButton.add(Utils.getButton("审核整体完工", 3022));
+            paramVal.put("houseFlowApplyId",houseFlowApp.getId());
+            footButton.add(Utils.getButton("审核整体完工", JSON.toJSONString(paramVal),3022));
             wfr.setState(6);
         } else {
             topButton.add(Utils.getButton("申请停工", 3010));

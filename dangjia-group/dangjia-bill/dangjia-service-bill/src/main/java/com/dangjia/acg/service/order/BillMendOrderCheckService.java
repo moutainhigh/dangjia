@@ -106,10 +106,10 @@ public class BillMendOrderCheckService {
                   member.setSurplusMoney(surplusMoney);
                   iBillMemberMapper.updateByPrimaryKeySelective(member);
 
-                  if(mendOrder.getType() == 5){//退货退款，才扣除店铺的钱
+                  if(mendOrder.getType() == 5||mendOrder.getType() == 2){//退货退款，才扣除店铺的钱
                       //修改店铺的金额(损扣减金额）
                       String storefrontId=mendOrder.getStorefrontId();
-                      billAccountFlowRecordService.updateStoreAccountMoney(storefrontId,mendOrder.getHouseId(),3,mendOrder.getId(), MathUtil.mul(mendOrder.getTotalAmount(),-1),"业主退货退款，自动扣减","SYSTEM");
+                      billAccountFlowRecordService.updateStoreAccountMoney(storefrontId,mendOrder.getHouseId(),8,mendOrder.getId(), MathUtil.mul(mendOrder.getTotalAmount(),-1),"业主退货退款，自动扣减","SYSTEM");
 
                   }
 

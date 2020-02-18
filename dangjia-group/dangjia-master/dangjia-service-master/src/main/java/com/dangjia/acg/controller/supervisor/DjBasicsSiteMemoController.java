@@ -4,7 +4,6 @@ import com.dangjia.acg.api.supervisor.DjBasicsSiteMemoAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.supervisor.SiteMemo;
 import com.dangjia.acg.service.supervisor.SiteMemoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,26 +23,33 @@ public class DjBasicsSiteMemoController implements DjBasicsSiteMemoAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse setAllSiteMemo(HttpServletRequest request,String houseId, String userToken) {
+        return siteMemoService.setAllSiteMemo( houseId,userToken);
+    }
+
+
+    @Override
+    @ApiMethod
     public ServerResponse deleteSiteMemo(HttpServletRequest request, String userToken, String memoId) {
         return siteMemoService.deleteSiteMemo(userToken, memoId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getMemoMessage(HttpServletRequest request, String userToken) {
-        return siteMemoService.getMemoMessage(userToken);
+    public ServerResponse getMemoMessage(HttpServletRequest request,String houseId, String userToken) {
+        return siteMemoService.getMemoMessage( houseId,userToken);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getMemoMessageList(HttpServletRequest request, PageDTO pageDTO, String userToken) {
-        return siteMemoService.getMemoList(pageDTO, userToken, 1);
+    public ServerResponse getMemoMessageList(HttpServletRequest request, PageDTO pageDTO, String houseId,String userToken) {
+        return siteMemoService.getMemoList(pageDTO, userToken,  houseId,1);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getMemoList(HttpServletRequest request, PageDTO pageDTO, String userToken) {
-        return siteMemoService.getMemoList(pageDTO, userToken, 0);
+    public ServerResponse getMemoList(HttpServletRequest request, PageDTO pageDTO,String houseId, String userToken) {
+        return siteMemoService.getMemoList(pageDTO, userToken,  houseId, 0);
     }
 
     @Override

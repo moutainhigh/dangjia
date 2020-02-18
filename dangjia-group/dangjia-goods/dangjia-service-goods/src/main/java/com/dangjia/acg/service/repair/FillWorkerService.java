@@ -53,7 +53,7 @@ public class FillWorkerService {
      *             <p>
      *             补人工,退人工共用此接口(精算内)
      */
-    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, PageDTO pageDTO,String cityId, String orderSource) {
+    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, PageDTO pageDTO, String cityId, String orderSource) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         if (StringUtil.isEmpty(workerTypeId)) {
             return ServerResponse.createByErrorMessage("workerTypeId不能为空");
@@ -69,15 +69,15 @@ public class FillWorkerService {
                 criteria.andEqualTo(BudgetMaterial.HOUSE_ID, houseId);
                 criteria.andEqualTo(BudgetMaterial.PRODUCT_TYPE, "2");
                 criteria.andNotEqualTo(BudgetMaterial.DELETE_STATE, "1");
-                criteria.andEqualTo(BudgetMaterial.CITY_ID,cityId);
+                criteria.andEqualTo(BudgetMaterial.CITY_ID, cityId);
                 List<BudgetMaterial> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
                 for (BudgetMaterial budgetWorker : budgetWorkerList) {
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
-                    DjBasicsProductTemplate workerGoods=djBasicsProductService.queryDataByProductId(budgetWorker.getProductId());  //通过商品id去关联规格
-                    String valueIdArr=workerGoods.getValueIdArr();
-                    if(!CommonUtil.isEmpty(valueIdArr)){
-                        String valueNameArr=djBasicsProductService.getNewValueNameArr(valueIdArr);
+                    DjBasicsProductTemplate workerGoods = djBasicsProductService.queryDataByProductId(budgetWorker.getProductId());  //通过商品id去关联规格
+                    String valueIdArr = workerGoods.getValueIdArr();
+                    if (!CommonUtil.isEmpty(valueIdArr)) {
+                        String valueNameArr = djBasicsProductService.getNewValueNameArr(valueIdArr);
                         budgetWorkerDTO.setValueNameArr(valueNameArr);
                     }
                     budgetWorkerDTO.setWorkerGoodsId(budgetWorker.getProductId());
@@ -86,6 +86,7 @@ public class FillWorkerService {
                     budgetWorkerDTO.setName(budgetWorker.getProductName());
                     budgetWorkerDTO.setPrice(budgetWorker.getPrice());
                     budgetWorkerDTO.setShopCount(budgetWorker.getShopCount() - budgetWorker.getBackCount() + budgetWorker.getRepairCount());
+                    budgetWorkerDTO.setTotalPrice(budgetWorker.getPrice() * budgetWorkerDTO.getShopCount());
                     budgetWorkerDTO.setUnitName(budgetWorker.getUnitName());
                     budgetWorkerDTO.setImage(address + workerGoods.getImage());
                     budgetWorkerDTOList.add(budgetWorkerDTO);
@@ -93,14 +94,14 @@ public class FillWorkerService {
             } else {
 
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId,houseId,  orderSource);
+                List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId, houseId, orderSource);
                 pageResult = new PageInfo(workerGoodsList);
-                for (ProductWorkerDTO  workerGoods : workerGoodsList) {
+                for (ProductWorkerDTO workerGoods : workerGoodsList) {
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
-                    DjBasicsProductTemplate djBasicsProduct=djBasicsProductService.queryDataByProductId(workerGoods.getId());  //通过商品id去关联规格
-                    if(djBasicsProduct!=null) {
+                    DjBasicsProductTemplate djBasicsProduct = djBasicsProductService.queryDataByProductId(workerGoods.getId());  //通过商品id去关联规格
+                    if (djBasicsProduct != null) {
                         String valueIdArr = djBasicsProduct.getValueIdArr();
-                        if(!CommonUtil.isEmpty(valueIdArr)) {
+                        if (!CommonUtil.isEmpty(valueIdArr)) {
                             String valueNameArr = djBasicsProductService.getNewValueNameArr(valueIdArr);
                             budgetWorkerDTO.setValueNameArr(valueNameArr);
                         }
@@ -110,6 +111,7 @@ public class FillWorkerService {
                     budgetWorkerDTO.setWorkerGoodsSn(workerGoods.getProductSn());
                     budgetWorkerDTO.setName(workerGoods.getName());
                     budgetWorkerDTO.setPrice(workerGoods.getPrice());
+                    budgetWorkerDTO.setTotalPrice(workerGoods.getPrice());
                     budgetWorkerDTO.setUnitName(workerGoods.getUnitName());//单位
                     budgetWorkerDTO.setImage(address + workerGoods.getImage());
                     budgetWorkerDTOList.add(budgetWorkerDTO);
@@ -140,25 +142,26 @@ public class FillWorkerService {
 
     /**
      * 查询符合条件的人工商品
+     *
      * @param workerId
      * @param searchKey
      * @param pageDTO
      * @param cityId
      * @return
      */
-    public ServerResponse getWorkerProductList(String workerId,String houseId,String searchKey,PageDTO pageDTO,String cityId){
-        try{
+    public ServerResponse getWorkerProductList(String workerId, String houseId, String searchKey, PageDTO pageDTO, String cityId) {
+        try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<ProductAppDTO> workerProductList=workerGoodsMapper.getWorkerProductList(workerId,houseId,searchKey,cityId);
+            List<ProductAppDTO> workerProductList = workerGoodsMapper.getWorkerProductList(workerId, houseId, searchKey, cityId);
             if (workerProductList == null || workerProductList.size() <= 0) {
                 return ServerResponse.createByErrorMessage("查无数据！");
             }
             goodsProductTemplateService.getProductList(workerProductList);
             PageInfo pageResult = new PageInfo(workerProductList);
             pageResult.setList(workerProductList);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
-        }catch (Exception e){
-            logger.error("查询失败",e);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }

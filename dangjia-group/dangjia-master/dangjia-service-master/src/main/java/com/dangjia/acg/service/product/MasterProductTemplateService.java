@@ -68,10 +68,14 @@ public class MasterProductTemplateService {
      */
     public Unit getUnitInfoByTemplateId(String productTemplateId){
         DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectByPrimaryKey(productTemplateId);
-        String unitId=djBasicsProductTemplate.getUnitId();
-        if(StringUtils.isNotBlank(djBasicsProductTemplate.getConvertUnit())){
-            unitId=djBasicsProductTemplate.getConvertUnit();
+        String unitId=null;
+        if(djBasicsProductTemplate!=null){
+            unitId=djBasicsProductTemplate.getUnitId();
+            if(StringUtils.isNotBlank(djBasicsProductTemplate.getConvertUnit())){
+                unitId=djBasicsProductTemplate.getConvertUnit();
+            }
         }
+
         return iMasterUnitMapper.selectByPrimaryKey(unitId);
     }
 

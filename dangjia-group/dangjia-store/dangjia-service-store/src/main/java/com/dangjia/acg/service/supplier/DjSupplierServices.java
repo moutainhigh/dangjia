@@ -608,7 +608,7 @@ public class DjSupplierServices {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Receipt> receipts = iStoreReceiptMapper.selectByExample(example);
             receipts.forEach(receipt -> {
-                receipt.setType("合併结算");
+                receipt.setType("合并结算");
                 JSONArray itemObjArr = JSON.parseArray(receipt.getMerge());
                 Double orderAmount=0d;
                 for (int i = 0; i < itemObjArr.size(); i++) {

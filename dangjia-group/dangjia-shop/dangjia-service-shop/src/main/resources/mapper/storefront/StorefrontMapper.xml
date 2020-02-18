@@ -241,44 +241,59 @@
     </select>
 
     <select id="selectStoreExpenseRecord" resultType="com.dangjia.acg.dto.storefront.StoreExpenseRecordDTO">
-        select
-        CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) as shipAddress, -- 收货地址
-        IFNULL(ddo.order_generation_time,'') as orderGenerationTime, -- 时间
-        IFNULL(ddo.id,'')  as orderNumber,-- 订单号
-        IFNULL(ddo.actual_payment_price,'')  as actualPaymentPrice,-- 实际收入金额
-        IFNULL(ddo.total_amount,'')  as totalAmount -- 订单金额
-        from dj_deliver_order  ddo
-        inner join  dj_house  dh on dh.id=ddo.house_id
-        where 1=1     and ddo.storefont_id=#{storefrontId}
-        <if test="orderNumber!=null and orderNumber!=''">
-            and ddo.id     LIKE CONCAT('%',#{orderNumber},'%')
-        </if>
+        select a.*,m.address shipAddress from (
+            SELECT
+                ddo.id orderId,
+                ddo.house_id,
+                ddo.address_id,
+                ddo.total_stevedorage_cost totalStevedorageCost,
+                ddo.total_transportation_cost totalTransportationCost,
+                IFNULL(ddo.order_generation_time,ddo.create_date) AS orderGenerationTime,
+                ddo.order_number AS orderNumber,
+                sum(osi.price*IFNULL(IFNULL(osi.receive_count,osi.ask_count),0)+(IFNULL(osi.stevedorage_cost,0)/osi.shop_count)*IFNULL(IFNULL(osi.receive_count,osi.ask_count),0)+(IFNULL(osi.transportation_cost,0)/osi.shop_count)*IFNULL(IFNULL(osi.receive_count,osi.ask_count),0)) AS actualPaymentPrice,
+                IFNULL(ddo.actual_payment_price, 0) AS totalAmount
+            FROM
+                dj_deliver_order ddo,
+                dj_deliver_order_item osi
+            WHERE ddo.id=osi.order_id
+            AND ddo.storefont_id = #{storefrontId}
+            <if test="orderNumber!=null and orderNumber!=''">
+                and ddo.order_number LIKE CONCAT('%',#{orderNumber},'%')
+            </if>
+            <if test="orderId!=null and orderId!=''">
+                and ddo.id =#{orderId}
+            </if>
+            group by ddo.id
+            ORDER BY ddo.create_date desc) a,dj_member_address m
+         where a.address_id=m.id or a.house_id=m.house_id
+
     </select>
 
 
 
     <select id="storeExpenseRecordOrderDetail" resultType="com.dangjia.acg.dto.storefront.ExpenseRecordOrderDetailDTO">
-
-            select
-            ddoi.order_id as orderId,
-            ddoi.product_name as productName,-- 商品名称
-            ddoi.product_sn as productSn,-- 商品编号
-            ddoi.image,-- 图片
-            IFNULL(ddosi.shop_count,'') as shopCount,-- 购买数量
-            IFNULL(ddosi.ask_count,'') as askCount,-- 要货数量
-            IFNULL(ddosi.num,'') as num ,-- 发货数量
-            IFNULL(ddosi.receive,'') as receive,-- 收货数量
-            IFNULL(ddosi.return_count,'') as returnCount,-- 退货数量
-            IFNULL(ddoi.cost,'') as cost,-- 供应单价
-            IFNULL((ddoi.cost*ddosi.shop_count),'') as totalCost,-- 供应总价
-            IFNULL(ddoi.price,'') as price,-- 销售单价
-            IFNULL(ddoi.price*ddosi.shop_count,'') as totalPrice,-- 销售总价
-            ddosi.product_id as productId,
-            ddosi.house_id as houseId
-		from dj_deliver_order_item ddoi
-		INNER JOIN dj_deliver_order_split_item  ddosi on
-		ddoi.house_id=ddosi.house_id and ddoi.product_id=ddosi.product_id
-        where  1=1     and ddoi.storefont_id=#{storefrontId} and ddoi.order_id=#{orderId}
+        SELECT
+            ddoi.order_id AS orderId,
+            ddoi.product_name AS productName,
+            ddoi.product_sn AS productSn,
+            ddoi.image,
+            ddoi.shop_count AS shopCount,
+            IFNULL(ddoi.ask_count, 0) AS askCount,
+            IFNULL(ddoi.ask_count, 0) AS num,
+            IFNULL(IFNULL(ddoi.receive_count, ddoi.ask_count), 0) AS receive,
+            IFNULL(ddoi.return_count, 0) AS returnCount,
+            IFNULL((select sum(t.return_count) from dj_deliver_order_split_item t where ddoi.id=t.order_item_id),0) returnRefundCount,
+            ddoi.price AS price,
+            IFNULL(p.move_cost,0) moveCost,
+            ddoi.price*ddoi.shop_count totalPrice,
+            ddoi.product_id AS productId,
+            ddoi.house_id AS houseId
+        FROM
+            dj_deliver_order_item ddoi,
+          dj_basics_storefront_product p
+        WHERE
+          ddoi.product_id=p.id
+            and ddoi.order_id = '720558991581165849924'
     </select>
 
     <select id="queryStoreOrderSplitItem" resultType="com.dangjia.acg.dto.storefront.StoreOrderSplitItemDTO">
@@ -322,48 +337,22 @@
     </select>
 
     <select id="queryStoreRevenueRecord" resultType="com.dangjia.acg.dto.storefront.StoreRevenueRecordDTO">
-        select
-        IFNULL(dafr.type,'') as type,-- 类型
-        IFNULL(dafr.house_order_id,'') as houseOrderId,-- 货单号
-        IFNULL(dafr.money,'') as money,-- 实际支出金额
-        IFNULL(drmo.actual_total_amount,'') as totalAmount,-- 订单金额
-        IFNULL(drmo.state,'') as orderStatus, -- 状态
-        '' as merge
-        from
-        dj_account_flow_record  dafr
-        inner join  dj_repair_mend_order drmo on drmo.id=dafr.house_order_id
-        where dafr.defined_account_id=#{storefrontId} and dafr.flow_type=1
+        SELECT
+            t.create_date,
+            t.state,
+            t.money,
+            t.house_order_id anyOrderId,
+            t.id accountFlowRecordId
+        FROM
+          dj_account_flow_record t
+        WHERE
+          t.defined_account_id = #{storefrontId}
+        and state in(1,8,9)
         <if test="orderNumber!=null and orderNumber!=''">
-            and dafr.house_order_id=#{orderNumber}
+            and (exists (select 1 from dj_repair_mend_deliver d where t.house_order_id=d.id and d.number like CONCAT('%',#{orderNumber},'%'))
+            or exists (select 1 from dj_receipt r where t.house_order_id=r.id and r.number like CONCAT('%',#{orderNumber},'%')))
         </if>
-        union all
-        select
-        '3' as type,-- 类型
-        IFNULL(dr.number,'') as houseOrderId,-- 货单号
-        IFNULL(dr.total_Amount,'') as money,-- 实际支出金额
-        '' as totalAmount, -- 订单金额
-        '' as orderStatus, -- 状态
-        dr.merge
-        from dj_receipt dr
-        inner join dj_sup_application dsa on dsa.sup_id=dr.supplier_id
-        where dr.data_status=0 and dsa.application_status=1 and dsa.data_status=0 and dsa.shop_id=#{storefrontId}
-        <if test="orderNumber!=null and orderNumber!=''">
-            and 1=2
-        </if>
-        UNION ALL
-        select
-        '4' as type,-- 类型
-        '' as houseOrderId,-- 货单号
-        '' as money,-- 实际支出金额
-        '' as totalAmount, -- 订单金额
-        dwwd.deposit_status,  -- 状态
-        '' as merge
-        from dj_account_flow_record dafr
-        inner  join dj_worker_withdraw_deposit dwwd  on dafr.house_order_id = dwwd.id
-        where dafr.data_status = 0 AND dafr.flow_type = 1 and dafr.defined_account_id=#{storefrontId}
-        <if test="orderNumber!=null and orderNumber!=''">
-            and dafr.house_order_id=#{orderNumber}
-        </if>
+        order by create_date desc
 
     </select>
 
@@ -419,22 +408,20 @@
     </select>
 
     <select id="setStorefrontSurplusMoney">
+     <![CDATA[
         UPDATE dj_basics_storefront a
-        INNER JOIN (
-        SELECT
-        storefront_id,
-        IFNULL(sum(total_amount), 0) AS surplus_money -- 总价
-        FROM
-        dj_deliver_split_deliver
-        WHERE
-        apply_state = 2
-        AND TIMESTAMPDIFF(DAY, send_time, SYSDATE())<![CDATA[<]]>7
-        GROUP BY
-        storefront_id
-        ) b ON a.id = b.storefront_id
         SET a.surplus_money = (
-        a.total_account - b.surplus_money - a.retention_money
-        )
+        case when (a.total_account - IFNULL((select sum(fr.money) from dj_account_flow_record fr where fr.state in(0,2,4) and fr.defined_account_id=a.id and fr.create_date>ADDDATE(NOW(),-7)),0))<0 then 0
+        else (a.total_account - IFNULL((select sum(fr.money) from dj_account_flow_record fr where fr.state in(0,2,4) and fr.defined_account_id=a.id and fr.create_date>ADDDATE(NOW(),-7)),0)) end
+        ),
+        a.modify_date=now()
+        where a.city_id=#{cityId}
+     ]]>
+
+    </select>
+
+    <select id="selectCityList" resultType="java.lang.String">
+        select city_id from dj_basics_storefront group by city_id
     </select>
 
     <select id="selectShopStoreByTypeCityId" resultType="com.dangjia.acg.modle.storefront.Storefront">

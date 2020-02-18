@@ -9,7 +9,6 @@ import com.dangjia.acg.service.deliver.OrderSplitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -110,7 +109,18 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
     }
 
-
+    /**
+     * 上门安装
+     * @param splitDeliverId 发货单ID
+     * @param installName 安装人姓名
+     * @param installMobile 安装人电话
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveInstallInfo(String splitDeliverId,String installName,String installMobile){
+        return orderSplitService.saveInstallInfo(splitDeliverId,installName,installMobile);
+    }
     /**
      * 部分收货申诉接口
      * @param splitDeliverId 发货单ID
@@ -161,7 +171,7 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getOrderSplitDeliverList(String orderSplitId){
+    public ServerResponse getOrderSplitDeliverList( HttpServletRequest request,String orderSplitId){
         return orderSplitService.getOrderSplitDeliverList(orderSplitId);
     }
 

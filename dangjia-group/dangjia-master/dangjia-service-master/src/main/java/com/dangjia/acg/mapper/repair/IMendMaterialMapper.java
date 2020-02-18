@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.repair;
 
+import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.house.WarehouseGoodsDTO;
 import com.dangjia.acg.dto.repair.ReturnOrderProgressDTO;
 import com.dangjia.acg.modle.repair.MendMateriel;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface IMendMaterialMapper extends Mapper<MendMateriel> {
@@ -26,4 +28,15 @@ public interface IMendMaterialMapper extends Mapper<MendMateriel> {
 
 
     List<ReturnOrderProgressDTO> queryMendMaterielProgress(@Param("progressOrderId") String progressOrderId);
+
+    List<OrderSplitItemDTO> searchReturnRefundMaterielList(@Param("mendOrderId") String mendOrderId,@Param("mendDeliverId") String mendDeliverId);
+
+    List<Map<String,Object>> getsupplierInfoList(@Param("storefrontId") String storefrontId, @Param("productId") String productId, @Param("houseId") String houseId);
+
+    List<Map<String,Object>> selectSupMaterialByMendId(@Param("mendOrderId") String mendOrderId,@Param("mendDeliverId") String mendDeliverId);
+
+    void updateMendDeliverIdByInfo(@Param("mendDeliverId") String mendDeliverId,@Param("mendOrderId") String mendOrderId,@Param("supplierId") String supplierId);
+
+    //查询当前订单下的总收货量，计算运费
+    Double getMendMaterialReceiverNum(@Param("mendDeliverId")String splitDeliverId,@Param("type") Integer type);
 }

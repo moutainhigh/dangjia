@@ -176,8 +176,8 @@ public class WorkerController implements WorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryRewardPunishRecord(String userToken, String workerId,PageDTO pageDTO){
-        return rewardPunishService.queryRewardPunishRecord(userToken, workerId,pageDTO);
+    public ServerResponse queryRewardPunishRecord(String userToken, String workerId,String houseId,PageDTO pageDTO){
+        return rewardPunishService.queryRewardPunishRecord(userToken, workerId, houseId,pageDTO);
     }
     /**
      *奖罚详情

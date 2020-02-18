@@ -329,11 +329,15 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     public ServerResponse queryRobOrderInFo(String userToken,String workerId,String houseId,String data) {
         return djMaintenanceRecordService.queryRobOrderInFo(userToken,workerId,houseId,data);
     }
-
     @Override
     @ApiMethod
-    public ServerResponse queryGuaranteeMoneyDetail(String userId,String cityId,String id) {
-       return djMaintenanceRecordService.queryGuaranteeMoneyDetail( userId, cityId,id);
+    public ServerResponse queryGuaranteeMoneyList(PageDTO pageDTO,String userId,String cityId){
+        return djMaintenanceRecordService.queryGuaranteeMoneyList(pageDTO,userId, cityId);
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse queryGuaranteeMoneyDetail(String userId,String cityId,String accountflowRecordId) {
+       return djMaintenanceRecordService.queryGuaranteeMoneyDetail( userId, cityId,accountflowRecordId);
     }
 
     @Override

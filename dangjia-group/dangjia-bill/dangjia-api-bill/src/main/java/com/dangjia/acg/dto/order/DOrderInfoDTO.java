@@ -25,6 +25,17 @@ public class DOrderInfoDTO {
     private String mobile;
     @ApiModelProperty("门店名称")
     private String storefrontName;
+
+
+    @ApiModelProperty("优惠卷ID")
+    private String discountId;
+    @ApiModelProperty("优惠卷号")
+    private String discountNumber;
+    @ApiModelProperty("优惠卷类型(1店铺，2平台) ")
+    private String discountType;
+    @ApiModelProperty("优惠金额")
+    private Double totalDiscountPrice;
+
     @ApiModelProperty("订单号")
     private String orderNumber;
     @ApiModelProperty("订单总额")

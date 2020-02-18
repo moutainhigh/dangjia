@@ -491,10 +491,16 @@
                 INNER JOIN dj_member m ON m.id = f.member_id
                 WHERE
                 <if test="workerType!=null and workerType==3">
-                    f.steward_id IS NULL
+                    (
+                        f.steward_order_time IS NULL
+                          AND
+                        (f.steward_id = #{workerId} OR f.steward_id  IS NULL)
+                    )
                 </if>
                 <if test="workerType!=null and workerType!=3">
-                    ( f.worker_member_id IS NULL  AND f.`worker_type_id` = #{workerTypeId} )
+                    ( f.worker_create_date IS NULL  AND f.`worker_type_id` = #{workerTypeId} )
+                    and
+                    (f.worker_member_id = #{workerId} OR f.worker_member_id  IS NULL)
                 </if>
                 AND h.`city_id` = #{cityId}
         ) a

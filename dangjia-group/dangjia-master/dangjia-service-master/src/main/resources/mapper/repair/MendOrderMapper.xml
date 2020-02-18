@@ -273,6 +273,34 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     </select>
 
+    <select id="searchReturnRrefundCount" resultType="java.lang.Integer">
+        SELECT
+          count(t.id)
+        FROM
+            dj_repair_mend_order t,
+            dj_member m,
+            dj_member_address madress
+        WHERE t.apply_member_id=m.id
+            and
+            (
+            t.house_id = madress.house_id
+            OR t.address_id = madress.id
+            )
+            and t.storefront_id=#{storefrontId}
+        <if test="type==1"><!--退货退款-->
+            and t.type in(2,5)
+        </if>
+        <if test="type==2"><!--仅退款-->
+            and t.type=4
+        </if>
+        <if test="state==1"><!--待处理-->
+            and t.state=1
+        </if>
+        <if test="state==2"><!--已处理-->
+            and t.state=4
+        </if>
+    </select>
+
     <select id="searchReturnRrefundList" resultType="com.dangjia.acg.dto.repair.MendOrderDTO">
         SELECT
             t.id mendOrderId,
@@ -281,7 +309,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             t.apply_member_id memberId,
             madress.address address,
             m.`name` memberName,
-            m.mobile memberMobile
+            m.mobile memberMobile,
+            t.state
         FROM
             dj_repair_mend_order t,
           dj_member m,
@@ -304,6 +333,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
         <if test="state==2"><!--已处理-->
             and t.state=4
+        </if>
+        <if test="likeAddress!=null and likeAddress!=''">
+            and (t.number LIKE CONCAT('%',#{likeAddress},'%')
+            or madress.address LIKE CONCAT('%',#{likeAddress},'%'))
         </if>
         order by t.create_date desc
 

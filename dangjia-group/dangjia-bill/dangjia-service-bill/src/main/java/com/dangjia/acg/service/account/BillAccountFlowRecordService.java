@@ -35,13 +35,21 @@ public class BillAccountFlowRecordService {
      */
     public ServerResponse updateStoreAccountMoney(String storefrontId,String houseId,Integer state,String orderId,Double money,String remark,String  userId){
         Storefront storefront=iBillStorefrontMapper.selectByPrimaryKey(storefrontId);
-        //1.修改店铺的滞留金额
-        Double retentionMoney = storefront.getRetentionMoney();//账户滞留金额
-        storefront.setRetentionMoney(MathUtil.add(retentionMoney,money));
+        //1.扣减店铺的总额和可提现余额
+        Double totalAccount=storefront.getTotalAccount();//账户总额
+        Double surplusMoney = storefront.getSurplusMoney();//可提现余额
+        //Double retentionMoney = storefront.getRetentionMoney();//账户滞留金额
+        //storefront.setRetentionMoney(MathUtil.add(retentionMoney,money));
+        storefront.setTotalAccount(MathUtil.add(totalAccount,money));
+        if(MathUtil.add(surplusMoney,money)<0){//如果小于0，则可提现余额改为0
+            storefront.setSurplusMoney(0d);
+        }else{
+            storefront.setSurplusMoney(MathUtil.add(surplusMoney,money));
+        }
         storefront.setModifyDate(new Date());
         iBillStorefrontMapper.updateByPrimaryKeySelective(storefront);
         //2.记录账户流水
-        saveBillAccountFlowRecore(houseId,money,state,storefrontId,remark,orderId,retentionMoney,storefront.getTotalAccount(),userId);
+        saveBillAccountFlowRecore(houseId,money,state,storefrontId,remark,orderId,totalAccount,storefront.getTotalAccount(),userId);
         return ServerResponse.createBySuccess("更新成功");
     }
 

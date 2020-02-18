@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.label;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.label.OptionalLabel;
 import io.swagger.annotations.Api;
@@ -24,7 +25,11 @@ public interface OptionalLabelAPI {
 
     @PostMapping("/web/label/queryOptionalLabel")
     @ApiOperation(value = "查询标签", notes = "查询标签")
-    ServerResponse queryOptionalLabel(@RequestParam("id") String id);
+    ServerResponse queryOptionalLabel(@RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping("/web/label/queryOptionalLabelById")
+    @ApiOperation(value = "查询标签详情", notes = "查询标签详情")
+    ServerResponse queryOptionalLabelById(@RequestParam("id") String id);
 
     @PostMapping("/web/label/delOptionalLabel")
     @ApiOperation(value = "删除标签", notes = "删除标签")
@@ -32,5 +37,5 @@ public interface OptionalLabelAPI {
 
     @PostMapping("/web/label/editOptionalLabel")
     @ApiOperation(value = "编辑标签", notes = "编辑标签")
-    ServerResponse editOptionalLabel(@RequestParam("optionalLabel") OptionalLabel optionalLabel);
+    ServerResponse editOptionalLabel(@RequestParam("jsonStr") String jsonStr);
 }
