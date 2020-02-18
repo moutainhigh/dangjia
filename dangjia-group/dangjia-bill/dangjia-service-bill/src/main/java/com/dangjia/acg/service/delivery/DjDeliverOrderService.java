@@ -13,6 +13,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.HouseResult;
@@ -2133,10 +2134,21 @@ public class DjDeliverOrderService {
                 orderSplitItem.setReceive(orderSplitItem.getNum());
                 orderSplitItem.setModifyDate(new Date());
                 billDjDeliverOrderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+                if(orderSplitItem.getOrderItemId()!=null){
+                    OrderItem orderItem=iBillDjDeliverOrderItemMapper.selectByPrimaryKey(orderSplitItem.getOrderItemId());
+                    if(orderItem!=null){
+                        if(orderItem.getReturnCount()==null)
+                            orderItem.setReceiveCount(0d);
+                        if(orderItem.getReturnCount()<orderItem.getAskCount()){
+                            orderItem.setReceiveCount(MathUtil.add(orderItem.getReceiveCount(),orderSplitItem.getReceive()));
+                            orderItem.setModifyDate(new Date());
+                            iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                        }
+                    }
+                }
             });
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("操作失败：", e);
             return ServerResponse.createByErrorMessage("操作失败");
         }
