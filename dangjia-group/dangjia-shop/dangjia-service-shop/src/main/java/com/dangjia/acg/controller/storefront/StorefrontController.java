@@ -164,8 +164,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String orderNumber, Integer type) {
-        return storefrontService.storeRevenueRecordOrderDetail(request,pageDTO,userId,cityId,orderNumber,type);
+    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String accountFlowRecordId, Integer type) {
+        return storefrontService.storeRevenueRecordOrderDetail(request,pageDTO,accountFlowRecordId,type);
     }
 
     @Override

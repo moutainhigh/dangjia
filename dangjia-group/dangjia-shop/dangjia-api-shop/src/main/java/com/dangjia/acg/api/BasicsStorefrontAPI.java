@@ -217,19 +217,15 @@ public interface BasicsStorefrontAPI {
      *
      * @param request
      * @param pageDTO
-     * @param userId
-     * @param cityId
-     * @param type
-     * @param orderNumber
+     * @param type 查询类型：1提现，9结算
+     * @param accountFlowRecordId 支出流水ID
      * @return
      */
     @PostMapping("/web/storeRevenueRecordOrderDetail")
     @ApiOperation(value = "店铺-支出记录-查看货单详情", notes = "店铺-支出记录-查看货单详情")
     ServerResponse storeRevenueRecordOrderDetail(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("pageDTO") PageDTO pageDTO,
-                                                 @RequestParam("userId") String userId,
-                                                 @RequestParam("cityId") String cityId,
-                                                 @RequestParam("orderNumber") String orderNumber,
+                                                 @RequestParam("accountFlowRecordId") String accountFlowRecordId,
                                                  @RequestParam("type") Integer type);
 
 

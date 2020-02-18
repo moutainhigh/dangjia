@@ -337,48 +337,22 @@
     </select>
 
     <select id="queryStoreRevenueRecord" resultType="com.dangjia.acg.dto.storefront.StoreRevenueRecordDTO">
-        select
-        IFNULL(dafr.type,'') as type,-- 类型
-        IFNULL(dafr.house_order_id,'') as houseOrderId,-- 货单号
-        IFNULL(dafr.money,'') as money,-- 实际支出金额
-        IFNULL(drmo.actual_total_amount,'') as totalAmount,-- 订单金额
-        IFNULL(drmo.state,'') as orderStatus, -- 状态
-        '' as merge
-        from
-        dj_account_flow_record  dafr
-        inner join  dj_repair_mend_order drmo on drmo.id=dafr.house_order_id
-        where dafr.defined_account_id=#{storefrontId} and dafr.flow_type=1
+        SELECT
+            t.create_date,
+            t.state,
+            t.money,
+            t.house_order_id anyOrderId,
+            t.id accountFlowRecordId
+        FROM
+          dj_account_flow_record t
+        WHERE
+          t.defined_account_id = #{storefrontId}
+        and state in(1,8,9)
         <if test="orderNumber!=null and orderNumber!=''">
-            and dafr.house_order_id=#{orderNumber}
+            and (exists (select 1 from dj_repair_mend_deliver d where t.house_order_id=d.id and d.number like CONCAT('%',#{orderNumber},'%'))
+            or exists (select 1 from dj_receipt r where t.house_order_id=r.id and r.number like CONCAT('%',#{orderNumber},'%')))
         </if>
-        union all
-        select
-        '3' as type,-- 类型
-        IFNULL(dr.number,'') as houseOrderId,-- 货单号
-        IFNULL(dr.total_Amount,'') as money,-- 实际支出金额
-        '' as totalAmount, -- 订单金额
-        '' as orderStatus, -- 状态
-        dr.merge
-        from dj_receipt dr
-        inner join dj_sup_application dsa on dsa.sup_id=dr.supplier_id
-        where dr.data_status=0 and dsa.application_status=1 and dsa.data_status=0 and dsa.shop_id=#{storefrontId}
-        <if test="orderNumber!=null and orderNumber!=''">
-            and 1=2
-        </if>
-        UNION ALL
-        select
-        '4' as type,-- 类型
-        '' as houseOrderId,-- 货单号
-        '' as money,-- 实际支出金额
-        '' as totalAmount, -- 订单金额
-        dwwd.deposit_status,  -- 状态
-        '' as merge
-        from dj_account_flow_record dafr
-        inner  join dj_worker_withdraw_deposit dwwd  on dafr.house_order_id = dwwd.id
-        where dafr.data_status = 0 AND dafr.flow_type = 1 and dafr.defined_account_id=#{storefrontId}
-        <if test="orderNumber!=null and orderNumber!=''">
-            and dafr.house_order_id=#{orderNumber}
-        </if>
+        order by create_date desc
 
     </select>
 

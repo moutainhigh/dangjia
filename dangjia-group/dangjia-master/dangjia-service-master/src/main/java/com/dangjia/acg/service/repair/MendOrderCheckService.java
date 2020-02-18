@@ -780,7 +780,7 @@ public class MendOrderCheckService {
                 // 扣除店铺的钱
                 if(mendDeliver.getStorefrontId()!=null){
                     masterAccountFlowRecordService.updateStoreAccountMoney(mendDeliver.getStorefrontId(), mendDeliver.getHouseId(),
-                            3, mendDeliver.getId(), MathUtil.mul(totalAmount.doubleValue(),-1),"供应商确认退货流水", userId);
+                            8, mendDeliver.getId(), MathUtil.mul(totalAmount.doubleValue(),-1),"供应商确认退货流水", userId);
                 }
                 //推送消息给业主退货退款通知
                 configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, member.getId(),

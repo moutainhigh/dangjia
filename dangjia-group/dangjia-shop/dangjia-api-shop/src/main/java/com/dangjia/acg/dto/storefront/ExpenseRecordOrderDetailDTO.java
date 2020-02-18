@@ -20,6 +20,8 @@ public class ExpenseRecordOrderDetailDTO {
     private String imageDetail;
     //购买数量
     private Double shopCount;
+    //剩余量
+    private Double surplusCount;
     //要货数量
     private Double askCount;
     //发货数量
