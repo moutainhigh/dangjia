@@ -241,44 +241,59 @@
     </select>
 
     <select id="selectStoreExpenseRecord" resultType="com.dangjia.acg.dto.storefront.StoreExpenseRecordDTO">
-        select
-        CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) as shipAddress, -- 收货地址
-        IFNULL(ddo.order_generation_time,'') as orderGenerationTime, -- 时间
-        IFNULL(ddo.id,'')  as orderNumber,-- 订单号
-        IFNULL(ddo.actual_payment_price,'')  as actualPaymentPrice,-- 实际收入金额
-        IFNULL(ddo.total_amount,'')  as totalAmount -- 订单金额
-        from dj_deliver_order  ddo
-        inner join  dj_house  dh on dh.id=ddo.house_id
-        where 1=1     and ddo.storefont_id=#{storefrontId}
-        <if test="orderNumber!=null and orderNumber!=''">
-            and ddo.id     LIKE CONCAT('%',#{orderNumber},'%')
-        </if>
+        select a.*,m.address shipAddress from (
+            SELECT
+                ddo.id orderId,
+                ddo.house_id,
+                ddo.address_id,
+                ddo.total_stevedorage_cost totalStevedorageCost,
+                ddo.total_transportation_cost totalTransportationCost,
+                IFNULL(ddo.order_generation_time,ddo.create_date) AS orderGenerationTime,
+                ddo.order_number AS orderNumber,
+                sum(osi.price*IFNULL(IFNULL(osi.receive_count,osi.ask_count),0)+(IFNULL(osi.stevedorage_cost,0)/osi.shop_count)*IFNULL(IFNULL(osi.receive_count,osi.ask_count),0)+(IFNULL(osi.transportation_cost,0)/osi.shop_count)*IFNULL(IFNULL(osi.receive_count,osi.ask_count),0)) AS actualPaymentPrice,
+                IFNULL(ddo.actual_payment_price, 0) AS totalAmount
+            FROM
+                dj_deliver_order ddo,
+                dj_deliver_order_item osi
+            WHERE ddo.id=osi.order_id
+            AND ddo.storefont_id = #{storefrontId}
+            <if test="orderNumber!=null and orderNumber!=''">
+                and ddo.order_number LIKE CONCAT('%',#{orderNumber},'%')
+            </if>
+            <if test="orderId!=null and orderId!=''">
+                and ddo.id =#{orderId}
+            </if>
+            group by ddo.id
+            ORDER BY ddo.create_date desc) a,dj_member_address m
+         where a.address_id=m.id or a.house_id=m.house_id
+
     </select>
 
 
 
     <select id="storeExpenseRecordOrderDetail" resultType="com.dangjia.acg.dto.storefront.ExpenseRecordOrderDetailDTO">
-
-            select
-            ddoi.order_id as orderId,
-            ddoi.product_name as productName,-- 商品名称
-            ddoi.product_sn as productSn,-- 商品编号
-            ddoi.image,-- 图片
-            IFNULL(ddosi.shop_count,'') as shopCount,-- 购买数量
-            IFNULL(ddosi.ask_count,'') as askCount,-- 要货数量
-            IFNULL(ddosi.num,'') as num ,-- 发货数量
-            IFNULL(ddosi.receive,'') as receive,-- 收货数量
-            IFNULL(ddosi.return_count,'') as returnCount,-- 退货数量
-            IFNULL(ddoi.cost,'') as cost,-- 供应单价
-            IFNULL((ddoi.cost*ddosi.shop_count),'') as totalCost,-- 供应总价
-            IFNULL(ddoi.price,'') as price,-- 销售单价
-            IFNULL(ddoi.price*ddosi.shop_count,'') as totalPrice,-- 销售总价
-            ddosi.product_id as productId,
-            ddosi.house_id as houseId
-		from dj_deliver_order_item ddoi
-		INNER JOIN dj_deliver_order_split_item  ddosi on
-		ddoi.house_id=ddosi.house_id and ddoi.product_id=ddosi.product_id
-        where  1=1     and ddoi.storefont_id=#{storefrontId} and ddoi.order_id=#{orderId}
+        SELECT
+            ddoi.order_id AS orderId,
+            ddoi.product_name AS productName,
+            ddoi.product_sn AS productSn,
+            ddoi.image,
+            ddoi.shop_count AS shopCount,
+            IFNULL(ddoi.ask_count, 0) AS askCount,
+            IFNULL(ddoi.ask_count, 0) AS num,
+            IFNULL(IFNULL(ddoi.receive_count, ddoi.ask_count), 0) AS receive,
+            IFNULL(ddoi.return_count, 0) AS returnCount,
+            IFNULL((select sum(t.return_count) from dj_deliver_order_split_item t where ddoi.id=t.order_item_id),0) returnRefundCount,
+            ddoi.price AS price,
+            IFNULL(p.move_cost,0) moveCost,
+            ddoi.price*ddoi.shop_count totalPrice,
+            ddoi.product_id AS productId,
+            ddoi.house_id AS houseId
+        FROM
+            dj_deliver_order_item ddoi,
+          dj_basics_storefront_product p
+        WHERE
+          ddoi.product_id=p.id
+            and ddoi.order_id = '720558991581165849924'
     </select>
 
     <select id="queryStoreOrderSplitItem" resultType="com.dangjia.acg.dto.storefront.StoreOrderSplitItemDTO">
