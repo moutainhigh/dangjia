@@ -38,6 +38,7 @@ import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.mysql.fabric.Server;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -90,7 +91,7 @@ public class StorefrontService {
     private IShopReceiptMapper iReceiptMapper;
 
     @Autowired
-    private IStorefrontMendDeliverMapper iStorefrontMendDeliverMapper;
+    private IStorefrontSplitDeliverMapper iStorefrontSplitDeliverMapper;
     @Autowired
     private StoreConfigService storeConfigService;
     @Autowired
@@ -776,75 +777,50 @@ public class StorefrontService {
     }
     /**
      *店铺铺-支出记录-查看货单详情
-     * @param request
-     * @param pageDTO
      * @param accountFlowRecordId
      * @param type 1提现，9结算
      * @return
      */
-    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String accountFlowRecordId,Integer type) {
+    public ServerResponse storeRevenueRecordOrderDetail(String accountFlowRecordId,Integer type) {
         try {
 
-           // DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId,cityId);
+            AccountFlowRecord accountFlowRecord=storefrontAccountFlowRecordMapper.selectByPrimaryKey(accountFlowRecordId);
+            if(accountFlowRecord==null){
+                return ServerResponse.createByErrorMessage("未找到符合条件的数据");
+            }
             /*1: 提现 9：合并结算4：体现*/
             if (type==null){
                 return ServerResponse.createByErrorMessage("类型参数不能为空");
             }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             if(type==1){//提现，查询回执
-                //Receipt receipt=iShopReceiptMapper.selectByPrimaryKey();
-            }
-             if(type==3){
-                // 3：合并结算
-                 Receipt receipt = iShopReceiptMapper.selectByPrimaryKey("");
+                WithdrawDeposit withdrawDeposit=istorefrontWithdrawDepositMapper.selectByPrimaryKey(accountFlowRecord.getHouseOrderId());
+                Map<String,Object> resultMap=new HashMap<>();
+                resultMap.put("image",withdrawDeposit.getImage());
+                resultMap.put("imageUrl",address+withdrawDeposit.getImage());
+                resultMap.put("reason",withdrawDeposit.getReason());//原因
+                return ServerResponse.createBySuccess("查询成功",resultMap);
+            }else if(type==9){//合并结算
+                 Receipt receipt=iShopReceiptMapper.selectByPrimaryKey(accountFlowRecord.getHouseOrderId());
+               //  JSONArray itemObjArr = JSON.parseArray(receipt.getImage());
                  if (receipt==null)
                      return ServerResponse.createByErrorMessage("没有查询到结算回执");
-                 JSONArray jsonArr = JSONArray.parseArray(receipt.getMerge());
+                JSONArray itemObjArr = JSON.parseArray(receipt.getImage());
                  DjSupplierDeliverDTOList djSupplierDeliverDTOList=new DjSupplierDeliverDTOList();
                  djSupplierDeliverDTOList.setCreateDate(receipt.getCreateDate());
-                 List<DjSupplierDeliverDTO> djSupplierDeliverDTOS = new ArrayList<>();
-                 Double totalMoney=0d;
-                 for (Object o : jsonArr){
-                     JSONObject obj = (JSONObject) o;
-                     String id = obj.getString("id");
-                     Integer deliverType = obj.getInteger("deliverType");
-                     DjSupplierDeliverDTO djSupplierDeliverDTO = new DjSupplierDeliverDTO();
-
-                     //发货单
-                     if (deliverType == 1) {
-                         SplitDeliver splitDeliver = ishopSplitDeliverMapper.selectByPrimaryKey(id);
-                         if(splitDeliver!=null) {
-                             djSupplierDeliverDTO.setId(splitDeliver.getId());
-                             djSupplierDeliverDTO.setShipAddress(splitDeliver.getShipAddress());
-                             djSupplierDeliverDTO.setDeliverType(1);
-                             djSupplierDeliverDTO.setApplyMoney(splitDeliver.getApplyMoney());
-                             djSupplierDeliverDTO.setApplyState(splitDeliver.getApplyState());
-                             djSupplierDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
-                             djSupplierDeliverDTO.setNumber(splitDeliver.getNumber());
-                             totalMoney+=splitDeliver.getTotalAmount();
-                         }
-                     } else if (deliverType == 2) {//退货单
-                         MendDeliver mendDeliver = ishopMendDeliverMapper.selectByPrimaryKey(id);
-                         if(mendDeliver!=null) {
-                             djSupplierDeliverDTO.setId(mendDeliver.getId());
-                             djSupplierDeliverDTO.setShipAddress(mendDeliver.getShipAddress());
-                             djSupplierDeliverDTO.setDeliverType(2);
-                             djSupplierDeliverDTO.setApplyMoney(mendDeliver.getApplyMoney());
-                             djSupplierDeliverDTO.setApplyState(mendDeliver.getApplyState());
-                             djSupplierDeliverDTO.setTotalAmount(mendDeliver.getTotalAmount());
-                             djSupplierDeliverDTO.setNumber(mendDeliver.getNumber());
-                             totalMoney-=mendDeliver.getTotalAmount();
-                         }
-                     }
-                     djSupplierDeliverDTOS.add(djSupplierDeliverDTO);
-                 }
-                 djSupplierDeliverDTOList.setTotalMoney(totalMoney);
+                 List<DjSupplierDeliverDTO> djSupplierDeliverDTOS = iStorefrontSplitDeliverMapper.selectItemListbyReceiptNumber(receipt.getNumber());//查询结算单明细(发货单或要货单的列表)
                  djSupplierDeliverDTOList.setDjSupplierDeliverDTOList(djSupplierDeliverDTOS);
+                 djSupplierDeliverDTOList.setImage(itemObjArr);
+                 djSupplierDeliverDTOList.setTotalMoney(receipt.getTotalAmount());
+                 DjSupplier djSupplier=iShopSupplierMapper.selectByPrimaryKey(receipt.getSupplierId());
+                 djSupplierDeliverDTOList.setName(djSupplier.getName());
+                 djSupplierDeliverDTOList.setTelephone(djSupplier.getTelephone());
                  return ServerResponse.createBySuccess("查询成功", djSupplierDeliverDTOList);
              }
 
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }

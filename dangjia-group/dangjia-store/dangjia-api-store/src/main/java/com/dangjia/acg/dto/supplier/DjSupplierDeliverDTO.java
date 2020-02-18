@@ -13,8 +13,8 @@ import java.util.Date;
  */
 @Data
 public class DjSupplierDeliverDTO {
-    private String id;
-    private String number;//单号
+    private String splitId;//货单ID
+    private String number;//货单号
     private String shipAddress;//地址
     private Double totalAmount;//货单金额
     private Double applyMoney;//结算金额
