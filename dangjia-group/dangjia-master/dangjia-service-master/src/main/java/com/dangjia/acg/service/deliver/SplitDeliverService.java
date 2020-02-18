@@ -236,6 +236,18 @@ public class SplitDeliverService {
                 orderSplitItem.setReceive(orderSplitItem.getNum());//收获量改为发货量
                 orderSplitItem.setSupTransportationCost(MathUtil.mul(MathUtil.div(splitDeliver.getDeliveryFee(),totalReceiverNum),orderSplitItem.getReceive()));
                 orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);//修改对应的运费，搬运费
+                if(orderSplitItem.getOrderItemId()!=null){
+                    OrderItem orderItem=orderItemMapper.selectByPrimaryKey(orderSplitItem.getOrderItemId());
+                    if(orderItem!=null){
+                        if(orderItem.getReturnCount()==null)
+                            orderItem.setReceiveCount(0d);
+                        if(orderItem.getReturnCount()<orderItem.getAskCount()){
+                            orderItem.setReceiveCount(MathUtil.add(orderItem.getReceiveCount(),orderSplitItem.getReceive()));
+                            orderItem.setModifyDate(new Date());
+                            orderItemMapper.updateByPrimaryKeySelective(orderItem);
+                        }
+                    }
+                }
             }
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());

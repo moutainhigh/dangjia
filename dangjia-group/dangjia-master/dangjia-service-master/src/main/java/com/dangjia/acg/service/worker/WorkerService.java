@@ -17,10 +17,7 @@ import com.dangjia.acg.mapper.worker.IWithdrawDepositMapper;
 import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.config.Sms;
-import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.HouseFlowApply;
-import com.dangjia.acg.modle.core.HouseWorker;
-import com.dangjia.acg.modle.core.HouseWorkerOrder;
+import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.BankCard;
@@ -90,6 +87,7 @@ public class WorkerService {
         Member member = memberMapper.selectByPrimaryKey(house.getMemberId());//房主
         Map<String, Object> map2 = new HashMap<>();
         map2.put("workerTypeName", "业主");
+        map2.put("workerTypeColor", "#D67DAE");
         map2.put("workerName", member.getNickName() == null ? member.getName() : member.getNickName());
         map2.put("workerPhone", member.getMobile());
         map2.put("workerId", member.getId());
@@ -105,28 +103,30 @@ public class WorkerService {
             for (HouseWorker houseWorker : houseWorkerList) {
                 Map<String, Object> map = new HashMap<>();
                 Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
-                if (worker2 == null) {
-                    continue;
+                if (worker2 != null) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId());
+                    map.put("workerTypeName", workerType.getName());
+                    map.put("workerTypeColor", workerType.getColor());
+                    map.put("workerName", worker2.getName());
+                    map.put("workerPhone", worker2.getMobile());
+                    map.put("workerId", worker2.getId());
+                    listMap.add(map);
                 }
-                map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId()).getName());
-                map.put("workerName", worker2.getName());
-                map.put("workerPhone", worker2.getMobile());
-                map.put("workerId", worker2.getId());
-                listMap.add(map);
             }
             if (worker.getWorkerType() == 3) {//大管家
                 List<HouseWorker> listHouseWorker = houseWorkerMapper.paidListByHouseId(houseId);
                 for (HouseWorker houseWorker : listHouseWorker) {
                     Map<String, Object> map = new HashMap<>();
                     Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
-                    if (worker2 == null) {
-                        continue;
+                    if (worker2 != null) {
+                        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId());
+                        map.put("workerTypeName", workerType.getName());
+                        map.put("workerTypeColor", workerType.getColor());
+                        map.put("workerName", worker2.getName());
+                        map.put("workerPhone", worker2.getMobile());
+                        map.put("workerId", worker2.getId());
+                        listMap.add(map);
                     }
-                    map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId()).getName());
-                    map.put("workerName", worker2.getName());
-                    map.put("workerPhone", worker2.getMobile());
-                    map.put("workerId", worker2.getId());
-                    listMap.add(map);
                 }
             } else {//普通工匠
                 HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseId, 3);
@@ -134,7 +134,9 @@ public class WorkerService {
                     Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());//根据工匠id查询工匠信息详情
                     if (worker2 != null) {
                         Map<String, Object> map = new HashMap<>();
-                        map.put("workerTypeName", "大管家");
+                        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId());
+                        map.put("workerTypeName", workerType.getName());
+                        map.put("workerTypeColor", workerType.getColor());
                         map.put("workerName", worker2.getName());//大管家
                         map.put("workerPhone", worker2.getMobile());
                         map.put("workerId", worker2.getId());

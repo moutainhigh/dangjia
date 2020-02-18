@@ -25,9 +25,9 @@ public interface IStorefrontMapper extends Mapper<Storefront> {
 
     List<WebSplitDeliverItemDTO> queryStoreSupplierSettlement(@Param("storefrontId") String storefrontId,@Param("searchKey") String searchKey);
 
-    List<StoreExpenseRecordDTO> selectStoreExpenseRecord(@Param("orderNumber") String orderNumber,@Param("storefrontId") String storefrontId);
+    List<StoreExpenseRecordDTO> selectStoreExpenseRecord(@Param("orderNumber") String orderNumber,@Param("storefrontId") String storefrontId,@Param("orderId") String orderId);
 
-    List<ExpenseRecordOrderDetailDTO> storeExpenseRecordOrderDetail(@Param("storefrontId") String storefrontId,@Param("orderId") String orderId);
+    List<ExpenseRecordOrderDetailDTO> storeExpenseRecordOrderDetail(@Param("orderId") String orderId);
 
     List<StoreOrderSplitItemDTO>  queryStoreOrderSplitItem(@Param("storefrontId") String storefrontId,@Param("houseId") String houseId,@Param("productId") String productId);
 

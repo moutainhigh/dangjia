@@ -563,6 +563,11 @@ public class OrderSplitService {
                 if(orderItem!=null){
                     orderItem.setAskCount(MathUtil.sub(orderItem.getAskCount(),countNum));//还原未要货量
                     orderItem.setModifyDate(new Date());
+                    if(orderItem.getReturnCount()==null)
+                    orderItem.setReceiveCount(0d);
+                    if(orderItem.getReturnCount()<orderItem.getAskCount()){
+                        orderItem.setReceiveCount(MathUtil.add(orderItem.getReceiveCount(),number));
+                    }
                     iOrderItemMapper.updateByPrimaryKeySelective(orderItem);//修改订单明细的要货量
                     //重新计算店铺的运费，搬运费
                     Double transportationCost=orderItem.getTransportationCost();//运费

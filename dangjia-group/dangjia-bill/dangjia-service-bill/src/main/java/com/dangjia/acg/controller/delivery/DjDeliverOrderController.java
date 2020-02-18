@@ -56,6 +56,16 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
         return djDeliverOrderService.getCollectInfo(houseId);
     }
 
+    /**
+     * 店铺--订单管理--列表
+     * @param request
+     * @param pageDTO 查询分页
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param orderKey 查询
+     * @param state 状态：3已支付
+     * @return
+     */
     @Override
     @ApiMethod
     public ServerResponse queryOrderInfo(HttpServletRequest request,

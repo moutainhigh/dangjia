@@ -91,6 +91,11 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("工匠申请验收时间")
     private Date applyCollectTime;
 
+    @Column(name = "end_collect_time")
+    @Desc(value = "业主验收时间")
+    @ApiModelProperty("业主验收时间")
+    private Date endCollectTime;
+
     @Column(name = "over_protection")
     @Desc(value = "是否过保（1是，0否）")
     @ApiModelProperty("是否过保（1是，0否）")

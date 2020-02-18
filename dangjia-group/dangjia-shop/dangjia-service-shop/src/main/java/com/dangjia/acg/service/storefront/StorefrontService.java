@@ -9,6 +9,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -20,6 +21,7 @@ import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTOList;
 import com.dangjia.acg.mapper.storefront.*;
 import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.other.City;
@@ -32,6 +34,7 @@ import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -91,6 +94,8 @@ public class StorefrontService {
     private StoreConfigService storeConfigService;
     @Autowired
     private IShopSupplierMapper iShopSupplierMapper;
+    @Autowired
+    private IStoreOrderMapper iStoreOrderMapper;
 
     /**
      * 获取需缴纳的滞留金
@@ -655,11 +660,11 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StoreExpenseRecordDTO>  list=istorefrontMapper.selectStoreExpenseRecord(orderNumber,storefront.getId());
+            List<StoreExpenseRecordDTO>  list=istorefrontMapper.selectStoreExpenseRecord(orderNumber,storefront.getId(),null);
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -730,25 +735,28 @@ public class StorefrontService {
      */
     public ServerResponse storeExpenseRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId,String orderId) {
         try {
-            Storefront storefront = this.queryStorefrontByUserID(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<ExpenseRecordOrderDetailDTO> list=istorefrontMapper.storeExpenseRecordOrderDetail(storefront.getId(),orderId);
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<ExpenseRecordOrderDetailDTO> list=istorefrontMapper.storeExpenseRecordOrderDetail(orderId);
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            Double totalPrice=0.0;
             for (ExpenseRecordOrderDetailDTO expenseRecordOrderDetailDTO :list) {
-                expenseRecordOrderDetailDTO.setImageDetail(address+expenseRecordOrderDetailDTO.getImage());
-              String productId=  expenseRecordOrderDetailDTO.getProductId();
-              String houseId=expenseRecordOrderDetailDTO.getHouseId();
-              //要货详情
-              List<StoreOrderSplitItemDTO> storeOrderSplitItemlist=  istorefrontMapper.queryStoreOrderSplitItem(storefront.getId(),houseId,productId);
-              expenseRecordOrderDetailDTO.setStoreOrderSplitItemlist(storeOrderSplitItemlist);
+                expenseRecordOrderDetailDTO.setImageDetail(StringTool.getImage(expenseRecordOrderDetailDTO.getImage(),address));
+                totalPrice=MathUtil.add(totalPrice,expenseRecordOrderDetailDTO.getTotalPrice());
             }
             PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            //查询对应的汇总费用信息
+            Order order=iStoreOrderMapper.selectByPrimaryKey(orderId);
+            List<StoreExpenseRecordDTO>  recordDTOList=istorefrontMapper.selectStoreExpenseRecord(order.getOrderNumber(),order.getStorefontId(),orderId);;
+            Map<String,Object> map=new HashMap<>();
+            if(recordDTOList!=null){
+                StoreExpenseRecordDTO storeExpenseRecordDTO=recordDTOList.get(0);
+                map=BeanUtils.beanToMap(storeExpenseRecordDTO);
+            }
+            map.put("totalPrice",totalPrice);//商品小计
+            map.put("orderItemList",pageResult);
+            return ServerResponse.createBySuccess("查询成功",map);
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
