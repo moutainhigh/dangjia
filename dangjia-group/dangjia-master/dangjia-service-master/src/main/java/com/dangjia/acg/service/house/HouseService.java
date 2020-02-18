@@ -3208,6 +3208,7 @@ public class HouseService {
 
     public ServerResponse getHistoryWorker(String houseId, String workerTypeId, String workId, PageDTO pageDTO) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseId)
@@ -3221,19 +3222,11 @@ public class HouseService {
             for (HouseWorker h : houseWorkers) {
                 HouseWorkDTO houseWorkDTO = new HouseWorkDTO();
                 Member member = memberMapper.selectByPrimaryKey(h.getWorkerId());
-                Example example1 = new Example(WorkerDetail.class);
-                example1.createCriteria().andEqualTo(WorkerDetail.HOUSE_ID, houseId)
-                        .andEqualTo(WorkerDetail.WORKER_ID, h.getWorkerId());
-                List<WorkerDetail> workerDetails = workerDetailMapper.selectByExample(example1);
-                double money = 0;
-                for (WorkerDetail w : workerDetails) {
-                    money += w.getMoney().doubleValue();
-                }
                 houseWorkDTO.setWorkName(member.getName());
                 houseWorkDTO.setPhone(member.getMobile());
                 houseWorkDTO.setModifyDate(h.getModifyDate());
                 houseWorkDTO.setWorkerId(h.getWorkerId());
-                houseWorkDTO.setHaveMoney(new BigDecimal(money));
+                houseWorkDTO.setHead(address+member.getHead());
                 houseWorkDTOS.add(houseWorkDTO);
             }
             pageResult.setList(houseWorkDTOS);

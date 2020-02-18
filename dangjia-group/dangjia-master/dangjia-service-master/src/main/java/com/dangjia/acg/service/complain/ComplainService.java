@@ -3,7 +3,6 @@ package com.dangjia.acg.service.complain;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
-import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.refund.RefundAfterSalesAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -15,13 +14,11 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.complain.ComPlainStopDTO;
 import com.dangjia.acg.dto.complain.ComplainDTO;
-import com.dangjia.acg.dto.complain.ReplaceMemberRecordDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
-import com.dangjia.acg.mapper.complain.MemberRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -29,10 +26,7 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
-import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
@@ -49,13 +43,9 @@ import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.member.ReplaceMemberRecord;
-import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
-import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
@@ -64,10 +54,8 @@ import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
-import com.dangjia.acg.service.deliver.SplitDeliverService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
-import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.service.repair.MendMaterielService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -91,8 +79,6 @@ public class ComplainService {
     private IMemberMapper memberMapper;
     @Autowired
     private IComplainMapper complainMapper;
-    @Autowired
-    private MemberRecordMapper memberRecordMapper;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -617,10 +603,6 @@ public class ComplainService {
                 }
             }
 
-            //增加工替换历史记录
-            ReplaceMemberRecord replaceMemberRecord = new ReplaceMemberRecord();
-            replaceMemberRecord.setMemberId(complain.getMemberId());
-            memberRecordMapper.insert(replaceMemberRecord);
 
         } else {
             if (complain.getComplainType() != null && complain.getComplainType() == 2) {
@@ -646,26 +628,10 @@ public class ComplainService {
 
         }
         complainMapper.updateByPrimaryKeySelective(complain);
-        //新增更换工匠历史记录
-        ReplaceMemberRecord replaceMemberRecord = new ReplaceMemberRecord();
-        replaceMemberRecord.setMemberId(complain.getMemberId());
-        memberRecordMapper.insert(replaceMemberRecord);
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 
 
-    /**
-     * 查询更换工匠历史记录
-     * @param memberId
-     * @return
-     */
-    public ServerResponse queryMemberRecord(String memberId) {
-        List<ReplaceMemberRecordDTO> queryMemberRecord = complainMapper.queryMemberRecord(memberId);
-        if (queryMemberRecord.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }
-        return ServerResponse.createBySuccess("查询成功", queryMemberRecord);
-    }
 
 
     /**

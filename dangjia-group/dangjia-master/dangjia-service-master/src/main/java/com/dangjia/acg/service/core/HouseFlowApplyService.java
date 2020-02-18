@@ -1040,6 +1040,7 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
             if (houseFlowApply.getEndDate() != null) {
                 houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
+                houseFlowApplyDTO.setApplyDec("注：大管家已通过验收，还剩"+DateUtil.getDateString2(houseFlowApplyDTO.getEndDate())+"，系统将默认自动通过。");
             }
             List<String> imageList=new ArrayList<>();
             setImageList(houseFlowApply.getId(),address,imageList);
@@ -1049,7 +1050,9 @@ public class HouseFlowApplyService {
                 if(map.get("imageList")!=null) {
                     map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
                 }
-
+                if(map.get("workerHead")!=null) {
+                    map.put("workerHead", Utils.getImageAddress(address, String.valueOf(map.get("workerHead"))));
+                }
                 if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
                     map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList")))+","+StringUtils.join(imageList.toArray(),"."));
                     map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
@@ -1116,6 +1119,7 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
             houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType())+"(第"+CommonUtil.numberToChinese(yanShouNum)+"次申请)");
+            houseFlowApplyDTO.setApplyDec("大管家你好 "+workerType.getName()+"已"+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType())+" 请验收");
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
             houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
             houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
@@ -1130,6 +1134,10 @@ public class HouseFlowApplyService {
                 if(map.get("imageList")!=null) {
                     map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
                 }
+                if(map.get("workerHead")!=null) {
+                    map.put("workerHead", Utils.getImageAddress(address, String.valueOf(map.get("workerHead"))));
+                }
+
                 if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
                     map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
                     map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList")))+","+StringUtils.join(imageList.toArray(),"."));

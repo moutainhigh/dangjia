@@ -75,11 +75,6 @@ public interface ComplainAPI {
                                   @RequestParam("rejectReason")  String rejectReason);
 
 
-    @PostMapping("/complain/queryMemberRecord")
-    @ApiOperation(value = "查询更换工匠历史记录", notes = "查询更换工匠历史记录")
-    ServerResponse queryMemberRecord(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("memberId") String memberId);
-
 
     @PostMapping("/complain/getComplain")
     @ApiOperation(value = "获取申诉详情", notes = "获取申诉详情")

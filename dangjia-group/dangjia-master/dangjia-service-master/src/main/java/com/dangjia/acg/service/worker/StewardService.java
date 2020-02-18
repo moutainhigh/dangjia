@@ -290,7 +290,7 @@ public class StewardService {
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                     String.format(DjConstants.GJPageAddress.READPROJECTINFO, userToken, hf.getCityId(), "交底详情") + "&houseFlowId=" + houseFlowId;
             //直接交底
-            confirmProjectInfo(houseFlowId);
+//            confirmProjectInfo(houseFlowId);
             return ServerResponse.createBySuccess("交底成功", url);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("扫码失败");

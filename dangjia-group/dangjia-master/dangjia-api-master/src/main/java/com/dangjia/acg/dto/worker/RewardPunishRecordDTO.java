@@ -56,6 +56,8 @@ public class RewardPunishRecordDTO {
 	@ApiModelProperty("启用状态")
 	private Integer state;//0:启用;1:不启用
 
+	private String images;
+
 	private RewardPunishCorrelationDTO correlation;
 
 }

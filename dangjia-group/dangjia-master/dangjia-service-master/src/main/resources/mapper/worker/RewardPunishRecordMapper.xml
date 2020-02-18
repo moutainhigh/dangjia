@@ -16,6 +16,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result column="type" property="type"/>
         <result column="remarks" property="remarks"/>
         <result column="state" property="state"/>
+        <result column="images" property="images"/>
         <result column="create_date" property="createDate"/>
         <result column="modify_date" property="modifyDate"/>
         <result column="data_status" property="dataStatus"/>
@@ -112,6 +113,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             m.type mtype,
             m.quantity mquantity,
             m.units munits,
+            r.images,
             m.start_time mstart_time,
             m.end_time mend_time
         FROM

@@ -57,11 +57,6 @@ public class ComplainController implements ComplainAPI {
     }
 
 
-    @Override
-    @ApiMethod
-    public ServerResponse queryMemberRecord(HttpServletRequest request, String memberId) {
-        return complainService.queryMemberRecord(memberId);
-    }
 
     @Override
     @ApiMethod

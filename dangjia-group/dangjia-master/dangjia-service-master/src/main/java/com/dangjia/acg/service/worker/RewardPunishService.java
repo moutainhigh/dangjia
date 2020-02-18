@@ -409,11 +409,17 @@ public class RewardPunishService {
      */
     public ServerResponse getRewardPunishRecord(String recordId) {
         try {
+
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             RewardPunishRecordDTO example = new RewardPunishRecordDTO();
             example.setId(recordId);
             List<RewardPunishRecordDTO> recordList = rewardPunishRecordMapper.queryRewardPunishRecord(example);
             if (recordList != null && recordList.size() > 0) {
-                return ServerResponse.createBySuccess("ok", recordList.get(0));
+                RewardPunishRecordDTO rewardPunishRecordDTO=recordList.get(0);
+                if(!CommonUtil.isEmpty(rewardPunishRecordDTO.getImages())){
+                    rewardPunishRecordDTO.setImages(imageAddress+rewardPunishRecordDTO.getImages());
+                }
+                return ServerResponse.createBySuccess("ok", rewardPunishRecordDTO);
             } else {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }

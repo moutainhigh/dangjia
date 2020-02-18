@@ -493,6 +493,7 @@
             t.color workerTypeColor,
              a.worker_type workerType,
             a.worker_id workerId,
+            w.head workerHead,
             w. NAME workerName,
             a.apply_dec applyDec,
             a.create_date createDate,

@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.complain;
 
 import com.dangjia.acg.dto.complain.ComplainDTO;
-import com.dangjia.acg.dto.complain.ReplaceMemberRecordDTO;
 import com.dangjia.acg.modle.complain.Complain;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -22,6 +21,4 @@ public interface IComplainMapper extends Mapper<Complain> {
 
     ComplainDTO getComplain(@Param("complainId")  String complainId);
 
-
-    List<ReplaceMemberRecordDTO> queryMemberRecord(@Param("memberId")  String memberId);
 }
