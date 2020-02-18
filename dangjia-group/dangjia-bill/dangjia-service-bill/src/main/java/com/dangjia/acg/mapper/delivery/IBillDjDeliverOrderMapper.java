@@ -189,4 +189,6 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
 
     List<DecorationCostDTO> queryCostDetailsAfterCompletion(@Param("houseId") String houseId);
 
+    Map<String,Object> selectDeliverOrderInfoById(@Param("orderId") String orderId);
+
 }

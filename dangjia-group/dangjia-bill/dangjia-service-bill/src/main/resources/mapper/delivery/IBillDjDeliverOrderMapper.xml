@@ -559,49 +559,30 @@
     <!-- 查询订单首页 -->
     <select id="queryOrderInfo" resultType="com.dangjia.acg.dto.order.DOrderInfoDTO">
         select
-        ddo.id as id,
-        CONCAT(
-        h.residential,
-        IFNULL(h.building, '*'),
-        '栋',
-        IFNULL(CONCAT(h.unit, '单元'),'' ),
-        IFNULL(h.number, '*'),
-        '号'
-        ) houseName,
-        m.mobile as mobile,
-        m.id as memberId,
-        bs.storefront_name as storefrontName,
-        IFNULL(ddo.total_amount,0) as totalAmount,
-        IFNULL(ddo.actual_payment_price,0) as actualPaymentPrice,
-        ddo.order_number AS orderNumber,
-        ddo.create_date as createDate,
-        ddo.payment AS payment,
-        ddo.order_generation_time as orderGenerationTime,
-        ddo.order_pay_time AS orderPayTime,
-        pbo.state as state,
-        pbo.pay_order_number AS payOrderNumber,
-        pbo.type AS type,
-        pbo.id as pboId,
-        pbo.image as pboImage,
-        ddo.cancellation_time as cancellationTime
+            ddo.id as id,
+            m.address houseName,
+            m.mobile as mobile,
+            m.id as memberId,
+            bs.storefront_name as storefrontName,
+            IFNULL(ddo.total_amount,0) as totalAmount,
+            IFNULL(ddo.actual_payment_price,0) as actualPaymentPrice,
+            ddo.order_number AS orderNumber,
+            ddo.create_date as createDate,
+            ddo.payment AS payment,
+            ddo.order_generation_time as orderGenerationTime,
+            ddo.order_pay_time AS orderPayTime,
+            pbo.state as state,
+            pbo.pay_order_number AS payOrderNumber,
+            pbo.type AS type,
+            pbo.id as pboId,
+            pbo.image as pboImage,
+            ddo.cancellation_time as cancellationTime
         from dj_deliver_order ddo
         INNER JOIN dj_pay_business_order pbo on ddo.business_order_number = pbo.number
         INNER JOIN dj_basics_storefront bs on bs.id = ddo.storefont_id
-        INNER JOIN dj_house h on ddo.house_id = h.id
-        INNER JOIN dj_member m on h.member_id = m.id
-        where 1=1
-        <if test="null != storefontId  and '' != storefontId">
-            and  ddo.storefont_id = #{storefontId}
-        </if>
-        <if test="null != state and state == 2">
-            and (pbo.state = 1 or pbo.state = 2)
-        </if>
-        <if test="null != state and state == 3">
-            and pbo.state = 3
-        </if>
-        <if test="null != state and state == 4">
-            and pbo.state = 4
-        </if>
+        INNER JOIN dj_member_address m on (ddo.house_id = m.house_id or ddo.address_id=m.id)
+        where  ddo.storefont_id = #{storefontId}
+        and pbo.state = #{state}
         <if test="null != id  and '' != id">
             and ddo.id = #{id}
         </if>
@@ -609,14 +590,7 @@
             and (
             m.mobile like CONCAT('%',#{orderKey},'%')
             or
-            CONCAT(
-            h.residential,
-            IFNULL(h.building, '*'),
-            '栋',
-            IFNULL(CONCAT(h.unit, '单元'),'' ),
-            IFNULL(h.number, '*'),
-            '号'
-            ) LIKE CONCAT('%',#{orderKey},'%')
+            m.address LIKE CONCAT('%',#{orderKey},'%')
             or
             ddo.order_number LIKE CONCAT('%',#{orderKey},'%')
             or
@@ -629,18 +603,21 @@
 
 
     <select id="queryOrderFineInfo" resultType="com.dangjia.acg.dto.order.DOrderFineInfoDTO">
-        select
-            bsp.image as image,
-            bpt.name as name,
-            bpt.product_sn as productSn,
-            doi.price as price,
-            doi.shop_count AS shopCount,
-            doi.ask_count as askCount,
-            doi.return_count as returnCount,
-            (IFNULL(doi.shop_count,0) - IFNULL(doi.ask_count,0) - IFNULL(doi.return_count,0)) AS remnantCount,
-            (IFNULL(doi.shop_count,0) * IFNULL(doi.price,0)) AS remember
+            select
+                bsp.image as image,
+                bpt.name as name,
+                bpt.product_sn as productSn,
+                doi.price as price,
+                doi.shop_count AS shopCount,
+                doi.ask_count as askCount,
+                doi.return_count as returnCount,
+                doi.stevedorage_cost stevedorageCost,
+                doi.transportation_cost transportationCost,
+                (doi.price*doi.shop_count) totalPrice,
+                (IFNULL(doi.shop_count,0) - IFNULL(doi.ask_count,0) - IFNULL(doi.return_count,0)) AS remnantCount,
+                (IFNULL(doi.shop_count,0) * IFNULL(doi.price,0)) AS remember
             from
-            dj_deliver_order_item doi
+                dj_deliver_order_item doi
             INNER JOIN dj_basics_storefront_product bsp on doi.product_id = bsp.id
             INNER JOIN dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
             where doi.order_id = #{orderId}
@@ -1219,4 +1196,25 @@
         AND t1.house_id = #{houseId}
     </select>
 
+    <select id="selectDeliverOrderInfoById" resultType="java.util.Map">
+        SELECT
+           t.id orderId,
+           t.order_number orderNumber,
+           t.total_amount totalAmount,
+           t.actual_payment_price actualPaymentPrice,
+           t.total_stevedorage_cost totalStevedorageSost,
+           t.total_transportation_cost totalTransportationSost,
+           t.total_discount_price totalDiscountPrice,
+           t.order_generation_time orderGenerationTime,
+           m.member_id memberId,
+           m.`name` memberName,
+           m.mobile memberMobile,
+           m.address address,
+           '' discountId
+        FROM
+            dj_deliver_order t
+        LEFT JOIN dj_member_address m ON (t.address_id=m.id or t.house_id=m.house_id)
+        where t.id=#{orderId}
+
+    </select>
 </mapper>

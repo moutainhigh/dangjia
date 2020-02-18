@@ -43,17 +43,27 @@ public interface DjDeliverOrderAPI {
                                   @RequestParam("houseId") String houseId);
 
 
+    /**
+     * 店铺--订单管理--列表
+     * @param request
+     * @param pageDTO 查询分页
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param orderKey 查询内容（房屋地址/电话/支付订单号/订单号）
+     * @param state 状态：3已支付
+     * @return
+     */
     @PostMapping("web/design/queryOrderInfo")
-    @ApiOperation(value = "查询订单列表", notes = "查询订单列表")
+    @ApiOperation(value = "店铺--订单管理--列表", notes = "店铺--订单管理--列表")
     ServerResponse queryOrderInfo(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("pageDTO") PageDTO pageDTO,
                                   @RequestParam("userId") String userId,
                                   @RequestParam("cityId") String cityId,
                                   @RequestParam("orderKey") String orderKey,
-                                  @RequestParam("orderKey") Integer state);
+                                  @RequestParam("state") Integer state);
 
     @PostMapping("web/design/queryOrderFineInfo")
-    @ApiOperation(value = "查询订单详情", notes = "查询订单详情")
+    @ApiOperation(value = "店铺--订单管理--查询订单详情", notes = "店铺--订单管理--查询订单详情")
     ServerResponse queryOrderFineInfo(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("orderId") String orderId);

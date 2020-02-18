@@ -589,6 +589,7 @@ public class DjMaintenanceRecordService {
             if(djMaintenanceRecord!=null&&auditResult==2){
               //验收不通过，改状态需要工匠重新申请
               djMaintenanceRecord.setState(3);
+              djMaintenanceRecord.setEndCollectTime(new Date());
               djMaintenanceRecord.setModifyDate(new Date());
               djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
               //发送消息给工匠，需要重新处理
@@ -599,6 +600,7 @@ public class DjMaintenanceRecordService {
                 //验收通过，修改状态为验收通过
                 djMaintenanceRecord.setState(2);
                 djMaintenanceRecord.setModifyDate(new Date());
+                djMaintenanceRecord.setEndCollectTime(new Date());
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
                 //质保期内的维保，分担责任给到对应的工匠和店铺
                 if(djMaintenanceRecord.getOverProtection()==0){
@@ -1042,6 +1044,11 @@ public class DjMaintenanceRecordService {
              }else{
                  WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecordContent.getWorkerTypeId());
                  resultMap.putAll(getWokerMemberInfo(djMaintenanceRecordContent.getMemberId(),workerType.getName(),workerType.getColor()));
+             }
+             if(type==1){
+                 DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+                 resultMap.put("state",djMaintenanceRecord.getState());//验收状态：2验收通过，3验收不通过
+                 resultMap.put("endCollectTime",djMaintenanceRecord.getEndCollectTime());//验收时间
              }
 
          }
