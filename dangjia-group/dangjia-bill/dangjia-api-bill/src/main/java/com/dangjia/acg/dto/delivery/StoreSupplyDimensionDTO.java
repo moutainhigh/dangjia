@@ -13,15 +13,23 @@ import java.util.List;
  */
 @Data
 public class StoreSupplyDimensionDTO {
+    private String storefrontId;//店铺ID
+    private String productId;//商品ID
     private String image;// 商品图片
     private String imageDetail;//图片详情
     private String productName;//商品名称
     private String productSn;//商品编号
     private String prodTemplateId;//商品id
-    private String shopCount;//总购买数
-    private String suppliedNum;//供货数
-    private String cost;//成本总价
-    private String price;//销售总价
-    private String profit; //利润
+    private Double shopCount;//总购买数
+    private Double suppliedNum;//供货数
+    private Double receive;//收货数
+    private Double returnCount;//退货数
+    private Double totalTransportationCost;//总运费
+    private Double totalStevedorageCost;//总搬运费
+    private Double totalPrice;//总销售价
+    private Double totalSupCost;//总供应价
+    private Double supPrice;//供应单价
+    private Double price;//销售单价
+    private Double profit; //利润
 
 }

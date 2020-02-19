@@ -136,12 +136,10 @@ public interface DjDeliveryReturnSlipAPI {
                                                   @RequestParam("houseId") String houseId);
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimensionGoodsDetails")
-    @ApiOperation(value = "店铺利润统计-供应商商品详情", notes = "店铺利润统计-供应商商品详情")
+    @ApiOperation(value = "店铺利润统计-货单详情--商品详情", notes = "店铺利润统计-货单详情--商品详情")
     ServerResponse supplierDimensionGoodsDetails(@RequestParam("request") HttpServletRequest request,
                                                   @RequestParam("pageDTO") PageDTO pageDTO,
-                                                  @RequestParam("userId") String userId,
-                                                  @RequestParam("cityId") String cityId,
-                                                  @RequestParam("orderSplitId") String searchKey);
+                                                  @RequestParam("splitDevlierId") String splitDevlierId);
 
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/storefrontProductDimension")

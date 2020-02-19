@@ -48,6 +48,7 @@ import com.dangjia.acg.service.complain.ComplainService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
+import com.dangjia.acg.service.member.MemberAddressService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.util.StringTool;
@@ -110,7 +111,7 @@ public class MendMaterielService {
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
-    private IComplainMapper iComplainMapper;
+    private MemberAddressService memberAddressService;
     @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
@@ -716,6 +717,13 @@ public class MendMaterielService {
                 mendDeliverDTO.setIsNonPlatformSupplier(djSupplier.getIsNonPlatformSupperlier().toString());//是否非平台供应商
             }else{
                 mendDeliverDTO.setIsNonPlatformSupplier("0");//是否非平台供应商
+            }
+            //查询业主信息
+            MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(mendDeliver.getAddressId(),mendDeliver.getHouseId());
+            if(memberAddress!=null){
+                mendDeliverDTO.setAddress(memberAddress.getAddress());
+                mendDeliverDTO.setMemberMobile(memberAddress.getMobile());
+                mendDeliverDTO.setMemberName(memberAddress.getName());
             }
             mendDeliverDTO.setMendMaterielList(mendMaterielList);
             return ServerResponse.createBySuccess("查询成功", mendDeliverDTO);

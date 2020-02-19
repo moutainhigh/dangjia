@@ -24,5 +24,6 @@ public class SupplierDimensionOrderDetailDTO {
     private Double expenditure ;// 支出
     private Double profit;// 利润
     private String houseId;//房子id
+    private Integer type;//货单类型：1发货单 2退货单
 
 }

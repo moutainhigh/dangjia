@@ -1230,6 +1230,7 @@
             dj_deliver_order t
         LEFT JOIN dj_member_address m ON (t.address_id=m.id or t.house_id=m.house_id)
         where t.id=#{orderId}
+        limit 1
 
     </select>
 </mapper>
