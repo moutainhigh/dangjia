@@ -66,9 +66,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
 
     @Override
     @ApiMethod
-    public  ServerResponse getWorkerComplainInFo(String userToken, Integer isSubstitution,
-                                         String complainId){
-        return houseWorkerService.getWorkerComplainInFo( isSubstitution,complainId);
+    public  ServerResponse getWorkerComplainInFo(String userToken, String houseFlowId){
+        return houseWorkerService.getWorkerComplainInFo( userToken,houseFlowId);
     }
 
     /**

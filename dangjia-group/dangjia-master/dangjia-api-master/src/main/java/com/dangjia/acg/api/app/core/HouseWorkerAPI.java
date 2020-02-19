@@ -96,8 +96,7 @@ public interface HouseWorkerAPI {
     @PostMapping("app/core/houseWorker/getWorkerComplainInFo")
     @ApiOperation(value = "申请更换工匠详情", notes = "申请更换工匠详情")
     ServerResponse getWorkerComplainInFo(@RequestParam("userToken") String userToken,
-                                         @RequestParam("isSubstitution") Integer isSubstitution,
-                                         @RequestParam("complainId") String complainId);
+                                         @RequestParam("houseFlowId") String houseFlowId);
 
 
     @PostMapping("app/core/houseWorker/getConstructionByWorkerId")

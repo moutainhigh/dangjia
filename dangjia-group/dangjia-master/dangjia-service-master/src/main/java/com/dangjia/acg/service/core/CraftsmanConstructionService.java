@@ -1222,7 +1222,7 @@ public class CraftsmanConstructionService {
         }
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         HouseFlow hfl = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询该房产下的工序
-            ConstructionByWorkerIdBean.WokerFlowListBean wfr = new ConstructionByWorkerIdBean.WokerFlowListBean();
+        ConstructionByWorkerIdBean.WokerFlowListBean wfr = new ConstructionByWorkerIdBean.WokerFlowListBean();
         Example example = new Example(HouseWorker.class);
         example.createCriteria()
                 .andEqualTo(HouseWorker.HOUSE_ID, hfl.getHouseId())
@@ -1240,7 +1240,7 @@ public class CraftsmanConstructionService {
         wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
         wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
         wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
-        wfr.setWorkerHead(imageAddress + worker2 == null ? "" :worker2.getHead());
+        wfr.setWorkerHead(worker2 == null ? "" :imageAddress+worker2.getHead());
         wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
         WorkerComprehensiveDTO workerComprehensive = workIntegralMapper.getComprehensiveWorker(worker.getId());
         wfr.setOverall(workerComprehensive.getOverall());
@@ -1248,6 +1248,13 @@ public class CraftsmanConstructionService {
         wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
         wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(hfl.getHouseId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
         wfr.setPatrolStandard("" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
+        example = new Example(HouseWorker.class);
+        example.createCriteria()
+                .andEqualTo(HouseWorker.WORKER_ID, wfr.getWorkerId())
+                .andEqualTo(HouseWorker.TYPE,0)
+                .andIn(HouseWorker.WORK_TYPE, Arrays.asList(1,6,8));
+        Integer orderTakingNum = houseWorkerMapper.selectCountByExample(example);
+        wfr.setOrderTakingNum(orderTakingNum);
         HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(hfl.getHouseId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
         if (todayStart == null) {//没有今日开工记录
             wfr.setIsStart(0);//今日是否开工0:否；1：是；
@@ -1259,8 +1266,10 @@ public class CraftsmanConstructionService {
         JSONObject paramVal=new JSONObject();
         HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hfl.getId(), worker2 == null ? "" : worker2.getId());//根据工种任务id和工人id查询此工人待审核
         if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
-            paramVal.put("houseFlowApplyId",houseFlowApp.getId());
-            footButton.add(Utils.getButton("审核阶段完工", JSON.toJSONString(paramVal), 3021));
+            if(houseFlowApp.getSupervisorCheck()==0) {
+                paramVal.put("houseFlowApplyId", houseFlowApp.getId());
+                footButton.add(Utils.getButton("审核阶段完工", JSON.toJSONString(paramVal), 3021));
+            }
             topButton.add( Utils.getButton("奖罚", 3011));
             if(houseWorker!=null&&houseWorker.getWorkType()!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
                 topButton.add(Utils.getButton("换人审核中", 3013));
@@ -1268,7 +1277,7 @@ public class CraftsmanConstructionService {
                 topButton.add(Utils.getButton("更换工匠", 3012));
             }
             wfr.setState(4);//装修进度0：未进场；1：待审核工匠；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
-        } else if (houseFlowApp != null && houseFlowApp.getApplyType() == 2) {
+        } else if (houseFlowApp != null && houseFlowApp.getApplyType() == 2&&houseFlowApp.getSupervisorCheck()==0) {
             paramVal.put("houseFlowApplyId",houseFlowApp.getId());
             footButton.add(Utils.getButton("审核整体完工", JSON.toJSONString(paramVal),3022));
             wfr.setState(6);

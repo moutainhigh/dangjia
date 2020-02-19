@@ -44,6 +44,7 @@ import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.core.HouseWorkerService;
@@ -132,6 +133,8 @@ public class EvaluateService {
     @Autowired
     private TaskStackService taskStackService;
 
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
     /**
      * 获取积分记录
      *
@@ -271,30 +274,17 @@ public class EvaluateService {
         }
     }
 
-    //工匠今日未开工，将扣除100
-    public void absenteeismOvertime(HouseFlow houseFlow) {
+    //工匠今日未开工，将扣除积分
+    public void absenteeismOvertime(HouseFlow houseFlow,String desc) {
         House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
         Member member = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
         if (member != null) {
+            Double evaluation = configRuleUtilService.getAbsenteeismCount(member.getEvaluationScore());
+            updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(evaluation), desc);
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-            BigDecimal money = new BigDecimal(100);
-            BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
-            BigDecimal haveMoney = member.getHaveMoney().subtract(money);
-            WorkerDetail workerDetail = new WorkerDetail();
-            workerDetail.setName(workerType.getName() + "旷工扣钱");
-            workerDetail.setWorkerId(member.getId());
-            workerDetail.setWorkerName(member.getName());
-            workerDetail.setHouseId(houseFlow.getHouseId());
-            workerDetail.setMoney(money);
-            workerDetail.setWalletMoney(surplusMoney);
-            workerDetail.setHaveMoney(haveMoney);
-            workerDetail.setState(3);
-            iWorkerDetailMapper.insert(workerDetail);
-            member.setSurplusMoney(surplusMoney);
-            member.setHaveMoney(haveMoney);
-            memberMapper.updateByPrimaryKeySelective(member);
+
             configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
-                    workerType.getName() + "旷工扣钱",
+                    workerType.getName() + desc,
                     String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
         }
     }

@@ -438,38 +438,55 @@ public class HouseWorkerService {
 
     /**
      * 查询申换工匠详情
-     * @param isSubstitution
+     * @param houseFlowId
      * @return
      */
-    public ServerResponse getWorkerComplainInFo(Integer isSubstitution,
-                                        String complainId) {
-        if (CommonUtil.isEmpty(isSubstitution)) {
-            return ServerResponse.createByErrorMessage("isSubstitution不能为空");
-        }
+    public ServerResponse getWorkerComplainInFo(String userToken,
+                                        String houseFlowId) {
+
         //0:审核中 1：申请换人
         ComplainInfoDTO complainInfoDTO = new ComplainInfoDTO();
-        if(isSubstitution == 0){
-            Complain complains = complainMapper.selectByPrimaryKey(complainId);
-            if(complains != null){
-                List<String> list = Arrays.asList(complains.getChangeReason().split(","));
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        Example example =new Example(Complain.class);
+        example.createCriteria()
+                .andEqualTo(Complain.COMPLAIN_TYPE,3)
+                .andEqualTo(Complain.HOUSE_ID,houseFlow.getHouseId())
+                .andEqualTo(Complain.MEMBER_ID,houseFlow.getWorkerId())
+                .andNotEqualTo(Complain.STATUS,2);
+        List<Complain> complains = complainMapper.selectByExample(example);
+        if(complains != null&&complains.size()>0){
+            Complain complain =complains.get(0);
+            if(complain.getStatus()==0) {
+                List<String> list = Arrays.asList(complain.getChangeReason().split("@"));
                 complainInfoDTO.setChangeList(list);
-                complainInfoDTO.setImageList(getImage(complains.getImage()));
-                complainInfoDTO.setRejectReason(complains.getRejectReason());
+            }else{
+                //查询更换原因
+                example = new Example(ReasonMatchSurface.class);
+                example.orderBy(ReasonMatchSurface.CREATE_DATE);
+                List<ReasonMatchSurface> reasonMatchSurface =  reasonMatchMapper.selectByExample(example);
+                List<String> list = new ArrayList<>();
+                reasonMatchSurface.forEach(a ->{
+                    list.add(a.getRemark());
+                });
+                complainInfoDTO.setChangeList(list);
             }
-            return ServerResponse.createBySuccess("查询成功", complainInfoDTO);
-        }else if(isSubstitution == 1){
+            complainInfoDTO.setStatus(complain.getStatus());
+            complainInfoDTO.setImageList(Arrays.asList(complain.getImage()));
+            complainInfoDTO.setImageURLList(getImage(complain.getImage()));
+            complainInfoDTO.setRejectReason(complain.getRejectReason());
+        }else{
             //查询更换原因
-            Example example = new Example(ReasonMatchSurface.class);
+            example = new Example(ReasonMatchSurface.class);
             example.orderBy(ReasonMatchSurface.CREATE_DATE);
             List<ReasonMatchSurface> reasonMatchSurface =  reasonMatchMapper.selectByExample(example);
             List<String> list = new ArrayList<>();
             reasonMatchSurface.forEach(a ->{
                 list.add(a.getRemark());
             });
+            complainInfoDTO.setStatus(-1);
             complainInfoDTO.setChangeList(list);
-            return ServerResponse.createBySuccess("查询成功", complainInfoDTO);
         }
-        return ServerResponse.createByErrorMessage("查询失败");
+        return ServerResponse.createBySuccess("查询成功", complainInfoDTO);
     }
 
     private List<String> getImage(String image){
@@ -1037,25 +1054,8 @@ public class HouseWorkerService {
                 return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
             }
         }
-//        houseFlowApplyList = getLeave(hf);
-//        if (houseFlowApplyList.size() > 0) {
-//            for (HouseFlowApply hfa : houseFlowApplyList) {
-//                hfa.setMemberCheck(2);//不通过不通过
-//                hfa.setModifyDate(new Date());
-//                houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
-//            }
-//        }
-//        int nums=0;
-//        if(!CommonUtil.isEmpty(imageList)){
-//            JSONArray imageObjArr = JSON.parseArray(imageList);
-//            nums=imageObjArr.size();
-//        }
         HouseFlowApply hfa = getHouseFlowApply(hf, 4, null);
         hfa.setPayState(0);//是否付款
-//        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
-//        hfa.setApplyDec("尊敬的业主，您好！<br/>" +
-//                "好工匠在当家，当家工匠" + workerType.getName() + "【"+worker.getName()+"】已到吉屋准备开工，开工前工地现场实况如下，请您查收。<br/>" +
-//                "【配图"+nums+"张，工地情况与材料情况】");//描述
 
         hfa.setApplyDec("尊敬的业主，您好！<br/>" +
                 "好工匠在当家，当家工匠" + workerType.getName() + "【" + worker.getName() + "】已到吉屋准备开工");
@@ -1107,6 +1107,12 @@ public class HouseWorkerService {
         }
         hf.setPause(0);//0:正常；1暂停；
         houseFlowMapper.updateByPrimaryKeySelective(hf);//发每日开工将暂停状态改为正常
+
+        //延期扣积分（每天）
+        if(hf.getEndDate()!=null&&hf.getEndDate().getTime()<new Date().getTime()){
+           Double evaluation= configRuleUtilService.getDelayCount(1);
+           evaluateService.updateMemberIntegral(hf.getWorkerId(),hf.getHouseId(),new BigDecimal(evaluation),"延期扣积分");
+        }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
