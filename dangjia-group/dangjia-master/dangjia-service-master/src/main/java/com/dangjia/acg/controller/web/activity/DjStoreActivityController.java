@@ -73,4 +73,22 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
     public ServerResponse queryActivitiesSessionByStorefront(String userId, String cityId, String id) {
         return djStoreActivityService.queryActivitiesSessionByStorefront(userId,cityId,id);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setStoreParticipateActivities(String userId, String cityId, String storeActivityId, String activitySessionId, Integer activityType) {
+        return djStoreActivityService.setStoreParticipateActivities(userId, cityId, storeActivityId, activitySessionId, activityType);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryWaitingSelectionProduct(String userId, String cityId, PageDTO pageDTO, String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.queryWaitingSelectionProduct(userId,cityId,pageDTO,storeActivityId,activitySessionId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySelectedWaitingSelectionCount(String userId, String cityId, String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.querySelectedWaitingSelectionCount(userId,cityId,storeActivityId,activitySessionId);
+    }
 }

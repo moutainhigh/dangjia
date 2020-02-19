@@ -25,8 +25,8 @@ public class DjStoreActivityDTO extends BaseEntity {
     @ApiModelProperty("状态 1：开启 2：停用")
     private Integer state;
 
-    @Desc(value = "是否参加 1：参加 2：未参加")
-    @ApiModelProperty("是否参加 1：参加 2：未参加 3：打回")
+    @Desc(value = "是否参加 0:未参加 1：已参加")
+    @ApiModelProperty("是否参加 0:未参加 1：已参加")
     private Integer attended;
 
     @Desc(value = "场次")
@@ -61,4 +61,7 @@ public class DjStoreActivityDTO extends BaseEntity {
     @ApiModelProperty("活动地区")
     private String city;
 
+    @Desc(value = "报名状态")
+    @ApiModelProperty("报名状态")
+    private Integer registrationStatus;
 }

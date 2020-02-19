@@ -1,16 +1,19 @@
 package com.dangjia.acg.service.activity;
 
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.activity.DjStoreActivityDTO;
+import com.dangjia.acg.dto.activity.DjStoreActivityProductDTO;
 import com.dangjia.acg.mapper.activity.DjActivitySessionMapper;
 import com.dangjia.acg.mapper.activity.DjStoreActivityMapper;
+import com.dangjia.acg.mapper.activity.DjStoreActivityProductMapper;
+import com.dangjia.acg.mapper.activity.DjStoreParticipateActivitiesMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
-import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
 import com.dangjia.acg.modle.activity.DjActivitySession;
 import com.dangjia.acg.modle.activity.DjStoreActivity;
+import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
+import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.product.MasterStorefrontService;
@@ -23,10 +26,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -46,6 +46,10 @@ public class DjStoreActivityService {
     private ICityMapper iCityMapper;
     @Autowired
     private MasterStorefrontService masterStorefrontService;
+    @Autowired
+    private DjStoreParticipateActivitiesMapper djStoreParticipateActivitiesMapper;
+    @Autowired
+    private DjStoreActivityProductMapper djStoreActivityProductMapper;
 
     /**
      * 添加活动
@@ -239,7 +243,7 @@ public class DjStoreActivityService {
 
 
     /**
-     * 查询活动(店参加)
+     * 查询活动(店铺参加)
      * @param userId
      * @param cityId
      * @return
@@ -258,7 +262,7 @@ public class DjStoreActivityService {
 
 
     /**
-     * 查询活动场次(店参加)
+     * 查询活动场次(店铺参加)
      * @param userId
      * @param cityId
      * @param id
@@ -270,6 +274,90 @@ public class DjStoreActivityService {
             List<DjStoreActivityDTO> djStoreActivityDTOS =
                     djStoreActivityMapper.queryActivitiesSessionByStorefront(id, storefront.getId());
             return ServerResponse.createBySuccess("查询成功",djStoreActivityDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 店参加活动
+     * @param userId
+     * @param cityId
+     * @param storeActivityId
+     * @param activitySessionId
+     * @param activityType
+     * @return
+     */
+    public ServerResponse setStoreParticipateActivities(String userId, String cityId,
+                                                        String storeActivityId, String activitySessionId,
+                                                        Integer activityType) {
+        try {
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
+            Example example=new Example(DjStoreParticipateActivities.class);
+            example.createCriteria().andEqualTo(DjStoreParticipateActivities.ACTIVITY_SESSION_ID,activitySessionId)
+                    .andEqualTo(DjStoreParticipateActivities.STORE_ACTIVITY_ID,storeActivityId)
+                    .andEqualTo(DjStoreParticipateActivities.STOREFRONT_ID,storefront.getId())
+                    .andEqualTo(DjStoreParticipateActivities.DATA_STATUS,0)
+                    .andCondition("registration_status in(1,3)");
+            if(djStoreParticipateActivitiesMapper.selectCountByExample(example)>0){
+                return ServerResponse.createByErrorMessage("请勿重复申请");
+            }
+            DjStoreParticipateActivities djStoreParticipateActivities=new DjStoreParticipateActivities();
+            djStoreParticipateActivities.setActivityType(activityType);
+            djStoreParticipateActivities.setStoreActivityId(storeActivityId);
+            djStoreParticipateActivities.setActivitySessionId(activitySessionId);
+            djStoreParticipateActivities.setStorefrontId(storefront.getId());
+            djStoreParticipateActivitiesMapper.insert(djStoreParticipateActivities);
+            return ServerResponse.createBySuccessMessage("添加成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("添加失败");
+        }
+    }
+
+
+    /**
+     * 店铺活动商品待选列表
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse queryWaitingSelectionProduct(String userId, String cityId, PageDTO pageDTO, String storeActivityId, String activitySessionId) {
+        try {
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
+            PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
+            List<DjStoreActivityProductDTO> djStoreActivityProductDTOS =
+                    djStoreActivityProductMapper.queryWaitingSelectionProduct(storefront.getId(),storeActivityId,activitySessionId);
+            PageInfo pageInfo=new PageInfo(djStoreActivityProductDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 已选/待选 数量
+     * @param userId
+     * @param cityId
+     * @param storeActivityId
+     * @param activitySessionId
+     * @return
+     */
+    public ServerResponse querySelectedWaitingSelectionCount(String userId, String cityId, String storeActivityId, String activitySessionId) {
+        try {
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
+            List<DjStoreActivityProductDTO> djStoreActivityProductDTOS =
+                    djStoreActivityProductMapper.queryWaitingSelectionProduct(storefront.getId(),storeActivityId,activitySessionId);
+            Map<String,Object> map=new HashMap<>();
+            map.put("selected",djStoreActivityProductDTOS.size());
+            List<DjStoreActivityProductDTO> djStoreActivityProductDTOS1 =
+                    djStoreActivityProductMapper.querySelectedProduct(storefront.getId(), storeActivityId, activitySessionId);
+            map.put("waiting",djStoreActivityProductDTOS1.size());
+            return ServerResponse.createBySuccess("查询成功",map);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

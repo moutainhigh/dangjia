@@ -37,6 +37,12 @@ public class MendOrderDetail {
     private String applicantName;//申请人名称
     private String applicantMobile;//申请人手机号
 
+    private Integer workerType;//工种
+
+    private Integer houseFlowApplyType;//类型 1：主动验收 2：被动验收
+
+    private String workerTypeColor;//工种颜色
+
     private ChangeOrder changeOrder;
     private List<Map<String,Object>> mapList;
     private List<String> imageList;

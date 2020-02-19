@@ -142,7 +142,7 @@ public class MendRecordService {
     }
 
     /**
-     * 要补退明细
+     * 审/要/补/退明细
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货, 6 审核进程
      */
     public ServerResponse mendOrderDetail(String userToken, String mendOrderId, Integer type) {
@@ -162,9 +162,15 @@ public class MendRecordService {
                 HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(mendOrderId);
                 Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
                 mendOrderDetail.setHouseId(houseFlowApply.getHouseId());
-                mendOrderDetail.setApplicantId(houseFlowApply.getWorkerId());
-                mendOrderDetail.setApplicantName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
-                mendOrderDetail.setApplicantMobile(member.getMobile());
+                if(houseFlowApply.getType()==2) {//被动验收
+                    mendOrderDetail.setApplicantId(houseFlowApply.getWorkerId());
+                    mendOrderDetail.setApplicantName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+                    mendOrderDetail.setApplicantMobile(member.getMobile());
+                    mendOrderDetail.setWorkerType(worker.getWorkerType());
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+                    mendOrderDetail.setWorkerTypeColor(workerType.getColor());
+                }
+                mendOrderDetail.setHouseFlowApplyType(houseFlowApply.getType());
                 mendOrderDetail.setNumber(houseFlowApply.getId());
                 mendOrderDetail.setType(6);
                 mendOrderDetail.setState(houseFlowApply.getApplyType());

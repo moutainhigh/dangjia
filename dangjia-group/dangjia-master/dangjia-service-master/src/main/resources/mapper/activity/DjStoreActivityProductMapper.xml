@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.activity.DjStoreActivityProductMapper">
+
+    <select id="queryWaitingSelectionProduct"
+            resultType="com.dangjia.acg.dto.activity.DjStoreActivityProductDTO">
+        SELECT
+            a.id AS productId,
+            c.`name` AS goodsName,
+            a.product_name AS productName,
+            b.product_sn AS productSn,
+            a.image,
+            a.sell_price AS sellPrice,
+            a.supplied_num AS inventory
+        FROM
+            dj_basics_storefront_product a,
+            dj_basics_product_template b,
+            dj_basics_goods c
+        WHERE
+            a.storefront_id =#{storefrontId}
+        AND a.prod_template_id = b.id
+        AND b.goods_id = c.id
+        AND NOT EXISTS (
+            SELECT
+                1
+            FROM
+                dj_store_activity_product d,
+                dj_store_participate_activities e
+            WHERE
+                d.store_participate_activities_id = e.id
+            AND a.id = d.product_id
+            AND e.store_activity_id =#{storeActivityId}
+            AND e.activity_session_id =#{activitySessionId}
+            AND e.storefront_id=#{storefrontId}
+        )
+    </select>
+
+
+    <select id="querySelectedProduct" resultType="com.dangjia.acg.dto.activity.DjStoreActivityProductDTO">
+        SELECT
+            c.id AS productId,
+            e.`name` AS goodsName,
+            c.product_name AS productName,
+            d.product_sn AS productSn,
+            c.image,
+            c.sell_price AS sellPrice,
+            c.supplied_num AS inventory
+        FROM
+            dj_store_activity_product a,
+            dj_store_participate_activities b,
+            dj_basics_storefront_product c,
+            dj_basics_product_template d,
+            dj_basics_goods e
+        WHERE
+            a.store_participate_activities_id = b.id
+        AND c.id = a.product_id
+        AND c.prod_template_id = d.id
+        AND d.goods_id = e.id
+        AND b.storefront_id =#{storefrontId}
+        AND b.store_activity_id =#{storeActivityId}
+        AND b.activity_session_id =#{activitySessionId}
+    </select>
+</mapper>

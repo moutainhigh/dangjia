@@ -50,4 +50,27 @@ public interface DjStoreActivityAPI {
     ServerResponse queryActivitiesSessionByStorefront(@RequestParam("userId") String userId,
                                                       @RequestParam("cityId") String cityId,
                                                       @RequestParam("id") String id);
+
+    @PostMapping("web/activity/setStoreParticipateActivities")
+    @ApiOperation(value = "店铺参加活动", notes = "店铺参加活动")
+    ServerResponse setStoreParticipateActivities(@RequestParam("userId") String userId,
+                                                 @RequestParam("cityId") String cityId,
+                                                 @RequestParam("storeActivityId") String storeActivityId,
+                                                 @RequestParam("activitySessionId") String activitySessionId,
+                                                 @RequestParam("activityType") Integer activityType);
+
+    @PostMapping("web/activity/queryWaitingSelectionProduct")
+    @ApiOperation(value = "店铺活动商品待选列表", notes = "店铺活动商品待选列表")
+    ServerResponse queryWaitingSelectionProduct(@RequestParam("userId") String userId,
+                                                @RequestParam("cityId") String cityId,
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                                @RequestParam("storeActivityId") String storeActivityId,
+                                                @RequestParam("activitySessionId") String activitySessionId);
+
+    @PostMapping("web/activity/querySelectedWaitingSelectionCount")
+    @ApiOperation(value = "已选/待选 数量", notes = "已选/待选 数量")
+    ServerResponse querySelectedWaitingSelectionCount(@RequestParam("userId") String userId,
+                                                      @RequestParam("cityId") String cityId,
+                                                      @RequestParam("storeActivityId") String storeActivityId,
+                                                      @RequestParam("activitySessionId") String activitySessionId);
 }

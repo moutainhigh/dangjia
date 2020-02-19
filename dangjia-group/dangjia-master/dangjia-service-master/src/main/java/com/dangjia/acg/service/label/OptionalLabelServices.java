@@ -115,6 +115,7 @@ public class OptionalLabelServices {
         try {
             Example example = new Example(OptionalLabel.class);
             example.createCriteria().andCondition(" DATA_STATUS =0").andCondition("parent_id is null");
+            example.orderBy(OptionalLabel.CREATE_DATE).desc();
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<OptionalLabel> optionalLabels = optionalLabelMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(optionalLabels);
@@ -208,52 +209,67 @@ public class OptionalLabelServices {
                 oldOptionalLabel.setLabelName(jsonObject.getString("topTitle"));
                 optionalLabelMapper.updateByPrimaryKeySelective(oldOptionalLabel);
             }
-            String labels = jsonObject.getString("labels");
-            JSONArray jsonArray = JSONArray.parseArray(labels);
-            for (Object o : jsonArray) {
-                JSONObject obj = (JSONObject) o;
-                String optionalLabelId = obj.getString("id");//标签id
-                String parentId = obj.getString("parentId");//父id
-                String tagName = obj.getString("tagName");//标签名称
-                //没有id则新增
-                if (StringUtils.isBlank(optionalLabelId)) {
+            //要删除的标签id数组，逗号分隔
+            String deleteLabels1 = jsonObject.getString("deleteLabels");
+            if(StringUtils.isNotBlank(deleteLabels1)) {
+                String[] deleteLabels = deleteLabels1.split(",");
+                for (String deleteLabel : deleteLabels) {
                     Example example = new Example(OptionalLabel.class);
-                    example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, tagName)
-                            .andEqualTo(OptionalLabel.DATA_STATUS, 0);
-                    if (optionalLabelMapper.selectByExample(example).size() > 0) {
-                        throw new Exception("标题已存在");
-                    }
-                    OptionalLabel optionalLabel = new OptionalLabel();
-                    optionalLabel.setParentId(parentId);
-                    optionalLabel.setLabelName(tagName);
-                    optionalLabelMapper.insert(optionalLabel);
-                } else {
-                    oldOptionalLabel = optionalLabelMapper.selectByPrimaryKey(optionalLabelId);
-                    if (!oldOptionalLabel.getLabelName().equals(tagName)) {
-                        Example example = new Example(OptionalLabel.class);
-                        example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, tagName)
-                                .andEqualTo(OptionalLabel.DATA_STATUS, 0);
-                        if (optionalLabelMapper.selectByExample(example).size() > 0) {
-                            throw new Exception("标题已存在");
-                        }
-                        oldOptionalLabel.setLabelName(tagName);
-                        optionalLabelMapper.updateByPrimaryKeySelective(oldOptionalLabel);
-                    }
+                    example.createCriteria().andCondition("(id =" + deleteLabel + " or parent_id =" + deleteLabel + ")");
+                    optionalLabelMapper.deleteByExample(example);
                 }
             }
-            //要删除的标签id数组，逗号分隔
-            String[] deleteLabels = jsonObject.getString("deleteLabels").split(",");
-            for (String deleteLabel : deleteLabels) {
-                Example example=new Example(OptionalLabel.class);
-                example.createCriteria().andCondition("(id ="+ deleteLabel +" or parent_id ="+ deleteLabel +")");
-                int i = optionalLabelMapper.deleteByExample(example);
-                if(i>0){
-                    return ServerResponse.createBySuccessMessage("操作成功");
-                }else{
-                    throw new Exception("操作失败");
+
+            String labels = jsonObject.getString("labels");
+            JSONArray jsonArray = JSONArray.parseArray(labels);
+            //二级标题
+            for (Object o : jsonArray) {
+                JSONObject obj = (JSONObject) o;
+                String id = obj.getString("id");//标签标题id
+                String subTitle = obj.getString("subTitle");//标签标题
+                id = this.commonality(id, subTitle, jsonObject.getString("id"));
+                String tagName = obj.getString("tagName");
+                JSONArray jsonArray1 = JSONArray.parseArray(tagName);
+                //标签
+                for (Object o1 : jsonArray1) {
+                    JSONObject obj1 = (JSONObject) o1;
+                    String id1 = obj1.getString("id");//标签id
+                    String tagName1 = obj1.getString("tagName");//标签名称
+                    this.commonality(id1, tagName1, id);
                 }
             }
         }
         return ServerResponse.createBySuccessMessage("编辑成功");
+    }
+
+
+    private String commonality(String id,String labelName,String parentId) throws Exception{
+        //没有id则新增
+        if (StringUtils.isBlank(id)) {
+            Example example = new Example(OptionalLabel.class);
+            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, labelName)
+                    .andEqualTo(OptionalLabel.DATA_STATUS, 0);
+            if (optionalLabelMapper.selectByExample(example).size() > 0) {
+                throw new Exception("标题已存在");
+            }
+            OptionalLabel optionalLabel = new OptionalLabel();
+            optionalLabel.setParentId(parentId);
+            optionalLabel.setLabelName(labelName);
+            optionalLabelMapper.insert(optionalLabel);
+            return optionalLabel.getId();
+        } else {
+            OptionalLabel oldOptionalLabel = optionalLabelMapper.selectByPrimaryKey(id);
+            if (!oldOptionalLabel.getLabelName().equals(labelName)) {
+                Example example = new Example(OptionalLabel.class);
+                example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, labelName)
+                        .andEqualTo(OptionalLabel.DATA_STATUS, 0);
+                if (optionalLabelMapper.selectByExample(example).size() > 0) {
+                    throw new Exception("标题已存在");
+                }
+                oldOptionalLabel.setLabelName(labelName);
+                optionalLabelMapper.updateByPrimaryKeySelective(oldOptionalLabel);
+            }
+            return id;
+        }
     }
 }

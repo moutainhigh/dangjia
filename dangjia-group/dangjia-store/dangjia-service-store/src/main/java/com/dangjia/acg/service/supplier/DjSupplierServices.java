@@ -665,7 +665,7 @@ public class DjSupplierServices {
                 Integer deliverType = obj.getInteger("deliverType");
                 DjSupplierDeliverDTO djSupplierDeliverDTO = new DjSupplierDeliverDTO();
                 djSupplierDeliverDTOList.setName(djSupplier.getName());
-                djSupplierDeliverDTOList.setImage(receipt.getImage());
+//                djSupplierDeliverDTOList.setImage(receipt.getImage());
                 //发货单
                 if (deliverType == 1) {
                     SplitDeliver splitDeliver = iStoreSplitDeliverMapper.selectByPrimaryKey(id);
