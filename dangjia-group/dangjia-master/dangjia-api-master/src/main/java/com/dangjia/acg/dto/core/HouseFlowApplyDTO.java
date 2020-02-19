@@ -17,7 +17,7 @@ public class HouseFlowApplyDTO {
     private String houseName;
     private String workerId;
     private String houseFlowApplyId;
-    private int applyType;//0每日完工申请，1阶段完工申请，2整体完工申请, 3大管家申请直接调用业主对大管家审核
+    private Integer applyType;//0每日完工申请，1阶段完工申请，2整体完工申请, 3大管家申请直接调用业主对大管家审核
     private String applyTypeName;//0每日完工申请，1阶段完工申请，2整体完工申请, 3大管家申请直接调用业主对大管家审核
     private List<String> imageList;//工地图片
     private String date;
@@ -27,6 +27,8 @@ public class HouseFlowApplyDTO {
     private Integer memberCheck;//用户审核结果,0未审核，1审核通过，2审核不通过，3自动审核
     private Integer supervisorCheck;//大管家审核结果,0未审核，1审核通过，2审核不通过
 
+    private String confirmMsg;//第二次确认消息
+    private Integer isPay;//是否需要再次购买 （1是，0否）
 
     private String supervisorHouseFlowId;
     private String applyDec;

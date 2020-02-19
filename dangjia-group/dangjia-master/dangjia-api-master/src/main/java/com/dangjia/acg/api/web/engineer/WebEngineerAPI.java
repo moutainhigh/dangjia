@@ -31,7 +31,8 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/changePayed")
     @ApiOperation(value = "已支付换工匠", notes = "已支付换工匠")
-    ServerResponse changePayed(@RequestParam("houseWorkerId") String houseWorkerId,
+    ServerResponse changePayed(@RequestParam("userToken") String userToken,
+                               @RequestParam("houseWorkerId") String houseWorkerId,
                                @RequestParam("workerId") String workerId);
 
     @PostMapping(value = "web/engineer/changeWorker")

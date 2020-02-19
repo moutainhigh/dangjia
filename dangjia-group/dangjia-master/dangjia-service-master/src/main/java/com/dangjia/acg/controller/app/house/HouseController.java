@@ -323,9 +323,9 @@ public class HouseController implements HouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setHousekeeperInitiatedAcceptance(String houseFlowApplyId, Integer supervisorCheck, String image, String applyDec) {
+    public ServerResponse setHousekeeperInitiatedAcceptance(String houseFlowId,String productId, Integer supervisorCheck, String image, String applyDec) {
         try {
-            return houseService.setHousekeeperInitiatedAcceptance(houseFlowApplyId,supervisorCheck,image,applyDec);
+            return houseService.setHousekeeperInitiatedAcceptance(houseFlowId, productId,supervisorCheck,image,applyDec);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createBySuccessMessage("操作失败");

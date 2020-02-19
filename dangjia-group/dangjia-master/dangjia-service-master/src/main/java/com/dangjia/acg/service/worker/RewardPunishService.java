@@ -355,6 +355,15 @@ public class RewardPunishService {
         }
     }
 
+
+    public ServerResponse getMyRewardPunishRecord(String userToken,String houseId, PageDTO pageDTO) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        return queryRewardPunishRecord(null,member.getId(),houseId,pageDTO);
+    }
     /**
      * 根据userToken查询奖罚记录
      *

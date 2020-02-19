@@ -41,8 +41,6 @@
         dj_basics_technology
         where
         (goods_id = #{technologyIds} or FIND_IN_SET(id,#{technologyIds}))
-        and
-        type in (2,3)
         ORDER BY create_date desc
     </select>
 

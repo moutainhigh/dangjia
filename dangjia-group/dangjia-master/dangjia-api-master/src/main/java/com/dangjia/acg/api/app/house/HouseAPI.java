@@ -329,12 +329,13 @@ public interface HouseAPI {
     /**
      * 大管家发起验收(主动验收)
      *
-     * @param houseFlowApplyId
+     * @param houseFlowId
      * @return
      */
     @PostMapping("app/house/house/setHousekeeperInitiatedAcceptance")
     @ApiOperation(value = "管家发起验收(主动验收)", notes = "管家发起验收(主动验收)")
-    ServerResponse setHousekeeperInitiatedAcceptance(@RequestParam("houseFlowApplyId") String houseFlowApplyId,
+    ServerResponse setHousekeeperInitiatedAcceptance(@RequestParam("houseFlowId") String houseFlowId,
+                                                     @RequestParam("productId") String productId,
                                                      @RequestParam("supervisorCheck") Integer supervisorCheck,
                                                      @RequestParam("image") String image,
                                                      @RequestParam("applyDec") String applyDec);

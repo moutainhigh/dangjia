@@ -110,6 +110,10 @@ public interface HouseWorkerAPI {
     @ApiOperation(value = "大管家查看工地进度详情", notes = "大管家查看工地进度详情")
     ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId,String houseFlowId);
 
+    @PostMapping("app/core/houseWorker/getJobsInfo")
+    @ApiOperation(value = "大管家查看任务详情", notes = "大管家查看任务详情")
+    ServerResponse getJobsInfo(HttpServletRequest request, String userToken, String houseId, String productId);
+
     @PostMapping("app/core/houseWorker/getHouseFlowApply")
     @ApiOperation(value = "获取申请单明细", notes = "获取申请单明细")
     ServerResponse getHouseFlowApply(@RequestParam("userToken") String userToken, @RequestParam("houseFlowApplyId") String houseFlowApplyId);

@@ -11,14 +11,18 @@ public class DjConstants {
 
     public static  HashMap<Integer, String> applyTypeMap = new HashMap<Integer, String>(){
         {
-            put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工");
-            put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工");
-            put(DjConstants.ApplyType.ZHENGTI_WANGONG, "整体完工");
-            put(DjConstants.ApplyType.TINGGONG, "停工");
-            put(DjConstants.ApplyType.MEIRI_KAIGONG, "每日开工");
-            put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");
-            put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
-            put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
+            put(ApplyType.MEIRI_WANGGONG, "每日完工");
+            put(ApplyType.JIEDUAN_WANGONG, "阶段完工");
+            put(ApplyType.ZHENGTI_WANGONG, "整体完工");
+            put(ApplyType.TINGGONG, "停工");
+            put(ApplyType.MEIRI_KAIGONG, "每日开工");
+            put(ApplyType.YOUXIAO_XUNCHA, "巡查");
+            put(ApplyType.WUREN_XUNCHA, "巡查");
+            put(ApplyType.ZUIJIA_XUNCHA, "巡查");
+
+            put(ApplyType.TIQIAN_JIESU, "提前结束装修");
+            put(ApplyType.TIQIAN_JIESU_SHENQ, "提前结束装修申请");
+            put(ApplyType.ZHUDONGYANSHOU, "主动验收申请");
         }
     };
     /**
@@ -151,6 +155,9 @@ public class DjConstants {
         public final static Integer YOUXIAO_XUNCHA = 5;// 5有效巡查
         public final static Integer WUREN_XUNCHA = 6;// 6无人巡查
         public final static Integer ZUIJIA_XUNCHA = 7;// 7追加巡查
+        public final static Integer TIQIAN_JIESU = 8;// 提前结束
+        public final static Integer TIQIAN_JIESU_SHENQ = 9;// 9提前结束申请
+        public final static Integer ZHUDONGYANSHOU = 10;// 主动验收
         public final static Integer JIEDUAN_WANGONG_SUCCESS = 101;// 阶段完工审核
         public final static Integer ZHENGTI_WANGONG_SUCCESS = 102;// 整体完工审核
         public final static Integer NO_PASS = 666;// 整体完工
@@ -179,23 +186,23 @@ public class DjConstants {
 
         public final static Map getRecordTypeMap(){
             Map<Integer, String> applyTypeMap = new HashMap<>();
-            applyTypeMap.put(DjConstants.RecordType.MEIRI_WANGGONG, "每日完工申请");
-            applyTypeMap.put(DjConstants.RecordType.JIEDUAN_WANGONG, "阶段完工申请");
-            applyTypeMap.put(DjConstants.RecordType.ZHENGTI_WANGONG, "整体完工申请");
-            applyTypeMap.put(DjConstants.RecordType.TINGGONG, "停工申请");
-            applyTypeMap.put(DjConstants.RecordType.MEIRI_KAIGONG, "每日开工");
-            applyTypeMap.put(DjConstants.RecordType.YOUXIAO_XUNCHA, "有效巡查");
-            applyTypeMap.put(DjConstants.RecordType.JJ_TINGGONG, "无人巡查");
-            applyTypeMap.put(DjConstants.RecordType.TY_TINGGONG, "追加巡查");
-            applyTypeMap.put(DjConstants.RecordType.BURENGONG, "补人工");
-            applyTypeMap.put(DjConstants.RecordType.TUIRENGONG, "退人工");
-            applyTypeMap.put(DjConstants.RecordType.BUCAILIAO, "补材料");
-            applyTypeMap.put(DjConstants.RecordType.TUICAILIAO, "退材料");
-            applyTypeMap.put(DjConstants.RecordType.YZ_TUICAILIAO, "业主退材料");
-            applyTypeMap.put(DjConstants.RecordType.TIQIANJIESHU, "提前结束装修");
-            applyTypeMap.put(DjConstants.RecordType.SCSJT, "上传平面图");
-            applyTypeMap.put(DjConstants.RecordType.SCSGT, "上传施工图");
-            applyTypeMap.put(DjConstants.RecordType.SJWC, "精算完成");
+            applyTypeMap.put(RecordType.MEIRI_WANGGONG, "每日完工申请");
+            applyTypeMap.put(RecordType.JIEDUAN_WANGONG, "阶段完工申请");
+            applyTypeMap.put(RecordType.ZHENGTI_WANGONG, "整体完工申请");
+            applyTypeMap.put(RecordType.TINGGONG, "停工申请");
+            applyTypeMap.put(RecordType.MEIRI_KAIGONG, "每日开工");
+            applyTypeMap.put(RecordType.YOUXIAO_XUNCHA, "有效巡查");
+            applyTypeMap.put(RecordType.JJ_TINGGONG, "无人巡查");
+            applyTypeMap.put(RecordType.TY_TINGGONG, "追加巡查");
+            applyTypeMap.put(RecordType.BURENGONG, "补人工");
+            applyTypeMap.put(RecordType.TUIRENGONG, "退人工");
+            applyTypeMap.put(RecordType.BUCAILIAO, "补材料");
+            applyTypeMap.put(RecordType.TUICAILIAO, "退材料");
+            applyTypeMap.put(RecordType.YZ_TUICAILIAO, "业主退材料");
+            applyTypeMap.put(RecordType.TIQIANJIESHU, "提前结束装修");
+            applyTypeMap.put(RecordType.SCSJT, "上传平面图");
+            applyTypeMap.put(RecordType.SCSGT, "上传施工图");
+            applyTypeMap.put(RecordType.SJWC, "精算完成");
             return applyTypeMap;
         }
     }
@@ -204,7 +211,7 @@ public class DjConstants {
      * ApplyType 任务进程-申请类型
      */
     public static class VisitState {
-//        0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
+        //        0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
         public final static Integer DAIKAIGONG = 0;//0待确认开工
         public final static Integer ZHAUNGXIUZHONG = 1;// 1装修中
         public final static Integer XIUMIANZHONG = 2;// 2休眠中
@@ -214,12 +221,12 @@ public class DjConstants {
 
         public final static Map getVisitStateMap(){
             Map<Integer, String> visitStateMap = new HashMap<>();
-            visitStateMap.put(DjConstants.VisitState.DAIKAIGONG, "待确认开工");
-            visitStateMap.put(DjConstants.VisitState.ZHAUNGXIUZHONG, "装修中");
-            visitStateMap.put(DjConstants.VisitState.XIUMIANZHONG, "休眠中");
-            visitStateMap.put(DjConstants.VisitState.WANGONG, "已完工");
-            visitStateMap.put(DjConstants.VisitState.TIQIANJIESHU, "提前结束装修");
-            visitStateMap.put(DjConstants.VisitState.TIQIANSHENHEZHONG, "提前结束装修申请中");
+            visitStateMap.put(VisitState.DAIKAIGONG, "待确认开工");
+            visitStateMap.put(VisitState.ZHAUNGXIUZHONG, "装修中");
+            visitStateMap.put(VisitState.XIUMIANZHONG, "休眠中");
+            visitStateMap.put(VisitState.WANGONG, "已完工");
+            visitStateMap.put(VisitState.TIQIANJIESHU, "提前结束装修");
+            visitStateMap.put(VisitState.TIQIANSHENHEZHONG, "提前结束装修申请中");
             return visitStateMap;
         }
     }
@@ -332,8 +339,8 @@ public class DjConstants {
         public final static String GJ_B_002 = "工匠您好！【%s】补人工申请大管家已同意，请查看数量";
 
         public final static String GJ_B_003 = "工匠您好！补人工申请未通过，请查看。";
-       // public final static String GJ_B_003 = "工匠您好！【%s】补人工申请未通过";
-       // public final static String YZ_B_001 = "业主您好！【%s】【%s】申请补人工，大管家审核补人工未通过";
+        // public final static String GJ_B_003 = "工匠您好！【%s】补人工申请未通过";
+        // public final static String YZ_B_001 = "业主您好！【%s】【%s】申请补人工，大管家审核补人工未通过";
         //public final static String GJ_B_004 = "工匠您好！【%s】补人工成功";
         //工匠您好！补人工成功，请查看。
         public final static String GJ_B_004 = "工匠您好！补人工成功，请查看。";
@@ -341,10 +348,10 @@ public class DjConstants {
         public final static String DGJ_T_002 = "大管家您好！【%s】业主申请退人工，请审核并填写数量！";
         //工匠您好！业主申请退人工，请查看并即时处理。
         public final static String GJ_T_003 = "工匠您好！业主申请退人工，请查看并即时处理。";
-       // public final static String GJ_T_003 = "工匠您好！【%s】业主申请退人工，大管家将审核并填写退人工数量，请知晓！";
+        // public final static String GJ_T_003 = "工匠您好！【%s】业主申请退人工，大管家将审核并填写退人工数量，请知晓！";
         public final static String YZ_B_002 = "业主您好！【%s】退人工申请未通过";
         public final static String YZ_T_003 = "业主您好！【%s】退人工申请大管家已同意，请查看数量";
-       // public final static String YZ_T_004 = "业主您好！【%s】退人工申请未通过";
+        // public final static String YZ_T_004 = "业主您好！【%s】退人工申请未通过";
         public final static String YZ_T_004 = "业主您好！【%s】退人工申请未通过，请查看。";
         //public final static String YZ_T_005 = "业主您好！【%s】退【%s】人工成功";
         //业主您好！XX退人工成功，请查看。

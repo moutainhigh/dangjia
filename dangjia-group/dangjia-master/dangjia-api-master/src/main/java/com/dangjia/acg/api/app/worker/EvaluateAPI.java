@@ -76,4 +76,9 @@ public interface EvaluateAPI {
                                 @RequestParam("wStar") Integer wStar,
                                 @RequestParam("sContent") String sContent,
                                 @RequestParam("sStar") Integer sStar);
+
+    @PostMapping("app/worker/evaluate/waitEvaluated")
+    @ApiOperation(value = "业主端待评价工匠", notes = "业主端待评价工匠")
+    ServerResponse waitEvaluated(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
 }

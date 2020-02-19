@@ -150,6 +150,7 @@ public class ConstructionByWorkerIdBean {
         private Integer workerType;//工种类型
         private String workerTypeName;//进程名称
         private String workerTypeColor;//颜色
+        private String workerTypeId;//颜色
         private Integer isStart;//是否开工0:今日未开工；1：今日已开工；
         private Long finishedDay;//每日完工天数
         private Long startDay;//开工天数

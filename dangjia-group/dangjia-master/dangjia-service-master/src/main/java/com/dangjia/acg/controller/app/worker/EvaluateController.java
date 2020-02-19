@@ -67,4 +67,9 @@ public class EvaluateController implements EvaluateAPI {
             ,String sContent, Integer sStar){
         return evaluateService.saveEvaluate(houseFlowApplyId,wContent,wStar,sContent,sStar,false);
     }
+    @Override
+    @ApiMethod
+    public ServerResponse waitEvaluated(String houseFlowApplyId){
+        return evaluateService.waitEvaluated(houseFlowApplyId);
+    }
 }

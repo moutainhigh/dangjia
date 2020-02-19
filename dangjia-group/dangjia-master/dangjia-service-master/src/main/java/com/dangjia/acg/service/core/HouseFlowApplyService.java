@@ -20,6 +20,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
@@ -41,6 +42,7 @@ import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
@@ -119,6 +121,8 @@ public class HouseFlowApplyService {
     @Autowired
     private ResidentialBuildingMapper residentialBuildingMapper;
 
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     @Autowired
     private UserMapper userMapper;
 
@@ -1028,6 +1032,7 @@ public class HouseFlowApplyService {
             Example example = new Example(HouseFlowApply.class);
             example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowApply.getHouseFlowId())
                     .andEqualTo(HouseFlowApply.APPLY_TYPE, houseFlowApply.getApplyType())
+                    .andEqualTo(HouseFlowApply.TYPE, houseFlowApply.getType())
                     .andEqualTo(HouseFlowApply.WORKER_ID, houseFlowApply.getWorkerId());
             Integer yanShouNum =  houseFlowApplyMapper.selectCountByExample(example);
             houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
@@ -1038,9 +1043,20 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
             houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
             houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
+            if(houseFlowApply.getApplyType()==10){
+                StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowApplyId());
+                if(storefrontProduct!=null){
+                    houseFlowApplyDTO.setApplyTypeName(storefrontProduct.getProductName()+"(第"+CommonUtil.numberToChinese(yanShouNum)+"次申请)");
+                }
+            }
             if (houseFlowApply.getEndDate() != null) {
                 houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
-                houseFlowApplyDTO.setApplyDec("注：大管家已通过验收，还剩"+DateUtil.getDateString2(houseFlowApplyDTO.getEndDate())+"，系统将默认自动通过。");
+                if(houseFlowApply.getSupervisorCheck()==1) {
+                    houseFlowApplyDTO.setApplyDec("大管家已通过验收");
+                }
+                if(houseFlowApply.getSupervisorCheck()==2) {
+                    houseFlowApplyDTO.setApplyDec("大管家未通过验收");
+                }
             }
             List<String> imageList=new ArrayList<>();
             setImageList(houseFlowApply.getId(),address,imageList);
@@ -1070,6 +1086,20 @@ public class HouseFlowApplyService {
             }
             houseFlowApplyDTO.setList(list);
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
+
+            if(houseFlowApply.getType()==1) {
+                example = new Example(HouseFlowApply.class);
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseFlowApply.getHouseId())
+                        .andEqualTo(HouseFlowApply.HOUSE_FLOW_APPLY_ID, houseFlowApply.getHouseFlowApplyId())
+                        .andEqualTo(HouseFlowApply.MEMBER_CHECK, 2)
+                        .andEqualTo(HouseFlowApply.TYPE, 1);
+                Integer checkNum = houseFlowApplyMapper.selectCountByExample(example);
+                houseFlowApplyDTO.setConfirmMsg("非平台工匠验收包含三次验收,还剩" + (3 - checkNum) + "次");
+                if(checkNum>=3){
+                    houseFlowApplyDTO.setConfirmMsg("非平台工匠验收包含三次验收,还剩0次");
+                    houseFlowApplyDTO.setIsPay(1);
+                }
+            }
             return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTO);
         } catch (Exception e) {
             e.printStackTrace();

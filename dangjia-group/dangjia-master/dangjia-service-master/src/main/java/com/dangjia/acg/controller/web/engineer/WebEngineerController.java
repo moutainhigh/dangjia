@@ -10,7 +10,6 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.engineer.EngineerService;
 import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,8 +42,8 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse changePayed(String houseWorkerId, String workerId) {
-        return engineerService.changePayed(houseWorkerId, workerId);
+    public ServerResponse changePayed(String userToken,String houseWorkerId, String workerId) {
+        return engineerService.changePayed( userToken,houseWorkerId, workerId);
     }
 
     /**

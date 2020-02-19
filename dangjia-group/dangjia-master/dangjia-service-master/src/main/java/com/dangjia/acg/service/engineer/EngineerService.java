@@ -39,7 +39,6 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.core.HouseWorkerService;
-import com.dangjia.acg.service.deliver.OrderSplitService;
 import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
@@ -115,7 +114,7 @@ public class EngineerService {
      * 已支付换工匠
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse changePayed(String houseWorkerId, String workerId) {
+    public ServerResponse changePayed(String userToken,String houseWorkerId, String workerId) {
         try {
             HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, 4, houseWorker.getWorkerId(), new Date());
@@ -142,7 +141,11 @@ public class EngineerService {
             hw.setCreateDate(houseWorker.getCreateDate());
             hw.setModifyDate(new Date());
             hw.setWorkerType(houseWorker.getWorkerType());
-            hw.setWorkType(4);//4已支付被平台换
+            if(CommonUtil.isEmpty(userToken)) {
+                hw.setWorkType(4);//4已支付被平台换
+            }else{
+                hw.setWorkType(2);//3已支付被管家换
+            }
             hw.setIsSelect(0);
             hw.setPrice(houseWorker.getPrice());
             hw.setType(houseWorker.getType());

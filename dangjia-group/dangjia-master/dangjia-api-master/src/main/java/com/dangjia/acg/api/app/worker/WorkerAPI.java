@@ -102,6 +102,12 @@ public interface WorkerAPI {
                                            @RequestParam("houseId") String houseId,
                                            @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping("/app/rewardPunish/my/list")
+    @ApiOperation(value = "奖罚记录", notes = "奖罚记录")
+    ServerResponse getMyRewardPunishRecord(@RequestParam("userToken") String userToken,
+                                           @RequestParam("houseId") String houseId,
+                                           @RequestParam("pageDTO") PageDTO pageDTO);
+
     @PostMapping("/app/rewardPunish/get")
     @ApiOperation(value = "奖罚详情", notes = "奖罚详情")
     ServerResponse getRewardPunishRecord(@RequestParam("recordId") String recordId);
