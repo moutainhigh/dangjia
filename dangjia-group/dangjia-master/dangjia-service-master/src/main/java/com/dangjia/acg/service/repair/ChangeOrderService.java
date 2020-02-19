@@ -25,7 +25,6 @@ import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.repair.ChangeOrder;
@@ -33,7 +32,6 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.repair.MendOrderCheck;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.deliver.RepairMendOrderService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -329,7 +327,7 @@ public class ChangeOrderService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
+//        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
         HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, workerTypeId);
         if (houseWorkerOrder != null) {
             if (type == 1) {

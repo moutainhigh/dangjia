@@ -505,6 +505,7 @@
         LEFT JOIN dj_core_house_flow_apply_image i ON i.house_flow_apply_id = a.id
         WHERE
             (a.`id` = #{houseFlowApplyId}) or  (a.house_flow_apply_id=#{houseFlowApplyId})
+        GROUP BY a.id
         ORDER BY a.create_date
     </select>
 

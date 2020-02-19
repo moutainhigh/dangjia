@@ -248,8 +248,8 @@ public class TaskService {
                 task.setImage(imageAddress + "icon/chaichu.png");
                 task.setHtmlUrl(address + String.format(DjConstants.GJPageAddress.COMFIRMAPPLY + "&houseFlowApplyId=%s",
                         userToken, house.getCityId(), "验收工匠完工申请", houseFlowApply.getId()));
-                task.setType(3);
-                task.setTaskId("");
+                task.setType(1012);
+                task.setTaskId(houseFlowApply.getId());
                 taskList.add(task);
             }
 

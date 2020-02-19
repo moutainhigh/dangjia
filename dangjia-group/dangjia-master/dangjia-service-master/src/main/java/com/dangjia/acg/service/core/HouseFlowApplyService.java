@@ -1056,7 +1056,7 @@ public class HouseFlowApplyService {
                 if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
                     map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList")))+","+StringUtils.join(imageList.toArray(),"."));
                     map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
-                }else if(Integer.parseInt((String)map.get("workerType"))==3){
+                }else if(Integer.parseInt(String.valueOf(map.get("workerType")))==3){
                     map.put("applyTypeName", "审核不通过");
                     if(houseFlowApplyDTO.getSupervisorCheck()==1){
                         map.put("applyTypeName", "审核通过");
@@ -1141,7 +1141,7 @@ public class HouseFlowApplyService {
                 if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
                     map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
                     map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList")))+","+StringUtils.join(imageList.toArray(),"."));
-                }else if(Integer.parseInt((String)map.get("workerType"))==3){
+                }else if(Integer.parseInt(String.valueOf(map.get("workerType")))==3){
                     map.put("applyTypeName", "审核不通过");
                     if(houseFlowApplyDTO.getSupervisorCheck()==1){
                         map.put("applyTypeName", "审核通过");
