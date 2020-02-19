@@ -569,20 +569,18 @@ public class DjDeliveryReturnSlipService {
      *店铺利润统计-供应商供应详情
      * @param request
      * @param pageDTO
-     * @param userId
-     * @param cityId
+     * @param storefrontId
+     * @param supId
      * @param searchKey
      * @return
      */
-    public ServerResponse supplierDimensionSupplyDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
+    public ServerResponse supplierDimensionSupplyDetails(HttpServletRequest request, PageDTO pageDTO, String storefrontId, String supId, String searchKey) {
         try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
-            if(storefront==null)
-            {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            if(storefrontId==null||supId==null){
+                return ServerResponse.createByErrorMessage("供应商或店铺ID为空");
             }
-            List<SupplierDimensionSupplyDTO> list  = djDeliveryReturnSlipMapper.supplierDimensionSupplyDetails(storefront.getId(),cityId,searchKey);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<SupplierDimensionSupplyDTO> list  = djDeliveryReturnSlipMapper.supplierDimensionSupplyDetails(storefrontId,supId,searchKey);
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -592,22 +590,19 @@ public class DjDeliveryReturnSlipService {
     }
 
     /**
-     *店铺利润统计-供应商货单详情
+     *店铺利润统计-供货详情--货单详情
      * @param request
      * @param pageDTO
-     * @param userId
-     * @param cityId
+     * @param storefrontId 店铺ID
+     * @param supId 供应商ID
+     * @param  addressId 地址ID
+     * @param houseId 房子ID
      * @return
      */
-    public ServerResponse supplierDimensionOrderDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId,String houseId) {
+    public ServerResponse supplierDimensionOrderDetails(HttpServletRequest request,PageDTO pageDTO,  String storefrontId, String supId,String addressId,String houseId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
-            if(storefront==null)
-            {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
-            List<SupplierDimensionOrderDetailDTO> list=djDeliveryReturnSlipMapper.supplierDimensionOrderDetails(houseId,storefront.getId(),cityId);
+            List<SupplierDimensionOrderDetailDTO> list=djDeliveryReturnSlipMapper.supplierDimensionOrderDetails(houseId,storefrontId,supId,addressId);
             PageInfo pageResult = new PageInfo(list);
             if (list.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());

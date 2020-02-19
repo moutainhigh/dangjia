@@ -13,7 +13,7 @@ import java.util.Date;
  */
 @Data
 public class SupplierDimensionSupplyDTO {
-    private String StorefrontId;//店铺id
+    private String storefrontId;//店铺id
     private String shipAddress; // 房子地址
     private String mobile; //联系号码
     private String name; // 业主名称
@@ -21,4 +21,6 @@ public class SupplierDimensionSupplyDTO {
     private String expenditure ;// 支出
     private String profit;// 利润
     private String houseId;//房子id
+    private String addressId;//地址ID
+    private String supId;//供应商ID
 }

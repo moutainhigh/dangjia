@@ -16,7 +16,8 @@ import java.util.List;
 public class DjSupplierDeliverDTOList {
     private String name;//供应商名称
     private String telephone;//供应商电话
-    private JSONArray image;//回执单
+    private String image;//回执单
+    private JSONArray imageArr;//回执单
     private Date createDate;// 创建日期
     private Double totalMoney;// 总金额
     List<DjSupplierDeliverDTO> djSupplierDeliverDTOList;

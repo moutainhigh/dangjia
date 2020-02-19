@@ -119,19 +119,20 @@ public interface DjDeliveryReturnSlipAPI {
                                                    @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimensionSupplyDetails")
-    @ApiOperation(value = "店铺利润统计-供应商供应详情", notes = "店铺利润统计-供应商供应详情")
+    @ApiOperation(value = "店铺利润统计-供应商维度--供应详情", notes = "店铺利润统计-供应商维度--供应详情")
     ServerResponse supplierDimensionSupplyDetails(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("pageDTO") PageDTO pageDTO,
-                                     @RequestParam("userId") String userId,
-                                     @RequestParam("cityId") String cityId,
+                                     @RequestParam("storefrontId") String storefrontId,
+                                     @RequestParam("supId") String supId,
                                      @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimensionOrderDetails")
-    @ApiOperation(value = "店铺利润统计-供应商货单详情", notes = "店铺利润统计-供应商货单详情")
+    @ApiOperation(value = "店铺利润统计--供应详情--货单详情", notes = "店铺利润统计--供应详情--货单详情")
     ServerResponse supplierDimensionOrderDetails(@RequestParam("request") HttpServletRequest request,
                                                   @RequestParam("pageDTO") PageDTO pageDTO,
-                                                  @RequestParam("userId") String userId,
-                                                  @RequestParam("cityId") String cityId,
+                                                  @RequestParam("storefrontId") String storefrontId,
+                                                  @RequestParam("supId") String supId,
+                                                  @RequestParam("addressId") String addressId,
                                                   @RequestParam("houseId") String houseId);
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimensionGoodsDetails")

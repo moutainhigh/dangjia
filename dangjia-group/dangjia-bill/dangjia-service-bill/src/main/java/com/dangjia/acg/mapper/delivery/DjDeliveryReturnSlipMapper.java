@@ -103,10 +103,10 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
     List<StoreBuyersDimensionDTO> sellerDimension(@Param("storefrontId") String storefrontId, @Param("cityId") String cityId,@Param("searchKey") String searchKey);
 
 
-    List<SupplierDimensionSupplyDTO> supplierDimensionSupplyDetails(@Param("storefrontId") String storefrontId, @Param("cityId") String cityId, @Param("searchKey") String searchKey);
+    List<SupplierDimensionSupplyDTO> supplierDimensionSupplyDetails(@Param("storefrontId") String storefrontId, @Param("supId") String supId, @Param("searchKey") String searchKey);
 
 
-    List<SupplierDimensionOrderDetailDTO> supplierDimensionOrderDetails(@Param("houseId")  String houseId,@Param("storefrontId")  String storefrontId,@Param("cityId")  String cityId);
+    List<SupplierDimensionOrderDetailDTO> supplierDimensionOrderDetails(@Param("houseId")  String houseId,@Param("storefrontId")  String storefrontId,@Param("supId")  String supId,@Param("addressId")  String addressId);
 
     List<SupplierDimensionGoodsDetailDTO> supplierDimensionGoodsDetails(@Param("orderSplitId")  String orderSplitId ,@Param("storefrontId")  String storefrontId );
 

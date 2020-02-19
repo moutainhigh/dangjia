@@ -802,15 +802,15 @@ public class StorefrontService {
                 return ServerResponse.createBySuccess("查询成功",resultMap);
             }else if(type==9){//合并结算
                  Receipt receipt=iShopReceiptMapper.selectByPrimaryKey(accountFlowRecord.getHouseOrderId());
-               //  JSONArray itemObjArr = JSON.parseArray(receipt.getImage());
+                 JSONArray itemObjArr = JSON.parseArray(receipt.getImage());
                  if (receipt==null)
                      return ServerResponse.createByErrorMessage("没有查询到结算回执");
-                JSONArray itemObjArr = JSON.parseArray(receipt.getImage());
+                //JSONArray itemObjArr = JSON.parseArray(receipt.getImage());
                  DjSupplierDeliverDTOList djSupplierDeliverDTOList=new DjSupplierDeliverDTOList();
                  djSupplierDeliverDTOList.setCreateDate(receipt.getCreateDate());
                  List<DjSupplierDeliverDTO> djSupplierDeliverDTOS = iStorefrontSplitDeliverMapper.selectItemListbyReceiptNumber(receipt.getNumber());//查询结算单明细(发货单或要货单的列表)
                  djSupplierDeliverDTOList.setDjSupplierDeliverDTOList(djSupplierDeliverDTOS);
-                 djSupplierDeliverDTOList.setImage(itemObjArr);
+                 djSupplierDeliverDTOList.setImageArr(itemObjArr);
                  djSupplierDeliverDTOList.setTotalMoney(receipt.getTotalAmount());
                  DjSupplier djSupplier=iShopSupplierMapper.selectByPrimaryKey(receipt.getSupplierId());
                  djSupplierDeliverDTOList.setName(djSupplier.getName());

@@ -610,48 +610,55 @@
 
     <select id="supplierDimensionSupplyDetails" resultType="com.dangjia.acg.dto.delivery.SupplierDimensionSupplyDTO" >
         SELECT
-        IFNULL(dsd.storefront_id ,'') as storefrontId, -- 店铺id
-        IFNULL(dsd.ship_address ,'')AS shipAddress, -- 房子地址
-        m.NAME, -- 业主姓名
-        m.mobile,-- 电话号码
-        IFNULL(sum(dsd.total_amount),'') AS income, -- 收入
-        IFNULL(sum(dsd.apply_money),'') AS expenditure,-- 支出
-        IFNULL(sum(dsd.total_amount)-sum(dsd.apply_money),'')AS profit, -- 利润
-        h.id AS houseId -- 房子id
+            dsd.storefront_id AS storefrontId,
+            m.address AS shipAddress,
+            m.`name`,
+            m.mobile,
+            sum(IFNULL(dsd.total_amount, 0)) AS income,
+            sum(IFNULL(dsd.apply_money, 0)) AS expenditure,
+            sum(IFNULL(dsd.total_amount, 0)) - sum(IFNULL(dsd.apply_money, 0)) AS profit,
+            dsd.house_id houseId,
+            dsd.address_id addressId,
+            dsd.supplier_id supId
         FROM
-        dj_deliver_split_deliver dsd  -- 后台生成发货单
-        INNER JOIN dj_house h ON dsd.house_id = h.id -- 房子
-        INNER JOIN dj_member m ON m.id = h.member_id -- 工人
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id -- 要货单明细
-        WHERE dsd.storefront_id = #{storefrontId}
+             dj_deliver_split_deliver dsd
+        INNER JOIN dj_member_address m ON (dsd.address_id = m.id OR dsd.house_id = m.house_id)
+        WHERE
+           dsd.storefront_id = #{storefrontId}
+        AND dsd.supplier_id = #{supId}
         <if test="null!=searchKey and ''!=searchKey">
             AND (
-            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%') or
-            m.NAME LIKE CONCAT('%',#{searchKey},'%')
+            m.address LIKE CONCAT('%',#{searchKey},'%') or
+            m.name LIKE CONCAT('%',#{searchKey},'%') or
+            m.mobile LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
-        and dsd.city_id=#{cityId}
-        GROUP BY h.id
+        GROUP BY
+            address_id,
+            dsd.house_id
+        ORDER BY m.create_date DESC
     </select>
 
 <!--店铺利润统计-供应商货单详情-->
     <select id="supplierDimensionOrderDetails" resultType="com.dangjia.acg.dto.delivery.SupplierDimensionOrderDetailDTO">
            SELECT
-            dsd.id AS orderSplitId,
-            IFNULL(dsd.number,'') as number,
-            IFNULL(dsd.send_time,'') AS createDate,
-            IFNULL(dosi.price*dosi.num, '') AS income,
-            IFNULL(dosi.cost*dosi.num, '') AS expenditure,
-            IFNULL(dosi.price*dosi.num, '') - IFNULL(dosi.cost*dosi.num, '') AS profit
-        FROM
-            dj_deliver_split_deliver dsd
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
-        WHERE
-             dsd.house_id = #{houseId}
-        AND dsd.storefront_id = #{storefrontId}
-        AND dsd.city_id = #{cityId}
-        GROUP BY
-	    dsd.number
+                dsd.id AS splitDevlierId,
+                dsd.number AS number,
+                dos.create_date AS createDate,
+                sum(IFNULL(dsd.total_amount, 0)) AS income,
+                sum(IFNULL(dsd.apply_money, 0)) AS expenditure,
+                sum(IFNULL(dsd.total_amount, 0)) - sum(IFNULL(dsd.apply_money, 0)) AS profit
+            FROM
+                dj_deliver_split_deliver dsd
+            INNER JOIN dj_deliver_order_split dos ON dsd.order_split_id = dos.id
+            WHERE
+                dsd.storefront_id = #{storefrontId}
+            AND dsd.supplier_id = #{supId}
+            AND (
+                dsd.address_id = #{addressId}
+                OR dsd.house_id = #{houseId}
+            )
+            order by dsd.create_date desc
     </select>
     <!--店铺利润统计-供应商商品详情-->
     <select id="supplierDimensionGoodsDetails" resultType="com.dangjia.acg.dto.delivery.SupplierDimensionGoodsDetailDTO">
