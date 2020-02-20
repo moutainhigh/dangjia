@@ -113,6 +113,8 @@ public class HouseFlowApplyService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
+    private CraftsmanConstructionService constructionService;
+    @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
     @Autowired
     private ConfigMessageService configMessageService;
@@ -1196,7 +1198,13 @@ public class HouseFlowApplyService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-    public ServerResponse queryAcceptanceTrend(String houseId) {
+    public ServerResponse queryAcceptanceTrend(String userToken,String houseId) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member =(Member) object;
+        userToken=member.getId();
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         Example example = new Example(HouseFlowApply.class);
         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
@@ -1272,6 +1280,7 @@ public class HouseFlowApplyService {
                     example = new Example(Complain.class);
                     example.createCriteria().andEqualTo(Complain.BUSINESS_ID, houseFlowApply.getId())
                             .andEqualTo(Complain.BUSINESS_ID, houseFlowApply.getId())
+                            .andEqualTo(Complain.USER_ID, userToken)
                             .andEqualTo(Complain.DATA_STATUS, 0);
                     List<Complain> complains = complainMapper.selectByExample(example);
                     if(complains.size()>0){

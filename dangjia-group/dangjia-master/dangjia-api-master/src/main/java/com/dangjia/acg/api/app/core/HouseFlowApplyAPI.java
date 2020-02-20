@@ -53,6 +53,6 @@ public interface HouseFlowApplyAPI {
 
     @PostMapping("app/core/houseFlowApply/queryAcceptanceTrend")
     @ApiOperation(value = "验收动态", notes = "验收动态")
-    ServerResponse queryAcceptanceTrend(@RequestParam("houseId") String houseId);
+    ServerResponse queryAcceptanceTrend(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId);
 
 }
