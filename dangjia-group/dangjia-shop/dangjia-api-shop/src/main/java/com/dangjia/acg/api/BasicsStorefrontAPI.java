@@ -71,6 +71,10 @@ public interface BasicsStorefrontAPI {
     @ApiOperation(value = "修改店铺信息", notes = "修改店铺信息")
     ServerResponse updateStorefront(StorefrontDTO storefrontDTO);
 
+    @PostMapping("/web/queryAllStorefrontList")
+    @ApiOperation(value = "查询所有的店铺列表", notes = "查询所有的店铺列表")
+    ServerResponse queryAllStorefrontList(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("searchKey") String searchKey);
+
 
     @PostMapping("/web/querySupplierApplicationShopList")
     @ApiOperation(value = "查询供应商申请店铺列表", notes = "供应商申请店铺列表")

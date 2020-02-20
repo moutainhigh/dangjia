@@ -30,8 +30,8 @@ public class DjMaintenanceRecordResponsibleParty extends BaseEntity {
     private String responsiblePartyId;
 
     @Column(name = "maintenance_record_id")
-    @Desc(value = "维保记录表id")
-    @ApiModelProperty("维保记录表id")
+    @Desc(value = "维保记录表id/定责流水ID")
+    @ApiModelProperty("维保记录表id/定责流水ID")
     private String maintenanceRecordId;
 
     @Column(name = "proportion")

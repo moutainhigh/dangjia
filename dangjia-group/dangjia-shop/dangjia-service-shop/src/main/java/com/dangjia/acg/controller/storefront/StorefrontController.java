@@ -95,6 +95,18 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     }
 
+    /**
+     * 查贸易所有店铺
+     * @param pageDTO
+     * @param searchKey
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryAllStorefrontList( PageDTO pageDTO,String searchKey){
+       return storefrontService.queryAllStorefrontList( pageDTO, searchKey);
+    }
+
     @Override
     @ApiMethod
     public ServerResponse querySupplierApplicationShopList(HttpServletRequest request, PageDTO pageDTO, String searchKey, String applicationStatus, String userId, String cityId) {

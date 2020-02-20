@@ -908,7 +908,7 @@
                 AND (
                 t.name LIKE CONCAT('%',#{searchKey},'%') or
                 t.telephone LIKE CONCAT('%', #{searchKey},'%') or
-                t.telephone LIKE CONCAT('%', #{searchKey},'%')
+                t.check_people LIKE CONCAT('%', #{searchKey},'%')
                 )
             </if>
             group by dsd.supplier_id
@@ -935,13 +935,13 @@
                 and dsd.create_date>=#{startTime}
             </if>
             <if test = "null!=endTime and ''!=endTime" >
-                <![CDATA[   and dsd.create_date<=#{endTime} ]]>
+                <![CDATA[   and dsd.create_date<DATE_ADD(#{endTime},INTERVAL 1 DAY) ]]>
             </if>
             <if test = "null!=searchKey and ''!=searchKey" >
                 AND (
                 t.name LIKE CONCAT('%',#{searchKey},'%') or
                 t.telephone LIKE CONCAT('%', #{searchKey},'%') or
-                t.telephone LIKE CONCAT('%', #{searchKey},'%')
+                t.check_people LIKE CONCAT('%', #{searchKey},'%')
                 )
             </if>
             group by dsd.supplier_id

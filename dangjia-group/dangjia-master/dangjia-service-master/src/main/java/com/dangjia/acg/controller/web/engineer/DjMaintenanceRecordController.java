@@ -307,9 +307,9 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse insertResponsibleParty(String responsiblePartyId,String houseId,
+    public ServerResponse insertResponsibleParty(String mrrpId,String responsiblePartyId,String houseId,
                                                  String description, String image) {
-        return djMaintenanceRecordService.insertResponsibleParty(responsiblePartyId,houseId,description,image);
+        return djMaintenanceRecordService.insertResponsibleParty(mrrpId,responsiblePartyId,houseId,description,image);
     }
 
     @Override
@@ -452,5 +452,25 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         }
     }
 
+    /**
+     * 维保申诉成功后--人工定责列表查询
+     * @param status 查询状态：-1全部，1待处理，2处理
+     * @param searchKey 查询条：业主名称/电话
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchManualAllocation(PageDTO pageDTO,Integer status,String searchKey){
+        return djMaintenanceRecordService.searchManualAllocation(pageDTO,status,searchKey);
+    }
+    /**
+     * 维保申诉成功后--人工定责列表查询
+     * @param manuaId 定责流水记录ID
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchManualAllocationDetail(String manuaId){
+        return djMaintenanceRecordService.searchManualAllocationDetail(manuaId);
+    }
 }
 

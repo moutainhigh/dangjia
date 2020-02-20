@@ -59,6 +59,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
+import com.dangjia.acg.service.engineer.DjMaintenanceRecordService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
@@ -101,6 +102,8 @@ public class ComplainService {
     private DjMaintenanceRecordResponsiblePartyMapper responsiblePartyMapper;
     @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
+    @Autowired
+    private DjMaintenanceRecordService djMaintenanceRecordService;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -183,7 +186,7 @@ public class ComplainService {
            }
            Storefront storefront=masterStorefrontService.getStorefrontById(rrp.getResponsiblePartyId());
            DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(rrp.getMaintenanceRecordId());
-           String complainId=insertUserComplain(storefront.getStorekeeperName(),storefront.getMobile(),userId,responsiblePartyId,djMaintenanceRecord.getHouseId(),12,content,images,3);
+           String complainId=insertUserComplain(storefront.getStorefrontName(),storefront.getMobile(),userId,responsiblePartyId,djMaintenanceRecord.getHouseId(),12,content,images,3);
            rrp.setComplainId(complainId);
            rrp.setModifyDate(new Date());
            responsiblePartyMapper.updateByPrimaryKeySelective(rrp);//修改对应的申诉单号到维保中去
@@ -250,12 +253,8 @@ public class ComplainService {
      * 添加申诉
      *
      * @param userToken    用户Token
-     * @param complainType 申诉类型 申述类型
-     *                     1: 被处罚申诉. 2：要求整改. 3：要求换人.
-     *                     4:部分收货申诉. 5:提前结束装修. 6业主要求换人.
-     *                     7:业主申诉部分退货. 8工匠申请部分退货.  9工匠报销.
-     *                     10工匠申维保定责, 12店铺申诉维保定责，
-     *                     13.业主投诉验收, 14.管家投诉验收, 15.工匠投诉验收
+     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.提前结束装修，6.业主申请换人,
+     *                      7.业主投诉验收, 8.管家投诉验收, 9.工匠投诉验收
      * @param businessId   对应业务ID
      *                     complain_type==1:对应处罚的rewardPunishRecordId,
      *                     complain_type==2:对应房子任务进程/申请表的houseFlowApplyId,
@@ -651,6 +650,21 @@ public class ComplainService {
                         String businessId = complain.getBusinessId();//业务订单号
                         mendMaterielService.updatePlatformComplainInfo(businessId,userId,7);
                         break;
+                    case 10://工匠申诉定责（平台同意后，返还工匠的质保金)
+                        //退还工匠的质保金
+                        DjMaintenanceRecordResponsibleParty recordResponsibleParty= responsiblePartyMapper.selectByPrimaryKey(complain.getBusinessId());
+                        Member worker=memberMapper.selectByPrimaryKey(recordResponsibleParty.getResponsiblePartyId());
+                        djMaintenanceRecordService.insertWorkerMinusDetention(worker,complain.getHouseId(),BigDecimal.valueOf(recordResponsibleParty.getMaintenanceTotalPrice()),recordResponsibleParty.getMaintenanceRecordId());
+                        //添加平台人工定责问题
+                        djMaintenanceRecordService.insertMaintenanceManualAllocation(complain.getId(),complain.getHouseId(),recordResponsibleParty.getMaintenanceRecordId(),recordResponsibleParty.getMaintenanceTotalPrice());
+                        break;
+                    case 12://店铺申请定责(平台同意后，返还店铺的质保金)
+                        //1.退还店铺的质保金
+                        DjMaintenanceRecordResponsibleParty responsibleParty= responsiblePartyMapper.selectByPrimaryKey(complain.getBusinessId());
+                        djMaintenanceRecordService.insertStorefrontReationMoney(responsibleParty.getMaintenanceRecordId(),complain.getHouseId(),responsibleParty.getResponsiblePartyId(),responsibleParty.getMaintenanceTotalPrice());
+                        //添加平台人工定责问题
+                        djMaintenanceRecordService.insertMaintenanceManualAllocation(complain.getId(),complain.getHouseId(),responsibleParty.getMaintenanceRecordId(),responsibleParty.getMaintenanceTotalPrice());
+                        break;
                 }
             }
 
@@ -754,6 +768,16 @@ public class ComplainService {
             } else if (complain.getComplainType() == 5) {
                 Object date = getDate(complain.getHouseId());
                 complain.setData(date);
+            }else if (complain.getComplainType() == 10||complain.getComplainType() == 12) {//10工匠申诉维保定责 、12店铺申诉维保定责
+                //查询对应的维可定责信息
+                DjMaintenanceRecordResponsibleParty recordResponsibleParty=responsiblePartyMapper.selectByPrimaryKey(complain.getBusinessId());
+                if(recordResponsibleParty!=null){
+                    Map<String,Object> paramInfo=new HashMap<>();
+                    paramInfo.put("totalPrice",recordResponsibleParty.getTotalPrice());//维保总额
+                    paramInfo.put("proportion",recordResponsibleParty.getProportion());//维保责任占比
+                    paramInfo.put("maintenanceTotalPrice",recordResponsibleParty.getMaintenanceTotalPrice());//所需质保金
+                    complain.setData(paramInfo);
+                }
             }else if (complain.getComplainType() == 13||complain.getComplainType() == 14||complain.getComplainType() == 15) {
                 Object date = houseFlowApplyService.checkDetail(complain.getBusinessId());
                 complain.setData(date);

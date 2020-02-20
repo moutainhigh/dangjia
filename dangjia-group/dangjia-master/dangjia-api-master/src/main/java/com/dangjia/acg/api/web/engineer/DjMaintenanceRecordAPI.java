@@ -178,7 +178,8 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/insertResponsibleParty")
     @ApiOperation(value = "新增工匠申诉", notes = "新增工匠申诉")
-    ServerResponse insertResponsibleParty(@RequestParam("responsiblePartyId") String responsiblePartyId,
+    ServerResponse insertResponsibleParty(@RequestParam("mrrpId") String mrrpId,
+                                          @RequestParam("responsiblePartyId") String responsiblePartyId,
                                           @RequestParam("houseId") String houseId,
                                           @RequestParam("description") String description,
                                           @RequestParam("image") String image);
@@ -301,5 +302,19 @@ public interface DjMaintenanceRecordAPI {
     ServerResponse setWorkerMaintenanceGoods(@RequestParam("userToken") String userToken,
                                              @RequestParam("maintenanceRecordId") String maintenanceRecordId,
                                              @RequestParam("houseId") String houseId);
+
+    /**
+     * 维保申诉成功后--人工定责列表查询
+     * @param status 查询状态：-1全部，1待处理，2处理
+     * @param searchKey 查询条：业主名称/电话
+     * @return
+     */
+    @PostMapping(value = "web/engineer/searchManualAllocation")
+    @ApiOperation(value = "申诉成功后平台人工定责--查询列表", notes = "申诉成功后平台人工定责--查询列表")
+    ServerResponse searchManualAllocation(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("status") Integer status,@RequestParam("searchKey") String searchKey);
+
+    @PostMapping(value = "web/engineer/searchManualAllocationDetail")
+    @ApiOperation(value = "申诉成功后平台人工定责--查询详情", notes = "申诉成功后平台人工定责--查询详情")
+    ServerResponse searchManualAllocationDetail(@RequestParam("manuaId") String manuaId);
 
 }

@@ -395,6 +395,26 @@ public class StorefrontService {
         storefrontConfig.setCityId(cityId);
         iStorefrontConfigMapper.insert(storefrontConfig);
     }
+
+
+    /**
+     * 查询所有店铺信息
+     * @param pageDTO
+     * @param searchKey
+     * @return
+     */
+    public ServerResponse queryAllStorefrontList( PageDTO pageDTO,String searchKey){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<StorefrontDTO> storefrontDTOList=istorefrontMapper.selectStorefrontAll(searchKey);
+            PageInfo pageResult = new PageInfo(storefrontDTOList);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch(Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
     /**
      * 查询供应商申请店铺列表
      *
