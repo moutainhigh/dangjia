@@ -42,8 +42,10 @@ public class MendOrderDetail {
     private Integer houseFlowApplyType;//类型 1：主动验收 2：被动验收
 
     private String workerTypeColor;//工种颜色
+    private String workerTypeName;//工种名称
 
     private ChangeOrder changeOrder;
     private List<Map<String,Object>> mapList;
+    private List<Map<String, Object>> workerList;
     private List<String> imageList;
 }

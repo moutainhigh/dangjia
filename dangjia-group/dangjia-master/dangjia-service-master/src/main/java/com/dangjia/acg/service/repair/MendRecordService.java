@@ -8,6 +8,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
@@ -17,7 +18,9 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -63,6 +66,8 @@ public class MendRecordService {
     @Autowired
     private IWarehouseMapper warehouseMapper;
 
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IMendDeliverMapper mendDeliverMapper;
     @Autowired
@@ -162,20 +167,76 @@ public class MendRecordService {
                 HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(mendOrderId);
                 Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
                 mendOrderDetail.setHouseId(houseFlowApply.getHouseId());
-                if(houseFlowApply.getType()==2) {//被动验收
+                if(houseFlowApply.getApplyType()!=10){//被动验收
                     mendOrderDetail.setApplicantId(houseFlowApply.getWorkerId());
                     mendOrderDetail.setApplicantName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                     mendOrderDetail.setApplicantMobile(member.getMobile());
                     mendOrderDetail.setWorkerType(worker.getWorkerType());
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
                     mendOrderDetail.setWorkerTypeColor(workerType.getColor());
+                    mendOrderDetail.setWorkerTypeName(workerType.getName());
                 }
                 mendOrderDetail.setHouseFlowApplyType(houseFlowApply.getType());
                 mendOrderDetail.setNumber(houseFlowApply.getId());
                 mendOrderDetail.setType(6);
                 mendOrderDetail.setState(houseFlowApply.getApplyType());
                 mendOrderDetail.setCreateDate(houseFlowApply.getCreateDate());
+                //查是否评价
+                Evaluate evaluate = evaluateMapper.getForCountMoneySup(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), worker.getId());
+                if (evaluate == null) {
+                    List<Map<String, Object>> listMap = new ArrayList<>();//返回通讯录list
+                    if(houseFlowApply.getApplyType()==10){
+                        House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+                        Member worker2 = memberMapper.selectByPrimaryKey(house.getMemberId());
+                        Map<String, Object> map2 = new HashMap<>();
+                        map2.put("workerTypeName", "业主");
+                        map2.put("workerTypeColor", "#D67DAE");
+                        map2.put("workerName", worker2.getNickName() == null ? worker2.getName() : worker2.getNickName());
+                        map2.put("workerPhone", worker2.getMobile());
+                        map2.put("workerId", worker2.getId());
+                        listMap.add(map2);
+                    }else{
+                        House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+                        Member worker1 = memberMapper.selectByPrimaryKey(house.getMemberId());
+                        Map<String, Object> map2 = new HashMap<>();
+                        map2.put("workerTypeName", "业主");
+                        map2.put("workerTypeColor", "#D67DAE");
+                        map2.put("workerName", worker1.getNickName() == null ? worker1.getName() : worker1.getNickName());
+                        map2.put("workerPhone", worker1.getMobile());
+                        map2.put("workerId", worker1.getId());
+                        listMap.add(map2);
+
+                        HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseFlowApply.getHouseId(),"3");
+                        if(!worker.getId().equals(houseFlow.getWorkerId())) {
+                            Member worker2 = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+                            if (worker2 != null) {
+                                Map<String, Object> map = new HashMap<>();
+                                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId());
+                                map.put("workerTypeName", workerType.getName());
+                                map.put("workerTypeColor", workerType.getColor());
+                                map.put("workerName", worker2.getName());
+                                map.put("workerPhone", worker2.getMobile());
+                                map.put("workerId", worker2.getId());
+                                listMap.add(map);
+                            }
+                        }
+
+                        //工匠
+                        if(!worker.getId().equals(member.getId())) {
+                            Map<String, Object> map = new HashMap<>();
+                            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                            map.put("workerTypeName", workerType.getName());
+                            map.put("workerTypeColor", workerType.getColor());
+                            map.put("workerName", member.getName());
+                            map.put("workerPhone", member.getMobile());
+                            map.put("workerId", member.getId());
+                            listMap.add(map);
+                        }
+                    }
+                    mendOrderDetail.setWorkerList(listMap);
+                }
                 mendOrderDetail.setMapList(getFlowInfo(houseFlowApply));
+
             } else if (type == 5) {
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
                 if (worker != null && worker.getWorkerTypeId() != null && worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())) {
