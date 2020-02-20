@@ -38,6 +38,7 @@
 
     <select id="querySelectedProduct" resultType="com.dangjia.acg.dto.activity.DjStoreActivityProductDTO">
         SELECT
+            a.id,
             c.id AS productId,
             e.`name` AS goodsName,
             c.product_name AS productName,
@@ -59,5 +60,106 @@
         AND b.storefront_id =#{storefrontId}
         AND b.store_activity_id =#{storeActivityId}
         AND b.activity_session_id =#{activitySessionId}
+    </select>
+
+
+    <select id="queryHaveAttendProduct" resultType="com.dangjia.acg.modle.activity.DjStoreParticipateActivities">
+        SELECT
+            b.id,
+            b.create_date AS createDate,
+            b.modify_date AS modifyDate,
+            b.data_status AS dataStatus,
+            b.activity_type AS activityType,
+            b.store_activity_id AS storeActivityId,
+            b.activity_session_id AS activitySessionId,
+            b.storefront_id AS storefrontId,
+            b.registration_status AS registrationStatus
+        FROM
+            dj_store_activity_product a,
+            dj_store_participate_activities b
+        WHERE
+            a.store_participate_activities_id = b.id
+        AND a.product_id = #{productId}
+        AND b.storefront_id = #{storefrontId}
+    </select>
+
+
+    <select id="queryWhetherOverlap" resultType="java.lang.Integer">
+        SELECT
+          COUNT(*)
+        FROM
+          dj_activity_session
+        WHERE id =#{id}
+        AND NOT (
+            end_session &lt; (
+                SELECT
+                end_session
+                FROM
+                dj_activity_session
+                WHERE
+                id = #{id1}
+            )
+            OR session_start_time &gt; (
+                SELECT
+                session_start_time
+                FROM
+                dj_activity_session
+                WHERE
+                id = #{id1}
+            )
+        )
+    </select>
+
+
+    <select id="queryWhetherOverlap1" resultType="java.lang.Integer">
+        SELECT
+          COUNT(*)
+        FROM
+          dj_store_activity
+        WHERE id = #{id}
+        AND NOT (
+            end_time &lt; (
+                SELECT
+                end_time
+                FROM
+                dj_store_activity
+                WHERE
+                id = #{id1}
+            )
+            OR activity_start_time &gt; (
+                SELECT
+                activity_start_time
+                FROM
+                dj_store_activity
+                WHERE
+                id = #{id1}
+            )
+        )
+    </select>
+
+
+    <select id="queryBillGoods" resultType="com.dangjia.acg.dto.activity.DjStoreActivityProductDTO">
+        SELECT
+            c.id AS productId,
+            e.`name` AS goodsName,
+            c.product_name AS productName,
+            d.product_sn AS productSn,
+            c.image,
+            c.sell_price AS sellPrice,
+            a.inventory AS inventory,
+            a.rush_purchase_price AS rushPurchasePrice,
+            b.registration_status AS registrationStatus
+        FROM
+            dj_store_activity_product a,
+            dj_store_participate_activities b,
+            dj_basics_storefront_product c,
+            dj_basics_product_template d,
+            dj_basics_goods e
+        WHERE
+            a.store_participate_activities_id = b.id
+        AND a.store_participate_activities_id =#{id}
+        AND a.product_id = c.id
+        AND c.prod_template_id = d.id
+        AND d.goods_id = e.id
     </select>
 </mapper>

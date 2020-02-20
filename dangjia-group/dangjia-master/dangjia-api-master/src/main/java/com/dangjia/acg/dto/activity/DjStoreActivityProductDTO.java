@@ -43,4 +43,13 @@ public class DjStoreActivityProductDTO extends BaseEntity {
     @ApiModelProperty("库存")
     private Double inventory;
 
+    @Desc(value = "抢购价格")
+    @ApiModelProperty("抢购价格")
+    private Double rushPurchasePrice;
+
+    @Desc(value = "状态 报名状态 1:已报名 2:申请中 3:审核中 4：被打回")
+    @ApiModelProperty("状态 报名状态 1:已报名 2:申请中 3:审核中 4：被打回")
+    private Integer registrationStatus;
+
+
 }

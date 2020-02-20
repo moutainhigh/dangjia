@@ -1,21 +1,27 @@
 package com.dangjia.acg.service.activity;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.activity.DjStoreActivityDTO;
 import com.dangjia.acg.dto.activity.DjStoreActivityProductDTO;
+import com.dangjia.acg.dto.activity.DjStoreParticipateActivitiesDTO;
 import com.dangjia.acg.mapper.activity.DjActivitySessionMapper;
 import com.dangjia.acg.mapper.activity.DjStoreActivityMapper;
 import com.dangjia.acg.mapper.activity.DjStoreActivityProductMapper;
 import com.dangjia.acg.mapper.activity.DjStoreParticipateActivitiesMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.modle.activity.DjActivitySession;
 import com.dangjia.acg.modle.activity.DjStoreActivity;
 import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
 import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -50,6 +56,8 @@ public class DjStoreActivityService {
     private DjStoreParticipateActivitiesMapper djStoreParticipateActivitiesMapper;
     @Autowired
     private DjStoreActivityProductMapper djStoreActivityProductMapper;
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
 
     /**
      * 添加活动
@@ -185,6 +193,9 @@ public class DjStoreActivityService {
                 City city = iCityMapper.selectByPrimaryKey(djStoreActivity.getCityId());
                 djStoreActivity.setCity(city.getName());
             });
+            if(djStoreActivities.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
             PageInfo pageInfo=new PageInfo(djStoreActivities);
             return ServerResponse.createBySuccess("查询成功",pageInfo);
         } catch (Exception e) {
@@ -253,6 +264,9 @@ public class DjStoreActivityService {
             Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             List<DjStoreActivityDTO> djStoreActivityDTOS =
                     djStoreActivityMapper.queryActivitiesByStorefront(activityType, storefront.getId());
+            if(djStoreActivityDTOS.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
             return ServerResponse.createBySuccess("查询成功",djStoreActivityDTOS);
         } catch (Exception e) {
             e.printStackTrace();
@@ -273,6 +287,9 @@ public class DjStoreActivityService {
             Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             List<DjStoreActivityDTO> djStoreActivityDTOS =
                     djStoreActivityMapper.queryActivitiesSessionByStorefront(id, storefront.getId());
+            if(djStoreActivityDTOS.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
             return ServerResponse.createBySuccess("查询成功",djStoreActivityDTOS);
         } catch (Exception e) {
             e.printStackTrace();
@@ -310,10 +327,10 @@ public class DjStoreActivityService {
             djStoreParticipateActivities.setActivitySessionId(activitySessionId);
             djStoreParticipateActivities.setStorefrontId(storefront.getId());
             djStoreParticipateActivitiesMapper.insert(djStoreParticipateActivities);
-            return ServerResponse.createBySuccessMessage("添加成功");
+            return ServerResponse.createBySuccess("申请成功",djStoreParticipateActivities.getId());
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("添加失败");
+            return ServerResponse.createByErrorMessage("申请失败");
         }
     }
 
@@ -330,6 +347,9 @@ public class DjStoreActivityService {
             PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
             List<DjStoreActivityProductDTO> djStoreActivityProductDTOS =
                     djStoreActivityProductMapper.queryWaitingSelectionProduct(storefront.getId(),storeActivityId,activitySessionId);
+            if(djStoreActivityProductDTOS.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
             PageInfo pageInfo=new PageInfo(djStoreActivityProductDTOS);
             return ServerResponse.createBySuccess("查询成功",pageInfo);
         } catch (Exception e) {
@@ -361,6 +381,234 @@ public class DjStoreActivityService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 店铺活动商品已选列表
+     * @param userId
+     * @param cityId
+     * @param storeActivityId
+     * @param activitySessionId
+     * @return
+     */
+    public ServerResponse querySelectedProduct(String userId, String cityId, PageDTO pageDTO, String storeActivityId, String activitySessionId) {
+        try {
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
+            PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
+            List<DjStoreActivityProductDTO> djStoreActivityProductDTOS =
+                    djStoreActivityProductMapper.querySelectedProduct(storefront.getId(), storeActivityId, activitySessionId);
+            if(djStoreActivityProductDTOS.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
+            PageInfo pageInfo=new PageInfo(djStoreActivityProductDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 店铺选择活动商品
+     * @param userId
+     * @param cityId
+     * @param storeActivityId
+     * @param activitySessionId
+     * @param productId
+     * @return
+     */
+    public ServerResponse setSelectActiveProduct(String userId, String cityId, String storeActivityId,
+                                                 String activitySessionId, String productId,
+                                                 Integer activityType,String storeParticipateActivitiesId) {
+        try {
+            Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
+            List<DjStoreParticipateActivities> djStoreParticipateActivities =
+                    djStoreActivityProductMapper.queryHaveAttendProduct(productId, storefront.getId());
+            StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+            if(djStoreParticipateActivities.size()<=0){
+                DjStoreActivityProduct djStoreActivityProduct=new DjStoreActivityProduct();
+                djStoreActivityProduct.setActivityType(activityType);
+                djStoreActivityProduct.setProductId(productId);
+                djStoreActivityProduct.setInventory(storefrontProduct.getSuppliedNum());
+                djStoreActivityProduct.setRushPurchasePrice(storefrontProduct.getSellPrice());
+                djStoreActivityProduct.setStoreParticipateActivitiesId(storeParticipateActivitiesId);
+                djStoreActivityProductMapper.insert(djStoreActivityProduct);
+                return ServerResponse.createBySuccessMessage("添加成功");
+            }else{
+                for (DjStoreParticipateActivities djStoreParticipateActivity : djStoreParticipateActivities) {
+                    if(djStoreParticipateActivity.getActivityType()==1){
+                        Integer integer =
+                                djStoreActivityProductMapper.queryWhetherOverlap(activitySessionId, djStoreParticipateActivity.getActivitySessionId());
+                        if(integer>0) {
+                            if (djStoreParticipateActivity.getRegistrationStatus() == 2 ||
+                                    djStoreParticipateActivity.getRegistrationStatus() == 4) {
+                                djStoreActivityProductMapper.deleteByPrimaryKey(djStoreParticipateActivity.getId());
+                                break;
+                            }
+                            return ServerResponse.createByErrorMessage("该商品在该时间段已存在活动");
+                        }
+                    }else{
+                        Integer integer =
+                                djStoreActivityProductMapper.queryWhetherOverlap1(storeActivityId, djStoreParticipateActivity.getStoreActivityId());
+                        if(integer>0) {
+                            if (djStoreParticipateActivity.getRegistrationStatus() == 2 ||
+                                    djStoreParticipateActivity.getRegistrationStatus() == 4) {
+                                djStoreActivityProductMapper.deleteByPrimaryKey(djStoreParticipateActivity.getId());
+                                break;
+                            }
+                            return ServerResponse.createByErrorMessage("该商品在该时间段已存在活动");
+                        }
+                    }
+                }
+                DjStoreActivityProduct djStoreActivityProduct = new DjStoreActivityProduct();
+                djStoreActivityProduct.setActivityType(activityType);
+                djStoreActivityProduct.setProductId(productId);
+                djStoreActivityProduct.setInventory(storefrontProduct.getSuppliedNum());
+                djStoreActivityProduct.setRushPurchasePrice(storefrontProduct.getSellPrice());
+                djStoreActivityProduct.setStoreParticipateActivitiesId(storeParticipateActivitiesId);
+            }
+            return ServerResponse.createBySuccessMessage("添加成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("添加失败");
+        }
+    }
+
+
+    /**
+     * 提交
+     * @param jsonStr
+     * @param storeParticipateActivitiesId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setCommit(String jsonStr, String storeParticipateActivitiesId) {
+        JSONArray jsonArr = JSONArray.parseArray(jsonStr);
+        jsonArr.forEach(str -> {
+            JSONObject obj = (JSONObject) str;
+            String id = obj.getString("id");
+            Double inventory = obj.getDouble("inventory");
+            Double rushPurchasePrice = obj.getDouble("rushPurchasePrice");
+            DjStoreActivityProduct djStoreActivityProduct=new DjStoreActivityProduct();
+            djStoreActivityProduct.setId(id);
+            djStoreActivityProduct.setInventory(inventory);
+            djStoreActivityProduct.setRushPurchasePrice(rushPurchasePrice);
+            djStoreActivityProductMapper.updateByPrimaryKeySelective(djStoreActivityProduct);
+        });
+        DjStoreParticipateActivities djStoreParticipateActivities=new DjStoreParticipateActivities();
+        djStoreParticipateActivities.setId(storeParticipateActivitiesId);
+        djStoreParticipateActivities.setRegistrationStatus(3);
+        djStoreParticipateActivitiesMapper.updateByPrimaryKeySelective(djStoreParticipateActivities);
+        return ServerResponse.createBySuccessMessage("提交成功");
+    }
+
+
+    /**
+     * 审核店铺参与活动列表
+     * @return
+     */
+    public ServerResponse queryAuditstoresParticipateActivities(PageDTO pageDTO) {
+        try {
+            Example example=new Example(DjStoreActivity.class);
+            example.createCriteria().andEqualTo(DjStoreActivity.DATA_STATUS,0);
+            PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
+            List<DjStoreActivity> djStoreActivities = djStoreActivityMapper.selectByExample(example);
+            List<DjStoreParticipateActivitiesDTO> djStoreParticipateActivitiesDTOS=new ArrayList<>();
+            djStoreActivities.forEach(djStoreActivity -> {
+                DjStoreParticipateActivitiesDTO djStoreParticipateActivitiesDTO=
+                        new DjStoreParticipateActivitiesDTO();
+                djStoreParticipateActivitiesDTO.setRegistrationNumber(djStoreParticipateActivitiesMapper.queryRegistrationNumber(djStoreActivity.getId()));
+                djStoreParticipateActivitiesDTO.setActivityType(djStoreActivity.getActivityType());
+                Example example1=new Example(DjStoreParticipateActivities.class);
+                example1.createCriteria().andEqualTo(DjStoreParticipateActivities.DATA_STATUS,0)
+                        .andEqualTo(DjStoreParticipateActivities.STORE_ACTIVITY_ID,djStoreActivity.getId())
+                        .andEqualTo(DjStoreParticipateActivities.REGISTRATION_STATUS,3);
+                djStoreParticipateActivitiesDTO.setPendingCount(djStoreParticipateActivitiesMapper.selectCountByExample(example1));
+                djStoreParticipateActivitiesDTO.setId(djStoreActivity.getId());
+                djStoreParticipateActivitiesDTOS.add(djStoreParticipateActivitiesDTO);
+            });
+            if(djStoreParticipateActivitiesDTOS.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
+            PageInfo pageInfo=new PageInfo(djStoreParticipateActivitiesDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 参与活动店铺列表
+     * @param pageDTO
+     * @param activityType
+     * @param id
+     * @return
+     */
+    public ServerResponse queryParticipatingShopsList(PageDTO pageDTO, Integer activityType, String id,
+                                                      String activitySessionId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
+            List<DjStoreParticipateActivitiesDTO> djStoreParticipateActivitiesDTOS =
+                    djStoreParticipateActivitiesMapper.queryParticipatingShopsList(id,activityType,activitySessionId);
+            djStoreParticipateActivitiesDTOS.forEach(djStoreParticipateActivitiesDTO -> {
+                djStoreParticipateActivitiesDTO.setRegistrationNumber(djStoreParticipateActivitiesDTOS.size());
+            });
+            if(djStoreParticipateActivitiesDTOS.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
+            PageInfo pageInfo=new PageInfo(djStoreParticipateActivitiesDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 货品清单
+     * @param pageDTO
+     * @param id
+     * @return
+     */
+    public ServerResponse queryBillGoods(PageDTO pageDTO, String id) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
+            List<DjStoreActivityProductDTO> djStoreActivityProductDTOS = djStoreActivityProductMapper.queryBillGoods(id);
+            if(djStoreActivityProductDTOS.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
+            PageInfo pageInfo=new PageInfo(djStoreActivityProductDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 审核货品清单
+     * @param id
+     * @param registrationStatus
+     * @return
+     */
+    public ServerResponse setBillGoods(String id, Integer registrationStatus, String backReason) {
+        try {
+            DjStoreParticipateActivities djStoreParticipateActivities=new DjStoreParticipateActivities();
+            djStoreParticipateActivities.setId(id);
+            djStoreParticipateActivities.setRegistrationStatus(registrationStatus);
+            djStoreParticipateActivities.setBackReason(backReason);
+            djStoreParticipateActivitiesMapper.updateByPrimaryKeySelective(djStoreParticipateActivities);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 

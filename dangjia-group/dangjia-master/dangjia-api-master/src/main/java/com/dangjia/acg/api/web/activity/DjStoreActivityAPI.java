@@ -73,4 +73,52 @@ public interface DjStoreActivityAPI {
                                                       @RequestParam("cityId") String cityId,
                                                       @RequestParam("storeActivityId") String storeActivityId,
                                                       @RequestParam("activitySessionId") String activitySessionId);
+
+    @PostMapping("web/activity/querySelectedProduct")
+    @ApiOperation(value = "店铺活动商品已选列表", notes = "店铺活动商品已选列表")
+    ServerResponse querySelectedProduct(@RequestParam("userId") String userId,
+                                        @RequestParam("cityId") String cityId,
+                                        @RequestParam("pageDTO") PageDTO pageDTO,
+                                        @RequestParam("storeActivityId") String storeActivityId,
+                                        @RequestParam("activitySessionId") String activitySessionId);
+
+    @PostMapping("web/activity/setSelectActiveProduct")
+    @ApiOperation(value = "店铺选择活动商品", notes = "店铺选择活动商品")
+    ServerResponse setSelectActiveProduct(@RequestParam("userId") String userId,
+                                          @RequestParam("cityId") String cityId,
+                                          @RequestParam("storeActivityId") String storeActivityId,
+                                          @RequestParam("activitySessionId") String activitySessionId,
+                                          @RequestParam("productId") String productId,
+                                          @RequestParam("activityType") Integer activityType,
+                                          @RequestParam("storeParticipateActivitiesId") String storeParticipateActivitiesId);
+
+    @PostMapping("web/activity/setCommit")
+    @ApiOperation(value = "提交", notes = "提交")
+    ServerResponse setCommit(@RequestParam("jsonStr") String jsonStr,
+                             @RequestParam("storeParticipateActivitiesId") String storeParticipateActivitiesId);
+
+    @PostMapping("web/activity/queryAuditstoresParticipateActivities")
+    @ApiOperation(value = "审核店铺参与活动列表", notes = "审核店铺参与活动列表")
+    ServerResponse queryAuditstoresParticipateActivities(@RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping("web/activity/queryParticipatingShopsList")
+    @ApiOperation(value = "参与活动店铺列表", notes = "参与活动店铺列表")
+    ServerResponse queryParticipatingShopsList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                               @RequestParam("activityType") Integer activityType,
+                                               @RequestParam("id") String id,
+                                               @RequestParam("activitySessionId") String activitySessionId);
+
+    @PostMapping("web/activity/queryBillGoods")
+    @ApiOperation(value = "货品清单", notes = "货品清单")
+    ServerResponse queryBillGoods(@RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("id") String id);
+
+    @PostMapping("web/activity/setBillGoods")
+    @ApiOperation(value = "审核货品清单", notes = "审核货品清单")
+    ServerResponse setBillGoods(@RequestParam("id") String id,
+                                @RequestParam("registrationStatus") Integer registrationStatus,
+                                @RequestParam("backReason") String backReason);
+
+
+
 }
