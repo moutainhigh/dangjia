@@ -31,5 +31,6 @@ public class StoreSupplyDimensionDTO {
     private Double supPrice;//供应单价
     private Double price;//销售单价
     private Double profit; //利润
-
+    private Double income;//总收入
+    private Double expenditure;//支出
 }

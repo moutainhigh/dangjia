@@ -9,6 +9,7 @@ import tk.mybatis.mapper.common.Mapper;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -158,6 +159,15 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
      */
 
     List<StoreSellerSplitDeliverDetailsDTO> sellerSplitDeliverDetails (@Param("splitDeliverId") String splitDeliverId,@Param("storefrontId") String storefrontId );
+
+    //利润统计--商品维度--发货单列表
+    List<StoreBuyersDimensionOrderDetailDTO> storefrontProductDimensionSplitDetail(@Param("storefrontId") String storefrontId,@Param("productId") String productId);
+    //利润统计--商品维度--退货单列表
+    List<StoreBuyersDimensionOrderDetailDTO> storefrontProductDimensionMendDetail(@Param("storefrontId") String storefrontId,@Param("productId") String productId);
+    //利润统计--商品维度--发货单总收入，支出
+    Map<String,Object> totalProductDimensionSplitDetail(@Param("storefrontId") String storefrontId, @Param("productId") String productId);
+    //利润统计--商品维度--退货单总收入，支出
+    Map<String,Object> totalProductDimensionMendDetail(@Param("storefrontId") String storefrontId, @Param("productId") String productId);
 
 }
 

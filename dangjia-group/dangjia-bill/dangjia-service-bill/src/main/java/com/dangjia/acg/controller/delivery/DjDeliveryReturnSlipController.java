@@ -6,6 +6,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.delivery.DjDeliveryReturnSlipService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -105,8 +106,8 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse supplierDimensionGoodsDetails(HttpServletRequest request, PageDTO pageDTO,String splitDevlierId) {
-        return djDeliveryReturnSlipService.supplierDimensionGoodsDetails(request,pageDTO,splitDevlierId);
+    public ServerResponse storefrontProductDimensionDetail(HttpServletRequest request, PageDTO pageDTO,String storefrontId,String productId,Integer type) {
+        return djDeliveryReturnSlipService.storefrontProductDimensionDetail(request,pageDTO, storefrontId, productId, type);
     }
 
     @Override

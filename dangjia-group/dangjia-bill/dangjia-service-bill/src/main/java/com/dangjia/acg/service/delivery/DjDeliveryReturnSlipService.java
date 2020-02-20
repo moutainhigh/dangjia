@@ -36,10 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -608,27 +605,36 @@ public class DjDeliveryReturnSlipService {
     }
 
     /**
-     *店铺利润统计-供应商商品详情
+     *店铺利润统计-商品维度--查询货单详情
      * @param request
      * @param pageDTO
-     * @param splitDevlierId 发货单ID
+     * @param storefrontId 店铺ID
+     * @param productId 商品ID
+     * @param type 查询类型：1发货单 2退货单
      * @return
      */
-    public ServerResponse supplierDimensionGoodsDetails(HttpServletRequest request, PageDTO pageDTO, String splitDevlierId) {
+    public ServerResponse storefrontProductDimensionDetail(HttpServletRequest request, PageDTO pageDTO,String storefrontId,String productId,Integer type) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            List<SupplierDimensionGoodsDetailDTO> list=djDeliveryReturnSlipMapper.supplierDimensionGoodsDetails(splitDevlierId);
-            for (SupplierDimensionGoodsDetailDTO supplierDimensionGoodsDetailDTO :list ) {
-                supplierDimensionGoodsDetailDTO.setImageDetail(imageAddress+supplierDimensionGoodsDetailDTO.getImage());
+            List<StoreBuyersDimensionOrderDetailDTO> list=new ArrayList<>();
+            Map<String,Object> totalPriceMap=new HashMap<>();//查询汇总，总收入，总支出
+            if(type==1){//查询发货单
+                list=djDeliveryReturnSlipMapper.storefrontProductDimensionSplitDetail(storefrontId,productId);
+                totalPriceMap=djDeliveryReturnSlipMapper.totalProductDimensionSplitDetail(storefrontId,productId);
+            }else if(type==2){//查询退货单
+                list=djDeliveryReturnSlipMapper.storefrontProductDimensionMendDetail(storefrontId,productId);
+                totalPriceMap=djDeliveryReturnSlipMapper.totalProductDimensionMendDetail(storefrontId,productId);
             }
             PageInfo pageResult = new PageInfo(list);
             if (list.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+
+            totalPriceMap.put("splitOrderList",pageResult);
+            return ServerResponse.createBySuccess("查询成功", totalPriceMap);
         } catch (Exception e) {
             logger.error("店铺利润统计-供应商商品详情异常", e);
-            return ServerResponse.createByErrorMessage("店铺利润统计-供应商商品详情异常: " + e);
+            return ServerResponse.createByErrorMessage("店铺利润统计-商品维度--查询货单详情异常 ");
         }
     }
 }

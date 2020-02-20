@@ -492,7 +492,9 @@
             sum(mt.totalTransportationCost) totalTransportationCost,
             sum(mt.totalPrice) totalPrice,
             sum(mt.totalSupCost) totalSupCost,
-            sum(mt.profit) profit
+            sum(mt.profit) profit,
+            sum(mt.totalPrice) income,
+            sum(mt.totalSupCost+mt.totalStevedorageCost+mt.totalTransportationCost) expenditure
         FROM
             (
                 SELECT
@@ -562,8 +564,8 @@
                         tt.productSn,
                         0 receiver,
                         sum(tt.returnCount) returnCount,
-                        sum(tt.sup_stevedorage_cost) totalStevedorageCost,
-                        sum(tt.sup_transportation_cost) totalTransportationCost,
+                        sum(tt.stevedorage_cost*(-1)) totalStevedorageCost,
+                        sum(tt.transportation_cost*(-1)) totalTransportationCost,
                         sum(
                             tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
                         ) totalPrice,
@@ -620,6 +622,227 @@
             mt.productId
         ORDER BY
             mt.productId
+    </select>
+    <!--利润统计-商品维度-发货单总收入支出-->
+    <select id="totalProductDimensionSplitDetail" resultType="java.util.Map">
+        SELECT
+            sum(
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+            ) income,
+            sum(
+                tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
+            ) expenditure,
+            sum(
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+            ) - sum(
+                tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
+            ) profit
+        FROM
+            (
+                SELECT
+                    IFNULL(
+                        (
+                            CASE
+                            WHEN s.shipping_state = 4
+                            AND s.complain_status = 3 THEN
+                                t.num
+                            ELSE
+                                t.receive
+                            END
+                        ),
+                        t.num
+                    ) AS receive,
+                    t.sup_cost AS supPrice,
+                    t.price AS price,
+                    IFNULL(t.transportation_cost, 0) transportation_cost,
+                    IFNULL(t.stevedorage_cost, 0) stevedorage_cost,
+                    IFNULL(
+                        t.sup_transportation_cost,
+                        0
+                    ) sup_transportation_cost,
+                    IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost,
+                    s.id splitId
+                FROM
+                    dj_deliver_split_deliver s
+                INNER JOIN dj_deliver_order_split_item t ON s.id = t.split_deliver_id
+                WHERE
+                    s.storefront_id = #{storefrontId}
+                AND t.product_id = #{productId}
+            ) tt
+    </select>
+    <!--利润统计-商品维度-发货单列表-->
+     <select id="storefrontProductDimensionSplitDetail" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionOrderDetailDTO">
+        SELECT
+            tt.splitId,
+            tt.number,
+            tt.sendTime,
+            tt.address,
+            sum(tt.receive) receive,
+            0 returnCount,
+            sum(tt.sup_stevedorage_cost) totalStevedorageCost,
+            sum(tt.sup_transportation_cost) totalTransportationCost,
+            sum(
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+            ) totalPrice,
+            tt.supPrice * tt.receive totalSupCost,
+            sum(
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+            ) - sum(
+                tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
+            ) profit
+        FROM
+            (
+                SELECT
+                    IFNULL(
+                        (
+                            CASE
+                            WHEN s.shipping_state = 4
+                            AND s.complain_status = 3 THEN
+                                t.num
+                            ELSE
+                                t.receive
+                            END
+                        ),
+                        t.num
+                    ) AS receive,
+                    t.sup_cost AS supPrice,
+                    t.price AS price,
+                    IFNULL(t.transportation_cost, 0) transportation_cost,
+                    IFNULL(t.stevedorage_cost, 0) stevedorage_cost,
+                    IFNULL(
+                        t.sup_transportation_cost,
+                        0
+                    ) sup_transportation_cost,
+                    IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost,
+                    s.id splitId,
+                    s.number number,
+                    s.create_date sendTime,
+                    m.address
+                FROM
+                    dj_deliver_split_deliver s
+                INNER JOIN dj_deliver_order_split_item t ON s.id = t.split_deliver_id
+                INNER JOIN dj_member_address m on (s.address_id=m.id or s.house_id=m.house_id)
+                WHERE
+                    s.storefront_id = #{storefrontId}
+                AND t.product_id = #{productId}
+            ) tt
+        GROUP BY
+            tt.splitId
+        order by tt.sendTime desc
+     </select>
+
+    <!--利润统计-商品维度-退货单汇总收入支出-->
+    <select id="totalProductDimensionMendDetail" resultType="java.util.Map">
+        SELECT
+            sum(
+                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost
+            ) expenditure,
+            sum(
+                tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
+            ) income,
+            sum(
+                tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
+            ) - sum(
+                tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost
+            ) profit
+        FROM
+            (
+                SELECT
+                    s.id splitId,
+                    IFNULL(
+                        (
+                            CASE
+                            WHEN s.shipping_state = 7 THEN
+                                t.shop_count
+                            ELSE
+                                t.actual_count
+                            END
+                        ),
+                        t.shop_count
+                    ) AS returnCount,
+                    t.cost AS supPrice,
+                    t.price AS price,
+                    IFNULL(t.transportation_cost, 0) transportation_cost,
+                    IFNULL(t.stevedorage_cost, 0) stevedorage_cost,
+                    IFNULL(
+                        t.sup_transportation_cost,
+                        0
+                    ) sup_transportation_cost,
+                    IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost
+                FROM
+                    dj_repair_mend_deliver s
+                INNER JOIN dj_repair_mend_materiel t ON s.id = t.repair_mend_deliver_id
+                INNER JOIN dj_basics_storefront_product bsp ON t.product_id = bsp.id
+                INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+                INNER JOIN dj_repair_mend_order m ON s.mend_order_id = m.id
+                WHERE
+                    s.storefront_id = #{storefrontId}
+                AND t.product_id = #{productId}
+                AND m.type IN (2, 5)
+            ) tt
+    </select>
+    <!--利润统计-商品维度-退货单列表-->
+    <select id="storefrontProductDimensionMendDetail" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionOrderDetailDTO">
+        SELECT
+            tt.splitId,
+            tt.number,
+            tt.sendTime,
+            0 receiver,
+            tt.address,
+            sum(tt.returnCount) returnCount,
+            sum(tt.sup_stevedorage_cost) totalStevedorageCost,
+            sum(tt.sup_transportation_cost) totalTransportationCost,
+            sum(
+                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost
+            ) totalPrice,
+            tt.supPrice * tt.returnCount totalSupCost,
+            sum(
+                tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
+            ) - sum(
+                tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost
+            ) profit
+        FROM
+            (
+                SELECT
+                    s.id splitId,
+                    s.number,
+                    m.create_date sendTime,
+                    ma.address,
+                    IFNULL(
+                        (
+                            CASE
+                            WHEN s.shipping_state = 7 THEN
+                                t.shop_count
+                            ELSE
+                                t.actual_count
+                            END
+                        ),
+                        t.shop_count
+                    ) AS returnCount,
+                    t.cost AS supPrice,
+                    t.price AS price,
+                    IFNULL(t.transportation_cost, 0) transportation_cost,
+                    IFNULL(t.stevedorage_cost, 0) stevedorage_cost,
+                    IFNULL(
+                        t.sup_transportation_cost,
+                        0
+                    ) sup_transportation_cost,
+                    IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost
+                FROM
+                    dj_repair_mend_deliver s
+                INNER JOIN dj_repair_mend_materiel t ON s.id = t.repair_mend_deliver_id
+                INNER JOIN dj_basics_storefront_product bsp ON t.product_id = bsp.id
+                INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+                INNER JOIN dj_repair_mend_order m ON s.mend_order_id = m.id
+                INNER JOIN dj_member_address ma on (s.address_id=ma.id or s.house_id=ma.house_id)
+                WHERE
+                    s.storefront_id = #{storefrontId}
+                AND t.product_id = #{productId}
+                AND m.type IN (2, 5)
+            ) tt
+        GROUP BY
+            tt.splitId
+        order by tt.sendTime desc
     </select>
 
     <!--店铺利润-供应商维度-->
