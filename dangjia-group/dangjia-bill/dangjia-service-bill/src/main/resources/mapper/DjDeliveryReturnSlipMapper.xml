@@ -665,9 +665,18 @@
                 FROM
                     dj_deliver_split_deliver s
                 INNER JOIN dj_deliver_order_split_item t ON s.id = t.split_deliver_id
+               INNER JOIN dj_member_address m on (s.address_id=m.id or s.house_id=m.house_id)
                 WHERE
                     s.storefront_id = #{storefrontId}
-                AND t.product_id = #{productId}
+                <if test = "null!=productId and ''!=productId" >
+                    AND t.product_id = #{productId}
+                </if>
+                <if test = "null!=addressId and ''!=addressId" >
+                    and m.id =#{addressId}
+                </if>
+                <if test = "null!=houseId and ''!=houseId" >
+                    and m.house_id=#{houseId}
+                </if>
             ) tt
     </select>
     <!--利润统计-商品维度-发货单列表-->
@@ -724,7 +733,15 @@
                 INNER JOIN dj_member_address m on (s.address_id=m.id or s.house_id=m.house_id)
                 WHERE
                     s.storefront_id = #{storefrontId}
-                AND t.product_id = #{productId}
+                 <if test = "null!=productId and ''!=productId" >
+                     AND t.product_id = #{productId}
+                 </if>
+                 <if test = "null!=addressId and ''!=addressId" >
+                     and m.id =#{addressId}
+                 </if>
+                 <if test = "null!=houseId and ''!=houseId" >
+                     and m.house_id=#{houseId}
+                 </if>
             ) tt
         GROUP BY
             tt.splitId
@@ -735,11 +752,11 @@
     <select id="totalProductDimensionMendDetail" resultType="java.util.Map">
         SELECT
             sum(
-                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost
-            ) expenditure,
-            sum(
                 tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
             ) income,
+            sum(
+                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost
+            ) expenditure,
             sum(
                 tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
             ) - sum(
@@ -775,9 +792,18 @@
                 INNER JOIN dj_basics_storefront_product bsp ON t.product_id = bsp.id
                 INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
                 INNER JOIN dj_repair_mend_order m ON s.mend_order_id = m.id
+                INNER JOIN dj_member_address ma on (s.address_id=ma.id or s.house_id=ma.house_id)
                 WHERE
                     s.storefront_id = #{storefrontId}
-                AND t.product_id = #{productId}
+                    <if test = "null!=productId and ''!=productId" >
+                        AND t.product_id = #{productId}
+                    </if>
+                    <if test = "null!=addressId and ''!=addressId" >
+                        and ma.id =#{addressId}
+                    </if>
+                    <if test = "null!=houseId and ''!=houseId" >
+                        and ma.house_id=#{houseId}
+                    </if>
                 AND m.type IN (2, 5)
             ) tt
     </select>
@@ -837,7 +863,15 @@
                 INNER JOIN dj_member_address ma on (s.address_id=ma.id or s.house_id=ma.house_id)
                 WHERE
                     s.storefront_id = #{storefrontId}
-                AND t.product_id = #{productId}
+                <if test = "null!=productId and ''!=productId" >
+                    AND t.product_id = #{productId}
+                </if>
+                <if test = "null!=addressId and ''!=addressId" >
+                    and ma.id =#{addressId}
+                </if>
+                <if test = "null!=houseId and ''!=houseId" >
+                    and ma.house_id=#{houseId}
+                </if>
                 AND m.type IN (2, 5)
             ) tt
         GROUP BY
@@ -881,9 +915,9 @@
             union all
             SELECT
                 dsd.storefront_id AS storefrontId,
-                sum(IFNULL(dsd.total_amount, 0)) AS expenditure,
                 sum(IFNULL(dsd.apply_money, 0)) AS income,
-                (sum(IFNULL(dsd.total_amount, 0))*(-1) + sum(IFNULL(dsd.apply_money, 0))) AS profit,
+                sum(IFNULL(dsd.total_amount, 0)) AS expenditure,
+                (sum(IFNULL(dsd.apply_money, 0))- sum(IFNULL(dsd.total_amount, 0))) AS profit,
                 dsd.supplier_id AS supId,
                 t.`name` NAME,
                 t.telephone,
@@ -977,15 +1011,17 @@
                 sum(IFNULL(dsd.total_amount, 0)) AS income,
                 sum(IFNULL(dsd.apply_money, 0)) AS expenditure,
                 sum(IFNULL(dsd.total_amount, 0)) - sum(IFNULL(dsd.apply_money, 0)) AS profit,
-                dsd.house_id houseId,
-                dsd.address_id addressId,
+                m.house_id houseId,
+                m.id addressId,
                 dsd.supplier_id supId,
                 dsd.create_date
             FROM
                dj_deliver_split_deliver dsd
             INNER JOIN dj_member_address m ON (dsd.address_id = m.id OR dsd.house_id = m.house_id)
             WHERE dsd.storefront_id = #{storefrontId}
-            AND dsd.supplier_id = #{supId}
+            <if test="null!=supId and ''!=supId">
+                AND dsd.supplier_id = #{supId}
+            </if>
             <if test="null!=searchKey and ''!=searchKey">
                 AND (
                 m.address LIKE CONCAT('%',#{searchKey},'%') or
@@ -993,25 +1029,27 @@
                 m.mobile LIKE CONCAT('%',#{searchKey},'%')
                 )
             </if>
-            GROUP BY address_id,dsd.house_id
+            GROUP BY m.id,m.house_id
             union all
             SELECT
                 dsd.storefront_id AS storefrontId,
                 m.address AS shipAddress,
                 m.`name`,
                 m.mobile,
-                sum(IFNULL(dsd.total_amount, 0)) AS expenditure,
                 sum(IFNULL(dsd.apply_money, 0)) AS income,
-                (sum(IFNULL(dsd.total_amount, 0))*(-1) + sum(IFNULL(dsd.apply_money, 0))) AS profit,
-                dsd.house_id houseId,
-                dsd.address_id addressId,
+                sum(IFNULL(dsd.total_amount, 0)) AS expenditure,
+                (sum(IFNULL(dsd.apply_money, 0))- sum(IFNULL(dsd.total_amount, 0))) AS profit,
+                m.house_id houseId,
+                m.id addressId,
                 dsd.supplier_id supId,
                 dsd.create_date
             FROM
                 dj_repair_mend_deliver dsd
             INNER JOIN dj_member_address m ON (dsd.address_id = m.id OR dsd.house_id = m.house_id)
             WHERE dsd.storefront_id = #{storefrontId}
-            AND dsd.supplier_id = #{supId}
+            <if test="null!=supId and ''!=supId">
+                AND dsd.supplier_id = #{supId}
+            </if>
             <if test="null!=searchKey and ''!=searchKey">
                 AND (
                 m.address LIKE CONCAT('%',#{searchKey},'%') or
@@ -1019,7 +1057,7 @@
                 m.mobile LIKE CONCAT('%',#{searchKey},'%')
                 )
             </if>
-            GROUP BY address_id,dsd.house_id
+            GROUP BY m.id,m.house_id
         ) tt
         group by tt.addressId,tt.houseId
         ORDER BY tt.create_date DESC
@@ -1052,9 +1090,9 @@
                             dsd.id AS splitDevlierId,
                             dsd.number AS number,
                             dos.create_date AS createDate,
-                            sum(IFNULL(dsd.total_amount, 0)) AS expenditure,
                             sum(IFNULL(dsd.apply_money, 0)) AS income,
-                            (sum(IFNULL(dsd.total_amount, 0))*(-1) + sum(IFNULL(dsd.apply_money, 0))) AS profit,
+                            sum(IFNULL(dsd.total_amount, 0)) AS expenditure,
+                            (sum(IFNULL(dsd.apply_money, 0))- sum(IFNULL(dsd.total_amount, 0))) AS profit,
                             2 type
                         FROM
                             dj_repair_mend_deliver dsd
