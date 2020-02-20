@@ -66,4 +66,10 @@ public class HouseFlowApplyController implements HouseFlowApplyAPI {
     public ServerResponse stewardCheckDetail(String userToken, String houseFlowApplyId) {
         return houseFlowApplyService.stewardCheckDetail(houseFlowApplyId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryAcceptanceTrend(String houseId) {
+        return houseFlowApplyService.queryAcceptanceTrend(houseId);
+    }
 }

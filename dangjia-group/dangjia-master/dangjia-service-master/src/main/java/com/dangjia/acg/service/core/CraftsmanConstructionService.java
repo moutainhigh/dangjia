@@ -784,9 +784,7 @@ public class CraftsmanConstructionService {
 
                 }
             }
-        } else if (houseFlowApplyList.size() != 0) {//今日已提交过有人巡查
-            buttonList.add(Utils.getButton("追加巡查", 3006));
-        } else {
+        }  else {
             buttonList.add(Utils.getButton("巡查工地", 3001));
         }
         bean.setPromptList(promptList);

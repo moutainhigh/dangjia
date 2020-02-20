@@ -1052,10 +1052,10 @@ public class HouseFlowApplyService {
             if (houseFlowApply.getEndDate() != null) {
                 houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
                 if(houseFlowApply.getSupervisorCheck()==1) {
-                    houseFlowApplyDTO.setApplyDec("大管家已通过验收");
+                    houseFlowApplyDTO.setApplyDec("大管家已通过验收,还剩${time},系统将默认自动通过。");
                 }
                 if(houseFlowApply.getSupervisorCheck()==2) {
-                    houseFlowApplyDTO.setApplyDec("大管家未通过验收");
+                    houseFlowApplyDTO.setApplyDec("大管家未通过验收,还剩${time},系统将默认自动不通过。");
                 }
             }
             List<String> imageList=new ArrayList<>();
@@ -1189,6 +1189,83 @@ public class HouseFlowApplyService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+    public ServerResponse queryAcceptanceTrend(String houseId) {
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        Example example = new Example(HouseFlowApply.class);
+        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
+                .andIn(HouseFlowApply.APPLY_TYPE, Arrays.asList(1,2,10));
+        List<HouseFlowApply> houseFlowApplies =  houseFlowApplyMapper.selectByExample(example);
+        List<HouseFlowApplyDTO> houseFlowApplyDTOList=new ArrayList<>();
+        for (HouseFlowApply houseFlowApply : houseFlowApplies) {
+            HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+            example = new Example(HouseFlowApply.class);
+            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowApply.getHouseFlowId())
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, houseFlowApply.getApplyType())
+                    .andEqualTo(HouseFlowApply.TYPE, houseFlowApply.getType())
+                    .andCondition(" (apply_type!=10 and house_flow_apply_id is null) ")
+                    .andEqualTo(HouseFlowApply.WORKER_ID, houseFlowApply.getWorkerId())
+                    .andLessThanOrEqualTo(HouseFlowApply.CREATE_DATE, houseFlowApply.getCreateDate());
+            Integer yanShouNum =  houseFlowApplyMapper.selectCountByExample(example);
+            houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
+            houseFlowApplyDTO.setWorkerId(houseFlowApply.getWorkerId());
+            houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApply.getId());
+            houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
+            houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType())+"(第"+CommonUtil.numberToChinese(yanShouNum)+"次申请)");
+            houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
+            houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
+            houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
+            if(houseFlowApply.getApplyType()==10){
+                StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowApplyId());
+                if(storefrontProduct!=null){
+                    houseFlowApplyDTO.setApplyTypeName(storefrontProduct.getProductName()+"(第"+CommonUtil.numberToChinese(yanShouNum)+"次申请)");
+                }
+            }
+            List<String> imageList=new ArrayList<>();
+            setImageList(houseFlowApply.getId(),address,imageList);
+            //工匠的进程明细
+            List<Map> list  = houseFlowApplyMapper.getApplyCheckInfo(houseFlowApply.getId());
+            for (Map map : list) {
+                if(map.get("imageList")!=null) {
+                    map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
+                }
+                if(map.get("workerHead")!=null) {
+                    map.put("workerHead", Utils.getImageAddress(address, String.valueOf(map.get("workerHead"))));
+                }
+                if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
+                    map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList")))+","+StringUtils.join(imageList.toArray(),"."));
+                }else{
+                    map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
+                }
+                if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
+                    map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
+                }else if(Integer.parseInt(String.valueOf(map.get("workerType")))==3){
+                    map.put("applyTypeName", "审核不通过");
+                    if(houseFlowApplyDTO.getSupervisorCheck()==1){
+                        map.put("applyTypeName", "审核通过");
+                    }
+                }else{
+                    map.put("applyTypeName", "审核不通过");
+                    if(houseFlowApplyDTO.getMemberCheck()==1){
+                        map.put("applyTypeName", "审核通过");
+                    }
+                }
+                map.put("isEvaluate", 0);//默认为评价
+                //查工匠被业主的评价
+                Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
+               if(evaluate!=null) {
+                   map.put("evaluateStar", evaluate.getStar());
+                   map.put("evaluateContent", evaluate.getContent());
+                   map.put("isEvaluate", 1);//设为已评价
+               }
+
+            }
+            houseFlowApplyDTO.setList(list);
+            houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
+            houseFlowApplyDTOList.add(houseFlowApplyDTO);
+        }
+        return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTOList);
     }
 
 }
