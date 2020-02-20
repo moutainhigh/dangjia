@@ -57,6 +57,7 @@ import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
@@ -127,6 +128,8 @@ public class ComplainService {
 
     @Autowired
     private OrderSplitService orderSplitService;
+    @Autowired
+    private HouseFlowApplyService houseFlowApplyService;
 
     @Autowired
     private DjSupplierAPI djSupplierAPI;
@@ -247,8 +250,12 @@ public class ComplainService {
      * 添加申诉
      *
      * @param userToken    用户Token
-     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.提前结束装修，6.业主申请换人,
-     *                      7.业主投诉验收, 8.管家投诉验收, 9.工匠投诉验收
+     * @param complainType 申诉类型 申述类型
+     *                     1: 被处罚申诉. 2：要求整改. 3：要求换人.
+     *                     4:部分收货申诉. 5:提前结束装修. 6业主要求换人.
+     *                     7:业主申诉部分退货. 8工匠申请部分退货.  9工匠报销.
+     *                     10工匠申维保定责, 12店铺申诉维保定责，
+     *                     13.业主投诉验收, 14.管家投诉验收, 15.工匠投诉验收
      * @param businessId   对应业务ID
      *                     complain_type==1:对应处罚的rewardPunishRecordId,
      *                     complain_type==2:对应房子任务进程/申请表的houseFlowApplyId,
@@ -352,11 +359,13 @@ public class ComplainService {
                     userid = rewardPunishRecord.getMemberId();
                     break;
                 case 2://2：业主要求整改.
+                case 13:// 业主投诉验收
                     House house = houseMapper.selectByPrimaryKey(houseId);
                     Member stewardHouse = memberMapper.selectByPrimaryKey(house.getMemberId());
                     userid = stewardHouse.getId();
                     break;
                 case 3:// 3：大管家（开工后）要求换人.
+                case 14:// 管家投诉验收
                     stewardHouse = memberMapper.getSupervisor(houseId);
                     userid = stewardHouse.getId();
                     break;
@@ -368,6 +377,10 @@ public class ComplainService {
                     House house2 = houseMapper.selectByPrimaryKey(houseId);
                     Member stewardHouse2 = memberMapper.selectByPrimaryKey(house2.getMemberId());
                     userid = stewardHouse2.getId();
+                    break;
+                case 15:// 工匠投诉验收
+                    HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(businessId);
+                    userid = houseFlowApply.getWorkerId();
                     break;
             }
         return userid;
@@ -740,6 +753,9 @@ public class ComplainService {
                 complain.setData(splitDeliverDTO);
             } else if (complain.getComplainType() == 5) {
                 Object date = getDate(complain.getHouseId());
+                complain.setData(date);
+            }else if (complain.getComplainType() == 13||complain.getComplainType() == 14||complain.getComplainType() == 15) {
+                Object date = houseFlowApplyService.checkDetail(complain.getBusinessId());
                 complain.setData(date);
             }
         }

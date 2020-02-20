@@ -14,6 +14,7 @@ import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
+import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -31,6 +32,7 @@ import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.house.House;
@@ -94,6 +96,8 @@ public class HouseFlowApplyService {
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IEvaluateMapper evaluateMapper;
+    @Autowired
+    private IComplainMapper complainMapper;
     @Autowired
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
@@ -1039,6 +1043,8 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setWorkerId(worker.getId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
+            houseFlowApplyDTO.setWithdrawalTime(houseFlowApply.getWithdrawalTime()==null
+                    || !(DateUtil.getDateString2(houseFlowApply.getWithdrawalTime().getTime()).equals(DateUtil.getDateString2(new Date().getTime())))?0:1);
             houseFlowApplyDTO.setApplyTypeName(workerType.getName()+DjConstants.applyTypeMap.get(houseFlowApply.getApplyType())+"(第"+CommonUtil.numberToChinese(yanShouNum)+"次申请)");
             houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
             houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
@@ -1251,15 +1257,28 @@ public class HouseFlowApplyService {
                         map.put("applyTypeName", "审核通过");
                     }
                 }
-                map.put("isEvaluate", 0);//默认为评价
-                //查工匠被业主的评价
-                Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
-               if(evaluate!=null) {
-                   map.put("evaluateStar", evaluate.getStar());
-                   map.put("evaluateContent", evaluate.getContent());
-                   map.put("isEvaluate", 1);//设为已评价
-               }
-
+                if(houseFlowApply.getMemberCheck()==1) {
+                    map.put("isEvaluate", 0);//默认为待评价
+                    //查工匠被业主的评价
+                    Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
+                    if (evaluate != null) {
+                        map.put("evaluateStar", evaluate.getStar());
+                        map.put("evaluateContent", evaluate.getContent());
+                        map.put("isEvaluate", 1);//设为已评价
+                    }
+                }
+                if(houseFlowApply.getMemberCheck()==2) {
+                    map.put("isComplain", -1);//未投诉
+                    example = new Example(Complain.class);
+                    example.createCriteria().andEqualTo(Complain.BUSINESS_ID, houseFlowApply.getId())
+                            .andEqualTo(Complain.BUSINESS_ID, houseFlowApply.getId())
+                            .andEqualTo(Complain.DATA_STATUS, 0);
+                    List<Complain> complains = complainMapper.selectByExample(example);
+                    if(complains.size()>0){
+                        map.put("isComplain", complains.get(0).getStatus());//-1：未投诉 0:待处理。1.驳回。2.接受
+                        map.put("complainId", complains.get(0).getId());
+                    }
+                }
             }
             houseFlowApplyDTO.setList(list);
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));

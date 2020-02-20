@@ -2,6 +2,7 @@ package com.dangjia.acg.dto.core;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ public class HouseFlowApplyDTO {
     private Integer memberCheck;//用户审核结果,0未审核，1审核通过，2审核不通过，3自动审核
     private Integer supervisorCheck;//大管家审核结果,0未审核，1审核通过，2审核不通过
 
+    private Integer withdrawalTime;//业主是否提醒
     private String confirmMsg;//第二次确认消息
     private Integer isPay;//是否需要再次购买 （1是，0否）
 

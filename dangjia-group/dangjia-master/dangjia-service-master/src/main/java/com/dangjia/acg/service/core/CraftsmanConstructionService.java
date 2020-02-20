@@ -1414,6 +1414,6 @@ public class CraftsmanConstructionService {
             }
 
         }
-        return ServerResponse.createBySuccess("获取指定工程进度明细成功");
+        return ServerResponse.createBySuccess("获取指定工程进度明细成功",map);
     }
 }
