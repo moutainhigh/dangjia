@@ -1405,7 +1405,7 @@ public class CraftsmanConstructionService {
             Example example = new Example(HouseFlowApply.class);
             example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
                     .andEqualTo(HouseFlowApply.HOUSE_FLOW_APPLY_ID, productId)
-                    .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                    .andNotIn(HouseFlowApply.MEMBER_CHECK, Arrays.asList(0,1))
                     .andEqualTo(HouseFlowApply.TYPE, 1);
             Integer checkNum = houseFlowApplyMapper.selectCountByExample(example);
             if(checkNum==0){
