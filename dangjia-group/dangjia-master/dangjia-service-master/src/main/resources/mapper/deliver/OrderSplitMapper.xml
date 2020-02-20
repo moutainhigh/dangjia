@@ -114,12 +114,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             dj_deliver_order_split t
         WHERE
             t.house_id =#{houseId}
-        AND NOT EXISTS (
-            SELECT
-                1 from dj_deliver_order_split d
-            WHERE
-                t.id = d.split_parent_id
-        )
+        AND  t.split_parent_id is null
     </select>
 
     <update id="updateOrderSplitStatus">

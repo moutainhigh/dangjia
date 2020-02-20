@@ -23,6 +23,7 @@ public interface WebOrderAPI {
     @ApiOperation(value = "支付订单流水(1:待付款2：支付中3：已支付4：已取消)", notes = "支付订单流水(1:待付款2：支付中3：已支付4：已取消)")
     ServerResponse getAllOrders(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
+                                @RequestParam("cityId") String cityId,
                                 @RequestParam("state") Integer state,
                                 @RequestParam("searchKey") String searchKey, @RequestParam("beginDate") String beginDate,@RequestParam("endDate") String endDate);
 

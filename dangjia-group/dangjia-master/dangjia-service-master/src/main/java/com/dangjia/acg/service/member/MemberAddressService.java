@@ -223,6 +223,26 @@ public class MemberAddressService {
     }
 
     /**
+     * 查找用户地址
+     *
+     * @param houseId 地址ID
+     * @return ServerResponse
+     */
+    public MemberAddress getMemberAddressInfo(String addressId,String houseId) {
+        if(addressId!=null){
+            return iMasterMemberAddressMapper.selectByPrimaryKey(addressId);
+        } else if(houseId!=null){
+            Example example=new Example(MemberAddress.class);
+            example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
+            List<MemberAddress> list= iMasterMemberAddressMapper.selectByExample(example);
+            if(list!=null){
+                return list.get(0);
+            }
+        }
+        return null;
+    }
+
+    /**
      * 查找用户地址列表
      *
      * @param pageDTO        分页信息

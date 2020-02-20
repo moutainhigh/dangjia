@@ -13,7 +13,9 @@
                 t.total_amount totalAmount,
                 t.apply_money applyMoney,
                 t.create_date,
-                m.address shipAddress
+                m.address shipAddress,
+                m.name memberName,
+                m.mobile memberMobile
             FROM
                 dj_deliver_split_deliver t,dj_member_address m
             WHERE
@@ -27,7 +29,9 @@
                     t1.total_amount totalAmount,
                     t1.apply_money applyMoney,
                     t1.create_date,
-                    m.address shipAddress
+                    m.address shipAddress,
+                    m.name memberName,
+                    m.mobile memberMobile
                 FROM
                     dj_repair_mend_deliver t1,dj_member_address m
                 WHERE

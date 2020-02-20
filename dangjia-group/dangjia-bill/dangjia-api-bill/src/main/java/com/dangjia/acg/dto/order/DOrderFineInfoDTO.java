@@ -39,6 +39,9 @@ public class DOrderFineInfoDTO {
     @ApiModelProperty("剩余数量")
     private Double remnantCount;
 
+    @ApiModelProperty("小计(单价*数量）")
+    private Double totalPrice;
+
     private Double stevedorageCost;//搬运费
 
     private Double transportationCost;//运费

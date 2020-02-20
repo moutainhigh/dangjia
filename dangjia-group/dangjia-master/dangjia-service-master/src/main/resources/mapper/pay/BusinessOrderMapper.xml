@@ -64,63 +64,45 @@
 
     <select id="getWebOrderList" resultType="com.dangjia.acg.dto.deliver.WebOrderDTO">
         SELECT
-        a.id AS id,
-        a.number AS orderId,
-        CONCAT(
-        c.residential,
-        IFNULL(c.building, '*'),
-        '栋',
-        IFNULL(CONCAT(c.unit, '单元'),'' ),
-        IFNULL(c.number, '*'),
-        '号'
-        ) AS houseName,
-        d.id AS memberId,
-        d.mobile AS mobile,
-        a.pay_order_number AS payOrderNumber,
-        a.total_price AS totalAmount,
-        a.discounts_price AS redPackAmount,
-        a.pay_price AS actualPayment,
-        a.type AS type,
-        a.image ,
-        a.storefront_id as storefrontId,
-        a.state AS state,
-        a.task_id AS taskId,
-        c.village_id storeName
+            a.id AS id,
+            a.number AS orderId,
+            m.address AS houseName,
+            m.member_id AS memberId,
+            m.mobile AS mobile,
+            a.pay_order_number AS payOrderNumber,
+            a.total_price AS totalAmount,
+            a.discounts_price AS redPackAmount,
+            a.pay_price AS actualPayment,
+            a.type AS type,
+            a.image ,
+            a.storefront_id as storefrontId,
+            a.state AS state,
+            a.task_id AS taskId,
+            c.village_id storeName
         FROM
-        dj_pay_business_order AS a
-        INNER JOIN dj_member AS d ON d.id = a.member_id
-        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name  FROM dj_member_city c GROUP BY c.member_id )
-        mt ON mt.member_id = d.id AND FIND_IN_SET(#{cityId}, mt.city_id )
-        LEFT JOIN dj_house AS c ON a.house_id = c.id
+            dj_pay_business_order AS a
+        INNER JOIN dj_deliver_order t on a.number=t.business_order_number
+        INNER JOIN dj_member_address m  ON (t.address_id=m.id or t.house_id=m.house_id)
+        LEFT JOIN dj_house c on a.house_id=c.id
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            INNER JOIN dj_pay_pay_order AS pa ON pa.number = a.pay_order_number
+            INNER JOIN dj_pay_pay_order pa AS pa ON pa.number = a.pay_order_number
         </if>
-        WHERE
-        a.data_status = 0
+        WHERE a.data_status = 0
+        and m.city_id=#{cityId}
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and pa.create_date between #{beginDate} and #{endDate}
-        </if>
-        <if test="storefrontId!=null and storefrontId!=''">
-            and a.storefront_id = #{storefrontId}
         </if>
         <if test="state != -1">
             and a.state = #{state}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and ( d.mobile like CONCAT('%',#{searchKey},'%')
-            or CONCAT(
-            c.residential,
-            IFNULL(c.building, '*'),
-            '栋',
-            IFNULL(CONCAT(c.unit, '单元'),'' ),
-            IFNULL(c.number, '*'),
-            '号'
-            ) LIKE CONCAT('%',#{searchKey},'%')
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or m.address LIKE CONCAT('%',#{searchKey},'%')
             or a.pay_order_number like CONCAT('%',#{searchKey},'%')
             or a.number like CONCAT('%',#{searchKey},'%'))
         </if>
 
-        GROUP BY a.id
+        group by a.id
         ORDER BY
         a.create_date DESC
     </select>

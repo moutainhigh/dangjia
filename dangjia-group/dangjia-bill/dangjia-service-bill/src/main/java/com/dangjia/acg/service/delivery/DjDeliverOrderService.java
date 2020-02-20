@@ -1170,10 +1170,11 @@ public class DjDeliverOrderService {
             Order order=iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DOrderFineInfoDTO> dOrderArrInfoDTO = iBillDjDeliverOrderMapper.queryOrderFineInfo(orderId);
-
+            Double totalPrice=0d;//商品总额（单价*数量）
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             for (DOrderFineInfoDTO dOrderFineInfoDTO : dOrderArrInfoDTO) {
                 dOrderFineInfoDTO.setImage(StringTool.getImage(dOrderFineInfoDTO.getImage(),imageAddress));
+                totalPrice=MathUtil.add(totalPrice,dOrderFineInfoDTO.getTotalPrice());
             }
             PageInfo orderInfoDTOSs = new PageInfo(dOrderArrInfoDTO);
             Map<String, Object> map =iBillDjDeliverOrderMapper.selectDeliverOrderInfoById(orderId);
@@ -1186,6 +1187,7 @@ public class DjDeliverOrderService {
                 map.put("elevator", floor);//是否电梯房
             }
             //查询优惠卷信息
+            map.put("totalPrice",totalPrice);//商品小计（单价*数量）
             map.put("discountType", "");//优惠卷类型
             map.put("discountNumber", "");//优惠卷编号
             map.put("discountName", "");//优惠卷名称

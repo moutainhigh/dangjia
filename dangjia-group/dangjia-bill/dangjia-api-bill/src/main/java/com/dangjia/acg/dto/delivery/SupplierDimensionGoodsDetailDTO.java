@@ -22,7 +22,7 @@ public class SupplierDimensionGoodsDetailDTO {
     private String totalCost;//成本总价
     private String price;//
     private String totalPrice;//
-    private String productId;//
+    private String productId;//商品ID
 
 
 }
