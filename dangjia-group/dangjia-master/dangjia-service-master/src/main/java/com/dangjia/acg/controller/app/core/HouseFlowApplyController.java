@@ -70,6 +70,6 @@ public class HouseFlowApplyController implements HouseFlowApplyAPI {
     @Override
     @ApiMethod
     public ServerResponse queryAcceptanceTrend(String userToken,String houseId) {
-        return houseFlowApplyService.queryAcceptanceTrend( userToken,houseId);
+        return houseFlowApplyService.queryAcceptanceTrend( userToken,houseId,null);
     }
 }

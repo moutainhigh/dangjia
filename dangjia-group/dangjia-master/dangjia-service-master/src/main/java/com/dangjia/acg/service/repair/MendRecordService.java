@@ -31,6 +31,7 @@ import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.HouseFlowApplyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -76,6 +77,8 @@ public class MendRecordService {
     private IMemberMapper memberMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private HouseFlowApplyService houseFlowApplyService;
 
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
@@ -503,7 +506,7 @@ public class MendRecordService {
             getMendOrderList(worker, roleType, houseId, 2, queryId, returnMap);
             sortMax(returnMap);
         } else if (type == 6) {
-            getHouseFlowApplies(worker, roleType, houseId, type, returnMap);
+            return houseFlowApplyService.queryAcceptanceTrend(userToken,houseId,worker.getWorkerType());
         } else if (type == 5) {
             getOrderSplitList(houseId, type, queryId, returnMap);
         } else {

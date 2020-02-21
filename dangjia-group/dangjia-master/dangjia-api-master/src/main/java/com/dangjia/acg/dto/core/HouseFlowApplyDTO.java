@@ -31,7 +31,8 @@ public class HouseFlowApplyDTO {
     private Integer withdrawalTime;//业主是否提醒
     private String confirmMsg;//第二次确认消息
     private Integer isPay;//是否需要再次购买 （1是，0否）
-
+    private Integer isComplain;//-1：未投诉 0:待处理。1.驳回。2.接受
+    private String  complainId;//投诉ID
     private String supervisorHouseFlowId;
     private String applyDec;
     private String managerId;
