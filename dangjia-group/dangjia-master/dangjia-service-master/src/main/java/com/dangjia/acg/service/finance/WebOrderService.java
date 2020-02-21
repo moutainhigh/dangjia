@@ -1,19 +1,18 @@
 package com.dangjia.acg.service.finance;
 
-import com.ctc.wstx.util.DataUtil;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.deliver.OrderItemByDTO;
-import com.dangjia.acg.dto.deliver.WebOrderDTO;
+import com.dangjia.acg.dto.deliver.*;
 import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRuleMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
@@ -23,13 +22,18 @@ import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -45,6 +49,7 @@ import java.util.Map;
  */
 @Service
 public class WebOrderService {
+    private static Logger logger = LoggerFactory.getLogger(WebOrderService.class);
     @Autowired
     private IBusinessOrderMapper iBusinessOrderMapper;
     @Autowired
@@ -56,6 +61,8 @@ public class WebOrderService {
     private IPayOrderMapper iPayOrderMapper;
     @Autowired
     private IStoreMapper iStoreMapper;
+    @Autowired
+    private IQuantityRoomMapper iQuantityRoomMapper;
 
 
     @Autowired
@@ -175,6 +182,52 @@ public class WebOrderService {
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 财务--订单管理--订单详情
+     * @param businessNumber 业务支付单号
+     * @return
+     */
+    public ServerResponse getOrderItemInfoList( String businessNumber){
+        try{
+            //1.查询订单基础信息
+            BusinessOrderInfoDTO businessOrderInfoDTO=iBusinessOrderMapper.selectBusinessOrderInfo(businessNumber);
+            if(businessOrderInfoDTO==null){
+                return ServerResponse.createByErrorMessage("未找到符合条件的订单");
+            }
+            //查询楼层数
+            //查询房子信息，获取房子对应的楼层
+            QuantityRoom quantityRoom=iQuantityRoomMapper.getQuantityRoom(businessOrderInfoDTO.getHouseId(),0);
+            if(quantityRoom!=null&& StringUtils.isNotBlank(quantityRoom.getId())){
+                Integer elevator=quantityRoom.getElevator();//是否电梯房
+                String floor=quantityRoom.getFloor();//楼层
+                businessOrderInfoDTO.setFloor(floor);//楼层
+                businessOrderInfoDTO.setElevator(elevator);//是否电梯房
+            }
+            //查询订单子单汇总金额，按店铺划分
+            List<OrderDTO> orderInfoList=iBusinessOrderMapper.selectOrderInfoList(businessNumber);
+            if(orderInfoList!=null){
+                for(OrderDTO order:orderInfoList){
+                    //查询每个店铺下的商品详情
+                    List<OrderItemDTO> orderItemList = iBusinessOrderMapper.queryOrderItemList(order.getOrderId());
+                    Double totalPrice=0d;//商品总额（单价*数量）
+                    String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                    for (OrderItemDTO orderItemDTO : orderItemList) {
+                        orderItemDTO.setImage(StringTool.getImage(orderItemDTO.getImage(),imageAddress));
+                        totalPrice= MathUtil.add(totalPrice,orderItemDTO.getTotalPrice());
+                    }
+                    order.setOrderItemList(orderItemList);
+                    order.setTotalPrice(totalPrice);
+                }
+            }
+            //查询优惠卷信息(暂无）
+            businessOrderInfoDTO.setOrderInfoList(orderInfoList);
+            return ServerResponse.createBySuccess("查询成功",businessOrderInfoDTO);
+        }catch (Exception e){
+            logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }

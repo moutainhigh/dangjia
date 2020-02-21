@@ -1183,14 +1183,15 @@ public class DjDeliverOrderService {
             if(quantityRoom!=null&& StringUtils.isNotBlank(quantityRoom.getId())){
                 Integer elevator=quantityRoom.getElevator();//是否电梯房
                 String floor=quantityRoom.getFloor();//楼层
-                map.put("floor", elevator);//楼层
-                map.put("elevator", floor);//是否电梯房
+                map.put("elevator", elevator);//是否电梯房
+                map.put("floor", floor);//楼层
             }
             //查询优惠卷信息
             map.put("totalPrice",totalPrice);//商品小计（单价*数量）
             map.put("discountType", "");//优惠卷类型
             map.put("discountNumber", "");//优惠卷编号
             map.put("discountName", "");//优惠卷名称
+            map.put("discountPrice", "");//优惠卷金额
             map.put("list",orderInfoDTOSs);//订单商品明细
             return ServerResponse.createBySuccess("查询成功", map);
         }catch (Exception e){

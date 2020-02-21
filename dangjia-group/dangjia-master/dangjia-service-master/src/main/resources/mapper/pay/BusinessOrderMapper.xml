@@ -130,5 +130,74 @@
 		it.worker_goods_sn
     ORDER BY 	it.product_sn DESC,it.worker_goods_sn DESC
 	</select>
+
+    <select id="selectBusinessOrderInfo" resultType="com.dangjia.acg.dto.deliver.BusinessOrderInfoDTO">
+        SELECT
+            p.id businessOrderId,
+            p.number businessNumber,
+            p.total_price totalAmount,
+            p.pay_price actualPaymentPrice,
+            sum(t.total_stevedorage_cost) totalStevedorageSost,
+            sum(t.total_transportation_cost) totalTransportationSost,
+            p.discounts_price totalDiscountPrice,
+            p.create_date orderGenerationTime,
+            m.member_id memberId,
+            m.`name` memberName,
+            m.mobile memberMobile,
+            m.address address,
+            p.red_packet_pay_money_id discountId,
+            p.state,
+            t.payment,
+            p.house_id houseId
+        FROM
+            dj_deliver_order t
+        INNER JOIN dj_pay_business_order p on t.business_order_number=p.number
+        LEFT JOIN dj_member_address m ON (
+            t.address_id = m.id
+            OR t.house_id = m.house_id
+        )
+        WHERE
+            p.number=#{businessNumber}
+        and (t.parent_order_id is null or t.parent_order_id=t.id)
+    </select>
+    <!-- 查询订单详情信息（按店铺汇总)-->
+    <select id="selectOrderInfoList" resultType="com.dangjia.acg.dto.deliver.OrderDTO">
+        SELECT
+            t.id orderId,
+            t.order_number orderNumber,
+            t.total_amount totalAmount,
+            t.actual_payment_price actualPaymentPrice,
+            t.total_stevedorage_cost totalStevedorageSost,
+            t.total_transportation_cost totalTransportationSost,
+            t.total_discount_price totalDiscountPrice,
+            s.id storefrontId,
+            s.storefront_name storefrontName
+        FROM
+            dj_deliver_order t
+        INNER JOIN dj_basics_storefront s ON t.storefont_id = s.id
+        WHERE
+            t.business_order_number = #{businessNumber}
+    </select>
+    <!-- 查询订单明细信息-->
+    <select id="queryOrderItemList" resultType="com.dangjia.acg.dto.deliver.OrderItemDTO">
+            select
+                bsp.image as image,
+                bpt.name as name,
+                bpt.product_sn as productSn,
+                doi.price as price,
+                doi.shop_count AS shopCount,
+                doi.ask_count as askCount,
+                doi.return_count as returnCount,
+                doi.stevedorage_cost stevedorageCost,
+                doi.transportation_cost transportationCost,
+                (doi.price*doi.shop_count) totalPrice,
+                (IFNULL(doi.shop_count,0) - IFNULL(doi.ask_count,0) - IFNULL(doi.return_count,0)) AS remnantCount,
+                (IFNULL(doi.shop_count,0) * IFNULL(doi.price,0)) AS remember
+            from
+                dj_deliver_order_item doi
+            INNER JOIN dj_basics_storefront_product bsp on doi.product_id = bsp.id
+            INNER JOIN dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
+            where doi.order_id = #{orderId}
+    </select>
 </mapper>
 
