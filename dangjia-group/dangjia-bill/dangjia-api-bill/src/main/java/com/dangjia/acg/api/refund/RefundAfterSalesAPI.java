@@ -85,8 +85,20 @@ public interface RefundAfterSalesAPI {
      * @return
      */
     @PostMapping("/app/refund/refundOrder/queryRefundOnlyHistoryOrderInfo")
-    @ApiOperation(value = "查询退款/退货退款的退款详情根据退货单", notes = "查询仅退款的退款详情根据退货单")
+    @ApiOperation(value = "查询仅退款的退款详情根据退货单", notes = "查询仅退款的退款详情根据退货单")
     ServerResponse queryRefundOnlyHistoryOrderInfo(@RequestParam("cityId") String cityId,
+                                                   @RequestParam("repairMendOrderId") String repairMendOrderId);
+
+    /**
+     * 查询退货退款--退款订单
+     *
+     * @param cityId
+     * @param repairMendOrderId
+     * @return
+     */
+    @PostMapping("/app/refund/refundOrder/queryRefundHistoryOrderInfo")
+    @ApiOperation(value = "退货退款--退款订单", notes = "退货退款--退款订单")
+    ServerResponse queryRefundHistoryOrderInfo(@RequestParam("cityId") String cityId,
                                                    @RequestParam("repairMendOrderId") String repairMendOrderId);
 
     @PostMapping("/app/refund/refundOrder/cancelRepairApplication")

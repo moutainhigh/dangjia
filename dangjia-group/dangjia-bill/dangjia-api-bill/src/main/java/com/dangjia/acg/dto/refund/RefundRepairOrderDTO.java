@@ -1,10 +1,12 @@
 package com.dangjia.acg.dto.refund;
 
+import com.dangjia.acg.modle.repair.MendDeliver;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class RefundRepairOrderDTO {
@@ -71,7 +73,11 @@ public class RefundRepairOrderDTO {
     @ApiModelProperty("可操作编码描述")
     private String associatedOperationName;
 
-    private List<RefundRepairOrderMaterialDTO> orderMaterialList;
+    private Integer mendDeliverCount;//退货单数量
+
+    private List<RefundRepairOrderMaterialDTO> orderMaterialList;//商品明细
 
     private List<OrderProgressDTO> orderProgressList;
+
+    private List<Map<String,Object>> mendDeliverList;//退货单
 }

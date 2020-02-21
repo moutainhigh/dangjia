@@ -104,6 +104,18 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     }
 
     /**
+     * 查询退货退款--退款订单
+     *
+     * @param cityId
+     * @param repairMendOrderId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryRefundHistoryOrderInfo(String cityId,String repairMendOrderId){
+        return refundAfterSalesService.queryRefundHistoryOrderInfo(cityId,repairMendOrderId);
+    }
+    /**
      * 撤销退款申请
      * @param cityId
      * @param repairMendOrderId

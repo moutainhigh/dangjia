@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
 import com.dangjia.acg.mapper.order.IBillQuantityRoomMapper;
 import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
 import com.dangjia.acg.mapper.refund.*;
+import com.dangjia.acg.mapper.repair.IBillMendDeliverMapper;
 import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.mapper.task.IBillTaskStackMapper;
 import com.dangjia.acg.model.Config;
@@ -45,6 +46,7 @@ import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.ChangeOrder;
+import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.service.order.BillMendOrderCheckService;
@@ -99,7 +101,7 @@ public class RefundAfterSalesService {
     @Autowired
     private IBillDjDeliverOrderItemMapper iBillDjDeliverOrderItemMapper;
     @Autowired
-    private IBillDjDeliverOrderMapper iBillDjDeliverOrderMapper;
+    private IBillMendDeliverMapper billMendDeliverMapper;
     @Autowired
     private IBillOrderProgressMapper iBillOrderProgressMapper;
     @Autowired
@@ -528,7 +530,7 @@ public class RefundAfterSalesService {
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 for(RefundRepairOrderDTO refundRepairOrderDTO:repairOrderDTOList){
                    String  repairMendOrderId=refundRepairOrderDTO.getRepairMendOrderId();
-                    List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId);
+                    List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId,null);
                     //getRepairOrderProductList(repairMaterialList,address);
                    // refundRepairOrderDTO.setRepairOrderMaterialDTO(repairMaterialList);
                     refundRepairOrderDTO.setRepairProductCount(repairMaterialList.size());
@@ -647,7 +649,7 @@ public class RefundAfterSalesService {
         try{
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
-            List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId);//退款商品列表查询
+            List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId,null);//退款商品列表查询
             getRepairOrderProductList(repairMaterialList,address);
             refundRepairOrderDTO.setOrderMaterialList(repairMaterialList);//将退款材料明细放入对象中
             //查询对应的流水节点信息(根据订单ID）
@@ -672,20 +674,64 @@ public class RefundAfterSalesService {
             refundRepairOrderDTO.setMobile(refundRepairOrderDTO.getStorefrontMobile());//拨打电话
             refundRepairOrderDTO.setStorefrontIcon(address+refundRepairOrderDTO.getStorefrontIcon());
             //相关凭证图片地址存储
-            String imageArr=refundRepairOrderDTO.getImageArr();
-            if(StringUtils.isNotBlank(imageArr)){
-                String[] imgArr = imageArr.split(",");
-                StringBuilder imgStr = new StringBuilder();
-                StringBuilder imgUrlStr = new StringBuilder();
-                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-                refundRepairOrderDTO.setImageArrUrl(imgStr.toString());//图片详情地址设置
-            }
+            refundRepairOrderDTO.setImageArrUrl(StringTool.getImage(refundRepairOrderDTO.getImageArr(),address));//图片详情地址设置
+
             return ServerResponse.createBySuccess("查询成功",refundRepairOrderDTO);
         }catch (Exception e){
             logger.error("queryRefundOnlyHistoryOrderInfo查询退款详情失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     * 查询退货退款--退款订单
+     *
+     * @param cityId
+     * @param repairMendOrderId
+     * @return
+     */
+    public ServerResponse queryRefundHistoryOrderInfo(String cityId,String repairMendOrderId){
+        try{
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
+            if("3".equals(refundRepairOrderDTO.getState())){//已分配供应商
+                List<Map<String,Object>> deliverList=new ArrayList<>();
+                Example example=new Example(MendDeliver.class);
+                example.createCriteria().andEqualTo(MendDeliver.MEND_ORDER_ID,refundRepairOrderDTO.getRepairMendOrderId());
+                List<MendDeliver> mendDeliverList=billMendDeliverMapper.selectByExample(example);
+                if(mendDeliverList!=null){
+                    Map<String,Object> param;
+                    for(MendDeliver mendDeliver:mendDeliverList){
+                        List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId,mendDeliver.getId());
+                        param=new HashMap();
+                        param.put("number",mendDeliver.getNumber());
+                        param.put("state",mendDeliver.getShippingState());//0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分退货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）
+                        param.put("stateName",CommonUtil.getDeliverStateName(mendDeliver.getShippingState()));
+                        param.put("totalAmount",mendDeliver.getTotalAmount());//退货总额
+                        param.put("count",repairMaterialList.size());//总件数
+                        if(repairMaterialList!=null&&repairMaterialList.size()>0){
+                            RefundRepairOrderMaterialDTO rm=repairMaterialList.get(0);
+                            param.put("ProductName",rm.getProductName());//商品名称
+                        }
+                        param.put("image",getStartTwoImage(repairMaterialList,address));//图片
+                        deliverList.add(param);
+                    }
+                }
+                refundRepairOrderDTO.setMendDeliverList(deliverList);
+            }else{//未分配供应商（1待处理（可撤销），5已撤销）
+                List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId,null);//退款商品列表查询
+                getRepairOrderProductList(repairMaterialList,address);
+                refundRepairOrderDTO.setOrderMaterialList(repairMaterialList);//将退款材料明细放入对象中
+            }
+            //相关凭证图片地址存储
+            refundRepairOrderDTO.setImageArrUrl(StringTool.getImage(refundRepairOrderDTO.getImageArr(),address));//图片详情地址设置
+            return ServerResponse.createBySuccess("查询成功",refundRepairOrderDTO);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
     //判断对就原按钮显不显示
     private List<OrderProgressDTO> setOrderProgressList(List<OrderProgressDTO> orderProgressDTOList,OrderProgressDTO orderProgressDTO){
         List<OrderProgressDTO> list=new ArrayList<>();
@@ -771,7 +817,7 @@ public class RefundAfterSalesService {
      * @param type 4仅退款，5退货退款
      */
     void updateRepairOrderInfo(RefundRepairOrderDTO refundRepairOrderDTO,String repairMendOrderId,Integer state,Integer type){
-        List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId);//退款商品列表查询
+        List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId,null);//退款商品列表查询
         if(repairMaterialList!=null&&repairMaterialList.size()>0){
             for(RefundRepairOrderMaterialDTO rm:repairMaterialList){
                 Double returnCount=rm.getReturnCount();

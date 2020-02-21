@@ -60,7 +60,7 @@ public interface RefundAfterSalesMapper extends Mapper<Order> {
      * @param repairMendOrderId
      * @return
      */
-    List<RefundRepairOrderMaterialDTO> queryRefundOnlyHistoryOrderMaterialList(@Param("repairMendOrderId") String repairMendOrderId);
+    List<RefundRepairOrderMaterialDTO> queryRefundOnlyHistoryOrderMaterialList(@Param("repairMendOrderId") String repairMendOrderId,@Param("mendDeliverId") String mendDeliverId);
 
     /**
      * 根据退货单ID查询退货详情信息

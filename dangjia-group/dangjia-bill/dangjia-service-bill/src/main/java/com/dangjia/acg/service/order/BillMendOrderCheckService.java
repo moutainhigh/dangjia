@@ -67,7 +67,7 @@ public class BillMendOrderCheckService {
             MendOrder mendOrder=iBillMendOrderMapper.selectByPrimaryKey(repairMendOrderId);//查询对应的退货申请单信息
           if(mendOrder.getType() == 4||mendOrder.getType() == 5) {//业主退款/业主退货退款
               /*审核通过修改仓库数量,记录流水*/
-              List<RefundRepairOrderMaterialDTO> repairMaterialList = refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(mendOrder.getId());//退款商品列表查询
+              List<RefundRepairOrderMaterialDTO> repairMaterialList = refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(mendOrder.getId(),null);//退款商品列表查询
               if (repairMaterialList != null && repairMaterialList.size() > 0) {
                   for (RefundRepairOrderMaterialDTO mendMateriel : repairMaterialList) {
                       Example example = new Example(Warehouse.class);

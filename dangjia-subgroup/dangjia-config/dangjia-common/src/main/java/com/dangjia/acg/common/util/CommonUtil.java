@@ -666,6 +666,30 @@ public class CommonUtil {
     return stateName;
   }
 
+  public static String getDeliverStateName(Integer state) {
+    String stateName="退货待处理";
+    //状态0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分退货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）
+    switch (state) {
+      case 4:
+        stateName = "部分退货";
+        break;
+      case 5:
+        stateName = "平台处理中";
+        break;
+      case 6:
+        stateName = "业主认可部分收货";
+        break;
+      case 2:
+      case 3:
+      case 7:
+      case 8:
+        stateName = "已完成";
+        break;
+      default:
+        break;
+    }
+    return stateName;
+  }
   /**
    * 判断对象属性是否是基本数据类型,包括是否包括string
    * @param className

@@ -178,6 +178,9 @@
           dj_basics_storefront_product t1
         where t.product_id = t1.id
         and t.mend_order_id=#{repairMendOrderId}
+        <if test="null!=mendDeliverId and ''!=mendDeliverId">
+            and t.repair_mend_deliver_id=#{mendDeliverId}
+        </if>
     </select>
     <!-- 根据退货单ID查询退货单信息 -->
     <select id="queryRefundOnlyHistoryOrderInfo" resultType="com.dangjia.acg.dto.refund.RefundRepairOrderDTO">
@@ -194,7 +197,7 @@
             t.create_date applyDate,
             t.apply_member_id applyMemberId,
             t2.`name` applyMemberName,
-            IFNULL(t.actual_total_amount,t.total_amount+IFNULL(t.carriage,0)) actualTotalAmount,
+            t.actual_total_amount actualTotalAmount,
             t.total_amount totalAmount,
             t.state,
             t.type,

@@ -74,8 +74,8 @@ public class MendOrder extends BaseEntity {
 	private Integer state;
 
 	@Column(name = "total_amount")
-	@Desc(value = "订单总额")
-	@ApiModelProperty("订单总额")
+	@Desc(value = "实退款")
+	@ApiModelProperty("实退款")
 	private Double totalAmount;
 
 	@Column(name = "carriage")
@@ -90,8 +90,8 @@ public class MendOrder extends BaseEntity {
 
 
 	@Column(name = "actual_total_amount")
-	@Desc(value = "实际总价（不含运费）")
-	@ApiModelProperty("实际总价（不含运费）")
+	@Desc(value = "订单总额")
+	@ApiModelProperty("订单总额")
 	private Double actualTotalAmount;
 
 	@Column(name = "room_charge")
