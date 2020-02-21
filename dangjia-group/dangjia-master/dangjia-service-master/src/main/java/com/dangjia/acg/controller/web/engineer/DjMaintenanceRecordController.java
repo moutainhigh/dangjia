@@ -301,10 +301,14 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDimensionRecordInFo(String mrId) {
-        return djMaintenanceRecordService.queryDimensionRecordInFo(mrId);
+    public ServerResponse queryDimensionRecordInFo(String mrrpId) {
+        return djMaintenanceRecordService.queryDimensionRecordInFo(mrrpId);
     }
-
+    @Override
+    @ApiMethod
+    public ServerResponse queryDimensionInfoByTaskId(String taskId){
+        return djMaintenanceRecordService.queryDimensionInfoByTaskId(taskId);
+    }
     @Override
     @ApiMethod
     public ServerResponse insertResponsibleParty(String mrrpId,String responsiblePartyId,String houseId,

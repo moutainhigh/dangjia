@@ -41,6 +41,10 @@ public class DimensionRecordDTO {
     private Integer pageType;//1-工匠先进场,2管家先进场
     private Integer primaryType;//1-原工匠,2 非原工匠
 
+    private Integer maintenanceType;//维保通知类型：1，责任通知，2最终责任通知
+    private Integer isComplain;//是否可申诉（1可申诉，0不可申诉，已过期）
+    private Double stevedorageCost;//搬运费
+    private Double transportationCost;//运费
 
     private List<Map<String,Object>> reimbursementInFo;//报销信息
 }

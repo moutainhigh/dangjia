@@ -79,6 +79,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 import tk.mybatis.mapper.entity.Example;
@@ -680,6 +681,8 @@ public class DjMaintenanceRecordService {
                     //1.查询对应的责任方，及责任方占比
                     productResponsibleType=templateRatio.getProductResponsibleType();
                     maintenanceTotalPrice=MathUtil.mul(totalPrice,retio);
+                    //3.保存对应的数据到占比表中去
+                    DjMaintenanceRecordResponsibleParty recordResponsibleParty=new DjMaintenanceRecordResponsibleParty();
                     if(productResponsibleType==1){//找商家店铺
                         responsiblePartyId=djMaintenanceRecordProductMapper.selectStorefrontIdByHouseId(houseId,templateRatio.getProductResponsibleId());
                        // 扣除责任方的钱，扣除店铺的钱
@@ -692,11 +695,8 @@ public class DjMaintenanceRecordService {
                         maintenanceMinusDetention(worker,djMaintenanceRecord.getHouseId(),BigDecimal.valueOf(maintenanceTotalPrice),djMaintenanceRecord.getId());
                         WorkerType workerType=workerTypeMapper.selectByPrimaryKey(templateRatio.getProductResponsibleId());
                         //推送扣款通知给原工匠
-                        taskStackService.insertTaskStackInfo(houseId,worker.getId(),"维保责任划分",workerType.getImage(),9,djMaintenanceRecord.getId());
+                        taskStackService.insertTaskStackInfo(houseId,worker.getId(),"维保责任划分",workerType.getImage(),9,recordResponsibleParty.getId());
                     }
-
-                    //3.保存对应的数据到占比表中去
-                    DjMaintenanceRecordResponsibleParty recordResponsibleParty=new DjMaintenanceRecordResponsibleParty();
                     recordResponsibleParty.setMaintenanceRecordId(djMaintenanceRecord.getId());
                     recordResponsibleParty.setResponsiblePartyId(responsiblePartyId);
                     recordResponsibleParty.setProportion(templateRatio.getProductRatio());
@@ -1451,72 +1451,99 @@ public class DjMaintenanceRecordService {
 
     /**
      * 查询维保详情
-     * @param mrId
      * @return
      */
-    public ServerResponse queryDimensionRecordInFo(String mrId) {
+    public ServerResponse queryDimensionRecordInFo(String mrrpId) {
         try {
-
-            DimensionRecordDTO dimensionRecordDTOS = djMaintenanceRecordResponsiblePartyMapper.queryDimensionRecordInFo(mrId, 2);
-
-            //查询房子信息
-            Example example = new Example(HouseFlowApply.class);
-            example.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID, dimensionRecordDTOS.getResponsiblePartyId())
-                    .andEqualTo(HouseFlowApply.DATA_STATUS, 0)
-                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 2);
-            example.orderBy(HouseFlowApply.CREATE_DATE).desc();
-            List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
-            String dateStr = "";
-            if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
-                dateStr = DateUtil.dateToString(houseFlowApplies.get(0).getCreateDate(), "yyyy-MM-dd");
-            }
-
-            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地" + "“" + dimensionRecordDTOS.getHouseName() + "”," +
-                    "业主申请了质保,经管家实地查看,平台合适确定,您需要负担" + dimensionRecordDTOS.getProportion() + "%的责任," +
-                    "已从您的滞留金中扣除总维保金额的" + dimensionRecordDTOS.getProportion() + "%,请悉知,如有疑问可申诉。");
-
-            //查询报销信息
-            List<Map<String,Object>> list = new ArrayList<>();
-            example = new Example(Complain.class);
-            example.createCriteria().andEqualTo(Complain.BUSINESS_ID, mrId)
-                    .andEqualTo(Complain.DATA_STATUS, 0);
-            List<Complain> Complains = iComplainMapper.selectByExample(example);
-            if(Complains != null && Complains.size() > 0){
-                Complains.forEach(a ->{
-                    Map<String,Object> map = new HashMap<>();
-                    map.put("reimbursementAmount",a.getActualMoney());//报销金额
-                    map.put("reimbursementRemark",a.getDescription());//报销备注
-                    map.put("reimbursementImage",getImage(a.getImage()));//报销图片
-                    list.add(map);
-                });
-                dimensionRecordDTOS.setReimbursementInFo(list);
-            }
-
-            //维保商品列表
-            dimensionRecordDTOS.setProductList(getMaintenanceProductList(mrId,1));
-
-            //查询申诉状态
-            example = new Example(Complain.class);
-            example.createCriteria().andEqualTo(Complain.MEMBER_ID, dimensionRecordDTOS.getResponsiblePartyId())
-                    .andEqualTo(Complain.DATA_STATUS, 0)
-                    .andEqualTo(Complain.HOUSE_ID, dimensionRecordDTOS.getHouseId())
-                    .andEqualTo(Complain.COMPLAIN_TYPE, 10);
-            example.orderBy(HouseFlowApply.CREATE_DATE).desc();
-            List<Complain> complains = iComplainMapper.selectByExample(example);
-            //0-申诉 1-申诉中  2-已完成
-            if (complains != null && complains.size() > 0) {
-                dimensionRecordDTOS.setType(complains.get(0).getStatus() == 0 ? 1 : 2);
-            } else {
-                dimensionRecordDTOS.setType(0);
-            }
-
-            return ServerResponse.createBySuccess("查询成功", dimensionRecordDTOS);
+            return ServerResponse.createBySuccess("查询成功", getDimensionRecordInfo(mrrpId));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 
+    /**
+     * 查询维保定责信息
+     * @param mrrpId 维保ID
+     * @param
+     * @return
+     */
+    public DimensionRecordDTO getDimensionRecordInfo(String mrrpId){
+        DimensionRecordDTO dimensionRecordDTOS = djMaintenanceRecordResponsiblePartyMapper.queryDimensionRecordInFo(mrrpId, 2);
+
+        String maintenanceRecordId=dimensionRecordDTOS.getMrId();
+        //查询房子信息
+        Example example = new Example(HouseFlowApply.class);
+        example.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID, dimensionRecordDTOS.getResponsiblePartyId())
+                .andEqualTo(HouseFlowApply.DATA_STATUS, 0)
+                .andEqualTo(HouseFlowApply.APPLY_TYPE, 2);
+        example.orderBy(HouseFlowApply.CREATE_DATE).desc();
+        List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
+        String dateStr = "";
+        if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
+            dateStr = DateUtil.dateToString(houseFlowApplies.get(0).getCreateDate(), "yyyy-MM-dd");
+        }
+        dimensionRecordDTOS.setMaintenanceType(1);//定责类型：1定责通知，七天内可申诉
+        DjMaintenanceManualAllocation manualAllocation=manualAllocationMapper.selectByPrimaryKey(maintenanceRecordId);
+        if(manualAllocation!=null){
+            maintenanceRecordId=manualAllocation.getMaintenanceRecordId();
+            dimensionRecordDTOS.setMaintenanceType(2);//2最终责任通知
+            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地" + "“" + dimensionRecordDTOS.getHouseName() + "”," +
+                    "业主申请了质保，业主申请了质保，根据维保服务项目责任划分，你需要负担一定的责任，已从您的滞留金中扣除总维保金额如下，请知悉。");
+        }else{
+            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地" + "“" + dimensionRecordDTOS.getHouseName() + "”," +
+                    "业主申请了质保，业主申请了质保，根据维保服务项目责任划分，你需要负担" + dimensionRecordDTOS.getProportion() + "%的责任," +
+                    "已从您的滞留金中扣除总维保金额的" + dimensionRecordDTOS.getProportion() + "%，请悉知,如有疑问可在7天内申诉。");
+        }
+
+        //查询报销信息
+        List<Map<String,Object>> list = new ArrayList<>();
+        example = new Example(Complain.class);
+        example.createCriteria().andEqualTo(Complain.BUSINESS_ID, maintenanceRecordId)
+                .andEqualTo(Complain.DATA_STATUS, 0);
+        List<Complain> Complains = iComplainMapper.selectByExample(example);
+        if(Complains != null && Complains.size() > 0){
+            Complains.forEach(a ->{
+                Map<String,Object> map = new HashMap<>();
+                map.put("reimbursementAmount",a.getActualMoney());//报销金额
+                map.put("reimbursementRemark",a.getDescription());//报销备注
+                map.put("reimbursementImage",getImage(a.getImage()));//报销图片
+                list.add(map);
+            });
+        }
+        dimensionRecordDTOS.setReimbursementInFo(list);
+        //维保商品列表
+        dimensionRecordDTOS.setProductList(getMaintenanceProductList(maintenanceRecordId,1));
+
+        //查询申诉状态
+        example = new Example(Complain.class);
+        example.createCriteria().andEqualTo(Complain.MEMBER_ID, dimensionRecordDTOS.getResponsiblePartyId())
+                .andEqualTo(Complain.DATA_STATUS, 0)
+                .andEqualTo(Complain.HOUSE_ID, dimensionRecordDTOS.getHouseId())
+                .andEqualTo(Complain.COMPLAIN_TYPE, 10);
+        example.orderBy(HouseFlowApply.CREATE_DATE).desc();
+        List<Complain> complains = iComplainMapper.selectByExample(example);
+        //0-申诉 1-申诉中  2-已完成
+        if (complains != null && complains.size() > 0) {
+            dimensionRecordDTOS.setType(complains.get(0).getStatus() == 0 ? 1 : 2);
+        } else {
+            dimensionRecordDTOS.setType(0);
+        }
+        return dimensionRecordDTOS;
+    }
+
+    public ServerResponse queryDimensionInfoByTaskId(String taskId){
+        try{
+            TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
+            if(taskStack==null){
+                return ServerResponse.createByErrorMessage("未找到符合条件的数据");
+            }
+            return ServerResponse.createBySuccess("查询成功",getDimensionRecordInfo(taskStack.getId()));
+        }catch (Exception e){
+            logger.error("查询失败");
+            return  ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     /**
      * 新增工匠申诉(工匠申诉维保责任点比
@@ -2650,6 +2677,8 @@ public class DjMaintenanceRecordService {
             String anyPartyId=obj.getString("anyPartyId");
             Integer type=obj.getInteger("type");
             Double actualMoney=obj.getDouble("money");
+            //3.保存对应的数据到占比表中去
+            DjMaintenanceRecordResponsibleParty recordResponsibleParty=new DjMaintenanceRecordResponsibleParty();
             if(type==1){//找商家店铺
                 // 扣除责任方的钱，扣除店铺的钱
                 maintenanceMinusStorefront(manuaId,manualAllocation.getHouseId(),anyPartyId,actualMoney);
@@ -2659,11 +2688,8 @@ public class DjMaintenanceRecordService {
                 maintenanceMinusDetention(worker,manualAllocation.getHouseId(),BigDecimal.valueOf(actualMoney),manuaId);
                 WorkerType workerType=workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
                 //推送扣款通知给工匠
-                taskStackService.insertTaskStackInfo(manualAllocation.getHouseId(),worker.getId(),"维保责任划分（人工定责）",workerType.getImage(),9,manuaId);
+                taskStackService.insertTaskStackInfo(manualAllocation.getHouseId(),worker.getId(),"维保责任划分（人工定责）",workerType.getImage(),9,recordResponsibleParty.getId());
             }
-
-            //3.保存对应的数据到占比表中去
-            DjMaintenanceRecordResponsibleParty recordResponsibleParty=new DjMaintenanceRecordResponsibleParty();
             recordResponsibleParty.setMaintenanceRecordId(manuaId);
             recordResponsibleParty.setResponsiblePartyId(anyPartyId);
             recordResponsibleParty.setResponsiblePartyType(type);

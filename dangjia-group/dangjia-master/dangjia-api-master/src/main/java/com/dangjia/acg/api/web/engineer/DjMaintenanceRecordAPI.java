@@ -173,8 +173,11 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/queryDimensionRecordInFo")
     @ApiOperation(value = "查询维保详情", notes = "查询维保详情")
-    ServerResponse queryDimensionRecordInFo(@RequestParam("mrId") String mrId);
+    ServerResponse queryDimensionRecordInFo(@RequestParam("mrrpId") String mrrpId);
 
+    @PostMapping(value = "app/engineer/queryDimensionInfoByTaskId")
+    @ApiOperation(value = "消息弹窗--查看维保定责", notes = "消息弹窗--查看维保定责")
+    ServerResponse queryDimensionInfoByTaskId(@RequestParam("taskId") String taskId);
 
     @PostMapping(value = "app/engineer/insertResponsibleParty")
     @ApiOperation(value = "新增工匠申诉", notes = "新增工匠申诉")
