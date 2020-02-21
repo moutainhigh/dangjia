@@ -101,6 +101,12 @@ public interface WebEngineerAPI {
                                @RequestParam("checkType") String checkType ,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping(value = "web/engineer/searchWorkerAllList")
+    @ApiOperation(value = "人工定责--查询所有工匠列表", notes = "人工定责--查询所有工匠列表")
+    ServerResponse searchWorkerAllList(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("searckKey") String searckKey ,
+                               @RequestParam("pageDTO") PageDTO pageDTO);
+
     @PostMapping(value = "web/engineer/setMemberStyle")
     @ApiOperation(value = "修改设计师绑定风格", notes = "修改设计师绑定风格")
      ServerResponse setMemberStyle(@RequestParam("request") HttpServletRequest request, @RequestParam("member") Member member) ;

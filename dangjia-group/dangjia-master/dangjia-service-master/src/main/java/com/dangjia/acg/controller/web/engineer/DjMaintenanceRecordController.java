@@ -460,8 +460,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse searchManualAllocation(PageDTO pageDTO,Integer status,String searchKey){
-        return djMaintenanceRecordService.searchManualAllocation(pageDTO,status,searchKey);
+    public ServerResponse searchManualAllocation(PageDTO pageDTO,Integer status,String searchKey,String cityId){
+        return djMaintenanceRecordService.searchManualAllocation(pageDTO,status,searchKey,cityId);
     }
     /**
      * 维保申诉成功后--人工定责列表查询
@@ -471,6 +471,24 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     @ApiMethod
     public ServerResponse searchManualAllocationDetail(String manuaId){
         return djMaintenanceRecordService.searchManualAllocationDetail(manuaId);
+    }
+
+    /**
+     * 平台人工定责，责任分配
+     * @param manuaId 责任流水ID
+     * @param newPartyInfo 定责信息 [{anyPartyId:”aa”,type:1,money:122},{anyPartyId:”aa”,type:2,money:122}]
+     *                     anyPartyId 店铺/工匠ID type:1店铺，2工匠 money:质保金额
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveNewPartyInfo(@RequestParam("manuaId") String manuaId,@RequestParam("newPartyInfo") String newPartyInfo){
+        try{
+            return djMaintenanceRecordService.saveNewPartyInfo(manuaId,newPartyInfo);
+        }catch (Exception e){
+            logger.error("责任分配失败",e);
+            return ServerResponse.createByErrorMessage("责任分配失败");
+        }
     }
 }
 

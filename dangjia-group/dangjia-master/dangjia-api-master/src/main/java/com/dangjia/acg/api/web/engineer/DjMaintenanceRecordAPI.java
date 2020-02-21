@@ -311,10 +311,15 @@ public interface DjMaintenanceRecordAPI {
      */
     @PostMapping(value = "web/engineer/searchManualAllocation")
     @ApiOperation(value = "申诉成功后平台人工定责--查询列表", notes = "申诉成功后平台人工定责--查询列表")
-    ServerResponse searchManualAllocation(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("status") Integer status,@RequestParam("searchKey") String searchKey);
+    ServerResponse searchManualAllocation(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("status") Integer status,
+                                          @RequestParam("searchKey") String searchKey,@RequestParam("cityId") String cityId);
 
     @PostMapping(value = "web/engineer/searchManualAllocationDetail")
     @ApiOperation(value = "申诉成功后平台人工定责--查询详情", notes = "申诉成功后平台人工定责--查询详情")
     ServerResponse searchManualAllocationDetail(@RequestParam("manuaId") String manuaId);
+
+    @PostMapping(value = "web/engineer/saveNewPartyInfo")
+    @ApiOperation(value = "申诉成功后平台人工定责--责任分配", notes = "申诉成功后平台人工定责--责任分配")
+    ServerResponse saveNewPartyInfo(@RequestParam("manuaId") String manuaId,@RequestParam("newPartyInfo") String newPartyInfo);
 
 }

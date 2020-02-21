@@ -103,8 +103,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryAllStorefrontList( PageDTO pageDTO,String searchKey){
-       return storefrontService.queryAllStorefrontList( pageDTO, searchKey);
+    public ServerResponse queryAllStorefrontList( PageDTO pageDTO,String searchKey,String cityId){
+       return storefrontService.queryAllStorefrontList( pageDTO, searchKey,cityId);
     }
 
     @Override

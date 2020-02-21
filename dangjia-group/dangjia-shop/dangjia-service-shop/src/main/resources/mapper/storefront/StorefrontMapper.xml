@@ -33,8 +33,9 @@
             a.`email`
         FROM
           dj_basics_storefront a
+        where a.city_id=#{cityId}
         <if test="null!=searchKey and ''!=searchKey">
-            where (
+            and (
             a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
             a.mobile LIKE CONCAT('%',#{searchKey},'%')
             )

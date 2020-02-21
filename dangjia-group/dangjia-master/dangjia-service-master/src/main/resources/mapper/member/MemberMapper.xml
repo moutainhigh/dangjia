@@ -91,6 +91,31 @@
         </if>
     </select>
 
+    <select id="searchWorkerAllList"  resultType="java.util.Map">
+        SELECT
+            m.id,
+            m. NAME userName,
+            m.nick_name nickName,
+            m.mobile,
+            w. NAME workerTypeName
+        FROM
+            dj_member m,
+            dj_core_worker_type w
+        WHERE
+            m.check_type IN (2, 3, 4)
+        AND m.worker_type_id = w.id
+            <if test="searchKey!=null and searchKey!=''">
+                and(
+                m.name LIKE CONCAT('%',#{searchKey},'%')
+                or
+                m.mobile LIKE CONCAT('%',#{searchKey},'%')
+                or
+                m.nick_name LIKE CONCAT('%',#{searchKey},'%')
+                )
+            </if>
+        order by m.name
+    </select>
+
     <select id="getSupervisor" resultType="com.dangjia.acg.modle.member.Member">
         SELECT
         <include refid="all_columns"/>

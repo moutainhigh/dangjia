@@ -17,6 +17,6 @@ import java.util.List;
 @Repository
 public interface DjMaintenanceManualAllocationMapper extends Mapper<DjMaintenanceManualAllocation> {
 
-    List<DjMaintenanceManualAllocationDTO> searchManualAllocation(@Param("status") Integer status, @Param("searchKey") String searchKey,@Param("manuaId") String manuaId);
+    List<DjMaintenanceManualAllocationDTO> searchManualAllocation(@Param("status") Integer status, @Param("searchKey") String searchKey,@Param("manuaId") String manuaId,@Param("cityId") String cityId);
 
 }

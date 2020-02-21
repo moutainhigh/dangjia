@@ -23,6 +23,9 @@
         <if test="null!=manuaId and ''!=manuaId">
             AND t.id =#{manuaId}
         </if>
+        <if test="null!=cityId and ''!=cityId">
+            AND m.city_id =#{cityId}
+        </if>
         <if test="status!=-1">
             AND t.status =#{status}
         </if>

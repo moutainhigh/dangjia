@@ -403,10 +403,10 @@ public class StorefrontService {
      * @param searchKey
      * @return
      */
-    public ServerResponse queryAllStorefrontList( PageDTO pageDTO,String searchKey){
+    public ServerResponse queryAllStorefrontList( PageDTO pageDTO,String searchKey,String cityId){
         try{
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StorefrontDTO> storefrontDTOList=istorefrontMapper.selectStorefrontAll(searchKey);
+            List<StorefrontListDTO> storefrontDTOList=istorefrontMapper.selectStorefrontAll(searchKey,cityId);
             PageInfo pageResult = new PageInfo(storefrontDTOList);
             return ServerResponse.createBySuccess("查询成功",pageResult);
         }catch(Exception e){

@@ -10,6 +10,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.engineer.EngineerService;
 import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -165,6 +166,19 @@ public class WebEngineerController implements WebEngineerAPI {
         return engineerService.artisanList(cityId,name, workerTypeId, type, checkType ,pageDTO);
     }
 
+    /**
+     * 人工定责--查询所有工匠列表
+     * @param request
+     * @param searckKey 查询条件（用户名/电话）
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchWorkerAllList(HttpServletRequest request, String searckKey ,PageDTO pageDTO){
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return engineerService.searchWorkerAllList(cityId,searckKey ,pageDTO);
+    }
     /**
      *  修改设计师绑定风格
      * @param request

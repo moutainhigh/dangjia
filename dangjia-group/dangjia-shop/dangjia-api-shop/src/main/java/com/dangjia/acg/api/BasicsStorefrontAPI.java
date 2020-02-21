@@ -73,7 +73,7 @@ public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/queryAllStorefrontList")
     @ApiOperation(value = "查询所有的店铺列表", notes = "查询所有的店铺列表")
-    ServerResponse queryAllStorefrontList(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("searchKey") String searchKey);
+    ServerResponse queryAllStorefrontList(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("searchKey") String searchKey,@RequestParam("cityId") String cityId);
 
 
     @PostMapping("/web/querySupplierApplicationShopList")

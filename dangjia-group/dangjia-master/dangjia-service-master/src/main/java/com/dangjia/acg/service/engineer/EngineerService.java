@@ -870,6 +870,24 @@ public class EngineerService {
         }
     }
 
+    /**
+     * 人工定责--查询所有工匠列表
+     * @param searckKey 查询条件（用户名/电话）
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse searchWorkerAllList( String cityId,String searckKey ,PageDTO pageDTO){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<Map<String,Object>> memberList = memberMapper.searchWorkerAllList(cityId,searckKey);
+            PageInfo pageResult = new PageInfo(memberList);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
     public ServerResponse getWareHouse( HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO) {
         String userID = request.getParameter("userId");
         //通过缓存查询店铺信息
