@@ -1249,11 +1249,11 @@ public class HouseFlowApplyService {
             if(houseFlowApply.getMemberCheck()==0){
                 houseFlowApplyDTO.setApplyTypeName(houseFlowApplyDTO.getApplyTypeName()+"-待验收");
             }
-            if(houseFlowApply.getMemberCheck()==1){
+            if(houseFlowApply.getMemberCheck()==1|| houseFlowApply.getMemberCheck()==3){
                 houseFlowApplyDTO.setApplyTypeName(houseFlowApplyDTO.getApplyTypeName()+"-通过");
             }
-            if(houseFlowApply.getMemberCheck()==2 || houseFlowApply.getMemberCheck()==3){
-                houseFlowApplyDTO.setApplyTypeName(houseFlowApplyDTO.getApplyTypeName()+"-通过");
+            if(houseFlowApply.getMemberCheck()==2 ){
+                houseFlowApplyDTO.setApplyTypeName(houseFlowApplyDTO.getApplyTypeName()+"-不通过");
             }
             if(houseFlowApply.getMemberCheck()==4){
                 houseFlowApplyDTO.setApplyTypeName(houseFlowApplyDTO.getApplyTypeName()+"-申述中");

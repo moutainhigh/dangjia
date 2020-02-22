@@ -1,11 +1,16 @@
 package com.dangjia.acg.service.core;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.matter.TechnologyRecordService;
@@ -32,6 +37,8 @@ public class TimingApplyService {
     @Autowired
     private EvaluateService evaluateService;
 
+    @Autowired
+    private IMemberMapper memberMapper;
     @Autowired
     private ConfigRuleUtilService configRuleUtilService;
     @Autowired
@@ -137,11 +144,21 @@ public class TimingApplyService {
     public void couponApply(){
         List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.couponApply(new Date());
         for (HouseFlowApply houseFlowApply : houseFlowApplyList){
-            if(houseFlowApply.getWorkerType() == 3){
-                evaluateService.saveEvaluateSupervisor(null,houseFlowApply.getId(),"",5,true,null);
-            }else {
-                evaluateService.saveEvaluate(houseFlowApply.getId(),"",5,"",5,true);
+            JSONArray jsons =new JSONArray();
+            JSONObject json =new JSONObject();
+            json.put("workerId",houseFlowApply.getWorkerId());
+            json.put("content","");
+            json.put("star",5);
+            jsons.add(json);
+            if(houseFlowApply.getWorkerType() != 3) {
+                Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
+                json = new JSONObject();
+                json.put("workerId", supervisor.getId());
+                json.put("content", "");
+                json.put("star", 5);
+                jsons.add(json);
             }
+            evaluateService.saveEvaluate(houseFlowApply.getId(), JSON.toJSONString(jsons),true);
         }
     }
 }

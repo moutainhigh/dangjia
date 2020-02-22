@@ -61,21 +61,15 @@ public interface EvaluateAPI {
                            @RequestParam("longitude") String longitude);
 
     @PostMapping("app/worker/evaluate/saveEvaluateSupervisor")
-    @ApiOperation(value = "业主评价管家完工", notes = "业主评价管家完工")
+    @ApiOperation(value = "业主通过管家完工申请", notes = "业主通过管家完工申请")
     ServerResponse saveEvaluateSupervisor(@RequestParam("userToken") String userToken,
-                                          @RequestParam("houseFlowApplyId") String houseFlowApplyId,
-                                          @RequestParam("content") String content,
-                                          @RequestParam("star") Integer star,
-                                          @RequestParam("onekey") String onekey);
+                                          @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 
     @PostMapping("app/worker/evaluate/saveEvaluate")
     @ApiOperation(value = "业主端评价工匠", notes = "业主端评价工匠")
     ServerResponse saveEvaluate(@RequestParam("userToken") String userToken,
                                 @RequestParam("houseFlowApplyId") String houseFlowApplyId,
-                                @RequestParam("wContent") String wContent,
-                                @RequestParam("wStar") Integer wStar,
-                                @RequestParam("sContent") String sContent,
-                                @RequestParam("sStar") Integer sStar);
+                                @RequestParam("evaluateJson") String evaluateJson);
 
     @PostMapping("app/worker/evaluate/waitEvaluated")
     @ApiOperation(value = "业主端待评价工匠", notes = "业主端待评价工匠")

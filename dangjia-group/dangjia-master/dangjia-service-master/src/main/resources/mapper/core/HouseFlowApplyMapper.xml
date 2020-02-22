@@ -492,6 +492,7 @@
             t. NAME workerTypeName,
             t.color workerTypeColor,
             a.worker_type workerType,
+            a.apply_type applyType,
             a.member_check AS memberCheck,
             a.supervisor_check AS supervisorCheck,
             a.worker_id workerId,
