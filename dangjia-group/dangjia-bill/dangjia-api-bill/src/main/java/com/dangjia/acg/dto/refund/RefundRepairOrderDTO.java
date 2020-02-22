@@ -13,9 +13,13 @@ public class RefundRepairOrderDTO {
 
     private  String repairMendOrderId;//退款申请单ID
 
+    private String mendDeliverId;//退货单ID
+
     private String storefrontId;//店铺ID
 
     private String houseId;//房子ID
+
+    private Date createDate;//生成时间
 
     private String repairOrderNum;//退款单号
 

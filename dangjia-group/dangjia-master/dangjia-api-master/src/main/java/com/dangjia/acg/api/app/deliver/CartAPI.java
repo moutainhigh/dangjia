@@ -21,7 +21,7 @@ public interface CartAPI {
 
     @PostMapping("app/cart/setCart")
     @ApiOperation(value = "设置购物车商品数量", notes = "设置购物车商品数量")
-     ServerResponse setCart(HttpServletRequest request, String userToken, Cart cart);
+    ServerResponse setCart(HttpServletRequest request, String userToken, Cart cart);
  
     
     @PostMapping("app/cart/clearCart")
@@ -47,5 +47,10 @@ public interface CartAPI {
 
     @PostMapping("app/cart/askAndQuit")
     @ApiOperation(value = "要退查询仓库", notes = "要退查询仓库")
-    ServerResponse askAndQuit(HttpServletRequest request, String userToken, PageDTO pageDTO, String houseId, String categoryId, String name);
+    ServerResponse askAndQuit(HttpServletRequest request,
+                              String userToken,
+                              PageDTO pageDTO,
+                              String houseId,
+                              String categoryId,
+                              String name);
 }

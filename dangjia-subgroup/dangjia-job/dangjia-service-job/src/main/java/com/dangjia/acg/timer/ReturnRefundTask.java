@@ -1,17 +1,6 @@
 package com.dangjia.acg.timer;
 
-import com.dangjia.acg.api.app.core.HouseFlowAPI;
-import com.dangjia.acg.api.app.core.HouseFlowApplyAPI;
-import com.dangjia.acg.api.app.house.HouseAPI;
-import com.dangjia.acg.api.config.ConfigMessageAPI;
-import com.dangjia.acg.api.data.TechnologyRecordAPI;
-import com.dangjia.acg.api.refund.RefundAfterSalesJobAPI;
-import com.dangjia.acg.api.sale.rob.RobAPI;
-import com.dangjia.acg.common.constants.DjConstants;
-import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.config.ConfigMessage;
-import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.api.web.repair.RefundAfterSalesJobAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 退款、退货退款售后

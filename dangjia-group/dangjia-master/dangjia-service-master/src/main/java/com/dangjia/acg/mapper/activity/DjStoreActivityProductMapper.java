@@ -30,10 +30,12 @@ public interface DjStoreActivityProductMapper extends Mapper<DjStoreActivityProd
                                                               @Param("storefrontId") String storefrontId);
 
     Integer queryWhetherOverlap(@Param("id") String id,
-                                @Param("id1") String id1);
+                                @Param("id1") String id1,
+                                @Param("storeActivityId") String storeActivityId);
 
     Integer queryWhetherOverlap1(@Param("id") String id,
-                                 @Param("id1") String id1);
+                                 @Param("id1") String id1,
+                                 @Param("activitySessionId") String activitySessionId);
 
     List<DjStoreActivityProductDTO> queryBillGoods(@Param("id") String id);
 }

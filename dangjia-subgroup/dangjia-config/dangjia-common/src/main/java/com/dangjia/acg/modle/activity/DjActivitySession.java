@@ -23,7 +23,7 @@ import java.util.Date;
 @Entity
 @FieldNameConstants(prefix = "")
 @Table(name = "dj_activity_session")
-@ApiModel(description = "活动主表")
+@ApiModel(description = "活动场次表")
 public class DjActivitySession extends BaseEntity {
 
     @Column(name = "session")

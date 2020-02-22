@@ -19,7 +19,7 @@ public interface DjStoreParticipateActivitiesMapper extends Mapper<DjStorePartic
 
     Integer queryRegistrationNumber(@Param("storeActivityId") String storeActivityId);
 
-    List<DjStoreParticipateActivitiesDTO> queryParticipatingShopsList(@Param("id") String id,
+    List<DjStoreParticipateActivitiesDTO> queryParticipatingShopsList(@Param("storeActivityId") String storeActivityId,
                                                                       @Param("activityType") Integer activityType,
                                                                       @Param("activitySessionId") String activitySessionId);
 }

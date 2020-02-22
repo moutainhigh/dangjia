@@ -66,11 +66,9 @@ public class DjStoreActivityService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse addActivities(DjStoreActivity djStoreActivity)throws Exception {
+    public ServerResponse addActivities(DjStoreActivity djStoreActivity){
         if (djStoreActivity.getActivityType() == 1) {
-            if (commonality(djStoreActivity)==false){
-                throw new Exception("配置失败");
-            }
+            commonality(djStoreActivity);
         }
         djStoreActivityMapper.insert(djStoreActivity);
         return ServerResponse.createBySuccessMessage("配置成功");
@@ -150,7 +148,7 @@ public class DjStoreActivityService {
         return simpleDateFormat.format(date);
     }
 
-    private boolean commonality(DjStoreActivity djStoreActivity){
+    private void commonality(DjStoreActivity djStoreActivity){
         if (DateUtil.getHourDays(djStoreActivity.getEndTime(),
                 djStoreActivity.getActivityStartTime()) <= djStoreActivity.getCyclePurchasing()) {
             DjActivitySession djActivitySession=new DjActivitySession();
@@ -159,7 +157,6 @@ public class DjStoreActivityService {
             djActivitySession.setSession(1);
             djActivitySession.setStoreActivityId(djStoreActivity.getId());
             djActivitySessionMapper.insert(djActivitySession);
-            return true;
         }else{
             List<String> intervalTimeList = getIntervalTimeList(convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getActivityStartTime())
                     , convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getEndTime()),
@@ -171,10 +168,8 @@ public class DjStoreActivityService {
                 djActivitySession.setSession(i+1);
                 djActivitySession.setStoreActivityId(djStoreActivity.getId());
                 djActivitySessionMapper.insert(djActivitySession);
-                return true;
             }
         }
-        return false;
     }
 
 
@@ -211,13 +206,18 @@ public class DjStoreActivityService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse setActivities(DjStoreActivity djStoreActivity)throws Exception {
+    public ServerResponse setActivities(DjStoreActivity djStoreActivity) throws Exception {
         if(djStoreActivity.getActivityType()==1){
-            Example example=new Example(DjActivitySession.class);
-            example.createCriteria().andNotEqualTo(DjActivitySession.STORE_ACTIVITY_ID,djStoreActivity.getId());
-            djActivitySessionMapper.deleteByExample(example);
-            if (commonality(djStoreActivity)==false){
-                throw new Exception("编辑失败");
+            DjStoreActivity djStoreActivity1 = djStoreActivityMapper.selectByPrimaryKey(djStoreActivity.getId());
+            if(djStoreActivity.getRegistrationStartTime().before(djStoreActivity.getActivityStartTime())||
+                    djStoreActivity.getEndTimeRegistration().after(djStoreActivity.getEndTime())){
+                throw new Exception("请正确填写报名时间和活动时间");
+            }
+            if(!djStoreActivity1.equals(djStoreActivity.getActivityStartTime())&&!djStoreActivity1.getEndTime().equals(djStoreActivity.getEndTime())){
+                Example example=new Example(DjActivitySession.class);
+                example.createCriteria().andEqualTo(DjActivitySession.STORE_ACTIVITY_ID,djStoreActivity.getId());
+                djActivitySessionMapper.deleteByExample(example);
+                commonality(djStoreActivity);
             }
         }
         djStoreActivityMapper.updateByPrimaryKeySelective(djStoreActivity);
@@ -237,15 +237,34 @@ public class DjStoreActivityService {
                 Example example=new Example(DjActivitySession.class);
                 example.createCriteria().andEqualTo(DjActivitySession.STORE_ACTIVITY_ID,id)
                         .andEqualTo(DjActivitySession.DATA_STATUS,0);
+                example.orderBy(DjActivitySession.SESSION).asc();
                 List<DjActivitySession> djActivitySessions = djActivitySessionMapper.selectByExample(example);
                 List<String> list=new ArrayList<>();
                 for (int i = 0; i < djActivitySessions.size(); i++) {
-                    list.add("第"+(i+1)+"场："+djActivitySessions.get(i).getSessionStartTime()
-                            +" 至 "+djActivitySessions.get(i+1).getEndSession());
+                    list.add("第"+(djActivitySessions.get(i).getSession())+"场："+convertDate2String("yyyy-MM-dd HH:mm:ss",djActivitySessions.get(i).getSessionStartTime())
+                            +" 至 "+convertDate2String("yyyy-MM-dd HH:mm:ss",djActivitySessions.get(i).getEndSession()));
                 }
                 djStoreActivity.setList(list);
             }
             return ServerResponse.createBySuccess("查询成功",djStoreActivity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 查询活动/场次详情
+     * @param id
+     * @param activityType
+     * @return
+     */
+    public ServerResponse queryActivitiesOrSessionById(String id, Integer activityType) {
+        try {
+            List<DjStoreActivityDTO> djStoreActivityDTOS =
+                    djStoreActivityMapper.queryActivitiesOrSessionById(id, activityType);
+            return ServerResponse.createBySuccess("查询成功",djStoreActivityDTOS);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -326,6 +345,7 @@ public class DjStoreActivityService {
             djStoreParticipateActivities.setStoreActivityId(storeActivityId);
             djStoreParticipateActivities.setActivitySessionId(activitySessionId);
             djStoreParticipateActivities.setStorefrontId(storefront.getId());
+            djStoreParticipateActivities.setRegistrationStatus(2);
             djStoreParticipateActivitiesMapper.insert(djStoreParticipateActivities);
             return ServerResponse.createBySuccess("申请成功",djStoreParticipateActivities.getId());
         } catch (Exception e) {
@@ -373,10 +393,10 @@ public class DjStoreActivityService {
             List<DjStoreActivityProductDTO> djStoreActivityProductDTOS =
                     djStoreActivityProductMapper.queryWaitingSelectionProduct(storefront.getId(),storeActivityId,activitySessionId);
             Map<String,Object> map=new HashMap<>();
-            map.put("selected",djStoreActivityProductDTOS.size());
+            map.put("waiting",djStoreActivityProductDTOS.size());
             List<DjStoreActivityProductDTO> djStoreActivityProductDTOS1 =
                     djStoreActivityProductMapper.querySelectedProduct(storefront.getId(), storeActivityId, activitySessionId);
-            map.put("waiting",djStoreActivityProductDTOS1.size());
+            map.put("selected",djStoreActivityProductDTOS1.size());
             return ServerResponse.createBySuccess("查询成功",map);
         } catch (Exception e) {
             e.printStackTrace();
@@ -439,28 +459,18 @@ public class DjStoreActivityService {
                 return ServerResponse.createBySuccessMessage("添加成功");
             }else{
                 for (DjStoreParticipateActivities djStoreParticipateActivity : djStoreParticipateActivities) {
-                    if(djStoreParticipateActivity.getActivityType()==1){
-                        Integer integer =
-                                djStoreActivityProductMapper.queryWhetherOverlap(activitySessionId, djStoreParticipateActivity.getActivitySessionId());
-                        if(integer>0) {
-                            if (djStoreParticipateActivity.getRegistrationStatus() == 2 ||
-                                    djStoreParticipateActivity.getRegistrationStatus() == 4) {
-                                djStoreActivityProductMapper.deleteByPrimaryKey(djStoreParticipateActivity.getId());
-                                break;
-                            }
-                            return ServerResponse.createByErrorMessage("该商品在该时间段已存在活动");
-                        }
+                    Integer integer;
+                    if(djStoreParticipateActivity.getActivityType()==1) {
+                        integer = djStoreActivityProductMapper.queryWhetherOverlap(djStoreParticipateActivity.getActivitySessionId(), activitySessionId, storeActivityId);
                     }else{
-                        Integer integer =
-                                djStoreActivityProductMapper.queryWhetherOverlap1(storeActivityId, djStoreParticipateActivity.getStoreActivityId());
-                        if(integer>0) {
-                            if (djStoreParticipateActivity.getRegistrationStatus() == 2 ||
-                                    djStoreParticipateActivity.getRegistrationStatus() == 4) {
-                                djStoreActivityProductMapper.deleteByPrimaryKey(djStoreParticipateActivity.getId());
-                                break;
-                            }
+                        integer = djStoreActivityProductMapper.queryWhetherOverlap1(djStoreParticipateActivity.getStoreActivityId(), storeActivityId,activitySessionId);
+                    }
+                    if(integer>0) {
+                        if (djStoreParticipateActivity.getRegistrationStatus() == 2 ||
+                                djStoreParticipateActivity.getRegistrationStatus() == 4)
+                            djStoreActivityProductMapper.deleteByPrimaryKey(djStoreParticipateActivity.getId());
+                        else
                             return ServerResponse.createByErrorMessage("该商品在该时间段已存在活动");
-                        }
                     }
                 }
                 DjStoreActivityProduct djStoreActivityProduct = new DjStoreActivityProduct();
@@ -469,6 +479,7 @@ public class DjStoreActivityService {
                 djStoreActivityProduct.setInventory(storefrontProduct.getSuppliedNum());
                 djStoreActivityProduct.setRushPurchasePrice(storefrontProduct.getSellPrice());
                 djStoreActivityProduct.setStoreParticipateActivitiesId(storeParticipateActivitiesId);
+                djStoreActivityProductMapper.insert(djStoreActivityProduct);
             }
             return ServerResponse.createBySuccessMessage("添加成功");
         } catch (Exception e) {
@@ -520,14 +531,15 @@ public class DjStoreActivityService {
             djStoreActivities.forEach(djStoreActivity -> {
                 DjStoreParticipateActivitiesDTO djStoreParticipateActivitiesDTO=
                         new DjStoreParticipateActivitiesDTO();
-                djStoreParticipateActivitiesDTO.setRegistrationNumber(djStoreParticipateActivitiesMapper.queryRegistrationNumber(djStoreActivity.getId()));
+                Integer integer = djStoreParticipateActivitiesMapper.queryRegistrationNumber(djStoreActivity.getId());
+                djStoreParticipateActivitiesDTO.setRegistrationNumber(null!=integer?integer:0);
                 djStoreParticipateActivitiesDTO.setActivityType(djStoreActivity.getActivityType());
                 Example example1=new Example(DjStoreParticipateActivities.class);
                 example1.createCriteria().andEqualTo(DjStoreParticipateActivities.DATA_STATUS,0)
                         .andEqualTo(DjStoreParticipateActivities.STORE_ACTIVITY_ID,djStoreActivity.getId())
                         .andEqualTo(DjStoreParticipateActivities.REGISTRATION_STATUS,3);
                 djStoreParticipateActivitiesDTO.setPendingCount(djStoreParticipateActivitiesMapper.selectCountByExample(example1));
-                djStoreParticipateActivitiesDTO.setId(djStoreActivity.getId());
+                djStoreParticipateActivitiesDTO.setStoreActivityId(djStoreActivity.getId());
                 djStoreParticipateActivitiesDTOS.add(djStoreParticipateActivitiesDTO);
             });
             if(djStoreParticipateActivitiesDTOS.size()<=0){
@@ -546,15 +558,15 @@ public class DjStoreActivityService {
      * 参与活动店铺列表
      * @param pageDTO
      * @param activityType
-     * @param id
+     * @param storeActivityId
      * @return
      */
-    public ServerResponse queryParticipatingShopsList(PageDTO pageDTO, Integer activityType, String id,
+    public ServerResponse queryParticipatingShopsList(PageDTO pageDTO, Integer activityType, String storeActivityId,
                                                       String activitySessionId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
             List<DjStoreParticipateActivitiesDTO> djStoreParticipateActivitiesDTOS =
-                    djStoreParticipateActivitiesMapper.queryParticipatingShopsList(id,activityType,activitySessionId);
+                    djStoreParticipateActivitiesMapper.queryParticipatingShopsList(storeActivityId,activityType,activitySessionId);
             djStoreParticipateActivitiesDTOS.forEach(djStoreParticipateActivitiesDTO -> {
                 djStoreParticipateActivitiesDTO.setRegistrationNumber(djStoreParticipateActivitiesDTOS.size());
             });

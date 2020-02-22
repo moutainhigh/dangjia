@@ -101,6 +101,18 @@ public interface RefundAfterSalesAPI {
     ServerResponse queryRefundHistoryOrderInfo(@RequestParam("cityId") String cityId,
                                                    @RequestParam("repairMendOrderId") String repairMendOrderId);
 
+    /**
+     * 查询退货退款--退款详情
+     *
+     * @param cityId
+     * @param mendDeliverId
+     * @return
+     */
+    @PostMapping("/app/refund/refundOrder/queryMendDeliverInfo")
+    @ApiOperation(value = "退货退款--退款详情", notes = "退货退款--退款详情")
+    ServerResponse queryMendDeliverInfo(@RequestParam("cityId") String cityId,
+                                               @RequestParam("mendDeliverId") String mendDeliverId);
+
     @PostMapping("/app/refund/refundOrder/cancelRepairApplication")
     @ApiOperation(value = "撤销退款/退货退款申请", notes = "撤销退款申请")
     ServerResponse cancelRepairApplication(@RequestParam("cityId") String cityId,
@@ -111,7 +123,7 @@ public interface RefundAfterSalesAPI {
     ServerResponse addRepairComplain(@RequestParam("userToken") String userToken,
                                      @RequestParam("content") String content,
                                      @RequestParam("houseId") String houseId,
-                                     @RequestParam("repairMendOrderId") String repairMendOrderId);
+                                     @RequestParam("mendDeliverId") String mendDeliverId);
 
     @PostMapping("/app/refund/refundOrder/rejectRepairApplication")
     @ApiOperation(value = "退款/退货退款驳回退款申诉", notes = "驳回退款申诉")
