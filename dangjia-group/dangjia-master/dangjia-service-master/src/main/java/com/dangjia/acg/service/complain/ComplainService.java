@@ -338,7 +338,7 @@ public class ComplainService {
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
         }
-        return ServerResponse.createBySuccessMessage("提交成功");
+        return ServerResponse.createBySuccess("提交成功",complain.getId());
     }
 
     /**
@@ -780,7 +780,7 @@ public class ComplainService {
                 }
             }else if (complain.getComplainType() == 13||complain.getComplainType() == 14||complain.getComplainType() == 15) {
                 Object date = houseFlowApplyService.checkDetail(complain.getBusinessId());
-                complain.setData(date);
+                complain.setData(((ServerResponse)date).getResultObj());
             }
         }
 

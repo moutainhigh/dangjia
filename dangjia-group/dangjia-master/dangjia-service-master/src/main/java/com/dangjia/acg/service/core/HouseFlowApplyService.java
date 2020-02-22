@@ -1095,7 +1095,7 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setList(list);
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
 
-            if(houseFlowApply.getType()==1) {
+            if(houseFlowApply.getApplyType()==10) {
                 example = new Example(HouseFlowApply.class);
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseFlowApply.getHouseId())
                         .andEqualTo(HouseFlowApply.HOUSE_FLOW_APPLY_ID, houseFlowApply.getHouseFlowApplyId())
