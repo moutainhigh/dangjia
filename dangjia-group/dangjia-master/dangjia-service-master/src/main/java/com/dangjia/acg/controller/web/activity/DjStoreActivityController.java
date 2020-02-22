@@ -64,6 +64,12 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse queryActivitiesOrSessionById(String id, Integer activityType) {
+        return djStoreActivityService.queryActivitiesOrSessionById(id,activityType);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse queryActivitiesByStorefront(String userId, String cityId, Integer activityType) {
         return djStoreActivityService.queryActivitiesByStorefront(userId,cityId,activityType);
     }
@@ -124,8 +130,8 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
     @Override
     @ApiMethod
     public ServerResponse queryParticipatingShopsList(PageDTO pageDTO, Integer activityType,
-                                                      String id, String activitySessionId) {
-        return djStoreActivityService.queryParticipatingShopsList(pageDTO,activityType,id, activitySessionId);
+                                                      String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.queryParticipatingShopsList(pageDTO,activityType,storeActivityId, activitySessionId);
     }
 
     @Override

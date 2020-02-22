@@ -62,7 +62,6 @@
         hw.work_back AS workBack,
         hw.receive,
         hw.repair_count AS repairCount,
-        hw.ask_count AS askCount,
         hw.rep_time AS repTime,
         hw.back_time AS backTime,
         hw.storefront_id AS storefrontId,

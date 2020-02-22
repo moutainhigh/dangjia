@@ -4,22 +4,27 @@
 
     <select id="queryActivitiesByStorefront" resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
         SELECT
+            b.id AS storeParticipateActivitiesId,
+            a.id,
             a.activity_type AS activityType,
             a.state,
             if(b.store_activity_id IS NULL OR b.store_activity_id="",0,1) AS attended
         FROM
             dj_store_activity a
         LEFT JOIN dj_store_participate_activities b ON a.id = b.store_activity_id
+        AND b.storefront_id = #{storefrontId}
         WHERE
             a.activity_type = #{activityType}
-        AND b.storefront_id = #{storefrontId}
     </select>
 
     <select id="queryActivitiesSessionByStorefront"
             resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
         SELECT
+            c.id AS storeParticipateActivitiesId,
+            a.id AS storeActivityId,
+            b.id AS activitySessionId,
             b.session,
-            d.name,
+            d.name AS city,
             a.activity_start_time AS activityStartTime,
             a.end_time AS endTime,
             a.registration_start_time AS registrationStartTime,
@@ -36,9 +41,37 @@
             dj_store_activity a
         INNER JOIN dj_activity_session b ON a.id = b.store_activity_id
         LEFT JOIN dj_store_participate_activities c ON c.store_activity_id = a.id
+        AND c.storefront_id =#{storefrontId}
         INNER JOIN dj_other_city d ON d.id = a.city_id
         WHERE
-            c.storefront_id =#{storefrontId}
-        AND a.id =#{id}
+          a.id =#{id}
+          ORDER BY b.session asc
+    </select>
+
+    <select id="queryActivitiesOrSessionById" resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
+        SELECT
+            a.activity_start_time AS activityStartTime,
+            a.end_time AS endTime,
+            a.registration_start_time AS registrationStartTime,
+            a.end_time_registration AS endTimeRegistration,
+            c.`name` AS city,
+            a.activity_description AS activityDescription
+        FROM
+            dj_store_activity a,
+            <if test="activityType==1">
+                dj_activity_session b,
+            </if>
+            dj_other_city c
+        WHERE
+            c.id=a.city_id
+        <choose>
+            <when test="activityType==1">
+                AND a.id = b.store_activity_id
+                AND b.id=#{id}
+            </when>
+            <otherwise>
+                AND a.id=#{id}
+            </otherwise>
+        </choose>
     </select>
 </mapper>

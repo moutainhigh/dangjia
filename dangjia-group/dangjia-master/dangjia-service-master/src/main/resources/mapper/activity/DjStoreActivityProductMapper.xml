@@ -45,7 +45,8 @@
             d.product_sn AS productSn,
             c.image,
             c.sell_price AS sellPrice,
-            c.supplied_num AS inventory
+            c.supplied_num AS inventory,
+            c.rush_purchase_price AS rushPurchasePrice
         FROM
             dj_store_activity_product a,
             dj_store_participate_activities b,
@@ -93,20 +94,38 @@
         AND NOT (
             end_session &lt; (
                 SELECT
-                end_session
+                activity_start_time
                 FROM
-                dj_activity_session
+                dj_store_activity
                 WHERE
-                id = #{id1}
+                id = #{storeActivityId}
             )
             OR session_start_time &gt; (
                 SELECT
-                session_start_time
+                end_time
                 FROM
-                dj_activity_session
+                dj_store_activity
                 WHERE
-                id = #{id1}
+                id = #{storeActivityId}
             )
+          <if test="null!=id1 and ''!=id1">
+              end_session &lt; (
+                  SELECT
+                  session_start_time
+                  FROM
+                  dj_activity_session
+                  WHERE
+                  id = #{id1}
+              )
+              OR session_start_time &gt; (
+                  SELECT
+                  end_session
+                  FROM
+                  dj_activity_session
+                  WHERE
+                  id = #{id1}
+              )
+          </if>
         )
     </select>
 
@@ -120,7 +139,7 @@
         AND NOT (
             end_time &lt; (
                 SELECT
-                end_time
+                activity_start_time
                 FROM
                 dj_store_activity
                 WHERE
@@ -128,12 +147,30 @@
             )
             OR activity_start_time &gt; (
                 SELECT
-                activity_start_time
+                end_time
                 FROM
                 dj_store_activity
                 WHERE
                 id = #{id1}
             )
+            <if test="null!=activitySessionId and ''!=activitySessionId">
+                OR end_time &lt; (
+                    SELECT
+                    session_start_time
+                    FROM
+                    dj_activity_session
+                    WHERE
+                    id = #{activitySessionId}
+                )
+                OR activity_start_time &gt; (
+                    SELECT
+                    end_session
+                    FROM
+                    dj_activity_session
+                    WHERE
+                    id = #{activitySessionId}
+                )
+            </if>
         )
     </select>
 

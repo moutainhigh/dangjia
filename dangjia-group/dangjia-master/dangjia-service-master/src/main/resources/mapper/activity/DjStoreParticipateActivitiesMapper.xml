@@ -18,7 +18,7 @@
     <select id="queryParticipatingShopsList"
             resultType="com.dangjia.acg.dto.activity.DjStoreParticipateActivitiesDTO">
         SELECT
-            a.id,
+            a.id AS storeParticipateActivities,
             b.storefront_name AS storefrontName,
             a.registration_status AS registrationStatus,
             (SELECT COUNT(0) FROM dj_store_activity_product WHERE store_participate_activities_id=a.id) AS participatingCommodityQuantity
@@ -38,8 +38,8 @@
                 )
             </otherwise>
         </choose>
-        AND a.activityType = #{activityType}
+        AND a.activity_type = #{activityType}
         AND a.registration_status != 2
-        AND a.store_activity_id = #{id}
+        AND a.store_activity_id = #{storeActivityId}
     </select>
 </mapper>

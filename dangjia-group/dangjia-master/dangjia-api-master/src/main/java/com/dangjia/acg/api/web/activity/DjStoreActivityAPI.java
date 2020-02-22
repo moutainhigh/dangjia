@@ -39,14 +39,19 @@ public interface DjStoreActivityAPI {
     @ApiOperation(value = "查询活动详情", notes = "查询活动详情")
     ServerResponse queryActivitiesById(@RequestParam("id") String id);
 
+    @PostMapping("web/activity/queryActivitiesOrSessionById")
+    @ApiOperation(value = "查询活动/场次详情", notes = "查询活动/场次详情")
+    ServerResponse queryActivitiesOrSessionById(@RequestParam("id") String id,
+                                                @RequestParam("activityType") Integer activityType);
+
     @PostMapping("web/activity/queryActivitiesByStorefront")
-    @ApiOperation(value = "查询活动(店参加)", notes = "查询活动(店参加)")
+    @ApiOperation(value = "查询活动(店铺参加)", notes = "查询活动(店参加)")
     ServerResponse queryActivitiesByStorefront(@RequestParam("userId") String userId,
                                                @RequestParam("cityId") String cityId,
                                                @RequestParam("activityType") Integer activityType);
 
     @PostMapping("web/activity/queryActivitiesSessionByStorefront")
-    @ApiOperation(value = "查询活动场次(店参加)", notes = "查询活动场次(店参加)")
+    @ApiOperation(value = "查询活动场次(店铺参加)", notes = "查询活动场次(店参加)")
     ServerResponse queryActivitiesSessionByStorefront(@RequestParam("userId") String userId,
                                                       @RequestParam("cityId") String cityId,
                                                       @RequestParam("id") String id);
@@ -105,7 +110,7 @@ public interface DjStoreActivityAPI {
     @ApiOperation(value = "参与活动店铺列表", notes = "参与活动店铺列表")
     ServerResponse queryParticipatingShopsList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                @RequestParam("activityType") Integer activityType,
-                                               @RequestParam("id") String id,
+                                               @RequestParam("storeActivityId") String storeActivityId,
                                                @RequestParam("activitySessionId") String activitySessionId);
 
     @PostMapping("web/activity/queryBillGoods")

@@ -20,8 +20,8 @@ import javax.persistence.Table;
 @Data
 @Entity
 @FieldNameConstants(prefix = "")
-@Table(name = "dj_store_participate_activities")
-@ApiModel(description = "dj_store_activity_product")
+@Table(name = "dj_store_activity_product")
+@ApiModel(description = "店铺活动商品表")
 public class DjStoreActivityProduct extends BaseEntity {
 
     @Column(name = "inventory")

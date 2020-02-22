@@ -64,4 +64,15 @@ public class DjStoreActivityDTO extends BaseEntity {
     @Desc(value = "报名状态")
     @ApiModelProperty("报名状态")
     private Integer registrationStatus;
+
+    @Desc(value = "活动说明")
+    @ApiModelProperty("活动说明")
+    private String activityDescription;
+
+
+    private String storeActivityId;//活动id
+
+    private String activitySessionId;//场次id
+
+    private String storeParticipateActivitiesId;//店铺参与活动表id
 }

@@ -17,11 +17,11 @@ public class DjStoreActivityProductDTO extends BaseEntity {
 
     @Desc(value = "货品名称")
     @ApiModelProperty("货品名称")
-    private Double goodsName;
+    private String goodsName;
 
-    @Desc(value = "数据类型 1:限时购，2:拼团购")
-    @ApiModelProperty("数据类型 1:限时购，2:拼团购")
-    private Integer productName;
+    @Desc(value = "商品名称")
+    @ApiModelProperty("商品名称")
+    private String productName;
 
     @Desc(value = "商品编号")
     @ApiModelProperty("商品编号")
@@ -35,8 +35,8 @@ public class DjStoreActivityProductDTO extends BaseEntity {
     @ApiModelProperty("店铺活动配置id")
     private String image;
 
-    @Desc(value = "抢购价格")
-    @ApiModelProperty("抢购价格")
+    @Desc(value = "销售价")
+    @ApiModelProperty("销售价")
     private Double sellPrice;
 
     @Desc(value = "库存")
