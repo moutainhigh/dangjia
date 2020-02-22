@@ -109,10 +109,10 @@ public class FeedbackService {
         if (!CommonUtil.isEmpty(customer.getCustomerdes())) {
             customer.setCustomerdes(userRoleText + customer.getCustomerdes());
         }
-//        if (!CommonUtil.isEmpty(customer.getWorkerTypeId())) {
-//            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(customer.getWorkerTypeId());
-//            customer.setWorkerTypeName(workerType == null ? "" : workerType.getName());
-//        }
+        if (!CommonUtil.isEmpty(customer.getWorkerTypeId())) {
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(customer.getWorkerTypeId());
+            customer.setWorkerTypeName(workerType == null ? "" : workerType.getName());
+        }
         iFeedbackMapper.insertSelective(customer);
         return ServerResponse.createBySuccessMessage("反馈成功");
     }
