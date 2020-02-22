@@ -4,8 +4,6 @@ package com.dangjia.acg.service.refund;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.api.app.repair.MendRecordAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -20,7 +18,6 @@ import com.dangjia.acg.mapper.config.IBillConfigMapper;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderItemMapper;
-import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
 import com.dangjia.acg.mapper.order.IBillChangeOrderMapper;
 import com.dangjia.acg.mapper.order.IBillMendWorkerMapper;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
@@ -34,7 +31,6 @@ import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.complain.Complain;
-import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.design.QuantityRoom;
@@ -42,14 +38,12 @@ import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.order.OrderProgress;
-import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
-import com.dangjia.acg.service.order.BillMendOrderCheckService;
 import com.dangjia.acg.service.product.BillProductTemplateService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -64,7 +58,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -114,8 +107,6 @@ public class RefundAfterSalesService {
     private BillDjDeliverOrderSplitMapper billDjDeliverOrderSplitMapper;
     @Autowired
     private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper;
-    @Autowired
-    private BillMendOrderCheckService billMendOrderCheckService;
    // @Autowired
   //  private MendRecordAPI mendRecordAPI;
     @Autowired
@@ -653,18 +644,18 @@ public class RefundAfterSalesService {
             getRepairOrderProductList(repairMaterialList,address);
             refundRepairOrderDTO.setOrderMaterialList(repairMaterialList);//将退款材料明细放入对象中
             //查询对应的流水节点信息(根据订单ID）
-            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairMendOrderId);//仅退款
+            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairMendOrderId,null);//仅退款
             refundRepairOrderDTO.setShowRepairDateType(1);//显示时间判断（1订单剩余时间，2最新处理时间）
            if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
                refundRepairOrderDTO.setRepairNewNode(orderProgressDTO.getNodeName());
-               refundRepairOrderDTO.setReparirRemainingTime(getRemainingTime(orderProgressDTO));
+               refundRepairOrderDTO.setReparirRemainingTime(getRemainingTime(orderProgressDTO,orderProgressDTO.getCreateDate()));
                refundRepairOrderDTO.setAssociatedOperation(orderProgressDTO.getAssociatedOperation());
                refundRepairOrderDTO.setAssociatedOperationName(orderProgressDTO.getAssociatedOperationName());
                refundRepairOrderDTO.setRepairNewDate(orderProgressDTO.getCreateDate());
                //前端节点显示
-               refundRepairOrderDTO.setOrderProgressList(setOrderProgressList(orderProgressDTOList,orderProgressDTO));//返回显示，节点优化
-               if("RA_008".equals(orderProgressDTO.getNodeCode())||"RA_008".equals(orderProgressDTO.getNodeCode())||"RA_010".equals(orderProgressDTO.getNodeCode())){
+               refundRepairOrderDTO.setOrderProgressList(setOrderProgressList(orderProgressDTOList,orderProgressDTO,1));//返回显示，节点优化
+               if("RA_008".equals(orderProgressDTO.getNodeCode())||"RA_009".equals(orderProgressDTO.getNodeCode())||"RA_010".equals(orderProgressDTO.getNodeCode())){
                    refundRepairOrderDTO.setShowRepairDateType(2);
                }
            }
@@ -704,6 +695,7 @@ public class RefundAfterSalesService {
                     for(MendDeliver mendDeliver:mendDeliverList){
                         List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId,mendDeliver.getId());
                         param=new HashMap();
+                        param.put("mendDeliverId",mendDeliver.getId());
                         param.put("number",mendDeliver.getNumber());
                         param.put("state",mendDeliver.getShippingState());//0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分退货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）
                         param.put("stateName",CommonUtil.getDeliverStateName(mendDeliver.getShippingState()));
@@ -711,10 +703,11 @@ public class RefundAfterSalesService {
                         param.put("count",repairMaterialList.size());//总件数
                         if(repairMaterialList!=null&&repairMaterialList.size()>0){
                             RefundRepairOrderMaterialDTO rm=repairMaterialList.get(0);
-                            param.put("ProductName",rm.getProductName());//商品名称
+                            param.put("productName",rm.getProductName());//商品名称
                         }
                         param.put("image",getStartTwoImage(repairMaterialList,address));//图片
                         deliverList.add(param);
+                        refundRepairOrderDTO.setRepairNewDate(mendDeliver.getCreateDate());//处理时间
                     }
                 }
                 refundRepairOrderDTO.setMendDeliverList(deliverList);
@@ -731,9 +724,62 @@ public class RefundAfterSalesService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+    /**
+     * 查询退货退款--退款详情
+     *
+     * @param cityId
+     * @param mendDeliverId 退货单ID
+     * @return
+     */
+    public ServerResponse queryMendDeliverInfo(String cityId,String mendDeliverId){
+        logger.info("queryMendDeliverInfo查询可退货退款的商品：city={},mendDeliverId={}",cityId,mendDeliverId);
+        try{
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryMendSplitOrderInfo(mendDeliverId);//退款订单详情查询
+            List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(refundRepairOrderDTO.getRepairMendOrderId(),mendDeliverId);//退款商品列表查询
+            getRepairOrderProductList(repairMaterialList,address);
+            refundRepairOrderDTO.setOrderMaterialList(repairMaterialList);//将退款材料明细放入对象中
+            //查询订单总额，运费等信息
+           Map<String,Object> totalMap=refundAfterSalesMapper.totalProductDimensionMendDetail(mendDeliverId);
+           if(totalMap!=null){
+               refundRepairOrderDTO.setTotalAmount(((BigDecimal)totalMap.get("totalAmount")).doubleValue());//实退款
+               refundRepairOrderDTO.setActualTotalAmount(((BigDecimal)totalMap.get("totalPrice")).doubleValue());//退货金额
+               refundRepairOrderDTO.setTotalStevedorageCost(((BigDecimal)totalMap.get("totalStevedorageCost")).doubleValue());//退货金额
+               refundRepairOrderDTO.setCarriage(((BigDecimal)totalMap.get("carriage")).doubleValue());//退货金额
+           }
+            //查询对应的流水节点信息(根据订单ID）
+            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(refundRepairOrderDTO.getRepairMendOrderId(),mendDeliverId);//仅退款
+            refundRepairOrderDTO.setShowRepairDateType(1);//显示时间判断（1订单剩余时间，2最新处理时间）
+            if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
+                OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
+                refundRepairOrderDTO.setRepairNewNode(orderProgressDTO.getNodeName());
+                if("RA_001".equals(orderProgressDTO.getNodeCode())||"RA_002".equals(orderProgressDTO.getNodeCode())){
+                    refundRepairOrderDTO.setReparirRemainingTime(getRemainingTime(orderProgressDTO,refundRepairOrderDTO.getCreateDate()));
+                }else{
+                    refundRepairOrderDTO.setReparirRemainingTime(getRemainingTime(orderProgressDTO,orderProgressDTO.getCreateDate()));
+                }
+
+                refundRepairOrderDTO.setAssociatedOperation(orderProgressDTO.getAssociatedOperation());
+                refundRepairOrderDTO.setAssociatedOperationName(orderProgressDTO.getAssociatedOperationName());
+                refundRepairOrderDTO.setRepairNewDate(orderProgressDTO.getCreateDate());
+                //前端节点显示
+                refundRepairOrderDTO.setOrderProgressList(setOrderProgressList(orderProgressDTOList,orderProgressDTO,3));//返回显示，节点优化
+                if("RA_008".equals(orderProgressDTO.getNodeCode())||"RA_009".equals(orderProgressDTO.getNodeCode())||"RA_010".equals(orderProgressDTO.getNodeCode())){
+                    refundRepairOrderDTO.setShowRepairDateType(2);
+                }
+            }
+            refundRepairOrderDTO.setMobile(refundRepairOrderDTO.getStorefrontMobile());//拨打电话
+            refundRepairOrderDTO.setStorefrontIcon(address+refundRepairOrderDTO.getStorefrontIcon());
+
+            return ServerResponse.createBySuccess("查询成功",refundRepairOrderDTO);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     //判断对就原按钮显不显示
-    private List<OrderProgressDTO> setOrderProgressList(List<OrderProgressDTO> orderProgressDTOList,OrderProgressDTO orderProgressDTO){
+    private List<OrderProgressDTO> setOrderProgressList(List<OrderProgressDTO> orderProgressDTOList,OrderProgressDTO orderProgressDTO,Integer type){
         List<OrderProgressDTO> list=new ArrayList<>();
         for(int i=0;i<orderProgressDTOList.size();i++){
             OrderProgressDTO op=orderProgressDTOList.get(i);
@@ -745,6 +791,10 @@ public class RefundAfterSalesService {
             //如果为商家已拒绝,最新节点也为已拒绝，则打红叉
             if("RA_004".equals(op.getNodeCode())&&"RA_004".equals(orderProgressDTO.getNodeCode())){//
                 op.setNodeStatus(3);//打红叉
+            }
+            if(type==3&&"RA_001".equals(op.getNodeCode())){
+                op.setAssociatedOperation("");//清空按钮数据
+                op.setAssociatedOperationName("");//清空按钮数据
             }
             //如果最新节点为RA_001，RA_002等待商家审核 状态，且当前显示节点为001的话，则显示“撤销按钮”,否则，则不显示
             if(!(("RA_001".equals(orderProgressDTO.getNodeCode())||"RA_002".equals(orderProgressDTO.getNodeCode())))&&"RA_001".equals(op.getNodeCode())){
@@ -771,14 +821,13 @@ public class RefundAfterSalesService {
      * 获取当前阶段剩余可处理时间
      * @return
      */
-    private long getRemainingTime(OrderProgressDTO orderProgressDTO){
+    private long getRemainingTime(OrderProgressDTO orderProgressDTO,Date createDate){
         try{
             String nodeCode=orderProgressDTO.getNodeCode();
             String parayKey=CommonUtil.getParayKey(nodeCode);
             if(parayKey!=null&&StringUtils.isNotBlank(parayKey)){
                 Config config=iBillConfigMapper.selectConfigInfoByParamKey(parayKey);//获取对应阶段需处理剩余时间
                 if(config!=null&&StringUtils.isNotBlank(config.getId())){
-                    Date createDate=orderProgressDTO.getCreateDate();
                     String hour=config.getParamValue();
                     Date newDate=DateUtil.addDateHours(createDate,Integer.parseInt(hour));
                     return DateUtil.daysBetweenTime(new Date(),newDate);
@@ -848,7 +897,7 @@ public class RefundAfterSalesService {
     }
 
     /**
-     * 驳回申诉（退货申请）
+     * 驳回申诉（退货申请）----废弃
      * @param repairMendOrderId
      */
     @Transactional(rollbackFor = Exception.class)
@@ -868,7 +917,7 @@ public class RefundAfterSalesService {
     }
 
     /**
-     * 同意退款申诉（退货申请）
+     * 同意退款申诉（退货申请）----废弃
      * @param repairMendOrderId
      */
     @Transactional(rollbackFor = Exception.class)
@@ -889,7 +938,7 @@ public class RefundAfterSalesService {
         updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_006",userId);
         //添加对应的流水记录节点信息，退款关闭
         updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_008",userId);
-        billMendOrderCheckService.settleMendOrder(repairMendOrderId);//退钱给业主
+       // billMendOrderCheckService.settleMendOrder(repairMendOrderId,null);//退钱给业主
         return ServerResponse.createBySuccess("操作成功");
     }
 
@@ -898,11 +947,11 @@ public class RefundAfterSalesService {
      * @param userToken
      * @param content  申诉内容
      * @param houseId  房子ID
-     * @param repairMendOrderId  申诉单号
+     * @param mendDeliverId  申诉单号
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse addRepairComplain(String userToken,String content,String houseId,String repairMendOrderId){
+    public ServerResponse addRepairComplain(String userToken,String content,String houseId,String mendDeliverId){
         Object object = getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -912,13 +961,13 @@ public class RefundAfterSalesService {
         example.createCriteria()
                 .andEqualTo(Complain.MEMBER_ID, member.getId())
                 .andEqualTo(Complain.COMPLAIN_TYPE, "7")
-                .andEqualTo(Complain.BUSINESS_ID, repairMendOrderId)
+                .andEqualTo(Complain.BUSINESS_ID, mendDeliverId)
                 .andEqualTo(Complain.STATUS, 0);
         List list = iBillComplainMapper.selectByExample(example);
         if (list.size() > 0) {
             return ServerResponse.createByErrorMessage("请勿重复提交申请！");
         }
-        RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
+        RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(mendDeliverId);//退款订单详情查询
         if(!("1".equals(refundRepairOrderDTO.getState())||"2".equals(refundRepairOrderDTO.getState()))){
             return ServerResponse.createByErrorMessage("不是处理中的单，不能申请平台申诉");
         }
@@ -933,10 +982,10 @@ public class RefundAfterSalesService {
         complain.setUserName(member.getName());
         complain.setUserMobile(member.getMobile());
         complain.setUserId(member.getId());
-        complain.setBusinessId(repairMendOrderId);
+        complain.setBusinessId(mendDeliverId);
         iBillComplainMapper.insert(complain);
         //添加对应的申诉流水信息(增加平台介入记录信息）
-        updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_005",member.getId());
+        updateOrderProgressInfo(mendDeliverId,"2","REFUND_AFTER_SALES","RA_005",member.getId());
         return ServerResponse.createBySuccessMessage("申诉提交成功");
     }
 
@@ -1325,7 +1374,7 @@ public class RefundAfterSalesService {
                 for(ReturnWorkOrderDTO returnWorkOrderDTO:reuturnWokerList){
                     String  repairWorkOrderId=returnWorkOrderDTO.getRepairWorkOrderId();
                     //查询对应的流水节点信息(根据订单ID）
-                    List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId);//退款历史记录
+                    List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,null);//退款历史记录
                     if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                         OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
                         returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeCode()));
@@ -1354,7 +1403,7 @@ public class RefundAfterSalesService {
             logger.info("退人工详情页面：repairWorkOrderId={}",repairWorkOrderId);
             ReturnWorkOrderDTO returnWorkOrderDTO=iBillChangeOrderMapper.queryReturnWorkerInfo(repairWorkOrderId);
 
-            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId);//退款历史记录
+            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,null);//退款历史记录
             if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                 OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
                 returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeCode()));
@@ -1509,7 +1558,7 @@ public class RefundAfterSalesService {
                     returnWorkOrderDTO.setApplyMemberTypeName(returnWorkOrderDTO.getWorkTypeName());//申请人类型名称
                 }
                 //查询对应的流水节点信息(根据订单ID）
-                List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId);//退款历史记录
+                List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,null);//退款历史记录
                 if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                     OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
                     returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeCode()));

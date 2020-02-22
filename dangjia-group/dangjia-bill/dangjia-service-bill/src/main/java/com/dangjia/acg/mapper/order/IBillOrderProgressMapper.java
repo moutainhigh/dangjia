@@ -15,7 +15,7 @@ public interface IBillOrderProgressMapper extends Mapper<OrderProgress> {
      * @param repairMendOrderId
      * @return
      */
-    List<OrderProgressDTO> queryOrderProgressListByOrderId(@Param("repairMendOrderId") String repairMendOrderId);
+    List<OrderProgressDTO> queryOrderProgressListByOrderId(@Param("repairMendOrderId") String repairMendOrderId,@Param("mendDeliverId") String mendDeliverId);
 
 
     void updateOrderStatusByNodeCode(@Param("repairMendOrderId") String repairMendOrderId,

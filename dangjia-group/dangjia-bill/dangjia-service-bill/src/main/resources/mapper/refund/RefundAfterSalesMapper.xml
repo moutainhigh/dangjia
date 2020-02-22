@@ -167,7 +167,9 @@
           t.product_type productType,
           t.price price,
           t.unit_name unitName,
-          t.shop_count returnCount,
+            IFNULL((CASEWHEN s.shipping_state = 7 THEN t.shop_count
+                 ELSE t.actual_count END
+            ),t.shop_count) returnCount,
           IFNULL(t.stevedorage_cost,0) stevedorageCost,
           IFNULL(t.transportation_cost,0) transportationCost,
           IFNULL(t.image,t1.image) image,
@@ -182,7 +184,7 @@
             and t.repair_mend_deliver_id=#{mendDeliverId}
         </if>
     </select>
-    <!-- 根据退货单ID查询退货单信息 -->
+    <!-- 根据退货单申请单ID查询退货单信息 -->
     <select id="queryRefundOnlyHistoryOrderInfo" resultType="com.dangjia.acg.dto.refund.RefundRepairOrderDTO">
         SELECT
             t.id repairMendOrderId,
@@ -202,7 +204,8 @@
             t.state,
             t.type,
             t.image_arr imageArr,
-            t.room_charge roomCharge
+            t.room_charge roomCharge,
+            t.create_date createDate
         FROM
             dj_repair_mend_order t,
             dj_basics_storefront t1,
@@ -213,22 +216,65 @@
         and t.state<![CDATA[<>]]>0
     </select>
 
-    <!--获取符合条件的数据-->
-    <select id="queryRefundJobList" resultType="java.util.Map">
-      <![CDATA[
+    <select id="queryMendSplitOrderInfo"  resultType="com.dangjia.acg.dto.refund.RefundRepairOrderDTO">
         SELECT
-          tt1.id repairMendOrderId,tt1.total_amount totalAmount,tt1.apply_member_id memberId,tt2.node_code nodeCode
+            t.id mendDeliverId,
+            t3.id repairMendOrderId,
+            t.storefront_id storefrontId,
+            t1.storefront_name storefrontName,
+            t1.mobile storefrontMobile,
+            t1.system_logo storefrontIcon,
+            t.house_id houseId,
+            t.number repairOrderNum,
+            IFNULL(t.stevedorage_cost,0) totalStevedorageCost,
+            IFNULL(t.delivery_fee,0) carriage,
+            t3.create_date applyDate,
+            t.apply_money actualTotalAmount,
+            t.total_amount totalAmount,
+            t.shipping_state state,
+            t.create_date createDate
         FROM
-            dj_repair_mend_order tt1,
-            dj_deliver_order_progress tt2
-        WHERE
-           tt1.id = tt2.progress_order_id
-        and tt2.create_date=(select max(t.create_date) from dj_deliver_order_progress t where t.progress_order_id=tt2.progress_order_id)
-        and tt2.node_code=#{nodeCode}
-        and tt1.type in(4,5)
-        and tt2.create_date<date_add(now(), interval -(select param_value from dj_config where param_key=#{paramNodeKey}) hour)
-        ]]>
+            dj_repair_mend_deliver t,
+            dj_basics_storefront t1,
+            dj_repair_mend_order t3
+        where t.storefront_id=t1.id
+        and t.mend_order_id=t3.id
+        and t.id=#{mendDeliverId}
     </select>
+
+    <select id="totalProductDimensionMendDetail" resultType="java.util.Map">
+       SELECT
+        sum(tt.price * tt.returnCount) totalPrice,
+        sum(tt.transportation_cost) totalStevedorageCost,
+        sum(tt.stevedorage_cost) carriage,
+        sum(tt.price * tt.returnCount) - sum(tt.transportation_cost) - sum(tt.stevedorage_cost) totalAmount
+    FROM
+        (
+            SELECT
+                IFNULL(
+                    (
+                        CASE
+                        WHEN s.shipping_state = 7 THEN
+                            t.shop_count
+                        ELSE
+                            t.actual_count,
+                        END
+                    ),
+                    t.shop_count
+                ) AS returnCount,
+                t.cost AS supPrice,
+                t.price AS price,
+                IFNULL(t.transportation_cost, 0) transportation_cost,
+                IFNULL(t.stevedorage_cost, 0) stevedorage_cost
+            FROM
+                dj_repair_mend_deliver s
+            INNER JOIN dj_repair_mend_materiel t ON s.id = t.repair_mend_deliver_id
+            WHERE
+                s.id = #{mendDeliverId}
+        ) tt
+    </select>
+
+
 
     <select id="queryWorkerProductList" resultType="com.dangjia.acg.dto.refund.RefundOrderItemDTO">
         SELECT

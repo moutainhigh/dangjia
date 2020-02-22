@@ -636,7 +636,7 @@ public class OrderSplitService {
             if(splitItemList==null){
                 return ServerResponse.createByErrorMessage("请选择需要申诉的商品信息");
             }
-            //先将旧的申诉商品改为款申诉，重新申诉
+            //先将旧的申诉商品改为未申诉，重新申诉
             Example example=new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID,splitDeliverId);
             OrderSplitItem sItem=new OrderSplitItem();
@@ -671,7 +671,7 @@ public class OrderSplitService {
             }
 
         }else if(type==3){//平台审核通过
-            Double totalAmount=updateSplitOrderInfo(splitDeliver,1);//按我给部收货算
+            Double totalAmount=updateSplitOrderInfo(splitDeliver,1);//按全部收货算
             if(StringUtils.isNotBlank(splitDeliver.getStorefrontId())){
                 //3.将当前订单所得钱给到对应的店铺
                 masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), splitDeliver.getHouseId(),

@@ -141,5 +141,48 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           </if>
           order by t.create_date desc
       </select>
+
+    <!--获取符合条件的数据-->
+    <select id="queryRefundJobList" resultType="java.util.Map">
+      <![CDATA[
+        SELECT
+          tt1.id repairMendOrderId,'' mendDeliverId,tt1.total_amount totalAmount,tt1.apply_member_id memberId
+        FROM
+            dj_repair_mend_order tt1
+        WHERE tt1.type =4
+        and tt1.state=1
+        and tt1.create_date<date_add(now(), interval -(select param_value from dj_config where param_key=#{paramNodeKey}) hour)
+        and EXISTS(select 1 from dj_deliver_order_progress p where tt1.id=p.progress_order_id)
+        union all
+        SELECT
+          tt1.id repairMendOrderId,tt2.id mendDeliverId,tt2.total_amount totalAmount,tt1.apply_member_id memberId
+        FROM
+            dj_repair_mend_order tt1,
+            dj_repair_mend_deliver tt2
+        WHERE tt1.type in(2,5)
+        and tt2.shipping_state = 0
+        and tt2.create_date<date_add(now(), interval -(select param_value from dj_config where param_key=#{paramNodeKey}) hour)
+        and EXISTS(select 1 from dj_deliver_order_progress p where tt1.id=p.progress_order_id)
+        ]]>
+    </select>
+
+    <select id="queryRefundDeliverJobList" resultType="java.util.Map">
+        <![CDATA[
+        SELECT
+          tt1.id repairMendOrderId,tt3.id mendDeliverId,tt1.total_amount totalAmount,tt1.apply_member_id memberId,tt2.node_code nodeCode
+        FROM
+            dj_repair_mend_order tt1,
+            dj_deliver_order_progress tt2,
+            dj_repair_mend_deliver tt3
+        WHERE
+           tt3.id = tt2.progress_order_id
+        and tt1.id=tt3.mend_order_id
+        and tt2.create_date=(select max(t.create_date) from dj_deliver_order_progress t where t.progress_order_id=tt2.progress_order_id)
+        and tt2.node_code=#{nodeCode}
+        and tt1.type in(2,5)
+        and tt2.create_date<date_add(now(), interval -(select param_value from dj_config where param_key=#{paramNodeKey}) hour)
+
+        ]]>
+    </select>
 </mapper>
 

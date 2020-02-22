@@ -2639,6 +2639,7 @@ public class DjMaintenanceRecordService {
                     paramMap.put("isComplain",1);//是否申诉方 1是，0否
                 }
                 paramMap.put("proportion",recordResponsibleParty.getProportion());//占比
+                paramMap.put("money",recordResponsibleParty.getMaintenanceTotalPrice());
                 responsiblePartylist.add(paramMap);
             }
         }

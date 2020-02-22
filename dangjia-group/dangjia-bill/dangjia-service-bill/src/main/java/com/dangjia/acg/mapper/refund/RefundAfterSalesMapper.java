@@ -63,19 +63,26 @@ public interface RefundAfterSalesMapper extends Mapper<Order> {
     List<RefundRepairOrderMaterialDTO> queryRefundOnlyHistoryOrderMaterialList(@Param("repairMendOrderId") String repairMendOrderId,@Param("mendDeliverId") String mendDeliverId);
 
     /**
-     * 根据退货单ID查询退货详情信息
+     * 根据退货单申请单ID查询退货详情信息
      * @param repairMendOrderId
      * @return
      */
     RefundRepairOrderDTO queryRefundOnlyHistoryOrderInfo(@Param("repairMendOrderId") String repairMendOrderId);
 
     /**
-     * 查询符合条件的数据信息
-     * @param nodeType  节点ID
-     * @param paramNodeKey 获取需处理的判断的时间值的key
+     * 根据退货单单ID查询退货详情信息
+     * @param mendDeliverId
      * @return
      */
-    List<Map<String,Object>> queryRefundJobList(@Param("nodeCode") String nodeType,@Param("paramNodeKey") String paramNodeKey);
+    RefundRepairOrderDTO  queryMendSplitOrderInfo(@Param("mendDeliverId") String mendDeliverId);
+
+    /**
+     * 获取退货单总额
+     * @param mendDeliverId
+     * @return
+     */
+    Map<String,Object> totalProductDimensionMendDetail(@Param("mendDeliverId") String mendDeliverId);
+
 
     /**
      * 查询可退人工商品
