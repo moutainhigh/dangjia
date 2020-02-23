@@ -349,6 +349,7 @@
           t4.id productTemplateId,
           t2.product_name productName,
           t4.product_sn productSn,
+          IFNULL(t4.convert_unit,t4.unit_id) unitId,
           t2.unit_name unitName,
           t4.image,
           t2.price price,

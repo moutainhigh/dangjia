@@ -47,6 +47,8 @@ public class DecorationCostItemDTO {
 
     private Integer steta;//商品类型 （1我们购，2自购商品）
 
+    private String unitId;
+
     private String unitName;//商品单位名称
 
     private String actuaryBudgetId;//精算商品ID（自购商品才有）

@@ -95,6 +95,18 @@ public class DecorationCostController implements DecorationCostAPI {
     }
 
     /**
+     *
+     * @param userToken
+     * @param type 1按工序查，2按分类查
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse selectScreeningConditions(String userToken,Integer type){
+        return decorationCostService.selectScreeningConditions(type);
+    }
+
+    /**
      * 精算--分类标签汇总信息查询
      * @param userToken 用户TOKEN
      * @param cityId 城市ID
@@ -115,16 +127,15 @@ public class DecorationCostController implements DecorationCostAPI {
      * @param userToken 用户TOKEN
      * @param cityId 城市ID
      * @param houseId 房子ID
-     * @param workerTypeId 工种ID
-     * @param categoryTopId 顶级分类ID
+     * @param searchTypeId 工种ID/顶级分类ID
      * @param labelValId 类别标签 ID
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse searchBudgetLastCategoryList(String userToken,String cityId,String houseId,
-                                                        String workerTypeId,String categoryTopId,String labelValId){
-        return decorationCostService.searchBudgetLastCategoryList(userToken,cityId,houseId,workerTypeId,categoryTopId,labelValId);
+                                                        String searchTypeId,String labelValId){
+        return decorationCostService.searchBudgetLastCategoryList(userToken,cityId,houseId,searchTypeId,labelValId);
     }
 
     /**
@@ -132,8 +143,7 @@ public class DecorationCostController implements DecorationCostAPI {
      * @param userToken 用户TOKEN
      * @param cityId 城市ID
      * @param houseId 房子ID
-     * @param workerTypeId 工种ID
-     * @param categoryTopId 顶级分类ID
+     * @param searchTypeId 工种ID/ 顶级分类ID
      * @param labelValId 类别标签 ID
      * @param categoryId 末级分类ID
      * @return
@@ -141,7 +151,7 @@ public class DecorationCostController implements DecorationCostAPI {
     @Override
     @ApiMethod
     public ServerResponse searchBudgetProductList(String userToken,String cityId,String houseId,
-                                                   String workerTypeId,String categoryTopId,String labelValId,String categoryId){
-        return decorationCostService.searchBudgetProductList(userToken,cityId,houseId,workerTypeId,categoryTopId,labelValId,categoryId);
+                                                   String searchTypeId,String labelValId,String categoryId){
+        return decorationCostService.searchBudgetProductList(userToken,cityId,houseId,searchTypeId,labelValId,categoryId);
     }
 }

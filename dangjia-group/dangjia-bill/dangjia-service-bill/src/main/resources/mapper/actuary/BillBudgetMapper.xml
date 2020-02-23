@@ -203,11 +203,9 @@
                     bm.house_id = #{houseId}
                 AND bm.product_id = sp.id
                 AND sp.prod_template_id = pt.id
-                <if test = "workerTypeId!=null and workerTypeId!=''">
-                    and bm.worker_type_id = #{workerTypeId}
-                </if>
-                <if test = "categoryTopId!=null and categoryTopId!=''">
-                    and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
+                <if test = "searchTypeId!=null and searchTypeId!=''">
+                    and (bm.worker_type_id = #{searchTypeId}
+                    or pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
                 </if>
                 GROUP BY
                     bm.id,
@@ -255,11 +253,9 @@
         AND sp.prod_template_id = pt.id
         AND pt.category_id = bgc.id
         and bgc.id=#{categoryId}
-        <if test = "workerTypeId!=null and workerTypeId!=''">
-            and bm.worker_type_id = #{workerTypeId}
-        </if>
-        <if test = "categoryTopId!=null and categoryTopId!=''">
-            and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
+        <if test = "searchTypeId!=null and searchTypeId!=''">
+            and ( bm.worker_type_id = #{searchTypeId}
+              or pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
         </if>
         <if test = "labelValId!=null and labelValId!=''">
             and FIND_IN_SET(#{labelValId},bgc.category_label_ids)
