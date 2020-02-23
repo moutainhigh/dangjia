@@ -9,12 +9,14 @@ import com.dangjia.acg.dto.order.DecorationCostDTO;
 import com.dangjia.acg.dto.order.DecorationCostItemDTO;
 import com.dangjia.acg.dto.refund.DeliverOrderAddedProductDTO;
 import com.dangjia.acg.mapper.actuary.IBillBudgetMapper;
+import com.dangjia.acg.mapper.config.IBillConfigMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
 import com.dangjia.acg.mapper.order.IBillDeliverOrderAddedProductMapper;
 import com.dangjia.acg.mapper.order.IBillOrderNodeMapper;
 import com.dangjia.acg.mapper.refund.IBillBasicsGoodsMapper;
 import com.dangjia.acg.mapper.refund.IBillBrandMapper;
 import com.dangjia.acg.mapper.refund.IBillProductTemplateMapper;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.order.OrderNode;
@@ -55,7 +57,7 @@ public class DecorationCostService {
     @Autowired
     private IBillDeliverOrderAddedProductMapper iBillDeliverOrderAddedProductMapper;
     @Autowired
-    private RefundAfterSalesService refundAfterSalesService;
+    private IBillConfigMapper iBillConfigMapper;
     @Autowired
     private IBillOrderNodeMapper iBillOrderNodeMapper;
     /**
@@ -235,6 +237,11 @@ public class DecorationCostService {
             //4.获取符合条件的据数返回给前端
             List<Map<String,Object>> list=getCommonList(budgetList,totalPrice);
             map.put("totalPrice",totalPrice);//总金额
+            Config config= iBillConfigMapper.selectConfigInfoByParamKey("ACTUARIAL_REMARK");//获取对应阶段需处理剩余时间
+            if(config!=null){
+                map.put("remark",config.getParamDesc());//文字描述
+            }
+            map.put("totalPrice",totalPrice);//总金额
             map.put("workerTypeList",list);
             return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
@@ -261,6 +268,10 @@ public class DecorationCostService {
             //4.获取符合条件的据数返回给前端
             List<Map<String,Object>> list=getCommonList(budgetList,totalPrice);
             map.put("totalPrice",totalPrice);//总金额
+            Config config= iBillConfigMapper.selectConfigInfoByParamKey("ACTUARIAL_REMARK");//获取对应阶段需处理剩余时间
+            if(config!=null){
+                map.put("remark",config.getParamDesc());//文字描述
+            }
             map.put("categoryList",list);
 
             return ServerResponse.createBySuccess("查询成功",map);
