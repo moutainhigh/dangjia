@@ -94,7 +94,7 @@ public class TechnologyRecordService {
             Map<String, Object> returnMap = new HashMap<>();
             if (applyType == 1 || applyType == 2) {
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlowId);
-                returnMap.put("hint", "温馨提示：当前免费提交审核次数<font color=red>("+houseFlowApplyList.size()+"/2)</font>,金额为100元/1次的费用.");
+                returnMap.put("hint", "温馨提示：当前免费提交审核次数<font color=red>("+houseFlowApplyList.size()+"/2)</font>，工匠应确保达到工艺标准，在提交审核次数超过2次之后，将罚款100元/次的费用。");
                 if (houseFlowApplyList.size() >= 2) {
                     returnMap.put("pop", "将按照100元/次自动罚款，请知晓");
                     returnMap.put("title", "审核次数已满两次");
