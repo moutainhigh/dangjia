@@ -235,14 +235,14 @@ public class DecorationCostService {
             //2.按工序查询已支付定单的汇总
             List<DecorationCostDTO> budgetList=iBillBudgetMapper.selectBudgetWorkerInfoList(houseId);
             //4.获取符合条件的据数返回给前端
-            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice);
+            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice,1);
             map.put("totalPrice",totalPrice);//总金额
             Config config= iBillConfigMapper.selectConfigInfoByParamKey("ACTUARIAL_REMARK");//获取对应阶段需处理剩余时间
             if(config!=null){
                 map.put("remark",config.getParamDesc());//文字描述
             }
             map.put("totalPrice",totalPrice);//总金额
-            map.put("workerTypeList",list);
+            map.put("list",list);
             return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
             logger.error("查询失败",e);
@@ -266,13 +266,13 @@ public class DecorationCostService {
             //2.按类别查询已支付定单的汇总
             List<DecorationCostDTO> budgetList=iBillBudgetMapper.selectBudgetCategoryInfoList(houseId);
             //4.获取符合条件的据数返回给前端
-            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice);
+            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice,2);
             map.put("totalPrice",totalPrice);//总金额
             Config config= iBillConfigMapper.selectConfigInfoByParamKey("ACTUARIAL_REMARK");//获取对应阶段需处理剩余时间
             if(config!=null){
                 map.put("remark",config.getParamDesc());//文字描述
             }
-            map.put("categoryList",list);
+            map.put("list",list);
 
             return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
@@ -281,7 +281,14 @@ public class DecorationCostService {
         }
     }
 
-    List<Map<String,Object>> getCommonList(List<DecorationCostDTO> budgetList,Double totalPrice){
+    /**
+     *
+     * @param budgetList
+     * @param totalPrice
+     * @param type 1按工序查看，2按类别查看
+     * @return
+     */
+    List<Map<String,Object>> getCommonList(List<DecorationCostDTO> budgetList,Double totalPrice,Integer type){
         List<Map<String,Object>> list=new ArrayList<>();
         if(budgetList!=null&&budgetList.size()>0){
             Map<String,Object> map;
@@ -294,10 +301,15 @@ public class DecorationCostService {
             for(int i=0;i<budgetList.size();i++){
                 map=new HashMap<>();
                DecorationCostDTO dc=budgetList.get(i);
-               map.put("workerTypeId",dc.getWorkerTypeId());
-               map.put("workerTypeName",dc.getWorkerTypeName());
-               map.put("categoryId",dc.getCategoryId());
-               map.put("categoryName",dc.getCategoryName());
+               if(type==1){
+                   map.put("id",dc.getWorkerTypeId());
+                   map.put("name",dc.getWorkerTypeName());
+
+               }else{
+                   map.put("id",dc.getCategoryId());
+                   map.put("name",dc.getCategoryName());
+               }
+
                 map.put("totalPrice",dc.getTotalPrice());
                 Double dul=MathUtil.round(MathUtil.div(dc.getTotalPrice(),totalPrice)*100);
                 if(i==budgetList.size()-1){
