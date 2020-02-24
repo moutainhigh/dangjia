@@ -21,11 +21,16 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.user.MainAuthService;
 import com.dangjia.acg.service.user.MainUserService;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -449,6 +454,28 @@ public class MainUserController implements MainUserAPI {
             return ServerResponse.createByErrorMessage("修改密码异常！");
         }
         return ServerResponse.createBySuccessMessage("ok");
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse updateMainInfoById(HttpServletRequest request,String userId,String userName,String email){
+        return userService.updateMainInfoById(userId,userName,email);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updateMainUserPwd(HttpServletRequest request,String userId,String oldPwd,String newPwd){
+        try{
+            return userService.updateMainUserPwd(userId,oldPwd,newPwd);
+        }catch (Exception e){
+            logger.error("更新密码失败",e);
+            return ServerResponse.createByErrorMessage("更新密码失败");
+        }
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse searchMainInfo( HttpServletRequest request,  String mobile){
+        //查询用户个人信息
+        return userService.searchMainInfo(mobile);
     }
 
     public ServerResponse findUserByMobile(HttpServletRequest request, String mobile) {

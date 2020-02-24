@@ -173,4 +173,18 @@ public interface MainUserAPI {
     ServerResponse findUserByMobile(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("mobile") String mobile);
 
+    @RequestMapping(value = "/user/updateMainInfoById", method = RequestMethod.POST)
+    @ApiOperation(value = "修改用户的基础信息", notes = "修改用户的基础信息")
+    ServerResponse updateMainInfoById(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("userId") String userId,@RequestParam("userName") String userName,@RequestParam("email") String email);
+
+    @RequestMapping(value = "/user/searchMainInfo", method = RequestMethod.POST)
+    @ApiOperation(value = "查询用户个人信息", notes = "查询用户个人信息")
+    ServerResponse searchMainInfo(@RequestParam("request") HttpServletRequest request,@RequestParam("mobile") String mobile);
+
+    @RequestMapping(value = "/user/updateMainUserPwd", method = RequestMethod.POST)
+    @ApiOperation(value = "修改用户密码信息", notes = "修改用户密码信息")
+    ServerResponse updateMainUserPwd(@RequestParam("request") HttpServletRequest request,@RequestParam("userId") String userId,@RequestParam("oldPwd") String oldPwd,@RequestParam("newPwd") String newPwd);
+
+
 }
