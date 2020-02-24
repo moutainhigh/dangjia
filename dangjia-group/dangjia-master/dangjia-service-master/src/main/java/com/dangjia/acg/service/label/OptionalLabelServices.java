@@ -135,41 +135,53 @@ public class OptionalLabelServices {
      */
     public ServerResponse queryOptionalLabelById(String id) {
         try {
-            OptionalLaelDetail optionalLaelDetail = new OptionalLaelDetail();
-            OptionalLabel optionalLabel = optionalLabelMapper.selectByPrimaryKey(id);
-            optionalLaelDetail.setId(id);
-            optionalLaelDetail.setTopTitle(optionalLabel.getLabelName());
-            Example example = new Example(OptionalLabel.class);
-            example.createCriteria().andEqualTo(OptionalLabel.PARENT_ID, id)
-                    .andEqualTo(OptionalLabel.DATA_STATUS, 0);
-            List<OptionalLabel> optionalLabels = optionalLabelMapper.selectByExample(example);
-            List<ChildTags> childTagsList = new ArrayList<>();
-            optionalLabels.forEach(optionalLabel1 -> {
-                ChildTags childTags = new ChildTags();
-                childTags.setId(optionalLabel1.getId());
-                childTags.setSubTitle(optionalLabel1.getLabelName());
-                childTags.setParentId(optionalLabel1.getParentId());
-                Example example1 = new Example(OptionalLabel.class);
-                example1.createCriteria().andEqualTo(OptionalLabel.PARENT_ID, optionalLabel1.getId())
-                        .andEqualTo(OptionalLabel.DATA_STATUS, 0);
-                List<OptionalLabel> optionalLabels1 = optionalLabelMapper.selectByExample(example1);
-                List<ChildChildTags> childChildTagsList = new ArrayList<>();
-                optionalLabels1.forEach(optionalLabel2 -> {
-                    ChildChildTags childChildTags = new ChildChildTags();
-                    childChildTags.setId(optionalLabel2.getId());
-                    childChildTags.setTagName(optionalLabel2.getLabelName());
-                    childChildTags.setParentId(optionalLabel2.getParentId());
-                    childChildTagsList.add(childChildTags);
-                });
-                childTags.setTagName(childChildTagsList);
-                childTagsList.add(childTags);
-            });
-            optionalLaelDetail.setLabels(childTagsList);
-            return ServerResponse.createBySuccess("查询成功", optionalLaelDetail);
+            return ServerResponse.createBySuccess("查询成功", queryOptionalLabelById1(id,null));
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+
+    public OptionalLaelDetail queryOptionalLabelById1(String id, String[] optionalLabelIds){
+        OptionalLaelDetail optionalLaelDetail = new OptionalLaelDetail();
+        OptionalLabel optionalLabel = optionalLabelMapper.selectByPrimaryKey(id);
+        optionalLaelDetail.setId(id);
+        optionalLaelDetail.setTopTitle(optionalLabel.getLabelName());
+        Example example = new Example(OptionalLabel.class);
+        example.createCriteria().andEqualTo(OptionalLabel.PARENT_ID, id)
+                .andEqualTo(OptionalLabel.DATA_STATUS, 0);
+        List<OptionalLabel> optionalLabels = optionalLabelMapper.selectByExample(example);
+        List<ChildTags> childTagsList = new ArrayList<>();
+        optionalLabels.forEach(optionalLabel1 -> {
+            ChildTags childTags = new ChildTags();
+            childTags.setId(optionalLabel1.getId());
+            childTags.setSubTitle(optionalLabel1.getLabelName());
+            childTags.setParentId(optionalLabel1.getParentId());
+            Example example1 = new Example(OptionalLabel.class);
+            example1.createCriteria().andEqualTo(OptionalLabel.PARENT_ID, optionalLabel1.getId())
+                    .andEqualTo(OptionalLabel.DATA_STATUS, 0);
+            List<OptionalLabel> optionalLabels1 = optionalLabelMapper.selectByExample(example1);
+            List<ChildChildTags> childChildTagsList = new ArrayList<>();
+            optionalLabels1.forEach(optionalLabel2 -> {
+                ChildChildTags childChildTags = new ChildChildTags();
+                childChildTags.setId(optionalLabel2.getId());
+                childChildTags.setTagName(optionalLabel2.getLabelName());
+                childChildTags.setParentId(optionalLabel2.getParentId());
+                childChildTags.setStatus("1");
+                for (String optionalLabelId : optionalLabelIds) {
+                    if(optionalLabelId.equals(optionalLabel2.getId())){
+                        childChildTags.setStatus("0");
+                        break;
+                    }
+                }
+                childChildTagsList.add(childChildTags);
+            });
+            childTags.setTagName(childChildTagsList);
+            childTagsList.add(childTags);
+        });
+        optionalLaelDetail.setLabels(childTagsList);
+        return optionalLaelDetail;
     }
 
     /**
