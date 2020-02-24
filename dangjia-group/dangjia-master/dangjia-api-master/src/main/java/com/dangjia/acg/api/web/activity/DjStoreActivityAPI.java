@@ -124,6 +124,10 @@ public interface DjStoreActivityAPI {
                                 @RequestParam("registrationStatus") Integer registrationStatus,
                                 @RequestParam("backReason") String backReason);
 
+    @PostMapping("app/activity/queryHomeGroupActivities")
+    @ApiOperation(value = "首页拼团活动", notes = "首页拼团活动")
+    ServerResponse queryHomeGroupActivities();
+
 
 
 }
