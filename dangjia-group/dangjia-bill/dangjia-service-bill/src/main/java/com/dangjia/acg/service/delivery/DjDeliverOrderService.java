@@ -16,6 +16,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.UserInfoResultDTO;
+import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.design.CollectDataDTO;
@@ -319,17 +320,13 @@ public class DjDeliverOrderService {
             }
         }
 
-
         //设置菜单
+        setMenus(workInFoDTO, house);
+
         example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
                 .andEqualTo(HouseFlow.DATA_STATUS, 0);
         List<HouseFlow> houseFlows = iBillHouseFlowMapper.selectByExample(example);
-        for (HouseFlow o : houseFlows) {
-            if (o.getWorkerType() <= 3) {
-                setMenus(workInFoDTO, house, o);
-            }
-        }
 
         //获取工序信息
         List<Object> workNodeListDTO = summationMethod(houseFlows, house);
@@ -379,35 +376,26 @@ public class DjDeliverOrderService {
     /**
      * 设置菜单
      */
-    private void setMenus(WorkInFoDTO workInFoDTO, House house, HouseFlow hf) {
+    private void setMenus(WorkInFoDTO workInFoDTO, House house) {
         String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-        List<WorkInFoDTO.ListMapBean> bigList = new ArrayList<>();
-        Example example = new Example(MenuConfiguration.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(MenuConfiguration.DATA_STATUS, 0);
-        if (hf.getWorkerType() == 1) {
-            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 2);
-        } else if (hf.getWorkerType() == 2) {
-            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 3);
-        } else {
-            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 4);
-        }
+        List<WorkInFoDTO.BigListBean> bigList = new ArrayList<>();
 
-        example.orderBy(MenuConfiguration.SORT).asc();
-        List<MenuConfiguration> menuConfigurations2 = iBillMenuConfigurationMapper.selectByExample(example);
-        for (MenuConfiguration configuration : menuConfigurations2) {
-            configuration.initPath(imageAddress, webAddress, house.getId(), hf.getId(), null);
-            WorkInFoDTO.ListMapBean mapBean = new WorkInFoDTO.ListMapBean();
-            mapBean.setName(configuration.getName());
-            mapBean.setUrl(configuration.getUrl());
-            mapBean.setApiUrl(configuration.getApiUrl());
-            mapBean.setImage(configuration.getImage());
-            mapBean.setType(configuration.getType());
-            bigList.add(mapBean);
+        WorkInFoDTO.BigListBean bigListBean = new WorkInFoDTO.BigListBean();
+        bigListBean.setName("我的工具");
+        if(workInFoDTO.getHouseType()==3){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shieji));
+            bigList.add(bigListBean);
+        }
+        if(workInFoDTO.getHouseType()==4){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.jingsuan));
+            bigList.add(bigListBean);
+        }
+        if(workInFoDTO.getHouseType()==5){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shigong));
+            bigList.add(bigListBean);
         }
         workInFoDTO.setBigList(bigList);//添加菜单到返回体中
-
     }
 
     public List<Map<String, Object>> optimizationHander(HouseFlow houseFlow) {
