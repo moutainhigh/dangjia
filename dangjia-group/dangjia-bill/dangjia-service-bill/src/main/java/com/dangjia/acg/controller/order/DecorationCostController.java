@@ -133,9 +133,9 @@ public class DecorationCostController implements DecorationCostAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse searchBudgetLastCategoryList(String userToken,String cityId,String houseId,
+    public ServerResponse searchBudgetLastCategoryList(String userToken,PageDTO pageDTO,String cityId,String houseId,
                                                         String searchTypeId,String labelValId){
-        return decorationCostService.searchBudgetLastCategoryList(userToken,cityId,houseId,searchTypeId,labelValId);
+        return decorationCostService.searchBudgetLastCategoryList(userToken,pageDTO,cityId,houseId,searchTypeId,labelValId);
     }
 
     /**

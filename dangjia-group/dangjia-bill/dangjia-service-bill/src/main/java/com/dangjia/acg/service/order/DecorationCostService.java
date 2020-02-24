@@ -306,6 +306,10 @@ public class DecorationCostService {
                 Example example=new Example(WorkerType.class);
                 example.createCriteria().andEqualTo(WorkerType.DATA_STATUS,"0");
                 List<WorkerType> list= iBillWorkerTypeMapper.selectAll();
+                WorkerType workerType=new WorkerType();
+                workerType.setId("");
+                workerType.setName("全部");
+                list.add(0,workerType);
                 return ServerResponse.createBySuccess("查询成功",list);
             }else{//顶级分类
                 Example example=new Example(BasicsGoodsCategory.class);
@@ -313,6 +317,10 @@ public class DecorationCostService {
                 .andEqualTo(BasicsGoodsCategory.PARENT_ID,"1");
                 example.orderBy(BasicsGoodsCategory.SORT);
                 List<BasicsGoodsCategory> list=billBasicsGoodsCategoryMapper.selectByExample(example);
+                BasicsGoodsCategory basicsGoodsCategory=new BasicsGoodsCategory();
+                basicsGoodsCategory.setId("");
+                basicsGoodsCategory.setName("全部");
+                list.add(0,basicsGoodsCategory);
               return ServerResponse.createBySuccess("查询成功",list);
             }
         }catch (Exception e){
@@ -406,21 +414,18 @@ public class DecorationCostService {
      * @param labelValId 类别标签 ID
      * @return
      */
-    public ServerResponse searchBudgetLastCategoryList(String userToken,String cityId,String houseId,
+    public ServerResponse searchBudgetLastCategoryList(String userToken,PageDTO pageDTO,String cityId,String houseId,
                                                    String searchTypeId,String labelValId){
         logger.info("查询分类汇总信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
         try{
 
             Map<String,Object> decorationMap=new HashMap<>();
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DecorationCostDTO> categoryList=iBillBudgetMapper.searchBudgetLastCategoryList(houseId,searchTypeId,labelValId);
-            Double totalPrice=0d;
-            if(categoryList!=null){
-                for (DecorationCostDTO decorationCostDTO:categoryList){
-                    totalPrice=MathUtil.add(totalPrice,decorationCostDTO.getTotalPrice());
-                }
-            }
+            Double totalPrice=iBillBudgetMapper.searchBudgetLastCategoryCount(houseId,searchTypeId);
+            PageInfo pageResult = new PageInfo(categoryList);
             decorationMap.put("totalPrice",totalPrice);
-            decorationMap.put("categoryList",categoryList);
+            decorationMap.put("categoryList",pageResult);
             return ServerResponse.createBySuccess("查询成功",decorationMap);
         }catch (Exception e){
             logger.error("查询失败",e);

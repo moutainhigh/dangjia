@@ -179,6 +179,23 @@
 
     </select>
 
+    <select id="searchBudgetLastCategoryCount" resultType="java.lang.Double">
+        SELECT
+          sum(bm.price*bm.shop_count) total_price
+        FROM
+            dj_actuary_budget_material bm,
+            dj_basics_storefront_product sp,
+            dj_basics_product_template pt
+        WHERE bm.house_id = #{houseId}
+        AND bm.product_id = sp.id
+        AND sp.prod_template_id = pt.id
+        <if test = "searchTypeId!=null and searchTypeId!=''">
+            and (bm.worker_type_id = #{searchTypeId}
+            or pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
+        </if>
+    </select>
+
+
     <!-- 精算，按类别汇总，末级分类 -->
     <select id="searchBudgetLastCategoryList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
 
@@ -194,7 +211,7 @@
                     pt.category_id,
                     bm.price,
                     bm.shop_count,
-                    bm.total_price
+                    bm.price*bm.shop_count total_price
                 FROM
                     dj_actuary_budget_material bm,
                     dj_basics_storefront_product sp,
@@ -240,7 +257,7 @@
             bm.unit_name unitName,
             bm.price,
             bm.shop_count shopCount,
-            bm.total_price actualPaymentPrice,
+            bm.price*bm.shop_count actualPaymentPrice,
             bm.id actuaryBudgetId
         FROM
             dj_actuary_budget_material bm,
