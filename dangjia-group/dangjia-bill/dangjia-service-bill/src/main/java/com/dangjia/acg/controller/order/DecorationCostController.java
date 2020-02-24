@@ -102,8 +102,8 @@ public class DecorationCostController implements DecorationCostAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse selectScreeningConditions(String userToken,Integer type){
-        return decorationCostService.selectScreeningConditions(type);
+    public ServerResponse selectScreeningConditions(String userToken,String houseId,Integer type){
+        return decorationCostService.selectScreeningConditions(houseId,type);
     }
 
     /**

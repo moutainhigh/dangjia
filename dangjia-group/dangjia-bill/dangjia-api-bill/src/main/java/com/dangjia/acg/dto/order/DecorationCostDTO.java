@@ -15,6 +15,12 @@ import java.util.List;
 
 @Data
 public class DecorationCostDTO {
+    @ApiModelProperty("类别ID/工种ID")
+    private String id;
+
+
+    @ApiModelProperty("类别名称/工种名称")
+    private String name;
 
 
     @ApiModelProperty("类别ID")

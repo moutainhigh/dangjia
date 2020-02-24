@@ -282,7 +282,7 @@ public class DecorationCostService {
             //4.获取符合条件的据数返回给前端
             List<Map<String,Object>> list=getCommonList(budgetList,totalPrice,2);
             map.put("totalPrice",totalPrice);//总金额
-            Config config= iBillConfigMapper.selectConfigInfoByParamKey("ACTUARIAL_REMARK");//获取对应阶段需处理剩余时间
+            Config config= iBillConfigMapper.selectConfigInfoByParamKey("ACTUARIAL_REMARK");//获取对应文字描述
             if(config!=null){
                 map.put("remark",config.getParamDesc());//文字描述
             }
@@ -300,27 +300,21 @@ public class DecorationCostService {
      * @param type 1按工序查，2按分类查
      * @return
      */
-    public ServerResponse selectScreeningConditions(Integer type){
+    public ServerResponse selectScreeningConditions(String houseId,Integer type){
         try{
             if(type==1){//工种
-                Example example=new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.DATA_STATUS,"0");
-                List<WorkerType> list= iBillWorkerTypeMapper.selectAll();
-                WorkerType workerType=new WorkerType();
-                workerType.setId("");
-                workerType.setName("全部");
-                list.add(0,workerType);
+                List<DecorationCostDTO> list=iBillBudgetMapper.selectBudgetWorkerInfoList(houseId);
+                DecorationCostDTO decorationCostDTO=new DecorationCostDTO();
+                decorationCostDTO.setId("");
+                decorationCostDTO.setName("全部");
+                list.add(0,decorationCostDTO);
                 return ServerResponse.createBySuccess("查询成功",list);
             }else{//顶级分类
-                Example example=new Example(BasicsGoodsCategory.class);
-                example.createCriteria().andEqualTo(BasicsGoodsCategory.DATA_STATUS,"0")
-                .andEqualTo(BasicsGoodsCategory.PARENT_ID,"1");
-                example.orderBy(BasicsGoodsCategory.SORT);
-                List<BasicsGoodsCategory> list=billBasicsGoodsCategoryMapper.selectByExample(example);
-                BasicsGoodsCategory basicsGoodsCategory=new BasicsGoodsCategory();
-                basicsGoodsCategory.setId("");
-                basicsGoodsCategory.setName("全部");
-                list.add(0,basicsGoodsCategory);
+                List<DecorationCostDTO> list=iBillBudgetMapper.selectBudgetCategoryInfoList(houseId);
+                DecorationCostDTO decorationCostDTO=new DecorationCostDTO();
+                decorationCostDTO.setId("");
+                decorationCostDTO.setName("全部");
+                list.add(0,decorationCostDTO);
               return ServerResponse.createBySuccess("查询成功",list);
             }
         }catch (Exception e){
@@ -350,15 +344,8 @@ public class DecorationCostService {
             for(int i=0;i<budgetList.size();i++){
                 map=new HashMap<>();
                DecorationCostDTO dc=budgetList.get(i);
-               if(type==1){
-                   map.put("id",dc.getWorkerTypeId());
-                   map.put("name",dc.getWorkerTypeName());
-
-               }else{
-                   map.put("id",dc.getCategoryId());
-                   map.put("name",dc.getCategoryName());
-               }
-
+                map.put("id",dc.getId());
+                map.put("name",dc.getName());
                 map.put("totalPrice",dc.getTotalPrice());
                 Double dul=MathUtil.round(MathUtil.div(dc.getTotalPrice(),totalPrice)*100);
                 if(i==budgetList.size()-1){

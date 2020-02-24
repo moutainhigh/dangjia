@@ -70,7 +70,7 @@ public interface DecorationCostAPI {
      */
     @PostMapping("/app/decoration/selectScreeningConditions")
     @ApiOperation(value = "精算--查询筛选条件列表", notes = "精算--查询筛选条件列表")
-    ServerResponse selectScreeningConditions(@RequestParam("userToken") String userToken,
+    ServerResponse selectScreeningConditions(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId,
                                           @RequestParam("type") Integer type);
 
 

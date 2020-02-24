@@ -48,8 +48,8 @@
     <select id="selectBudgetWorkerInfoList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
 
             SELECT
-                wt.id workerTypeId,
-                wt.`name` workerTypeName,
+                wt.id id,
+                wt.`name` name,
                 sum(tt.total_price) totalPrice
             FROM
                 (
@@ -93,8 +93,8 @@
     <select id="selectBudgetCategoryInfoList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
 
        SELECT
-            bcp.id categoryId,
-            bcp. NAME categoryName,
+            bcp.id id,
+            bcp. NAME name,
             sum(tt.total_price) totalPrice
         FROM
             (
