@@ -16,7 +16,7 @@ public class ComplainDataDTO {
     private Date createDate;//申诉时间
     private String description;//申诉描述,
     private String image;//申诉图片
-    private List<String> images;//
+    private String images;//
     private Date handleDate;//平台处理时间
     private String name;//工匠名称
     private String mobile;//工匠电话

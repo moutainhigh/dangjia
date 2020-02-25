@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.shell.IHomeShellProductMapper">
+
+    <!--查询商品列表信息-->
+     <select id="queryHomeShellProductList" resultType="com.dangjia.acg.dto.shell.HomeShellProductDTO">
+        SELECT
+            t.id shellProductId,
+            t.create_date createDate,
+            t.NAME,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.integral,
+            t.money,
+            t.stock_num stockNum,
+            t.shelf_status shelfStatus
+        FROM
+            dj_home_shell_product t
+        where t.data_status=0
+         <if test="null!=productType and ''!=productType">
+             and t.product_type=#{productType}
+         </if>
+         <if test="null!=searchKey and ''!=searchKey">
+             AND (t.name LIKE CONCAT('%',#{searchKey},'%')
+             or t.product_sn LIKE CONCAT('%',#{searchKey},'%'))
+         </if>
+        order by t.sort
+     </select>
+</mapper>

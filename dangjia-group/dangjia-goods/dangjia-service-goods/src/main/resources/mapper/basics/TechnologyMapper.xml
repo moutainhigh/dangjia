@@ -72,7 +72,9 @@
             and
             name LIKE CONCAT('%',#{name},'%')
         </if>
-        and material_or_worker=#{materialOrWorker}
+        <if test="null!=materialOrWorker and ''!=materialOrWorker">
+            and material_or_worker=#{materialOrWorker}
+        </if>
         ORDER BY create_date desc
     </select>
 

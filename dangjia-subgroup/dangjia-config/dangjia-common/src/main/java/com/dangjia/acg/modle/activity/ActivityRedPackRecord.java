@@ -75,4 +75,8 @@ public class ActivityRedPackRecord extends BaseEntity {
 	@ApiModelProperty("订单编号")
 	private String businessOrderNumber;
 
+	@Column(name = "pack_num")
+	@Desc(value = "优惠卷编码")
+	@ApiModelProperty("优惠卷编码")
+	private String packNum;
 }

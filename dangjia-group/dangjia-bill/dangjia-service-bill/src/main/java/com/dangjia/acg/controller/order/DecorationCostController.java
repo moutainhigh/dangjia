@@ -102,8 +102,8 @@ public class DecorationCostController implements DecorationCostAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse selectScreeningConditions(String userToken,Integer type){
-        return decorationCostService.selectScreeningConditions(type);
+    public ServerResponse selectScreeningConditions(String userToken,String houseId,Integer type){
+        return decorationCostService.selectScreeningConditions(houseId,type);
     }
 
     /**
@@ -133,9 +133,9 @@ public class DecorationCostController implements DecorationCostAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse searchBudgetLastCategoryList(String userToken,String cityId,String houseId,
+    public ServerResponse searchBudgetLastCategoryList(String userToken,PageDTO pageDTO,String cityId,String houseId,
                                                         String searchTypeId,String labelValId){
-        return decorationCostService.searchBudgetLastCategoryList(userToken,cityId,houseId,searchTypeId,labelValId);
+        return decorationCostService.searchBudgetLastCategoryList(userToken,pageDTO,cityId,houseId,searchTypeId,labelValId);
     }
 
     /**

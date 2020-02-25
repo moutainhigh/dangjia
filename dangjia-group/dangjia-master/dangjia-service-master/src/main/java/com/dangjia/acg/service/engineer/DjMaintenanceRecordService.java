@@ -1187,15 +1187,15 @@ public class DjMaintenanceRecordService {
      * @param image
      * @return
      */
-    private List<String> getImage(String image) {
-        List<String> strList = new ArrayList<>();
+    private String getImage(String image) {
+        //List<String> strList = new ArrayList<>();
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        List<String> result = Arrays.asList(image.split(","));
+        /*List<String> result = Arrays.asList(image.split(","));
         for (int i = 0; i < result.size(); i++) {
             String str = imageAddress + result.get(i);
             strList.add(str);
-        }
-        return strList;
+        }*/
+        return StringTool.getImage(image,imageAddress);
     }
 
 
@@ -2038,21 +2038,30 @@ public class DjMaintenanceRecordService {
      * 查询报销记录
      *
      * @param userToken
-     * @param memberId
      * @return
      */
-    public ServerResponse queryComplain(String userToken,String memberId){
+    public ServerResponse queryComplain(String userToken,PageDTO pageDTO,String maintenanceRecordId){
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             Example example = new Example(Complain.class);
-            example.createCriteria().andEqualTo(Complain.MEMBER_ID,memberId)
+            example.createCriteria().andEqualTo(Complain.MEMBER_ID,worker.getId())
                     .andEqualTo(Complain.DATA_STATUS,0).
                     andEqualTo(Complain.COMPLAIN_TYPE,9);
+            if(StringUtils.isNotBlank(maintenanceRecordId)){
+                example.createCriteria().andNotEqualTo(Complain.BUSINESS_ID,maintenanceRecordId);
+            }
             example.orderBy(Complain.MODIFY_DATE).desc();
             List<Complain> member = iComplainMapper.selectByExample(example);
             if (member.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            return ServerResponse.createBySuccess("查询成功", member);
+            PageInfo pageInfo=new PageInfo(member);
+            return ServerResponse.createBySuccess("查询成功", pageInfo);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

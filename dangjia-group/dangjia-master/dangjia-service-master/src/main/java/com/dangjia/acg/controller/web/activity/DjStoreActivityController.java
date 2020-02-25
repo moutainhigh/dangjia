@@ -145,4 +145,10 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
     public ServerResponse setBillGoods(String id, Integer registrationStatus, String backReason) {
         return djStoreActivityService.setBillGoods(id,registrationStatus,backReason);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryHomeGroupActivities() {
+        return djStoreActivityService.queryHomeGroupActivities();
+    }
 }

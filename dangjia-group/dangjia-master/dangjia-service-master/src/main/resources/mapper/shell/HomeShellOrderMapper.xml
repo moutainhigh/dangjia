@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.shell.IHomeShellOrderMapper">
+
+    <!--查询商品列表信息-->
+     <select id="selectShellOrderList" resultType="com.dangjia.acg.dto.shell.HomeShellOrderDTO">
+         SELECT
+             t.id shellOrderId,
+             t.number,
+             t.product_id productId,
+             t.exchange_client exchangeClient,
+             t.exchange_time exchangeTime,
+             t.member_id memberId,
+             t.member_name memberName,
+             t.member_mobile memberMobile,
+             t.`status`,
+             t.address_id addressId,
+             t.address,
+             t.exchange_num exchangeNum,
+             t.integral,
+             t.money,
+             t.image,
+             p. NAME productName,
+             p.product_type productType
+         FROM
+             dj_home_shell_order t,
+             dj_home_shell_product p
+         WHERE t.data_status=0
+         and t.product_id = p.id
+         and t.status in(1,2,3,4,5)
+         <if test="exchangeClient!=null and exchangeClient!=-1">
+             and t.exchange_client=#{exchangeClient}
+         </if>
+         <if test="status!=null and status!=-1">
+             and t.status=#{status}
+         </if>
+         <if test="null!=startTime and ''!=startTime">
+             and t.exchange_time>=#{startTime}
+         </if>
+         <if test="null!=endTime and ''!=endTime">
+          <![CDATA[ and t.exchange_time<DATE_ADD(#{exchangeClient},INTERVAL 1 DAY) ]]>
+         </if>
+         <if test="null!=searchKey and ''!=searchKey">
+             AND (t.number LIKE CONCAT('%',#{searchKey},'%')
+             or t.member_name LIKE CONCAT('%',#{searchKey},'%')
+             or t.member_mobile LIKE CONCAT('%',#{searchKey},'%'))
+         </if>
+        order by t.exchange_time desc
+     </select>
+</mapper>

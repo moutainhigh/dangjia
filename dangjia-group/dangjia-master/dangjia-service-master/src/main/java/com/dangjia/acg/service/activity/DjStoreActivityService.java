@@ -2,10 +2,12 @@ package com.dangjia.acg.service.activity;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.DjStoreActivityDTO;
 import com.dangjia.acg.dto.activity.DjStoreActivityProductDTO;
 import com.dangjia.acg.dto.activity.DjStoreParticipateActivitiesDTO;
@@ -58,6 +60,8 @@ public class DjStoreActivityService {
     private DjStoreActivityProductMapper djStoreActivityProductMapper;
     @Autowired
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+    @Autowired
+    private ConfigUtil configUtil;
 
     /**
      * 添加活动
@@ -363,6 +367,7 @@ public class DjStoreActivityService {
      */
     public ServerResponse queryWaitingSelectionProduct(String userId, String cityId, PageDTO pageDTO, String storeActivityId, String activitySessionId) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
             List<DjStoreActivityProductDTO> djStoreActivityProductDTOS =
@@ -370,6 +375,9 @@ public class DjStoreActivityService {
             if(djStoreActivityProductDTOS.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
             }
+            djStoreActivityProductDTOS.forEach(djStoreActivityProductDTO -> {
+                djStoreActivityProductDTO.setImage(imageAddress+djStoreActivityProductDTO.getImage());
+            });
             PageInfo pageInfo=new PageInfo(djStoreActivityProductDTOS);
             return ServerResponse.createBySuccess("查询成功",pageInfo);
         } catch (Exception e) {
@@ -415,6 +423,7 @@ public class DjStoreActivityService {
      */
     public ServerResponse querySelectedProduct(String userId, String cityId, PageDTO pageDTO, String storeActivityId, String activitySessionId) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
             List<DjStoreActivityProductDTO> djStoreActivityProductDTOS =
@@ -422,6 +431,9 @@ public class DjStoreActivityService {
             if(djStoreActivityProductDTOS.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
             }
+            djStoreActivityProductDTOS.forEach(djStoreActivityProductDTO -> {
+                djStoreActivityProductDTO.setImage(imageAddress+djStoreActivityProductDTO.getImage());
+            });
             PageInfo pageInfo=new PageInfo(djStoreActivityProductDTOS);
             return ServerResponse.createBySuccess("查询成功",pageInfo);
         } catch (Exception e) {
@@ -590,11 +602,15 @@ public class DjStoreActivityService {
      */
     public ServerResponse queryBillGoods(PageDTO pageDTO, String id) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
             List<DjStoreActivityProductDTO> djStoreActivityProductDTOS = djStoreActivityProductMapper.queryBillGoods(id);
             if(djStoreActivityProductDTOS.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
             }
+            djStoreActivityProductDTOS.forEach(djStoreActivityProductDTO -> {
+                djStoreActivityProductDTO.setImage(imageAddress+djStoreActivityProductDTO.getImage());
+            });
             PageInfo pageInfo=new PageInfo(djStoreActivityProductDTOS);
             return ServerResponse.createBySuccess("查询成功",pageInfo);
         } catch (Exception e) {
@@ -622,6 +638,15 @@ public class DjStoreActivityService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
+    }
+
+
+    /**
+     * 首页拼团活动
+     * @return
+     */
+    public ServerResponse queryHomeGroupActivities() {
+        return null;
     }
 
 }

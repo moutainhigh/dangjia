@@ -21,4 +21,5 @@ public class RenovationSayDTO {
     private List<String> contentImages;//装修说内容图List
     private String coverImage;//装修说封面
     private String coverImages;//装修说封面
+    private Integer whetherThumbUp;//是否点赞 1:点赞 0:未点赞
 }

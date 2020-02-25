@@ -70,7 +70,7 @@ public interface DecorationCostAPI {
      */
     @PostMapping("/app/decoration/selectScreeningConditions")
     @ApiOperation(value = "精算--查询筛选条件列表", notes = "精算--查询筛选条件列表")
-    ServerResponse selectScreeningConditions(@RequestParam("userToken") String userToken,
+    ServerResponse selectScreeningConditions(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId,
                                           @RequestParam("type") Integer type);
 
 
@@ -103,6 +103,7 @@ public interface DecorationCostAPI {
     @PostMapping("/app/decoration/searchBudgetLastCategoryList")
     @ApiOperation(value = "精算--分类汇总信息查询(末级分类） ", notes = "查询分类汇总信息（末级分类）")
     ServerResponse searchBudgetLastCategoryList(@RequestParam("userToken") String userToken,
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
                                              @RequestParam("cityId") String cityId,
                                              @RequestParam("houseId") String houseId,
                                              @RequestParam("searchTypeId") String searchTypeId,

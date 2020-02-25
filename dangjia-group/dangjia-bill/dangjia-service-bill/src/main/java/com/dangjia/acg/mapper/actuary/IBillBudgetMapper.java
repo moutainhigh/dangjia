@@ -49,6 +49,11 @@ public interface IBillBudgetMapper extends Mapper<BudgetMaterial> {
     List<DecorationCostDTO> searchBudgetLastCategoryList(@Param("houseId") String houseId,@Param("searchTypeId") String searchTypeId,@Param("labelValId") String  labelValId);
 
     /**
+     * 查询汇总的价钱
+     * @return
+     */
+    Double searchBudgetLastCategoryCount(@Param("houseId") String houseId,@Param("searchTypeId") String searchTypeId);
+    /**
      * 精算--查询商品信息
      * @param houseId
      * @param searchTypeId

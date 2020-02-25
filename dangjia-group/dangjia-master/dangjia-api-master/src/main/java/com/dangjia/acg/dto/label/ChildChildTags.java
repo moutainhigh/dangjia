@@ -13,4 +13,5 @@ public class ChildChildTags {
     private String id;
     private String tagName;
     private String parentId;
+    private String status;
 }
