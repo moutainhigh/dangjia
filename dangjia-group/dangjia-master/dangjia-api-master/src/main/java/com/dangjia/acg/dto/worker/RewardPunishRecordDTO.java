@@ -58,6 +58,10 @@ public class RewardPunishRecordDTO {
 
 	private String images;
 
+
+	private Integer isComplain;//-1：未投诉 0:待处理。1.驳回。2.接受
+	private String  complainId;//投诉ID
+
 	private RewardPunishCorrelationDTO correlation;
 
 }
