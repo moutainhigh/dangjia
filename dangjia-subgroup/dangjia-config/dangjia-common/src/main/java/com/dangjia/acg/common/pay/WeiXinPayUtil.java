@@ -78,6 +78,7 @@ public class WeiXinPayUtil {
                 callbackMap.put("appid", (userRole == null || userRole == 1) ? WeiXinPayUtil.appid : WeiXinPayUtil.appid2);
                 callbackMap.put("partnerid", WeiXinPayUtil.mch_id);//微信支付商户信息号（固定值）
                 callbackMap.put("prepayid", prepay_id);
+                callbackMap.put("prepay_id", prepay_id);
                 callbackMap.put("noncestr", map.get("nonce_str").toString());//随机字符串，不长于32位
                 callbackMap.put("timestamp", Long.toString(timeStamp));
                 callbackMap.put("package", "Sign=WXPay");
