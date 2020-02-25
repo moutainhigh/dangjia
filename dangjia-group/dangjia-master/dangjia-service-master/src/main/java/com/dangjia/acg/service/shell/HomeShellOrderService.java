@@ -11,12 +11,14 @@ import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellOrderMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellProductMapper;
+import com.dangjia.acg.mapper.shell.IHomeShellProductSpecMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.shell.HomeShellOrder;
 import com.dangjia.acg.modle.shell.HomeShellProduct;
+import com.dangjia.acg.modle.shell.HomeShellProductSpec;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.util.StringTool;
@@ -44,9 +46,9 @@ public class HomeShellOrderService {
     protected static final Logger logger = LoggerFactory.getLogger(HomeShellOrderService.class);
 
     @Autowired
-    private IHomeShellOrderMapper billHomeShellOrderMapper;
+    private IHomeShellOrderMapper homeShellOrderMapper;
     @Autowired
-    private IHomeShellProductMapper billHomeShellProductMapper;
+    private IHomeShellProductMapper homeShellProductMapper;
     @Autowired
     private IMasterMemberAddressMapper memberAddressMapper;
     @Autowired
@@ -57,6 +59,8 @@ public class HomeShellOrderService {
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private IWorkIntegralMapper workIntegralMapper;
+    @Autowired
+    private IHomeShellProductSpecMapper homeShellProductSpecMapper;
 
     /**
      * 查询兑换记录列表
@@ -71,7 +75,7 @@ public class HomeShellOrderService {
     public ServerResponse queryOrderInfoList(PageDTO pageDTO,Integer exchangeClient,Integer status, Date startTime, Date endTime, String searchKey){
         try{
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
-            List<HomeShellOrderDTO>  shellOrderDTOList=billHomeShellOrderMapper.selectShellOrderList(exchangeClient,status,startTime,endTime,searchKey);
+            List<HomeShellOrderDTO>  shellOrderDTOList=homeShellOrderMapper.selectShellOrderList(exchangeClient,status,startTime,endTime,searchKey);
             PageInfo pageInfo=new PageInfo(shellOrderDTOList);
             return ServerResponse.createBySuccess("查询成功",pageInfo);
         }catch(Exception e){
@@ -90,12 +94,12 @@ public class HomeShellOrderService {
             if(homeOrderId==null){
                 return ServerResponse.createByErrorMessage("兑换记录ID为空");
             }
-            HomeShellOrder homeShellOrder=billHomeShellOrderMapper.selectByPrimaryKey(homeOrderId);
+            HomeShellOrder homeShellOrder=homeShellOrderMapper.selectByPrimaryKey(homeOrderId);
             HomeShellOrderDTO homeShellOrderDTO=new HomeShellOrderDTO();
             BeanUtils.beanToBean(homeShellOrder,homeShellOrderDTO);
             homeShellOrderDTO.setShellOrderId(homeShellOrder.getId());
             String productId=homeShellOrder.getProuctId();
-            HomeShellProduct homeShellProduct=billHomeShellProductMapper.selectByPrimaryKey(productId);
+            HomeShellProduct homeShellProduct=homeShellProductMapper.selectByPrimaryKey(productId);
             homeShellOrderDTO.setProductName(homeShellProduct.getName());
             homeShellOrderDTO.setProductType(homeShellProduct.getProductType());
             homeShellOrderDTO.setProductSn(homeShellProduct.getProductSn());
@@ -126,21 +130,22 @@ public class HomeShellOrderService {
             return ServerResponse.createByErrorMessage("兑换流水ID不能为空");
         }
         //修改对应的货单状态
-        HomeShellOrder homeShellOrder=billHomeShellOrderMapper.selectByPrimaryKey(homeOrderId);
+        HomeShellOrder homeShellOrder=homeShellOrderMapper.selectByPrimaryKey(homeOrderId);
         if(homeShellOrder.getStatus()!=1&&homeShellOrder.getStatus()!=4){
             return ServerResponse.createBySuccess("此单处理，请勿重复操作");
         }
         homeShellOrder.setStatus(status);
         if(status==2){//发货
             homeShellOrder.setDeliverTime(new Date());
-            billHomeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder);
+            homeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder);
         }else if(status==5){//退货
             homeShellOrder.setRefundTime(new Date());
-            billHomeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder);
+            homeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder);
             //还原贝币
-            HomeShellProduct homeShellProduct=billHomeShellProductMapper.selectByPrimaryKey(homeShellOrder.getProuctId());
-            homeShellProduct.setStockNum(homeShellProduct.getStockNum()+1);
-            homeShellProduct.setConvertedNumber(homeShellProduct.getConvertedNumber()-1);
+            HomeShellProductSpec shellProductSpec=homeShellProductSpecMapper.selectByPrimaryKey(homeShellOrder.getProductSpecId());
+            shellProductSpec.setStockNum(shellProductSpec.getStockNum()+1);
+            homeShellProductSpecMapper.updateByPrimaryKey(shellProductSpec);
+            HomeShellProduct homeShellProduct=homeShellProductMapper.selectByPrimaryKey(homeShellOrder.getProuctId());
             Member member=memberMapper.selectByPrimaryKey(homeShellOrder.getMemberId());
             //还原对应的金额及贝币给到用户或工匠
             if(homeShellOrder.getMoney()!=null&&homeShellOrder.getMoney()>0){

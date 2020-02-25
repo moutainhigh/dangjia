@@ -72,4 +72,18 @@ public interface HomeShellProductAPI {
     ServerResponse deleteHomeShellProduct(@RequestParam("request") HttpServletRequest request,
                                              @RequestParam("shellProductId") String shellProductId);
 
+
+    /**
+     * 当家贝商品列表(业主端商城）
+     * @param userToken
+     * @param pageDTO 分页
+     * @param productType 商品类型：1实物商品 2虚拟商品
+     * @return
+     */
+    @PostMapping("/app/homeShell/serachShellProductList")
+    @ApiOperation(value = "当家贝商城", notes = "当家贝商城")
+    ServerResponse serachShellProductList(@RequestParam("userToken") String userToken,
+                                             @RequestParam("pageDTO") PageDTO pageDTO,
+                                             @RequestParam("productType") String productType);
+
 }

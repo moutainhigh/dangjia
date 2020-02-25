@@ -1,6 +1,8 @@
 package com.dangjia.acg.service.shell;
 
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -119,5 +121,32 @@ public class HomeShellProductService {
         billHomeShellProductMapper.updateByPrimaryKey(homeShellProduct);
         return ServerResponse.createBySuccessMessage("删除成功");
     }
+
+    /**
+     * 当家贝商城
+     * @param userToken
+     * @param pageDTO 分页
+     * @param productType 商品类型：1实物商品 2虚拟商品
+     * @return
+     */
+    public ServerResponse serachShellProductList(String userToken,PageDTO pageDTO,String productType){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页
+            List<HomeShellProductDTO> homeShellProductDTOList=billHomeShellProductMapper.serachShellProductList(productType);
+            if(homeShellProductDTOList==null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for(HomeShellProductDTO homeShellProductDTO:homeShellProductDTOList){
+                homeShellProductDTO.setImageUrl(StringTool.getImage(homeShellProductDTO.getImage(),address));
+            }
+            PageInfo pageInfo=new PageInfo(homeShellProductDTOList);
+            return ServerResponse.createBySuccess("查询成功",pageInfo);
+        }catch(Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 
 }

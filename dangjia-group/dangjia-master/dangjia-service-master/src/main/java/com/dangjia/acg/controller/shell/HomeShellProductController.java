@@ -6,9 +6,12 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.shell.HomeShellProductDTO;
 import com.dangjia.acg.service.shell.HomeShellProductService;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -81,6 +84,19 @@ public class HomeShellProductController implements HomeShellProductAPI {
             logger.error("删除失败");
             return ServerResponse.createBySuccessMessage("删除失败");
         }
+    }
+
+    /**
+     * 当家贝商城
+     * @param userToken
+     * @param pageDTO 分页
+     * @param productType 商品类型：1实物商品 2虚拟商品
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse serachShellProductList(String userToken,PageDTO pageDTO,String productType){
+        return billHomeShellProductService.serachShellProductList(userToken,pageDTO,productType);
     }
 
 }

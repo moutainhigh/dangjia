@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -49,20 +50,11 @@ public class HomeShellProductDTO {
     @ApiModelProperty("支付类型：1积分，2积分+金钱")
     private Integer payType;
 
-    @ApiModelProperty("积分")
-    private Double integral;
-
-    @ApiModelProperty("金额")
-    private Double money;
-
     @ApiModelProperty("是否开启积分限时 1是，0否")
     private Integer openingTimeLimit;
 
     @ApiModelProperty("限制时间（小时）")
     private Double limithours;
-
-    @ApiModelProperty("库存数量")
-    private Double stockNum;//
 
     @ApiModelProperty("已兑换数")
     private Double convertedNumber;//
@@ -77,5 +69,7 @@ public class HomeShellProductDTO {
     private String shelfStatus;
 
     private Date createDate;//创建时间
+
+    private List<HomeShellProductSpecDTO> productSpecList;//规格列表
 
 }
