@@ -13,6 +13,8 @@ import java.io.IOException;
  */
 public class NIMPost {
 
+    public static String SYS_ACCID = "fengjiangit";  //AppKey
+
     public static String APPKEY = "fa7d0ea859179f00c81a70a8969f073a";  //AppKey
     public static String SECRET = "dcadf8b137a1";  //AppSecret
     /**
@@ -20,11 +22,23 @@ public class NIMPost {
      */
     public static String CREATE = "https://api.netease.im/nimserver/user/create.action";//创建网易云通信
     public static String GETUINFOS = "https://api.netease.im/nimserver/user/getUinfos.action";//获取用户名片
+    public static String UPDATE = "https://api.netease.im/nimserver/user/update.action";//修改用户token
+    public static String UPDATEUINFO = "https://api.netease.im/nimserver/user/updateUinfo.action";//修改用户名片
 
     /**
      * 消息发送
      */
     public static String SEND_MSG = "https://api.netease.im/nimserver/msg/sendMsg.action";//发送消息
+    public static String BROADCAST_MSG = "https://api.netease.im/nimserver/msg/broadcastMsg.action";//广播消息
+    public static String SEND_BATCH_ATTACH_MSG = "https://api.netease.im/nimserver/msg/sendBatchAttachMsg.action";//推送消息
+
+    /**
+     * 群管理
+     */
+    public static String TEAM_CREATE = "https://api.netease.im/nimserver/team/create.action";//创建群
+    public static String TEAM_ADD = "https://api.netease.im/nimserver/team/add.action";//拉人
+    public static String TEAM_KICK = "https://api.netease.im/nimserver/team/kick.action";//踢人
+    public static String TEAM_DETAIL = "https://api.netease.im/nimserver/team/queryDetail.action";//查询指定群的详细信息（群信息+成员详细信息）
 
     private static Logger logger = LoggerFactory.getLogger(NIMPost.class);
 

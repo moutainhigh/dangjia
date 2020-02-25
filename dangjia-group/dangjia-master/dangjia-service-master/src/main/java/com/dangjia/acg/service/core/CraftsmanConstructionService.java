@@ -32,6 +32,8 @@ import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supervisor.ISiteMemoMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
@@ -50,6 +52,8 @@ import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.safe.WorkerTypeSafe;
+import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supervisor.SiteMemo;
 import com.dangjia.acg.modle.worker.Insurance;
@@ -99,9 +103,11 @@ public class CraftsmanConstructionService {
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
     @Autowired
     private DjMaintenanceRecordProductMapper djMaintenanceRecordProductMapper;
-    @Autowired
-    private WorkerTypeSafeOrderService workerTypeSafeOrderService;
 
+    @Autowired
+    private IWorkerTypeSafeMapper workerTypeSafeMapper;
+    @Autowired
+    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -284,12 +290,26 @@ public class CraftsmanConstructionService {
         }
 
         if (hw.getType() == 2) {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             List<ButtonListBean> buttonList = new ArrayList<>();
             DjMaintenanceRecord record = djMaintenanceRecordMapper.selectByPrimaryKey(hw.getBusinessId());
+            //查询保险订单对应的工种
+
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hw.getWorkerTypeId());
             House house = houseMapper.selectByPrimaryKey(record.getHouseId());
             bean.setHouseId(house.getId());
             bean.setHouseName(house.getHouseName());
             bean.setWorkerType(worker.getWorkerType());//0:大管家；1：工匠；2：设计师；3：精算师
+            bean.setWorkerTypeColor(workerType.getColor());
+            bean.setWorkerTypeName(workerType.getName());
+            bean.setWorkerTypeImage(imageAddress+workerType.getImage());
+
+            if(record.getOverProtection()==1){
+                bean.setWorkerTypeSlogan(workerType.getName()+"已过保");
+            }else {
+                bean.setWorkerTypeSlogan(workerType.getName()+"免费质保");
+            }
+            bean.setWorkerTypeColor(workerType.getColor());
             bean.setHouseFlowId(hw.getId());
             if (hw.getWorkType() == 6) {
                 bean.setAlreadyMoney(new BigDecimal(0));//已得钱

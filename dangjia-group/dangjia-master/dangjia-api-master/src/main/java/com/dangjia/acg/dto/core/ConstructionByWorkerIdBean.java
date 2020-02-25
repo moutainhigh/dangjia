@@ -66,6 +66,12 @@ public class ConstructionByWorkerIdBean {
     private String houseWorkerId;//装修单ID
     private Integer retentionType;//0-需缴纳质保金 1-不缴纳质保金
 
+    private String workerTypeName;//工种名称
+    private String workerTypeColor;//工种颜色
+    private String workerTypeImage;//工种颜色
+    private String workerTypeSlogan;//工种标语
+
+
     private String businessId;//业务id
     @Data
     public static class BigListBean {

@@ -60,9 +60,9 @@ public class WorkInFoDTO {
         private HashMap<String, ListMapBean> beanBut = new HashMap<String, ListMapBean>(){
             {
 
-                put("ZX0001",  new ListMapBean("设计图","iconWork/menus/zxy_icon_cangku@2x.png","","ZX0001"));
-                put("ZX0002",  new ListMapBean("精算","iconWork/menus/zxy_icon_record@2x.png","","ZX0002"));
-                put("ZX0003",  new ListMapBean("施工","iconWork/menus/zxy_icon_audit@2x.png","","ZX0003"));
+                put("ZX0001",  new ListMapBean("设计图","iconWork/menus/sheji_icon_sg@2x.png","","ZX0001"));
+                put("ZX0002",  new ListMapBean("精算","iconWork/menus/jingsuan_icon_sg@2x.png","","ZX0002"));
+                put("ZX0003",  new ListMapBean("施工","iconWork/menus/zhuangx_icon_sg@2x.png","","ZX0003"));
             }
         };
         public  List<ListMapBean> getMenus(String imageAddress,String[] menusCodes){
