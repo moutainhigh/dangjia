@@ -41,6 +41,7 @@ public interface PaymentAPI {
     @ApiOperation(value = "获取微信签名信息", notes = "获取微信签名信息")
     ServerResponse getWeiXinSign(@RequestParam("userToken") String userToken,
                                  @RequestParam("businessOrderNumber") String businessOrderNumber,
+                                 @RequestParam("openId") String openId,
                                  @RequestParam("userRole")Integer userRole);
 
     @PostMapping("app/pay/payment/getAliSign")

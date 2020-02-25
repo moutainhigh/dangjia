@@ -9,13 +9,17 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
+import com.dangjia.acg.mapper.member.IMemberAuthMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IMasterSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.modle.house.HouseDistribution;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAuth;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.Utils;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -51,6 +55,10 @@ public class PayService {
     @Autowired
     private IMasterSupplierPayOrderMapper masterSupplierPayOrderMapper;
 
+    @Autowired
+    private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IMemberAuthMapper memberAuthMapper;
     @Autowired
     private IPayOrderMapper payOrderMapper;
     @Autowired
@@ -197,7 +205,7 @@ public class PayService {
     /*
    微信签名
     */
-    public ServerResponse getWeiXinSign(String businessOrderNumber, Integer userRole) {
+    public ServerResponse getWeiXinSign(String userToken,String businessOrderNumber, String openId,Integer userRole) {
         //API路径
         String basePath = configUtil.getValue(SysConfig.DANGJIA_API_LOCAL, String.class);
         LOG.info(basePath + "getWeiXinSign**********************************************");
@@ -208,7 +216,25 @@ public class PayService {
         PayOrder payOrder = getPayOrder("1", businessOrderNumber);
         String price = payOrder.getPrice().toString();
         String outTradeNo = payOrder.getNumber();//支付订单号
-        return WeiXinPayUtil.getWeiXinSign(price, outTradeNo, basePath, userRole);
+        if(userRole==null){
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            Example example = new Example(MemberAuth.class);
+            example.createCriteria()
+                    .andEqualTo(MemberAuth.OPEN_TYPE, 1)
+                    .andEqualTo(MemberAuth.MEMBER_ID, member.getId())
+                    .andEqualTo(MemberAuth.DATA_STATUS, 0);
+            List<MemberAuth> memberAuthList = memberAuthMapper.selectByExample(example);
+            if (memberAuthList == null && memberAuthList.size() == 0) {
+                return ServerResponse.createByErrorMessage("未绑定微信！");
+            }
+            return WeiXinPayUtil.getWeiXinH5Sign(price, outTradeNo, basePath,memberAuthList.get(0).getOpenid());
+        }else {
+            return WeiXinPayUtil.getWeiXinSign(price, outTradeNo, basePath, userRole);
+        }
     }
 
     /*
