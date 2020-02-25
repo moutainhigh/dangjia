@@ -91,6 +91,7 @@ import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
+import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2221,6 +2222,8 @@ public class PaymentService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
+
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Member member = (Member) object;
 
             PaymentDTO paymentDTO = new PaymentDTO();
@@ -2341,6 +2344,8 @@ public class PaymentService {
                     BigDecimal totalSellPrice = new BigDecimal(0);//总价
                     for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
                         ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
+                        shoppingCartListDTO.setImageUrl(StringTool.getImage(shoppingCartListDTO.getImage(), imageAddress));//图多张
+                        shoppingCartListDTO.setImageSingle(StringTool.getImageSingle(shoppingCartListDTO.getImage(), imageAddress));//图一张
                         shoppingCartListDTO.setShopCount(parmDTO.getShopCount());
                         totalSellPrice = totalSellPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
                         totalPrice = totalPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
