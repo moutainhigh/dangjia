@@ -355,8 +355,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryComplain(String userToken,PageDTO pageDTO){
-        return djMaintenanceRecordService.queryComplain(userToken,pageDTO);
+    public ServerResponse queryComplain(String userToken,PageDTO pageDTO,String maintenanceRecordId){
+        return djMaintenanceRecordService.queryComplain(userToken,pageDTO,maintenanceRecordId);
     }
 
     @Override

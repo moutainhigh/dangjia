@@ -2040,7 +2040,7 @@ public class DjMaintenanceRecordService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryComplain(String userToken,PageDTO pageDTO){
+    public ServerResponse queryComplain(String userToken,PageDTO pageDTO,String maintenanceRecordId){
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -2052,6 +2052,9 @@ public class DjMaintenanceRecordService {
             example.createCriteria().andEqualTo(Complain.MEMBER_ID,worker.getId())
                     .andEqualTo(Complain.DATA_STATUS,0).
                     andEqualTo(Complain.COMPLAIN_TYPE,9);
+            if(StringUtils.isNotBlank(maintenanceRecordId)){
+                example.createCriteria().andNotEqualTo(Complain.BUSINESS_ID,maintenanceRecordId);
+            }
             example.orderBy(Complain.MODIFY_DATE).desc();
             List<Complain> member = iComplainMapper.selectByExample(example);
             if (member.size() <= 0) {

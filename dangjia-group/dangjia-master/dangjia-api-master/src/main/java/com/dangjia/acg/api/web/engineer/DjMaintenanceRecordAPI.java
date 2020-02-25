@@ -273,7 +273,7 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/queryComplain")
     @ApiOperation(value = "查询报销记录", notes = "查询报销记录")
-    ServerResponse queryComplain(@RequestParam("userToken") String userToken,@RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse queryComplain(@RequestParam("userToken") String userToken,@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("maintenanceRecordId") String maintenanceRecordId);
 
     @PostMapping(value = "app/engineer/queryComplainInFo")
     @ApiOperation(value = "查询报销记录详情", notes = "查询报销记录详情")
