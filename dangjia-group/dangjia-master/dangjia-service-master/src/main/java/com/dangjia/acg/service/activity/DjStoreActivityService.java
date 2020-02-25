@@ -11,6 +11,8 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.DjStoreActivityDTO;
 import com.dangjia.acg.dto.activity.DjStoreActivityProductDTO;
 import com.dangjia.acg.dto.activity.DjStoreParticipateActivitiesDTO;
+import com.dangjia.acg.dto.activity.HomeLimitedPurchaseActivitieDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.activity.DjActivitySessionMapper;
 import com.dangjia.acg.mapper.activity.DjStoreActivityMapper;
 import com.dangjia.acg.mapper.activity.DjStoreActivityProductMapper;
@@ -340,9 +342,22 @@ public class DjStoreActivityService {
                     .andEqualTo(DjStoreParticipateActivities.STORE_ACTIVITY_ID,storeActivityId)
                     .andEqualTo(DjStoreParticipateActivities.STOREFRONT_ID,storefront.getId())
                     .andEqualTo(DjStoreParticipateActivities.DATA_STATUS,0)
-                    .andCondition("registration_status in(1,3)");
+                    .andCondition("registration_status in(1,2,3)");
             if(djStoreParticipateActivitiesMapper.selectCountByExample(example)>0){
                 return ServerResponse.createByErrorMessage("请勿重复申请");
+            }
+            example=new Example(DjStoreParticipateActivities.class);
+            example.createCriteria().andEqualTo(DjStoreParticipateActivities.ACTIVITY_SESSION_ID,activitySessionId)
+                    .andEqualTo(DjStoreParticipateActivities.STORE_ACTIVITY_ID,storeActivityId)
+                    .andEqualTo(DjStoreParticipateActivities.STOREFRONT_ID,storefront.getId())
+                    .andEqualTo(DjStoreParticipateActivities.DATA_STATUS,0)
+                    .andEqualTo(DjStoreParticipateActivities.REGISTRATION_STATUS,4);
+            DjStoreParticipateActivities djStoreParticipateActivities1 =
+                    djStoreParticipateActivitiesMapper.selectOneByExample(example);
+            if(djStoreParticipateActivities1!=null){
+                djStoreParticipateActivities1.setRegistrationStatus(2);
+                djStoreParticipateActivitiesMapper.updateByPrimaryKeySelective(djStoreParticipateActivities1);
+                return ServerResponse.createBySuccessMessage("操作成功");
             }
             DjStoreParticipateActivities djStoreParticipateActivities=new DjStoreParticipateActivities();
             djStoreParticipateActivities.setActivityType(activityType);
@@ -450,6 +465,8 @@ public class DjStoreActivityService {
      * @param storeActivityId
      * @param activitySessionId
      * @param productId
+     * @param activityType
+     * @param storeParticipateActivitiesId
      * @return
      */
     public ServerResponse setSelectActiveProduct(String userId, String cityId, String storeActivityId,
@@ -464,7 +481,7 @@ public class DjStoreActivityService {
                 DjStoreActivityProduct djStoreActivityProduct=new DjStoreActivityProduct();
                 djStoreActivityProduct.setActivityType(activityType);
                 djStoreActivityProduct.setProductId(productId);
-                djStoreActivityProduct.setInventory(storefrontProduct.getSuppliedNum());
+                djStoreActivityProduct.setInventory(storefrontProduct.getSuppliedNum().intValue());
                 djStoreActivityProduct.setRushPurchasePrice(storefrontProduct.getSellPrice());
                 djStoreActivityProduct.setStoreParticipateActivitiesId(storeParticipateActivitiesId);
                 djStoreActivityProductMapper.insert(djStoreActivityProduct);
@@ -488,7 +505,7 @@ public class DjStoreActivityService {
                 DjStoreActivityProduct djStoreActivityProduct = new DjStoreActivityProduct();
                 djStoreActivityProduct.setActivityType(activityType);
                 djStoreActivityProduct.setProductId(productId);
-                djStoreActivityProduct.setInventory(storefrontProduct.getSuppliedNum());
+                djStoreActivityProduct.setInventory(storefrontProduct.getSuppliedNum().intValue());
                 djStoreActivityProduct.setRushPurchasePrice(storefrontProduct.getSellPrice());
                 djStoreActivityProduct.setStoreParticipateActivitiesId(storeParticipateActivitiesId);
                 djStoreActivityProductMapper.insert(djStoreActivityProduct);
@@ -513,7 +530,7 @@ public class DjStoreActivityService {
         jsonArr.forEach(str -> {
             JSONObject obj = (JSONObject) str;
             String id = obj.getString("id");
-            Double inventory = obj.getDouble("inventory");
+            Integer inventory = obj.getInteger("inventory");
             Double rushPurchasePrice = obj.getDouble("rushPurchasePrice");
             DjStoreActivityProduct djStoreActivityProduct=new DjStoreActivityProduct();
             djStoreActivityProduct.setId(id);
@@ -642,11 +659,84 @@ public class DjStoreActivityService {
 
 
     /**
+     * 删除店铺活动商品已选列表
+     * @param id
+     * @return
+     */
+    public ServerResponse deleteSelectedProduct(String id) {
+        try {
+            djStoreActivityProductMapper.deleteByPrimaryKey(id);
+            return ServerResponse.createBySuccessMessage("删除成功 ");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除失败");
+        }
+    }
+
+
+    /**
      * 首页拼团活动
      * @return
      */
-    public ServerResponse queryHomeGroupActivities() {
-        return null;
+    public ServerResponse queryHomeGroupActivities(Integer limit) {
+        try {
+            List<StorefrontProductDTO> storefrontProductDTOS =
+                    djStoreActivityProductMapper.queryHomeGroupActivities(limit,null);
+            return ServerResponse.createBySuccess("查询成功",storefrontProductDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 首页限时购活动
+     * @param limit
+     * @return
+     */
+    public ServerResponse queryHomeLimitedPurchaseActivities(Integer limit) {
+        try {
+            Example example=new Example(DjActivitySession.class);
+            example.createCriteria().andLessThanOrEqualTo(DjActivitySession.SESSION_START_TIME,new Date())
+                    .andGreaterThanOrEqualTo(DjActivitySession.END_SESSION,new Date());
+            List<DjActivitySession> djActivitySessions = djActivitySessionMapper.selectByExample(example);
+            List<HomeLimitedPurchaseActivitieDTO> homeLimitedPurchaseActivitieDTOS=new ArrayList<>();
+            djActivitySessions.forEach(djActivitySession -> {
+                HomeLimitedPurchaseActivitieDTO homeLimitedPurchaseActivitieDTO=new HomeLimitedPurchaseActivitieDTO();
+                homeLimitedPurchaseActivitieDTO.setId(djActivitySession.getId());
+                homeLimitedPurchaseActivitieDTO.setSessionStartTime(djActivitySession.getSessionStartTime());
+                homeLimitedPurchaseActivitieDTO.setEndSession(djActivitySession.getEndSession());
+                List<StorefrontProductDTO> storefrontProductDTOS =
+                        djStoreActivityProductMapper.queryHomeGroupActivities(limit,djActivitySession.getId());
+                homeLimitedPurchaseActivitieDTO.setStorefrontProductDTOS(storefrontProductDTOS);
+                homeLimitedPurchaseActivitieDTOS.add(homeLimitedPurchaseActivitieDTO);
+            });
+            if(homeLimitedPurchaseActivitieDTOS.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
+            return ServerResponse.createBySuccess("查询成功",homeLimitedPurchaseActivitieDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 限时购(更多)
+     * @param id
+     * @return
+     */
+    public ServerResponse queryBuyMoreLimitedTime(String id) {
+        try {
+            List<StorefrontProductDTO> storefrontProductDTOS =
+                    djStoreActivityProductMapper.queryHomeGroupActivities(null,id);
+            return ServerResponse.createBySuccess("查询成功 ",storefrontProductDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
 }

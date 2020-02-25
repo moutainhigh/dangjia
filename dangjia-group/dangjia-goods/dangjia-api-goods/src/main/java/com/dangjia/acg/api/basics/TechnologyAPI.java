@@ -58,6 +58,11 @@ public interface TechnologyAPI {
                                @RequestParam("name") String name,
                                @RequestParam("workerTypeId") String workerTypeId,
                                @RequestParam("cityId") String cityId,
-                               @RequestParam("materialOrWorker") Integer materialOrWorker);
+                               @RequestParam("materialOrWorker") Integer materialOrWorker,
+                               @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping("/basics/technology/queryTechnologyWorkerType")
+    @ApiOperation(value = "根据工艺所有工种", notes = "根据工艺所有工种")
+    ServerResponse queryTechnologyWorkerType(@RequestParam("request") HttpServletRequest request);
 
 }

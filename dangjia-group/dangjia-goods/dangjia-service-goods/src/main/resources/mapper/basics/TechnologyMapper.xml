@@ -144,4 +144,18 @@
         GROUP BY `name`
         ORDER BY create_date desc
     </select>
+
+    <select id="queryTechnologyWorkerType" resultType="com.dangjia.acg.modle.core.WorkerType">
+        SELECT
+            b.id,
+            b.name
+        FROM
+            dj_basics_technology a,
+            dj_core_worker_type b
+        WHERE
+            a.worker_type_id = b.id
+        GROUP BY
+            a.worker_type_id
+        ORDER BY b.id
+    </select>
 </mapper>

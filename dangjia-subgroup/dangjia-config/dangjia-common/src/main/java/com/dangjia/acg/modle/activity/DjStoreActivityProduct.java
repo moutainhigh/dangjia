@@ -27,7 +27,7 @@ public class DjStoreActivityProduct extends BaseEntity {
     @Column(name = "inventory")
     @Desc(value = "库存")
     @ApiModelProperty("库存")
-    private Double inventory;
+    private Integer inventory;
 
     @Column(name = "activity_type")
     @Desc(value = "数据类型 1:限时购，2:拼团购")

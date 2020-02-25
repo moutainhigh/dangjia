@@ -2003,16 +2003,22 @@ public class DjDeliverOrderService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state) {
+    public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state, String userToken) {
         try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<OrderStorefrontDTO> orderStorefrontDTOS = null;
+            List<OrderStorefrontDTO> orderStorefrontDTOS;
             if (StringUtils.isBlank(state)) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             if (state.equals("2") || state.equals("4")) {
-                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(houseId, state);
+                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(member.getId(),houseId, state);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                     List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderItemObligation(orderStorefrontDTO.getOrderId());
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
@@ -2024,7 +2030,7 @@ public class DjDeliverOrderService {
                     }
                 });
             } else {
-                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(houseId);
+                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(member.getId(),houseId);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                     List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
@@ -2035,10 +2041,10 @@ public class DjDeliverOrderService {
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
                     if (orderStorefrontDTO.getStorefrontType().equals("worker")) {
-                        Member member = this.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
-                        if (member != null) {
-                            orderStorefrontDTO.setWorkerId(member.getId());
-                            orderStorefrontDTO.setWorkerName(member.getName());
+                        Member worker = this.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
+                        if (worker != null) {
+                            orderStorefrontDTO.setWorkerId(worker.getId());
+                            orderStorefrontDTO.setWorkerName(worker.getName());
                         }
                     }
                 });

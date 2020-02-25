@@ -25,10 +25,6 @@ public class DjStoreActivityDTO extends BaseEntity {
     @ApiModelProperty("状态 1：开启 2：停用")
     private Integer state;
 
-    @Desc(value = "是否参加 0:未参加 1：已参加")
-    @ApiModelProperty("是否参加 0:未参加 1：已参加")
-    private Integer attended;
-
     @Desc(value = "场次")
     @ApiModelProperty("场次")
     private Integer session;
@@ -68,6 +64,10 @@ public class DjStoreActivityDTO extends BaseEntity {
     @Desc(value = "活动说明")
     @ApiModelProperty("活动说明")
     private String activityDescription;
+
+    @Desc(value = "限购周期")
+    @ApiModelProperty("限购周期")
+    private Integer cyclePurchasing;
 
 
     private String storeActivityId;//活动id

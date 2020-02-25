@@ -41,7 +41,7 @@ public class DjStoreActivityProductDTO extends BaseEntity {
 
     @Desc(value = "库存")
     @ApiModelProperty("库存")
-    private Double inventory;
+    private Integer inventory;
 
     @Desc(value = "抢购价格")
     @ApiModelProperty("抢购价格")

@@ -87,6 +87,10 @@ public interface DjStoreActivityAPI {
                                         @RequestParam("storeActivityId") String storeActivityId,
                                         @RequestParam("activitySessionId") String activitySessionId);
 
+    @PostMapping("web/activity/deleteSelectedProduct")
+    @ApiOperation(value = "删除店铺活动商品已选列表", notes = "删除店铺活动商品已选列表")
+    ServerResponse deleteSelectedProduct(@RequestParam("id") String id);
+
     @PostMapping("web/activity/setSelectActiveProduct")
     @ApiOperation(value = "店铺选择活动商品", notes = "店铺选择活动商品")
     ServerResponse setSelectActiveProduct(@RequestParam("userId") String userId,
@@ -126,8 +130,14 @@ public interface DjStoreActivityAPI {
 
     @PostMapping("app/activity/queryHomeGroupActivities")
     @ApiOperation(value = "首页拼团活动", notes = "首页拼团活动")
-    ServerResponse queryHomeGroupActivities();
+    ServerResponse queryHomeGroupActivities(@RequestParam("limit") Integer limit);
 
+    @PostMapping("app/activity/queryHomeLimitedPurchaseActivities")
+    @ApiOperation(value = "首页限时购活动", notes = "首页限时购活动")
+    ServerResponse queryHomeLimitedPurchaseActivities(@RequestParam("limit") Integer limit);
 
+    @PostMapping("app/activity/queryBuyMoreLimitedTime")
+    @ApiOperation(value = "限时购(更多)", notes = "限时购(更多)")
+    ServerResponse queryBuyMoreLimitedTime(@RequestParam("id") String id);
 
 }

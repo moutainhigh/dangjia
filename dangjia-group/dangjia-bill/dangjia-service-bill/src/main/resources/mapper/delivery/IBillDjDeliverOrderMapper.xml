@@ -726,7 +726,14 @@
         WHERE
             t3.state = 3
         AND t1.payment IS NOT NULL
-        AND t1.house_id = #{houseId}
+        <choose>
+            <when test="null!=memberId and ''!=memberId">
+                AND t1.member_id=#{memberId}
+            </when>
+            <otherwise>
+                AND t1.house_id=#{houseId}
+            </otherwise>
+        </choose>
         AND t1.data_status=0
         AND EXISTS (
             SELECT
@@ -817,8 +824,15 @@
                 AND t2.state=#{state}
             </otherwise>
         </choose>
-            AND t1.house_id=#{houseId}
             AND t1.data_status=0
+          <choose>
+              <when test="null!=memberId and ''!=memberId">
+                  AND t1.member_id=#{memberId}
+              </when>
+              <otherwise>
+                  AND t1.house_id=#{houseId}
+              </otherwise>
+          </choose>
     </select>
 
     <select id="queryDeliverOrderItemObligation" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">

@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -304,10 +306,19 @@ public class TechnologyService {
         }
     }
     //根据名称查询所有工艺（名称去重）
-    public ServerResponse queryByName(String name,String workerTypeId,String cityId,Integer materialOrWorker) {
+    public ServerResponse queryByName(String name,String workerTypeId,String cityId,Integer materialOrWorker,PageDTO pageDTO) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
             List<Technology> tList = iTechnologyMapper.queryByName(name, workerTypeId,cityId, materialOrWorker);
-            return ServerResponse.createBySuccess("查询成功", tList);
+            if(tList.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
+            tList.forEach(technology -> {
+                technology.setImage(imageAddress+technology.getImage());
+            });
+            PageInfo pageInfo=new PageInfo(tList);
+            return ServerResponse.createBySuccess("查询成功", pageInfo);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -451,5 +462,20 @@ public class TechnologyService {
         BudgetMaterial budgetMaterial = new Gson().fromJson(json, new TypeToken<BudgetMaterial>() {
         }.getType());
         budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+    }
+
+
+    /**
+     * 根据工艺所有工种
+     * @return
+     */
+    public ServerResponse queryTechnologyWorkerType() {
+        List<WorkerType> workerTypes = iTechnologyMapper.queryTechnologyWorkerType();
+        WorkerType workerType=new WorkerType();
+        workerType.setId("-1");
+        workerType.setName("全部");
+        workerTypes.add(workerType);
+        workerTypes.sort(Comparator.comparing(BaseEntity::getId));
+        return ServerResponse.createBySuccess("查询成功",workerTypes);
     }
 }

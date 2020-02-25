@@ -131,12 +131,12 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      * @param houseId
      * @return
      */
-    List<OrderStorefrontDTO> queryDeliverOrderHump(@Param("houseId") String houseId);
+    List<OrderStorefrontDTO> queryDeliverOrderHump(@Param("memberId") String memberId,@Param("houseId") String houseId);
 
     /**
      * 我的订单待付款订单店铺对象
      */
-    List<OrderStorefrontDTO> queryDeliverOrderObligation(@Param("houseId") String houseId,@Param("state") String state);
+    List<OrderStorefrontDTO> queryDeliverOrderObligation(@Param("memberId") String memberId,@Param("houseId") String houseId,@Param("state") String state);
 
     /**
      * 我的订单待发货商品

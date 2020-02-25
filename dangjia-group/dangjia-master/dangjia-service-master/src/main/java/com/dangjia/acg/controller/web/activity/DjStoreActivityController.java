@@ -106,6 +106,12 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse deleteSelectedProduct(String id) {
+        return djStoreActivityService.deleteSelectedProduct(id);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse setSelectActiveProduct(String userId, String cityId, String storeActivityId, String activitySessionId, String productId, Integer activityType, String storeParticipateActivitiesId) {
         return djStoreActivityService.setSelectActiveProduct(userId,cityId,storeActivityId,activitySessionId,productId,activityType,storeParticipateActivitiesId);
     }
@@ -148,7 +154,19 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryHomeGroupActivities() {
-        return djStoreActivityService.queryHomeGroupActivities();
+    public ServerResponse queryHomeGroupActivities(Integer limit) {
+        return djStoreActivityService.queryHomeGroupActivities(limit);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryHomeLimitedPurchaseActivities(Integer limit) {
+        return djStoreActivityService.queryHomeLimitedPurchaseActivities(limit);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryBuyMoreLimitedTime(String id) {
+        return djStoreActivityService.queryBuyMoreLimitedTime(id);
     }
 }

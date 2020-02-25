@@ -100,7 +100,7 @@ public class MemberAddressService {
         setAddressDefaultType(defaultType, member.getId());
         int insert = iMasterMemberAddressMapper.insertSelective(memberAddress);
         if (insert > 0) {
-            return ServerResponse.createBySuccessMessage("新增成功");
+            return ServerResponse.createBySuccess("新增成功",memberAddress);
         } else {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
         }
@@ -162,7 +162,7 @@ public class MemberAddressService {
         memberAddress.setModifyDate(new Date());
         setAddressDefaultType(defaultType, member.getId());
         iMasterMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
-        return ServerResponse.createBySuccessMessage("修改成功");
+        return ServerResponse.createBySuccess("修改成功",memberAddress);
     }
 
     public ServerResponse updataAddress(House house) {
