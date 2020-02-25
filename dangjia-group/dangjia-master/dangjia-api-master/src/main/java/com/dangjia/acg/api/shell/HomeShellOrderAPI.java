@@ -18,8 +18,8 @@ import java.util.Date;
  * Time: 下午 3:29
  */
 @Api(description = "当家贝订单")
-@FeignClient("dangjia-service-bill")
-public interface BillHomeShellOrderAPI {
+@FeignClient("dangjia-service-master")
+public interface HomeShellOrderAPI {
 
 
     /**

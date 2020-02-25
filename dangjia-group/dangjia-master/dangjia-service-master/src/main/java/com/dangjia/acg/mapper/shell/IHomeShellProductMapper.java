@@ -9,7 +9,7 @@ import tk.mybatis.mapper.common.Mapper;
 import java.util.List;
 
 @Repository
-public interface IBillHomeShellProductMapper extends Mapper<HomeShellProduct> {
+public interface IHomeShellProductMapper extends Mapper<HomeShellProduct> {
     /**
      * 查询商品列表
      * @param productType 商品分类 1实物商品，虚拟商品

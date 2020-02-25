@@ -6,7 +6,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.shell.HomeShellProductDTO;
-import com.dangjia.acg.mapper.shell.IBillHomeShellProductMapper;
+import com.dangjia.acg.mapper.shell.IHomeShellProductMapper;
 import com.dangjia.acg.modle.shell.HomeShellProduct;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -28,11 +28,11 @@ import java.util.List;
  * Time: 下午 3:31
  */
 @Service
-public class BillHomeShellProductService {
-    protected static final Logger logger = LoggerFactory.getLogger(BillHomeShellProductService.class);
+public class HomeShellProductService {
+    protected static final Logger logger = LoggerFactory.getLogger(HomeShellProductService.class);
 
     @Autowired
-    private IBillHomeShellProductMapper billHomeShellProductMapper;
+    private IHomeShellProductMapper billHomeShellProductMapper;
 
     @Autowired
     private ConfigUtil configUtil;

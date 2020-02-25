@@ -55,6 +55,12 @@ public class HomeShellOrderDTO extends GoodsBaseEntity {
     @ApiModelProperty("收货地址")
     private String address;
 
+    @ApiModelProperty("收货人姓名")
+    private String reveiveMemberName;
+
+    @ApiModelProperty("收货人电话")
+    private String reveiveMemberMobile;
+
     @ApiModelProperty("兑换数量")
     private Double exchangeNum;
 
