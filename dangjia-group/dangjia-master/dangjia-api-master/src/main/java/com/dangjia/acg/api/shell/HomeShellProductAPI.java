@@ -31,7 +31,7 @@ public interface HomeShellProductAPI {
      * @param searchKey 商品名称/编码
      * @return
      */
-    @PostMapping("/app/homeShell/queryHomeShellProductList")
+    @PostMapping("/web/homeShell/queryHomeShellProductList")
     @ApiOperation(value = "当家贝商品列表", notes = "当家贝商品列表")
     ServerResponse queryHomeShellProductList(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("pageDTO") PageDTO pageDTO,
@@ -44,7 +44,7 @@ public interface HomeShellProductAPI {
      * @param shellProductId 当家贝商品ID
      * @return
      */
-    @PostMapping("/app/homeShell/queryHomeShellProductInfo")
+    @PostMapping("/web/homeShell/queryHomeShellProductInfo")
     @ApiOperation(value = "当家贝商品详情", notes = "当家贝商品详情")
     ServerResponse queryHomeShellProductInfo(@RequestParam("request") HttpServletRequest request,
                                              @RequestParam("shellProductId") String shellProductId);
@@ -55,7 +55,7 @@ public interface HomeShellProductAPI {
      * @param homeShellProductDTO 商品内容
      * @return
      */
-    @PostMapping("/app/homeShell/editHomeShellProductInfo")
+    @PostMapping("/web/homeShell/editHomeShellProductInfo")
     @ApiOperation(value = "当家贝商品详情", notes = "当家贝商品详情")
     ServerResponse editHomeShellProductInfo(@RequestParam("request") HttpServletRequest request,
                                              @RequestParam("homeShellProductDTO") HomeShellProductDTO homeShellProductDTO,
@@ -67,7 +67,7 @@ public interface HomeShellProductAPI {
      * @param shellProductId 当家贝商品ID
      * @return
      */
-    @PostMapping("/app/homeShell/deleteHomeShellProduct")
+    @PostMapping("/web/homeShell/deleteHomeShellProduct")
     @ApiOperation(value = "删除商品信息", notes = "删除商品信息")
     ServerResponse deleteHomeShellProduct(@RequestParam("request") HttpServletRequest request,
                                              @RequestParam("shellProductId") String shellProductId);

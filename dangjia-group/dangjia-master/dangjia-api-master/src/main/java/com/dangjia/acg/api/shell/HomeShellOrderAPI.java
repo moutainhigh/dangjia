@@ -33,7 +33,7 @@ public interface HomeShellOrderAPI {
      * @param searchKey 兑换人姓名/电话/单号
      * @return
      */
-    @PostMapping("/app/shellOrder/queryOrderInfoList")
+    @PostMapping("/web/shellOrder/queryOrderInfoList")
     @ApiOperation(value = "查询当家贝兑换记录", notes = "查询当家贝兑换记录")
     ServerResponse queryOrderInfoList(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("pageDTO") PageDTO pageDTO,
@@ -49,7 +49,7 @@ public interface HomeShellOrderAPI {
      * @param homeOrderId 兑换记录ID
      * @return
      */
-    @PostMapping("/app/shellOrder/queryOrderInfoDetail")
+    @PostMapping("/web/shellOrder/queryOrderInfoDetail")
     @ApiOperation(value = "查询当家贝兑换详情", notes = "查询当家贝兑换详情")
     ServerResponse queryOrderInfoDetail(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("homeOrderId") String homeOrderId);
@@ -61,7 +61,7 @@ public interface HomeShellOrderAPI {
      * @param status 2发货，5退货
      * @return
      */
-    @PostMapping("/app/shellOrder/updateOrderInfo")
+    @PostMapping("/web/shellOrder/updateOrderInfo")
     @ApiOperation(value = "修改订单状态", notes = "修改订单状态")
     ServerResponse updateOrderInfo(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("homeOrderId") String homeOrderId,
