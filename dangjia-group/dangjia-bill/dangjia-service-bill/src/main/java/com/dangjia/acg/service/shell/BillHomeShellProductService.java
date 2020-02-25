@@ -1,14 +1,25 @@
 package com.dangjia.acg.service.shell;
 
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.shell.HomeShellProductDTO;
 import com.dangjia.acg.mapper.shell.IBillHomeShellProductMapper;
+import com.dangjia.acg.modle.shell.HomeShellProduct;
+import com.dangjia.acg.util.StringTool;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,6 +33,10 @@ public class BillHomeShellProductService {
 
     @Autowired
     private IBillHomeShellProductMapper billHomeShellProductMapper;
+
+    @Autowired
+    private ConfigUtil configUtil;
+
     /**
      * 当家贝商品列表
      * @param pageDTO 分页
@@ -31,10 +46,12 @@ public class BillHomeShellProductService {
      */
     public ServerResponse queryHomeShellProductList( PageDTO pageDTO, String productType, String searchKey){
         try{
-
-            return ServerResponse.createBySuccess("查询成功","");
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
+            List<HomeShellProductDTO> homeShellProductDTOList=billHomeShellProductMapper.queryHomeShellProductList(productType,searchKey);
+            PageInfo pageInfo=new PageInfo(homeShellProductDTOList);
+            return ServerResponse.createBySuccess("查询成功",pageInfo);
         }catch(Exception e){
-            logger.error("查询失败");
+            logger.error("查询失败",e);
             return ServerResponse.createBySuccessMessage("查询失败");
         }
     }
@@ -46,8 +63,20 @@ public class BillHomeShellProductService {
      */
     public ServerResponse queryHomeShellProductInfo(String shellProductId){
         try{
-
-            return ServerResponse.createBySuccess("查询成功","");
+            if(shellProductId==null){
+                return ServerResponse.createBySuccessMessage("商品ID不能为空");
+            }
+            HomeShellProduct homeShellProduct=billHomeShellProductMapper.selectByPrimaryKey(shellProductId);
+            if(homeShellProduct==null){
+                return  ServerResponse.createBySuccessMessage("未找到符合条件的数据");
+            }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            HomeShellProductDTO homeShellProductDTO= new HomeShellProductDTO();
+            BeanUtils.beanToBean(homeShellProduct,homeShellProductDTO);
+            homeShellProductDTO.setShellProductId(homeShellProduct.getId());
+            homeShellProductDTO.setImageUrl(StringTool.getImage(homeShellProductDTO.getImage(),address));
+            homeShellProductDTO.setDetailImageUrl(StringTool.getImage(homeShellProductDTO.getDetailImageUrl(),address));
+            return ServerResponse.createBySuccess("查询成功",homeShellProductDTO);
         }catch(Exception e){
             logger.error("查询失败");
             return ServerResponse.createBySuccessMessage("查询失败");
@@ -61,7 +90,19 @@ public class BillHomeShellProductService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse editHomeShellProductInfo( HomeShellProductDTO homeShellProductDTO,String cityId){
+        String shellProductId=homeShellProductDTO.getShellProductId();
 
+        if(StringUtils.isNotBlank(shellProductId)){//修改
+            HomeShellProduct homeShellProduct=billHomeShellProductMapper.selectByPrimaryKey(shellProductId);
+            BeanUtils.beanToBean(homeShellProductDTO,homeShellProduct);
+            homeShellProduct.setCityId(cityId);
+            billHomeShellProductMapper.updateByPrimaryKey(homeShellProduct);
+        }else{
+            HomeShellProduct homeShellProduct=new HomeShellProduct();
+            BeanUtils.beanToBean(homeShellProductDTO,homeShellProduct);
+            homeShellProduct.setCityId(cityId);
+            billHomeShellProductMapper.insert(homeShellProduct);
+        }
         return ServerResponse.createBySuccessMessage("保存成功");
     }
 
@@ -72,7 +113,10 @@ public class BillHomeShellProductService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse deleteHomeShellProduct(String shellProductId){
-
+        HomeShellProduct homeShellProduct=billHomeShellProductMapper.selectByPrimaryKey(shellProductId);
+        homeShellProduct.setDataStatus(1);//删除当条数据
+        homeShellProduct.setModifyDate(new Date());
+        billHomeShellProductMapper.updateByPrimaryKey(homeShellProduct);
         return ServerResponse.createBySuccessMessage("删除成功");
     }
 

@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,7 +19,7 @@ import javax.persistence.Table;
  * Time: 下午 5:18
  */
 @Data
-public class HomeShellProductDTO extends GoodsBaseEntity {
+public class HomeShellProductDTO {
 
     @ApiModelProperty("商品ID")
     private String shellProductId;//商品名称
@@ -29,11 +30,18 @@ public class HomeShellProductDTO extends GoodsBaseEntity {
     @ApiModelProperty("商品编码")
     private String productSn;
 
+    @ApiModelProperty("商品分类：1实物商品，2虚拟商品")
+    private String productType;
+
     @ApiModelProperty("图片")
     private String image;
 
+    private String imageUrl;//图片地址
+
     @ApiModelProperty("上传详情图")
     private String detailImage;//上传详情图
+
+    private String detailImageUrl;//详情图地址
 
     @ApiModelProperty("排序")
     private Integer sort;
@@ -51,7 +59,7 @@ public class HomeShellProductDTO extends GoodsBaseEntity {
     private Integer openingTimeLimit;
 
     @ApiModelProperty("限制时间（小时）")
-    private Double limit_hours;
+    private Double limithours;
 
     @ApiModelProperty("库存数量")
     private Double stockNum;//
@@ -63,9 +71,11 @@ public class HomeShellProductDTO extends GoodsBaseEntity {
     private Integer limitExchangeVolume;//
 
     @ApiModelProperty("单人限数(兑换量）")
-    private String exchangeVolumeNum;//
+    private Integer exchangeVolumeNum;//
 
     @ApiModelProperty(" 上下架状态 1：上架  0:下架")
     private String shelfStatus;
+
+    private Date createDate;//创建时间
 
 }

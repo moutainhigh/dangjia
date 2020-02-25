@@ -36,6 +36,11 @@ public class HomeShellProduct extends GoodsBaseEntity {
     @ApiModelProperty("商品编码")
     private String productSn;
 
+    @Column(name = "product_type")
+    @Desc(value = "商品分类：1实物商品，2虚拟商品")
+    @ApiModelProperty("商品分类：1实物商品，2虚拟商品")
+    private String productType;
+
     @Column(name = "image")
     @Desc(value = "图片")
     @ApiModelProperty("图片")
@@ -75,7 +80,7 @@ public class HomeShellProduct extends GoodsBaseEntity {
     @Column(name = "limit_hours")
     @Desc(value = "限制时间（小时）")
     @ApiModelProperty("限制时间（小时）")
-    private Double limit_hours;
+    private Double limithours;
 
     @Column(name = "stock_num")
     @Desc(value = "库存数量")
@@ -96,7 +101,7 @@ public class HomeShellProduct extends GoodsBaseEntity {
     @Column(name = "exchange_volume_num")
     @Desc(value = "单人限数（兑换量）")
     @ApiModelProperty("单人限数(兑换量）")
-    private String exchangeVolumeNum;
+    private Integer exchangeVolumeNum;
 
 
     @Column(name = "shelf_status")
