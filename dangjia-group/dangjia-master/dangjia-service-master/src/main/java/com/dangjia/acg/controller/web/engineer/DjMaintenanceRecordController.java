@@ -355,8 +355,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryComplain(String userToken,String memberId){
-        return djMaintenanceRecordService.queryComplain(userToken, memberId);
+    public ServerResponse queryComplain(String userToken,PageDTO pageDTO){
+        return djMaintenanceRecordService.queryComplain(userToken,pageDTO);
     }
 
     @Override
@@ -450,9 +450,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         try {
             return djMaintenanceRecordService.setMaintenanceHandlesSubmissions(userToken,maintenanceRecordId,remark,image);
         } catch (Exception e) {
-            e.printStackTrace();
             logger.info("操作失败",e);
-            return ServerResponse.createByErrorMessage("操作成功");
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 
