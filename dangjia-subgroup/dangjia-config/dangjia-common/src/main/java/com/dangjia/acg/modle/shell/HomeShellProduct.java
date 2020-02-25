@@ -62,16 +62,6 @@ public class HomeShellProduct extends GoodsBaseEntity {
     private Integer payType;
 
 
-    @Column(name = "integral")
-    @Desc(value = "所需积分")
-    @ApiModelProperty("积分")
-    private Double integral;
-
-    @Column(name = "money")
-    @Desc(value = "所需金额")
-    @ApiModelProperty("金额")
-    private Double money;
-
     @Column(name = "opening_time_limit")
     @Desc(value = "是否开启积分限时 1是，0否")
     @ApiModelProperty("是否开启积分限时 1是，0否")
@@ -82,10 +72,6 @@ public class HomeShellProduct extends GoodsBaseEntity {
     @ApiModelProperty("限制时间（小时）")
     private Double limithours;
 
-    @Column(name = "stock_num")
-    @Desc(value = "库存数量")
-    @ApiModelProperty("库存数量")
-    private Double stockNum;
 
     @Column(name = "converted_number")
     @Desc(value = "已兑换数")

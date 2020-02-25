@@ -127,8 +127,8 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state) {
-        return djDeliverOrderService.queryDeliverOrderHump(pageDTO, houseId, state);
+    public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state, String userToken) {
+        return djDeliverOrderService.queryDeliverOrderHump(pageDTO, houseId, state,userToken);
     }
 
     @Override

@@ -17,4 +17,11 @@ public interface IHomeShellProductMapper extends Mapper<HomeShellProduct> {
      * @return
      */
     List<HomeShellProductDTO> queryHomeShellProductList(@Param("productType") String productType, @Param("searchKey") String searchKey);
+
+    /**
+     * 当家贝商城
+     * @param productType
+     * @return
+     */
+    List<HomeShellProductDTO> serachShellProductList(@Param("productType") String productType);
 }

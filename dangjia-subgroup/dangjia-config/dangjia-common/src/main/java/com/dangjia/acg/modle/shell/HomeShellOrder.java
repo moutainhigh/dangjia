@@ -36,6 +36,12 @@ public class HomeShellOrder extends GoodsBaseEntity {
     @ApiModelProperty("商品Id")
     private String prouctId;
 
+    @Column(name = "product_spec_id")
+    @Desc(value = "商品规格ID")
+    @ApiModelProperty("商品规格ID")
+    private String productSpecId;
+
+
     @Column(name = "exchange_time")
     @Desc(value = "兑换时间")
     @ApiModelProperty("兑换时间")

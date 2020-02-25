@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.activity;
 
 import com.dangjia.acg.dto.activity.DjStoreActivityProductDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
 import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
 import org.apache.ibatis.annotations.Param;
@@ -38,4 +39,8 @@ public interface DjStoreActivityProductMapper extends Mapper<DjStoreActivityProd
                                  @Param("activitySessionId") String activitySessionId);
 
     List<DjStoreActivityProductDTO> queryBillGoods(@Param("id") String id);
+
+
+    List<StorefrontProductDTO> queryHomeGroupActivities(@Param("limit") Integer limit,
+                                                        @Param("activitySessionId") String activitySessionId);
 }

@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.data;
 
 import com.dangjia.acg.api.data.HouseDistributionConfigAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.HouseDistributionConfig;
 import com.dangjia.acg.service.house.HouseDistributionConfigService;
@@ -61,5 +62,11 @@ public class HouseDistributionConfigController implements HouseDistributionConfi
     @ApiMethod
     public ServerResponse addHouseDistributionConfig(HttpServletRequest request,HouseDistributionConfig houseDistributionConfig) {
         return houseDistributionConfigService.addHouseDistributionConfig(request,houseDistributionConfig);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryProfessionalHomeInspector(HttpServletRequest request, String cityId, PageDTO pageDTO) {
+        return houseDistributionConfigService.queryProfessionalHomeInspector(cityId,pageDTO);
     }
 }

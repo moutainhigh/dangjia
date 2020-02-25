@@ -30,7 +30,9 @@
                 d.store_participate_activities_id = e.id
             AND a.id = d.product_id
             AND e.store_activity_id =#{storeActivityId}
-            AND e.activity_session_id =#{activitySessionId}
+            <if test="null!=activitySessionId and ''!=activitySessionId">
+                AND e.activity_session_id =#{activitySessionId}
+            </if>
             AND e.storefront_id=#{storefrontId}
         )
     </select>
@@ -46,7 +48,7 @@
             c.image,
             c.sell_price AS sellPrice,
             c.supplied_num AS inventory,
-            c.rush_purchase_price AS rushPurchasePrice
+            a.rush_purchase_price AS rushPurchasePrice
         FROM
             dj_store_activity_product a,
             dj_store_participate_activities b,
@@ -60,7 +62,9 @@
         AND d.goods_id = e.id
         AND b.storefront_id =#{storefrontId}
         AND b.store_activity_id =#{storeActivityId}
-        AND b.activity_session_id =#{activitySessionId}
+        <if test="null!=activitySessionId and ''!=activitySessionId">
+            AND b.activity_session_id =#{activitySessionId}
+        </if>
     </select>
 
 
@@ -198,5 +202,37 @@
         AND a.product_id = c.id
         AND c.prod_template_id = d.id
         AND d.goods_id = e.id
+    </select>
+
+    <select id="queryHomeGroupActivities" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
+        SELECT
+            b.id AS storefrontProductId,
+            b.image,
+            c.storefront_name AS storefrontName,
+            b.sell_price AS sellPrice,
+            a.rush_purchase_price AS rushPurchasePrice
+        FROM
+            dj_store_activity_product a,
+            dj_basics_storefront_product b,
+            dj_basics_storefront c,
+            dj_basics_product_template d,
+            dj_store_participate_activities e
+        WHERE
+            a.product_id = b.id
+        AND b.prod_template_id = d.id
+        AND c.id = b.storefront_id
+        AND e.id=a.store_participate_activities_id
+        <choose>
+            <when test="null!=activitySessionId and ''!=activitySessionId">
+                AND e.activity_session_id=#{activitySessionId}
+            </when>
+            <otherwise>
+                AND a.activity_type=2
+            </otherwise>
+        </choose>
+        AND e.registration_status=1
+        <if test="null!=limit and ''!=limit">
+            order by rand() limit #{limit}
+        </if>
     </select>
 </mapper>

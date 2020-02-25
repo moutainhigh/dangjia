@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.data;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.HouseDistributionConfig;
 import io.swagger.annotations.Api;
@@ -63,4 +64,10 @@ public interface HouseDistributionConfigAPI {
     @ApiOperation(value = "新增验房配置", notes = "新增验房配置")
     ServerResponse addHouseDistributionConfig(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("houseDistributionConfig") HouseDistributionConfig houseDistributionConfig);
+
+    @PostMapping("/config/distribution/queryProfessionalHomeInspector")
+    @ApiOperation(value = "专业验房列表", notes = "专业验房列表")
+    ServerResponse queryProfessionalHomeInspector(@RequestParam("request") HttpServletRequest request,
+                                                  @RequestParam("cityId") String cityId,
+                                                  @RequestParam("pageDTO") PageDTO pageDTO);
 }

@@ -8,7 +8,7 @@
             a.id,
             a.activity_type AS activityType,
             a.state,
-            if(b.store_activity_id IS NULL OR b.store_activity_id="",0,1) AS attended
+            if(b.store_activity_id IS NULL OR b.store_activity_id="",0,1) AS registrationStatus
         FROM
             dj_store_activity a
         LEFT JOIN dj_store_participate_activities b ON a.id = b.store_activity_id
@@ -50,20 +50,28 @@
 
     <select id="queryActivitiesOrSessionById" resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
         SELECT
+            a.id as storeActivityId,
             a.activity_start_time AS activityStartTime,
             a.end_time AS endTime,
             a.registration_start_time AS registrationStartTime,
             a.end_time_registration AS endTimeRegistration,
             c.`name` AS city,
-            a.activity_description AS activityDescription
+            a.activity_description AS activityDescription,
+            a.cycle_purchasing AS cyclePurchasing,
+            d.id AS storeParticipateActivitiesId
+            <if test="activityType==1">
+                ,b.id as activitySessionId
+            </if>
         FROM
             dj_store_activity a,
             <if test="activityType==1">
                 dj_activity_session b,
             </if>
-            dj_other_city c
+            dj_other_city c,
+            dj_store_participate_activities d
         WHERE
             c.id=a.city_id
+        AND a.id=d.store_activity_id
         <choose>
             <when test="activityType==1">
                 AND a.id = b.store_activity_id
