@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.deliver;
 
 import com.dangjia.acg.api.app.deliver.SplitDeliverAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
@@ -76,8 +77,8 @@ public class SplitDeliverController implements SplitDeliverAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse splitDeliverList(String houseId, Integer shipState) {
-        return splitDeliverService.splitDeliverList(houseId, shipState);
+    public ServerResponse splitDeliverList(PageDTO pageDTO, String houseId, Integer shipState) {
+        return splitDeliverService.splitDeliverList( pageDTO,houseId, shipState);
     }
 
     /**

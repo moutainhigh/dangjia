@@ -449,7 +449,7 @@ public class HouseWorkerService {
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         Example example =new Example(Complain.class);
         example.createCriteria()
-                .andEqualTo(Complain.COMPLAIN_TYPE,3)
+                .andIn(Complain.COMPLAIN_TYPE,Arrays.asList(3,6))
                 .andEqualTo(Complain.HOUSE_ID,houseFlow.getHouseId())
                 .andEqualTo(Complain.MEMBER_ID,houseFlow.getWorkerId())
                 .andNotEqualTo(Complain.STATUS,2);

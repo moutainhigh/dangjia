@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.deliver;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,8 +61,9 @@ public interface SplitDeliverAPI {
      */
     @PostMapping("app/deliver/splitDeliver/splitDeliverList")
     @ApiOperation(value = "收货列表", notes = "收货列表")
-    ServerResponse splitDeliverList(@RequestParam("houseId") String houseId,
-                                    @RequestParam("shipState") Integer shipState);
+    ServerResponse splitDeliverList( @RequestParam("pageDTO")PageDTO pageDTO,
+                                     @RequestParam("houseId") String houseId,
+            @RequestParam("shipState") Integer shipState);
 
 
 

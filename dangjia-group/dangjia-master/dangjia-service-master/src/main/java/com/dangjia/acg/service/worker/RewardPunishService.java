@@ -17,12 +17,14 @@ import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.*;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -71,6 +73,9 @@ public class RewardPunishService {
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IMemberMapper memberMapper;
+
+    @Autowired
+    private UserMapper userMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
@@ -404,6 +409,16 @@ public class RewardPunishService {
                     rewardPunishRecordDTO.setId(record.getId());
                     recordDTOS.addAll(rewardPunishRecordMapper.queryRewardPunishRecord(rewardPunishRecordDTO));
                 }
+                for (RewardPunishRecordDTO recordDTO : recordDTOS) {
+                    Member member=memberMapper.selectByPrimaryKey(recordDTO.getOperatorId());
+                    if(member!=null){
+                        recordDTO.setOperatorName(CommonUtil.isEmpty(member.getName())?member.getNickName():member.getName());
+                        recordDTO.setOperatorTypeName(workerTypeMapper.getName(member.getWorkerType()));
+                    }else{
+                        MainUser user=userMapper.selectByPrimaryKey(recordDTO.getOperatorId());
+                        recordDTO.setOperatorName(CommonUtil.isEmpty(user.getUsername())?user.getMobile():user.getUsername());
+                    }
+                }
                 pageResult.setList(recordDTOS);
                 return ServerResponse.createBySuccess("ok", pageResult);
             } else {
@@ -432,6 +447,15 @@ public class RewardPunishService {
                 RewardPunishRecordDTO rewardPunishRecordDTO=recordList.get(0);
                 if(!CommonUtil.isEmpty(rewardPunishRecordDTO.getImages())){
                     rewardPunishRecordDTO.setImages(imageAddress+rewardPunishRecordDTO.getImages());
+                }
+                Member member=memberMapper.selectByPrimaryKey(rewardPunishRecordDTO.getOperatorId());
+                if(member!=null){
+                    rewardPunishRecordDTO.setOperatorName(CommonUtil.isEmpty(member.getName())?member.getNickName():member.getName());
+                    rewardPunishRecordDTO.setOperatorTypeName(workerTypeMapper.getName(member.getWorkerType()));
+                }else{
+                    MainUser user=userMapper.selectByPrimaryKey(rewardPunishRecordDTO.getOperatorId());
+                    rewardPunishRecordDTO.setOperatorName(CommonUtil.isEmpty(user.getUsername())?user.getMobile():user.getUsername());
+                    rewardPunishRecordDTO.setOperatorTypeName("");
                 }
                 rewardPunishRecordDTO.setIsComplain(-1);//未投诉
                 Example examples = new Example(Complain.class);

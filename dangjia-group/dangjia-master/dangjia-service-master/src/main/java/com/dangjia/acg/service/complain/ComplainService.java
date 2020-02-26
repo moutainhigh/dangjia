@@ -266,8 +266,7 @@ public class ComplainService {
      */
 
     public ServerResponse addComplain(String userToken, String memberId, Integer complainType,
-                                      String businessId, String houseId, String files,
-                                      String orderSplitItemId,String changeReason,String image) {
+                                      String businessId, String houseId, String files,String changeReason,String image) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
@@ -285,7 +284,6 @@ public class ComplainService {
         }
         Example example = new Example(Complain.class);
         example.createCriteria()
-                .andEqualTo(Complain.MEMBER_ID, memberId)
                 .andEqualTo(Complain.COMPLAIN_TYPE, complainType)
                 .andEqualTo(Complain.BUSINESS_ID, businessId)
                 .andEqualTo(Complain.STATUS, 0);
@@ -311,7 +309,7 @@ public class ComplainService {
                 complain.setUserNickName("供应商-" + djSupplier.getCheckPeople());
             }
             OrderSplitItem orderSplitItem=new OrderSplitItem();
-            orderSplitItem.setId(orderSplitItemId);
+            orderSplitItem.setSplitDeliverId(businessId);
             orderSplitItem.setShippingState(1);
             orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
         } else {
@@ -737,7 +735,6 @@ public class ComplainService {
                 complain.setData(rewardPunishRecordMapper.queryRewardPunishRecord(rewardPunishRecordDTO));
             } else if (complain.getComplainType() == 4) {//收货
                 SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(complain.getBusinessId());
-                House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
                 BeanUtils.beanToBean(splitDeliver,splitDeliverDTO);
                 Example example = new Example(OrderSplitItem.class);

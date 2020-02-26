@@ -7,6 +7,8 @@ import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
+import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
@@ -34,6 +36,8 @@ import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -412,7 +416,7 @@ public class SplitDeliverService {
      * 收货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消  5所有
      */
-    public ServerResponse splitDeliverList(String houseId, int shipState) {
+    public ServerResponse splitDeliverList(PageDTO pageDTO, String houseId, int shipState) {
         try {
             Example example = new Example(SplitDeliver.class);
             if (shipState == 5) {
@@ -423,10 +427,11 @@ public class SplitDeliverService {
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIPPING_STATE, shipState);
             }
             example.orderBy(SplitDeliver.CREATE_DATE).desc();
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
+            PageInfo pageResult = new PageInfo(splitDeliverList);
             List<SplitDeliverDTO> splitDeliverDTOList = new ArrayList<>();
             for (SplitDeliver splitDeliver : splitDeliverList) {
-                House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
                 splitDeliverDTO.setSplitDeliverId(splitDeliver.getId());
                 splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
@@ -457,7 +462,11 @@ public class SplitDeliverService {
                 splitDeliverDTOList.add(splitDeliverDTO);
             }
 
-            return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);
+            pageResult.setList(splitDeliverDTOList);
+            if (splitDeliverDTOList.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
