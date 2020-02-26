@@ -376,6 +376,7 @@ public class PaymentService {
             if(active!=null&&(active.equals("dev"))) {
                 //开发回调
                 setServersSuccess(payOrder.getId());
+                payOrder = payOrderMapper.selectByPrimaryKey(payOrder.getId());
             }
             Example example = new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER, payOrder.getBusinessOrderNumber());
@@ -402,7 +403,7 @@ public class PaymentService {
                 returnMap.put("name", "当家装修担保平台");
                 returnMap.put("businessOrderNumber", businessOrderNumber);
                 returnMap.put("price", payOrder.getPrice());
-                return ServerResponse.createByErrorMessage("未支付成功");
+                return ServerResponse.createByErrorMessage("未支付成功",returnMap);
             }
         } catch (Exception e) {
             returnMap.put("name", "当家装修担保平台");
