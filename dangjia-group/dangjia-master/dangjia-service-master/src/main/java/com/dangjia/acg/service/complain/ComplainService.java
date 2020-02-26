@@ -707,13 +707,16 @@ public class ComplainService {
      */
     public ServerResponse getComplain(String complainId) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-
         if (CommonUtil.isEmpty(complainId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
         }
         ComplainDTO complain = complainMapper.getComplain(complainId);
         if (complain == null) {
             return ServerResponse.createByErrorMessage("未找到对应申诉");
+        }
+        if(!CommonUtil.isEmpty(complain.getMemberId())){
+            Member member = memberMapper.selectByPrimaryKey(complain.getMemberId());
+            complain.setMemberHead(address+member.getHead());
         }
         String files = complain.getFiles();
         if (!CommonUtil.isEmpty(files)) {
@@ -782,8 +785,8 @@ public class ComplainService {
                 complain.setData(((ServerResponse) date).getResultObj());
             }
         }
-        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        complain.setImages(StringTool.getImage(complain.getImage(), imageAddress));
+
+        complain.setImages(StringTool.getImage(complain.getImage(), address));
         return ServerResponse.createBySuccess("查询成功", complain);
     }
 
