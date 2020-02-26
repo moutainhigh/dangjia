@@ -6,6 +6,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.pay.AliPayUtil;
 import com.dangjia.acg.common.pay.WeiXinPayUtil;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
@@ -188,9 +189,13 @@ public class PayService {
         //API路径
         String basePath = configUtil.getValue(SysConfig.DANGJIA_API_LOCAL, String.class);
         LOG.info(basePath + "getWeiXinSignURL**********************************************");
-
+        String payState="1";
+        try {
         //检测订单有效性
-        String payState=checkOrder(businessOrderNumber);
+            payState=checkOrder(businessOrderNumber);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage(e.getMessage());
+        }
         //生成支付流水
         PayOrder payOrder = getPayOrder("4", businessOrderNumber);
         String price = payOrder.getPrice().toString();
@@ -210,8 +215,12 @@ public class PayService {
         String basePath = configUtil.getValue(SysConfig.DANGJIA_API_LOCAL, String.class);
         LOG.info(basePath + "getWeiXinSign**********************************************");
 
-        //检测订单有效性
-        checkOrder(businessOrderNumber);
+        try {
+            //检测订单有效性
+            checkOrder(businessOrderNumber);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage(e.getMessage());
+        }
         //生成支付流水
         PayOrder payOrder = getPayOrder("1", businessOrderNumber);
         String price = payOrder.getPrice().toString();
@@ -246,7 +255,12 @@ public class PayService {
         LOG.info(basePath + "getAliSign**********************************************");
 
         //检测订单有效性
-        checkOrder(businessOrderNumber);
+        try {
+            //检测订单有效性
+            checkOrder(businessOrderNumber);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage(e.getMessage());
+        }
         //生成支付流水
         PayOrder payOrder = getPayOrder("2", businessOrderNumber);
         String price = payOrder.getPrice().toString();
@@ -257,8 +271,12 @@ public class PayService {
     /* POS支付 */
     public ServerResponse getPOSSign(String businessOrderNumber) {
        try {
-           //检测订单有效性
-           checkOrder(businessOrderNumber);
+           try {
+               //检测订单有效性
+               checkOrder(businessOrderNumber);
+           } catch (Exception e) {
+               return ServerResponse.createByErrorMessage(e.getMessage());
+           }
            //生成支付流水
            PayOrder payOrder = payOrderMapper.getByNumber(businessOrderNumber);
            if (payOrder == null) {
@@ -273,6 +291,9 @@ public class PayService {
        }
     }
     private String checkOrder(String businessOrderNumber) {
+        if (CommonUtil.isEmpty(businessOrderNumber)) {
+            throw new BaseException(ServerCode.ERROR, "该订单不存在");
+        }
         String payState="0";
         Example example = new Example(BusinessOrder.class);
         example.createCriteria().andEqualTo("number", businessOrderNumber).andEqualTo("state", 1);
