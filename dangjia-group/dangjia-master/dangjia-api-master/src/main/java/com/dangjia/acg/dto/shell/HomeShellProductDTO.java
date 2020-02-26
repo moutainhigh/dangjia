@@ -75,6 +75,10 @@ public class HomeShellProductDTO {
     private String productSpecId;//价格最少的规格ID
     private Double integral;//价格最少的贝币
     private Double money;//价格最少钱
+    private Double stockNum;//当前库存数据
+    private Integer showButton;//显示按钮：1兑换按钮，2库存不足，3贝币不足，4超过兑换次数
+
+    private long remainingTime;//兑换剩余时间
 
 
 }

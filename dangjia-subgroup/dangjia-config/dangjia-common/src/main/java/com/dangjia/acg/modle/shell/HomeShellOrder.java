@@ -41,6 +41,10 @@ public class HomeShellOrder extends GoodsBaseEntity {
     @ApiModelProperty("商品规格ID")
     private String productSpecId;
 
+    @Column(name = "business_order_number")
+    @Desc(value = "业务支付单号")
+    @ApiModelProperty("业务支付单号")
+    private String businessOrderNumber;
 
     @Column(name = "exchange_time")
     @Desc(value = "兑换时间")
@@ -69,8 +73,8 @@ public class HomeShellOrder extends GoodsBaseEntity {
 
 
     @Column(name = "status")
-    @Desc(value = "订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款）")
-    @ApiModelProperty("订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款）")
+    @Desc(value = "订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款，6已取消）")
+    @ApiModelProperty("订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款，6已取消）")
     private Integer status;
 
     @Column(name = "address_id")

@@ -29,6 +29,7 @@ import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -338,20 +339,24 @@ public class DjStoreActivityService {
         try {
             Storefront storefront = masterStorefrontService.getStorefrontByUserId(userId, cityId);
             Example example=new Example(DjStoreParticipateActivities.class);
-            example.createCriteria().andEqualTo(DjStoreParticipateActivities.ACTIVITY_SESSION_ID,activitySessionId)
-                    .andEqualTo(DjStoreParticipateActivities.STORE_ACTIVITY_ID,storeActivityId)
-                    .andEqualTo(DjStoreParticipateActivities.STOREFRONT_ID,storefront.getId())
-                    .andEqualTo(DjStoreParticipateActivities.DATA_STATUS,0)
-                    .andCondition("registration_status in(1,2,3)");
+            Example.Criteria criteria = example.createCriteria().andEqualTo(DjStoreParticipateActivities.STORE_ACTIVITY_ID, storeActivityId)
+                    .andEqualTo(DjStoreParticipateActivities.STOREFRONT_ID, storefront.getId())
+                    .andEqualTo(DjStoreParticipateActivities.DATA_STATUS, 0)
+                    .andCondition("registration_status in(1,3)");
+            if(StringUtils.isNotBlank(activitySessionId)){
+                criteria.andEqualTo(DjStoreParticipateActivities.ACTIVITY_SESSION_ID,activitySessionId);
+            }
             if(djStoreParticipateActivitiesMapper.selectCountByExample(example)>0){
                 return ServerResponse.createByErrorMessage("请勿重复申请");
             }
             example=new Example(DjStoreParticipateActivities.class);
-            example.createCriteria().andEqualTo(DjStoreParticipateActivities.ACTIVITY_SESSION_ID,activitySessionId)
-                    .andEqualTo(DjStoreParticipateActivities.STORE_ACTIVITY_ID,storeActivityId)
-                    .andEqualTo(DjStoreParticipateActivities.STOREFRONT_ID,storefront.getId())
-                    .andEqualTo(DjStoreParticipateActivities.DATA_STATUS,0)
-                    .andEqualTo(DjStoreParticipateActivities.REGISTRATION_STATUS,4);
+            Example.Criteria criteria1 = example.createCriteria().andEqualTo(DjStoreParticipateActivities.STORE_ACTIVITY_ID, storeActivityId)
+                    .andEqualTo(DjStoreParticipateActivities.STOREFRONT_ID, storefront.getId())
+                    .andEqualTo(DjStoreParticipateActivities.DATA_STATUS, 0)
+                    .andEqualTo(DjStoreParticipateActivities.REGISTRATION_STATUS, 4);
+            if(StringUtils.isNotBlank(activitySessionId)){
+                criteria1.andEqualTo(DjStoreParticipateActivities.ACTIVITY_SESSION_ID,activitySessionId);
+            }
             DjStoreParticipateActivities djStoreParticipateActivities1 =
                     djStoreParticipateActivitiesMapper.selectOneByExample(example);
             if(djStoreParticipateActivities1!=null){
@@ -736,6 +741,25 @@ public class DjStoreActivityService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 撤回
+     * @param storeParticipateActivitiesId
+     * @return
+     */
+    public ServerResponse setwithdraw(String storeParticipateActivitiesId) {
+        try {
+            DjStoreParticipateActivities djStoreParticipateActivities =
+                    djStoreParticipateActivitiesMapper.selectByPrimaryKey(storeParticipateActivitiesId);
+            djStoreParticipateActivities.setRegistrationStatus(2);
+            djStoreParticipateActivitiesMapper.updateByPrimaryKeySelective(djStoreParticipateActivities);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 

@@ -8,7 +8,7 @@
             a.id,
             a.activity_type AS activityType,
             a.state,
-            if(b.store_activity_id IS NULL OR b.store_activity_id="",0,1) AS registrationStatus
+            if(b.store_activity_id IS NULL OR b.store_activity_id="",0,b.registration_status) AS registrationStatus
         FROM
             dj_store_activity a
         LEFT JOIN dj_store_participate_activities b ON a.id = b.store_activity_id
@@ -40,7 +40,7 @@
         FROM
             dj_store_activity a
         INNER JOIN dj_activity_session b ON a.id = b.store_activity_id
-        LEFT JOIN dj_store_participate_activities c ON c.store_activity_id = a.id
+        LEFT JOIN dj_store_participate_activities c ON c.activity_session_id=b.id
         AND c.storefront_id =#{storefrontId}
         INNER JOIN dj_other_city d ON d.id = a.city_id
         WHERE
@@ -63,18 +63,18 @@
                 ,b.id as activitySessionId
             </if>
         FROM
-            dj_store_activity a,
+            dj_store_activity a
             <if test="activityType==1">
-                dj_activity_session b,
+                INNER JOIN dj_activity_session b
+                ON a.id = b.store_activity_id
             </if>
-            dj_other_city c,
-            dj_store_participate_activities d
-        WHERE
-            c.id=a.city_id
-        AND a.id=d.store_activity_id
+            INNER JOIN dj_other_city c
+            ON c.id=a.city_id
+            LEFT JOIN dj_store_participate_activities d
+            ON a.id=d.store_activity_id
+        WHERE 1=1
         <choose>
             <when test="activityType==1">
-                AND a.id = b.store_activity_id
                 AND b.id=#{id}
             </when>
             <otherwise>

@@ -662,17 +662,22 @@ public class DateUtil implements AutoCloseable, Serializable {
      * @throws ParseException
      */
     public static long daysBetweenTime(Date first, Date second) throws ParseException {
-        SimpleDateFormat sformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        first = sformat.parse(sformat.format(first));
-        second = sformat.parse(sformat.format(second));
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(first);
-        long firstMills = calendar.getTimeInMillis();
-        calendar.setTime(second);
-        long secondMills = calendar.getTimeInMillis();
+        try{
+            SimpleDateFormat sformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            first = sformat.parse(sformat.format(first));
+            second = sformat.parse(sformat.format(second));
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(first);
+            long firstMills = calendar.getTimeInMillis();
+            calendar.setTime(second);
+            long secondMills = calendar.getTimeInMillis();
 
-        long mills = secondMills - firstMills;
-        return mills>0?mills/1000:0;
+            long mills = secondMills - firstMills;
+            return mills>0?mills/1000:0;
+        }catch (Exception e){
+            return 0;
+        }
+
     }
 
     /**

@@ -478,4 +478,22 @@ public class TechnologyService {
         workerTypes.sort(Comparator.comparing(BaseEntity::getId));
         return ServerResponse.createBySuccess("查询成功",workerTypes);
     }
+
+
+    /**
+     * 根据id查询工艺详情
+     * @param id
+     * @return
+     */
+    public ServerResponse queryTechnologDetail(String id) {
+        try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            Technology technology = iTechnologyMapper.selectByPrimaryKey(id);
+            technology.setImage(imageAddress+technology.getImage());
+            return ServerResponse.createBySuccess("查询成功",technology);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 }

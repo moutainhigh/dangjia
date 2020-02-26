@@ -873,7 +873,6 @@
         AND t2.product_id = t3.id
         AND t3.prod_template_id = t4.id
         AND t1.parent_order_id = #{orderId}
-        AND t1.id!=t1.parent_order_id
         AND t2.data_status=0
     </select>
 

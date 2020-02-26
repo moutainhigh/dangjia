@@ -67,4 +67,32 @@ public interface HomeShellOrderAPI {
                                    @RequestParam("homeOrderId") String homeOrderId,
                                    @RequestParam("status") Integer status);
 
+
+    /**
+     * 当家贝商城--商品兑换提交
+     * @param userToken 用户token
+     * @param addressId 地址ID
+     * @param productSpecId 商品规格ID
+     * @param exchangeNum 商品数量
+     * @param userRole 提交服务端：1为业主应用，2为工匠应用，3为销售应用
+     * @return
+     */
+    @PostMapping("/app/shellOrder/saveConvertedCommodities")
+    @ApiOperation(value = "商品兑换提交", notes = "商品兑换提交")
+    ServerResponse saveConvertedCommodities(@RequestParam("userToken") String userToken,
+                                   @RequestParam("addressId") String addressId,
+                                   @RequestParam("productSpecId") String productSpecId,
+                                   @RequestParam("exchangeNum") Integer exchangeNum,
+                                   @RequestParam("userRole") Integer userRole,
+                                   @RequestParam("cityId") String cityId);
+    /**
+     * 当家贝商城--兑换记录
+     * @param userToken
+     * @return
+     */
+    @PostMapping("/app/homeShell/searchConvertedProductList")
+    @ApiOperation(value = "当家贝商城--兑换记录", notes = "当家贝商城--兑换记录")
+    ServerResponse searchShellProductInfo(@RequestParam("userToken") String userToken,
+                                          @RequestParam("pageDTO") PageDTO pageDTO);
+
 }

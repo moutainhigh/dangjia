@@ -65,4 +65,9 @@ public interface TechnologyAPI {
     @ApiOperation(value = "根据工艺所有工种", notes = "根据工艺所有工种")
     ServerResponse queryTechnologyWorkerType(@RequestParam("request") HttpServletRequest request);
 
+
+    @PostMapping("/basics/technology/queryTechnologDetail")
+    @ApiOperation(value = "根据id查询工艺详情", notes = "根据工艺所有工种")
+    ServerResponse queryTechnologDetail(@RequestParam("id") String id);
+
 }
