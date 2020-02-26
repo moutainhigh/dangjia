@@ -1372,7 +1372,7 @@ public class PaymentService {
             order.setBusinessOrderNumber(businessOrder.getNumber());
             order.setTotalAmount(paymentPrice);// 订单总额(工钱)
             if(orderSource==4){
-                order.setWorkerTypeName(" 补差价订单");
+                order.setWorkerTypeName("补差价订单");
             }
             if(workerTypeId!=null&&"1".equals(workerTypeId)){
                 order.setWorkerTypeName("设计师人工订单");
@@ -1411,7 +1411,7 @@ public class PaymentService {
             example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                     .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
             iShoppingCartMapper.deleteByExample(example);
-            return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
+            return ServerResponse.createBySuccess("提交成功", businessOrder);
         }
         return ServerResponse.createBySuccess("提交成功");
     }
