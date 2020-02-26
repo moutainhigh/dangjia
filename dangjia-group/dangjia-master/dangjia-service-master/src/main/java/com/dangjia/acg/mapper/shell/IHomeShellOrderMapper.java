@@ -17,4 +17,8 @@ public interface IHomeShellOrderMapper extends Mapper<HomeShellOrder> {
                                                  @Param("startTime") Date startTime,
                                                  @Param("endTime") Date  endTime,
                                                  @Param("searchKey") String  searchKey);
+
+    Integer selectExchangeCount(@Param("memberId") String memberId,@Param("productId") String productId);
+
+    List<HomeShellOrderDTO> searchShellProductInfo(@Param("memberId") String memberId);
 }

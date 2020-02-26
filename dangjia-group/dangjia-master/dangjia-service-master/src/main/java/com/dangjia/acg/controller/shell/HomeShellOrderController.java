@@ -5,9 +5,12 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.shell.HomeShellOrderService;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +25,7 @@ public class HomeShellOrderController implements HomeShellOrderAPI {
     protected static final Logger logger = LoggerFactory.getLogger(HomeShellOrderController.class);
 
     @Autowired
-    private HomeShellOrderService billHomeShellOrderService;
+    private HomeShellOrderService homeShellOrderService;
     /**
      * 查询兑换记录列表
      * @param request
@@ -37,7 +40,7 @@ public class HomeShellOrderController implements HomeShellOrderAPI {
     @Override
     @ApiMethod
     public ServerResponse queryOrderInfoList(HttpServletRequest request, PageDTO pageDTO,Integer exchangeClient,Integer status, Date startTime,Date endTime, String searchKey){
-        return billHomeShellOrderService.queryOrderInfoList(pageDTO,exchangeClient,status,startTime,endTime,searchKey);
+        return homeShellOrderService.queryOrderInfoList(pageDTO,exchangeClient,status,startTime,endTime,searchKey);
     }
     /**
      * 查询兑换详情
@@ -48,7 +51,7 @@ public class HomeShellOrderController implements HomeShellOrderAPI {
     @Override
     @ApiMethod
     public ServerResponse queryOrderInfoDetail(HttpServletRequest request,String homeOrderId){
-        return billHomeShellOrderService.queryOrderInfoDetail(homeOrderId);
+        return homeShellOrderService.queryOrderInfoDetail(homeOrderId);
     }
 
     /**
@@ -62,10 +65,42 @@ public class HomeShellOrderController implements HomeShellOrderAPI {
     @ApiMethod
     public ServerResponse updateOrderInfo(HttpServletRequest request,String homeOrderId,Integer status){
         try{
-            return billHomeShellOrderService.updateOrderInfo(homeOrderId,status);
+            return homeShellOrderService.updateOrderInfo(homeOrderId,status);
         }catch (Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     * 当家贝商城--商品兑换提交
+     * @param userToken 用户token
+     * @param addressId 地址ID
+     * @param productSpecId 商品规格ID
+     * @param exchangeNum 商品数量
+     * @param userRole 提交服务端：1为业主应用，2为工匠应用，3为销售应用
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveConvertedCommodities(String userToken,String addressId,String productSpecId,Integer exchangeNum,Integer userRole,String cityId){
+        try{
+            return homeShellOrderService.saveConvertedCommodities(userToken,addressId,productSpecId,exchangeNum,userRole,cityId);
+        }catch (Exception e){
+            logger.error("兑换失败",e);
+            return ServerResponse.createByErrorMessage("兑换失败");
+        }
+    }
+    /**
+     * 当家贝商城--兑换记录
+     * @param userToken 用户token
+     * @param pageDTO 分页
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchShellProductInfo(String userToken,PageDTO pageDTO){
+        return homeShellOrderService.searchShellProductInfo(userToken,pageDTO);
+    }
+
 }

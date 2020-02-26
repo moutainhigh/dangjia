@@ -99,4 +99,17 @@ public class HomeShellProductController implements HomeShellProductAPI {
         return billHomeShellProductService.serachShellProductList(userToken,pageDTO,productType);
     }
 
+    /**
+     * 商品详情
+     * @param userToken
+     * @param shellProductId 当家贝商品ID
+     * @param productSpecId 商品规格Id
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchShellProductInfo(String userToken,String shellProductId,String productSpecId){
+        return billHomeShellProductService.searchShellProductInfo(userToken,shellProductId,productSpecId);
+    }
+
 }

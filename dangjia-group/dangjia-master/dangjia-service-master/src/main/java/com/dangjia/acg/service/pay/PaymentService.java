@@ -79,6 +79,7 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
+import com.dangjia.acg.modle.shell.HomeShellOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -91,6 +92,7 @@ import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
+import com.dangjia.acg.service.shell.HomeShellOrderService;
 import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -226,6 +228,8 @@ public class PaymentService {
     private TaskStackService taskStackService;
     @Autowired
     private IMemberMapper iMemberMapper;
+    @Autowired
+    private HomeShellOrderService homeShellOrderService;
 
 
     @Autowired
@@ -337,6 +341,8 @@ public class PaymentService {
                     //修改维保订单的支付状态为已支付
                     djMaintenanceRecordProductMapper.updateRecordProductInfoByBusinessNumber(businessOrder.getMaintenanceRecordId(),businessOrder.getNumber());
                 }
+            }else if(businessOrder.getType()==11){//当家贝商品兑换
+                homeShellOrderService.updateShellOrderInfo(businessOrder.getNumber());
             }
             if(!CommonUtil.isEmpty(businessOrder.getHouseId())) {
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
@@ -351,7 +357,7 @@ public class PaymentService {
             }
             return ServerResponse.createBySuccessMessage("支付成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("支付回调异常",e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createByErrorMessage("支付回调异常");
         }

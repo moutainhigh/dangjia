@@ -35,4 +35,6 @@ public class HomeShellProductSpecDTO {
     @ApiModelProperty("已兑换数")
     private Double convertedNumber;//
 
+    private Integer showButton;//显示按钮：1兑换按钮，2库存不足，3贝币不足，4超过兑换次数
+
 }

@@ -86,4 +86,19 @@ public interface HomeShellProductAPI {
                                              @RequestParam("pageDTO") PageDTO pageDTO,
                                              @RequestParam("productType") String productType);
 
+
+    /**
+     * 商品详情
+     * @param userToken
+     * @param shellProductId 当家贝商品ID
+     * @param productSpecId 商品规格Id
+     * @return
+     */
+    @PostMapping("/app/homeShell/searchShellProductInfo")
+    @ApiOperation(value = "当家贝商城商品详情", notes = "当家贝商城商品详情")
+    ServerResponse searchShellProductInfo(@RequestParam("userToken") String userToken,
+                                             @RequestParam("shellProductId") String shellProductId,
+                                             @RequestParam("ProductSpecId") String productSpecId);
+
+
 }

@@ -18,13 +18,16 @@ import com.dangjia.acg.dto.order.PaymentToBeMadeDTO;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverSplitDeliverMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
+import com.dangjia.acg.mapper.member.IBillMemberAddressMapper;
 import com.dangjia.acg.mapper.order.IBillDjAcceptanceEvaluationMapper;
+import com.dangjia.acg.mapper.order.IBillHouseMapper;
 import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
 import com.dangjia.acg.mapper.shoppingCart.IBillShoppingCartMapper;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.order.DjAcceptanceEvaluation;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.ShoppingCart;
@@ -52,6 +55,8 @@ public class DjDeliverOrderItemService {
     @Autowired
     private HouseAPI houseAPI;
     @Autowired
+    private IBillMemberAddressMapper billMemberAddressMapper;
+    @Autowired
     private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper;
     @Autowired
     private BillProductTemplateService billProductTemplateService;
@@ -67,6 +72,8 @@ public class DjDeliverOrderItemService {
     private IBillDjAcceptanceEvaluationMapper iBillDjAcceptanceEvaluationMapper;
     @Autowired
     private BillDjDeliverSplitDeliverMapper billDjDeliverSplitDeliverMapper;
+    @Autowired
+    private IBillHouseMapper houseMapper;
 
     /**
      * 待付款/已取消订单详情
@@ -86,12 +93,24 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
             paymentToBeMadeDTO.setModifyDate(order.getModifyDate());
             paymentToBeMadeDTO.setOrderSource(order.getOrderSource());
-            House house= houseAPI.selectHouseById(order.getHouseId());
+           // House house= houseAPI.selectHouseById(order.getHouseId());
+            String memberId="";
+            MemberAddress memberAddress=billMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
+            if(memberAddress!=null){
+                paymentToBeMadeDTO.setHouseId(memberAddress.getHouseId());
+                paymentToBeMadeDTO.setHouseName( memberAddress.getAddress());
+                memberId=memberAddress.getMemberId();
+            }else{
+                House house=houseMapper.selectByPrimaryKey(order.getHouseId());
+                if(house!=null){
+                    paymentToBeMadeDTO.setHouseId(house.getHouseId());
+                    paymentToBeMadeDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号");
+
+                }
+            }
             Example example = new Example(ShoppingCart.class);
-            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId());
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, memberId);
             paymentToBeMadeDTO.setShoppingCartsCount(iBillShoppingCartMapper.selectCountByExample(example));
-            paymentToBeMadeDTO.setHouseId(house.getHouseId());
-            paymentToBeMadeDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号");
             List<OrderStorefrontDTO> orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryPaymentToBeMade(orderId);
             this.duplicatedCode(orderStorefrontDTOS);
             paymentToBeMadeDTO.setOrderStorefrontDTOS(orderStorefrontDTOS);
@@ -123,9 +142,19 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setOrderNumber(order.getOrderNumber());
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
             paymentToBeMadeDTO.setModifyDate(order.getModifyDate());
-            House house= houseAPI.selectHouseById(order.getHouseId());
-            paymentToBeMadeDTO.setHouseId(house.getHouseId());
-            paymentToBeMadeDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号");
+            MemberAddress memberAddress=billMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
+            if(memberAddress!=null){
+                paymentToBeMadeDTO.setHouseId(memberAddress.getHouseId());
+                paymentToBeMadeDTO.setHouseName( memberAddress.getAddress());
+
+            }else{
+                House house=houseMapper.selectByPrimaryKey(order.getHouseId());
+                if(house!=null){
+                    paymentToBeMadeDTO.setHouseId(house.getHouseId());
+                    paymentToBeMadeDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号");
+
+                }
+            }
             List<String> strings = billDjDeliverOrderSplitItemMapper.querySplitDeliverId(orderId);
             paymentToBeMadeDTO.setSplitDeliverCount(strings.size());
             paymentToBeMadeDTO.setSplitDeliverId(CommonUtil.isEmpty(String.join(",",strings))?null:String.join(",",strings));
