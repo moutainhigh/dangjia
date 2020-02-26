@@ -7,9 +7,14 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.shell.HomeShellOrderDTO;
 import com.dangjia.acg.dto.shell.HomeShellProductDTO;
+import com.dangjia.acg.dto.shell.HomeShellProductSpecDTO;
 import com.dangjia.acg.mapper.shell.IHomeShellProductMapper;
+import com.dangjia.acg.mapper.shell.IHomeShellProductSpecMapper;
+import com.dangjia.acg.modle.shell.HomeShellOrder;
 import com.dangjia.acg.modle.shell.HomeShellProduct;
+import com.dangjia.acg.modle.shell.HomeShellProductSpec;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -35,6 +40,8 @@ public class HomeShellProductService {
 
     @Autowired
     private IHomeShellProductMapper billHomeShellProductMapper;
+    @Autowired
+    private IHomeShellProductSpecMapper productSpecMapper;
 
     @Autowired
     private ConfigUtil configUtil;
@@ -78,9 +85,11 @@ public class HomeShellProductService {
             homeShellProductDTO.setShellProductId(homeShellProduct.getId());
             homeShellProductDTO.setImageUrl(StringTool.getImage(homeShellProductDTO.getImage(),address));
             homeShellProductDTO.setDetailImageUrl(StringTool.getImage(homeShellProductDTO.getDetailImageUrl(),address));
+            List<HomeShellProductSpecDTO> productSpecDTO=productSpecMapper.selectProductSpecByProductId(shellProductId);
+            homeShellProductDTO.setProductSpecList(productSpecDTO);
             return ServerResponse.createBySuccess("查询成功",homeShellProductDTO);
         }catch(Exception e){
-            logger.error("查询失败");
+            logger.error("查询失败",e);
             return ServerResponse.createBySuccessMessage("查询失败");
         }
     }
@@ -93,17 +102,37 @@ public class HomeShellProductService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse editHomeShellProductInfo( HomeShellProductDTO homeShellProductDTO,String cityId){
         String shellProductId=homeShellProductDTO.getShellProductId();
-
+        //修改商品信息
         if(StringUtils.isNotBlank(shellProductId)){//修改
             HomeShellProduct homeShellProduct=billHomeShellProductMapper.selectByPrimaryKey(shellProductId);
             BeanUtils.beanToBean(homeShellProductDTO,homeShellProduct);
             homeShellProduct.setCityId(cityId);
-            billHomeShellProductMapper.updateByPrimaryKey(homeShellProduct);
+            billHomeShellProductMapper.updateByPrimaryKeySelective(homeShellProduct);
         }else{
             HomeShellProduct homeShellProduct=new HomeShellProduct();
             BeanUtils.beanToBean(homeShellProductDTO,homeShellProduct);
             homeShellProduct.setCityId(cityId);
-            billHomeShellProductMapper.insert(homeShellProduct);
+            billHomeShellProductMapper.insertSelective(homeShellProduct);
+            shellProductId=homeShellProduct.getId();
+        }
+        //修改商品规格信息
+        List<HomeShellProductSpecDTO> productSpecList=homeShellProductDTO.getProductSpecList();
+        if(productSpecList!=null){
+            for(HomeShellProductSpecDTO productSpecDTO:productSpecList){
+                if(StringUtils.isNotBlank(productSpecDTO.getProductSpecId())){
+                    //修改
+                    HomeShellProductSpec productSpec=productSpecMapper.selectByPrimaryKey(productSpecDTO.getProductSpecId());
+                    BeanUtils.beanToBean(productSpecDTO,productSpec);
+                    productSpec.setProductId(shellProductId);
+                    productSpecMapper.updateByPrimaryKeySelective(productSpec);
+                }else{
+                    //添加
+                    HomeShellProductSpec productSpec=new HomeShellProductSpec();
+                    BeanUtils.beanToBean(productSpecDTO,productSpec);
+                    productSpec.setProductId(shellProductId);
+                    productSpecMapper.insertSelective(productSpec);
+                }
+            }
         }
         return ServerResponse.createBySuccessMessage("保存成功");
     }
@@ -139,6 +168,12 @@ public class HomeShellProductService {
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             for(HomeShellProductDTO homeShellProductDTO:homeShellProductDTOList){
                 homeShellProductDTO.setImageUrl(StringTool.getImage(homeShellProductDTO.getImage(),address));
+                HomeShellProductSpecDTO productSpecDTO=productSpecMapper.selectProductSpecInfo(homeShellProductDTO.getShellProductId());
+                if(productSpecDTO!=null){
+                    homeShellProductDTO.setProductSpecId(productSpecDTO.getProductSpecId());
+                    homeShellProductDTO.setIntegral(productSpecDTO.getIntegral());
+                    homeShellProductDTO.setMoney(productSpecDTO.getMoney());
+                }
             }
             PageInfo pageInfo=new PageInfo(homeShellProductDTOList);
             return ServerResponse.createBySuccess("查询成功",pageInfo);

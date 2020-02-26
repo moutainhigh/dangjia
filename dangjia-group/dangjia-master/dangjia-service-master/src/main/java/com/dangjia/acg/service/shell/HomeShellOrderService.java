@@ -110,6 +110,10 @@ public class HomeShellOrderService {
             MemberAddress memberAddress=memberAddressMapper.selectByPrimaryKey(homeShellOrder.getAddressId());
             homeShellOrderDTO.setReveiveMemberName(memberAddress.getName());
             homeShellOrderDTO.setReveiveMemberMobile(memberAddress.getMobile());
+            HomeShellProductSpec productSpec=homeShellProductSpecMapper.selectByPrimaryKey(homeShellOrder.getProductSpecId());
+            if(productSpec!=null){
+                homeShellOrderDTO.setProductSpecName(productSpec.getName());
+            }
             return ServerResponse.createBySuccess("查询成功",homeShellOrderDTO);
         }catch (Exception e){
             logger.error("查询失败",e);

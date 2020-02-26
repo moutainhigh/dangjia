@@ -82,4 +82,8 @@ public class HomeShellOrderDTO extends GoodsBaseEntity {
 
     private String productSn;//商品编码
 
+    private String productSpecName;//规格名称
+
+    private String  productSpecId;//商品规格ID
+
 }

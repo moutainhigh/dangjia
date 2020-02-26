@@ -72,4 +72,9 @@ public class HomeShellProductDTO {
 
     private List<HomeShellProductSpecDTO> productSpecList;//规格列表
 
+    private String productSpecId;//价格最少的规格ID
+    private Double integral;//价格最少的贝币
+    private Double money;//价格最少钱
+
+
 }

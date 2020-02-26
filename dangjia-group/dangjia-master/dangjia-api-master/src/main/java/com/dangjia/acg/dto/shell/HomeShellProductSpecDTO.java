@@ -15,10 +15,10 @@ import java.util.Date;
 public class HomeShellProductSpecDTO {
 
     @ApiModelProperty("规格ID")
-    private String ProductSpecId;//规格ID
+    private String productSpecId;//规格ID
 
     @ApiModelProperty("商品ID")
-    private String ProductId;//商品ID
+    private String productId;//商品ID
 
     @ApiModelProperty("规格名称")
     private String name;//规格名称

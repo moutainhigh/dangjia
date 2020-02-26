@@ -10,9 +10,7 @@
             t.NAME,
             t.product_sn productSn,
             t.product_type productType,
-            t.integral,
-            t.money,
-            t.stock_num stockNum,
+            IFNULL(t.converted_number,0) convertedNumber,
             t.shelf_status shelfStatus
         FROM
             dj_home_shell_product t
@@ -35,9 +33,6 @@
             t. NAME,
             t.product_sn productSn,
             t.product_type productType,
-            t.integral,
-            t.money,
-            t.stock_num stockNum,
             IFNULL(t.converted_number,0) convertedNumber,
             t.shelf_status shelfStatus,
             t.opening_time_limit openingTimeLimit,
