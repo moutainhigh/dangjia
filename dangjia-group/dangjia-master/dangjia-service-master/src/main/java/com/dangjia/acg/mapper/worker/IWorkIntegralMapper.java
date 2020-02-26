@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -29,5 +30,14 @@ public interface IWorkIntegralMapper extends Mapper<WorkIntegral> {
 
     WorkerComprehensiveDTO getComprehensiveWorker(@Param("workerId")String workerId);
 
+
+    /**
+     * 查询当家贝流水明细
+     * @param memberId
+     * @return
+     */
+    List<WorkIntegralDTO> queryWorkerIntegerList(@Param("memberId")String memberId);
+
+    Map<String,Object> getTotalShellMoney(@Param("memberId") String memberId);
 
 }

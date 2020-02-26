@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
+import javax.jnlp.IntegrationService;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -34,6 +35,9 @@ public class HomeShellOrderDTO extends GoodsBaseEntity {
     @ApiModelProperty("兑换时间")
     private Date exchangeTime;
 
+    @ApiModelProperty("业务支付单号")
+    private String businessOrderNumber;
+
     @ApiModelProperty("兑换客户端 1业主端，2工匠端")
     private Integer exchangeClient;
 
@@ -46,8 +50,10 @@ public class HomeShellOrderDTO extends GoodsBaseEntity {
     @ApiModelProperty("兑换人电话")
     private String memberMobile;
 
-    @ApiModelProperty("订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款）")
+    @ApiModelProperty("订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款，6已取消）")
     private Integer status;
+
+    private String statusName;//状态名称
 
     @ApiModelProperty("收货地址ID")
     private String addressId;
@@ -85,5 +91,9 @@ public class HomeShellOrderDTO extends GoodsBaseEntity {
     private String productSpecName;//规格名称
 
     private String  productSpecId;//商品规格ID
+
+    private Integer showButton;//按钮显示 0不显示，1显示”去支付“，2显示”确认收货“
+
+    private Integer refundButton;//取消/按钮显示 0不显示，1取消，2退款
 
 }

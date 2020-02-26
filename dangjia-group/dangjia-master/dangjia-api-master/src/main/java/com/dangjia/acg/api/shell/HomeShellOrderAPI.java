@@ -95,4 +95,54 @@ public interface HomeShellOrderAPI {
     ServerResponse searchShellProductInfo(@RequestParam("userToken") String userToken,
                                           @RequestParam("pageDTO") PageDTO pageDTO);
 
+    /**
+     * 当家贝商城--当家贝明细
+     * @param userToken
+     * @return
+     */
+    @PostMapping("/app/homeShell/searchShellMoneyList")
+    @ApiOperation(value = "当家贝商城--当家贝明细", notes = "当家贝商城--当家贝明细")
+    ServerResponse searchShellMoneyList(@RequestParam("userToken") String userToken,
+                                        @RequestParam("pageDTO") PageDTO pageDTO);
+
+    /**
+     * 当家贝商城--兑换详情
+     * @param userToken
+     * @return
+     */
+    @PostMapping("/app/homeShell/searchConvertedProductInfo")
+    @ApiOperation(value = "当家贝商城--兑换详情", notes = "当家贝商城--兑换详情")
+    ServerResponse searchConvertedProductInfo(@RequestParam("userToken") String userToken,
+                                          @RequestParam("shellOrderId") String shellOrderId);
+
+    /**
+     * 当家贝商城--确认收货/撤销退款
+     * @param userToken
+     * @param shellOrderId 兑换记录ID
+     * @param type 类型：1确认收货，2撤销退款
+     * @return
+     */
+    @PostMapping("/app/shellOrder/updateConvertedProductInfo")
+    @ApiOperation(value = "当家贝商城--确认收货/撤销退款", notes = "当家贝商城--确认收货/撤销退款")
+    ServerResponse updateConvertedProductInfo(@RequestParam("userToken") String userToken,
+                                              @RequestParam("shellOrderId") String shellOrderId,
+                                              @RequestParam("type") Integer type);
+
+    /**
+     * 当家贝商城--取消订单/申请退款
+     * @param userToken
+     * @param shellOrderId 兑换记录ID
+     * @param image 相关凭证
+     * @param type 申请类型：1取消订单，2申请退款
+     * @return
+     */
+    @PostMapping("/app/shellOrder/refundConvertedProductInfo")
+    @ApiOperation(value = "当家贝商城--取消订单/申请退款", notes = "当家贝商城--取消订单/申请退款")
+    ServerResponse refundConvertedProductInfo(@RequestParam("userToken") String userToken,
+                                              @RequestParam("shellOrderId") String shellOrderId,
+                                              @RequestParam("image") String image,
+                                              @RequestParam("type") Integer type);
+
+
+
 }

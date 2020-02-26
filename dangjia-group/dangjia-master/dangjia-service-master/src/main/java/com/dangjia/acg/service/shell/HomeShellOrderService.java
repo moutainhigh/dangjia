@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.shell;
 
+import com.ctc.wstx.sw.EncodingXmlWriter;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -10,6 +11,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.shell.HomeShellOrderDTO;
+import com.dangjia.acg.dto.worker.WorkIntegralDTO;
 import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
@@ -42,7 +44,9 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -210,7 +214,7 @@ public class HomeShellOrderService {
     public void settleIntegral(Member member,String orderId,String remark,Double money,Integer type){
         WorkIntegral workIntegral = new WorkIntegral();
         workIntegral.setAnyBusinessId(orderId);
-        workIntegral.setStatus(2);
+        workIntegral.setStatus(3);
         workIntegral.setWorkerId(member.getId());
         workIntegral.setBriefed(remark);
         //加/减积分流水
@@ -218,7 +222,7 @@ public class HomeShellOrderService {
         workIntegral.setIntegralType(type);
         workIntegralMapper.insert(workIntegral);
         //用户当家币修改
-        member.setShellMoney(member.getSurplusMoney().add(BigDecimal.valueOf(money)));
+        member.setShellMoney(member.getShellMoney().add(BigDecimal.valueOf(money)));
         member.setModifyDate(new Date());
         memberMapper.updateByPrimaryKeySelective(member);
     }
@@ -266,7 +270,7 @@ public class HomeShellOrderService {
         }
         //生成兑换订单
         HomeShellOrder homeShellOrder=new HomeShellOrder();
-        homeShellOrder.setNumber("DS"+System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+        homeShellOrder.setNumber("DS"+System.currentTimeMillis()+ (int) (Math.random() * 9000 + 1000));
         //扣减库存
         productSpec.setStockNum(MathUtil.sub(productSpec.getStockNum(),1));
         productSpec.setConvertedNumber(MathUtil.add(productSpec.getConvertedNumber(),1));
@@ -291,11 +295,6 @@ public class HomeShellOrderService {
             businessOrder.setType(11);//记录支付类型任务类型
             businessOrderMapper.insert(businessOrder);
             businessNum=businessOrder.getNumber();
-        }
-
-        homeShellOrder.setProductSpecId(productSpecId);
-        homeShellOrder.setProuctId(product.getId());
-        if(StringUtils.isBlank(businessNum)){
             homeShellOrder.setStatus(0);//待支付
             homeShellOrder.setMoney(productSpec.getMoney());
             homeShellOrder.setBusinessOrderNumber(businessNum);
@@ -303,6 +302,8 @@ public class HomeShellOrderService {
             homeShellOrder.setStatus(1);//待发货
             homeShellOrder.setMoney(0d);
         }
+        homeShellOrder.setProductSpecId(productSpecId);
+        homeShellOrder.setProuctId(product.getId());
         homeShellOrder.setExchangeClient(userRole);//1业主端，2工匠端
         homeShellOrder.setExchangeTime(new Date());
         homeShellOrder.setAddressId(addressId);
@@ -357,4 +358,205 @@ public class HomeShellOrderService {
         }
     }
 
+    /**
+     * 当家贝商城--当家贝明细
+     * @param userToken
+     * @return
+     */
+    public ServerResponse searchShellMoneyList(String userToken,PageDTO pageDTO){
+        try{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
+            List<WorkIntegralDTO> workIntegralList=workIntegralMapper.queryWorkerIntegerList(member.getId());
+            PageInfo pageInfo=new PageInfo(workIntegralList);
+            //查询所有汇总，收入支出的当家贝币
+            Map<String,Object> map=workIntegralMapper.getTotalShellMoney(member.getId());
+            if(map==null){
+                map =new HashMap<>();
+                map.put("incomeIntegral",0);
+                map.put("expendIntegral",0);
+            }
+            //查询用户的当家贝币
+            member=memberMapper.selectByPrimaryKey(member.getId());
+            map.put("shellMoney",member.getShellMoney());
+            map.put("workIntegralList",pageInfo);
+            return ServerResponse.createBySuccess("查询成功",map);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 当家贝商城--兑换详情
+     * @param userToken
+     * @param  shellOrderId 兑换记录ID
+     * @return
+     */
+    public ServerResponse searchConvertedProductInfo(String userToken,String shellOrderId){
+        try{
+            if(shellOrderId==null){
+                return ServerResponse.createByErrorMessage("兑换记录ID为空");
+            }
+            HomeShellOrder homeShellOrder=homeShellOrderMapper.selectByPrimaryKey(shellOrderId);
+            HomeShellOrderDTO homeShellOrderDTO=new HomeShellOrderDTO();
+            BeanUtils.beanToBean(homeShellOrder,homeShellOrderDTO);
+            homeShellOrderDTO.setShellOrderId(homeShellOrder.getId());
+            String productId=homeShellOrder.getProuctId();
+            HomeShellProduct homeShellProduct=homeShellProductMapper.selectByPrimaryKey(productId);
+            homeShellOrderDTO.setProductName(homeShellProduct.getName());
+            homeShellOrderDTO.setProductType(homeShellProduct.getProductType());
+            homeShellOrderDTO.setProductSn(homeShellProduct.getProductSn());
+            if(StringUtils.isNotBlank(homeShellProduct.getImage())){
+                String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                homeShellOrderDTO.setImageUrl(StringTool.getImage(homeShellProduct.getImage(),address));
+            }
+            MemberAddress memberAddress=memberAddressMapper.selectByPrimaryKey(homeShellOrder.getAddressId());
+            homeShellOrderDTO.setReveiveMemberName(memberAddress.getName());
+            homeShellOrderDTO.setReveiveMemberMobile(memberAddress.getMobile());
+            HomeShellProductSpec productSpec=homeShellProductSpecMapper.selectByPrimaryKey(homeShellOrder.getProductSpecId());
+            if(productSpec!=null){
+                homeShellOrderDTO.setProductSpecName(productSpec.getName());
+            }
+            //判断是否可退款
+            if(homeShellOrderDTO.getStatus()==1){
+                homeShellOrderDTO.setRefundButton(1);//显示取消按钮
+            }else if(homeShellOrderDTO.getStatus()==3){
+                homeShellOrderDTO.setRefundButton(2);//显示退款按钮
+            }else{
+                homeShellOrderDTO.setRefundButton(0);//不显示退款按钮
+            }
+            homeShellOrderDTO.setShowButton(0);//不显示
+            //判断前端按钮显示
+            if(homeShellOrderDTO.getStatus()==0){
+               homeShellOrderDTO.setShowButton(1);//去支付
+            }else if(homeShellOrder.getStatus()==2){
+                homeShellOrderDTO.setShowButton(2);//确认收货
+                //剩余处理时间（默认倒时计7天）
+            }else if(homeShellOrder.getStatus()==4){
+                //剩余处理时间（默认倒时计7天）
+            }
+            homeShellOrderDTO.setStatusName(getStatusName(homeShellOrderDTO.getStatus()));//订单状态名称
+            return ServerResponse.createBySuccess("查询成功",homeShellOrderDTO);
+        }catch(Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    private String getStatusName(Integer status){
+        String statusName="";
+        switch (status){
+            case 0 :
+                statusName="待付款";
+                break;
+            case 1:
+                statusName="待发货";
+                break;
+            case 2:
+                statusName="待收货";
+                break;
+            case 3:
+                statusName="兑换成功";
+                break;
+            case 4:
+                statusName="等待商家处理";
+                break;
+            case 5:
+            case 6:
+                statusName="兑换关闭";
+                break;
+            default:
+                break;
+        }
+        return statusName;
+    }
+
+
+    /**
+     * 当家贝商城--确认收货/撤销退款申请
+     * @param userToken
+     * @param shellOrderId 兑换记录ID
+     * @param type 类型：1确认收货，2撤销退款
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateConvertedProductInfo(String userToken,String shellOrderId,Integer type){
+        if(shellOrderId==null){
+            return ServerResponse.createByErrorMessage("兑换记录ID为空");
+        }
+        //修改对应的货单状态
+        HomeShellOrder homeShellOrder=homeShellOrderMapper.selectByPrimaryKey(shellOrderId);
+        if(type==1&&homeShellOrder.getStatus()!=2){
+            return ServerResponse.createBySuccess("订单不符合确认收货条件，不能确认收货");
+        }else if(type==2&&homeShellOrder.getStatus()!=4){
+            return ServerResponse.createBySuccess("订单不符合确撤销条件，不能撤销退款申请");
+        }
+        if(type==1){//确认收货
+            homeShellOrder.setStatus(3);
+            homeShellOrder.setReveiveTime(new Date());//收货时间
+            homeShellOrder.setModifyDate(new Date());
+            homeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder);
+        }else if(type==2){//撤销申请
+            homeShellOrder.setStatus(3);
+            homeShellOrder.setCancelApplicationTime(new Date());//撤销退款申请
+            homeShellOrder.setModifyDate(new Date());
+            homeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder);
+        }
+        return ServerResponse.createBySuccessMessage("提交成功");
+    }
+
+    /**
+     * 当家贝商城--取消订单/申请退款
+     * @param userToken
+     * @param shellOrderId 兑换记录ID
+     * @param image 相关凭证
+     * @param type 申请类型：1取消订单，2申请退款
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse refundConvertedProductInfo(String userToken,String shellOrderId,String image,Integer type){
+        if(shellOrderId==null){
+            return ServerResponse.createByErrorMessage("兑换记录ID为空");
+        }
+        //修改对应的货单状态
+        HomeShellOrder homeShellOrder=homeShellOrderMapper.selectByPrimaryKey(shellOrderId);
+        if(type==2&&homeShellOrder.getStatus()!=3){
+            return ServerResponse.createBySuccess("订单不符合退款条件，不能申请退款");
+        }else if(type==1&&homeShellOrder.getStatus()!=1){
+            return ServerResponse.createBySuccess("订单不符合取消条件，不能申请取消");
+        }
+        if(type==1){//取消订单
+            homeShellOrder.setStatus(6);
+            homeShellOrder.setCancelApplicationTime(new Date());//申请取消时间
+            homeShellOrder.setImage(image);
+            homeShellOrder.setModifyDate(new Date());
+            homeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder) ;
+            //退还当家贝币和金钱
+            //还原贝币
+            HomeShellProductSpec shellProductSpec=homeShellProductSpecMapper.selectByPrimaryKey(homeShellOrder.getProductSpecId());
+            shellProductSpec.setStockNum(shellProductSpec.getStockNum()+1);
+            homeShellProductSpecMapper.updateByPrimaryKey(shellProductSpec);
+            HomeShellProduct homeShellProduct=homeShellProductMapper.selectByPrimaryKey(homeShellOrder.getProuctId());
+            Member member=memberMapper.selectByPrimaryKey(homeShellOrder.getMemberId());
+            //还原对应的金额及贝币给到用户或工匠
+            if(homeShellOrder.getMoney()!=null&&homeShellOrder.getMoney()>0){
+                //退钱给业主
+                settleMemberMoney(member,homeShellOrder.getId(),homeShellOrder.getMoney());
+            }else if(homeShellOrder.getIntegral()!=null&&homeShellOrder.getIntegral()>0){
+                settleIntegral(member,homeShellOrder.getId(),homeShellProduct.getName(),homeShellOrder.getIntegral(),2);
+            }
+        }else if(type==2){//申请退款
+            homeShellOrder.setStatus(4);
+            homeShellOrder.setReturnApplicationTime(new Date());//申请退款时间
+            homeShellOrder.setImage(image);
+            homeShellOrder.setModifyDate(new Date());
+            homeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder) ;
+        }
+
+        return ServerResponse.createBySuccessMessage("申请成功");
+    }
 }

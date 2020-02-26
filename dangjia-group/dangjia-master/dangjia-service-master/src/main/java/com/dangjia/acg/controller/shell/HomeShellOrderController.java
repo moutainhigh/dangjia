@@ -6,6 +6,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.shell.HomeShellOrderService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,65 @@ public class HomeShellOrderController implements HomeShellOrderAPI {
     @ApiMethod
     public ServerResponse searchShellProductInfo(String userToken,PageDTO pageDTO){
         return homeShellOrderService.searchShellProductInfo(userToken,pageDTO);
+    }
+    /**
+     * 当家贝商城--当家贝明细
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchShellMoneyList(String userToken,PageDTO pageDTO){
+        return homeShellOrderService.searchShellMoneyList(userToken,pageDTO);
+    }
+
+    /**
+     * 当家贝商城--兑换详情
+     * @param userToken
+     * @param  shellOrderId 兑换记录ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchConvertedProductInfo(String userToken,String shellOrderId){
+        return homeShellOrderService.searchConvertedProductInfo(userToken,shellOrderId);
+    }
+
+    /**
+     * 当家贝商城--确认收货/撤销退款
+     * @param userToken
+     * @param shellOrderId 兑换记录ID
+     * @param type 类型：1确认收货，2撤销退款
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse updateConvertedProductInfo(String userToken,String shellOrderId,Integer type){
+        try{
+            return homeShellOrderService.updateConvertedProductInfo(userToken,shellOrderId,type);
+        }catch(Exception e){
+            logger.error("确认收货失败",e);
+            return ServerResponse.createByErrorMessage("确认收货失败");
+        }
+    }
+
+    /**
+     * 当家贝商城--取消订单/申请退款
+     * @param userToken
+     * @param shellOrderId 兑换记录ID
+     * @param image 相关凭证
+     * @param type 申请类型：1取消订单，2申请退款
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse refundConvertedProductInfo(String userToken,String shellOrderId,String image,Integer type){
+        try{
+            return homeShellOrderService.refundConvertedProductInfo(userToken,shellOrderId,image,type);
+        }catch(Exception e){
+            logger.error("申请退款失败",e);
+            return ServerResponse.createByErrorMessage("申请退款失败");
+        }
     }
 
 }

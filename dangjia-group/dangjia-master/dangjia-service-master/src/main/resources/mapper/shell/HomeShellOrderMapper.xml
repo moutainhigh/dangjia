@@ -31,7 +31,6 @@
          WHERE t.data_status=0
          and t.product_id = p.id
          and t.product_spec_id=s.id
-         and t.status in(1,2,3,4,5)
          <if test="exchangeClient!=null and exchangeClient!=-1">
              and t.exchange_client=#{exchangeClient}
          </if>
