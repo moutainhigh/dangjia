@@ -140,4 +140,8 @@ public interface DjStoreActivityAPI {
     @ApiOperation(value = "限时购(更多)", notes = "限时购(更多)")
     ServerResponse queryBuyMoreLimitedTime(@RequestParam("id") String id);
 
+    @PostMapping("app/activity/setwithdraw")
+    @ApiOperation(value = "撤回", notes = "撤回")
+    ServerResponse setwithdraw(@RequestParam("storeParticipateActivitiesId") String storeParticipateActivitiesId);
+
 }

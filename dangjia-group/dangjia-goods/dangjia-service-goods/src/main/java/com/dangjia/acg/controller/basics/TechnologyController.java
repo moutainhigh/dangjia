@@ -128,4 +128,10 @@ public class TechnologyController implements TechnologyAPI {
     public ServerResponse queryTechnologyWorkerType(HttpServletRequest request) {
         return technologyService.queryTechnologyWorkerType();
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryTechnologDetail(String id) {
+        return technologyService.queryTechnologDetail(id);
+    }
 }

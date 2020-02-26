@@ -169,4 +169,10 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
     public ServerResponse queryBuyMoreLimitedTime(String id) {
         return djStoreActivityService.queryBuyMoreLimitedTime(id);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setwithdraw(String storeParticipateActivitiesId) {
+        return djStoreActivityService.setwithdraw(storeParticipateActivitiesId);
+    }
 }

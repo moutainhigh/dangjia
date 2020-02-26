@@ -113,7 +113,7 @@
                 id = #{storeActivityId}
             )
           <if test="null!=id1 and ''!=id1">
-              end_session &lt; (
+              OR end_session &lt; (
                   SELECT
                   session_start_time
                   FROM
