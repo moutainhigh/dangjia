@@ -271,12 +271,8 @@ public class PayService {
     /* POS支付 */
     public ServerResponse getPOSSign(String businessOrderNumber) {
        try {
-           try {
-               //检测订单有效性
-               checkOrder(businessOrderNumber);
-           } catch (Exception e) {
-               return ServerResponse.createByErrorMessage(e.getMessage());
-           }
+           //检测订单有效性
+           checkOrder(businessOrderNumber);
            //生成支付流水
            PayOrder payOrder = payOrderMapper.getByNumber(businessOrderNumber);
            if (payOrder == null) {
