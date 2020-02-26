@@ -21,12 +21,16 @@
              t.money,
              t.image,
              p. NAME productName,
-             p.product_type productType
+             p.product_type productType,
+             s.id productSpecId,
+             s.name productSpecName
          FROM
              dj_home_shell_order t,
-             dj_home_shell_product p
+             dj_home_shell_product p,
+             dj_home_shell_product_spec s
          WHERE t.data_status=0
          and t.product_id = p.id
+         and t.product_spec_id=s.id
          and t.status in(1,2,3,4,5)
          <if test="exchangeClient!=null and exchangeClient!=-1">
              and t.exchange_client=#{exchangeClient}
