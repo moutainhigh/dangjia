@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.config;
 
-import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -9,6 +8,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.nimserver.apply.NimMessageService;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.IConfigMessageMapper;
 import com.dangjia.acg.modle.config.ConfigMessage;
@@ -38,8 +38,6 @@ public class ConfigMessageService {
     private ConfigUtil configUtil;
     @Autowired
     private IConfigMessageMapper configMessageMapper;
-    @Autowired
-    private MessageAPI messageAPI;
     @Autowired
     private CraftsmanConstructionService constructionService;
 
@@ -241,10 +239,10 @@ public class ConfigMessageService {
                         }
                     }
                     if (!CommonUtil.isEmpty(configMessage.getTargetUid()) && configMessage.getTargetType().equals("0")) {
-                        messageAPI.sendMemberIdPush(appType.getDesc(), new String[]{configMessage.getTargetUid()}, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
+                        NimMessageService.sendMemberIdPush(appType.getDesc(), new String[]{configMessage.getTargetUid()}, configMessage.getText(), configMessage.getSpeak());
                     }
                     if (configMessage.getTargetType().equals("1")) {
-                        messageAPI.sendSysPush(appType.getDesc(), configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
+                        NimMessageService.sendSysPush(appType.getDesc(),  configMessage.getText());
                     }
                 }).start();
             }

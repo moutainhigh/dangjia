@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.house;
 
-import com.dangjia.acg.api.MessageAPI;
-import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -9,8 +7,10 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.nimserver.NIMPost;
+import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
@@ -18,7 +18,6 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
@@ -72,12 +71,6 @@ public class MyHouseService {
 
     @Autowired
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
-    @Autowired
-    private UserAPI userAPI;
-    @Autowired
-    private ICustomerMapper iCustomerMapper;
-    @Autowired
-    private MessageAPI messageAPI;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -221,7 +214,7 @@ public class MyHouseService {
                 map.put("memberType", 1);
                 map.put("id", member1.getId());
                 map.put("targetId", member1.getId());
-                map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+                map.put("targetAppKey", NIMPost.APPKEY);
                 map.put("nickName", member1.getNickName());
                 map.put("name", member1.getName());
                 map.put("mobile", member1.getMobile());
@@ -260,10 +253,10 @@ public class MyHouseService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", user.getId());
                 map.put("targetId", user.getId());
-                map.put("targetAppKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
-                UserInfoResultDTO userInfoResult = userAPI.getUserInfo(AppType.SALE.getDesc(), userid);
-                if (userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
-                    map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
+                map.put("targetAppKey", NIMPost.APPKEY);
+                List<NimUserInfo> userInfoResult = NimUserService.getUserInfo(AppType.SALE.getDesc(), userid);
+                if (userInfoResult != null &&userInfoResult.size()>0&& !CommonUtil.isEmpty(userInfoResult.get(0).getName())) {
+                    map.put("nickName", "装修顾问 " + userInfoResult.get(0).getName());
                 } else {
                     map.put("nickName", "装修顾问 小" + user.getUsername().substring(0, 1));
                 }

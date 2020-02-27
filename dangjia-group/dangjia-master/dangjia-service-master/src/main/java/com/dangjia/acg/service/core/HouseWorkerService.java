@@ -3,7 +3,6 @@ package com.dangjia.acg.service.core;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -16,6 +15,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.nimserver.NIMPost;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.complain.ComplainInfoDTO;
 import com.dangjia.acg.dto.house.HouseChatDTO;
@@ -88,8 +88,6 @@ public class HouseWorkerService {
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IModelingVillageMapper modelingVillageMapper;//小区
     @Autowired
     private IHouseMapper houseMapper;
@@ -116,8 +114,6 @@ public class HouseWorkerService {
     @Autowired
     private HouseFlowService houseFlowService;
     @Autowired
-    private ForMasterAPI forMasterAPI;
-    @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
     private HouseFlowApplyService houseFlowApplyService;
@@ -127,8 +123,6 @@ public class HouseWorkerService {
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
-    @Autowired
-    private MessageAPI messageAPI;
     @Value("${spring.profiles.active}")
     private String active;
     @Autowired
@@ -256,7 +250,7 @@ public class HouseWorkerService {
             Map<String, Object> map = new HashMap<>();
             map.put("id", member1.getId());
             map.put("targetId", member1.getId());
-            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            map.put("targetAppKey", NIMPost.APPKEY);
             map.put("nickName", member1.getNickName());
             map.put("name", member1.getName());
             map.put("mobile", member1.getMobile());
@@ -298,7 +292,7 @@ public class HouseWorkerService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", member1.getId());
                 map.put("targetId", member1.getId());
-                map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+                map.put("targetAppKey", NIMPost.APPKEY);
                 map.put("nickName", member1.getNickName());
                 map.put("name", member1.getName());
                 map.put("mobile", member1.getMobile());
@@ -350,7 +344,7 @@ public class HouseWorkerService {
             Map<String, Object> map = new HashMap<>();
             map.put("id", member1.getId());
             map.put("targetId", member1.getId());
-            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            map.put("targetAppKey", NIMPost.APPKEY);
             map.put("nickName", member1.getNickName());
             map.put("name", member1.getName());
             map.put("mobile", member1.getMobile());
@@ -540,7 +534,7 @@ public class HouseWorkerService {
                 String text = "业主您好,我是体验师" +  worker.getName() + "，已成功抢单";
                 HouseChatDTO h = new HouseChatDTO();
                 h.setTargetId(order.getMemberId());
-                h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+                h.setTargetAppKey(NIMPost.APPKEY);
                 h.setText(text);
                 return ServerResponse.createBySuccess("抢单成功", h);
             }else if(type==2){
@@ -578,7 +572,7 @@ public class HouseWorkerService {
                 String text = "业主您好,我是"+ workerTypeMapper.getName(worker.getWorkerType())+"维保" +  worker.getName() + "，已成功抢单";
                 HouseChatDTO h = new HouseChatDTO();
                 h.setTargetId(record.getMemberId());
-                h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+                h.setTargetAppKey(NIMPost.APPKEY);
                 h.setText(text);
                 return ServerResponse.createBySuccess("抢单成功");
             }else {
@@ -684,7 +678,7 @@ public class HouseWorkerService {
                 String text = "业主您好,我是" + workerType.get(0).getName() + worker.getName() + "，已成功抢单";
                 HouseChatDTO h = new HouseChatDTO();
                 h.setTargetId(house.getMemberId());
-                h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+                h.setTargetAppKey(NIMPost.APPKEY);
                 h.setText(text);
                 return ServerResponse.createBySuccess("抢单成功", h);
             }

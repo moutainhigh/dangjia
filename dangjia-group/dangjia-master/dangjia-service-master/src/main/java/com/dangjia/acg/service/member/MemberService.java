@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.member;
 
 import com.dangjia.acg.api.BasicsStorefrontAPI;
-import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -11,6 +10,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.*;
+import com.dangjia.acg.common.util.nimserver.NIMPost;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
@@ -141,8 +141,6 @@ public class MemberService {
      */
     @Autowired
     private RedisClient redisClient;
-    @Autowired
-    private MessageAPI messageAPI;
     @Autowired
     private IStoreMapper iStoreMapper;
     @Autowired
@@ -1191,7 +1189,7 @@ public class MemberService {
             map.put("name", member.getNickName());
             map.put("mobile", member.getMobile());
             map.put("head", member.getHead());
-            map.put("appKey", messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+            map.put("appKey", NIMPost.APPKEY);
             datas.add(map);
         }
         example = new Example(MemberInfo.class);
@@ -1212,7 +1210,7 @@ public class MemberService {
                     map.put("workerName", wt.getName());
                 }
             }
-            map.put("appKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            map.put("appKey", NIMPost.APPKEY);
             datas.add(map);
         }
         MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
@@ -1226,7 +1224,7 @@ public class MemberService {
                 map.put("name", member.getNickName());
                 map.put("mobile", member.getMobile());
                 map.put("head", member.getHead());
-                map.put("appKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
+                map.put("appKey", NIMPost.APPKEY);
                 datas.add(map);
             }
         }

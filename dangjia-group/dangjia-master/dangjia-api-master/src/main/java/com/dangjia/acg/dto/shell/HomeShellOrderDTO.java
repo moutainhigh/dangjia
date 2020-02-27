@@ -1,16 +1,9 @@
 package com.dangjia.acg.dto.shell;
 
-import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.modle.GoodsBaseEntity;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.experimental.FieldNameConstants;
 
-import javax.jnlp.IntegrationService;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 

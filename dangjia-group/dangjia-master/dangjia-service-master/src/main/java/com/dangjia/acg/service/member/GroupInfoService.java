@@ -1,9 +1,8 @@
 package com.dangjia.acg.service.member;
 
+import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.CrossAppAPI;
 import com.dangjia.acg.api.GroupAPI;
-import com.dangjia.acg.api.MessageAPI;
-import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -11,6 +10,10 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.nimserver.NIMPost;
+import com.dangjia.acg.common.util.nimserver.apply.NimMessageService;
+import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.CreateGroupResultDTO;
 import com.dangjia.acg.dto.UserInfoResultDTO;
@@ -38,10 +41,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -81,11 +81,7 @@ public class GroupInfoService {
     @Autowired
     private GroupAPI groupAPI;
     @Autowired
-    private UserAPI userAPI;
-    @Autowired
     private CrossAppAPI crossAppAPI;
-    @Autowired
-    private MessageAPI messageAPI;
 
 
     /**
@@ -134,7 +130,7 @@ public class GroupInfoService {
      */
     public ServerResponse sendGroupsNotify(HttpServletRequest request, GroupNotifyInfo groupNotifyInfo) {
         groupNotifyInfo.setUserId(ADMIN_NAME);
-        messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupNotifyInfo.getGroupId(), ADMIN_NAME, groupNotifyInfo.getText());
+        NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupNotifyInfo.getGroupId(), ADMIN_NAME, groupNotifyInfo.getText());
         groupNotifyInfoMapper.insert(groupNotifyInfo);
         return ServerResponse.createBySuccessMessage("ok");
     }
@@ -176,7 +172,7 @@ public class GroupInfoService {
                     text = GONGJIANG.replaceAll("WORKERNAME", workerType.getName());
                 }
                 if (!CommonUtil.isEmpty(text)) {
-                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
+                    NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
                 }
             }
         }
@@ -220,7 +216,7 @@ public class GroupInfoService {
                     text = GONGJIANG.replaceAll("WORKERNAME", workerType.getName());
                 }
                 if (!CommonUtil.isEmpty(text)) {
-                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
+                    NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
                 }
             }
         }
@@ -264,7 +260,7 @@ public class GroupInfoService {
                     String nickname = getUserName(userid);
                     //给业主发送默认提示语
                     String text = KEFU.replaceAll("NAME", nickname);
-                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), group.getGroupId(), userid, text);
+                    NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), group.getGroupId(), userid, text);
                 }
         }
         if (this.groupMapper.insertSelective(group) > 0) {
@@ -287,10 +283,12 @@ public class GroupInfoService {
     }
 
     public void registerJGUsers(String appType, String[] username, String[] prefixs) {
+        List<NimUserInfo> userInfos = NimUserService.getUserInfo(appType, Arrays.toString(username));
         if (username != null && username.length > 0) {
-            for (int i = 0; i < username.length; i++) {
-                UserInfoResultDTO userInfoResult = userAPI.getUserInfo(appType, username[i]);
-                if (userInfoResult == null || CommonUtil.isEmpty(userInfoResult.getUsername())) {
+            for (int i = 0; i < userInfos.size(); i++) {
+                NimUserInfo userInfoResult =userInfos.get(i);
+                boolean result  = Arrays.asList(username).contains(userInfoResult.getAccid());
+                if (result) {
                     String nickname;
                     String phone;
                     String avatar;
@@ -337,9 +335,14 @@ public class GroupInfoService {
                     if (!CommonUtil.isEmpty(prefix)) {
                         nickname = prefix + "-" + nickname;
                     }
-                    userAPI.registerUsers(appType, new String[]{username[i]}, new String[]{username[i]});
-                    userAPI.updateUserInfo(appType, username[i], nickname, null, signature, 0,
-                            phone, null, avatar);
+                    NimUserInfo userInfo=new NimUserInfo();
+                    userInfo.setAccid(username[i]);
+                    userInfo.setName(nickname);
+                    userInfo.setIcon(avatar);
+                    userInfo.setSign(signature);
+                    userInfo.setMobile(phone);
+                    userInfo.setEx(prefix);
+                    NimUserService.registerUsers(appType,  userInfo);
                 }
             }
         }
@@ -356,7 +359,7 @@ public class GroupInfoService {
         if (user!=null) {
             Map map = new HashMap();
             map.put("targetId", user.getId());
-            map.put("targetAppKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
+            map.put("targetAppKey", NIMPost.APPKEY);
             String text = null;
             if (type == 1) {
                 text = "业主您好！我是您的售前客服！";
