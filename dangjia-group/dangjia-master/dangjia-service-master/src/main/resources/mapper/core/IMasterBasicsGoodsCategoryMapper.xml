@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.core.IMasterBasicsGoodsCategoryMapper">
+
+    <select id="queryHouseWarehouseGoodsCategory"
+            resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+            b.id,
+            b.name
+        FROM
+            dj_house_warehouse a,
+            dj_basics_goods_category b
+        WHERE
+            a.category_id = b.id
+        AND a.house_id=#{houseId}
+        AND b.is_last_category = 1
+        GROUP BY
+            a.category_id
+    </select>
+</mapper>

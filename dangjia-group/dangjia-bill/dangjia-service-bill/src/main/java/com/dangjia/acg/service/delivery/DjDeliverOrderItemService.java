@@ -85,7 +85,7 @@ public class DjDeliverOrderItemService {
             Order order = iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
             PaymentToBeMadeDTO paymentToBeMadeDTO=new PaymentToBeMadeDTO();
             paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
-            paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost()!=null?order.getTotalStevedorageCost():new BigDecimal(0));
             paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice()!=null?order.getTotalDiscountPrice():new BigDecimal(0));
             paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice()!=null?order.getActualPaymentPrice():new BigDecimal(0));
             paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount()!=null?order.getTotalAmount():new BigDecimal(0));

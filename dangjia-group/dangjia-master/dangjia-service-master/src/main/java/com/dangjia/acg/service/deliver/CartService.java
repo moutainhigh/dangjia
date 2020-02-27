@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.deliver;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.product.BasicsGoodsCategoryAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
@@ -16,7 +14,6 @@ import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
 import com.dangjia.acg.mapper.core.IMasterBasicsGoodsCategoryMapper;
 import com.dangjia.acg.mapper.core.IMasterBasicsGoodsMapper;
-import com.dangjia.acg.mapper.core.IMasterBrandMapper;
 import com.dangjia.acg.mapper.delivery.ICartMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -24,7 +21,7 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
-import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
@@ -406,46 +403,68 @@ public class CartService {
             }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
            // PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
+            List<BasicsGoodsCategory> basicsGoodsCategories;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjBasicsProductTemplateDTO> djBasicsProductTemplateDTOS = iMasterProductTemplateMapper.queryProductData(houseId,name, categoryId, productType);
-            if(djBasicsProductTemplateDTOS.size()<=0){
+            if(StringUtils.isNotBlank(categoryId)){
+                Example example=new Example(BasicsGoodsCategory.class);
+                example.createCriteria().andEqualTo(BasicsGoodsCategory.IS_LAST_CATEGORY,1)
+                        .andEqualTo(BasicsGoodsCategory.PARENT_TOP,categoryId);
+                basicsGoodsCategories =
+                        iMasterBasicsGoodsCategoryMapper.selectByExample(example);
+            }else {
+                basicsGoodsCategories =
+                        iMasterBasicsGoodsCategoryMapper.queryHouseWarehouseGoodsCategory(houseId);
+            }
+            List<Map> list=new ArrayList<>();
+            for (BasicsGoodsCategory basicsGoodsCategory : basicsGoodsCategories) {
+                List<DjBasicsProductTemplateDTO> djBasicsProductTemplateDTOS = iMasterProductTemplateMapper.queryProductData(houseId,name, basicsGoodsCategory.getId(), productType);
+                List<WarehouseDTO> warehouseDTOS=new ArrayList<>();
+                for (DjBasicsProductTemplateDTO djBasicsProductTemplateDTO : djBasicsProductTemplateDTOS) {
+                    WarehouseDTO warehouseDTO = new WarehouseDTO();
+                    warehouseDTO.setProductId(djBasicsProductTemplateDTO.getStorefrontProductId());
+                    warehouseDTO.setMaket(1);
+                    if ((djBasicsProductTemplateDTO.getMaket()!=null&&"0".equals(djBasicsProductTemplateDTO.getMaket()))
+                            ||(djBasicsProductTemplateDTO.getType()!=null&& "0".equals(djBasicsProductTemplateDTO.getType()))) {
+                        warehouseDTO.setMaket(0);
+                    }
+                    warehouseDTO.setPrice(Double.parseDouble(String.valueOf(djBasicsProductTemplateDTO.getPrice())));
+                    warehouseDTO.setProductType(Integer.parseInt(productType));
+                    warehouseDTO.setImage(address + djBasicsProductTemplateDTO.getImage());
+                    BasicsGoods basicsGoods = iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplateDTO.getGoodsId());
+                    if (basicsGoods != null) {
+                        warehouseDTO.setSales(basicsGoods.getSales());
+                    }
+                    warehouseDTO.setUnitName(djBasicsProductTemplateDTO.getUnitName());
+                    warehouseDTO.setImage(address + djBasicsProductTemplateDTO.getImage());
+                    warehouseDTO.setImageUrl(address+ djBasicsProductTemplateDTO.getImage());
+                    warehouseDTO.setShopCount(djBasicsProductTemplateDTO.getShopCount());
+                    warehouseDTO.setAskCount(djBasicsProductTemplateDTO.getAskCount());
+                    warehouseDTO.setBackCount((djBasicsProductTemplateDTO.getWorkBack() == null ? 0D : djBasicsProductTemplateDTO.getWorkBack()));
+                    warehouseDTO.setRealCount(djBasicsProductTemplateDTO.getShopCount() - djBasicsProductTemplateDTO.getBackCount());
+                    warehouseDTO.setSurCount(djBasicsProductTemplateDTO.getShopCount() - (djBasicsProductTemplateDTO.getOwnerBack() == null ? 0D : djBasicsProductTemplateDTO.getOwnerBack()) - djBasicsProductTemplateDTO.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
+                    warehouseDTO.setPrice(djBasicsProductTemplateDTO.getPrice());
+                    warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * djBasicsProductTemplateDTO.getPrice());
+                    warehouseDTO.setReceive(djBasicsProductTemplateDTO.getReceive() - (djBasicsProductTemplateDTO.getWorkBack() == null ? 0D : djBasicsProductTemplateDTO.getWorkBack()));
+                    warehouseDTO.setAskTime(djBasicsProductTemplateDTO.getAskTime());
+                    warehouseDTO.setRepTime(djBasicsProductTemplateDTO.getRepTime());
+                    warehouseDTO.setBackTime(djBasicsProductTemplateDTO.getBackTime());
+                    warehouseDTO.setStorefrontId(djBasicsProductTemplateDTO.getStorefrontId());
+                    warehouseDTO.setProductName(djBasicsProductTemplateDTO.getProductName());
+                    warehouseDTO.setProductSn(djBasicsProductTemplateDTO.getProductSn());
+                    warehouseDTOS.add(warehouseDTO);
+                }
+                if(warehouseDTOS.size()>0){
+                    Map map=new HashMap();
+                    map.put("categoryId",basicsGoodsCategory.getId());
+                    map.put("name",basicsGoodsCategory.getName());
+                    map.put("warehouseDTOS",warehouseDTOS);
+                    list.add(map);
+                }
+            }
+            if(list.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
             }
-            List<WarehouseDTO> warehouseDTOS=new ArrayList<>();
-            for (DjBasicsProductTemplateDTO djBasicsProductTemplateDTO : djBasicsProductTemplateDTOS) {
-                WarehouseDTO warehouseDTO = new WarehouseDTO();
-                warehouseDTO.setProductId(djBasicsProductTemplateDTO.getStorefrontProductId());
-                warehouseDTO.setMaket(1);
-                if ((djBasicsProductTemplateDTO.getMaket()!=null&&"0".equals(djBasicsProductTemplateDTO.getMaket()))
-                        ||(djBasicsProductTemplateDTO.getType()!=null&& "0".equals(djBasicsProductTemplateDTO.getType()))) {
-                    warehouseDTO.setMaket(0);
-                }
-                warehouseDTO.setPrice(Double.parseDouble(String.valueOf(djBasicsProductTemplateDTO.getPrice())));
-                warehouseDTO.setProductType(Integer.parseInt(productType));
-                warehouseDTO.setImage(address + djBasicsProductTemplateDTO.getImage());
-                BasicsGoods basicsGoods = iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplateDTO.getGoodsId());
-                if (basicsGoods != null) {
-                    warehouseDTO.setSales(basicsGoods.getSales());
-                }
-                warehouseDTO.setUnitName(djBasicsProductTemplateDTO.getUnitName());
-                warehouseDTO.setImage(address + djBasicsProductTemplateDTO.getImage());
-                warehouseDTO.setShopCount(djBasicsProductTemplateDTO.getShopCount());
-                warehouseDTO.setAskCount(djBasicsProductTemplateDTO.getAskCount());
-                warehouseDTO.setBackCount((djBasicsProductTemplateDTO.getWorkBack() == null ? 0D : djBasicsProductTemplateDTO.getWorkBack()));
-                warehouseDTO.setRealCount(djBasicsProductTemplateDTO.getShopCount() - djBasicsProductTemplateDTO.getBackCount());
-                warehouseDTO.setSurCount(djBasicsProductTemplateDTO.getShopCount() - (djBasicsProductTemplateDTO.getOwnerBack() == null ? 0D : djBasicsProductTemplateDTO.getOwnerBack()) - djBasicsProductTemplateDTO.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
-                warehouseDTO.setPrice(djBasicsProductTemplateDTO.getPrice());
-                warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * djBasicsProductTemplateDTO.getPrice());
-                warehouseDTO.setReceive(djBasicsProductTemplateDTO.getReceive() - (djBasicsProductTemplateDTO.getWorkBack() == null ? 0D : djBasicsProductTemplateDTO.getWorkBack()));
-                warehouseDTO.setAskTime(djBasicsProductTemplateDTO.getAskTime());
-                warehouseDTO.setRepTime(djBasicsProductTemplateDTO.getRepTime());
-                warehouseDTO.setBackTime(djBasicsProductTemplateDTO.getBackTime());
-                warehouseDTO.setStorefrontId(djBasicsProductTemplateDTO.getStorefrontId());
-                warehouseDTO.setProductName(djBasicsProductTemplateDTO.getProductName());
-                warehouseDTO.setProductSn(djBasicsProductTemplateDTO.getProductSn());
-                warehouseDTOS.add(warehouseDTO);
-            }
-            PageInfo pageResult=new PageInfo(warehouseDTOS);
+            PageInfo pageResult=new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

@@ -2,6 +2,7 @@ package com.dangjia.acg.service.label;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.label.ChildChildTags;
@@ -169,10 +170,12 @@ public class OptionalLabelServices {
                 childChildTags.setTagName(optionalLabel2.getLabelName());
                 childChildTags.setParentId(optionalLabel2.getParentId());
                 childChildTags.setStatus("1");
-                for (String optionalLabelId : optionalLabelIds) {
-                    if(optionalLabelId.equals(optionalLabel2.getId())){
-                        childChildTags.setStatus("0");
-                        break;
+                if(optionalLabelIds!=null) {
+                    for (String optionalLabelId : optionalLabelIds) {
+                        if (optionalLabelId.equals(optionalLabel2.getId())) {
+                            childChildTags.setStatus("0");
+                            break;
+                        }
                     }
                 }
                 childChildTagsList.add(childChildTags);
@@ -282,6 +285,32 @@ public class OptionalLabelServices {
                 optionalLabelMapper.updateByPrimaryKeySelective(oldOptionalLabel);
             }
             return id;
+        }
+    }
+
+
+    /**
+     * 精算选配标签
+     * @return
+     */
+    public ServerResponse queryActuarialOptionalLabel() {
+        try {
+            Example example=new Example(OptionalLabel.class);
+            example.createCriteria().andEqualTo(OptionalLabel.DATA_STATUS,0)
+                    .andIsNull(OptionalLabel.PARENT_ID);
+            List<OptionalLabel> optionalLabels = optionalLabelMapper.selectByExample(example);
+            List<OptionalLaelDetail> optionalLaelDetailList = new ArrayList<>();
+            for (OptionalLabel label : optionalLabels) {
+                OptionalLaelDetail optionalLaelDetail =
+                        this.queryOptionalLabelById1(label.getId(),null);
+                optionalLaelDetailList.add(optionalLaelDetail);
+            }
+            if(optionalLaelDetailList.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功",optionalLaelDetailList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 }

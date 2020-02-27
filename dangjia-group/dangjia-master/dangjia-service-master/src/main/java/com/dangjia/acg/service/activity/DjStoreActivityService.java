@@ -220,7 +220,7 @@ public class DjStoreActivityService {
                     djStoreActivity.getEndTimeRegistration().after(djStoreActivity.getEndTime())){
                 throw new Exception("请正确填写报名时间和活动时间");
             }
-            if(!djStoreActivity1.equals(djStoreActivity.getActivityStartTime())&&!djStoreActivity1.getEndTime().equals(djStoreActivity.getEndTime())){
+            if(!djStoreActivity1.getActivityStartTime().equals(djStoreActivity.getActivityStartTime())&&!djStoreActivity1.getEndTime().equals(djStoreActivity.getEndTime())){
                 Example example=new Example(DjActivitySession.class);
                 example.createCriteria().andEqualTo(DjActivitySession.STORE_ACTIVITY_ID,djStoreActivity.getId());
                 djActivitySessionMapper.deleteByExample(example);
