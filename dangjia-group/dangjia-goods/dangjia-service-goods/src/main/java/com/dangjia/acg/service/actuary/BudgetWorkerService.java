@@ -466,6 +466,7 @@ public class BudgetWorkerService {
                             budgetMaterial.setPrice(pro.getSellPrice());
                             budgetMaterial.setImage(pro.getImage());
                             budgetMaterial.setShopCount(shopCount);
+                            budgetMaterial.setTotalPrice(pro.getSellPrice()*shopCount);
                             budgetMaterial.setUnitName(pro.getUnitName());
                             budgetMaterial.setHousekeeperAcceptance(0);
                         } else {
@@ -477,6 +478,7 @@ public class BudgetWorkerService {
                             budgetMaterial.setCost(0.0);
                             budgetMaterial.setImage("");//货品图片
                             budgetMaterial.setShopCount(shopCount);
+                            budgetMaterial.setTotalPrice(goods.getIndicativePrice()*shopCount);
                             budgetMaterial.setTotalPrice(0.0);
                             budgetMaterial.setStorefontId("");
                             budgetMaterial.setHousekeeperAcceptance(0);
@@ -495,6 +497,7 @@ public class BudgetWorkerService {
                         budgetMaterial.setGroupType(groupType);
                         budgetMaterial.setGoodsGroupId(goodsGroupId);
                         budgetMaterial.setCityId(cityId);
+                        budgetMaterial.setIsBudgetData(1);//精算师精算数据
                         //budgetMaterial.setTemplateId(actuarialTemplateId);
                         iBudgetMaterialMapper.insert(budgetMaterial);
                     } catch (Exception e) {

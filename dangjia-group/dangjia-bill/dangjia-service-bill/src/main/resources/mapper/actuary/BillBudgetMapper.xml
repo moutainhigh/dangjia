@@ -11,26 +11,18 @@
                SELECT
                     bm.id,
                     bm.product_id,
-                    pt.category_id,
+                    bm.category_id,
                     bm.price,
                     bm.shop_count,
-                    bm.total_price
+                    bm.price*bm.shop_count total_price
                 FROM
-                    dj_actuary_budget_material bm,
-                    dj_basics_storefront_product sp,
-                    dj_basics_product_template pt,
-                    dj_pay_business_order t,
-                    dj_deliver_order t1
+                    dj_actuary_budget_material bm
                 WHERE
-                    t.house_id = #{houseId}
-                and bm.product_id=sp.id
-                and sp.prod_template_id=pt.id
-                AND bm.house_id = t.house_id
-                AND t.number = t1.business_order_number
-                AND t.state = 3
+                    bm.house_id = #{houseId}
+               and is_budget_data=1
              <if test = "searchTypeId!=null and searchTypeId!=''">
                  and (bm.worker_type_id = #{searchTypeId}
-                 and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
+                 and bm.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
              </if>
              <if test = "steta!=null and steta!=''">
                  and bm.steta = #{steta}
@@ -45,38 +37,25 @@
     <!--按工序查询订单-->
     <select id="selectBudgetWorkerInfoList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
 
-            SELECT
+           SELECT
                 wt.id id,
-                wt.`name` name,
+                wt.`name` NAME,
                 sum(tt.total_price) totalPrice
             FROM
                 (
-                     SELECT
-                            bm.id,
-                            bm.product_id,
-                            pt.category_id,
-                            bm.worker_type_id,
-                            bm.price,
-                            bm.shop_count,
-                            bm.total_price
-                        FROM
-                            dj_actuary_budget_material bm,
-                           dj_basics_storefront_product sp,
-                           dj_basics_product_template pt,
-                            dj_pay_business_order t,
-                            dj_deliver_order t1
-                        WHERE
-                            t.house_id = #{houseId}
-                    and bm.product_id=sp.id
-                    and sp.prod_template_id=pt.id
-                        AND bm.house_id = t.house_id
-                        AND t.number = t1.business_order_number
-                        AND t.state = 3
-                        GROUP BY
-                            bm.id,
-                            bm.product_id,
-                            bm.shop_count,
-                            bm.total_price
+                    SELECT
+                        bm.id,
+                        bm.product_id,
+                        bm.category_id,
+                        bm.worker_type_id,
+                        bm.price,
+                        bm.shop_count,
+                        bm.price*bm.shop_count total_price
+                    FROM
+                        dj_actuary_budget_material bm
+                    WHERE
+                        bm.house_id = #{houseId}
+                    and is_budget_data=1
                 ) tt,
                 dj_core_worker_type wt
             WHERE
@@ -84,13 +63,14 @@
             GROUP BY
                 wt.id,
                 wt. NAME
-            order by sum(tt.total_price) desc
+            ORDER BY
+                sum(tt.total_price) DESC
      </select>
 
     <!-- 按类别查询精算信息(顶级分类)-->
     <select id="selectBudgetCategoryInfoList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
 
-       SELECT
+        SELECT
             bcp.id id,
             bcp. NAME name,
             sum(tt.total_price) totalPrice
@@ -99,23 +79,16 @@
                 SELECT
                     bm.id,
                     bm.product_id,
-                    pt.category_id,
+                    bm.category_id,
                     bm.price,
+                    bm.goods_id,
                     bm.shop_count,
-                    bm.total_price
+                    bm.price*bm.shop_count total_price
                 FROM
-                    dj_actuary_budget_material bm,
-                    dj_basics_storefront_product sp,
-                    dj_basics_product_template pt
+                    dj_actuary_budget_material bm
                 WHERE
                     bm.house_id = #{houseId}
-                and bm.product_id=sp.id
-                and sp.prod_template_id=pt.id
-                GROUP BY
-                    bm.id,
-                    bm.product_id,
-                    bm.shop_count,
-                    bm.total_price
+                and is_budget_data=1
             ) tt,
             dj_basics_goods_category bc,
             dj_basics_goods_category bcp
@@ -125,7 +98,7 @@
         GROUP BY
             bcp.id,bcp.NAME
         ORDER BY
-            sum(tt.total_price) DESC
+            sum(tt.total_price) DESC;
     </select>
 
     <!-- 精算，按类别标签汇总分类信息 -->
@@ -139,29 +112,19 @@
                 SELECT
                     bm.id,
                     bm.product_id,
-                    pt.category_id,
+                    bm.category_id,
                     bm.price,
                     bm.shop_count,
-                    bm.total_price
+                    bm.price*bm.shop_count total_price
                 FROM
-                    dj_actuary_budget_material bm,
-                    dj_basics_storefront_product sp,
-                    dj_basics_product_template pt
+                    dj_actuary_budget_material bm
                 WHERE
                     bm.house_id = #{houseId}
-                AND bm.product_id = sp.id
-                AND sp.prod_template_id = pt.id
-                <if test = "workerTypeId!=null and workerTypeId!=''">
-                    and bm.worker_type_id = #{workerTypeId}
+                and is_budget_data=1
+                <if test = "searchTypeId!=null and searchTypeId!=''">
+                    and ( bm.worker_type_id = #{searchTypeId}
+                    or bm.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
                 </if>
-                <if test = "categoryTopId!=null and categoryTopId!=''">
-                    and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
-                </if>
-                GROUP BY
-                    bm.id,
-                    bm.product_id,
-                    bm.shop_count,
-                    bm.total_price
             ) tt,
             dj_basics_goods_category bgc,
             dj_basics_category_label bcl
@@ -174,22 +137,18 @@
         GROUP BY
             bcl.id,
             bcl. NAME
-
     </select>
 
     <select id="searchBudgetLastCategoryCount" resultType="java.lang.Double">
         SELECT
           sum(bm.price*bm.shop_count) total_price
         FROM
-            dj_actuary_budget_material bm,
-            dj_basics_storefront_product sp,
-            dj_basics_product_template pt
+            dj_actuary_budget_material bm
         WHERE bm.house_id = #{houseId}
-        AND bm.product_id = sp.id
-        AND sp.prod_template_id = pt.id
+        and is_budget_data=1
         <if test = "searchTypeId!=null and searchTypeId!=''">
             and (bm.worker_type_id = #{searchTypeId}
-            or pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
+            or bm.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
         </if>
     </select>
 
@@ -206,27 +165,19 @@
                 SELECT
                     bm.id,
                     bm.product_id,
-                    pt.category_id,
+                    bm.category_id,
                     bm.price,
                     bm.shop_count,
                     bm.price*bm.shop_count total_price
                 FROM
-                    dj_actuary_budget_material bm,
-                    dj_basics_storefront_product sp,
-                    dj_basics_product_template pt
+                    dj_actuary_budget_material bm
                 WHERE
                     bm.house_id = #{houseId}
-                AND bm.product_id = sp.id
-                AND sp.prod_template_id = pt.id
+                 and is_budget_data=1
                 <if test = "searchTypeId!=null and searchTypeId!=''">
                     and (bm.worker_type_id = #{searchTypeId}
-                    or pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
+                    or bm.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
                 </if>
-                GROUP BY
-                    bm.id,
-                    bm.product_id,
-                    bm.shop_count,
-                    bm.total_price
             ) tt,
             dj_basics_goods_category bgc
         WHERE
@@ -250,12 +201,12 @@
             bm.product_id productId,
             pt.id productTemplateId,
             bm.product_name productName,
-            pt.product_sn productSn,
-            sp.image image,
+            bm.product_sn productSn,
+            bm.image image,
             bm.unit_name unitName,
             bm.price,
             bm.shop_count shopCount,
-            bm.price*bm.shop_count actualPaymentPrice,
+            bm.price * bm.shop_count actualPaymentPrice,
             bm.id actuaryBudgetId
         FROM
             dj_actuary_budget_material bm,
@@ -263,14 +214,48 @@
             dj_basics_product_template pt,
             dj_basics_goods_category bgc
         WHERE
-            bm.house_id = #{houseId}
+             bm.house_id = #{houseId}
         AND bm.product_id = sp.id
         AND sp.prod_template_id = pt.id
-        AND pt.category_id = bgc.id
-        and bgc.id=#{categoryId}
+        AND bm.category_id = bgc.id
+        AND bm.is_budget_data = 1
+        AND bgc.id = #{categoryId}
         <if test = "searchTypeId!=null and searchTypeId!=''">
             and ( bm.worker_type_id = #{searchTypeId}
-              or pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
+            or bm.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
+        </if>
+        <if test = "labelValId!=null and labelValId!=''">
+            and FIND_IN_SET(#{labelValId},bgc.category_label_ids)
+        </if>
+        UNION ALL
+        SELECT
+            bm.category_id categoryId,
+            bm.goods_id goodsId,
+            '' productId,
+            '' productTemplateId,
+            t2. NAME productName,
+            '' productSn,
+            bm.image image,
+            bm.unit_name unitName,
+            bm.price,
+            bm.shop_count shopCount,
+            bm.price * bm.shop_count actualPaymentPrice,
+            bm.id actuaryBudgetId
+        FROM
+        dj_actuary_budget_material bm,
+        dj_basics_goods t2,
+        dj_basics_goods_category  bgc
+        WHERE
+            bm.steta = 2
+        AND bm.goods_id = t2.id
+        AND bm.category_id =  bgc.id
+        AND bm.is_budget_data = 1
+        AND bm.product_id IS NULL
+        AND bm.house_id = #{houseId}
+        AND bm.category_id = #{categoryId}
+        <if test = "searchTypeId!=null and searchTypeId!=''">
+            and ( bm.worker_type_id = #{searchTypeId}
+              or bm.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
         </if>
         <if test = "labelValId!=null and labelValId!=''">
             and FIND_IN_SET(#{labelValId},bgc.category_label_ids)
