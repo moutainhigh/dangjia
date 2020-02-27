@@ -28,4 +28,12 @@ public interface RefundAfterSalesJobAPI {
     @ApiOperation(value = "业主申诉后，等待平台处理(到期自动处理）", notes = "业主申诉后，等待平台处理(到期自动处理）")
     void returnPlatformProcessTime();
 
+    @PostMapping("app/refund/job/homeShellOrderReceiveTime")
+    @ApiOperation(value = "当家贝商城--待收货时间", notes = "当家贝商城--待收货时间")
+    void homeShellOrderReceiveTime();
+
+    @PostMapping("app/refund/job/homeShellOrderRefundTime")
+    @ApiOperation(value = "当家贝商城--待退款时间", notes = "当家贝商城--待退款时间")
+    void homeShellOrderRefundTime();
+
 }

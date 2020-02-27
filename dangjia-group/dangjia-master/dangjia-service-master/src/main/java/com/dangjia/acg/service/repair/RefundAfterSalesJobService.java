@@ -1,19 +1,25 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.dto.shell.HomeShellOrderDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
 import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.shell.IHomeShellOrderMapper;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.service.node.NodeProgressService;
+import com.dangjia.acg.service.shell.HomeShellOrderService;
+import com.dangjia.acg.service.shell.HomeShellProductService;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -38,6 +44,12 @@ public class RefundAfterSalesJobService {
     @Autowired
     private NodeProgressService nodeProgressService;
     @Autowired MendMaterielService mendMaterielService;
+
+    @Autowired
+    private HomeShellOrderService homeShellOrderService;
+    @Autowired
+    private IHomeShellOrderMapper homeShellOrderMapper;
+
     /**
      * 店铺申请等待商家处理（到期自动处理)
      * 处理：若到期店铺款处理，则默认自动退款(修改订单的状态为已同意，增加节点状态，退款至业主帐户）
@@ -84,9 +96,6 @@ public class RefundAfterSalesJobService {
 
             }
         }
-        //查询退货退款符合条件的数据
-
-
 
     }
 
@@ -147,6 +156,30 @@ public class RefundAfterSalesJobService {
                     complain.setDescription("处理超时，自动同意！");
                 }
                 complainMapper.updateByPrimaryKeySelective(complain);
+            }
+        }
+    }
+    /**
+     *当家贝商城--待收货时间
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void homeShellOrderReceiveTime(){
+        List<HomeShellOrderDTO> list =homeShellOrderMapper.queryHomeShellOrderList("SHELL_PRODUCT_RECIEVE_TIME",1);
+        if(list==null){
+            for(HomeShellOrderDTO shellOrderDTO:list){
+               homeShellOrderService.updateConvertedProductInfo(null,shellOrderDTO.getShellOrderId(),1);//确认收货
+            }
+        }
+    }
+    /**
+     *当家贝商城--待退款时间
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void homeShellOrderRefundTime(){
+        List<HomeShellOrderDTO> list =homeShellOrderMapper.queryHomeShellOrderList("SHELL_PRODUCT_REFUND_TIME",2);
+        if(list==null){
+            for(HomeShellOrderDTO shellOrderDTO:list){
+                homeShellOrderService.updateOrderInfo(shellOrderDTO.getShellOrderId(),5);//确认退货
             }
         }
     }

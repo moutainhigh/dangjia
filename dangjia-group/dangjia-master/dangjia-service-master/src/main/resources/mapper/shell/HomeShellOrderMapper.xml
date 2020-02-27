@@ -84,4 +84,36 @@
         AND t.product_spec_id = s.id
         AND t.member_id = #{memberId}
     </select>
+
+    <select id="queryHomeShellOrderList" resultType="com.dangjia.acg.dto.shell.HomeShellOrderDTO">
+
+        SELECT
+            t.id shellOrderId,
+            t.number,
+            t.exchange_time exchangeTime,
+            t.`status`,
+            t.exchange_num exchangeNum,
+            t.integral,
+            t.money,
+            p.image,
+            p. NAME productName,
+            p.product_type productType
+        FROM
+            dj_home_shell_order t,
+            dj_home_shell_product p
+        WHERE
+            t.data_status = 0
+        AND t.product_id = p.id
+        AND p.product_type = '1'
+        <if test="type==1">
+           and t.`status`=2
+        <![CDATA[    and t.deliver_time<=date_add(now(), interval -((select param_value from dj_config where param_key=#{paramKey})) DAY) ]]>
+
+        </if>
+        <if test="type!==2">
+            and t.`status`=4
+         <![CDATA[    and t.return_application_time<=date_add(now(), interval -((select param_value from dj_config where param_key=#{paramKey})) DAY) ]]>
+        </if>
+
+    </select>
 </mapper>
