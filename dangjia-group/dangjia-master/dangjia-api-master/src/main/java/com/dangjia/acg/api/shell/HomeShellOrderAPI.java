@@ -145,4 +145,20 @@ public interface HomeShellOrderAPI {
 
 
 
+    @PostMapping("/app/shellOrder/searchShellRechargeInfo")
+    @ApiOperation(value = "当家贝商城--充值页面", notes = "当家贝商城--充值页面")
+    ServerResponse searchShellRechargeInfo(@RequestParam("userToken") String userToken);
+
+    /**
+     * 当家贝商城--支付充值（生成支付单)
+     * @param userToken
+     * @param id 充值记录ID
+     * @param cityId 城市ID
+     * @return
+     */
+    @PostMapping("/app/shellOrder/saveShellRechargeInfo")
+    @ApiOperation(value = "当家贝商城--支付充值（生成支付单)", notes = "当家贝商城--支付充值（生成支付单)")
+    ServerResponse saveShellRechargeInfo(@RequestParam("userToken") String userToken,
+                                         @RequestParam("id") String id,
+                                         @RequestParam("cityId") String cityId);
 }

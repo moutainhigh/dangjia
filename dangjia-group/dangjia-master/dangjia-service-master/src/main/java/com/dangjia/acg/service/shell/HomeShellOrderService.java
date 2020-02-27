@@ -21,11 +21,13 @@ import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellOrderMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellProductMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellProductSpecMapper;
+import com.dangjia.acg.mapper.shell.IMasterOrderNodeMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
+import com.dangjia.acg.modle.order.OrderNode;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.shell.HomeShellOrder;
 import com.dangjia.acg.modle.shell.HomeShellProduct;
@@ -36,9 +38,8 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mysql.fabric.Server;
-import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
+import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -86,6 +84,8 @@ public class HomeShellOrderService {
     private HomeShellProductService homeShellProductService;
     @Autowired
     private IConfigMapper configMapper;
+    @Autowired
+    private IMasterOrderNodeMapper masterOrderNodeMapper;
 
     /**
      * 查询兑换记录列表
@@ -181,7 +181,7 @@ public class HomeShellOrderService {
                 //退钱给业主
                 settleMemberMoney(member,homeShellOrder.getId(),homeShellOrder.getMoney());
             }else if(homeShellOrder.getIntegral()!=null&&homeShellOrder.getIntegral()>0){
-                settleIntegral(member,homeShellOrder.getId(),homeShellProduct.getName(),homeShellOrder.getIntegral(),2);
+                settleIntegral(member,homeShellOrder.getId(),"兑换退款："+homeShellProduct.getName(),homeShellOrder.getIntegral(),2);
             }
         }
         return ServerResponse.createBySuccessMessage("提交成功");
@@ -287,7 +287,7 @@ public class HomeShellOrderService {
         product.setModifyDate(new Date());
         homeShellProductMapper.updateByPrimaryKeySelective(product);
         //扣减用户的当家贝币
-        settleIntegral(member,homeShellOrder.getId(),"兑换商品:"+product.getName(),productSpec.getIntegral()*(-1),3);//贝币流水记录
+        settleIntegral(member,homeShellOrder.getId(),"兑换商品："+product.getName(),productSpec.getIntegral()*(-1),3);//贝币流水记录
         String businessNum="";
         //判断是否需要生成支付订单
         if(product.getPayType()==2&&productSpec.getMoney()>0){//需要支付金钱的订单，则生成业务支付单号
@@ -597,7 +597,7 @@ public class HomeShellOrderService {
                 //退钱给业主
                 settleMemberMoney(member,homeShellOrder.getId(),homeShellOrder.getMoney());
             }else if(homeShellOrder.getIntegral()!=null&&homeShellOrder.getIntegral()>0){
-                settleIntegral(member,homeShellOrder.getId(),homeShellProduct.getName(),homeShellOrder.getIntegral(),2);
+                settleIntegral(member,homeShellOrder.getId(),"取消订单:"+homeShellProduct.getName(),homeShellOrder.getIntegral(),2);
             }
         }else if(type==2){//申请退款
             homeShellOrder.setStatus(4);
@@ -609,4 +609,98 @@ public class HomeShellOrderService {
 
         return ServerResponse.createBySuccessMessage("申请成功");
     }
+
+    /**
+     * 当家贝商城，充值页面
+     * @param userToken
+     * @return
+     */
+    public ServerResponse searchShellRechargeInfo(String userToken){
+        try{
+            Map<String,Object> paramMap=new HashMap<>();
+            Config config=configMapper.selectConfigInfoByParamKey("SHELL_RECHARGE_REMARK");
+            if(config!=null){
+                paramMap.put("remark",config.getParamDesc());
+            }else{
+                paramMap.put("remark","1.当家贝可用于兑换相应的物品；\n" +
+                        "\n" +
+                        "2.当家贝获取规则：充值；特定方法获取；\n" +
+                        "\n" +
+                        "3.当家贝为虚拟币，不会过期，不可赠送、提现、转让。");
+            }
+            List rechargeList=new ArrayList();
+            Map rechargeMap;
+            Example example=new Example(OrderNode.class);
+            example.createCriteria().andEqualTo(OrderNode.TYPE,"SHELL_MONEY_NODE");
+            example.orderBy(OrderNode.SORT).asc();
+            List<OrderNode> orderNodeList=masterOrderNodeMapper.selectByExample(example);
+            if(orderNodeList!=null){
+                for(OrderNode orderNode:orderNodeList){
+                    rechargeMap=new HashMap();
+                    rechargeMap.put("id",orderNode.getId());
+                    rechargeMap.put("money",orderNode.getCode());
+                    rechargeMap.put("integral",orderNode.getName());
+                    rechargeList.add(rechargeMap);
+                }
+            }
+            paramMap.put("rechargeList",rechargeList);
+
+            return ServerResponse.createBySuccess("查询成功",paramMap);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 当家贝商城--支付充值（生成支付单)
+     * @param userToken
+     * @param id 充值记录ID
+     * @param cityId 城市ID
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse saveShellRechargeInfo(String userToken,String id,String cityId){
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        if(id==null){
+            return ServerResponse.createByErrorMessage("请传入要充值的记录ID");
+        }
+        OrderNode orderNode=masterOrderNodeMapper.selectByPrimaryKey(id);
+        if(orderNode==null){
+            return ServerResponse.createByErrorMessage("未找到符合条件的充值记录信息");
+        }
+        //生成业务支付单
+        BusinessOrder businessOrder=new BusinessOrder();
+        businessOrder.setMemberId(member.getId());
+        businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+        businessOrder.setState(1);//刚生成
+        businessOrder.setTotalPrice(BigDecimal.valueOf(Double.parseDouble(orderNode.getCode())));
+        businessOrder.setDiscountsPrice(new BigDecimal(0));
+        businessOrder.setPayPrice(BigDecimal.valueOf(Double.parseDouble(orderNode.getCode())));
+        businessOrder.setType(12);//记录支付类型任务类型
+        businessOrder.setAnyOrderId(id);//充值单ID
+        businessOrderMapper.insert(businessOrder);
+        return  ServerResponse.createBySuccess("提交成功",businessOrder.getNumber());
+    }
+
+    /**
+     * 充值成功，记录充值流水，将当家币汇总到用户帐号上去
+     * @param businessOrder
+     */
+    public void saveShellMoney(BusinessOrder businessOrder){
+        OrderNode orderNode=masterOrderNodeMapper.selectByPrimaryKey(businessOrder.getAnyOrderId());
+        if(orderNode!=null){
+            Double integral=Double.parseDouble(orderNode.getName());//当家贝币s
+            String memberId=businessOrder.getMemberId();
+            Member member=memberMapper.selectByPrimaryKey(memberId);
+            //将当家币放到用户帐户上去
+            settleIntegral(member,businessOrder.getId(),"充值获取",integral,1);
+        }
+
+    }
+
 }

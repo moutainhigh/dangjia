@@ -163,4 +163,32 @@ public class HomeShellOrderController implements HomeShellOrderAPI {
         }
     }
 
+    /**
+     * 当家贝商城，充值页面
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchShellRechargeInfo(String userToken){
+         return homeShellOrderService.searchShellRechargeInfo(userToken);
+    }
+
+    /**
+     * 当家贝商城--支付充值（生成支付单)
+     * @param userToken
+     * @param id 充值记录ID
+     * @param cityId 城市ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveShellRechargeInfo(String userToken,String id,String cityId){
+        try{
+            return homeShellOrderService.saveShellRechargeInfo(userToken,id,cityId);
+        }catch (Exception e){
+            logger.error("生成失败",e);
+            return ServerResponse.createByErrorMessage("充值失败");
+        }
+    }
 }
