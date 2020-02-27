@@ -345,13 +345,13 @@ public class WorkerService {
                 return ServerResponse.createByErrorMessage("请选择银行卡类型");
             }
 
-            if (!Validator.isMobileNo(phone)) {
-                return ServerResponse.createBySuccessMessage("手机号不正确");
-            }
-            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
-            if (registerCode == null || smscode != registerCode) {
-                return ServerResponse.createByErrorMessage("无效验证码");
-            }
+//            if (!Validator.isMobileNo(phone)) {
+//                return ServerResponse.createBySuccessMessage("手机号不正确");
+//            }
+//            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
+//            if (registerCode == null || smscode != registerCode) {
+//                return ServerResponse.createByErrorMessage("无效验证码");
+//            }
 
             String id = null;
             //如果 userToken 为空，代表中台登录 供应商，店铺 添加银行卡 2019/11/7 添加
