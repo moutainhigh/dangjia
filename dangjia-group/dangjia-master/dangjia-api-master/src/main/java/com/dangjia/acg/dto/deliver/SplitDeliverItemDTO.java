@@ -16,10 +16,12 @@ public class SplitDeliverItemDTO {
     private String supplierName;//
     @ExcelField(titile = "工地名称", offset = 2)
     private String houseName;//工地名称
+    private String houseId;//工地名称
     private String image;//图片
 
     @ExcelField(titile = "商品名称", offset = 3)
     private String productName;//名字
+    private String productId;//名字
     private String productSn;//编号
     private Double shopCount;//购买总数
     private Double num;//本次发货数量

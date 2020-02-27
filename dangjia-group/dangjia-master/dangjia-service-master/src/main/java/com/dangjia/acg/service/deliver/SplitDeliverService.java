@@ -295,6 +295,7 @@ public class SplitDeliverService {
             SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
             splitDeliverDTO.setShipState(splitDeliver.getShippingState());//发货状态
             splitDeliverDTO.setNumber(splitDeliver.getNumber());
+            splitDeliverDTO.setSplitDeliverId(splitDeliver.getId());
             splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
             splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
             splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
@@ -339,6 +340,7 @@ public class SplitDeliverService {
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                 splitDeliverItemDTO.setImage(address + storefrontProduct.getImage());
                 splitDeliverItemDTO.setProductName(storefrontProduct.getProductName());
+                splitDeliverItemDTO.setProductId(storefrontProduct.getId());
                 if (splitDeliver.getShippingState() == 2 || splitDeliver.getShippingState() == 4 || splitDeliver.getShippingState() == 5) {
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice() * orderSplitItem.getReceive());
                     sumprice += orderSplitItem.getPrice() * orderSplitItem.getReceive();
@@ -355,6 +357,7 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setId(orderSplitItem.getId());
                 splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
                 splitDeliverItemDTO.setHouseName(house.getHouseName());
+                splitDeliverItemDTO.setHouseId(house.getId());
                 splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());
                 splitDeliverItemDTO.setSupCostTotal(orderSplitItem.getReceive()*orderSplitItem.getSupCost());
                 splitDeliverItemDTO.setAskCount(orderSplitItem.getAskCount());

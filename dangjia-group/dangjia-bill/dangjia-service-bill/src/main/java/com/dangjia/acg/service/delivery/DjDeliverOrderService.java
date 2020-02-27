@@ -1454,38 +1454,35 @@ public class DjDeliverOrderService {
                 Double num = JS.getDouble("shopCount");//发货数量(总数)
                 String productId = JS.getString("productId");//要货货品id
                 String houseId = JS.getString("houseId");//要货房子id
-                if (receive < num) {
+                Example example = new Example(OrderItem.class);
+                example.createCriteria().andEqualTo(OrderItem.HOUSE_ID, houseId)
+                        .andEqualTo(OrderItem.PRODUCT_ID, productId)
+                        .andEqualTo(OrderItem.ORDER_ID, id);
+                example.orderBy(OrderItem.CREATE_DATE).desc();
+                OrderItem item = iBillDjDeliverOrderItemMapper.selectOneByExample(example);
+                if (receive < item.getShopCount()) {
                     //部分收货
                     isFlag = true;
-                    Example example = new Example(OrderItem.class);
-                    example.createCriteria().andEqualTo(OrderItem.HOUSE_ID, houseId)
-                            .andEqualTo(OrderItem.PRODUCT_ID, productId);
-                    example.orderBy(OrderItem.CREATE_DATE).desc();
-                    List<OrderItem> orderItem = iBillDjDeliverOrderItemMapper.selectByExample(example);
                     Double retur = num - receive;//发货数量 减去 收货数量 =  退货数量
-                    for (OrderItem item : orderItem) {
-                        if (item.getAskCount() > retur) {
-                            //订单数量大于退货数量
-                            retur = item.getAskCount() - retur;
-                            item.setAskCount(retur);
-                            item.setModifyDate(new Date());
-                            //修改订单明细数量
-                            iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
-                            break;
-                        } else if (item.getAskCount() == retur) {
-                            retur = item.getAskCount() - retur;
-                            item.setAskCount(retur);
-                            item.setModifyDate(new Date());
-                            //修改订单明细数量
-                            iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
-                            break;
-                        } else if (item.getAskCount() < retur) {
-                            retur = retur - item.getAskCount();
-                            item.setAskCount(retur);
-                            item.setModifyDate(new Date());
-                            //修改订单明细数量
-                            iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
-                        }
+                    if (item.getAskCount() > retur) {
+                        //订单数量大于退货数量
+                        retur = item.getAskCount() - retur;
+                        item.setAskCount(retur);
+                        item.setModifyDate(new Date());
+                        //修改订单明细数量
+                        iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
+                    } else if (item.getAskCount() == retur) {
+                        retur = item.getAskCount() - retur;
+                        item.setAskCount(retur);
+                        item.setModifyDate(new Date());
+                        //修改订单明细数量
+                        iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
+                    } else if (item.getAskCount() < retur) {
+                        retur = retur - item.getAskCount();
+                        item.setAskCount(retur);
+                        item.setModifyDate(new Date());
+                        //修改订单明细数量
+                        iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
                     }
 
                     //修改业主仓库数量
