@@ -41,8 +41,8 @@ public class ActivityRedPackRecord extends BaseEntity {
 
 
 	@Column(name = "have_receive")
-	@Desc(value = "优惠券状态，0未使用，1已使用，2已过期,3已失效")
-	@ApiModelProperty("优惠券状态，0未使用，1已使用，2已过期,3已失效")
+	@Desc(value = "优惠券状态，0未使用，1已使用，2已过期,3已失效,4未领取")
+	@ApiModelProperty("优惠券状态，0未使用，1已使用，2已过期,3已失效,4未领取")
 	private Integer haveReceive;//havereceive
 
 	@Column(name = "city_id")
@@ -79,4 +79,9 @@ public class ActivityRedPackRecord extends BaseEntity {
 	@Desc(value = "优惠卷编码")
 	@ApiModelProperty("优惠卷编码")
 	private String packNum;
+
+	@Column(name = "sort")
+	@Desc(value = "序号")
+	@ApiModelProperty("序号")
+	private Integer sort;
 }

@@ -7,13 +7,19 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.activity.ActivityDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
+import com.dangjia.acg.dto.activity.ActivityRedPackInfo;
 import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.service.activity.ActivityService;
 import com.dangjia.acg.service.activity.RedPackService;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,9 +31,10 @@ import java.util.List;
  */
 @RestController
 public class ActivityController  implements ActivityAPI {
-
+    private static Logger logger = LoggerFactory.getLogger(ActivityController.class);
     @Autowired
     private ActivityService activityService;
+
 
     @Autowired
     private RedPackService redPackService;
@@ -147,6 +154,24 @@ public class ActivityController  implements ActivityAPI {
             }
         }
         return redPackService.addActivityRedPack(request,activityRedPack,nums,moneys,satisfyMoneys);
+    }
+
+    /**
+     * 中台--新增优惠卷
+     *
+     * @param activityRedPackInfo 优惠卷对象
+     * @param userId 用户ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse addNewActivityRedPack(HttpServletRequest request, ActivityRedPackInfo activityRedPackInfo, String userId){
+        try{
+            return redPackService.addNewActivityRedPack(activityRedPackInfo,userId);
+        }catch (Exception e){
+            logger.error("新增失败",e);
+            return ServerResponse.createByErrorMessage("新增失败");
+        }
     }
 
     @Override

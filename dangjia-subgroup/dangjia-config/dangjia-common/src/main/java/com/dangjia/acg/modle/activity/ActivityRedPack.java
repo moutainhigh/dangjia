@@ -11,6 +11,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -38,6 +39,11 @@ public class ActivityRedPack extends BaseEntity {
 	@Desc(value = "来源数据类型 0为人工 1为材料 2为单品,3类别，4货品，5商品")
 	@ApiModelProperty("来源数据类型 0为人工 1为材料 2为单品,3类别，4货品，5商品，6城市，7店铺 ")
 	private Integer fromObjectType;//
+
+	@Column(name = "source_type")
+	@Desc(value = "优惠卷类型：1城市券，2店铺券")
+	@ApiModelProperty("优惠卷类型：1城市券，2店铺券")
+	private Integer sourceType;//
 
 
 	@Column(name = "start_date")
@@ -70,6 +76,16 @@ public class ActivityRedPack extends BaseEntity {
 	@ApiModelProperty("优惠券剩余总数量")
 	private Integer surplusNums ;//
 
+	@Column(name = "money")
+	@Desc(value = "面值金额")
+	@ApiModelProperty("面值金额")
+	private BigDecimal money;//
+
+
+	@Column(name = "satisfy_money")
+	@Desc(value = "满足使用条件的金额数")
+	@ApiModelProperty("满足使用条件的金额数")
+	private BigDecimal satisfyMoney;//
 
 	@Column(name = "receive_count")
 	@Desc(value = "单人领取次数 默认1")

@@ -384,6 +384,10 @@ public class DecorationCostService {
            Double totalzgPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,searchTypeId,2);//自购商品汇总
            decorationMap.put("actualPaymentPrice",totalPrice);
            decorationMap.put("actualSelfPrice",totalzgPrice);
+           DecorationCostDTO decorationCostDTO=new DecorationCostDTO();
+           decorationCostDTO.setLabelValId("");
+           decorationCostDTO.setLabelValName("全部");
+           categoryLabelList.add(0,decorationCostDTO);
            decorationMap.put("categoryLabelList",categoryLabelList);
            return ServerResponse.createBySuccess("查询成功",decorationMap);
        }catch (Exception e){

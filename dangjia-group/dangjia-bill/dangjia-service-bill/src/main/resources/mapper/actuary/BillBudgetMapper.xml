@@ -22,16 +22,11 @@
                and is_budget_data=1
              <if test = "searchTypeId!=null and searchTypeId!=''">
                  and (bm.worker_type_id = #{searchTypeId}
-                 and bm.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
+                 or bm.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
              </if>
              <if test = "steta!=null and steta!=''">
                  and bm.steta = #{steta}
              </if>
-                GROUP BY
-                    bm.id,
-                    bm.product_id,
-                    bm.shop_count,
-                    bm.total_price
             ) tt
      </select>
     <!--按工序查询订单-->
