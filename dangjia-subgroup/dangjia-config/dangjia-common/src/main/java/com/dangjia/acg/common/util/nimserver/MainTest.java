@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.nimserver.apply.NimMessageService;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import org.apache.http.HttpEntity;
@@ -42,9 +43,9 @@ public class MainTest {
 //        String res2 = getUinfos(accessToken.getMemberId());
 //        System.out.println("--------"+res2);
 
-
-        String res2 = sendMsg("13755051551","13755051550");
-        System.out.println("--------"+res2);
+//        sendMsg("13755051550","13755051551");
+        NimMessageService.sendMemberIdPush("1",new String[]{"13755051551"}, " 的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>","111");
+//        NimMessageService.sendSysPush("1","sss");
         //TODO: 对结果的业务处理，如解析返回结果，并保存成功注册的用户
     }
 

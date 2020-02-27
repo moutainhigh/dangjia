@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class NIMPost {
 
-    public static String SYS_ACCID = "fengjiangit";  //AppKey
+    public static String SYS_ACCID = "13755051550";  //AppKey
 
     public static String APPKEY = "fa7d0ea859179f00c81a70a8969f073a";  //AppKey
     public static String SECRET = "dcadf8b137a1";  //AppSecret
@@ -31,6 +31,7 @@ public class NIMPost {
     public static String SEND_MSG = "https://api.netease.im/nimserver/msg/sendMsg.action";//发送消息
     public static String BROADCAST_MSG = "https://api.netease.im/nimserver/msg/broadcastMsg.action";//广播消息
     public static String SEND_BATCH_ATTACH_MSG = "https://api.netease.im/nimserver/msg/sendBatchAttachMsg.action";//推送消息
+    public static String SEND_ATTACH_MSG = "https://api.netease.im/nimserver/msg/sendAttachMsg.action";//自定义系统消息
 
     /**
      * 群管理

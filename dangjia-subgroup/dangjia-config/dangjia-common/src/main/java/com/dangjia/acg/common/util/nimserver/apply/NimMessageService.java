@@ -62,8 +62,6 @@ public class NimMessageService {
     public static void sendSysPush(String appType, String alert) {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("from", NIMPost.SYS_ACCID));
-            params.add(new BasicNameValuePair("targetOs", "[\"ios\",\"aos\",\"pc\",\"web\",\"mac\"]"));
             params.add(new BasicNameValuePair("body", alert));
             //UTF-8编码,解决中文问题
             HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
@@ -88,8 +86,7 @@ public class NimMessageService {
             params.add(new BasicNameValuePair("fromAccid", NIMPost.SYS_ACCID));
             params.add(new BasicNameValuePair("toAccids", Arrays.toString(memberId)));
             JSONObject json=new JSONObject();
-            json.put("alert",alert);
-            json.put("speak",speak);
+            json.put("content",alert);
             params.add(new BasicNameValuePair("attach", JSON.toJSONString(json)));
             //UTF-8编码,解决中文问题
             HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
