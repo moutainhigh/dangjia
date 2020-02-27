@@ -28,14 +28,12 @@
                 AND bm.house_id = t.house_id
                 AND t.number = t1.business_order_number
                 AND t.state = 3
-             <if test = "workerTypeId!=null and workerTypeId!=''">
-                 and bm.worker_type_id = #{workerTypeId}
+             <if test = "searchTypeId!=null and searchTypeId!=''">
+                 and (bm.worker_type_id = #{searchTypeId}
+                 and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{searchTypeId}))
              </if>
              <if test = "steta!=null and steta!=''">
                  and bm.steta = #{steta}
-             </if>
-             <if test = "categoryTopId!=null and categoryTopId!=''">
-                 and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
              </if>
                 GROUP BY
                     bm.id,

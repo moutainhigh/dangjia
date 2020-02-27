@@ -32,11 +32,11 @@ public class ActivityRedPack extends BaseEntity {
 	@Column(name = "from_object")
 	@Desc(value = "来源数据ID（类别ID/货品ID/商品ID/店铺商品ID）")
 	@ApiModelProperty("来源数据ID（类别ID/货品ID/商品ID/店铺商品ID）")
-	private String fromObject;//workertypeid
+	private String fromObject;//若适用汇范围为（6城市，7店铺），则此字段为空
 
 	@Column(name = "from_object_type")
 	@Desc(value = "来源数据类型 0为人工 1为材料 2为单品,3类别，4货品，5商品")
-	@ApiModelProperty("来源数据类型 0为人工 1为材料 2为单品,3类别，4货品，5商品 ")
+	@ApiModelProperty("来源数据类型 0为人工 1为材料 2为单品,3类别，4货品，5商品，6城市，7店铺 ")
 	private Integer fromObjectType;//
 
 
