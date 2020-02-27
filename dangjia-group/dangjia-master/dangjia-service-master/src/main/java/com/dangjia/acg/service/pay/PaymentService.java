@@ -343,6 +343,8 @@ public class PaymentService {
                 }
             }else if(businessOrder.getType()==11){//当家贝商品兑换
                 homeShellOrderService.updateShellOrderInfo(businessOrder.getNumber());
+            }else if(businessOrder.getType()==12){//当家贝充值
+                homeShellOrderService.saveShellMoney(businessOrder);
             }
             if(!CommonUtil.isEmpty(businessOrder.getHouseId())) {
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());

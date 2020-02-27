@@ -76,8 +76,8 @@ public class BusinessOrder extends BaseEntity {
 	private String image;//
 
 	@Column(name = "type")
-	@Desc(value = "支付类型  1精算支付任务,2业主购 , 3,充值，5验房分销, 7:设计精算补单,8:未购买,9:工人保险，10维保订单，11当家贝兑换单")
-	@ApiModelProperty("支付类型  1工序支付任务,2补货补人工 , 3,充值，4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单,9:工人保险，10维保订单，11当家贝兑换单")
+	@Desc(value = "支付类型  1精算支付任务,2业主购 , 3,充值，5验房分销, 7:设计精算补单,8:未购买,9:工人保险，10维保订单，11当家贝兑换单,12当家贝充值")
+	@ApiModelProperty("支付类型  1工序支付任务,2补货补人工 , 3,充值，4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单,9:工人保险，10维保订单，11当家贝兑换单,12当家贝充值")
 	private Integer type; // 1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单
 
 
@@ -90,6 +90,12 @@ public class BusinessOrder extends BaseEntity {
 	@Desc(value = "维修单ID")
 	@ApiModelProperty("维修单ID")
 	private String maintenanceRecordId;
+
+	@Column(name = "any_order_id")
+	@Desc(value = "任意单ID（当家贝充值单ID）")
+	@ApiModelProperty("任意单ID（当家贝充值单ID）")
+	private String anyOrderId;
+
 
 
 }
