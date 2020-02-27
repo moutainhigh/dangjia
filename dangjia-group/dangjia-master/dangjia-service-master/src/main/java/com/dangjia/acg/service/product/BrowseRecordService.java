@@ -58,7 +58,7 @@ public class BrowseRecordService {
                 browseRecordDTO.setVisitsNum(browseRecord.getVisitsNum());
                 browseRecordDTO.setVistsType(browseRecord.getVistsType());
                 browseRecordDTO.setProductId(productId);
-                browseRecordDTO.setObject(JSONObject.parseObject(appActuaryOperationAPI.getCommo(request,productId,null).getResultObj().toString()));
+                browseRecordDTO.setObject(JSONObject.parseObject(appActuaryOperationAPI.getCommo(request,productId,null,null).getResultObj().toString()));
                 browseRecordList.add(browseRecordDTO);
             }
             return ServerResponse.createBySuccess("查询浏览记录成功!",browseRecordList);

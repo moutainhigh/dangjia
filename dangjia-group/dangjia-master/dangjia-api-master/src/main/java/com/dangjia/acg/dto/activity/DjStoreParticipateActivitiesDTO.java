@@ -21,5 +21,6 @@ public class DjStoreParticipateActivitiesDTO {
     private Integer participatingCommodityQuantity;//参与商品数量
     private String  storeActivityId;//活动id
     private String  storeParticipateActivities;//店铺参与活动id
+    private String  activitySessionId;//场次id
 
 }

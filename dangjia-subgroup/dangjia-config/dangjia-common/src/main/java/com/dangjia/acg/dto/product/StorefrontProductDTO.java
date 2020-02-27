@@ -7,6 +7,8 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(prefix = "")
 public class StorefrontProductDTO {
+    private String id;
+
     private String storefrontId; //店铺ID;
 
     private String storefrontProductId; //店铺商品ID;

@@ -206,6 +206,7 @@
 
     <select id="queryHomeGroupActivities" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
         SELECT
+            a.id,
             b.id AS storefrontProductId,
             b.image,
             c.storefront_name AS storefrontName,
