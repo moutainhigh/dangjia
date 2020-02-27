@@ -8,10 +8,13 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.dto.shell.HomeShellOrderDTO;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
+import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
@@ -20,6 +23,7 @@ import com.dangjia.acg.mapper.shell.IHomeShellProductMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellProductSpecMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.pay.BusinessOrder;
@@ -80,6 +84,8 @@ public class HomeShellOrderService {
     private IBusinessOrderMapper businessOrderMapper;
     @Autowired
     private HomeShellProductService homeShellProductService;
+    @Autowired
+    private IConfigMapper configMapper;
 
     /**
      * 查询兑换记录列表
@@ -144,7 +150,7 @@ public class HomeShellOrderService {
     /**
      * 修改订单状态
      * @param homeOrderId 兑换记录ID
-     * @param status 2发货，5退货
+     * @param status 类型：2发货，5退货，8确认发放
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
@@ -154,11 +160,11 @@ public class HomeShellOrderService {
         }
         //修改对应的货单状态
         HomeShellOrder homeShellOrder=homeShellOrderMapper.selectByPrimaryKey(homeOrderId);
-        if(homeShellOrder.getStatus()!=1&&homeShellOrder.getStatus()!=4){
+        if(homeShellOrder.getStatus()!=1&&homeShellOrder.getStatus()!=4||homeShellOrder.getStatus()!=7){
             return ServerResponse.createBySuccess("此单处理，请勿重复操作");
         }
         homeShellOrder.setStatus(status);
-        if(status==2){//发货
+        if(status==2||status==8){//发货/发放
             homeShellOrder.setDeliverTime(new Date());
             homeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder);
         }else if(status==5){//退货
@@ -299,7 +305,11 @@ public class HomeShellOrderService {
             homeShellOrder.setMoney(productSpec.getMoney());
             homeShellOrder.setBusinessOrderNumber(businessNum);
         }else{
-            homeShellOrder.setStatus(1);//待发货
+            if("2".equals(product.getProductType())){//虚拟商品
+                homeShellOrder.setStatus(7);//待发放
+            }else{
+                homeShellOrder.setStatus(1);//待发货
+            }
             homeShellOrder.setMoney(0d);
         }
         homeShellOrder.setProductSpecId(productSpecId);
@@ -325,6 +335,12 @@ public class HomeShellOrderService {
         example.createCriteria().andEqualTo(HomeShellOrder.BUSINESS_ORDER_NUMBER,businessOrderNum);
         HomeShellOrder homeShellOrder=homeShellOrderMapper.selectOneByExample(example);
         homeShellOrder.setStatus(1);
+        HomeShellProduct product=homeShellProductMapper.selectByPrimaryKey(homeShellOrder.getProuctId());
+        if("2".equals(product.getProductType())){//虚拟商品
+            homeShellOrder.setStatus(7);//待发放
+        }else{
+            homeShellOrder.setStatus(1);//待发货
+        }
         homeShellOrder.setModifyDate(new Date());
         homeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder);
     }
@@ -422,31 +438,65 @@ public class HomeShellOrderService {
             if(productSpec!=null){
                 homeShellOrderDTO.setProductSpecName(productSpec.getName());
             }
-            //判断是否可退款
-            if(homeShellOrderDTO.getStatus()==1){
-                homeShellOrderDTO.setRefundButton(1);//显示取消按钮
-            }else if(homeShellOrderDTO.getStatus()==3){
-                homeShellOrderDTO.setRefundButton(2);//显示退款按钮
-            }else{
-                homeShellOrderDTO.setRefundButton(0);//不显示退款按钮
-            }
+            homeShellOrderDTO.setRefundButton(0);//不显示退款按钮
             homeShellOrderDTO.setShowButton(0);//不显示
-            //判断前端按钮显示
-            if(homeShellOrderDTO.getStatus()==0){
-               homeShellOrderDTO.setShowButton(1);//去支付
-            }else if(homeShellOrder.getStatus()==2){
-                homeShellOrderDTO.setShowButton(2);//确认收货
-                //剩余处理时间（默认倒时计7天）
-            }else if(homeShellOrder.getStatus()==4){
-                //剩余处理时间（默认倒时计7天）
+            if(homeShellOrderDTO.getProductType()!=null&&"1".equals(homeShellOrderDTO.getProductType())){//只有实物商品才显示下面的按钮
+                //判断是否可退款
+                if(homeShellOrderDTO.getStatus()==1){
+                    homeShellOrderDTO.setRefundButton(1);//显示取消按钮
+                }else if(homeShellOrderDTO.getStatus()==3){
+                    homeShellOrderDTO.setRefundButton(2);//显示退款按钮
+                }
+
+                //判断前端按钮显示
+                if(homeShellOrderDTO.getStatus()==0){
+                    homeShellOrderDTO.setShowButton(1);//去支付
+                }else if(homeShellOrder.getStatus()==2){
+                    homeShellOrderDTO.setShowButton(2);//确认收货
+                    //剩余处理时间（默认倒时计7天）
+                    homeShellOrderDTO.setRemainingTime(getRemainingTime("SHELL_PRODUCT_RECIEVE_TIME",homeShellOrder.getDeliverTime()));
+                }else if(homeShellOrder.getStatus()==4){//待退款
+                    //剩余处理时间（默认倒时计7天）
+                    homeShellOrderDTO.setRemainingTime(getRemainingTime("SHELL_PRODUCT_REFUND_TIME",homeShellOrder.getDeliverTime()));
+                }else if(homeShellOrder.getStatus()==5){
+                    //显示退款时间
+                    homeShellOrderDTO.setRefundTime(homeShellOrder.getRefundTime());
+                }
+                homeShellOrderDTO.setStatusName(getStatusName(homeShellOrderDTO.getStatus()));//订单状态名称
+            }else{//虚拟商品
+                if(homeShellOrder.getStatus()==0){
+                    homeShellOrderDTO.setStatusName("待付款");
+                }else{
+                    homeShellOrderDTO.setStatusName("兑换成功");
+                }
             }
-            homeShellOrderDTO.setStatusName(getStatusName(homeShellOrderDTO.getStatus()));//订单状态名称
+
             return ServerResponse.createBySuccess("查询成功",homeShellOrderDTO);
         }catch(Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     * 获取当前阶段剩余可处理时间
+     * @return
+     */
+    private long getRemainingTime(String paramKey, Date createDate){
+        try{
+            Config config=configMapper.selectConfigInfoByParamKey(paramKey);//获取对应阶段需处理剩余时间
+            if(config!=null&&StringUtils.isNotBlank(config.getId())){
+                String day=config.getParamValue();
+                Date newDate= DateUtil.addDateDays(createDate,Integer.parseInt(day));
+                return DateUtil.daysBetweenTime(new Date(),newDate);
+            }
+        }catch (Exception e){
+            logger.error("获取剩余时间异常:",e);
+        }
+
+        return 0;
+    }
+
     private String getStatusName(Integer status){
         String statusName="";
         switch (status){

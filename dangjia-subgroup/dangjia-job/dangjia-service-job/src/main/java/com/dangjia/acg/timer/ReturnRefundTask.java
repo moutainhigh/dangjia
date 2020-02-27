@@ -45,6 +45,13 @@ public class ReturnRefundTask {
         refundAfterSalesJobAPI.returnPlatformProcessTime();//业主申诉后，等待平台处理(到期自动处理）
         log.info(format.format(new Date()) + "结束执行业主申诉后，等待平台处理任务...");
 
+        log.info(format.format(new Date()) + "当家贝商城--待收货时间...");
+        refundAfterSalesJobAPI.homeShellOrderReceiveTime();//当家贝商城--待收货时间(到期自动处理）
+        log.info(format.format(new Date()) + "当家贝商城--待收货时间...");
+
+        log.info(format.format(new Date()) + "当家贝商城--待退款时间...");
+        refundAfterSalesJobAPI.homeShellOrderRefundTime();//当家贝商城--待退款时间
+        log.info(format.format(new Date()) + "当家贝商城--待退款时间...");
 
 
     }

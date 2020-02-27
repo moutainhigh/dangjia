@@ -73,8 +73,8 @@ public class HomeShellOrder extends GoodsBaseEntity {
 
 
     @Column(name = "status")
-    @Desc(value = "订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款，6已取消）")
-    @ApiModelProperty("订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款，6已取消）")
+    @Desc(value = "订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款，6已取消,7待发放，8已发放）")
+    @ApiModelProperty("订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款，6已取消,7待发放，8已发放）")
     private Integer status;
 
     @Column(name = "address_id")

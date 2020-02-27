@@ -50,7 +50,7 @@ public class HomeShellOrderDTO extends GoodsBaseEntity {
     @ApiModelProperty("兑换人电话")
     private String memberMobile;
 
-    @ApiModelProperty("订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款，6已取消）")
+    @ApiModelProperty("订单状态（0待付款，1待发货，2待收货，3已收货，4待退款，5已退款，6已取消,7待发放，8已发放）")
     private Integer status;
 
     private String statusName;//状态名称
@@ -80,6 +80,11 @@ public class HomeShellOrderDTO extends GoodsBaseEntity {
     private String image;
 
     private String imageUrl;
+
+    @ApiModelProperty("退款时间")
+    private Date refundTime;//
+
+    private long RemainingTime;//剩余处理时间
 
 
     private String productName;//商品名称

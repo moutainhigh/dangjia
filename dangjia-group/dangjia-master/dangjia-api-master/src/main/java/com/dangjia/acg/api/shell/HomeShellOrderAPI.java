@@ -58,7 +58,7 @@ public interface HomeShellOrderAPI {
      * 修改订单状态
      * @param request
      * @param homeOrderId 兑换记录ID
-     * @param status 2发货，5退货
+     * @param status 类型：2发货，5退货，8确认发放
      * @return
      */
     @PostMapping("/web/shellOrder/updateOrderInfo")
