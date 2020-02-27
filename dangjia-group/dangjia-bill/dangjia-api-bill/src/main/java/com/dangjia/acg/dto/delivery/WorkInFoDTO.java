@@ -2,7 +2,6 @@ package com.dangjia.acg.dto.delivery;
 
 import com.dangjia.acg.common.util.ImageUtil;
 import lombok.Data;
-import sun.plugin.com.Utils;
 
 import java.util.HashMap;
 import java.util.LinkedList;

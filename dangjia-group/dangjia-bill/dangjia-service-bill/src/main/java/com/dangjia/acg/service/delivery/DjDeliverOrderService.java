@@ -3,7 +3,6 @@ package com.dangjia.acg.service.delivery;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -14,6 +13,8 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
+import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
@@ -78,8 +79,6 @@ public class DjDeliverOrderService {
     private IBillDjAlreadyRobSingleMapper iBillDjAlreadyRobSingleMapper;
     @Autowired
     private IBillUserMapper iBillUserMapper;
-    @Autowired
-    private UserAPI userAPI;
     @Autowired
     private IBillMemberMapper iBillMemberMapper;
     @Autowired
@@ -349,9 +348,9 @@ public class DjDeliverOrderService {
                 map = new HashMap<>();
                 map.put("id", user.getId());
                 map.put("targetId", user.getId());
-                UserInfoResultDTO userInfoResult = userAPI.getUserInfo(AppType.SALE.getDesc(), userid);
-                if (userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
-                    map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
+                List<NimUserInfo> userInfoResult = NimUserService.getUserInfo(AppType.SALE.getDesc(), userid);
+                if (userInfoResult != null &&userInfoResult.size()>0&& !CommonUtil.isEmpty(userInfoResult.get(0).getName())) {
+                    map.put("nickName", "装修顾问 " + userInfoResult.get(0).getName());
                 } else {
                     map.put("nickName", "装修顾问 小" + user.getUsername().substring(0, 1));
                 }

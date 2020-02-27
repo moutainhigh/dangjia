@@ -2,7 +2,6 @@ package com.dangjia.acg.common.util.nimserver.apply;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.nimserver.NIMPost;
 import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import org.apache.http.HttpEntity;
@@ -29,7 +28,7 @@ public class NimUserService {
     /**
      *  用户注册
      * @param appType  应用类型（zx=当家装修，gj=当家工匠）
-     * @param userInfoJsons
+     * @param infoResultDTO
      * accid:	String	是	用户帐号，最大长度32字符，必须保证一个APP内唯一
      * name:	String	否	用户昵称，最大长度64字符，可设置为空字符串
      * icon:	String	否	用户头像，最大长度1024字节，可设置为空字符串
@@ -40,23 +39,23 @@ public class NimUserService {
      * gender:	int	否	用户性别，0表示未知，1表示男，2女表示女，其它会报参数错误
      * ex:	String	否	用户名片扩展字段，最大长度1024字符，用户可自行扩展，建议封装成JSON字符串，也可以设置为空字符串
      */
-    public static   void registerUsers(String appType,String userInfoJsons) {
+    public static   void registerUsers(String appType,NimUserInfo infoResultDTO) {
         try {
-            List resList=new ArrayList();
-            JSONArray userInfoJson= JSON.parseArray(userInfoJsons);
-            for (Object o : userInfoJson) {
-                JSONObject jsonObject=(JSONObject)o;
                 List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("accid", jsonObject.getString("accid")));
-                params.add(new BasicNameValuePair("name", jsonObject.getString("name")));
-                params.add(new BasicNameValuePair("token", jsonObject.getString("token")));
-                params.add(new BasicNameValuePair("icon",jsonObject.getString("head")));
+                params.add(new BasicNameValuePair(NimUserInfo.ACCID, infoResultDTO.getAccid()));
+                params.add(new BasicNameValuePair(NimUserInfo.NAME, infoResultDTO.getName()));
+                params.add(new BasicNameValuePair(NimUserInfo.BIRTH, infoResultDTO.getBirth()));
+                params.add(new BasicNameValuePair(NimUserInfo.EMAIL, infoResultDTO.getEmail()));
+                params.add(new BasicNameValuePair(NimUserInfo.EX, infoResultDTO.getEx()));
+                params.add(new BasicNameValuePair(NimUserInfo.TOKEN, infoResultDTO.getToken()));
+                params.add(new BasicNameValuePair(NimUserInfo.GENDER, infoResultDTO.getGender()!=null?String.valueOf(infoResultDTO.getGender()):"0"));
+                params.add(new BasicNameValuePair(NimUserInfo.ICON, infoResultDTO.getIcon()));
+                params.add(new BasicNameValuePair(NimUserInfo.MOBILE, infoResultDTO.getMobile()));
+                params.add(new BasicNameValuePair(NimUserInfo.SIGN, infoResultDTO.getSign()));
                 //UTF-8编码,解决中文问题
                 HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
 
                 String res = NIMPost.postNIMServer(NIMPost.CREATE, entity, NIMPost.APPKEY, NIMPost.SECRET);
-                resList.add(res);
-            }
         } catch (Exception e) {
             LOG.error("Error response from JPush server. Should review and fix it. ", e);
             LOG.info("Error Message: " + e.getMessage());

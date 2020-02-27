@@ -1,14 +1,8 @@
 package com.dangjia.acg.common.util.nimserver.apply;
 
-import cn.jiguang.common.ClientConfig;
-import cn.jiguang.common.resp.APIConnectionException;
-import cn.jiguang.common.resp.APIRequestException;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.nimserver.NIMPost;
-import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -16,7 +10,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -36,7 +32,7 @@ public class NimMessageService {
      * @param fromId   发送者的用户名（必填）
      * @param text     消息内容 （必填）
      */
-    public void sendGroupTextByAdmin(String appType, String targetId, String fromId, String text) {
+    public static void sendGroupTextByAdmin(String appType, String targetId, String fromId, String text) {
 
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -63,7 +59,7 @@ public class NimMessageService {
      * @param appType 应用类型（zx=当家装修，gj=当家工匠）
      * @param alert   通知内容
      */
-    public void sendSysPush(String appType, String alert) {
+    public static void sendSysPush(String appType, String alert) {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("from", NIMPost.SYS_ACCID));
@@ -86,7 +82,7 @@ public class NimMessageService {
      * @param alert    通知内容
      * @param speak    语音通知内容
      */
-    public void sendMemberIdPush(String appType, String[] memberId,String alert, String speak) {
+    public static void sendMemberIdPush(String appType, String[] memberId,String alert, String speak) {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("fromAccid", NIMPost.SYS_ACCID));

@@ -1,14 +1,13 @@
 package com.dangjia.acg.service.store;
 
-import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.nimserver.NIMPost;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
@@ -58,8 +57,6 @@ public class StoreUserServices {
     private ClientService clientService;
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private MessageAPI messageAPI;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -234,7 +231,7 @@ public class StoreUserServices {
         storeUserDTO.setModifyDate(mainUser.getModifyDate());// 修改日期
         String storeName = store.getStoreName() + (storeUser.getType() == 0 ? "-内场销售" : "-外场销售");
         storeUserDTO.setStoreName(storeName);//门店——岗位名称
-        storeUserDTO.setAppKey(messageAPI.getAppKey(AppType.SALE.getDesc()));//极光聊天的Key
+        storeUserDTO.setAppKey(NIMPost.APPKEY);//网易云聊天的Key
         storeUserDTO.setOutField(clientService.getResidentialRangeDTOList(userId));
         storeUserDTO.setMonthlyTarget(clientService.getMonthlyTargetList(userId));
         return ServerResponse.createBySuccess("查询成功", storeUserDTO);

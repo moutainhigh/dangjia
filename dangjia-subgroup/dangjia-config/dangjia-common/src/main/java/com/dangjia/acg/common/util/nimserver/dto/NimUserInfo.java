@@ -9,6 +9,7 @@ public class NimUserInfo {
 
     private String	accid	;//	用户帐号，最大长度32字符，必须保证一个APP内唯一
     private String	name	;//	用户昵称，最大长度64字符，可设置为空字符串
+    private String	token	;//	用户TOKEN
     private String	icon	;//	用户头像，最大长度1024字节，可设置为空字符串
     private String	sign	;//	用户签名，最大长度256字符，可设置为空字符串
     private String	email	;//	用户email，最大长度64字符，可设置为空字符串
