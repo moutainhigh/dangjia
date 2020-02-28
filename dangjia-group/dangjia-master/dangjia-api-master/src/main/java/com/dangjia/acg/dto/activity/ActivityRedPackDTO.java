@@ -76,6 +76,10 @@ public class ActivityRedPackDTO{
 	@ApiModelProperty("状态，0正常，1停用")
 	private int deleteState;//deletestate
 
+	private String status;//优惠卷状态：1发行中，2暂停发放，3已过期，4发送完毕
+
+	private String statusNme;//状态名称
+
 	@ApiModelProperty("优惠券拆分包")
 	private List<ActivityRedPackRule> redPackRule;
 	@ApiModelProperty("优惠券拆分包(文字说明)")

@@ -114,5 +114,22 @@
         FROM dj_activity_red_pack_record
         where business_order_number = #{businessOrderNumber}
     </select>
+
+    <select id="queryActivityRedPackRecordList" resultType="com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO">
+        SELECT
+            rpr.id,
+            rpr.sort,
+            rpr.pack_num packNum,
+          (case when rpr.member_id!=null then 1 else 0 end) isReceived,
+          (case when rpr.business_order_number!=null then 1 else 0 end) isApply,
+            rpr.have_receive haveReceive,
+            rpr.business_order_number businessOrderNumber
+        FROM
+            dj_activity_red_pack_record rpr
+        WHERE
+            rpr.red_pack_id = #{redPackId}
+        order by rpr.sort
+
+    </select>
 </mapper>
 

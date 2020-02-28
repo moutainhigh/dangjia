@@ -49,6 +49,9 @@ public class ActivityRedPackRecordDTO {
 	@ApiModelProperty("订单编号")
 	private String businessOrderNumber;
 
+	private Integer sort;
+	private String packNum;//券码
+
 	private ActivityRedPack redPack;
 
 	private ActivityRedPackRule redPackRule;
@@ -65,6 +68,10 @@ public class ActivityRedPackRecordDTO {
 
 	@ApiModelProperty("有效结束时间")
 	private Date endDate;//
+
+	private Integer isReceived;//是否领取(1是，0否）
+
+	private Integer isApply;//是否核销(1是，0否）
 
 	public void toConvert(){
 		if (this.getRedPack().getType() == 0) {

@@ -378,6 +378,65 @@ public class RedPackService {
         }
     }
 
+    /**
+     * 中台--优惠卷详情
+     * @param redPackId 优惠卷ID
+     * @return
+     */
+    public ServerResponse getNewActivityRedPackDetail(String  redPackId){
+        try{
+            if(redPackId==null){
+                return ServerResponse.createByErrorMessage("查询失败");
+            }
+            ActivityRedPackDTO activityRedPackDTO=activityRedPackMapper.getNewActivityRedPackDetail(redPackId);
+            return ServerResponse.createBySuccess("查询成功",activityRedPackDTO);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 中台--优惠卷领取列表
+     * @param redPackId 优惠卷ID
+     * @return
+     */
+    public ServerResponse getActivityRedPackRecordList(PageDTO pageDTO,String  redPackId){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<ActivityRedPackRecordDTO> list = activityRedPackRecordMapper.queryActivityRedPackRecordList(redPackId);
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    /**
+     * 中台--查询优惠卷列表
+     *
+     * @param status 优惠卷状态：1发行中，2暂停发放，3已过期，4发送完毕
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户Id
+     * @param cityId 城市Id
+     * @return
+     */
+    public ServerResponse queryNewActivityRedList(PageDTO pageDTO,Integer sourceType,String userId,String cityId,String status ){
+        try{
+            String storefrontId=null;
+            if(sourceType==2){
+                Storefront storefront=masterStorefrontService.getStorefrontByUserId(userId,cityId);
+                storefrontId=storefront.getId();
+            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<ActivityRedPackDTO> list = activityRedPackMapper.queryActivityRedPackRecords(sourceType,status,storefrontId,cityId);
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch(Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     /**
      *  * 中台--新增优惠卷--查询类别

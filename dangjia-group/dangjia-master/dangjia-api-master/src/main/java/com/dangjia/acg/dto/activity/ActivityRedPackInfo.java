@@ -27,7 +27,7 @@ public class ActivityRedPackInfo {
 
 
 	@ApiModelProperty("有效开始时间")
-	private Date startDate;//
+	private Date startDate;//fromObjectName
 
 	@ApiModelProperty("有效结束时间")
 	private Date endDate;//

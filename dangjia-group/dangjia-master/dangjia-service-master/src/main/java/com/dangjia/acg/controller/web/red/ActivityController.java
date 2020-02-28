@@ -174,6 +174,44 @@ public class ActivityController  implements ActivityAPI {
         }
     }
     /**
+     * 中台--优惠卷详情
+     * @param request
+     * @param redPackId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getNewActivityRedPackDetail(HttpServletRequest request,String  redPackId){
+        return redPackService.getNewActivityRedPackDetail(redPackId);
+    }
+
+    /**
+     * 中台--优惠卷领取列表
+     * @param request
+     * @param redPackId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getActivityRedPackRecordList(HttpServletRequest request,PageDTO pageDTO,String  redPackId){
+        return redPackService.getActivityRedPackRecordList(pageDTO,redPackId);
+    }
+
+    /**
+     * 中台--查询优惠卷列表
+     *
+     * @param status 优惠卷状态：1发行中，2暂停发放，3已过期，4发送完毕
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户Id
+     * @param cityId 城市Id
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryNewActivityRedList(HttpServletRequest request,PageDTO pageDTO,Integer sourceType,String userId,String cityId,String status){
+        return redPackService.queryNewActivityRedList(pageDTO,sourceType,userId,cityId,status);
+    }
+    /**
      *  * 中台--新增优惠卷--查询类别
      * @param request
      * @param sourceType 发行级别：1城市卷，2店铺卷

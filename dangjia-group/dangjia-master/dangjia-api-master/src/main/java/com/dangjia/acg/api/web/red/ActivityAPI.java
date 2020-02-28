@@ -115,6 +115,7 @@ public interface ActivityAPI {
      * 新增
      *
      * @param activityRedPack
+     *
      * @return
      */
     @PostMapping("web/activity/red/add")
@@ -124,6 +125,47 @@ public interface ActivityAPI {
                                       @RequestParam("ruleNum") String ruleNum,
                                       @RequestParam("ruleMoney") String ruleMoney,
                                       @RequestParam("ruleSatisfyMoney") String ruleSatisfyMoney);
+
+    /**
+     * 中台--查询优惠卷列表
+     *
+     * @param status 优惠卷状态：1发行中，2暂停发放，3已过期，4发送完毕
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户Id
+     * @param cityId 城市Id
+     * @return
+     */
+    @PostMapping("web/activity/red/queryNewActivityRedList")
+    @ApiOperation(value = "获取所有优惠券列表", notes = "获取所有优惠券列表")
+    ServerResponse queryNewActivityRedList(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("pageDTO") PageDTO pageDTO,
+                                           @RequestParam("sourceType") Integer sourceType,
+                                           @RequestParam("userId") String userId,
+                                           @RequestParam("cityId") String cityId,
+                                         @RequestParam("status") String status);
+
+    /**
+     * 中台--优惠卷详情
+     * @param request
+     * @param redPackId
+     * @return
+     */
+    @PostMapping("web/activity/red/getNewActivityRedPackDetail")
+    @ApiOperation(value = "中台--优惠卷详情", notes = "优惠卷详情")
+    ServerResponse getNewActivityRedPackDetail(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("redPackId") String  redPackId);
+
+    /**
+     * 中台--优惠卷领取列表
+     * @param request
+     * @param redPackId
+     * @return
+     */
+    @PostMapping("web/activity/red/getActivityRedPackRecordList")
+    @ApiOperation(value = "中台--优惠卷领取列表", notes = "优惠卷领取列表")
+    ServerResponse getActivityRedPackRecordList(@RequestParam("request") HttpServletRequest request,
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                                @RequestParam("redPackId") String  redPackId);
 
     /**
      * 中台--新增优惠卷
@@ -137,6 +179,8 @@ public interface ActivityAPI {
     ServerResponse addNewActivityRedPack(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("activityRedPackInfo") ActivityRedPackInfo activityRedPackInfo,
                                          @RequestParam("userId") String userId);
+
+
 
     /**
      *  * 中台--新增优惠卷--查询类别
