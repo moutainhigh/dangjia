@@ -250,6 +250,17 @@ public class TaskService {
                 task.setImage(imageAddress + "icon/chaichu.png");
                 task.setHtmlUrl(address + String.format(DjConstants.GJPageAddress.COMFIRMAPPLY + "&houseFlowApplyId=%s",
                         userToken, house.getCityId(), "验收工匠完工申请", houseFlowApply.getId()));
+                if(workerType.getType()==6){
+                    Example example = new Example(HouseFlowApplyImage.class);
+                    example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_ID, houseId).andEqualTo(HouseFlowApplyImage.IMAGE_TYPE, 4);
+                    int num = houseFlowApplyImageMapper.selectCountByExample(example);//验收图
+                    if(num==0){
+                        task.setType(1016);
+                        task.setTaskId(houseId);
+                        taskList.add(task);
+                        continue;
+                    }
+                }
                 task.setType(1012);
                 task.setTaskId(houseFlowApply.getId());
                 taskList.add(task);
