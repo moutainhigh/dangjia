@@ -2,6 +2,7 @@ package com.dangjia.acg.dto.group;
 
 
 import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -40,5 +41,5 @@ public class GroupDTO extends BaseEntity {
 	private String adminId;
 
 	@ApiModelProperty("群成员")
-	private List<Map> members;
+	private List<NimUserInfo> members;
 }

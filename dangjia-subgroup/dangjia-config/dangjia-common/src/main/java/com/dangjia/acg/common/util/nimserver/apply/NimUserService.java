@@ -2,6 +2,7 @@ package com.dangjia.acg.common.util.nimserver.apply;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.nimserver.NIMPost;
 import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import org.apache.http.HttpEntity;
@@ -78,7 +79,8 @@ public class NimUserService {
             //UTF-8编码,解决中文问题
             HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
             String res = NIMPost.postNIMServer(NIMPost.GETUINFOS, entity, NIMPost.APPKEY, NIMPost.SECRET);
-            JSONArray userInfoJson= JSON.parseArray(res);
+            JSONObject uinfos= JSON.parseObject(res);
+            JSONArray userInfoJson= JSON.parseArray(uinfos.getString("uinfos"));
             List<NimUserInfo> resultDTO=userInfoJson.toJavaList(NimUserInfo.class);
             return resultDTO;
         } catch (Exception e) {

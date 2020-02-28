@@ -6,8 +6,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.nimserver.NIMPost;
 import com.dangjia.acg.common.util.nimserver.dto.NimGroup;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -38,7 +40,7 @@ public class NimGroupService {
      * @param desc（选填）群描述
      *              支持的字符：全部，包括表情符号。
      */
-    public String createGroup(String appType, String ownerUsername, String name, String[] membersUsername, String avatar, String desc) {
+    public static String createGroup(String appType, String ownerUsername, String name, String[] membersUsername, String avatar, String desc) {
 
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -50,6 +52,7 @@ public class NimGroupService {
             params.add(new BasicNameValuePair("joinmode", "0"));
             params.add(new BasicNameValuePair("beinvitemode", "1"));
             params.add(new BasicNameValuePair("invitemode", "1"));
+            params.add(new BasicNameValuePair("msg", name+"邀请您入群"));
             //UTF-8编码,解决中文问题
             HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
             String res = NIMPost.postNIMServer(NIMPost.TEAM_CREATE, entity, NIMPost.APPKEY, NIMPost.SECRET);
@@ -72,7 +75,7 @@ public class NimGroupService {
      * @param removeList remove json数组表示要从群组删除的用户（任选）
      *        addList和removeList  两者至少要有一个
      */
-    public  void manageGroup(String appType,String groupId, String ownerUsername,String[] addList,String[] removeList) {
+    public static void manageGroup(String appType,String groupId, String ownerUsername,String[] addList,String[] removeList) {
 
         try {
             if(addList!=null&&addList.length>0) {
@@ -104,25 +107,33 @@ public class NimGroupService {
      * @param gid 群组ID
      * @return
      */
-    public  List<Map>  getGroupInfoMembers(String appType, String gid) {
+    public static List<NimUserInfo>  getGroupInfoMembers(String appType, String gid) {
         try {
-            List<Map> resultMap=new ArrayList<Map>();
+            List<NimUserInfo> resultMap=new ArrayList<>();
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("tid", gid));
             HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
            String res= NIMPost.postNIMServer(NIMPost.TEAM_DETAIL, entity, NIMPost.APPKEY, NIMPost.SECRET);
             JSONObject json =JSON.parseObject(res);
             if(json!=null) {
-                JSONArray members = json.getJSONArray("members");
+                StringBuffer accids=new StringBuffer();
+                JSONObject jsonms =json.getJSONObject("tinfo");
+                JSONObject owner =jsonms.getJSONObject("owner");
+                if(owner!=null) {
+                    accids.append(owner.getString("accid"));
+                }
+
+                JSONArray members = jsonms.getJSONArray("members");
                 if(members!=null&&members.size()>0) {
                     for (Object member : members) {
                         JSONObject m = (JSONObject) member;
-                        Map map = new HashMap();
-                        map.put("nickname", m.get("nick"));
-                        map.put("memberId", m.get("accid"));
-                        map.put("username", m.get("name"));
-                        resultMap.add(map);
+                        accids.append(","+m.getString("accid"));
                     }
+                }
+
+
+                if(!CommonUtil.isEmpty(accids)) {
+                    resultMap = NimUserService.getUserInfo(appType, accids.toString());
                 }
             }
             return resultMap;

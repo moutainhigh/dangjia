@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.nimserver.apply.NimGroupService;
 import com.dangjia.acg.common.util.nimserver.apply.NimMessageService;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import org.apache.http.HttpEntity;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Firrela
@@ -44,8 +47,11 @@ public class MainTest {
 //        System.out.println("--------"+res2);
 
 //        sendMsg("13755051550","13755051551");
-        NimMessageService.sendMemberIdPush("1",new String[]{"13755051551"}, " 的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>","111");
+//        NimMessageService.sendMemberIdPush("1",new String[]{"13755051551"}, " 的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>的刷卡机会疯狂拉收到回复老师打卡机九尾狐放肆<br>","111");
 //        NimMessageService.sendSysPush("1","sss");
+//        NimGroupService.createGroup("1","13755051550","小分队",new String[]{"13755051551"},"http://pic1.zhimg.com/50/v2-60957c76fd38d48903276445b27ac714_hd.jpg","hahaha");
+        List<NimUserInfo> res=NimGroupService.getGroupInfoMembers("1","2775748139");
+        System.out.println("--------"+res);
         //TODO: 对结果的业务处理，如解析返回结果，并保存成功注册的用户
     }
 

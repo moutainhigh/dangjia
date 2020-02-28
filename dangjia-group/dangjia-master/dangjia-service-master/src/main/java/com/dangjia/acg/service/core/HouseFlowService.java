@@ -1249,7 +1249,7 @@ public class HouseFlowService {
                 PageInfo pageInfo = (PageInfo) groups.getResultObj();
                 List<GroupDTO> listdto = pageInfo.getList();
                 if (listdto != null && listdto.size() > 0) {
-                    groupInfoService.editManageGroup(Integer.parseInt(listdto.get(0).getGroupId()), memberid, "");
+                    groupInfoService.editManageGroup(listdto.get(0).getGroupId(), memberid, "");
                 }
             }
         } catch (Exception e) {
