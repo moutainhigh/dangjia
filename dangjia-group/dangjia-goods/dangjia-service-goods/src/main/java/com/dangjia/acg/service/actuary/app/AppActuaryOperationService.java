@@ -17,7 +17,9 @@ import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.mapper.sup.IShopMapper;
 import com.dangjia.acg.mapper.sup.IShopProductMapper;
+import com.dangjia.acg.modle.activity.DjActivitySession;
 import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
+import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.GoodsGroup;
 import com.dangjia.acg.modle.basics.GroupLink;
@@ -89,6 +91,8 @@ public class AppActuaryOperationService {
     private IGoodsDjStoreActivityProductMapper iGoodsDjStoreActivityProductMapper;
     @Autowired
     private IGoodsDjActivitySessionMapper iGoodsDjActivitySessionMapper;
+    @Autowired
+    private IGoodsDjStoreParticipateActivitiesMapper iGoodsDjStoreParticipateActivitiesMapper;
 
 
     @Autowired
@@ -337,8 +341,17 @@ public class AppActuaryOperationService {
             ActuarialProductAppDTO goodsDTO = assembleGoodsResult(product, goods);
             DjStoreActivityProduct djStoreActivityProduct =
                     iGoodsDjStoreActivityProductMapper.selectByPrimaryKey(storeActivityProductId);
-            goodsDTO.setRushPurchasePrice(djStoreActivityProduct.getRushPurchasePrice());
-            iGoodsDjActivitySessionMapper.selectByPrimaryKey(djStoreActivityProduct);
+            if(djStoreActivityProduct!=null){
+                goodsDTO.setRushPurchasePrice(djStoreActivityProduct.getRushPurchasePrice());
+                if(djStoreActivityProduct.getActivityType()==1) {
+                    DjStoreParticipateActivities djStoreParticipateActivities
+                            = iGoodsDjStoreParticipateActivitiesMapper.selectByPrimaryKey(djStoreActivityProduct.getStoreParticipateActivitiesId());
+                    DjActivitySession djActivitySession =
+                            iGoodsDjActivitySessionMapper.selectByPrimaryKey(djStoreParticipateActivities.getActivitySessionId());
+                    goodsDTO.setEndSession(djActivitySession.getEndSession());
+                    goodsDTO.setSessionStartTime(djActivitySession.getSessionStartTime());
+                }
+            }
             //如果商品为0：材料；1：服务
             GoodsGroup srcGoodsGroup = null;
             List<String> pIdTargetGroupSet = new ArrayList<>();
