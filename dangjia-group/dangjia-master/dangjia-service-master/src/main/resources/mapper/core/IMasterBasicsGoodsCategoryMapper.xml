@@ -17,4 +17,40 @@
         GROUP BY
             a.category_id
     </select>
+
+    <select id="queryCategoryListByType" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+            id,
+            NAME,
+            parent_id AS parentId,
+            parent_top AS parentTop,
+            image,
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            is_last_category AS isLastCategory,
+            purchase_restrictions AS purchaseRestrictions,
+            cover_image AS coverImage,
+            category_label_ids categoryLabelId,
+            owner_display ownerDisplay
+        FROM dj_basics_goods_category c where parent_id =#{parentId}
+        <if test="sourceType==2">
+            AND EXISTS (
+            SELECT
+               t2.parent_top
+            FROM
+                dj_basics_storefront_product t,
+                dj_basics_product_template t1,
+                dj_basics_goods_category t2
+            WHERE
+              t.prod_template_id = t1.id
+            AND t1.category_id = t2.id
+            AND t.storefront_id = #{storefrontId}
+            AND (
+            c.id = t2.parent_top
+            OR c.parent_top = t2.parent_top
+            )
+            )
+        </if>
+        ORDER BY sort,create_date asc
+    </select>
 </mapper>

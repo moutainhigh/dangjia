@@ -138,6 +138,64 @@ public interface ActivityAPI {
                                          @RequestParam("activityRedPackInfo") ActivityRedPackInfo activityRedPackInfo,
                                          @RequestParam("userId") String userId);
 
+    /**
+     *  * 中台--新增优惠卷--查询类别
+     * @param request
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户Id
+     * @param cityId 城市Id
+     * @param parentId 父类ID
+     * @return
+     */
+    @PostMapping("web/activity/red/queryCategoryListByType")
+    @ApiOperation(value = "中台--新增优惠卷--查询类别", notes = "中台--新增优惠卷--查询类别")
+    ServerResponse queryCategoryListByType(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("sourceType") Integer sourceType,
+                                         @RequestParam("userId") String userId,
+                                         @RequestParam("cityId") String cityId,
+                                         @RequestParam("parentId") String parentId);
+
+
+    /**
+     * 中台--新增优惠卷--查询货品
+     * @param request
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户Id
+     * @param cityId 城市Id
+     * @param categoryId 类别ID
+     * @param pageDTO 分页
+     * @return
+     */
+    @PostMapping("web/activity/red/queryGoodsByType")
+    @ApiOperation(value = "中台--新增优惠卷--查询货品", notes = "中台--新增优惠卷--查询货品")
+    ServerResponse queryGoodsByType(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("sourceType") Integer sourceType,
+                                     @RequestParam("userId") String userId,
+                                     @RequestParam("cityId") String cityId,
+                                     @RequestParam("categoryId") String categoryId,
+                                     @RequestParam("pageDTO") PageDTO pageDTO,
+                                    @RequestParam("searchKey") String searchKey);
+
+    /**
+     * 中台--新增优惠卷--查询商品
+     * @param request
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param goodsId 货品ID
+     * @return
+     */
+    @PostMapping("web/activity/red/queryPrductByType")
+    @ApiOperation(value = "中台--新增优惠卷--查询商品", notes = "中台--新增优惠卷--查询商品")
+    ServerResponse queryPrductByType(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("sourceType") Integer sourceType,
+                                         @RequestParam("userId") String userId,
+                                         @RequestParam("cityId") String cityId,
+                                         @RequestParam("goodsId") String goodsId,
+                                     @RequestParam("searchKey") String searchKey);
+
+
+
     @PostMapping("web/activity/close")
     @ApiOperation(value = "活动设置为关闭", notes = "活动设置为关闭")
     ServerResponse closeActivity(@RequestParam("id") String id);

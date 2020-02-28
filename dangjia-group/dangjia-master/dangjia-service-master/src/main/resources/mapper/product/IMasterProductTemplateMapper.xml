@@ -53,7 +53,7 @@
         p.unit_name as unitName,
         p.type as type,
         sp.sell_price as price,
-        sp.name as productName,
+        sp.product_name as productName,
         p.istop,
         p.value_id_arr AS valueIdArr,
         p.value_name_arr AS valueNameArr,
@@ -132,6 +132,52 @@
         GROUP BY
         t1.sell_price ASC
         limit 1
+    </select>
+
+    <select id="queryPrductTemplateByType" resultType="java.util.Map">
+       SELECT
+           c.id productId,
+           c.name productName,
+           c.product_sn productSn,
+           c.image
+        FROM
+            dj_basics_product_template c,
+          dj_basics_goods g
+        WHERE
+            c.goods_id=#{goodsId}
+        and c.city_id=#{cityId}
+        and c.goods_id=g.id
+        and c.maket=1
+        and c.type=1
+        and c.data_status=0
+        <if test="searchKey!=null and searchKey!=''">
+            and (c.name like CONCAT('%',#{searchKey},'%')
+            or g.name like CONCAT('%',#{searchKey},'%'))
+        </if>
+    </select>
+
+    <select id="queryPrductByType"  resultType="java.util.Map">
+
+        SELECT
+             p.id productId,
+           p.product_name productName,
+           c.product_sn productSn,
+           p.image
+        FROM
+            dj_basics_product_template c,
+          dj_basics_goods g,
+          dj_basics_storefront_product p
+        WHERE
+            c.goods_id=#{goodsId}
+        and c.goods_id=g.id
+        and c.data_status=0
+        and c.id=p.prod_template_id
+        and p.is_shelf_status=1
+        and p.storefront_id=#{storefrontId}
+        <if test="searchKey!=null and searchKey!=''">
+            and (p.name like CONCAT('%',#{searchKey},'%')
+            or g.name like CONCAT('%',#{searchKey},'%'))
+        </if>
     </select>
 
 </mapper>

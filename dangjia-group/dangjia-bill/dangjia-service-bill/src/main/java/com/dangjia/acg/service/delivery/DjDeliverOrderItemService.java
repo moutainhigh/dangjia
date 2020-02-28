@@ -93,6 +93,7 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
             paymentToBeMadeDTO.setModifyDate(order.getModifyDate());
             paymentToBeMadeDTO.setOrderSource(order.getOrderSource());
+            paymentToBeMadeDTO.setBusinessOrderNumber(order.getBusinessOrderNumber());
            // House house= houseAPI.selectHouseById(order.getHouseId());
             String memberId="";
             MemberAddress memberAddress=billMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
