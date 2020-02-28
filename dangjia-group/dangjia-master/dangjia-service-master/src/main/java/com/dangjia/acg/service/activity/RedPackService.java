@@ -48,10 +48,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 优惠券管理
@@ -396,6 +393,59 @@ public class RedPackService {
             activityRedPackRecordMapper.insertSelective(activityRedPackRecord);
         }
     }
+
+    /**
+     * 业主端--获取所有有效的优惠券
+     *
+     * @param cityId
+     * @param userToken 指定用户是否已经领取该优惠券
+     * @return
+     */
+    public ServerResponse queryMyActivityRedList(String userToken,Integer sourceType,String cityId){
+        try{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            Map<String,Object> map=new HashMap<>();
+            List<ActivityRedPackRecordDTO> list=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,1);//查有效的
+            map.put("list",list);
+            //查询当前用户优惠券数量
+            map.put("totalCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),null));//全部券
+            map.put("totalCityCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),1));//城市平台券
+            map.put("totalStorefrontCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),2));//店铺券
+            return ServerResponse.createBySuccess("查询成功",map);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 业主端--获取用户所有失效的优惠券
+     *
+     * @param cityId
+     * @param userToken 指定用户是否已经领取该优惠券
+     * @return
+     */
+    public ServerResponse queryMyExpireRedList(String userToken,Integer sourceType,String cityId,PageDTO pageDTO){
+        try{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<ActivityRedPackRecordDTO> list=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,2);//查失效
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 
     /**
      * 中台--优惠卷详情

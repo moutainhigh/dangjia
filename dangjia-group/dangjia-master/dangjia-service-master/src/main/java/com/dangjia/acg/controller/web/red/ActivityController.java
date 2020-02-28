@@ -174,6 +174,31 @@ public class ActivityController  implements ActivityAPI {
         }
     }
     /**
+     * 业主端--获取所有有效的优惠券
+     *
+     * @param cityId
+     * @param userToken 指定用户是否已经领取该优惠券
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryMyActivityRedList(String userToken,Integer sourceType,String cityId){
+        return redPackService.queryMyActivityRedList(userToken,sourceType,cityId);
+    }
+
+    /**
+     * 业主端--获取用户所有失效的优惠券
+     *
+     * @param cityId
+     * @param userToken 指定用户是否已经领取该优惠券
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryMyExpireRedList(String userToken,Integer sourceType,String cityId,PageDTO pageDTO){
+        return redPackService.queryMyExpireRedList(userToken,sourceType,cityId,pageDTO);
+    }
+    /**
      * 中台--优惠卷详情
      * @param request
      * @param redPackId

@@ -131,5 +131,83 @@
         order by rpr.sort
 
     </select>
+
+    <select id="queryMyAticvityList" resultType="com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO">
+        SELECT
+            p.id,
+            p.`name`,
+            p.from_object_type fromObjectType,
+            p.type,
+            (
+                CASE
+                WHEN (
+                   (p.type = 0 || p.type = 1)
+                    AND p.satisfy_money > 0
+                ) THEN
+                CONCAT('满',p.satisfy_money,'元可用')
+                ELSE
+                '无门槛'
+                END
+            ) satisfyMoneyRemark,
+            (
+                CASE
+                WHEN p.source_type = 1 THEN
+                '平台券'
+                WHEN p.source_type = 2 THEN
+                '店铺券'
+                END
+            ) typeName,
+        <if test="searchType==2"><!--失效优惠券-->
+            (
+                CASE
+                WHEN r.business_order_number!=null THEN
+                '已使用'
+                else
+                '已失效'
+                END
+            ) statusName,
+        </if>
+            p.satisfy_money,
+            p.money,
+            p.source_type sourceType,
+            c.`name` cityName,
+            p.start_date startDate,
+            p.end_date endDate
+        FROM
+        dj_activity_red_pack p,
+        dj_activity_red_pack_record r,
+        dj_other_city c
+        WHERE
+        r.red_pack_id = p.id
+        AND p.city_id = c.id
+        <if test="searchType==1"> <!--有效优惠券-->
+            AND p.end_date >= DATE_FORMAT(NOW(), '%Y-%m-%d')
+            and r.business_order_number is null
+        </if>
+        <if test="searchType==2"><!--失效优惠券-->
+        <![CDATA[
+           AND( p.end_date < DATE_FORMAT(NOW(), '%Y-%m-%d')
+            or r.business_order_number is not null)]]>
+        </if>
+        AND r.member_id = #{memberId}
+        <if test="null!=sourceType and ''!=sourceType">
+            and p.source_type=#{sourceType}
+        </if>
+        order by r.modify_date desc
+    </select>
+
+    <select id="queryActivityRedCount" resultType="java.lang.Integer">
+        SELECT
+            count(r.id)
+        FROM
+            dj_activity_red_pack p,
+            dj_activity_red_pack_record r
+        WHERE
+            r.red_pack_id = p.id
+        AND r.member_id = #{memberId}
+        <if test="null!=sourceType and ''!=sourceType">
+            and p.source_type=#{sourceType}
+        </if>
+    </select>
 </mapper>
 

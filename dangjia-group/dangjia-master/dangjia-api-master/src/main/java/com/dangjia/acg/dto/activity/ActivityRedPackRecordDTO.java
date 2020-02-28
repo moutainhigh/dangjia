@@ -46,6 +46,9 @@ public class ActivityRedPackRecordDTO {
 	@ApiModelProperty("优惠券Id")
 	private String redPackId;//
 
+	@ApiModelProperty("优惠券类型名称")
+	private String typeName;
+
 	@ApiModelProperty("订单编号")
 	private String businessOrderNumber;
 
@@ -62,6 +65,12 @@ public class ActivityRedPackRecordDTO {
 	private String share;//是否公用说明
 	private String selected;//是否选中
 
+	private String Type;//优惠券类型 0为减免金额券 1 为折扣券 2代金券
+	private String satisfyMoneyRemark;//满足使用的说明
+	private Double money;//面值，折扣，满减额度
+	private String cityName;//城市名称
+	private Integer sourceType;//优惠券类型 1城市券，2店铺券
+	private String statusName;//优惠券使用状态
 
 	@ApiModelProperty("有效开始时间")
 	private Date startDate;//

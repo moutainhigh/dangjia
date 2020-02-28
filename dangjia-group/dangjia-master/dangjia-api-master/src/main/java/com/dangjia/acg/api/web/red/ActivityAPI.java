@@ -127,6 +127,33 @@ public interface ActivityAPI {
                                       @RequestParam("ruleSatisfyMoney") String ruleSatisfyMoney);
 
     /**
+     * 业主端--获取所有有效的优惠券
+     *
+     * @param cityId
+     * @param userToken 指定用户是否已经领取该优惠券
+     * @return
+     */
+    @PostMapping("app/activity/red/queryMyActivityRedList")
+    @ApiOperation(value = "业主端--获取所有有效的优惠券", notes = "业主端--获取所有有效的优惠券")
+    ServerResponse queryMyActivityRedList(@RequestParam("userToken") String userToken,
+                                       @RequestParam("sourceType") Integer sourceType,
+                                       @RequestParam("cityId") String cityId);
+
+    /**
+     * 业主端--获取用户所有失效的优惠券
+     *
+     * @param cityId
+     * @param userToken 指定用户是否已经领取该优惠券
+     * @return
+     */
+    @PostMapping("app/activity/red/queryMyExpireRedList")
+    @ApiOperation(value = "业主端--获取用户所有失效的优惠券", notes = "业主端--获取用户所有失效的优惠券")
+    ServerResponse queryMyExpireRedList(@RequestParam("userToken") String userToken,
+                                          @RequestParam("sourceType") Integer sourceType,
+                                          @RequestParam("cityId") String cityId,
+                                          @RequestParam("pageDTO") PageDTO pageDTO);
+
+    /**
      * 中台--查询优惠卷列表
      *
      * @param status 优惠卷状态：1发行中，2暂停发放，3已过期，4发送完毕
@@ -151,7 +178,7 @@ public interface ActivityAPI {
      * @return
      */
     @PostMapping("web/activity/red/getNewActivityRedPackDetail")
-    @ApiOperation(value = "中台--优惠卷详情", notes = "优惠卷详情")
+    @ApiOperation(value = "中台--优惠券详情", notes = "优惠卷详情")
     ServerResponse getNewActivityRedPackDetail(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("redPackId") String  redPackId);
 
@@ -162,7 +189,7 @@ public interface ActivityAPI {
      * @return
      */
     @PostMapping("web/activity/red/getActivityRedPackRecordList")
-    @ApiOperation(value = "中台--优惠卷领取列表", notes = "优惠卷领取列表")
+    @ApiOperation(value = "中台--优惠券领取列表", notes = "优惠卷领取列表")
     ServerResponse getActivityRedPackRecordList(@RequestParam("request") HttpServletRequest request,
                                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                                 @RequestParam("redPackId") String  redPackId);
@@ -175,7 +202,7 @@ public interface ActivityAPI {
      * @return
      */
     @PostMapping("web/activity/red/addNewActivityRedPack")
-    @ApiOperation(value = "中台--新增优惠卷", notes = "中台--新增优惠卷")
+    @ApiOperation(value = "中台--新增优惠券", notes = "中台--新增优惠卷")
     ServerResponse addNewActivityRedPack(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("activityRedPackInfo") ActivityRedPackInfo activityRedPackInfo,
                                          @RequestParam("userId") String userId);
@@ -192,7 +219,7 @@ public interface ActivityAPI {
      * @return
      */
     @PostMapping("web/activity/red/queryCategoryListByType")
-    @ApiOperation(value = "中台--新增优惠卷--查询类别", notes = "中台--新增优惠卷--查询类别")
+    @ApiOperation(value = "中台--新增优惠券--查询类别", notes = "中台--新增优惠卷--查询类别")
     ServerResponse queryCategoryListByType(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("sourceType") Integer sourceType,
                                          @RequestParam("userId") String userId,
@@ -211,7 +238,7 @@ public interface ActivityAPI {
      * @return
      */
     @PostMapping("web/activity/red/queryGoodsByType")
-    @ApiOperation(value = "中台--新增优惠卷--查询货品", notes = "中台--新增优惠卷--查询货品")
+    @ApiOperation(value = "中台--新增优惠券--查询货品", notes = "中台--新增优惠卷--查询货品")
     ServerResponse queryGoodsByType(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("sourceType") Integer sourceType,
                                      @RequestParam("userId") String userId,
