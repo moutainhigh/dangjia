@@ -22,6 +22,10 @@ public interface CartAPI {
     @PostMapping("app/cart/setCart")
     @ApiOperation(value = "设置购物车商品数量", notes = "设置购物车商品数量")
     ServerResponse setCart(HttpServletRequest request, String userToken, Cart cart);
+
+    @PostMapping("app/cart/setCart1")
+    @ApiOperation(value = "要货添加购物篮", notes = "要货添加购物篮")
+    ServerResponse setCart1(HttpServletRequest request, String userToken, String jsonStr, String houseId);
  
     
     @PostMapping("app/cart/clearCart")

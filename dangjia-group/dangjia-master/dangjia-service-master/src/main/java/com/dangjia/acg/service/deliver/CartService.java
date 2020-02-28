@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.deliver;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.product.BasicsGoodsCategoryAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
@@ -37,6 +39,7 @@ import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
@@ -126,20 +129,45 @@ public class CartService {
                     cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
                     cart.setCityId(house.getCityId());
                 }
-//                  else {//商品库商品
-//                    DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectByPrimaryKey(cart.getProductId());
-//                    BasicsGoods basicsGoods=iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
-//                    cart.setProductSn(djBasicsProductTemplate.getProductSn());
-//                    cart.setProductName(djBasicsProductTemplate.getName());
-//                    cart.setMemberId(operator.getId());
-//                    cart.setPrice(djBasicsProductTemplate.getPrice());
-//                    cart.setWorkerTypeId(operator.getWorkerTypeId());
-//                    cart.setProductType(basicsGoods.getType());
-//                    cart.setUnitName(djBasicsProductTemplate.getUnitName());
-//                    cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
-//                    cart.setCityId(house.getCityId());
-//
-//                }
+                cartMapper.insert(cart);
+            }
+
+        }
+        return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setCart(String userToken, String jsonStr, String houseId) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member operator = (Member) object;
+        Example example = new Example(Cart.class);
+        example.createCriteria()
+                .andEqualTo(Cart.HOUSE_ID, houseId)
+                .andEqualTo(Cart.WORKER_TYPE_ID, operator.getWorkerTypeId())
+                .andEqualTo(Cart.MEMBER_ID, operator.getId());
+        cartMapper.deleteByExample(example);
+        JSONArray jsonArr = JSONArray.parseArray(jsonStr);
+        for (Object o : jsonArr) {
+            JSONObject obj = (JSONObject) o;
+            //查询对应的符合条件的商品信息
+            StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(obj.getString("productId"));
+            if (storefrontProduct != null && StringUtils.isNotBlank(storefrontProduct.getId())) {//店铺商品(补人工为店铺商品)
+                DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+                BasicsGoods basicsGoods = iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
+                Cart cart = new Cart();
+                cart.setProductSn(djBasicsProductTemplate.getProductSn());
+                cart.setProductName(storefrontProduct.getProductName());
+                cart.setMemberId(operator.getId());
+                cart.setPrice(storefrontProduct.getSellPrice());
+                cart.setWorkerTypeId(operator.getWorkerTypeId());
+                cart.setProductType(basicsGoods.getType());
+                cart.setUnitName(djBasicsProductTemplate.getUnitName());
+                cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
+                cart.setShopCount(obj.getDouble("shopCount"));
                 cartMapper.insert(cart);
             }
         }
