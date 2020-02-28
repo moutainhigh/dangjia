@@ -45,7 +45,6 @@ import java.util.*;
 @Service
 public class GroupInfoService {
 
-    public final static String ADMIN_NAME = "dangjia";
 
     //客服
     public final static String KEFU = "业主您好！我是当家装修的客服NAME，我将负责帮您协调传达信息，有任何装修问题都可以给我发消息。";
@@ -121,55 +120,11 @@ public class GroupInfoService {
      * @return
      */
     public ServerResponse sendGroupsNotify(HttpServletRequest request, GroupNotifyInfo groupNotifyInfo) {
-        groupNotifyInfo.setUserId(ADMIN_NAME);
-        NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupNotifyInfo.getGroupId(), ADMIN_NAME, groupNotifyInfo.getText());
+        NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupNotifyInfo.getGroupId(), groupNotifyInfo.getUserId(), groupNotifyInfo.getText());
         groupNotifyInfoMapper.insert(groupNotifyInfo);
         return ServerResponse.createBySuccessMessage("ok");
     }
 
-    /**
-     * 批量更新群组成员（本地）
-     *
-     * @param groupId    gid群组ID
-     * @param addList    添加到群组的用户,多个以逗号分割（任选）
-     * @param removeList 从群组删除的用户,多个以逗号分割（任选）addList和removeList  两者至少要有一个
-     */
-    public ServerResponse editManageLocalGroup(String groupId,String ownerUsername, String addList, String removeList) {
-        String[] adds = StringUtils.split(addList, ",");
-        String[] removes = StringUtils.split(removeList, ",");
-        if (!CommonUtil.isEmpty(addList)) {
-            registerJGUsers(AppType.GONGJIANG.getDesc(), adds, new String[adds.length]);
-        }
-        //夸应用添加删除
-        NimGroupService.manageGroup(AppType.GONGJIANG.getDesc(), groupId,ownerUsername, adds, removes);
-        if (CommonUtil.isEmpty(addList)) {
-            return ServerResponse.createBySuccessMessage("ok");
-        }
-        //给业主发送默认提示语
-        for (String userid : adds) {
-            Member member = memberMapper.selectByPrimaryKey(userid);
-            if (member != null) {
-                String text = "";
-                if (member.getWorkerType() == 1) {
-                    text = SHEJISHI;
-                }
-                if (member.getWorkerType() == 2) {
-                    text = JINGSUANSHI;
-                }
-                if (member.getWorkerType() == 3) {
-                    text = DAGUANGJIA;
-                }
-                if (member.getWorkerType() > 3) {
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                    text = GONGJIANG.replaceAll("WORKERNAME", workerType.getName());
-                }
-                if (!CommonUtil.isEmpty(text)) {
-                    NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
-                }
-            }
-        }
-        return ServerResponse.createBySuccessMessage("ok");
-    }
 
     /**
      * 批量更新群组成员(跨域)
