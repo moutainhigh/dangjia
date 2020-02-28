@@ -350,17 +350,36 @@ public class RedPackService {
         //优惠卷赋值
         ActivityRedPack activityRedPack=new ActivityRedPack();
         BeanUtils.beanToBean(activityRedPackInfo,activityRedPack);
-        if(activityRedPackInfo.getSourceType()==2){//店铺卷
+        String name="";
+
+        if(activityRedPackInfo.getSourceType()==2){//店铺券
           //1.查询店铺ID
             Storefront storefront= masterStorefrontService.getStorefrontByUserId(userId,activityRedPackInfo.getCityId());
             activityRedPack.setStorefrontId(storefront.getId());
+            //3类别，4货品，5商品，6城市，7店铺
+            if(activityRedPackInfo.getFromObjectType()==3){
+                activityRedPack.setName("限"+storefront.getStorefrontName()+"店"+activityRedPackInfo.getFromObjectName()+"类商品使用");
+            }else if(activityRedPackInfo.getFromObjectType()==4||activityRedPackInfo.getFromObjectType()==5){
+                activityRedPack.setName("限"+storefront.getStorefrontName()+"店"+activityRedPackInfo.getFromObjectName()+"使用");
+            }else{
+                activityRedPack.setName(storefront.getStorefrontName()+"店通用");
+            }
+        }else{//城市券
+            //3类别，4货品，5商品，6城市，7店铺
+            if(activityRedPackInfo.getFromObjectType()==3){
+                activityRedPack.setName("限"+activityRedPackInfo.getFromObjectName()+"类商品使用");
+            }else if(activityRedPackInfo.getFromObjectType()==4||activityRedPackInfo.getFromObjectType()==5){
+                activityRedPack.setName("限"+activityRedPackInfo.getFromObjectName()+"使用");
+            }else{
+                activityRedPack.setName("全品类通用");
+            }
         }
         activityRedPack.setIsShare(1);
         activityRedPack.setDeleteState(0);//状态正常
         activityRedPack.setSurplusNums(activityRedPack.getNum());
-        //2.添加优惠卷信息
+        //2.添加优惠券信息
         activityRedPackMapper.insertSelective(activityRedPack);
-        //3.添加优惠卷编码列表
+        //3.添加优惠券编码列表
         insertActivityRedPackRecord(activityRedPack);
         return ServerResponse.createBySuccessMessage("添加成功");
     }
