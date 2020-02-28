@@ -38,4 +38,8 @@ public interface OptionalLabelAPI {
     @PostMapping("/web/label/editOptionalLabel")
     @ApiOperation(value = "编辑标签", notes = "编辑标签")
     ServerResponse editOptionalLabel(@RequestParam("jsonStr") String jsonStr);
+
+    @PostMapping("/web/label/queryActuarialOptionalLabel")
+    @ApiOperation(value = "精算选配标签", notes = "精算选配标签")
+    ServerResponse queryActuarialOptionalLabel();
 }

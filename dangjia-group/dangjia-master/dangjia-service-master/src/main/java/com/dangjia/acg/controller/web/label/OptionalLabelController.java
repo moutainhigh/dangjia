@@ -55,4 +55,10 @@ public class OptionalLabelController implements OptionalLabelAPI {
             return ServerResponse.createByErrorMessage("标题已存在");
         }
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryActuarialOptionalLabel() {
+        return optionalLabelServices.queryActuarialOptionalLabel();
+    }
 }

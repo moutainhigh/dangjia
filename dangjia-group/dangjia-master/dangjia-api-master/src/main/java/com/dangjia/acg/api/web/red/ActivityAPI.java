@@ -4,6 +4,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.activity.ActivityDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
+import com.dangjia.acg.dto.activity.ActivityRedPackInfo;
 import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
@@ -123,6 +124,19 @@ public interface ActivityAPI {
                                       @RequestParam("ruleNum") String ruleNum,
                                       @RequestParam("ruleMoney") String ruleMoney,
                                       @RequestParam("ruleSatisfyMoney") String ruleSatisfyMoney);
+
+    /**
+     * 中台--新增优惠卷
+     *
+     * @param activityRedPackInfo 优惠卷对象
+     * @param userId 用户ID
+     * @return
+     */
+    @PostMapping("web/activity/red/addNewActivityRedPack")
+    @ApiOperation(value = "中台--新增优惠卷", notes = "中台--新增优惠卷")
+    ServerResponse addNewActivityRedPack(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("activityRedPackInfo") ActivityRedPackInfo activityRedPackInfo,
+                                         @RequestParam("userId") String userId);
 
     @PostMapping("web/activity/close")
     @ApiOperation(value = "活动设置为关闭", notes = "活动设置为关闭")

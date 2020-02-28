@@ -111,15 +111,14 @@ public class DecorationCostController implements DecorationCostAPI {
      * @param userToken 用户TOKEN
      * @param cityId 城市ID
      * @param houseId 房子ID
-     * @param workerTypeId 工种ID
-     * @param categoryTopId 顶级分类ID
+     * @param searchTypeId 工种ID/ 顶级分类ID
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse searchBudgetCategoryLabelList(String userToken,String cityId,String houseId,
-                                                 String workerTypeId,String categoryTopId){
-        return decorationCostService.searchBudgetCategoryLabelList(userToken,cityId,houseId,workerTypeId,categoryTopId);
+                                                 String searchTypeId){
+        return decorationCostService.searchBudgetCategoryLabelList(userToken,cityId,houseId,searchTypeId);
     }
 
     /**

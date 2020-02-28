@@ -17,6 +17,9 @@ import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.mapper.sup.IShopMapper;
 import com.dangjia.acg.mapper.sup.IShopProductMapper;
+import com.dangjia.acg.modle.activity.DjActivitySession;
+import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
+import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.GoodsGroup;
 import com.dangjia.acg.modle.basics.GroupLink;
@@ -84,6 +87,12 @@ public class AppActuaryOperationService {
     private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
     @Autowired
     private ShopCartAPI shopCartAPI;
+    @Autowired
+    private IGoodsDjStoreActivityProductMapper iGoodsDjStoreActivityProductMapper;
+    @Autowired
+    private IGoodsDjActivitySessionMapper iGoodsDjActivitySessionMapper;
+    @Autowired
+    private IGoodsDjStoreParticipateActivitiesMapper iGoodsDjStoreParticipateActivitiesMapper;
 
 
     @Autowired
@@ -286,7 +295,7 @@ public class AppActuaryOperationService {
 
             StorefrontProduct product = iShopProductMapper.selectByPrimaryKey(selectVal);//目标product 对象
 
-            Object goodsDTO = goodsDetail(product, budgetMaterialId);
+            Object goodsDTO = goodsDetail(product, budgetMaterialId, null);
             if (goodsDTO != null) {
                 return ServerResponse.createBySuccess("查询成功", goodsDTO);
             } else {
@@ -302,13 +311,13 @@ public class AppActuaryOperationService {
      * 商品详情
      * gId:  budgetWorkerId   budgetMaterialId
      */
-    public ServerResponse getCommo(String productId, String budgetMaterialId) {
+    public ServerResponse getCommo(String productId, String budgetMaterialId, String storeActivityProductId) {
         try {
             StorefrontProduct product = iShopProductMapper.selectByPrimaryKey(productId);//目标product 对象
             if (product == null) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
             }
-            Object goodsDTO = goodsDetail(product, budgetMaterialId);
+            Object goodsDTO = goodsDetail(product, budgetMaterialId, storeActivityProductId);
             if (goodsDTO != null) {
                 return ServerResponse.createBySuccess("查询成功", goodsDTO);
             } else {
@@ -325,11 +334,24 @@ public class AppActuaryOperationService {
      * @param budgetMaterialId 传null ：表示不是精算里的商品。 如果是精算里的商品 ，可能有 关联组，关联组id 在 精算表里存的，所以，需要传精算id  ，
      * @return GoodsDTO
      */
-    public Object goodsDetail(StorefrontProduct product, String budgetMaterialId) {
+    public Object goodsDetail(StorefrontProduct product, String budgetMaterialId, String storeActivityProductId) {
         try {
 
             BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
             ActuarialProductAppDTO goodsDTO = assembleGoodsResult(product, goods);
+            DjStoreActivityProduct djStoreActivityProduct =
+                    iGoodsDjStoreActivityProductMapper.selectByPrimaryKey(storeActivityProductId);
+            if(djStoreActivityProduct!=null){
+                goodsDTO.setRushPurchasePrice(djStoreActivityProduct.getRushPurchasePrice());
+                if(djStoreActivityProduct.getActivityType()==1) {
+                    DjStoreParticipateActivities djStoreParticipateActivities
+                            = iGoodsDjStoreParticipateActivitiesMapper.selectByPrimaryKey(djStoreActivityProduct.getStoreParticipateActivitiesId());
+                    DjActivitySession djActivitySession =
+                            iGoodsDjActivitySessionMapper.selectByPrimaryKey(djStoreParticipateActivities.getActivitySessionId());
+                    goodsDTO.setEndSession(djActivitySession.getEndSession());
+                    goodsDTO.setSessionStartTime(djActivitySession.getSessionStartTime());
+                }
+            }
             //如果商品为0：材料；1：服务
             GoodsGroup srcGoodsGroup = null;
             List<String> pIdTargetGroupSet = new ArrayList<>();
@@ -417,7 +439,6 @@ public class AppActuaryOperationService {
             ActuarialProductAppDTO goodsDTO = new ActuarialProductAppDTO();
             DjBasicsProductTemplate productTemplate = iBasicsProductTemplateMapper.selectByPrimaryKey(product.getProdTemplateId());//目标product 对象
             BasicsGoodsCategory goodsCategory = iBasicsGoodsCategoryMapper.selectByPrimaryKey(goods.getCategoryId());
-
             goodsDTO.setGoodsId(goods.getId());
             goodsDTO.setProductTemplateId(productTemplate.getId());
             if (goodsCategory != null) {

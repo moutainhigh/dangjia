@@ -3,6 +3,7 @@ package com.dangjia.acg.service.activity;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -10,6 +11,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
+import com.dangjia.acg.dto.activity.ActivityRedPackInfo;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
@@ -21,12 +23,15 @@ import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
@@ -63,6 +68,8 @@ public class RedPackService {
     private IMemberMapper memberMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private MasterStorefrontService masterStorefrontService;
 
     /**
      * 获取所有优惠券
@@ -307,6 +314,48 @@ public class RedPackService {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
         }
     }
+
+
+    /**
+     * 中台--新增优惠卷
+     *
+     * @param activityRedPackInfo 优惠卷对象
+     * @param userId 用户ID
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse addNewActivityRedPack(ActivityRedPackInfo activityRedPackInfo, String userId){
+        //优惠卷赋值
+        ActivityRedPack activityRedPack=new ActivityRedPack();
+        BeanUtils.beanToBean(activityRedPackInfo,activityRedPack);
+        if(activityRedPackInfo.getSourceType()==2){//店铺卷
+          //1.查询店铺ID
+            Storefront storefront= masterStorefrontService.getStorefrontByUserId(userId,activityRedPackInfo.getCityId());
+            activityRedPack.setStorefrontId(storefront.getId());
+        }
+        activityRedPack.setIsShare(1);
+        activityRedPack.setDeleteState(0);//状态正常
+        activityRedPack.setSurplusNums(activityRedPack.getNum());
+        //2.添加优惠卷信息
+        activityRedPackMapper.insertSelective(activityRedPack);
+        //3.添加优惠卷编码列表
+        insertActivityRedPackRecord(activityRedPack);
+        return ServerResponse.createBySuccessMessage("添加成功");
+    }
+    //添加优惠卷编码
+    private void insertActivityRedPackRecord(ActivityRedPack activityRedPack){
+        ActivityRedPackRecord activityRedPackRecord;
+        for(int i=0;i<activityRedPack.getNum();i++){
+            activityRedPackRecord=new ActivityRedPackRecord();
+            activityRedPackRecord.setCityId(activityRedPack.getCityId());
+            activityRedPackRecord.setRedPackId(activityRedPack.getId());
+            activityRedPackRecord.setPackNum("DJYHJ"+System.currentTimeMillis()+ (int) (Math.random() * 9000 + (1001+i)));
+            activityRedPackRecord.setHaveReceive(4);//未领取
+            activityRedPackRecord.setSort(i+1);
+            activityRedPackRecordMapper.insertSelective(activityRedPackRecord);
+        }
+    }
+
 
     /**
      * 设置优惠券优惠券

@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.actuary.app;
 
+import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.modle.sup.Shop;
@@ -186,6 +187,17 @@ public class ActuarialProductAppDTO {
 
     @ApiModelProperty("该product所在的原关联组id")
     private String srcGroupId;
+
+    @ApiModelProperty("抢购价格")
+    private Double rushPurchasePrice;
+
+    @Desc(value = "场次开始时间")
+    @ApiModelProperty("场次开始时间")
+    private Date sessionStartTime;
+
+    @Desc(value = "场次结束时间")
+    @ApiModelProperty("场次结束时间")
+    private Date endSession;
 
     @ApiModelProperty("关联的工艺ID，多个逗号分割")
     private String technologyIds;

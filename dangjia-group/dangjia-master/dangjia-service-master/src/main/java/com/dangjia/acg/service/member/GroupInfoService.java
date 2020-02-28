@@ -284,7 +284,7 @@ public class GroupInfoService {
 
     public void registerJGUsers(String appType, String[] username, String[] prefixs) {
         List<NimUserInfo> userInfos = NimUserService.getUserInfo(appType, Arrays.toString(username));
-        if (username != null && username.length > 0) {
+        if (userInfos != null && userInfos.size() > 0) {
             for (int i = 0; i < userInfos.size(); i++) {
                 NimUserInfo userInfoResult =userInfos.get(i);
                 boolean result  = Arrays.asList(username).contains(userInfoResult.getAccid());

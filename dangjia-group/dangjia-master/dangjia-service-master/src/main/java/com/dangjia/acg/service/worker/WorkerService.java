@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.*;
+import com.dangjia.acg.controller.web.red.ActivityController;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.*;
@@ -29,6 +30,8 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -42,6 +45,7 @@ import java.util.*;
  */
 @Service
 public class WorkerService {
+    private static Logger logger = LoggerFactory.getLogger(WorkerService.class);
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -336,7 +340,7 @@ public class WorkerService {
      * @param bankCard
      * @return
      */
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard, String userId, String phone, int smscode) {
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard, String userId, String phone, Integer smscode) {
         try {
             if (CommonUtil.isEmpty(bankCard.getBankCardNumber())) {
                 return ServerResponse.createByErrorMessage("请输入银行卡卡号");
@@ -383,6 +387,7 @@ public class WorkerService {
             this.workerBankCardMapper.insertSelective(bankCard);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
+            logger.error("操作失败",e);
             return ServerResponse.createByErrorMessage("操作失败，请您稍后再试");
         }
     }

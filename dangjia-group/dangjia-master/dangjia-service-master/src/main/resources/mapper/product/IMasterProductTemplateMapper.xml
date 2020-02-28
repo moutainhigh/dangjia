@@ -53,6 +53,7 @@
         p.unit_name as unitName,
         p.type as type,
         sp.sell_price as price,
+        sp.name as productName,
         p.istop,
         p.value_id_arr AS valueIdArr,
         p.value_name_arr AS valueNameArr,
