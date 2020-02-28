@@ -747,6 +747,7 @@
             )
             AND t2.data_status = 0
         )
+        ORDER BY t1.create_date DESC
     </select>
 
     <select id="queryAppointmentHump" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
@@ -788,7 +789,7 @@
         AND t.order_id =  #{orderId}
         AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
         AND t.data_status = 0
-        ORDER BY t.create_date
+        ORDER BY t.create_date DESC
     </select>
 
     <select id="queryDeliverOrderObligation" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
@@ -833,6 +834,7 @@
                   AND t1.house_id=#{houseId}
               </otherwise>
           </choose>
+        ORDER BY t1.create_date DESC
     </select>
 
     <select id="queryDeliverOrderItemObligation" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
@@ -874,6 +876,7 @@
         AND t3.prod_template_id = t4.id
         AND t1.parent_order_id = #{orderId}
         AND t2.data_status=0
+        ORDER BY t1.create_date DESC
     </select>
 
 
