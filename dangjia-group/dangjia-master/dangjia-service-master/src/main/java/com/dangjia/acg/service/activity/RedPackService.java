@@ -5,30 +5,42 @@ import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.controller.web.red.ActivityController;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackInfo;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
+import com.dangjia.acg.dto.product.BasicsGoodDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRuleMapper;
+import com.dangjia.acg.mapper.core.IMasterBasicsGoodsCategoryMapper;
+import com.dangjia.acg.mapper.core.IMasterBasicsGoodsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,6 +82,16 @@ public class RedPackService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private MasterStorefrontService masterStorefrontService;
+    private static Logger logger = LoggerFactory.getLogger(ActivityController.class);
+
+    @Autowired
+    private IMasterBasicsGoodsCategoryMapper masterBasicsGoodsCategoryMapper;
+    @Autowired
+    private IMasterBasicsGoodsMapper masterBasicsGoodsMapper;
+    @Autowired
+    private IMasterProductTemplateMapper masterProductTemplateMapper;
+    @Autowired
+    private ConfigUtil configUtil;
 
     /**
      * 获取所有优惠券
@@ -353,6 +375,94 @@ public class RedPackService {
             activityRedPackRecord.setHaveReceive(4);//未领取
             activityRedPackRecord.setSort(i+1);
             activityRedPackRecordMapper.insertSelective(activityRedPackRecord);
+        }
+    }
+
+
+    /**
+     *  * 中台--新增优惠卷--查询类别
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户Id
+     * @param cityId 城市Id
+     * @param parentId 父类ID
+     * @return
+     */
+    public ServerResponse queryCategoryListByType(Integer sourceType,String userId,String cityId,String parentId){
+        try{
+            String storefrontId=null;
+            if(sourceType==2){
+                Storefront storefront=masterStorefrontService.getStorefrontByUserId(userId,cityId);
+                storefrontId=storefront.getId();
+            }
+            List<BasicsGoodsCategory> goodsCategoryList = masterBasicsGoodsCategoryMapper.queryCategoryListByType(parentId, sourceType,storefrontId);
+            /*if (goodsCategoryList.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }*/
+            return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createBySuccessMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 中台--新增优惠卷--查询货品
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户Id
+     * @param cityId 城市Id
+     * @param categoryId 类别ID
+     * @param pageDTO 分页
+     * @return
+     */
+    public ServerResponse queryGoodsByType(Integer sourceType,String userId,String cityId, String categoryId,PageDTO pageDTO,String searchKey){
+        try{
+            String storefrontId=null;
+            if(sourceType==2){
+                Storefront storefront=masterStorefrontService.getStorefrontByUserId(userId,cityId);
+                storefrontId=storefront.getId();
+            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<BasicsGoodDTO> goodDTOList=masterBasicsGoodsMapper.queryGoodsByType(categoryId,sourceType,storefrontId,searchKey,cityId);
+            PageInfo pageResult = new PageInfo(goodDTOList);
+            pageResult.setList(goodDTOList);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createBySuccessMessage("查询失败");
+        }
+    }
+
+    /**
+     * 中台--新增优惠卷--查询商品
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param goodsId 货品ID
+     * @return
+     */
+    public ServerResponse queryPrductByType(Integer sourceType,String userId,String cityId,String goodsId,String searchKey){
+        try{
+            String storefrontId=null;
+            List<Map<String,Object>> productList=null;
+            if(sourceType==2){
+                Storefront storefront=masterStorefrontService.getStorefrontByUserId(userId,cityId);
+                storefrontId=storefront.getId();
+                productList=masterProductTemplateMapper.queryPrductByType(goodsId,storefrontId,searchKey);
+            }else{
+                productList=masterProductTemplateMapper.queryPrductTemplateByType(goodsId,searchKey,cityId);
+            }
+            if(productList!=null){
+                String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                 for(Map<String,Object> map:productList){
+                     String image=(String)map.get("image");
+                     map.put("imageUrl", StringTool.getImage(image,address));
+                 }
+            }
+            return ServerResponse.createBySuccess("查询成功",productList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createBySuccessMessage("查询失败");
         }
     }
 

@@ -173,6 +173,52 @@ public class ActivityController  implements ActivityAPI {
             return ServerResponse.createByErrorMessage("新增失败");
         }
     }
+    /**
+     *  * 中台--新增优惠卷--查询类别
+     * @param request
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户Id
+     * @param cityId 城市Id
+     * @param parentId 父类ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryCategoryListByType(HttpServletRequest request,Integer sourceType,String userId,String cityId,String parentId){
+        return redPackService.queryCategoryListByType(sourceType,userId,cityId,parentId);
+    }
+
+
+    /**
+     * 中台--新增优惠卷--查询货品
+     * @param request
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户Id
+     * @param cityId 城市Id
+     * @param categoryId 类别ID
+     * @param pageDTO 分页
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryGoodsByType(HttpServletRequest request,Integer sourceType,String userId,String cityId, String categoryId,PageDTO pageDTO,String searchKey){
+        return redPackService.queryGoodsByType(sourceType,userId,cityId,categoryId,pageDTO,searchKey);
+    }
+
+    /**
+     * 中台--新增优惠卷--查询商品
+     * @param request
+     * @param sourceType 发行级别：1城市卷，2店铺卷
+     * @param userId 用户ID
+     * @param cityId 城市ID
+     * @param goodsId 货品ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryPrductByType(HttpServletRequest request,Integer sourceType,String userId,String cityId,String goodsId,String searchKey){
+        return redPackService.queryPrductByType(sourceType,userId,cityId,goodsId,searchKey);
+    }
 
     @Override
     @ApiMethod

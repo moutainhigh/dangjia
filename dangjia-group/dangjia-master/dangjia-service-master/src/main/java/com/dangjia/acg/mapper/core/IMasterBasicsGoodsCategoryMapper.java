@@ -19,4 +19,8 @@ import java.util.List;
 public interface IMasterBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> {
 
     List<BasicsGoodsCategory> queryHouseWarehouseGoodsCategory(@Param("houseId") String houseId);
+
+    //根据父id查询下属商品类型(分店铺还是城市)
+    List<BasicsGoodsCategory> queryCategoryListByType(@Param("parentId") String parentId,@Param("sourceType") Integer sourceType,@Param("storefrontId") String storefrontId);
+
 }
