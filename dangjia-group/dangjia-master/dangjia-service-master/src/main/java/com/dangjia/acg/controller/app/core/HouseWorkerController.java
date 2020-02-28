@@ -117,6 +117,11 @@ public class HouseWorkerController implements HouseWorkerAPI {
                 imageList, latitude, longitude,returnableMaterial,materialProductArr);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse setHouseFlowImage(String houseId, String imageList){
+        return houseWorkerService.setHouseFlowImage(houseId,imageList);
+    }
     /**
      * 提前进场
      */

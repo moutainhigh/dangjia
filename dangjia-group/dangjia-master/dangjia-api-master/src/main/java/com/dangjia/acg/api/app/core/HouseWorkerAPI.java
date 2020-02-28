@@ -152,6 +152,9 @@ public interface HouseWorkerAPI {
     ServerResponse getAdvanceInAdvance(@RequestParam("userToken") String userToken,
                                        @RequestParam("houseFlowId") String houseFlowId);
 
+    @PostMapping("app/core/houseWorker/setHouseFlowImage")
+    @ApiOperation(value = "上传水电管路图", notes = "上传水电管路图")
+    ServerResponse setHouseFlowImage(@RequestParam("houseId") String houseId, @RequestParam("imageList") String imageList);
 
     /**
      * showdoc

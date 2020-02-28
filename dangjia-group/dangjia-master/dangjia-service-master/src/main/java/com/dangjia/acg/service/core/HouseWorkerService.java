@@ -1240,6 +1240,30 @@ public class HouseWorkerService {
     }
 
     /**
+     * 保存水电管路图图片
+     */
+    public ServerResponse setHouseFlowImage(String houseId, String imageList) {
+        StringBuilder strbfr = new StringBuilder();
+        if (StringUtil.isNotEmpty(imageList)) {
+            JSONArray imageObjArr = JSON.parseArray(imageList);
+            for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片
+                JSONObject imageObj = imageObjArr.getJSONObject(i);
+                int imageType = Integer.parseInt(imageObj.getString("imageType"));
+                String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
+                String[] imageArr = imageUrl.split(",");
+                for (String anImageArr : imageArr) {
+                    HouseFlowApplyImage houseFlowApplyImage = new HouseFlowApplyImage();
+                    houseFlowApplyImage.setHouseId(houseId);
+                    houseFlowApplyImage.setImageUrl(anImageArr);
+                    houseFlowApplyImage.setImageType(imageType);//图片类型 0：材料照片；1：进度照片；2:现场照片；3:其他
+                    houseFlowApplyImage.setImageTypeName(imageObj.getString("imageTypeName"));//图片类型名称 例如：材料照片；进度照片
+                    houseFlowApplyImageMapper.insert(houseFlowApplyImage);
+                }
+            }
+        }
+        return ServerResponse.createBySuccessMessage("上传成功");
+    }
+    /**
      * 保存巡查图片,验收节点图片等信息
      */
     public String setHouseFlowApplyImage(HouseFlowApply hfa, House house, String imageList) {
@@ -1268,7 +1292,7 @@ public class HouseWorkerService {
                     String imageTypeId = imageObj.getString("imageTypeId");
                     String productId = imageObj.getString("productId");
                     Technology technology = iMasterTechnologyMapper.selectByPrimaryKey(imageTypeId);
-                   // forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
+                    // forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
                     if (technology == null) continue;
                     TechnologyRecord technologyRecord = new TechnologyRecord();
                     technologyRecord.setHouseId(house.getId());

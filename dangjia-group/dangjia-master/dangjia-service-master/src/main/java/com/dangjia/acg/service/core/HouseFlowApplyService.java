@@ -1139,6 +1139,14 @@ public class HouseFlowApplyService {
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+            if(workerType.getType()==6){
+                Example example = new Example(HouseFlowApplyImage.class);
+                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_ID, houseFlowApply.getHouseId()).andEqualTo(HouseFlowApplyImage.IMAGE_TYPE, 4);
+                int num = houseFlowApplyImageMapper.selectCountByExample(example);//验收图
+                if(num==0){
+                    return ServerResponse.createByErrorMessage("您还未上传水电管路图",houseFlowApply.getHouseId());
+                }
+            }
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);//大管家的hf
 
