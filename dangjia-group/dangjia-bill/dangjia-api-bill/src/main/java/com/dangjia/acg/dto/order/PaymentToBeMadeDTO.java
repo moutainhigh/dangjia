@@ -17,6 +17,7 @@ import java.util.List;
 public class PaymentToBeMadeDTO{
 
     private String houseName;
+    private String businessOrderNumber;
     private List<OrderStorefrontDTO> orderStorefrontDTOS;
     private BigDecimal actualPaymentPrice;//实付总价
     private BigDecimal totalAmount;//总价（不含运费）
