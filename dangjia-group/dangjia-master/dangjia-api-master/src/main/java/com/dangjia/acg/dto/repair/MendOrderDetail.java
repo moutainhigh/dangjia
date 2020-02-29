@@ -23,6 +23,7 @@ public class MendOrderDetail {
     private Double totalAmount;
     private Date createDate;
     private Date modifyDate;
+    private String stateName;
 
 
     private String houseId;//房ID
@@ -48,4 +49,6 @@ public class MendOrderDetail {
     private List<Map<String,Object>> mapList;
     private List<Map<String, Object>> workerList;
     private List<String> imageList;
+
+    private List<Map> button;
 }
