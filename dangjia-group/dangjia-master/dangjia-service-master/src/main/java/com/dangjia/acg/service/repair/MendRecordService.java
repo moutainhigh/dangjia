@@ -32,6 +32,7 @@ import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -253,11 +254,29 @@ public class MendRecordService {
                 mendOrderDetail.setMendOrderId(orderSplit.getMendNumber());
                 mendOrderDetail.setType(5);
                 mendOrderDetail.setState(orderSplit.getApplyStatus());
+                switch (orderSplit.getApplyStatus()) {
+                    case 0:
+                        mendOrderDetail.setStateName("申请中");
+                        break;
+                    case 1:
+                    case 2:
+                        mendOrderDetail.setStateName("待发货");
+                        break;
+                    case 3:
+                        mendOrderDetail.setStateName("已拒绝");
+                        break;
+                    case 4:
+                        mendOrderDetail.setStateName("审核中");
+                        break;
+                    case 5:
+                        mendOrderDetail.setStateName("已撤回");
+                        break;
+                }
                 mendOrderDetail.setCreateDate(orderSplit.getCreateDate());
                 /*
                 计算要货单钱
                  */
-                mendOrderDetail.setTotalAmount(orderSplit.getTotalAmount().doubleValue());
+                mendOrderDetail.setTotalAmount(orderSplit.getTotalAmount()!=null?orderSplit.getTotalAmount().doubleValue():0d);
 
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 /*Example example = new Example(OrderSplitItem.class);
@@ -287,6 +306,23 @@ public class MendRecordService {
                     }
                     mapList.add(map);
                 }
+                List<Map> button = new ArrayList<>();
+                if(orderSplit.getApplyStatus()==0||orderSplit.getApplyStatus()==4||
+                        orderSplit.getApplyStatus()==1){
+                    Map map=new HashMap();
+                    map.put("withdraw","撤回货单");
+                    map.put("withdrawColour","#3B444D");
+                    map.put("mendOrderId",mendOrderId);
+                    button.add(map);
+                }
+                if(StringUtils.isNotBlank(orderSplit.getMendNumber())){
+                    Map map=new HashMap();
+                    map.put("repairInvoice","查看补货单");
+                    map.put("repairInvoiceColour","#F57341");
+                    map.put("mendOrderId",mendOrderId);
+                    button.add(map);
+                }
+                mendOrderDetail.setButton(button);
                 mendOrderDetail.setMapList(mapList);
 
             } else {

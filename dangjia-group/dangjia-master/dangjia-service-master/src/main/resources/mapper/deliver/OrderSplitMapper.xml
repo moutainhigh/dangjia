@@ -115,6 +115,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE
             t.house_id =#{houseId}
         AND  t.split_parent_id is null
+        ORDER BY t.create_date desc
     </select>
 
     <update id="updateOrderSplitStatus">

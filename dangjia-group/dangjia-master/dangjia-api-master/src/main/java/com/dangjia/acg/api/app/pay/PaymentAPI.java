@@ -92,4 +92,9 @@ public interface PaymentAPI {
                                       @RequestParam("userToken") String userToken,
                                       @RequestParam("workerId") String workerId);
 
+    @PostMapping("app/pay/payment/queryActivityRedPackInfo")
+    @ApiOperation(value = "查询可用优惠券", notes = "查询可用优惠券")
+    ServerResponse queryActivityRedPackInfo(@RequestParam("userToken") String userToken,
+                                    @RequestParam("productJsons") String productJsons);
+
 }

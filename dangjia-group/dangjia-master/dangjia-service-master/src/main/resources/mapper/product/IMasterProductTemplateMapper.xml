@@ -143,9 +143,10 @@
         FROM
             dj_basics_product_template c,
           dj_basics_goods g
-        WHERE
-            c.goods_id=#{goodsId}
-        and c.city_id=#{cityId}
+        WHERE c.city_id=#{cityId}
+        <if test="goodsId!=null and goodsId!=''">
+            and c.goods_id=#{goodsId}
+        </if>
         and c.goods_id=g.id
         and c.maket=1
         and c.type=1
@@ -167,9 +168,10 @@
             dj_basics_product_template c,
           dj_basics_goods g,
           dj_basics_storefront_product p
-        WHERE
-            c.goods_id=#{goodsId}
-        and c.goods_id=g.id
+        WHERE c.goods_id=g.id
+        <if test="goodsId!=null and goodsId!=''">
+            and c.goods_id=#{goodsId}
+        </if>
         and c.data_status=0
         and c.id=p.prod_template_id
         and p.is_shelf_status=1
@@ -178,6 +180,24 @@
             and (p.name like CONCAT('%',#{searchKey},'%')
             or g.name like CONCAT('%',#{searchKey},'%'))
         </if>
+    </select>
+
+    <select id="queryPrductByStorefrontId"  resultType="java.util.Map">
+        SELECT
+            p.id productId,
+            p.storefront_id storefrontId,
+            c.id prodTemplateId,
+            c.goods_id goodsId,
+            c.category_id categoryId,
+            g.parent_top categoryTopId
+        FROM
+            dj_basics_storefront_product p,
+            dj_basics_product_template c,
+            dj_basics_goods_category g
+        WHERE
+            p.prod_template_id = c.id
+        AND c.category_id = g.id
+        AND p.id = #{storefrontId}
     </select>
 
 </mapper>

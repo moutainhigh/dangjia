@@ -78,7 +78,7 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addCartBuyAgain(HttpServletRequest request, String userToken, String cityId, String jsonStr) {
-        return shopCartservice.addCartBuyAgain(userToken,cityId,jsonStr);
+    public ServerResponse addCartBuyAgain(HttpServletRequest request, String userToken, String cityId, String jsonStr,String orderId) {
+        return shopCartservice.addCartBuyAgain(userToken,cityId,jsonStr,orderId);
     }
 }

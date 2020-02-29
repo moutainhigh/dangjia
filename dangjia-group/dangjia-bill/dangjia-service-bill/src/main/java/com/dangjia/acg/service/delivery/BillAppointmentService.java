@@ -120,7 +120,7 @@ public class BillAppointmentService {
             }
             JSONObject job = (JSONObject) object;
             Member member = job.toJavaObject(Member.class);
-            if(!CommonUtil.isEmpty(orderIds)) {//库存页面预约发货
+            if(!CommonUtil.isEmpty(orderIds)) {//我的订单库存页面预约发货
                 Order order = djDeliverOrderMapper.selectByPrimaryKey(orderIds);
                 OrderSplit orderSplit = new OrderSplit();
                 Example example = new Example(OrderSplit.class);
@@ -168,6 +168,7 @@ public class BillAppointmentService {
                     orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
                     orderSplitItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                     billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
+                    orderItem.setAskCount(orderItem.getShopCount());
                     orderItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                     djDeliverOrderItemMapper.updateByPrimaryKey(orderItem);
                 });
@@ -223,6 +224,7 @@ public class BillAppointmentService {
                         orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
                         orderSplitItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                         billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
+                        orderItem.setAskCount(orderItem.getShopCount());
                         orderItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                         djDeliverOrderItemMapper.updateByPrimaryKey(orderItem);
                     }

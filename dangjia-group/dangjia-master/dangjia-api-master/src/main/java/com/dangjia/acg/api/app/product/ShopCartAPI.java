@@ -85,7 +85,8 @@ public interface ShopCartAPI {
     ServerResponse addCartBuyAgain(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("userToken") String userToken,
                                    @RequestParam("cityId") String cityId,
-                                   @RequestParam("jsonStr") String jsonStr);
+                                   @RequestParam("jsonStr") String jsonStr,
+                                   @RequestParam("orderId") String orderId);
 }
 
 
