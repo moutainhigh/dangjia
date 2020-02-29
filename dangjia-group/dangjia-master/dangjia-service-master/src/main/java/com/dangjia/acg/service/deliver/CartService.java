@@ -23,7 +23,6 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
-import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
@@ -128,6 +127,7 @@ public class CartService {
                     cart.setUnitName(djBasicsProductTemplate.getUnitName());
                     cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
                     cart.setCityId(house.getCityId());
+                    cart.setStorefrontId(storefrontProduct.getStorefrontId());
                 }
                 cartMapper.insert(cart);
             }
@@ -144,6 +144,7 @@ public class CartService {
             return (ServerResponse) object;
         }
         Member operator = (Member) object;
+        House house = iHouseMapper.selectByPrimaryKey(houseId);
         Example example = new Example(Cart.class);
         example.createCriteria()
                 .andEqualTo(Cart.HOUSE_ID, houseId)
@@ -168,6 +169,10 @@ public class CartService {
                 cart.setUnitName(djBasicsProductTemplate.getUnitName());
                 cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
                 cart.setShopCount(obj.getDouble("shopCount"));
+                cart.setHouseId(houseId);
+                cart.setProductId(obj.getString("productId"));
+                cart.setStorefrontId(storefrontProduct.getStorefrontId());
+                cart.setCityId(house.getCityId());
                 cartMapper.insert(cart);
             }
         }

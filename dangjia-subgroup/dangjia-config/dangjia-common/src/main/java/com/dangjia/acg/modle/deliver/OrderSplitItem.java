@@ -116,6 +116,7 @@ public class OrderSplitItem extends BaseEntity {
 	@Column(name = "image")
 	private String image;//图片
 
+
 	@Column(name = "house_id")
 	private String houseId;//房子id
 
@@ -124,6 +125,7 @@ public class OrderSplitItem extends BaseEntity {
 
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
+		this.imageUrl = StringUtils.isEmpty(this.image)?null:address+this.image;
 	}
 
 	@Column(name = "address_id")
@@ -181,4 +183,6 @@ public class OrderSplitItem extends BaseEntity {
 	List<Map<String,Object>> supplierIdlist;
 	@Transient
 	private Integer isNonPlatformSupperlier;
+	@Transient
+	private String imageUrl;//图片
 }

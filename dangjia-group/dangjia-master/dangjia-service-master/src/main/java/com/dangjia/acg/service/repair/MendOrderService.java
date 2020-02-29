@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberInfoMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.mapper.task.IMasterTaskStackMapper;
 import com.dangjia.acg.modle.brand.Unit;
@@ -45,6 +46,7 @@ import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.*;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
@@ -123,6 +125,8 @@ public class MendOrderService {
     private IOrderItemMapper iOrderItemMapper;
     @Autowired
     private IMasterOrderProgressMapper iMasterOrderProgressMapper;
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
 
     /**
      * 补材料明细
@@ -1095,11 +1099,12 @@ public class MendOrderService {
         MendMateriel mendMateriel = new MendMateriel();//补退材料明细
         double num = Double.parseDouble(shopCount);
         Warehouse warehouse = warehouseMapper.getByProductId(productId, house.getId());
-        DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productId);
+        StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+        DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), storefrontProduct.getProdTemplateId());
          mendMateriel.setCityId(house.getCityId());
         if (warehouse != null) {
             mendMateriel.setProductSn(product.getProductSn());
-            mendMateriel.setProductName(product.getName());
+            mendMateriel.setProductName(storefrontProduct.getProductName());
             mendMateriel.setPrice(warehouse.getPrice());
             mendMateriel.setCost(warehouse.getCost());
             mendMateriel.setUnitName(warehouse.getUnitName());
@@ -1110,10 +1115,10 @@ public class MendOrderService {
         } else {
 
             mendMateriel.setProductSn(product.getProductSn());
-            mendMateriel.setProductName(product.getName());
-            mendMateriel.setPrice(product.getPrice());
+            mendMateriel.setProductName(storefrontProduct.getProductName());
+            mendMateriel.setPrice(storefrontProduct.getSellPrice());
             mendMateriel.setCost(product.getCost());
-            mendMateriel.setTotalPrice(num * product.getPrice());
+            mendMateriel.setTotalPrice(num * storefrontProduct.getSellPrice());
             mendMateriel.setCategoryId(product.getCategoryId());
             mendMateriel.setImage(product.getImage());
             String unitName = forMasterAPI.getUnitName(house.getCityId(), product.getConvertUnit());

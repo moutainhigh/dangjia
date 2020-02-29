@@ -614,10 +614,28 @@ public class MendRecordService {
             Map<String, Object> map = new HashMap<>();
             map.put("mendOrderId", orderSplit.getId());
             map.put("number", orderSplit.getNumber());
-            map.put("name", "要货记录");
+            map.put("name", "申请要货");
             map.put("state", orderSplit.getApplyStatus());
             map.put("createDate", orderSplit.getCreateDate());
             map.put("type", type);
+            switch (orderSplit.getApplyStatus()) {
+                case 0:
+                    map.put("applyStatus","申请中");
+                    break;
+                case 1:
+                case 2:
+                    map.put("applyStatus","待发货");
+                    break;
+                case 3:
+                    map.put("applyStatus","已拒绝");
+                    break;
+                case 4:
+                    map.put("applyStatus","审核中");
+                    break;
+                case 5:
+                    map.put("applyStatus","已撤回");
+                    break;
+            }
             if (!CommonUtil.isEmpty(queryId)) {
                 /*example = new Example(OrderSplitItem.class);
                 example.createCriteria()

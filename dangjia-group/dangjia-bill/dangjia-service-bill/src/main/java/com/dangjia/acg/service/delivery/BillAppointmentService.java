@@ -120,7 +120,7 @@ public class BillAppointmentService {
             }
             JSONObject job = (JSONObject) object;
             Member member = job.toJavaObject(Member.class);
-            if(!CommonUtil.isEmpty(orderIds)) {//订单列表页面预约发货
+            if(!CommonUtil.isEmpty(orderIds)) {//库存页面预约发货
                 Order order = djDeliverOrderMapper.selectByPrimaryKey(orderIds);
                 OrderSplit orderSplit = new OrderSplit();
                 Example example = new Example(OrderSplit.class);
@@ -135,6 +135,7 @@ public class BillAppointmentService {
                 orderSplit.setCityId(order.getCityId());
                 orderSplit.setOrderId(orderIds);
                 orderSplit.setIsReservationDeliver("1");
+                orderSplit.setAddressId(order.getAddressId());
                 orderSplit.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                 billDjDeliverOrderSplitMapper.insert(orderSplit);
                 example=new Example(OrderItem.class);
