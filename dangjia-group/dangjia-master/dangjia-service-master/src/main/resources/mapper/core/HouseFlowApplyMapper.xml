@@ -91,9 +91,7 @@
         from dj_core_house_flow_apply
         where member_check = 0
         and house_id = #{houseId}
-
-        and ( ((apply_type=1 or apply_type=2) and (supervisor_check = 1))
-        or apply_type=0 )
+        and ((apply_type=1 or apply_type=2) or apply_type=0)
     </select>
 
     <!--查询待审核的申请-->
