@@ -286,10 +286,18 @@ public class ComplainService {
             }
         }
         Example example = new Example(Complain.class);
-        example.createCriteria()
-                .andEqualTo(Complain.COMPLAIN_TYPE, complainType)
-                .andEqualTo(Complain.BUSINESS_ID, businessId)
-                .andEqualTo(Complain.STATUS, 0);
+        if(CommonUtil.isEmpty(memberId)) {
+            example.createCriteria()
+                    .andEqualTo(Complain.COMPLAIN_TYPE, complainType)
+                    .andEqualTo(Complain.BUSINESS_ID, businessId)
+                    .andEqualTo(Complain.STATUS, 0);
+        }else{
+            example.createCriteria()
+                    .andEqualTo(Complain.COMPLAIN_TYPE, complainType)
+                    .andEqualTo(Complain.BUSINESS_ID, businessId)
+                    .andEqualTo(Complain.MEMBER_ID, memberId)
+                    .andEqualTo(Complain.STATUS, 0);
+        }
         List list = complainMapper.selectByExample(example);
         if (list.size() > 0) {
             return ServerResponse.createByErrorMessage("请勿重复提交申请！");
@@ -307,7 +315,9 @@ public class ComplainService {
         if (complainType == 4) {
             DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(complain.getUserId());
             if (djSupplier != null) {
-                complain.setMemberId(djSupplier.getId());
+                if(CommonUtil.isEmpty(complain.getMemberId())) {
+                    complain.setMemberId(djSupplier.getId());
+                }
                 complain.setUserMobile(djSupplier.getTelephone());
                 complain.setUserName(djSupplier.getName());
                 complain.setUserNickName("供应商-" + djSupplier.getCheckPeople());
@@ -328,7 +338,9 @@ public class ComplainService {
                         field = workerType.getName() + "-";
                     }
                 }
-                complain.setMemberId(member.getId());
+                if(CommonUtil.isEmpty(complain.getMemberId())) {
+                    complain.setMemberId(member.getId());
+                }
                 complain.setUserMobile(member.getMobile());
                 complain.setUserName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                 complain.setUserNickName(field + member.getNickName());
@@ -407,7 +419,9 @@ public class ComplainService {
             if (member != null) {
                 if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
                     WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                    field = workerType.getName() + "-";
+                    if(workerType!=null) {
+                        field = workerType.getName() + "-";
+                    }
                 }
                 userName = field + (CommonUtil.isEmpty(member.getName()) ? member.getUserName() : member.getName());
                 return userName;

@@ -879,6 +879,14 @@ public class DjDeliverOrderService {
                 list.add(map);
             }
         }
+        //重新排序
+        Collections.sort(list, new Comparator<Map<String, Object>>() {
+            public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+                Date date1 = (Date)o1.get("date");
+                Date date2 = (Date)o2.get("date");
+                return date1.compareTo(date2);
+            }
+        });
         collectDataDTO.setName("预计完工");
         collectDataDTO.setDate(date);
         collectDataDTO.setList(list);

@@ -98,7 +98,7 @@ public interface BasicsStorefrontAPI {
     /**
      * 我的钱包
      */
-    @PostMapping("/web/queryStorefrontWallet")
+    @PostMapping("store/sup/myWallet/web/queryStorefrontWallet")
     @ApiOperation(value = "店铺-我的钱包", notes = "店铺-我的钱包")
     ServerResponse queryStorefrontWallet(@RequestParam("userId") String userId,
                                          @RequestParam("cityId") String cityId);
