@@ -82,7 +82,12 @@ public class OrderController implements OrderAPI {
     @Override
     @ApiMethod
     public ServerResponse confirmOrderSplit(String houseId, String userToken) {
-        return orderService.confirmOrderSplit(userToken, houseId);
+        try {
+            return orderService.confirmOrderSplit(userToken, houseId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
     /**

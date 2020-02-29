@@ -113,12 +113,25 @@ public class RenovationSayService {
      */
     public ServerResponse queryRenovationSayList(PageDTO pageDTO){
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(RenovationSay.class);
             example.createCriteria()
                     .andEqualTo(RenovationSay.DATA_STATUS, 0);
             example.orderBy(RenovationSay.CREATE_DATE).desc();
             List<RenovationSay> renovationSays = renovationSayMapper.selectByExample(example);
+            StringBuffer stringBuffer=new StringBuffer();
+            renovationSays.forEach(renovationSay -> {
+                renovationSay.setCoverImageUrl(imageAddress+renovationSay.getCoverImage());
+                String[] split = renovationSay.getContentImage().split(",");
+                for (int i = 0; i < split.length; i++) {
+                    stringBuffer.append(imageAddress+split[i]);
+                    if(i<split.length-1) {
+                        stringBuffer.append(",");
+                    }
+                }
+                renovationSay.setContentImageUrl(stringBuffer.toString());
+            });
             PageInfo pageResult = new PageInfo(renovationSays);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
