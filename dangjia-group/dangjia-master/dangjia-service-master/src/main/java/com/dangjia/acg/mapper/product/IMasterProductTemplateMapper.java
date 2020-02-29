@@ -36,4 +36,7 @@ public interface IMasterProductTemplateMapper extends Mapper<DjBasicsProductTemp
     List<Map<String,Object>> queryPrductTemplateByType(@Param("goodsId") String goodsId,@Param("searchKey") String searchKey,@Param("cityId") String cityId);
 
 
+    //根据店铺ID查询店铺所有信息
+    Map<String,Object> queryPrductByStorefrontId( @Param("storefrontId") String storefrontId);
+
 }

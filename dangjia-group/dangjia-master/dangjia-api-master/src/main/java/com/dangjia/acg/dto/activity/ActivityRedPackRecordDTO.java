@@ -52,6 +52,9 @@ public class ActivityRedPackRecordDTO {
 	@ApiModelProperty("订单编号")
 	private String businessOrderNumber;
 
+
+
+
 	private Integer sort;
 	private String packNum;//券码
 
@@ -66,11 +69,21 @@ public class ActivityRedPackRecordDTO {
 	private String selected;//是否选中
 
 	private String Type;//优惠券类型 0为减免金额券 1 为折扣券 2代金券
+	private Double satisfyMoney;//满足条件的优惠金额
 	private String satisfyMoneyRemark;//满足使用的说明
 	private Double money;//面值，折扣，满减额度
 	private String cityName;//城市名称
 	private Integer sourceType;//优惠券类型 1城市券，2店铺券
 	private String statusName;//优惠券使用状态
+	@ApiModelProperty("来源数据ID")
+	private String fromObject;//
+	@ApiModelProperty("来源数据name")
+	private String fromObjectName;//
+	@ApiModelProperty("来源数据类型 0为人工 1为材料 2为单品,3类别，4货品，5商品，6城市，7店铺")
+	private int fromObjectType;//
+
+	private String storefrontId;//店铺ID
+
 
 	@ApiModelProperty("有效开始时间")
 	private Date startDate;//
@@ -81,6 +94,12 @@ public class ActivityRedPackRecordDTO {
 	private Integer isReceived;//是否领取(1是，0否）
 
 	private Integer isApply;//是否核销(1是，0否）
+
+
+	private Double totalMoney;//商品总额
+	private Double concessionMoney;//可优惠总额
+	private String products;//优惠商品ID，用逗号分隔
+
 
 	public void toConvert(){
 		if (this.getRedPack().getType() == 0) {

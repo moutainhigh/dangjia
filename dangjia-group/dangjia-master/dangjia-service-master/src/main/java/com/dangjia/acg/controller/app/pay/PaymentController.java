@@ -5,7 +5,10 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.pay.PayService;
 import com.dangjia.acg.service.pay.PaymentService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,6 +99,17 @@ public class PaymentController implements PaymentAPI {
         return paymentService.queryInsuranceInfo(userToken,workerId);
     }
 
+    /**
+     * 查询符合条件的优惠券
+     * @param userToken
+     * @param productJsons
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivityRedPackInfo(String userToken,String productJsons){
+        return paymentService.queryActivityRedPackInfo(userToken,productJsons);
+    }
 
 
 }

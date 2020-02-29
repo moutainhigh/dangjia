@@ -137,6 +137,10 @@
             p.id,
             p.`name`,
             p.from_object_type fromObjectType,
+            p.from_object fromObject,
+            p.storefront_id storefrontId,
+            p.from_object_name fromObjectName,
+            IFNULL(p.satisfy_money,0)  satisfyMoney,
             p.type,
             (
                 CASE
@@ -188,6 +192,13 @@
         <![CDATA[
            AND( p.end_date < DATE_FORMAT(NOW(), '%Y-%m-%d')
             or r.business_order_number is not null)]]>
+        </if>
+        <if test="searchType==3"> <!--可使用的有效优惠券-->
+            <![CDATA[
+            AND p.start_date <= DATE_FORMAT(NOW(), '%Y-%m-%d')
+            AND p.end_date >= DATE_FORMAT(NOW(), '%Y-%m-%d')
+            and r.business_order_number is null
+            ]]>
         </if>
         AND r.member_id = #{memberId}
         <if test="null!=sourceType and ''!=sourceType">
