@@ -56,6 +56,7 @@ import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
+import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
@@ -1275,6 +1276,7 @@ public class PaymentService {
                 totalMoney=recommendCuponsPack.getTotalMoney();
                 concessionMoney=recommendCuponsPack.getConcessionMoney();
                 concessionProducts=recommendCuponsPack.getProducts()+",";
+
             }
         }
 
@@ -1329,6 +1331,8 @@ public class PaymentService {
                     //优惠价钱
                     if(totalMoney>0&&concessionProducts.contains(good.getProductId()+",")){
                         orderItem.setDiscountPrice(MathUtil.div(MathUtil.mul(orderItem.getTotalPrice(),totalMoney),concessionMoney));//每个商品的优惠总额
+                    }else{
+                        orderItem.setDiscountPrice(0d);
                     }
 
                     if(orderSource==1||orderSource==4){
@@ -1396,9 +1400,8 @@ public class PaymentService {
                 businessOrder.setHouseId(houseId);
                 businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
                 businessOrder.setState(1);//刚生成
-                businessOrder.setTotalPrice(paymentPrice);
-                businessOrder.setDiscountsPrice(new BigDecimal(0));
-                businessOrder.setPayPrice(paymentPrice);
+                businessOrder.setTotalPrice(paymentPrice);//订单总额
+                businessOrder.setPayPrice(paymentPrice.add(totalMoveDost).add(freightPrice).subtract(order.getTotalDiscountPrice()));//实付总额
                 businessOrder.setDiscountsPrice(BigDecimal.valueOf(concessionMoney));
                 businessOrder.setRedPacketPayMoneyId(activityRedPackId);//优惠券ID
                 if(orderSource==1||orderSource==4){
@@ -1415,6 +1418,7 @@ public class PaymentService {
             order.setTotalStevedorageCost(totalMoveDost);//总搬运费
             order.setBusinessOrderNumber(businessOrder.getNumber());
             order.setTotalAmount(paymentPrice);// 订单总额(工钱)
+            order.setActualPaymentPrice(paymentPrice.add(totalMoveDost).add(freightPrice).subtract(order.getTotalDiscountPrice()));
             if(orderSource==4){
                 order.setWorkerTypeName("补差价订单");
             }
@@ -1448,6 +1452,15 @@ public class PaymentService {
                     example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID, shoppingCart.getId()).andEqualTo(DeliverOrderAddedProduct.SOURCE, 4);
                     masterDeliverOrderAddedProductMapper.deleteByExample(example1);
                 }
+            }
+
+            if(totalMoney>0){
+                //优惠卷状态改为已使用
+                ActivityRedPackRecord activityRedPackRecord=activityRedPackRecordMapper.selectByPrimaryKey(activityRedPackId);
+                activityRedPackRecord.setHaveReceive(1);
+                activityRedPackRecord.setBusinessOrderNumber(businessOrder.getNumber());
+                activityRedPackRecord.setModifyDate(new Date());
+                activityRedPackRecordMapper.updateByPrimaryKeySelective(activityRedPackRecord);
             }
 
             //清空购物车指定商品
