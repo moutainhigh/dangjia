@@ -114,6 +114,7 @@ public interface HouseAPI {
      * @param cityId 城市ID
      * @param houseType 房屋类型
      * @param addressId 地址ID
+     * @param activityRedPackId 优惠券ID
      * @param actuarialDesignAttr 设计精算列表 商品列表(
      * id	String	设计精算模板ID
      * configName	String	设计精算名称
@@ -128,6 +129,7 @@ public interface HouseAPI {
                                  @RequestParam("cityId") String cityId,
                                  @RequestParam("houseType") String houseType,
                                  @RequestParam("addressId") String addressId,
+                                 @RequestParam("activityRedPackId") String activityRedPackId,
                                  @RequestParam("actuarialDesignAttr") String actuarialDesignAttr);
 
     @PostMapping("app/house/house/revokeHouse")

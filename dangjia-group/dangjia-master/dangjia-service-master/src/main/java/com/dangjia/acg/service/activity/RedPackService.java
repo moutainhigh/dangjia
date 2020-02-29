@@ -409,7 +409,7 @@ public class RedPackService {
             }
             Member member = (Member) object;
             Map<String,Object> map=new HashMap<>();
-            List<ActivityRedPackRecordDTO> list=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,1);//查有效的
+            List<ActivityRedPackRecordDTO> list=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,1,null);//查有效的
             map.put("list",list);
             //查询当前用户优惠券数量
             map.put("totalCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),null));//全部券
@@ -437,7 +437,7 @@ public class RedPackService {
             }
             Member member = (Member) object;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<ActivityRedPackRecordDTO> list=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,2);//查失效
+            List<ActivityRedPackRecordDTO> list=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,2,null);//查失效
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功",pageResult);
         }catch (Exception e){

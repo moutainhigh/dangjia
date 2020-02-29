@@ -1610,7 +1610,7 @@ public class OrderService {
      * @param productArr 商品列表
      * @return
      */
-    public ServerResponse saveDesignOrderInfo(String userToken,String houseId,String taskId,String productArr){
+    public ServerResponse saveDesignOrderInfo(String userToken,String houseId,String taskId,String productArr,String activityRedPackId){
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -1633,7 +1633,7 @@ public class OrderService {
         String productJsons = getNewProductJsons(house,productArr);
         if(StringUtils.isNotEmpty(productJsons)){
             //2.生成订单信息
-            ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"1");
+            ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"1",activityRedPackId);
             if (serverResponse.getResultObj() != null) {
                 String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                 //3.生成houseflow待抢单的流程(设计师的待创单流程)

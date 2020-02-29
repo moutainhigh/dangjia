@@ -24,6 +24,8 @@ public interface IActivityRedPackRecordMapper extends Mapper<ActivityRedPackReco
     List<ActivityRedPackRecordDTO> queryActivityRedPackRecordList(@Param("redPackId") String redPackId);
 
     List<ActivityRedPackRecordDTO> queryMyAticvityList(@Param("memberId") String memberId,
-                                                       @Param("sourceType") Integer sourceType,@Param("searchType") Integer searchType);
+                                                       @Param("sourceType") Integer sourceType,
+                                                       @Param("searchType") Integer searchType,
+                                                       @Param("activityRedPackId") String activityRedPackId);
     Integer queryActivityRedCount(@Param("memberId") String memberId,@Param("sourceType") Integer sourceType);
 }

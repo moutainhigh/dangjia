@@ -134,7 +134,7 @@
 
     <select id="queryMyAticvityList" resultType="com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO">
         SELECT
-            p.id,
+            r.id,
             p.`name`,
             p.from_object_type fromObjectType,
             p.from_object fromObject,
@@ -203,6 +203,9 @@
         AND r.member_id = #{memberId}
         <if test="null!=sourceType and ''!=sourceType">
             and p.source_type=#{sourceType}
+        </if>
+        <if test="null!=activityRedPackId and ''!=activityRedPackId">
+            and r.id=#{activityRedPackId}
         </if>
         order by r.modify_date desc
     </select>

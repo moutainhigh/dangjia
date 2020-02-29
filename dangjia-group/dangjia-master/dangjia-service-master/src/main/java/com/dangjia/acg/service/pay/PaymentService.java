@@ -99,6 +99,7 @@ import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
 import com.dangjia.acg.service.shell.HomeShellOrderService;
 import com.dangjia.acg.util.StringTool;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1189,7 +1190,7 @@ public class PaymentService {
      * 提交订单
      * @return
      */
-    public ServerResponse generateOrder(String userToken,String cityId, String productJsons,String workerId, String addressId) {
+    public ServerResponse generateOrder(String userToken,String cityId, String productJsons,String workerId, String addressId,String activityRedPackId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1201,7 +1202,7 @@ public class PaymentService {
             if(house!= null) {
                 houseId=house.getId();
             }
-            return generateOrderCommon(member,houseId, cityId, productJsons, workerId,  addressId,2,null);
+            return generateOrderCommon(member,houseId, cityId, productJsons, workerId,  addressId,2,null,activityRedPackId);
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1218,9 +1219,10 @@ public class PaymentService {
      * @param workerId
      * @param addressId
      * @param orderSource (1设计精算订单提交，2购物车提交，4设计精算补差价订单提交）
+     * @param activityRedPackId 优惠券ID
      * @return
      */
-    public ServerResponse generateOrderCommon(Member member,String houseId,String cityId, String productJsons,String workerId, String addressId,Integer orderSource,String workerTypeId){
+    public ServerResponse generateOrderCommon(Member member,String houseId,String cityId, String productJsons,String workerId, String addressId,Integer orderSource,String workerTypeId,String activityRedPackId){
         JSONArray productArray= JSON.parseArray(productJsons);
         if(productArray.size()==0){
             return ServerResponse.createByErrorMessage("参数错误");
@@ -1237,6 +1239,11 @@ public class PaymentService {
         BigDecimal paymentPrice = new BigDecimal(0);//总共钱
         BigDecimal freightPrice = new BigDecimal(0);//总运费
         BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
+        Double totalMoney=0d;//优惠商品总额
+        Double concessionMoney=0d;//优惠总额
+        String concessionProducts="";//可优惠商品编码
+        ActivityProductDTO activityProductDTO;
+        List<ActivityProductDTO> activityProductDTOList=new ArrayList<>();
         for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
             BigDecimal totalSellPrice = new BigDecimal(0);//总价
             BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
@@ -1250,9 +1257,25 @@ public class PaymentService {
                 }
                 totalSellPrice = totalSellPrice.add(totalPrice);
                 paymentPrice = paymentPrice.add(totalPrice);
+
+                activityProductDTO=new ActivityProductDTO();
+                activityProductDTO.setProductId(parmDTO.getProductId());
+                activityProductDTO.setPrice(parmDTO.getPrice());
+                activityProductDTO.setShopCount(parmDTO.getShopCount());
+                activityProductDTOList.add(activityProductDTO);
             }
             shoppingCartDTO.setTotalMaterialPrice(totalMaterialPrice);
             shoppingCartDTO.setTotalPrice(totalSellPrice);
+        }
+        if(StringUtils.isNotBlank(activityRedPackId)){
+            //查询对应的优惠信息
+            Map map=discountPage(member.getId(),activityProductDTOList,activityRedPackId);
+            if(map!=null){
+                ActivityRedPackRecordDTO recommendCuponsPack=(ActivityRedPackRecordDTO)map.get("recommendCuponsPack");
+                totalMoney=recommendCuponsPack.getTotalMoney();
+                concessionMoney=recommendCuponsPack.getConcessionMoney();
+                concessionProducts=recommendCuponsPack.getProducts()+",";
+            }
         }
 
         if (shoppingCartDTOS!=null) {
@@ -1277,6 +1300,7 @@ public class PaymentService {
             order.setOrderSource(orderSource);//来源购物车
             order.setCreateBy(member.getId());
             order.setWorkerTypeId(workerTypeId);
+            order.setTotalDiscountPrice(BigDecimal.valueOf(concessionMoney));
             orderMapper.insert(order);
             for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
                 Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),shoppingCartDTO.getTotalMaterialPrice().doubleValue());
@@ -1302,6 +1326,11 @@ public class PaymentService {
                     orderItem.setActualPaymentPrice(0d);
                     orderItem.setStevedorageCost(0d);
                     orderItem.setTransportationCost(0d);
+                    //优惠价钱
+                    if(totalMoney>0&&concessionProducts.contains(good.getProductId()+",")){
+                        orderItem.setDiscountPrice(MathUtil.div(MathUtil.mul(orderItem.getTotalPrice(),totalMoney),concessionMoney));//每个商品的优惠总额
+                    }
+
                     if(orderSource==1||orderSource==4){
                         orderItem.setWorkerTypeId(good.getWorkerTypeId());
                     }
@@ -1370,6 +1399,8 @@ public class PaymentService {
                 businessOrder.setTotalPrice(paymentPrice);
                 businessOrder.setDiscountsPrice(new BigDecimal(0));
                 businessOrder.setPayPrice(paymentPrice);
+                businessOrder.setDiscountsPrice(BigDecimal.valueOf(concessionMoney));
+                businessOrder.setRedPacketPayMoneyId(activityRedPackId);//优惠券ID
                 if(orderSource==1||orderSource==4){
                     businessOrder.setType(1);//记录支付类型任务类型(精算支付任务，走工序的）
                 }else{
@@ -2154,7 +2185,7 @@ public class PaymentService {
                 activityProductDTO.setShopCount(productObj.getDouble("shopCount"));
                 activityProductDTOList.add(activityProductDTO);
             }
-            Map<String,Object> map=discountPage(member.getId(),activityProductDTOList);
+            Map<String,Object> map=discountPage(member.getId(),activityProductDTOList,null);
             if(map==null){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -2171,7 +2202,7 @@ public class PaymentService {
      * @param activityProductDTOList 需支付商品列表
      * @return
      */
-    public Map<String,Object> discountPage(String membreId,List<ActivityProductDTO> activityProductDTOList) {
+    public Map<String,Object> discountPage(String membreId,List<ActivityProductDTO> activityProductDTOList,String activityRedPackId) {
         try {
             Map<String,Object> redPackMap=new HashMap<>();
             if (activityProductDTOList.size() == 0) {
@@ -2180,7 +2211,7 @@ public class PaymentService {
             //满足条件的优惠券记录
             List<ActivityRedPackRecordDTO> redPacetResultList = new ArrayList<>();
             ActivityRedPackRecordDTO recommendCuponsPack=new ActivityRedPackRecordDTO();//推荐优惠券
-            List<ActivityRedPackRecordDTO> redPacketRecordSelectList = activityRedPackRecordMapper.queryMyAticvityList(membreId,null,3);
+            List<ActivityRedPackRecordDTO> redPacketRecordSelectList = activityRedPackRecordMapper.queryMyAticvityList(membreId,null,3,activityRedPackId);
             if (redPacketRecordSelectList.size() == 0) {
                 return null;
             }
@@ -2503,7 +2534,7 @@ public class PaymentService {
                 return ServerResponse.createByErrorMessage("参数错误");
             }
             //获取符合条件的有效的优惠券
-            Map<String,Object> redPackMap=discountPage(member.getId(),activityProductDTOList);
+            Map<String,Object> redPackMap=discountPage(member.getId(),activityProductDTOList,null);
             if(redPackMap!=null){
                 //推荐优惠券
                 ActivityRedPackRecordDTO recommendCuponsPack=(ActivityRedPackRecordDTO)redPackMap.get("recommendCuponsPack");

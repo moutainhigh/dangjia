@@ -69,6 +69,11 @@ public class BusinessOrder extends BaseEntity {
 	@ApiModelProperty("实付")
 	private BigDecimal payPrice;//
 
+	@Column(name = "red_packet_pay_money_id")
+	@Desc(value = "优惠券ID")
+	@ApiModelProperty("优惠券ID")
+	private String redPacketPayMoneyId;//
+
 
 	@Column(name = "image")
 	@Desc(value = "支付回执单图片（多张，逗号分隔）")
