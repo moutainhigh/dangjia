@@ -127,7 +127,8 @@ public interface OrderAPI {
     ServerResponse saveDesignOrderInfo(@RequestParam("userToken") String userToken,
                                            @RequestParam("houseId") String houseId,
                                            @RequestParam("taskId") String taskId,
-                                           @RequestParam("productArr") String productArr);
+                                           @RequestParam("productArr") String productArr,
+                                       @RequestParam("activityRedPackId") String activityRedPackId);
 
     @PostMapping("app/order/checkExperience")
     @ApiOperation(value = "体验单验收", notes = "体验单验收")

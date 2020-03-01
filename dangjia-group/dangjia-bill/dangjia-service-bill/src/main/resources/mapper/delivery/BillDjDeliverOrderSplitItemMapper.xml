@@ -67,7 +67,8 @@
         IFNULL(t3.transportation_cost, 0) transportationCost,
         t1.prod_template_id productTemplateId,
         t1.is_upstairs_cost isUpstairsCost,
-        IFNULL(t1.move_cost, 0) moveCost
+        IFNULL(t1.move_cost, 0) moveCost,
+        t.discount_price discountPrice
         FROM
           dj_deliver_order_split_item t
         LEFT JOIN  dj_deliver_order_item t3 on t.order_item_id=t3.id

@@ -105,6 +105,7 @@ public class HouseController implements HouseAPI {
      * @param cityId 城市ID
      * @param houseType 房屋类型
      * @param addressId 地址ID
+     * @param activityRedPackId 优惠券ID
      * @param actuarialDesignAttr 设计精算列表 商品列表(
      * id	String	设计精算模板ID
      * configName	String	设计精算名称
@@ -115,9 +116,9 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse applicationDecorationHouse(String userToken,String cityId,String houseType,String addressId,String actuarialDesignAttr){
+    public ServerResponse applicationDecorationHouse(String userToken,String cityId,String houseType,String addressId,String activityRedPackId,String actuarialDesignAttr){
         try{
-            return houseService.applicationDecorationHouse(userToken, cityId, houseType, addressId,actuarialDesignAttr);
+            return houseService.applicationDecorationHouse(userToken, cityId, houseType, addressId,activityRedPackId,actuarialDesignAttr);
 
         }catch (Exception e){
             logger.error("提交失败",e);

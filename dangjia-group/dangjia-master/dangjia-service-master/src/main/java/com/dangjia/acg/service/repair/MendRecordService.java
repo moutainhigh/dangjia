@@ -310,16 +310,18 @@ public class MendRecordService {
                 if(orderSplit.getApplyStatus()==0||orderSplit.getApplyStatus()==4||
                         orderSplit.getApplyStatus()==1){
                     Map map=new HashMap();
-                    map.put("withdraw","撤回货单");
-                    map.put("withdrawColour","#3B444D");
-                    map.put("mendOrderId",mendOrderId);
+                    map.put("buttonText","撤回货单");
+                    map.put("buttonType",1);
+                    map.put("buttonColour","#3B444D");
+                    map.put("mendOrderId",orderSplit.getMendNumber());
                     button.add(map);
                 }
                 if(StringUtils.isNotBlank(orderSplit.getMendNumber())){
                     Map map=new HashMap();
-                    map.put("repairInvoice","查看补货单");
-                    map.put("repairInvoiceColour","#F57341");
-                    map.put("mendOrderId",mendOrderId);
+                    map.put("buttonText","查看补货单");
+                    map.put("buttonType",2);
+                    map.put("buttonColour","#F57341");
+                    map.put("mendOrderId",orderSplit.getMendNumber());
                     button.add(map);
                 }
                 mendOrderDetail.setButton(button);

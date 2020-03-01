@@ -827,11 +827,22 @@
         </choose>
             AND t1.data_status=0
           <choose>
-              <when test="null!=memberId and ''!=memberId">
-                  AND t1.member_id=#{memberId}
+              <when test="null!=houseId and ''!=houseId">
+                  AND t1.house_id=#{houseId}
               </when>
               <otherwise>
-                  AND t1.house_id=#{houseId}
+                  AND EXISTS (
+                      SELECT
+                        *
+                      FROM
+                        dj_member_address ma
+                      WHERE
+                        ma.member_id=#{memberId}
+                      AND (
+                          ma.id = t1.address_id
+                          OR ma.house_id = t1.house_id
+                      )
+                  )
               </otherwise>
           </choose>
         ORDER BY t1.create_date DESC
@@ -921,7 +932,27 @@
         ddsd.order_split_id as orderSplitId
         from dj_deliver_split_deliver ddsd
         inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
-        where ddsd.house_id = #{houseId} and ddsd.data_status = 0
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND ddsd.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = ddsd.address_id
+                        OR ma.house_id = ddsd.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and ddsd.data_status = 0
         <if test="cityId!=null and cityId!=''">
             and  ddsd.city_id = #{cityId}
         </if>
@@ -961,8 +992,28 @@
         from dj_deliver_order_split dos
         LEFT JOIN dj_deliver_order_split_item dosi on dos.id = dosi.order_split_id
         LEFT JOIN dj_deliver_split_deliver ddsd on dosi.split_deliver_id = ddsd.id
-        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
-        where dos.house_id = #{houseId} and dos.data_status = 0 and dos.apply_status = 2
+        inner join dj_basics_storefront dbs on dbs.id=dosi.storefront_id
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND dos.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = dos.address_id
+                        OR ma.house_id = dos.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and dos.data_status = 0 and dos.apply_status = 2
         <if test="cityId!=null and cityId!=''">
             and  dos.city_id = #{cityId}
         </if>

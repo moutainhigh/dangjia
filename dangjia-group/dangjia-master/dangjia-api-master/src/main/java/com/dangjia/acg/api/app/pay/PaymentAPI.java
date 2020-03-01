@@ -70,7 +70,8 @@ public interface PaymentAPI {
                                  @RequestParam("cityId") String cityId,
                                  @RequestParam("productIds") String productIds,
                                  @RequestParam("workerId")String workerId,
-                                 @RequestParam("addressId")String addressId);
+                                 @RequestParam("addressId")String addressId,
+                                 @RequestParam("activityRedPackId") String activityRedPackId);
 
     @PostMapping("app/order/edit")
     @ApiOperation(value = "订单更新接口", notes = "订单更新接口")

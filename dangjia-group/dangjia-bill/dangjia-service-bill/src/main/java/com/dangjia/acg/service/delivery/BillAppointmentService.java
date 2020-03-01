@@ -9,6 +9,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.AppointmentListDTO;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -137,19 +139,18 @@ public class BillAppointmentService {
                 orderSplit.setIsReservationDeliver("1");
                 orderSplit.setAddressId(order.getAddressId());
                 orderSplit.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
-                billDjDeliverOrderSplitMapper.insert(orderSplit);
+                Double totalPrice=0d;
                 example=new Example(OrderItem.class);
                 example.createCriteria().andEqualTo(OrderItem.ORDER_ID,orderIds)
                         .andEqualTo(OrderItem.IS_RESERVATION_DELIVER,1);
                 List<OrderItem> orderItems = djDeliverOrderItemMapper.selectByExample(example);
-                orderItems.forEach(orderItem -> {
+                for(OrderItem orderItem:orderItems) {
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setProductId(orderItem.getProductId());
                     orderSplitItem.setProductSn(orderItem.getProductSn());
                     orderSplitItem.setProductName(orderItem.getProductName());
                     orderSplitItem.setPrice(orderItem.getPrice());
-                    orderSplitItem.setAskCount(orderItem.getAskCount());
                     orderSplitItem.setCost(orderItem.getCost());
                     orderSplitItem.setShopCount(orderItem.getShopCount());
                     orderSplitItem.setNum(orderItem.getShopCount());
@@ -167,17 +168,45 @@ public class BillAppointmentService {
                     orderSplitItem.setOrderItemId(orderItem.getId());
                     orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
                     orderSplitItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
+                    //计算运费，搬运费
+                    Double transportationCost=orderItem.getTransportationCost()!=null?orderItem.getTransportationCost():0;//运费
+                    Double stevedorageCost=orderItem.getStevedorageCost()!=null?orderItem.getStevedorageCost():0;//搬运费
+                    Double askCount=orderItem.getShopCount();
+                    //计算运费
+                    if(transportationCost>0.0) {//（运费/总数量）*收货量
+                        orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                    }else{
+                        orderSplitItem.setTransportationCost(0d);
+                    }
+                    //计算搬运费
+                    if(stevedorageCost>0.0){//（搬运费/总数量）*收货量
+                        orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                    }else{
+                        orderSplitItem.setStevedorageCost(0d);
+                    }
+                    if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
+                        orderSplitItem.setDiscountPrice(MathUtil.mul(MathUtil.div(orderItem.getDiscountPrice(),orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                    }else{
+                        orderSplitItem.setDiscountPrice(0d);
+                    }
+                    totalPrice=MathUtil.add(totalPrice,MathUtil.add(orderSplitItem.getTotalPrice(),MathUtil.add(orderSplitItem.getTransportationCost(),orderSplitItem.getStevedorageCost())));
+                    totalPrice=MathUtil.sub(totalPrice,orderSplitItem.getDiscountPrice());
                     billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
-                    orderItem.setAskCount(orderItem.getShopCount());
+                    if(orderItem.getAskCount()==null)
+                        orderItem.setAskCount(0d);
+                    orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(),orderItem.getShopCount()));
                     orderItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                     djDeliverOrderItemMapper.updateByPrimaryKey(orderItem);
-                });
+
+                }
+                orderSplit.setTotalAmount(BigDecimal.valueOf(totalPrice));
+                billDjDeliverOrderSplitMapper.insert(orderSplit);
             }else {//预约发货页面预约发货
                 JSONObject villageObj = JSONObject.parseObject(jsonStr);
                 String objList = villageObj.getString("objList");
                 JSONArray jsonArr = JSONArray.parseArray(objList);
-                jsonArr.forEach(str -> {
-                    JSONObject obj = (JSONObject) str;
+                for(int i=0;i<jsonArr.size();i++){
+                    JSONObject obj = jsonArr.getJSONObject(i);
                     String orderId = obj.getString("orderId");
                     String[] orderItemsIds = obj.getString("orderItemId").split(",");
                     Order djDeliverOrder = djDeliverOrderMapper.selectByPrimaryKey(orderId);
@@ -196,7 +225,7 @@ public class BillAppointmentService {
                     orderSplit.setIsReservationDeliver("1");
                     orderSplit.setAddressId(djDeliverOrder.getAddressId());
                     orderSplit.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
-                    billDjDeliverOrderSplitMapper.insert(orderSplit);
+                    Double totalPrice=0d;
                     for (String orderItemsId : orderItemsIds) {
                         OrderItem orderItem = djDeliverOrderItemMapper.selectByPrimaryKey(orderItemsId);
                         OrderSplitItem orderSplitItem = new OrderSplitItem();
@@ -205,7 +234,6 @@ public class BillAppointmentService {
                         orderSplitItem.setProductSn(orderItem.getProductSn());
                         orderSplitItem.setProductName(orderItem.getProductName());
                         orderSplitItem.setPrice(orderItem.getPrice());
-                        orderSplitItem.setAskCount(orderItem.getAskCount());
                         orderSplitItem.setCost(orderItem.getCost());
                         orderSplitItem.setShopCount(orderItem.getShopCount());
                         orderSplitItem.setNum(orderItem.getShopCount());
@@ -223,12 +251,40 @@ public class BillAppointmentService {
                         orderSplitItem.setOrderItemId(orderItem.getId());
                         orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
                         orderSplitItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
+                        Double askCount=orderItem.getShopCount();
+                        //计算运费，搬运费
+                        Double transportationCost=orderItem.getTransportationCost()!=null?orderItem.getTransportationCost():0;//运费
+                        Double stevedorageCost=orderItem.getStevedorageCost()!=null?orderItem.getStevedorageCost():0;//搬运费
+                        //计算运费
+                        if(transportationCost>0.0) {//（运费/总数量）*收货量
+                            orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                        }else{
+                            orderSplitItem.setTransportationCost(0d);
+                        }
+                        //计算搬运费
+                        if(stevedorageCost>0.0){//（搬运费/总数量）*收货量
+                            orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                        }else{
+                            orderSplitItem.setStevedorageCost(0d);
+                        }
+                        if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
+                            orderSplitItem.setDiscountPrice(MathUtil.mul(MathUtil.div(orderItem.getDiscountPrice(),orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                        }else{
+                            orderSplitItem.setDiscountPrice(0d);
+                        }
+                        totalPrice=MathUtil.add(totalPrice,MathUtil.add(orderSplitItem.getTotalPrice(),MathUtil.add(orderSplitItem.getTransportationCost(),orderSplitItem.getStevedorageCost())));
+                        totalPrice=MathUtil.sub(totalPrice,orderSplitItem.getDiscountPrice());
                         billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
-                        orderItem.setAskCount(orderItem.getShopCount());
+                        if(orderItem.getAskCount()==null)
+                            orderItem.setAskCount(0d);
+                        orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(),orderSplitItem.getShopCount()));
                         orderItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                         djDeliverOrderItemMapper.updateByPrimaryKey(orderItem);
                     }
-                });
+                    orderSplit.setTotalAmount(BigDecimal.valueOf(totalPrice));
+                    billDjDeliverOrderSplitMapper.insert(orderSplit);
+                }
+
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

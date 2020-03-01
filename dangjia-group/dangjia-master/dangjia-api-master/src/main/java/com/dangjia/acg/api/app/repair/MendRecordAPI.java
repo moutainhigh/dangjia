@@ -43,5 +43,6 @@ public interface MendRecordAPI {
 
     @PostMapping(value = "app/repair/mendRecord/backOrder")
     @ApiOperation(value = "撤回补货要货订单", notes = "撤回补货要货订单")
-    ServerResponse backOrder(@RequestParam("mendOrderId") String mendOrderId, @RequestParam("type") Integer type);
+    ServerResponse backOrder(@RequestParam("mendOrderId") String mendOrderId,
+                             @RequestParam("type") Integer type);
 }

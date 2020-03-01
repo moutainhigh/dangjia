@@ -1837,6 +1837,7 @@ public class HouseService {
      * @param cityId              城市ID
      * @param houseType           房屋类型
      * @param addressId           地址ID
+     * @param activityRedPackId  优惠券ID
      * @param actuarialDesignAttr 设计精算列表 商品列表(
      *                            id	String	设计精算模板ID
      *                            configName	String	设计精算名称
@@ -1846,7 +1847,7 @@ public class HouseService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse applicationDecorationHouse(String userToken, String cityId, String houseType, String addressId, String actuarialDesignAttr) {
+    public ServerResponse applicationDecorationHouse(String userToken, String cityId, String houseType, String addressId,String activityRedPackId, String actuarialDesignAttr) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -1908,7 +1909,7 @@ public class HouseService {
         editHouseFlowWorker(house, desginInfo, actuaialInfo);
         //8.提交订单信息,生成待支付订单,生成待抢单信息
         String productJsons = getProductJsons(actuarialDesignAttr, memberAddress.getInputArea(),house);
-        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId);
+        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId,activityRedPackId);
     }
 
     /**
@@ -2092,7 +2093,7 @@ public class HouseService {
             String productStr = getEligibleProduct(houseOrderDetailDTOList, 1, square, inputArea,house);
             if (productStr != null && StringUtils.isNotBlank(productStr)) {
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productStr, null, memberAddress.getId(), 4,null);//补差价订单
+                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productStr, null, memberAddress.getId(), 4,null,null);//补差价订单
                 if (serverResponse.getResultObj() != null) {
                     String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                     //增加任务(补差价订单）

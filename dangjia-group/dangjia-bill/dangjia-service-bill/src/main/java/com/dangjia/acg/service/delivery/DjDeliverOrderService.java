@@ -1279,12 +1279,18 @@ public class DjDeliverOrderService {
      * @return
      */
     public ServerResponse queryAppOrderList(PageDTO pageDTO,
+                                            String userToken,
                                             String houseId,
                                             String cityId,
                                             Integer orderStatus,
                                             String idList) {
         try {
-
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             String[] arr;
             if (!CommonUtil.isEmpty(idList)) {
@@ -1293,7 +1299,7 @@ public class DjDeliverOrderService {
                 arr = null;
             }
 
-            List<DjSplitDeliverOrderDTO> list = iBillDjDeliverOrderMapper.queryAppOrderList(cityId, houseId, orderStatus, arr);
+            List<DjSplitDeliverOrderDTO> list = iBillDjDeliverOrderMapper.queryAppOrderList(cityId,member.getId(), houseId, orderStatus, arr);
             if (list != null && list.size() > 0) {
                 for (DjSplitDeliverOrderDTO djSplitDeliverOrderDTO : list) {
 
@@ -1324,11 +1330,11 @@ public class DjDeliverOrderService {
 
                     OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(djSplitDeliverOrderDTO.getOrderSplitId());
                     if (orderSplit != null) {
-                        Member member = queryWorker(orderSplit.getHouseId(), orderSplit.getWorkerTypeId());
-                        if (member != null) {
+                        Member member1 = queryWorker(orderSplit.getHouseId(), orderSplit.getWorkerTypeId());
+                        if (member1 != null) {
                             //人工姓名
-                            djSplitDeliverOrderDTO.setName(member.getName());
-                            djSplitDeliverOrderDTO.setWorkerId(member.getId());
+                            djSplitDeliverOrderDTO.setName(member1.getName());
+                            djSplitDeliverOrderDTO.setWorkerId(member1.getId());
                         }
                     }
                 }
@@ -1353,13 +1359,19 @@ public class DjDeliverOrderService {
      * @param cityId
      * @return
      */
-    public ServerResponse queryAppHairOrderList(PageDTO pageDTO,
+    public ServerResponse queryAppHairOrderList(String userToken,
+                                                PageDTO pageDTO,
                                                 String houseId,
                                                 String cityId) {
         try {
-
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
-            List<DjSplitDeliverOrderDTO> list = iBillDjDeliverOrderMapper.queryAppHairOrderList(cityId, houseId);
+            List<DjSplitDeliverOrderDTO> list = iBillDjDeliverOrderMapper.queryAppHairOrderList(cityId, houseId,member.getId());
             if (list != null && list.size() > 0) {
                 for (DjSplitDeliverOrderDTO djSplitDeliverOrderDTO : list) {
                     //待发货
@@ -1387,11 +1399,11 @@ public class DjDeliverOrderService {
 
                     OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(djSplitDeliverOrderDTO.getOrderSplitId());
                     if (orderSplit != null) {
-                        Member member = queryWorker(orderSplit.getHouseId(), orderSplit.getWorkerTypeId());
-                        if (member != null) {
+                        Member member1 = queryWorker(orderSplit.getHouseId(), orderSplit.getWorkerTypeId());
+                        if (member1 != null) {
                             //人工姓名
-                            djSplitDeliverOrderDTO.setName(member.getName());
-                            djSplitDeliverOrderDTO.setWorkerId(member.getId());
+                            djSplitDeliverOrderDTO.setName(member1.getName());
+                            djSplitDeliverOrderDTO.setWorkerId(member1.getId());
                         }
                     }
                 }
@@ -1466,7 +1478,7 @@ public class DjDeliverOrderService {
                         .andEqualTo(OrderItem.PRODUCT_ID, productId)
                         .andEqualTo(OrderItem.ORDER_ID, id);
                 example.orderBy(OrderItem.CREATE_DATE).desc();
-                OrderItem item = iBillDjDeliverOrderItemMapper.selectOneByExample(example);
+                /*OrderItem item = iBillDjDeliverOrderItemMapper.selectOneByExample(example);
                 if (receive < item.getShopCount()) {
                     //部分收货
                     isFlag = true;
@@ -1504,7 +1516,7 @@ public class DjDeliverOrderService {
                         warehouse.setModifyDate(new Date());
                         iBillWarehouseMapper.updateByPrimaryKeySelective(warehouse);
                     }
-                }
+                }*/
                 orderSplit.setId(JS.getString("id"));
                 orderSplit.setReceive(JS.getDouble("receive"));
                 //修改要货单详情数量

@@ -293,10 +293,17 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.updateTaskStackData(id);
     }
 
+
     @Override
     @ApiMethod
-    public ServerResponse queryDimensionRecord(String memberId) {
-        return djMaintenanceRecordService.queryDimensionRecord(memberId);
+    public ServerResponse queryMaintenanceRecordList(String userToken,PageDTO pageDTO,String houseId){
+        return djMaintenanceRecordService.queryMaintenanceRecordList(userToken,pageDTO,houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryDimensionRecord(String userToken,String houseId) {
+        return djMaintenanceRecordService.queryDimensionRecord(userToken,houseId);
     }
 
     @Override

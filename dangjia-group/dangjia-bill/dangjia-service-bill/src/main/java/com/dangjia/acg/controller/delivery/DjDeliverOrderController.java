@@ -134,14 +134,14 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
     @Override
     @ApiMethod
     public ServerResponse queryAppOrderList(PageDTO pageDTO, String userToken, String houseId, String cityId, Integer orderStatus, String idList) {
-        return djDeliverOrderService.queryAppOrderList(pageDTO, houseId, cityId, orderStatus, idList);
+        return djDeliverOrderService.queryAppOrderList(pageDTO,userToken, houseId, cityId, orderStatus, idList);
     }
 
 
     @Override
     @ApiMethod
     public ServerResponse queryAppHairOrderList(String userToken, PageDTO pageDTO, String houseId, String cityId) {
-        return djDeliverOrderService.queryAppHairOrderList(pageDTO, houseId, cityId);
+        return djDeliverOrderService.queryAppHairOrderList(userToken,pageDTO, houseId, cityId);
     }
 
     @Override

@@ -581,12 +581,14 @@ public class ShopCartService {
                     this.addCartBuyAgain(userToken, orderItem.getShopCount(), orderItem.getId(), cityId, member.getId());
                 });
             }else{
-                JSONArray jsonArr = JSONArray.parseArray(jsonStr);
-                for (Object o : jsonArr) {
-                    JSONObject obj = (JSONObject) o;
-                    Double shopCount = obj.getDouble("shopCount");
-                    String orderItemId = obj.getString("orderItemId");
-                    this.addCartBuyAgain(userToken,shopCount,orderItemId,cityId,member.getId());
+                if(StringUtils.isNotBlank(jsonStr)) {
+                    JSONArray jsonArr = JSONArray.parseArray(jsonStr);
+                    for (Object o : jsonArr) {
+                        JSONObject obj = (JSONObject) o;
+                        Double shopCount = obj.getDouble("shopCount");
+                        String orderItemId = obj.getString("orderItemId");
+                        this.addCartBuyAgain(userToken, shopCount, orderItemId, cityId, member.getId());
+                    }
                 }
             }
             Example example = new Example(ShoppingCart.class);

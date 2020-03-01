@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.engineer;
 
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -12,4 +13,5 @@ import tk.mybatis.mapper.common.Mapper;
  */
 @Repository
 public interface DjMaintenanceRecordContentMapper extends Mapper<DjMaintenanceRecordContent> {
+
 }

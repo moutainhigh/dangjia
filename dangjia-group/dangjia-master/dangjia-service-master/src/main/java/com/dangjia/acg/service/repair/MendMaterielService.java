@@ -235,6 +235,12 @@ public class MendMaterielService {
                     }else{
                         mendMateriel.setStevedorageCost(0d);
                     }
+                    //优惠总额
+                    if(orderSplitItem.getDiscountPrice()>0.0){//（优惠总额/收货量）*退货量
+                        mendMateriel.setDiscountPrice(MathUtil.mul(MathUtil.div(orderSplitItem.getDiscountPrice(),orderSplitItem.getReceive()),mendMateriel.getShopCount()));
+                    }else{
+                        mendMateriel.setDiscountPrice(0d);
+                    }
                 }else{
                     mendMateriel.setTransportationCost(0d);
                     mendMateriel.setStevedorageCost(0d);
@@ -410,11 +416,17 @@ public class MendMaterielService {
                     if(totalReceiverNum>0){//运费
                         mendMateriel.setSupTransportationCost(MathUtil.mul(MathUtil.div(mendDeliver.getDeliveryFee(),totalReceiverNum),actualCount));
                     }
-
+                    //优惠总额
+                    if(orderSplitItem.getDiscountPrice()>0.0){//（优惠总额/收货量）*退货量
+                        mendMateriel.setDiscountPrice(MathUtil.mul(MathUtil.div(orderSplitItem.getDiscountPrice(),orderSplitItem.getReceive()),actualCount));
+                    }else{
+                        mendMateriel.setDiscountPrice(0d);
+                    }
                 }
                 if(mendMateriel.getSupStevedorageCost()==null)
                     mendMateriel.setSupStevedorageCost(0d);
                 totalAmount=MathUtil.add(totalAmount, MathUtil.sub(MathUtil.sub(MathUtil.mul(mendMateriel.getPrice(),actualCount),mendMateriel.getTransportationCost()),mendMateriel.getStevedorageCost()));
+                totalAmount=MathUtil.sub(totalAmount,mendMateriel.getDiscountPrice());
                 applyMoney=MathUtil.add(applyMoney,MathUtil.sub(MathUtil.mul(mendMateriel.getCost(),actualCount),mendMateriel.getSupStevedorageCost()));
                 totalPrice=MathUtil.add(totalPrice,MathUtil.mul(mendMateriel.getCost(),actualCount));
                 totalStevedorageCost=MathUtil.add(totalStevedorageCost,mendMateriel.getSupStevedorageCost());

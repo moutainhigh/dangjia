@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.StorefrontConfigAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -1434,13 +1435,63 @@ public class DjMaintenanceRecordService {
     }
 
     /**
-     * 查询维保责任记录
-     * @param memberId
+     * 查询当前房子的甩有维保记录
+     * @param userToken
+     * @param houseId
      * @return
      */
-    public ServerResponse queryDimensionRecord(String memberId) {
+    public ServerResponse queryMaintenanceRecordList(String userToken,PageDTO pageDTO,String houseId){
+        try{
+
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<Map<String,Object>> list=djMaintenanceRecordMapper.queryRecordContentList(houseId);
+            if(list==null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for(Map<String,Object> map:list){
+                String memberId=(String)map.get("memberId");
+                Integer type=(Integer)map.get("type");
+                String workerTypeId=(String)map.get("workerTypeId");
+                if(type==3){//业主
+                    map.putAll(getWokerMemberInfo(memberId,"业主",null));
+                    map.put("stateName","申请维保");
+                }else{
+                    WorkerType workerType=workerTypeMapper.selectByPrimaryKey(workerTypeId);
+                    map.putAll(getWokerMemberInfo(memberId,workerType.getName(),workerType.getColor()));
+                    map.put("stateName","质保验收");
+                }
+                if(type==1){
+                    map.put("stateName","质保验收");
+                }else if(type==2){
+                    map.put("stateName","提前结束");
+                }
+                map.put("imageUrl",StringTool.getImage((String)map.get("image"),address));
+            }
+
+            PageInfo pageInfo = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageInfo);
+        }catch (Exception e){
+            logger.error("查询失败");
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    /**
+     * 查询维保责任记录
+     * @param userToken
+     * @return
+     */
+    public ServerResponse queryDimensionRecord(String userToken,String houseId) {
         try {
-            List<DimensionRecordDTO> dimensionRecordDTOS = djMaintenanceRecordResponsiblePartyMapper.queryDimensionRecord(memberId);
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
+            List<DimensionRecordDTO> dimensionRecordDTOS = djMaintenanceRecordResponsiblePartyMapper.queryDimensionRecord(worker.getId(),houseId);
+            if(dimensionRecordDTOS==null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
             return ServerResponse.createBySuccess("查询成功", dimensionRecordDTOS);
         } catch (Exception e) {
             e.printStackTrace();
