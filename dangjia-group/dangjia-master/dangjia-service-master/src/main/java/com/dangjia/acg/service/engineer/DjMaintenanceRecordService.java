@@ -1539,12 +1539,12 @@ public class DjMaintenanceRecordService {
         if(manualAllocation!=null){
             maintenanceRecordId=manualAllocation.getMaintenanceRecordId();
             dimensionRecordDTOS.setMaintenanceType(2);//2最终责任通知
-            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地" + "“" + dimensionRecordDTOS.getHouseName() + "”," +
+            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地<font color=red>“" + dimensionRecordDTOS.getHouseName() + "”</font>," +
                     "业主申请了质保，业主申请了质保，根据维保服务项目责任划分，你需要负担一定的责任，已从您的滞留金中扣除总维保金额如下，请知悉。");
         }else{
-            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地" + "“" + dimensionRecordDTOS.getHouseName() + "”," +
-                    "业主申请了质保，业主申请了质保，根据维保服务项目责任划分，你需要负担" + dimensionRecordDTOS.getProportion() + "%的责任," +
-                    "已从您的滞留金中扣除总维保金额的" + dimensionRecordDTOS.getProportion() + "%，请悉知,如有疑问可在7天内申诉。");
+            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地" + "<font color=red>“" + dimensionRecordDTOS.getHouseName() + "”</font>," +
+                    "业主申请了质保，业主申请了质保，根据维保服务项目责任划分，你需要负担<font color=red>" + dimensionRecordDTOS.getProportion() + "%</font>的责任," +
+                    "已从您的滞留金中扣除总维保金额的" + dimensionRecordDTOS.getProportion() + "%，请悉知,如有疑问可在<font color=red>7天内</font>申诉。");
         }
 
         //查询报销信息
@@ -1567,16 +1567,10 @@ public class DjMaintenanceRecordService {
         dimensionRecordDTOS.setProductList(getMaintenanceProductList(maintenanceRecordId,1));
 
         //查询申诉状态
-        example = new Example(Complain.class);
-        example.createCriteria().andEqualTo(Complain.MEMBER_ID, dimensionRecordDTOS.getResponsiblePartyId())
-                .andEqualTo(Complain.DATA_STATUS, 0)
-                .andEqualTo(Complain.HOUSE_ID, dimensionRecordDTOS.getHouseId())
-                .andEqualTo(Complain.COMPLAIN_TYPE, 10);
-        example.orderBy(HouseFlowApply.CREATE_DATE).desc();
-        List<Complain> complains = iComplainMapper.selectByExample(example);
+        Complain complain = iComplainMapper.selectByPrimaryKey(dimensionRecordDTOS.getComplainId());
         //0-申诉 1-申诉中  2-已完成
-        if (complains != null && complains.size() > 0) {
-            dimensionRecordDTOS.setType(complains.get(0).getStatus() == 0 ? 1 : 2);
+        if (complain != null && StringUtils.isNotBlank(complain.getId())) {
+            dimensionRecordDTOS.setType(complain.getStatus() == 0 ? 1 : 2);
         } else {
             dimensionRecordDTOS.setType(0);
         }

@@ -44,7 +44,9 @@
             mrrp.proportion AS proportion,
             mrrp.id AS mrrpId,
             mrrp.maintenance_total_price AS maintenanceTotalPrice,
-            h.address houseName
+            h.address houseName,
+            mrrp.create_date paymentDate,
+            mrrp.maintenance_total_price paymentAmount
         FROM
             dj_maintenance_record_responsible_party mrrp
         INNER JOIN dj_maintenance_record mr ON mrrp.maintenance_record_id = mr.id
@@ -77,7 +79,8 @@
             ) houseName,
            (case when mrrp.create_date>=DATE_ADD(NOW(),INTERVAL -7 DAY) THEN 1 else 0 end ) isComplain,
            IFNULL(mrrp.stevedorage_cost,0) stevedorageCost,
-           IFNULL(mrrp.transportation_cost,0) transportationCost
+           IFNULL(mrrp.transportation_cost,0) transportationCost,
+           mrrp.complain_id complainId
         from dj_maintenance_record mr
         INNER JOIN  dj_maintenance_record_responsible_party mrrp on mrrp.maintenance_record_id = mr.id
         INNER JOIN dj_house h on mr.house_id = h.id

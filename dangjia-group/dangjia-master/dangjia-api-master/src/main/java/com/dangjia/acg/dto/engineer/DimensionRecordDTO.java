@@ -19,7 +19,7 @@ public class DimensionRecordDTO {
     private Double sincePurchaseAmount;//维保金额
     private Double paymentAmount;//付款金额
     private Double proportion;//维保责任方占比
-    private String mrId;//
+    private String mrId;//totalPrice
     private String mrrpId;
     private String houseName;//房子名称
     private String houseId;//房子名称
@@ -45,6 +45,6 @@ public class DimensionRecordDTO {
     private Integer isComplain;//是否可申诉（1可申诉，0不可申诉，已过期）
     private Double stevedorageCost;//搬运费
     private Double transportationCost;//运费
-
+    private String complainId;//申诉ID
     private List<Map<String,Object>> reimbursementInFo;//报销信息
 }

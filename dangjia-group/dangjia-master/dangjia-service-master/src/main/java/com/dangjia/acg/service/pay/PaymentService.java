@@ -818,7 +818,7 @@ public class PaymentService {
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
-
+            BigDecimal totalDiscountPrice = new BigDecimal(0);//优惠总额
             Order orderNew = orderMapper.getStorefontOrder(queryShopGood.getShopId(),order.getId(),queryShopGood.getProductType());
             if(queryShopGoods.size()>1){
                 if(orderNew==null) {
@@ -869,6 +869,10 @@ public class PaymentService {
                     paymentPrice = paymentPrice.add(new BigDecimal(orderItem.getTotalPrice()));
                     freightPrice = freightPrice.add(new BigDecimal(orderItem.getTransportationCost()));
                     totalMoveDost = totalMoveDost.add(new BigDecimal(orderItem.getStevedorageCost()));
+                    if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
+                        totalDiscountPrice=totalDiscountPrice.add(new BigDecimal(orderItem.getDiscountPrice()));
+                    }
+
                     if(!CommonUtil.isEmpty(payState)) {
                         orderItem.setOrderStatus("2");
                     }else{
@@ -904,11 +908,12 @@ public class PaymentService {
                 orderNew.setTotalTransportationCost(freightPrice);//总运费
                 orderNew.setTotalStevedorageCost(totalMoveDost);//总搬运费
                 orderNew.setTotalAmount(paymentPrice);// 订单总额(工钱)
-
+                orderNew.setTotalDiscountPrice(totalDiscountPrice);//优惠总额
                 BigDecimal payPrice = orderNew.getTotalAmount().subtract(orderNew.getTotalDiscountPrice());
                 payPrice = payPrice.add(orderNew.getTotalStevedorageCost());
                 payPrice = payPrice.add(orderNew.getTotalTransportationCost());
-                orderNew.setActualPaymentPrice(payPrice);
+                payPrice = payPrice.subtract(totalDiscountPrice);
+                orderNew.setActualPaymentPrice(payPrice);//优惠总额
                 if(!CommonUtil.isEmpty(payState)) {
                     orderNew.setOrderStatus("2");
                     orderNew.setOrderPayTime(new Date());

@@ -26,16 +26,16 @@ import com.dangjia.acg.dto.design.WorkChartListDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.dto.order.*;
 import com.dangjia.acg.mapper.delivery.*;
-import com.dangjia.acg.mapper.order.IBillHouseMapper;
-import com.dangjia.acg.mapper.order.IBillQuantityRoomImagesMapper;
-import com.dangjia.acg.mapper.order.IBillQuantityRoomMapper;
-import com.dangjia.acg.mapper.order.IBillWarehouseMapper;
+import com.dangjia.acg.mapper.order.*;
+import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
 import com.dangjia.acg.mapper.refund.IBillMendOrderMapper;
 import com.dangjia.acg.mapper.sale.IBillDjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.mapper.sale.IBillUserMapper;
 import com.dangjia.acg.mapper.shoppingCart.IBillShoppingCartMapper;
 import com.dangjia.acg.mapper.storeFront.IBillStorefrontMapper;
+import com.dangjia.acg.modle.activity.ActivityRedPack;
+import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -47,6 +47,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
@@ -104,7 +105,7 @@ public class DjDeliverOrderService {
     @Autowired
     private IBillHouseFlowApplyMapper iBillHouseFlowApplyMapper;
     @Autowired
-    private IBillMenuConfigurationMapper iBillMenuConfigurationMapper;
+    private IBillActivityRedPackRecordMapper billActivityRedPackRecordMapper;
 
     @Autowired
     private HouseAPI houseAPI;
@@ -131,7 +132,11 @@ public class DjDeliverOrderService {
     private IBillShoppingCartMapper iBillShoppingCartMapper;
     @Autowired
     private IBillQuantityRoomMapper iQuantityRoomMapper;
+    @Autowired
+    private IBillActivityRedPackMapper billActivityRedPackMapper;
 
+    @Autowired
+    private IBillBusinessOrderMapper billBusinessOrderMapper;
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -1138,6 +1143,21 @@ public class DjDeliverOrderService {
             map.put("state", 3);//只查已支付的
             map.put("storefontId", storefrontList.get(0).getId());
             List<DOrderInfoDTO> orderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);
+            if(orderInfoDTOS!=null){
+                for(DOrderInfoDTO orderInfoDTO:orderInfoDTOS){
+                    String discountId=orderInfoDTO.getDiscountId();
+                    if(orderInfoDTO.getTotalDiscountPrice()!=null&&orderInfoDTO.getTotalDiscountPrice()>0){
+                        ActivityRedPackRecord redPackRecord=billActivityRedPackRecordMapper.selectByPrimaryKey(discountId);
+                        ActivityRedPack activityRedPack=billActivityRedPackMapper.selectByPrimaryKey(redPackRecord.getRedPackId());
+                        if(activityRedPack.getSourceType()==2){
+                            orderInfoDTO.setDiscountType("1");
+                        }else{
+                            orderInfoDTO.setDiscountType("2");
+                        }
+                        orderInfoDTO.setDiscountNumber(redPackRecord.getPackNum());
+                    }
+                }
+            }
             PageInfo orderInfoDTOSs = new PageInfo(orderInfoDTOS);
             /*map = new HashMap<>();
             map.put("storefontId", storefrontList.get(0).getId());
@@ -1183,10 +1203,36 @@ public class DjDeliverOrderService {
             }
             //查询优惠卷信息
             map.put("totalPrice",totalPrice);//商品小计（单价*数量）
-            map.put("discountType", "");//优惠卷类型
-            map.put("discountNumber", "");//优惠卷编号
-            map.put("discountName", "");//优惠卷名称
-            map.put("discountPrice", "");//优惠卷金额
+
+            if(order.getTotalDiscountPrice()!=null&&order.getTotalDiscountPrice().doubleValue()>0){
+                Example example=new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.NUMBER,order.getBusinessOrderNumber());
+                BusinessOrder businessOrder=billBusinessOrderMapper.selectOneByExample(example);
+                String discountId=businessOrder.getRedPacketPayMoneyId();
+                ActivityRedPackRecord redPackRecord=billActivityRedPackRecordMapper.selectByPrimaryKey(discountId);
+                ActivityRedPack activityRedPack=billActivityRedPackMapper.selectByPrimaryKey(redPackRecord.getRedPackId());
+                if(activityRedPack.getSourceType()==2){
+                    map.put("discountType", "1");//店铺券
+                }else{
+                    map.put("discountType", "2");//平台券
+                }
+                map.put("discountNumber", redPackRecord.getPackNum());//优惠卷编号
+                if(activityRedPack.getType()==0){
+                    map.put("discountName", "满"+activityRedPack.getSatisfyMoney()+"减"+activityRedPack.getMoney());//优惠卷方式
+                    map.put("discountPrice", activityRedPack.getMoney()+"元");//优惠卷金额
+                }else if(activityRedPack.getType()==1){
+                    if(activityRedPack.getSatisfyMoney()!=null&&activityRedPack.getSatisfyMoney().doubleValue()>0){
+                        map.put("discountName", "满"+activityRedPack.getSatisfyMoney()+"打"+activityRedPack.getMoney()+"折");//优惠卷方式
+                        map.put("discountPrice", activityRedPack.getMoney()+"元");//优惠卷金额
+                    }else{
+                        map.put("discountName", "无门槛");//优惠卷方式
+                        map.put("discountPrice", activityRedPack.getMoney()+"折");//优惠卷金额
+                    }
+                }else{
+                    map.put("discountName", "无门槛");//优惠卷方式
+                    map.put("discountPrice", activityRedPack.getMoney()+"元");//优惠卷金额
+                }
+            }
             map.put("list",orderInfoDTOSs);//订单商品明细
             return ServerResponse.createBySuccess("查询成功", map);
         }catch (Exception e){
