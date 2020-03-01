@@ -319,7 +319,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             max(
             IFNULL(t.is_delivery_install, '0')
             ) isDeliveryInstall,
-            sum(IFNULL(t.price * IFNULL(t.receive, t.num), 0)) + sum(IFNULL(t.transportation_cost,0)) + sum(IFNULL(t.stevedorage_cost,0)) totalAmount,
+            sum(IFNULL(t.price * IFNULL(t.receive, t.num), 0)) + sum(IFNULL(t.transportation_cost,0)) + sum(IFNULL(t.stevedorage_cost,0))-sum(IFNULL(t.discount_price,0)) totalAmount,
             sum(IFNULL(t.sup_cost * IFNULL(t.receive, t.num), 0)) + sum(IFNULL(t.sup_stevedorage_cost, 0)) + t1.transportation_cost applyMoney
         FROM
             dj_deliver_order_split_item t,

@@ -164,4 +164,9 @@ public class MendMateriel extends BaseEntity {
 	@ApiModelProperty("供应商运费")
 	private Double supTransportationCost;
 
+	@Column(name = "discount_price")
+	@Desc(value = "优惠价钱")
+	@ApiModelProperty("优惠价钱")
+	private Double discountPrice;//优惠价钱
+
 }

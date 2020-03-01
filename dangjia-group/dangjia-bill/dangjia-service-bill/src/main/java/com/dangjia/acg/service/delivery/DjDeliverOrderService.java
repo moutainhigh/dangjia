@@ -1470,7 +1470,7 @@ public class DjDeliverOrderService {
                         .andEqualTo(OrderItem.PRODUCT_ID, productId)
                         .andEqualTo(OrderItem.ORDER_ID, id);
                 example.orderBy(OrderItem.CREATE_DATE).desc();
-                OrderItem item = iBillDjDeliverOrderItemMapper.selectOneByExample(example);
+                /*OrderItem item = iBillDjDeliverOrderItemMapper.selectOneByExample(example);
                 if (receive < item.getShopCount()) {
                     //部分收货
                     isFlag = true;
@@ -1508,7 +1508,7 @@ public class DjDeliverOrderService {
                         warehouse.setModifyDate(new Date());
                         iBillWarehouseMapper.updateByPrimaryKeySelective(warehouse);
                     }
-                }
+                }*/
                 orderSplit.setId(JS.getString("id"));
                 orderSplit.setReceive(JS.getDouble("receive"));
                 //修改要货单详情数量

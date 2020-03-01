@@ -105,7 +105,8 @@
             IFNULL(t.transportation_cost,0) transportationCost,
             t1.prod_template_id productTemplateId,
             t1.is_upstairs_cost isUpstairsCost,
-            IFNULL(t1.move_cost,0) moveCost
+            IFNULL(t1.move_cost,0) moveCost,
+            t.discount_price discountPrice
         FROM
             dj_deliver_order_item t,
             dj_basics_storefront_product t1

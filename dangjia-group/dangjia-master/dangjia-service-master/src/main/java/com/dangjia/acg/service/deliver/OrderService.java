@@ -806,6 +806,11 @@ public class OrderService {
                             }else{
                                 splitItem.setStevedorageCost(0d);
                             }
+                            if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
+                                splitItem.setDiscountPrice(MathUtil.mul(MathUtil.div(orderItem.getDiscountPrice(),orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                            }else{
+                                splitItem.setDiscountPrice(0d);
+                            }
                             splitItem.setModifyDate(new Date());
                             orderSplitItemMapper.updateByPrimaryKeySelective(splitItem);
                             //修改订单中的要货量
@@ -813,7 +818,7 @@ public class OrderService {
                             orderItem.setModifyDate(new Date());
                             orderItemMapper.updateByPrimaryKeySelective(orderItem);
                             totalAmount = MathUtil.add(totalAmount,MathUtil.add(MathUtil.add(splitItem.getPrice()*splitItem.getNum(),splitItem.getStevedorageCost()),splitItem.getTransportationCost()));
-
+                            totalAmount=MathUtil.sub(totalAmount,splitItem.getDiscountPrice());
                         }else if(surplus > 0 &&surplus < askCount){
                             //生成新的要货单明细
                             OrderSplitItem orderSplitItem=new OrderSplitItem();
@@ -837,15 +842,20 @@ public class OrderService {
                             Double stevedorageCost=orderItem.getStevedorageCost()!=null?orderItem.getStevedorageCost():0;//搬运费
                             //计算运费
                             if(transportationCost>0.0) {//（运费/总数量）*收货量
-                                orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()!=null?orderItem.getShopCount():0),askCount));
+                                orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
                             }else{
                                 orderSplitItem.setTransportationCost(0d);
                             }
                             //计算搬运费
                             if(stevedorageCost>0.0){//（搬运费/总数量）*收货量
-                                orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()!=null?orderItem.getShopCount():0),askCount));
+                                orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
                             }else{
                                 orderSplitItem.setStevedorageCost(0d);
+                            }
+                            if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
+                                orderSplitItem.setDiscountPrice(MathUtil.mul(MathUtil.div(orderItem.getDiscountPrice(),orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                            }else{
+                                orderSplitItem.setDiscountPrice(0d);
                             }
                             orderSplitItemMapper.insert(orderSplitItem);
                             //修改订单中的要货量
@@ -856,6 +866,7 @@ public class OrderService {
                             askCount=MathUtil.sub(askCount,surplus);
                             totalAmount = MathUtil.add(totalAmount,MathUtil.add(MathUtil.add(orderSplitItem.getPrice()*(orderSplitItem.getNum()!=null?orderSplitItem.getNum():0)
                                     ,orderSplitItem.getStevedorageCost()!=null?orderSplitItem.getStevedorageCost():0),orderSplitItem.getTransportationCost()!=null?orderSplitItem.getTransportationCost():0));
+                            totalAmount=MathUtil.sub(totalAmount,orderSplitItem.getDiscountPrice());
                         }
                     }
                     orderSplit.setTotalAmount(BigDecimal.valueOf(totalAmount));

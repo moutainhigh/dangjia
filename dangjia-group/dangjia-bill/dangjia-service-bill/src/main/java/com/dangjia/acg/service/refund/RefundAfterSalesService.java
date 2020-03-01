@@ -280,7 +280,13 @@ public class RefundAfterSalesService {
                             Double returnStevedorageCost=CommonUtil.getReturnStevedorageCost(elevator,floor,isUpstairsCost,moveCost,returnCount);
                             totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
                         }
+                        //优惠金额
+                        Double discountPrice=0d;
+                        if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                            discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
+                        }
                         actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
+                        actualTotalAmount=MathUtil.sub(actualTotalAmount,discountPrice);
                         orderItemList.add(refundOrderItemDTO);
                     }
 
@@ -400,10 +406,16 @@ public class RefundAfterSalesService {
                         totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
                         refundOrderItemDTO.setStevedorageCost(totalStevedorageCost);
                     }
-
+                    //优惠金额
+                    Double discountPrice=0d;
+                    if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                        discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
+                        refundOrderItemDTO.setDiscountPrice(discountPrice);
+                    }
                     //添回退款申请明细信息
                     MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,returnCount);
                     actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
+                    actualTotalAmount=MathUtil.sub(actualTotalAmount,discountPrice);
 
                 }
                 mendOrder.setModifyDate(new Date());
@@ -467,10 +479,10 @@ public class RefundAfterSalesService {
         mendMateriel.setStorefrontId(refundOrderItemDTO.getStorefrontId());
         mendMateriel.setOrderItemId(refundOrderItemDTO.getOrderItemId());
         mendMateriel.setShopCount(returnCount.doubleValue());
-        Unit unit = iBillUnitMapper.selectByPrimaryKey(refundOrderItemDTO.getConvertUnit());
+        /*Unit unit = iBillUnitMapper.selectByPrimaryKey(refundOrderItemDTO.getConvertUnit());
         if (unit!=null&&unit.getType() == 1) {
             mendMateriel.setShopCount(Math.ceil(returnCount.doubleValue()));
-        }
+        }*/
         mendMateriel.setStevedorageCost(refundOrderItemDTO.getStevedorageCost());
         mendMateriel.setTransportationCost(refundOrderItemDTO.getTransportationCost());
         mendMateriel.setMendOrderId(mendOrder.getId());
@@ -478,6 +490,7 @@ public class RefundAfterSalesService {
         mendMateriel.setCategoryId(refundOrderItemDTO.getCategoryId());
         mendMateriel.setActualCount(mendMateriel.getShopCount());
         mendMateriel.setActualPrice(mendMateriel.getTotalPrice());
+        mendMateriel.setDiscountPrice(refundOrderItemDTO.getDiscountPrice());
         iBillMendMaterialMapper.insertSelective(mendMateriel);
         return mendMateriel;
     }
@@ -1084,7 +1097,13 @@ public class RefundAfterSalesService {
                             Double returnStevedorageCost=CommonUtil.getReturnStevedorageCost(elevator,floor,isUpstairsCost,moveCost,returnCount);
                             totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
                         }
+                        //优惠金额
+                        Double discountPrice=0d;
+                        if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                            discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
+                        }
                         actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
+                        actualTotalAmount=MathUtil.sub(actualTotalAmount,discountPrice);
                         orderItemList.add(refundOrderItemDTO);
                     }
                     orderInfo.setTotalRransportationCost(totalRransportationCost);//可退运费
@@ -1204,6 +1223,13 @@ public class RefundAfterSalesService {
                         totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
                         refundOrderItemDTO.setStevedorageCost(totalStevedorageCost);
                     }
+                    //优惠金额
+                    Double discountPrice=0d;
+                    if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                        discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
+                        refundOrderItemDTO.setDiscountPrice(discountPrice);
+                    }
+
                     refundOrderItemDTO.setOrderItemId(refundOrderItemDTO.getOrderSplitItemId());//传退货单详情ID
                     //添回退款申请明细信息
                     MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,returnCount);
@@ -1329,10 +1355,17 @@ public class RefundAfterSalesService {
                         totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
                         refundOrderItemDTO.setStevedorageCost(totalStevedorageCost);
                     }
+                    //优惠金额
+                    Double discountPrice=0d;
+                    if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                        discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
+                        refundOrderItemDTO.setDiscountPrice(discountPrice);
+                    }
                     refundOrderItemDTO.setOrderItemId(refundOrderItemDTO.getOrderSplitItemId());//传退货单详情ID
                     //添回退款申请明细信息
                     MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,returnCount);
                     actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
+                    actualTotalAmount=MathUtil.sub(actualTotalAmount,discountPrice);
 
                 }
                 mendOrder.setModifyDate(new Date());
