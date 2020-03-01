@@ -82,6 +82,11 @@ public class OrderSplitItem extends BaseEntity {
 	@ApiModelProperty("店铺搬运费")
 	private Double stevedorageCost;
 
+	@Column(name = "discount_price")
+	@Desc(value = "优惠价钱")
+	@ApiModelProperty("优惠价钱")
+	private Double discountPrice;//优惠价钱
+
 
 	@Column(name = "transportation_cost")
 	@Desc(value = "店铺运费")

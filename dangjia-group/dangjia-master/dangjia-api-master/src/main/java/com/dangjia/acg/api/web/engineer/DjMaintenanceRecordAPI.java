@@ -166,10 +166,13 @@ public interface DjMaintenanceRecordAPI {
     @ApiOperation(value = "修改消息状态", notes = "修改消息状态")
     ServerResponse updateTaskStackData(@RequestParam("id") String id);
 
+    @PostMapping(value = "app/engineer/queryMaintenanceRecordList")
+    @ApiOperation(value = "工匠--查询维保记录(当前房子的所有维保记录)", notes = "工匠--查询维保记录(当前房子的所有维保记录)")
+    ServerResponse queryMaintenanceRecordList(@RequestParam("userToken") String userToken,@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("houseId") String houseId);
 
     @PostMapping(value = "app/engineer/queryDimensionRecord")
     @ApiOperation(value = "查询维保责任记录", notes = "查询维保责任记录")
-    ServerResponse queryDimensionRecord(@RequestParam("memberId") String memberId);
+    ServerResponse queryDimensionRecord(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId);
 
     @PostMapping(value = "app/engineer/queryDimensionRecordInFo")
     @ApiOperation(value = "查询维保详情", notes = "查询维保详情")
