@@ -78,7 +78,9 @@
             a.storefront_id as storefrontId,
             a.state AS state,
             a.task_id AS taskId,
-            c.village_id storeName
+            c.village_id storeName,
+            a.red_packet_pay_money_id redPackId,
+            a.discounts_price redPackAmount
         FROM
             dj_pay_business_order AS a
         INNER JOIN dj_deliver_order t on a.number=t.business_order_number
@@ -148,7 +150,9 @@
             p.red_packet_pay_money_id discountId,
             p.state,
             t.payment,
-            p.house_id houseId
+            p.house_id houseId,
+            p.red_packet_pay_money_id redPackId,
+            p.discounts_price redPackAmount
         FROM
             dj_deliver_order t
         INNER JOIN dj_pay_business_order p on t.business_order_number=p.number

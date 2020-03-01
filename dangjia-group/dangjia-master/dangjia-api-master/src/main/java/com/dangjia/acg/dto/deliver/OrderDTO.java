@@ -28,7 +28,7 @@ public class OrderDTO {
     private String discountType;//优惠卷类型（1店铺，2平台）
     private String discountNumber;//优惠卷编号
     private String discountName;//优惠卷名称(方式)
-    private Double discountPrice;//优惠卷金额
+    private String discountPrice;//优惠卷金额
     private Double totalDiscountPrice;//优惠金额
 
     List<OrderItemDTO>  orderItemList;//订单明细（商品列表）
