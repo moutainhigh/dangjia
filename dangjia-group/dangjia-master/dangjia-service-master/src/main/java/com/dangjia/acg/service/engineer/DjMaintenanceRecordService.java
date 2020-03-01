@@ -1520,6 +1520,7 @@ public class DjMaintenanceRecordService {
      * @return
      */
     public DimensionRecordDTO getDimensionRecordInfo(String mrrpId){
+
         DimensionRecordDTO dimensionRecordDTOS = djMaintenanceRecordResponsiblePartyMapper.queryDimensionRecordInFo(mrrpId, 2);
 
         String maintenanceRecordId=dimensionRecordDTOS.getMrId();
@@ -1583,7 +1584,7 @@ public class DjMaintenanceRecordService {
             if(taskStack==null){
                 return ServerResponse.createByErrorMessage("未找到符合条件的数据");
             }
-            return ServerResponse.createBySuccess("查询成功",getDimensionRecordInfo(taskStack.getId()));
+            return ServerResponse.createBySuccess("查询成功",getDimensionRecordInfo(taskStack.getData()));
         }catch (Exception e){
             logger.error("查询失败");
             return  ServerResponse.createByErrorMessage("查询失败");

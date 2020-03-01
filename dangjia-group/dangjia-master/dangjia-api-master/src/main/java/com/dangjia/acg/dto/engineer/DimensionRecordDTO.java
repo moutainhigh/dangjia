@@ -13,7 +13,6 @@ import java.util.Map;
  */
 @Data
 public class DimensionRecordDTO {
-
     private Date createDate;// 创建日期
     private Date paymentDate;//支付时间
     private Double sincePurchaseAmount;//维保金额

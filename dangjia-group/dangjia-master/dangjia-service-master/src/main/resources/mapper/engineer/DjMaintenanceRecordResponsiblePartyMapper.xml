@@ -85,7 +85,7 @@
         INNER JOIN  dj_maintenance_record_responsible_party mrrp on mrrp.maintenance_record_id = mr.id
         INNER JOIN dj_house h on mr.house_id = h.id
         where  1=1
-        <if test="mrId != null and mrId == ''">
+        <if test="mrrpId != null and mrrpId != ''">
             and mrrp.id = #{mrrpId}
         </if>
         <if test="type == 2">
