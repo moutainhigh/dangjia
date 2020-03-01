@@ -26,6 +26,7 @@ import com.dangjia.acg.dto.design.WorkChartListDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.dto.order.*;
 import com.dangjia.acg.mapper.delivery.*;
+import com.dangjia.acg.mapper.member.IBillMemberAddressMapper;
 import com.dangjia.acg.mapper.order.*;
 import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
 import com.dangjia.acg.mapper.refund.IBillMendOrderMapper;
@@ -46,6 +47,7 @@ import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.ShoppingCart;
@@ -132,6 +134,10 @@ public class DjDeliverOrderService {
     private IBillShoppingCartMapper iBillShoppingCartMapper;
     @Autowired
     private IBillQuantityRoomMapper iQuantityRoomMapper;
+    @Autowired
+    private IBillMemberAddressMapper iBillMemberAddressMapper;
+    @Autowired
+    private IBillHouseMapper houseMapper;
     @Autowired
     private IBillActivityRedPackMapper billActivityRedPackMapper;
 
@@ -884,14 +890,6 @@ public class DjDeliverOrderService {
                 list.add(map);
             }
         }
-        //重新排序
-        Collections.sort(list, new Comparator<Map<String, Object>>() {
-            public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-                Date date1 = (Date)o1.get("date");
-                Date date2 = (Date)o2.get("date");
-                return date1.compareTo(date2);
-            }
-        });
         collectDataDTO.setName("预计完工");
         collectDataDTO.setDate(date);
         collectDataDTO.setList(list);
@@ -1608,7 +1606,6 @@ public class DjDeliverOrderService {
         }
     }
 
-
     /**
      * App 详情拒绝收货
      *
@@ -1767,9 +1764,19 @@ public class DjDeliverOrderService {
 
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         OrderCollectInFoDTO orderCollectInFoDTO = new OrderCollectInFoDTO();
-        House house = iBillHouseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-        String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
-        orderCollectInFoDTO.setHouseName(houseName);
+        MemberAddress memberAddress=iBillMemberAddressMapper.selectByPrimaryKey(splitDeliver.getAddressId());
+        House house = null;
+        if(memberAddress!=null){
+            orderCollectInFoDTO.setHouseId(memberAddress.getHouseId());
+            orderCollectInFoDTO.setHouseName( memberAddress.getAddress());
+
+        }else{
+            house=houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            if(house!=null){
+                orderCollectInFoDTO.setHouseId(house.getHouseId());
+                orderCollectInFoDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋 " + house.getUnit() + "单元" + house.getNumber() + "号");
+            }
+        }
         orderCollectInFoDTO.setCreateDate(splitDeliver.getCreateDate());
         orderCollectInFoDTO.setRecTime(splitDeliver.getRecTime());
         orderCollectInFoDTO.setSendTime(splitDeliver.getRecTime());
@@ -1845,7 +1852,7 @@ public class DjDeliverOrderService {
 
         //查询购物车数量
         example = new Example(ShoppingCart.class);
-        example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId());
+        example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId()!=null?house.getMemberId():memberAddress.getMemberId());
         orderCollectInFoDTO.setShoppingCartsCount(iBillShoppingCartMapper.selectCountByExample(example));
 
         orderCollectInFoDTO.setOrderStorefrontDTOS(listArr);
@@ -1876,13 +1883,22 @@ public class DjDeliverOrderService {
 
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             OrderCollectInFoDTO orderCollectInFoDTO = new OrderCollectInFoDTO();
-            House house = houseAPI.selectHouseById(orderSplit.getHouseId());
-            String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
-            orderCollectInFoDTO.setHouseName(houseName);
+            MemberAddress memberAddress=iBillMemberAddressMapper.selectByPrimaryKey(orderSplit.getAddressId());
+            if(memberAddress!=null){
+                orderCollectInFoDTO.setHouseId(memberAddress.getHouseId());
+                orderCollectInFoDTO.setHouseName( memberAddress.getAddress());
+
+            }else{
+                House house=houseMapper.selectByPrimaryKey(orderSplit.getHouseId());
+                if(house!=null){
+                    orderCollectInFoDTO.setHouseId(house.getHouseId());
+                    orderCollectInFoDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + " 单元" + house.getNumber() + "号");
+                }
+            }
             orderCollectInFoDTO.setCreateDate(orderSplit.getCreateDate());
             orderCollectInFoDTO.setNumber(orderSplit.getNumber());
-            orderCollectInFoDTO.setActualPaymentPrice(orderSplit.getTotalAmount().doubleValue());
-            orderCollectInFoDTO.setTotalAmount(orderSplit.getTotalAmount().doubleValue());
+            orderCollectInFoDTO.setActualPaymentPrice(orderSplit.getTotalAmount()!=null?orderSplit.getTotalAmount().doubleValue():0);
+            orderCollectInFoDTO.setTotalAmount(orderSplit.getTotalAmount()!=null?orderSplit.getTotalAmount().doubleValue():0);
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId())
                     .andEqualTo(OrderSplitItem.DATA_STATUS, 0);
@@ -1936,7 +1952,7 @@ public class DjDeliverOrderService {
 
             //查询购物车数量
             example = new Example(ShoppingCart.class);
-            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId());
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, orderSplit.getMemberId());
             orderCollectInFoDTO.setShoppingCartsCount(iBillShoppingCartMapper.selectCountByExample(example));
             orderCollectInFoDTO.setOrderStorefrontDTOS(listArr);
             return ServerResponse.createBySuccess("查询成功", orderCollectInFoDTO);
@@ -1974,9 +1990,18 @@ public class DjDeliverOrderService {
 
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         OrderCollectInFoDTO orderCollectInFoDTO = new OrderCollectInFoDTO();
-        House house = iBillHouseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-        String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
-        orderCollectInFoDTO.setHouseName(houseName);
+        MemberAddress memberAddress=iBillMemberAddressMapper.selectByPrimaryKey(splitDeliver.getAddressId());
+        if(memberAddress!=null){
+            orderCollectInFoDTO.setHouseId(memberAddress.getHouseId());
+            orderCollectInFoDTO.setHouseName( memberAddress.getAddress());
+
+        }else{
+            House house=houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            if(house!=null){
+                orderCollectInFoDTO.setHouseId(house.getHouseId());
+                orderCollectInFoDTO.setHouseName( house.getResidential() + house.getBuilding() + " 栋" + house.getUnit() + "单元" + house.getNumber() + "号");
+            }
+        }
         orderCollectInFoDTO.setCreateDate(splitDeliver.getCreateDate());
         orderCollectInFoDTO.setSendTime(splitDeliver.getRecTime());
         orderCollectInFoDTO.setNumber(splitDeliver.getNumber());
