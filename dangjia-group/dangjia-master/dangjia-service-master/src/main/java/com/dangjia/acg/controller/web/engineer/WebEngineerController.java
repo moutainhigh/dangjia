@@ -200,8 +200,8 @@ public class WebEngineerController implements WebEngineerAPI {
     }
     @Override
     @ApiMethod
-    public ServerResponse getWareHouse( HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO) {
-        return engineerService.getWareHouse(request,cityId,houseId, pageDTO);
+    public ServerResponse getWareHouse( HttpServletRequest request,String searckKey ,String cityId,String houseId, PageDTO pageDTO) {
+        return engineerService.getWareHouse(request, searckKey ,cityId,houseId, pageDTO);
     }
 
     /**

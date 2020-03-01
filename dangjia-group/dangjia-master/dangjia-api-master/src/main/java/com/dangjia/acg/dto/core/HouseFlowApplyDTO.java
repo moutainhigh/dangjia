@@ -33,6 +33,8 @@ public class HouseFlowApplyDTO {
     private Integer isPay;//是否需要再次购买 （1是，0否）
     private Integer isComplain;//-1：未投诉 0:待处理。1.驳回。2.接受
     private String  complainId;//投诉ID
+    private Integer  complainType;//投诉ID
+    private List<Map> complainWorkerlist;//可投诉对象集合
     private String supervisorHouseFlowId;
     private String applyDec;
     private String managerId;

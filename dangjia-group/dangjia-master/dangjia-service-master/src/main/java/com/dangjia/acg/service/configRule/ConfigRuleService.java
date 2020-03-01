@@ -128,12 +128,15 @@ public class ConfigRuleService {
                     List<Map> types=new ArrayList<>();
                     String[] paramtype = new String[0];
                     //施工流程分类获取
-                    if(MK003.equals(configRuleModule.getTypeId())||MK004.equals(configRuleModule.getTypeId())) {
+                    if(MK003.equals(configRuleModule.getTypeId())||MK004.equals(configRuleModule.getTypeId())||MK007.equals(configRuleModule.getTypeId())) {
                         if (MK003.equals(configRuleModule.getTypeId())) {
                             paramtype = new String[]{SG001, SG002, SG003, SG004};
                         }
                         if (MK004.equals(configRuleModule.getTypeId())) {
                             paramtype = new String[]{SG005, SG006};
+                        }
+                        if (MK007.equals(configRuleModule.getTypeId())) {
+                            paramtype = new String[]{SG007, SG008};
                         }
                         example = new Example(DjConfigRuleType.class);
                         example.createCriteria().andEqualTo(DjConfigRuleType.SOURCE, 3).andIn(DjConfigRuleType.ID, Arrays.asList(paramtype));
@@ -523,10 +526,9 @@ public class ConfigRuleService {
                 field.put("completed","竣工");
             }
 
-            if(MK008.equals(configRuleModule.getTypeId())) {
-                field.put("integral","配置上线(元)");
-            }
-            if(MK007.equals(configRuleModule.getTypeId())) {
+
+            if(MK007.equals(configRuleModule.getTypeId())||MK008.equals(configRuleModule.getTypeId())) {
+                field.put("maxScore","配置上限(元)");
                 field.put("integral","配置比例(百分比)");
             }
             if(MK006.equals(configRuleModule.getTypeId())) {
@@ -609,6 +611,10 @@ public class ConfigRuleService {
     public static String   SG004 = "SG004";//竣工
     public static String   SG005 = "SG005";//每日完工
     public static String   SG006 = "SG006";//被评价
+
+
+    public static String   SG007 = "SG007";//店铺
+    public static String   SG008 = "SG008";//供应商
 
     public static String   CS001 = "CS001";//店铺总销量
     public static String   CS002 = "CS002";//店铺上货数

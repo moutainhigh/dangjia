@@ -888,7 +888,7 @@ public class EngineerService {
         }
     }
 
-    public ServerResponse getWareHouse( HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO) {
+    public ServerResponse getWareHouse( HttpServletRequest request,String searckKey ,String cityId,String houseId, PageDTO pageDTO) {
         String userID = request.getParameter("userId");
         //通过缓存查询店铺信息
         Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
@@ -898,7 +898,12 @@ public class EngineerService {
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(Warehouse.class);
-        example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.STOREFRONT_ID,storefront.getId());
+        if(!CommonUtil.isEmpty(searckKey)){
+            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.STOREFRONT_ID, storefront.getId())
+                    .andLike(Warehouse.PRODUCT_NAME, "%"+searckKey+"%");
+        }else {
+            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.STOREFRONT_ID, storefront.getId());
+        }
         example.orderBy(Warehouse.PRODUCT_SN).desc();
         List<Warehouse> warehouseList = iWarehouseMapper.selectByExample(example);
         if (warehouseList == null) {

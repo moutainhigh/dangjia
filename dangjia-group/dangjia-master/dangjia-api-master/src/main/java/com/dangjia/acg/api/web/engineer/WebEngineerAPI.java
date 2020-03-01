@@ -117,6 +117,7 @@ public interface WebEngineerAPI {
     @PostMapping(value = "web/engineer/getWareHouse")
     @ApiOperation(value = "仓库列表", notes = "仓库列表")
     ServerResponse getWareHouse(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("searckKey") String searckKey ,
                                 @RequestParam("cityId") String cityId,
                                 @RequestParam("houseId") String houseId,
                                @RequestParam("pageDTO") PageDTO pageDTO);

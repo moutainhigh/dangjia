@@ -1225,6 +1225,7 @@ public class HouseFlowApplyService {
                     .andIn(HouseFlowApply.APPLY_TYPE, Arrays.asList(1, 2, 10));
         }
         List<HouseFlowApply> houseFlowApplies =  houseFlowApplyMapper.selectByExample(example);
+        House house =  houseMapper.selectByPrimaryKey(houseId);
         List<HouseFlowApplyDTO> houseFlowApplyDTOList=new ArrayList<>();
         for (HouseFlowApply houseFlowApply : houseFlowApplies) {
             if((houseFlowApply.getApplyType()==1||houseFlowApply.getApplyType()==2)&&!CommonUtil.isEmpty(houseFlowApply.getHouseFlowApplyId())){
@@ -1271,17 +1272,15 @@ public class HouseFlowApplyService {
             //工匠的进程明细
             List<Map> list  = houseFlowApplyMapper.getApplyCheckInfo(houseFlowApply.getId());
             for (Map map : list) {
-                if(map.get("imageList")!=null) {
-                    map.put("imageList", Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
-                }
-                if(map.get("workerHead")!=null) {
-                    map.put("workerHead", Utils.getImageAddress(address, String.valueOf(map.get("workerHead"))));
-                }
                 if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
                     map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList")))+","+StringUtils.join(imageList.toArray(),"."));
                 }else{
                     map.put("imageList",  Utils.getImageAddress(address, String.valueOf(map.get("imageList"))));
                 }
+                if(map.get("workerHead")!=null) {
+                    map.put("workerHead", Utils.getImageAddress(address, String.valueOf(map.get("workerHead"))));
+                }
+
                 if(houseFlowApply.getWorkerId().equals(map.get("workerId"))){
                     map.put("applyTypeName", DjConstants.applyTypeMap.get(houseFlowApply.getApplyType()));
                 }else if(Integer.parseInt(String.valueOf(map.get("workerType")))==3){
@@ -1317,6 +1316,31 @@ public class HouseFlowApplyService {
                 if(complains.size()>0){
                     houseFlowApplyDTO.setIsComplain(complains.get(0).getStatus());//-1：未投诉 0:待处理。1.驳回。2.接受
                     houseFlowApplyDTO.setComplainId(complains.get(0).getId());
+                }
+                if(houseFlowApplyDTO.getIsComplain()<=0){
+                    List<Map> complainWorkerlist =new ArrayList<>();
+                    for (Map map : list) {
+//                        13.业主投诉验收, 14.管家投诉验收, 15.工匠投诉验收
+                        if(!member.getId().equals(map.get("workerId"))){
+                            Map mapWorker=new HashMap();
+                            mapWorker.put("workerId",map.get("workerId"));
+                            mapWorker.put("workerTypeName",Integer.parseInt(String.valueOf(map.get("workerType")))==3?"大管家":"工匠");
+                            complainWorkerlist.add(mapWorker);
+                        }
+                        if(member.getId().equals(map.get("workerId"))){
+                            houseFlowApplyDTO.setComplainType(Integer.parseInt(String.valueOf(map.get("workerType")))==3?14:15);
+                        }
+                    }
+                    if(!member.getId().equals(house.getMemberId())){
+                        Map mapWorker=new HashMap();
+                        mapWorker.put("workerId",house.getMemberId());
+                        mapWorker.put("workerTypeName","业主");
+                        complainWorkerlist.add(mapWorker);
+                    }
+                    if(member.getId().equals(house.getMemberId())){
+                        houseFlowApplyDTO.setComplainType(13);
+                    }
+                    houseFlowApplyDTO.setComplainWorkerlist(complainWorkerlist);
                 }
             }
             houseFlowApplyDTO.setList(list);

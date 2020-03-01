@@ -3,6 +3,7 @@ package com.dangjia.acg.service.worker;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.*;
@@ -235,33 +236,6 @@ public class WorkerService {
                 hwMap.put(House.BUILD_SQUARE, house.getBuildSquare());
                 hwMap.put(House.SQUARE, house.getSquare());
                 hwMap.put(House.VISIT_STATE, house.getVisitState());
-//                Long suspendDay = houseFlowApplyMapper.getSuspendApply(house.getId(), worker.getId());//根据房子id和工人id查询暂停天数
-//                Long everyEndDay = houseFlowApplyMapper.getEveryDayApply(house.getId(), worker.getId());//根据房子id和工人id查询每日完工申请天数
-//                long totalDay = 0;
-//                List<HouseFlowApply> earliestTime = houseFlowApplyMapper.getEarliestTimeHouseApply(house.getId(), worker.getId());//查询最早的每日开工申请
-//                if (earliestTime != null && earliestTime.size() > 0) {
-//                    Date EarliestDay = earliestTime.get(0).getCreateDate();//最早开工时间
-//                    Example example1 = new Example(HouseFlowApply.class);
-//                    example1.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID, worker.getId())
-//                            .andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.APPLY_TYPE, 2);
-//                    List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example1);
-//                    Date newDate = new Date();
-//                    if (houseFlowApplies.size() > 0) {
-//                        newDate = houseFlowApplies.get(0).getModifyDate();
-//                    }
-//                    long num = 1 + DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
-//                    if (suspendDay == null) {
-//                        totalDay = num;//总开工天数
-//                    } else {
-//                        long aa = num - suspendDay;
-//                        if (aa >= 0) {
-//                            totalDay = aa;
-//                        }
-//                    }
-//                }
-//                hwMap.put("suspendDay", suspendDay == null ? 0 : suspendDay);//暂停天数
-//                hwMap.put("everyEndDay", everyEndDay == null ? 0 : everyEndDay);//每日完工申请天数
-//                hwMap.put("totalDay", totalDay);//总开工数
             }
             hwMapList.add(hwMap);
         }
@@ -330,6 +304,9 @@ public class WorkerService {
                 map.put("bankCardImage", bankCard.getBankCardImage());//银行卡图片
             }
             mapList.add(map);
+        }
+        if (mapList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         return ServerResponse.createBySuccess("获取我的银行卡成功", mapList);
     }

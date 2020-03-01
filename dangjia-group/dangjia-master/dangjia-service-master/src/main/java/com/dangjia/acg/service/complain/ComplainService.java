@@ -733,9 +733,30 @@ public class ComplainService {
             return ServerResponse.createByErrorMessage("未找到对应申诉");
         }
         if(!CommonUtil.isEmpty(complain.getMemberId())){
-            Member member = memberMapper.selectByPrimaryKey(complain.getMemberId());
-            if(member!=null) {
-                complain.setMemberHead(address + member.getHead());
+            if(complain.getComplainType()==13 || complain.getComplainType()==14 || complain.getComplainType()==15) {
+                complain.setMemberName("");
+                complain.setMemberNickName("");
+                complain.setMemberMobile("");
+            }
+            Example example = new Example(Member.class);
+            example.createCriteria().andIn(Member.ID,Arrays.asList(complain.getMemberId().split(",")));
+            List<Member> members = memberMapper.selectByExample(example);
+            if(members!=null) {
+                for (Member member : members) {
+                    complain.setMemberHead(address + member.getHead());
+                    if(complain.getComplainType()==13 || complain.getComplainType()==14 || complain.getComplainType()==15) {
+                        if(CommonUtil.isEmpty(complain.getMemberMobile())){
+                            complain.setMemberName(member.getName());
+                            complain.setMemberNickName(member.getNickName());
+                            complain.setMemberMobile(member.getMobile());
+                        }else {
+                            complain.setMemberName(complain.getMemberName()+"、"+member.getName());
+                            complain.setMemberNickName(complain.getMemberName()+"、"+member.getNickName());
+                            complain.setMemberMobile(complain.getMemberName()+"、"+member.getMobile());
+                        }
+
+                    }
+                }
             }
         }
         String files = complain.getFiles();
