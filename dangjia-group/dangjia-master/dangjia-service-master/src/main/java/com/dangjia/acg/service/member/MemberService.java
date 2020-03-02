@@ -1429,6 +1429,7 @@ public class MemberService {
                 map.put("id",orderNode.getCode());
                 map.put("name",orderNode.getName());
                 map.put("code",orderNode.getCode());
+                map.put("type",0);//未获取
                 if("H001".equals(orderNode.getCode())){
                     //判断当前人员是否有保险
                     //查询保险徽章
@@ -1441,6 +1442,7 @@ public class MemberService {
                     if(insurance!=null&&insurance.size()>0){
                         map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
                         map.put("id",insurance.get(0).getId());
+                        map.put("type",1);//已获取
                     }
                 }if("H002".equals(orderNode.getCode())){//技能详情
                     example = new Example(DjSkillCertification.class);
@@ -1450,6 +1452,7 @@ public class MemberService {
                     if(djSkillCertifications != null && djSkillCertifications.size() >0){
                         map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
                         map.put("id",worker.getId());
+                        map.put("type",1);//已获取
                     }
                 }
 
@@ -1485,6 +1488,7 @@ public class MemberService {
                 map.put("id",orderNode.getCode());
                 map.put("name",orderNode.getName());
                 map.put("code",orderNode.getCode());
+                map.put("type",0);//未获取
             }
             if("H001".equals(code)){
                 //判断当前人员是否有保险
@@ -1501,6 +1505,7 @@ public class MemberService {
                     map.put("id",insurance.get(0).getId());
                     map.put("startDate",rance.getStartDate());//保险开始时间
                     map.put("ednDate",rance.getEndDate());//保险结束时间
+                    map.put("type",1);//已获取
                 }else{
                     map.put("showButton","去购买");
                 }
@@ -1520,6 +1525,7 @@ public class MemberService {
                 if(djSkillCertifications != null && djSkillCertifications.size() >0){
                     map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
                     map.put("id",worker.getId());
+                    map.put("type",1);//已获取
                 }
                 example = new Example(DjSkillCertification.class);
                 example.createCriteria().andEqualTo(DjSkillCertification.DATA_STATUS, 0);
