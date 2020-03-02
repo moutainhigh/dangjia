@@ -546,6 +546,14 @@ public interface MemberAPI {
     ServerResponse getMyHomePage(@RequestParam("userToken") String userToken,
                                  @RequestParam("userRole") Integer userRole);
 
+    @PostMapping("app/core/houseWorker/getMyInsigniaList")
+    @ApiOperation(value = "获取我的徽章", notes = "获取我的徽章")
+    ServerResponse getMyInsigniaList(@RequestParam("userToken") String userToken);
+
+    @PostMapping("app/core/houseWorker/getMyInsigniaDetail")
+    @ApiOperation(value = "获取我的徽章--徽章详情", notes = "获取我的徽章--徽章详情")
+    ServerResponse getMyInsigniaDetail(@RequestParam("userToken") String userToken,@RequestParam("code") String code);
+
     @RequestMapping(value = "member/getMember", method = RequestMethod.POST)
     @ApiOperation(value = "其他项目获取登录信息", notes = "其他项目获取登录信息")
     Object getMember(@RequestParam("userToken") String userToken);

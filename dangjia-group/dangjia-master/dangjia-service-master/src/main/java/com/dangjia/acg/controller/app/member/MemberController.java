@@ -8,8 +8,11 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.member.MemberService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -119,7 +122,22 @@ public class MemberController implements MemberAPI {
     public ServerResponse getMyHomePage(String userToken, Integer userRole) {
         return memberService.getMyHomePage(userToken, userRole);
     }
-
+    /**
+     * 获取我的徽章
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMyInsigniaList(String userToken){
+        return memberService.getMyInsigniaList(userToken);
+    }
+    /**
+     * 获取我的徽章--徽章详情
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMyInsigniaDetail(String userToken,String code){
+        return memberService.getMyInsigniaDetail(userToken,code);
+    }
 
     @Override
     @ApiMethod
