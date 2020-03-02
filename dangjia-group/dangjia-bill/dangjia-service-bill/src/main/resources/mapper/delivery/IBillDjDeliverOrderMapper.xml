@@ -583,7 +583,9 @@
                 pbo.type AS type,
                 pbo.id AS pboId,
                 pbo.image AS pboImage,
-                ddo.cancellation_time AS cancellationTime
+                ddo.total_discount_price totalDiscountPrice,
+                ddo.cancellation_time AS cancellationTime,
+                pbo.red_packet_pay_money_id discountId
             FROM
                 dj_deliver_order ddo,
                 dj_pay_business_order pbo,

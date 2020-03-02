@@ -54,4 +54,12 @@ public class RefundAfterSalesJobController implements RefundAfterSalesJobAPI {
     public void homeShellOrderRefundTime(){
         refundAfterSalesJobService.homeShellOrderRefundTime();
     }
+    /**
+     * 当家贝商城--待支付时间
+     */
+    @Override
+    @ApiMethod
+    public void homeShellOrderPayTime(){
+        refundAfterSalesJobService.homeShellOrderPayTime();
+    }
 }

@@ -15,4 +15,6 @@ public interface IHomeShellProductSpecMapper extends Mapper<HomeShellProductSpec
 
     HomeShellProductSpecDTO selectProductSpecInfo(@Param("productId") String productId);
 
+    HomeShellProductSpec selectProductSpecStockById(@Param("specId") String specId);
+
 }

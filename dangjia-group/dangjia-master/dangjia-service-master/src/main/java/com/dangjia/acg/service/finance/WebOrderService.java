@@ -172,10 +172,16 @@ public class WebOrderService {
                     }
                 }
                 //优惠卷
-                ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(webOrderDTO.getOrderId());
+                ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.selectByPrimaryKey(webOrderDTO.getRedPackId());
                 if (activityRedPackRecord != null) {
                     ActivityRedPack activityRedPack = iActivityRedPackMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackId());
                     webOrderDTO.setRedPackName(activityRedPack.getName());
+                    if(activityRedPack.getSourceType()==2){
+                        webOrderDTO.setRedPackType("店铺券");
+                    }else{
+                        webOrderDTO.setRedPackType("平台券");
+                    }
+                    webOrderDTO.setRedPackNumber(activityRedPackRecord.getPackNum());
                 }
             }
             pageResult.setList(orderList);
@@ -207,6 +213,33 @@ public class WebOrderService {
                 businessOrderInfoDTO.setFloor(floor);//楼层
                 businessOrderInfoDTO.setElevator(elevator);//是否电梯房
             }
+            //优惠卷
+            ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.selectByPrimaryKey(businessOrderInfoDTO.getRedPackId());
+            if (activityRedPackRecord != null) {
+                ActivityRedPack activityRedPack = iActivityRedPackMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackId());
+                businessOrderInfoDTO.setTotalDiscountPrice(businessOrderInfoDTO.getRedPackAmount());
+                if(activityRedPack.getSourceType()==2){
+                    businessOrderInfoDTO.setDiscountType("店铺券");
+                }else{
+                    businessOrderInfoDTO.setDiscountType("平台券");
+                }
+                businessOrderInfoDTO.setDiscountNumber(activityRedPackRecord.getPackNum());
+                if(activityRedPack.getType()==0){
+                    businessOrderInfoDTO.setDiscountName( "满"+activityRedPack.getSatisfyMoney()+"减"+activityRedPack.getMoney());//优惠卷方式
+                    businessOrderInfoDTO.setDiscountPrice(activityRedPack.getMoney()+"元");//优惠卷金额
+                }else if(activityRedPack.getType()==1){
+                    if(activityRedPack.getSatisfyMoney()!=null&&activityRedPack.getSatisfyMoney().doubleValue()>0){
+                        businessOrderInfoDTO.setDiscountName( "满"+activityRedPack.getSatisfyMoney()+"打"+activityRedPack.getMoney()+"折");//优惠卷方式
+                        businessOrderInfoDTO.setDiscountPrice( activityRedPack.getMoney()+"元");//优惠卷金额
+                    }else{
+                        businessOrderInfoDTO.setDiscountName(  "无门槛");//优惠卷方式
+                        businessOrderInfoDTO.setDiscountPrice(activityRedPack.getMoney()+"折");//优惠卷金额
+                    }
+                }else{
+                    businessOrderInfoDTO.setDiscountName(  "无门槛");//优惠卷方式
+                    businessOrderInfoDTO.setDiscountPrice(activityRedPack.getMoney()+"元");//优惠卷金额
+                }
+            }
             //查询订单子单汇总金额，按店铺划分
             List<OrderDTO> orderInfoList=iBusinessOrderMapper.selectOrderInfoList(businessNumber);
             if(orderInfoList!=null){
@@ -221,9 +254,14 @@ public class WebOrderService {
                     }
                     order.setOrderItemList(orderItemList);
                     order.setTotalPrice(totalPrice);
+                    if(order.getTotalDiscountPrice()!=null&&order.getTotalDiscountPrice()>0){
+                        order.setDiscountName(businessOrderInfoDTO.getDiscountName());
+                        order.setDiscountPrice(businessOrderInfoDTO.getDiscountPrice());
+                        order.setDiscountNumber(businessOrderInfoDTO.getBusinessNumber());
+                        order.setDiscountType(businessOrderInfoDTO.getDiscountType());
+                    }
                 }
             }
-            //查询优惠卷信息(暂无）
             businessOrderInfoDTO.setOrderInfoList(orderInfoList);
             return ServerResponse.createBySuccess("查询成功",businessOrderInfoDTO);
         }catch (Exception e){

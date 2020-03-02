@@ -36,4 +36,7 @@ public interface RefundAfterSalesJobAPI {
     @ApiOperation(value = "当家贝商城--待退款时间", notes = "当家贝商城--待退款时间")
     void homeShellOrderRefundTime();
 
+    @PostMapping("app/refund/job/homeShellOrderPayTime")
+    @ApiOperation(value = "当家贝商城--待支付时间", notes = "当家贝商城--待支付时间")
+    void homeShellOrderPayTime();
 }

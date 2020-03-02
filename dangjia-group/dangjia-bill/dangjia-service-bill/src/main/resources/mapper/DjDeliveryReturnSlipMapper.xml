@@ -507,11 +507,11 @@
                     sum(tt.sup_stevedorage_cost) totalStevedorageCost,
                     sum(tt.sup_transportation_cost) totalTransportationCost,
                     sum(
-                        tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+                        tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
                     ) totalPrice,
                     tt.supPrice * tt.receive totalSupCost,
                     sum(
-                        tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+                        tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
                     ) - sum(
                         tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
                     ) profit
@@ -539,6 +539,7 @@
                             IFNULL(t.stevedorage_cost,0) stevedorage_cost,
                             IFNULL(t.sup_transportation_cost,0) sup_transportation_cost,
                             IFNULL(t.sup_stevedorage_cost,0) sup_stevedorage_cost,
+                            IFNULL(t.discount_price,0) discount_price,
                             t.product_id AS productId
                         FROM
                             dj_deliver_split_deliver s
@@ -569,11 +570,11 @@
                         sum(
                             tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
                         ) totalPrice,
-                        tt.price * tt.returnCount totalSupCost,
+                        tt.price * tt.returnCount-tt.discount_price totalSupCost,
                         sum(
                             tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
                         ) - sum(
-                            tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost
+                            tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost-tt.discount_price
                         ) profit
                     FROM
                         (
@@ -598,6 +599,7 @@
                                 IFNULL(t.stevedorage_cost,0) stevedorage_cost,
                                 IFNULL(t.sup_transportation_cost,0) sup_transportation_cost,
                                 IFNULL(t.sup_stevedorage_cost,0) sup_stevedorage_cost,
+                                IFNULL(t.discount_price,0) discount_price,
                                 t.product_id AS productId
                             FROM
                                 dj_repair_mend_deliver s
@@ -627,13 +629,13 @@
     <select id="totalProductDimensionSplitDetail" resultType="java.util.Map">
         SELECT
             sum(
-                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
             ) income,
             sum(
                 tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
             ) expenditure,
             sum(
-                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
             ) - sum(
                 tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
             ) profit
@@ -661,6 +663,7 @@
                         0
                     ) sup_transportation_cost,
                     IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost,
+                    IFNULL(t.discount_price,0) discount_price,
                     s.id splitId
                 FROM
                     dj_deliver_split_deliver s
@@ -691,11 +694,11 @@
             sum(tt.sup_stevedorage_cost) totalStevedorageCost,
             sum(tt.sup_transportation_cost) totalTransportationCost,
             sum(
-                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
             ) totalPrice,
             tt.supPrice * tt.receive totalSupCost,
             sum(
-                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
             ) - sum(
                 tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
             ) profit
@@ -723,6 +726,7 @@
                         0
                     ) sup_transportation_cost,
                     IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost,
+                    IFNULL(t.discount_price,0) discount_price,
                     s.id splitId,
                     s.number number,
                     s.create_date sendTime,
@@ -755,12 +759,12 @@
                 tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
             ) income,
             sum(
-                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost
+                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost-tt.discount_price
             ) expenditure,
             sum(
                 tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
             ) - sum(
-                tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost
+                tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost-tt.discount_price
             ) profit
         FROM
             (
@@ -785,6 +789,7 @@
                         t.sup_transportation_cost,
                         0
                     ) sup_transportation_cost,
+                    IFNULL(t.discount_price,0) discount_price,
                     IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost
                 FROM
                     dj_repair_mend_deliver s
@@ -819,13 +824,13 @@
             sum(tt.sup_stevedorage_cost) totalStevedorageCost,
             sum(tt.sup_transportation_cost) totalTransportationCost,
             sum(
-                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost
+                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost - tt.discount_price
             ) totalPrice,
             tt.supPrice * tt.returnCount totalSupCost,
             sum(
                 tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
             ) - sum(
-                tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost
+                tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost-tt.discount_price
             ) profit
         FROM
             (
@@ -853,6 +858,7 @@
                         t.sup_transportation_cost,
                         0
                     ) sup_transportation_cost,
+                    IFNULL(t.discount_price,0) discount_price,
                     IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost
                 FROM
                     dj_repair_mend_deliver s

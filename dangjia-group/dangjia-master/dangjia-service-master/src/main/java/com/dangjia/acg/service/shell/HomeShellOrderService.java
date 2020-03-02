@@ -97,14 +97,14 @@ public class HomeShellOrderService {
      * @param searchKey 兑换人姓名/电话/单号
      * @return
      */
-    public ServerResponse queryOrderInfoList(PageDTO pageDTO,Integer exchangeClient,Integer status, Date startTime, Date endTime, String searchKey){
+    public ServerResponse queryOrderInfoList(PageDTO pageDTO,Integer exchangeClient,Integer status, String startTime, String endTime, String searchKey){
         try{
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             List<HomeShellOrderDTO>  shellOrderDTOList=homeShellOrderMapper.selectShellOrderList(exchangeClient,status,startTime,endTime,searchKey);
             PageInfo pageInfo=new PageInfo(shellOrderDTOList);
             return ServerResponse.createBySuccess("查询成功",pageInfo);
         }catch(Exception e){
-            logger.error("查询失败");
+            logger.error("查询失败",e);
             return ServerResponse.createBySuccessMessage("查询失败");
         }
     }
@@ -253,9 +253,10 @@ public class HomeShellOrderService {
         if(productSpecId==null){
             return ServerResponse.createByErrorMessage("商品规格ID不能为空");
         }
-        HomeShellProductSpec productSpec=homeShellProductSpecMapper.selectByPrimaryKey(productSpecId);
+        //查询库存是否充足
+        HomeShellProductSpec productSpec=homeShellProductSpecMapper.selectProductSpecStockById(productSpecId);
         if(productSpec==null){
-            return ServerResponse.createByErrorMessage("请传入正确的商品规格ID");
+            return ServerResponse.createByErrorMessage("库存不足");
         }
         HomeShellProduct product=homeShellProductMapper.selectByPrimaryKey(productSpec.getProductId());
         if("1".equals(product.getProductType())&&StringUtils.isBlank(addressId)){
@@ -596,7 +597,8 @@ public class HomeShellOrderService {
             if(homeShellOrder.getMoney()!=null&&homeShellOrder.getMoney()>0){
                 //退钱给业主
                 settleMemberMoney(member,homeShellOrder.getId(),homeShellOrder.getMoney());
-            }else if(homeShellOrder.getIntegral()!=null&&homeShellOrder.getIntegral()>0){
+            }
+            if(homeShellOrder.getIntegral()!=null&&homeShellOrder.getIntegral()>0){
                 settleIntegral(member,homeShellOrder.getId(),"取消订单:"+homeShellProduct.getName(),homeShellOrder.getIntegral(),2);
             }
         }else if(type==2){//申请退款
@@ -608,6 +610,40 @@ public class HomeShellOrderService {
         }
 
         return ServerResponse.createBySuccessMessage("申请成功");
+    }
+
+    /**
+     * 取消支付订单
+     * @param shellOrderDTO
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelOrderInfo(HomeShellOrderDTO shellOrderDTO){
+        //修改对应的货单状态
+        HomeShellOrder homeShellOrder=homeShellOrderMapper.selectByPrimaryKey(shellOrderDTO.getShellOrderId());
+        homeShellOrder.setStatus(6);
+        homeShellOrder.setCancelApplicationTime(new Date());//申请取消时间
+        homeShellOrder.setModifyDate(new Date());
+        homeShellOrderMapper.updateByPrimaryKeySelective(homeShellOrder) ;
+        //退还当家贝币和金钱
+        //还原贝币
+        HomeShellProductSpec shellProductSpec=homeShellProductSpecMapper.selectByPrimaryKey(homeShellOrder.getProductSpecId());
+        shellProductSpec.setStockNum(shellProductSpec.getStockNum()+1);
+        homeShellProductSpecMapper.updateByPrimaryKey(shellProductSpec);
+        HomeShellProduct homeShellProduct=homeShellProductMapper.selectByPrimaryKey(homeShellOrder.getProuctId());
+        Member member=memberMapper.selectByPrimaryKey(homeShellOrder.getMemberId());
+        //还原对应的金额及贝币给到用户或工匠
+        if(homeShellOrder.getMoney()!=null&&homeShellOrder.getMoney()>0){
+            //将订单支付状态改为取消
+            Example example=new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.NUMBER,homeShellOrder.getBusinessOrderNumber());
+            BusinessOrder businessOrder=businessOrderMapper.selectOneByExample(example);
+            businessOrder.setState(4);
+            businessOrder.setModifyDate(new Date());
+            businessOrderMapper.updateByPrimaryKeySelective(businessOrder);//将支付单状态改为已取消
+        }
+        if(homeShellOrder.getIntegral()!=null&&homeShellOrder.getIntegral()>0){
+            settleIntegral(member,homeShellOrder.getId(),"取消订单:"+homeShellProduct.getName(),homeShellOrder.getIntegral(),2);
+        }
     }
 
     /**

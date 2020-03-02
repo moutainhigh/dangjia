@@ -95,7 +95,6 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setOrderSource(order.getOrderSource());
             paymentToBeMadeDTO.setBusinessOrderNumber(order.getBusinessOrderNumber());
             paymentToBeMadeDTO.setOrderId(orderId);
-           // House house= houseAPI.selectHouseById(order.getHouseId());
             String memberId="";
             MemberAddress memberAddress=billMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
             if(memberAddress!=null){

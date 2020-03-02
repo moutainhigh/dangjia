@@ -798,7 +798,9 @@ public class OrderSplitService {
                     String isDeliveryInstall=orderSplitItemMapper.selectIsDeliveryInstall(sd.getId());
                     sd.setIsDeliveryInstall(isDeliveryInstall);
                     DjSupplier supplier=iMasterSupplierMapper.selectByPrimaryKey(sd.getSupplierId());
-                    sd.setIsNonPlatformSupperlier(supplier.getIsNonPlatformSupperlier());//是否非平台供应商 1是，0否
+                    if(supplier!=null){
+                        sd.setIsNonPlatformSupperlier(supplier.getIsNonPlatformSupperlier());//是否非平台供应商 1是，0否
+                    }
                     list.add(sd);
                 }
             }

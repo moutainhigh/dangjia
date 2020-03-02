@@ -585,52 +585,64 @@
 
     <!--查询对应店铺发货任务信息-->
     <select id="getHouseAddrssByAddress" resultType="com.dangjia.acg.dto.deliver.DeliverHouseDTO">
-
         SELECT
-        ord.house_id houseId,
-        ord.address_id addressId,
-        ma.address houseName,
-        ma.member_id AS memberId,
-        ord.storefont_id storefrontId,
-        ma.mobile mobile,
-        m.`name` name,
-        h.create_date AS createDate,
-        h.construction_date AS constructionDate,
-        (
-           SELECT COUNT(1) FROM
-              dj_deliver_order_split tcount
-            where (tcount.house_id = h.id OR tcount.address_id = ord.address_id)
-            and tcount.apply_status='1'
-            and tcount.storefront_id=#{storefrontId}
-        ) AS wait,
-        (SELECT COUNT(1) FROM
-             dj_deliver_order_split tcount
-            where (tcount.house_id = h.id OR tcount.address_id = ord.address_id)
-            and tcount.apply_status='2'
-            and tcount.storefront_id=#{storefrontId}
-        ) AS sent
-        FROM
-        dj_deliver_order ord
-        LEFT JOIN dj_house h on ord.house_id=h.id
-        INNER JOIN dj_member_address ma on ( ord.address_id=ma.id or ord.house_id=ma.house_id)
-        INNER JOIN dj_member m on ma.member_id=m.id
-        INNER JOIN dj_pay_business_order pbo on ord.business_order_number=pbo.number
-        WHERE ord.storefont_id = #{storefrontId}
-        and pbo.state=3
-        and pbo.data_status=0
-        <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
-            and h.construction_date BETWEEN #{startDate} and #{endDate}
-        </if>
+           tt.*, (
+                SELECT COUNT(1)
+                FROM
+                    dj_deliver_order_split tcount
+                WHERE ( tcount.house_id = tt.houseId OR tcount.address_id = tt.addressId )
+                AND tcount.apply_status = '1'
+                AND tcount.storefront_id = #{storefrontId}
+            ) AS wait,
+           (
+            SELECT COUNT(1)
+            FROM
+                dj_deliver_order_split tcount
+            WHERE (tcount.house_id = tt.houseId OR tcount.address_id = tt.addressId)
+            AND tcount.apply_status = '2'
+            AND tcount.storefront_id = #{storefrontId}
+            ) AS sent,
+            ma.address houseName,
+            ma.member_id AS memberId,
+            ma.mobile mobile,
+            m.`name` NAME
+        FROM (
+            SELECT
+                ord.house_id houseId,
+                ord.address_id addressId,
+                ord.storefont_id storefrontId,
+                h.create_date AS createDate,
+                h.construction_date AS constructionDate
+            FROM
+            dj_deliver_order ord
+            LEFT JOIN dj_house h on ord.house_id=h.id
+            INNER JOIN dj_pay_business_order pbo on ord.business_order_number=pbo.number
+            WHERE ord.storefont_id = #{storefrontId}
+            and pbo.state=3
+            and pbo.data_status=0
+            <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
+                and h.construction_date BETWEEN #{startDate} and #{endDate}
+            </if>
+           group by ord.house_id,ord.address_id
+        ) tt,dj_member_address ma,dj_member m
+        where (tt.addressId=ma.id or tt.houseId=ma.house_id) and ma.member_id=m.id
         <if test="likeAddress!=null and likeAddress!=''">
             AND ma.address LIKE CONCAT('%' ,#{likeAddress}, '%')
         </if>
-        GROUP BY
-        ma.id
+        group by ma.id
         ORDER BY
         wait DESC,
         sent DESC,
-        ord.create_date DESC
+        tt.createDate DESC
 
+    </select>
+
+    <select id="queryCoutHouseOrder" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+          dj_deliver_order_split tcount
+        where (tcount.house_id = #{houseId} OR tcount.address_id = #{addressId})
+        and tcount.apply_status= #{applyStatus}
+        and tcount.storefront_id=#{storefrontId}
     </select>
 
 <!--查询所有的房子 指定房子 装修状态-->
