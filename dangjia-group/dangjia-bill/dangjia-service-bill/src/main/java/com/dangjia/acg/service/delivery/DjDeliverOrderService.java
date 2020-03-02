@@ -1852,7 +1852,7 @@ public class DjDeliverOrderService {
 
         //查询购物车数量
         example = new Example(ShoppingCart.class);
-        example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId()!=null?house.getMemberId():memberAddress.getMemberId());
+        example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house!=null?house.getMemberId():memberAddress.getMemberId());
         orderCollectInFoDTO.setShoppingCartsCount(iBillShoppingCartMapper.selectCountByExample(example));
 
         orderCollectInFoDTO.setOrderStorefrontDTOS(listArr);
