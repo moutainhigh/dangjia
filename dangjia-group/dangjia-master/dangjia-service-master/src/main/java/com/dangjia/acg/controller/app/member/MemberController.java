@@ -62,6 +62,18 @@ public class MemberController implements MemberAPI {
         return memberService.checkRegister(request, phone, smscode, password, invitationCode, userRole, longitude, latitude);
     }
 
+    /**
+     * 注销账号
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public  ServerResponse cancellationAccountMember(String userToken){
+        return memberService.cancellationAccountMember(userToken);
+    }
+
+
     @Override
     @ApiMethod
     public ServerResponse updateWokerRegister(Member user, String userToken) {

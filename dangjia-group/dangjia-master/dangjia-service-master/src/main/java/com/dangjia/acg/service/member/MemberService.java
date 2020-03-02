@@ -526,6 +526,84 @@ public class MemberService {
             return register(request, phone, password, invitationCode, userRole, longitude, latitude);
         }
     }
+    /**
+     * 注销账号
+     * @param userToken
+     * @return
+     */
+    public  ServerResponse cancellationAccountMember(String userToken){
+        try{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            Map map=new HashMap();
+            map.put("state",0);
+            //1.判断用户名下是否有未完工的房子
+            Example example =new Example(House.class);
+            example.createCriteria().andEqualTo(House.MEMBER_ID,member.getId()).andEqualTo(House.VISIT_STATE,1);
+            List<House> houseList=houseMapper.selectByExample(example);
+            if(houseList!=null&&houseList.size()>0){
+                map.put("stateName","用户名下有未完工的房子不能注销");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //2.判断是否有未支付完成的订单
+            Integer count=iOrderMapper.selectCountOrderByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在未支付完成的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有未要货的订单
+            count=iOrderMapper.selectOrderItemByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在已支付未要货的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有待发货的单
+            count=iOrderMapper.selectOrderSplitItemByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在已要货待处理的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有待收货的单
+            count=iOrderMapper.selectOrderSplitDeliverByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在待收货的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有待退款的订单
+            count=iOrderMapper.selectMendOrderByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在已申请退款待处理的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有未处理完的退款单
+            count=iOrderMapper.selectMendDeliverByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在正在处理中的退款单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断账户是否有余额未提现
+            Member newMember=memberMapper.selectByPrimaryKey(member.getId());
+            if(newMember.getSurplusMoney()!=null&&newMember.getSurplusMoney().doubleValue()>0){
+                map.put("stateName","存在未提现的余额");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            newMember.setDataStatus(1);
+            newMember.setMobile("---delete----"+newMember.getMobile());
+            newMember.setName("--delet--"+member.getName());
+            newMember.setId("--delete--"+member.getId());
+            memberMapper.updateByPrimaryKey(newMember);
+            map.put("state",1);
+            map.put("stateName","注销成功");
+            return ServerResponse.createBySuccess("注销成功 ",map);
+        }catch (Exception e){
+            logger.error("注销失败",e);
+            return ServerResponse.createByErrorMessage("注销失败");
+        }
+    }
+
 
     private void updateOrInsertInfo(String memberid, String policyId, String pwd) {
         try {

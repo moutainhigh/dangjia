@@ -302,6 +302,10 @@ public interface MemberAPI {
                                  @RequestParam("longitude") String longitude,
                                  @RequestParam("latitude") String latitude);
 
+    @RequestMapping(value = "app/member/cancellationAccountMember", method = RequestMethod.POST)
+    @ApiOperation(value = "注销帐号", notes = "注销帐号")
+    ServerResponse cancellationAccountMember(@RequestParam("userToken") String userToken);
+
     /**
      * showdoc
      *
