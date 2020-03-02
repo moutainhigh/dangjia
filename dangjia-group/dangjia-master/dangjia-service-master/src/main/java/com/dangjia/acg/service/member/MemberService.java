@@ -19,6 +19,7 @@ import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -35,6 +36,7 @@ import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
@@ -126,8 +128,6 @@ public class MemberService {
     private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
-    @Autowired
-    private IMenuConfigurationMapper iMenuConfigurationMapper;
 
 
     @Autowired
@@ -136,6 +136,8 @@ public class MemberService {
     @Autowired
     private DjSkillCertificationMapper djSkillCertificationMapper;
 
+    @Autowired
+    private IOrderMapper iOrderMapper;
     /****
      * 注入配置
      */
@@ -1516,11 +1518,28 @@ public class MemberService {
                     .andEqualTo(WorkerBankCard.WORKER_ID,member.getId());
             memberDTO.setBankCardCount(iWorkerBankCardMapper.selectCountByExample(example));//银行卡数量
             memberDTO.setDiscountCouponCount(0);//优惠券数量
-            example=new Example(BusinessOrder.class);
-            example.createCriteria().andEqualTo(BusinessOrder.DATA_STATUS,0)
-                    .andEqualTo(BusinessOrder.MEMBER_ID,member.getId())
-                    .andIn(BusinessOrder.STATE,Arrays.asList(new Integer[]{1,2}));
-            memberDTO.setObligationCount(iBusinessOrderMapper.selectCountByExample(example));//待付款数量
+
+
+            example = new Example(Order.class);
+            //待付款
+            example.createCriteria()
+                    .andEqualTo(Order.DATA_STATUS, 0)
+                    .andEqualTo(Order.ORDER_STATUS, 1);
+            memberDTO.setObligationCount(iOrderMapper.selectCountByExample(example));
+
+            //已付款
+            example = new Example(Order.class);
+            example.createCriteria()
+                    .andEqualTo(Order.DATA_STATUS, 0)
+                    .andEqualTo(Order.ORDER_STATUS, 2);
+            memberDTO.setDeliverCount(iOrderMapper.selectCountByExample(example));
+
+            //待收货
+            example = new Example(Order.class);
+            example.createCriteria()
+                    .andEqualTo(Order.DATA_STATUS, 0)
+                    .andEqualTo(Order.ORDER_STATUS, 3);
+            memberDTO.setReceiveCount(iOrderMapper.selectCountByExample(example));
             memberDTO.setSurplusMoney(member.getSurplusMoney());
             return ServerResponse.createBySuccess("查询成功",memberDTO);
         } catch (Exception e) {
