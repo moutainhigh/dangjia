@@ -53,6 +53,10 @@ public class ReturnRefundTask {
         refundAfterSalesJobAPI.homeShellOrderRefundTime();//当家贝商城--待退款时间
         log.info(format.format(new Date()) + "当家贝商城--待退款时间...");
 
+        log.info(format.format(new Date()) + "当家贝商城--待支付时间...");
+        refundAfterSalesJobAPI.homeShellOrderPayTime();//当家贝商城--待支付时间(到期自动处理）
+        log.info(format.format(new Date()) + "当家贝商城--待支付时间...");
+
 
     }
 

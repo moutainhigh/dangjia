@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.dto.shell.HomeShellOrderDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
@@ -162,7 +163,6 @@ public class RefundAfterSalesJobService {
     /**
      *当家贝商城--待收货时间
      */
-    @Transactional(rollbackFor = Exception.class)
     public void homeShellOrderReceiveTime(){
         List<HomeShellOrderDTO> list =homeShellOrderMapper.queryHomeShellOrderList("SHELL_PRODUCT_RECIEVE_TIME",1);
         if(list==null){
@@ -174,12 +174,23 @@ public class RefundAfterSalesJobService {
     /**
      *当家贝商城--待退款时间
      */
-    @Transactional(rollbackFor = Exception.class)
     public void homeShellOrderRefundTime(){
         List<HomeShellOrderDTO> list =homeShellOrderMapper.queryHomeShellOrderList("SHELL_PRODUCT_REFUND_TIME",2);
         if(list==null){
             for(HomeShellOrderDTO shellOrderDTO:list){
                 homeShellOrderService.updateOrderInfo(shellOrderDTO.getShellOrderId(),5);//确认退货
+            }
+        }
+    }
+
+    /**
+     * 当家贝商城--待支付时间(到期取消支付)
+     */
+    public void homeShellOrderPayTime(){
+        List<HomeShellOrderDTO> list =homeShellOrderMapper.queryHomeShellOrderList("SHELL_PRODUCT_PAY_TIME",3);
+        if(list==null){
+            for(HomeShellOrderDTO shellOrderDTO:list){
+                homeShellOrderService.cancelOrderInfo(shellOrderDTO);//确认退货
             }
         }
     }

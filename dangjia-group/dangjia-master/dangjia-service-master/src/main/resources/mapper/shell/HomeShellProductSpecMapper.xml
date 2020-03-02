@@ -33,4 +33,15 @@
         order by t.integral,t.money asc
         limit 1
     </select>
+    <select id="selectProductSpecStockById" resultType="com.dangjia.acg.modle.shell.HomeShellProductSpec">
+       select t.id productSpecId,
+            t.product_id productId,
+            t. NAME,
+            t.integral,
+            t.money,
+            t.stock_num stockNum,
+            t.converted_number convertedNumber
+        from dj_home_shell_product_spec  t
+        where id=#{specId} and stock_num>0 for update
+    </select>
 </mapper>
