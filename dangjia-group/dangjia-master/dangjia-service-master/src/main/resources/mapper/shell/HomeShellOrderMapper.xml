@@ -41,7 +41,7 @@
              and t.exchange_time>=#{startTime}
          </if>
          <if test="null!=endTime and ''!=endTime">
-          <![CDATA[ and t.exchange_time<DATE_ADD(#{exchangeClient},INTERVAL 1 DAY) ]]>
+          <![CDATA[ and t.exchange_time<DATE_ADD(#{endTime},INTERVAL 1 DAY) ]]>
          </if>
          <if test="null!=searchKey and ''!=searchKey">
              AND (t.number LIKE CONCAT('%',#{searchKey},'%')

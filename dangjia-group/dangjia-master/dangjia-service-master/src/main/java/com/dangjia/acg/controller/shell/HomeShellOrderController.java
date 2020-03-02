@@ -40,7 +40,7 @@ public class HomeShellOrderController implements HomeShellOrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryOrderInfoList(HttpServletRequest request, PageDTO pageDTO,Integer exchangeClient,Integer status, Date startTime,Date endTime, String searchKey){
+    public ServerResponse queryOrderInfoList(HttpServletRequest request, PageDTO pageDTO,Integer exchangeClient,Integer status, String startTime,String endTime, String searchKey){
         return homeShellOrderService.queryOrderInfoList(pageDTO,exchangeClient,status,startTime,endTime,searchKey);
     }
     /**

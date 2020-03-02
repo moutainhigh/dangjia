@@ -39,8 +39,8 @@ public interface HomeShellOrderAPI {
                                     @RequestParam("pageDTO") PageDTO pageDTO,
                                     @RequestParam("exchangeClient") Integer exchangeClient,
                                     @RequestParam("status") Integer status,
-                                    @RequestParam("startTime") Date startTime,
-                                    @RequestParam("endTime") Date endTime,
+                                    @RequestParam("startTime") String startTime,
+                                    @RequestParam("endTime") String endTime,
                                     @RequestParam("searchKey") String searchKey);
 
     /**

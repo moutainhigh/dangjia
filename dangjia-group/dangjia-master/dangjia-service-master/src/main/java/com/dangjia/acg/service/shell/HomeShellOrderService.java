@@ -97,14 +97,14 @@ public class HomeShellOrderService {
      * @param searchKey 兑换人姓名/电话/单号
      * @return
      */
-    public ServerResponse queryOrderInfoList(PageDTO pageDTO,Integer exchangeClient,Integer status, Date startTime, Date endTime, String searchKey){
+    public ServerResponse queryOrderInfoList(PageDTO pageDTO,Integer exchangeClient,Integer status, String startTime, String endTime, String searchKey){
         try{
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             List<HomeShellOrderDTO>  shellOrderDTOList=homeShellOrderMapper.selectShellOrderList(exchangeClient,status,startTime,endTime,searchKey);
             PageInfo pageInfo=new PageInfo(shellOrderDTOList);
             return ServerResponse.createBySuccess("查询成功",pageInfo);
         }catch(Exception e){
-            logger.error("查询失败");
+            logger.error("查询失败",e);
             return ServerResponse.createBySuccessMessage("查询失败");
         }
     }
