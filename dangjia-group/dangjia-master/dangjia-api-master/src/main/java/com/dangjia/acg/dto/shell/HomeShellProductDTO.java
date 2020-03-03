@@ -70,6 +70,8 @@ public class HomeShellProductDTO {
 
     private Date createDate;//创建时间
 
+    private String productSpecListStr;//添加时规格列表
+
     private List<HomeShellProductSpecDTO> productSpecList;//规格列表
 
     private String productSpecId;//价格最少的规格ID

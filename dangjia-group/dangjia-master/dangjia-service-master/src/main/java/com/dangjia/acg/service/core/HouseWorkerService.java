@@ -61,9 +61,13 @@ import com.dangjia.acg.service.configRule.ConfigRuleService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.deliver.RepairMendOrderService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.shell.HomeShellProductService;
 import com.dangjia.acg.service.worker.EvaluateService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -84,6 +88,7 @@ import java.util.*;
 @Service
 public class HouseWorkerService {
 
+    protected static final Logger logger = LoggerFactory.getLogger(HouseWorkerService.class);
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
@@ -165,6 +170,7 @@ public class HouseWorkerService {
 
     @Autowired
     private IWorkerChoiceCaseMapper iWorkerChoiceCaseMapper;
+
     /**
      * 根据工人id查询所有房子任务
      */
@@ -315,35 +321,23 @@ public class HouseWorkerService {
     /**
      * 新获取工匠详情
      * @param userToken
-     * @param houseFlowId
+     * @param orderId
      * @return
      */
-    public ServerResponse getWorkerInFo(String userToken, String houseFlowId) {
-        Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-        if (houseFlow == null) {
-            return ServerResponse.createByErrorMessage("该工序不存在");
-        }
-        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-        HouseWorker houseWorker = null;
-        if (houseFlow.getWorkType() == 3) {//待支付
-            houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-        } else if (houseFlow.getWorkType() == 4) {//已支付
-            houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 6);
-        }
-        Map<String, Object> mapData = new HashMap<>();
-        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        if (houseWorker == null) {
-            mapData.put("houseWorker", null);
-        } else {
-            Member member1 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+    public ServerResponse getWorkerInFo(String userToken, String workerId,String orderId) {
+        try{
+            Order order=orderMapper.selectByPrimaryKey(orderId);
+            if(order==null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            Map<String, Object> mapData = new HashMap<>();
+            Member member1 = memberMapper.selectByPrimaryKey(workerId);
             member1.setPassword(null);
             member1.initPath(address);
             Map<String, Object> map = new HashMap<>();
             map.put("id", member1.getId());
+            map.put("memberId", member1.getId());
             map.put("targetId", member1.getId());
             map.put("targetAppKey", NIMPost.APPKEY);
             map.put("nickName", member1.getNickName());
@@ -351,83 +345,105 @@ public class HouseWorkerService {
             map.put("mobile", member1.getMobile());
             map.put("head", member1.getHead());
             map.put("workerTypeId", member1.getWorkerTypeId());
-            map.put("workerName", workerType.getName());
-            map.put("houseFlowId", houseFlow.getId());
-            map.put("houseId", houseFlow.getHouseId());
-            map.put("houseWorkerId", houseWorker.getId());
-            if (workerType.getType() == 1 || workerType.getType() == 2) {//设计精算不展示换人按钮
-                map.put("isSubstitution", 2);//0:审核中 1：申请换人 2：不显示
-            } else {
-                Example example = new Example(Complain.class);
-                example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
-                        .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
-                        .andEqualTo(Complain.STATUS, 0)
-                        .andEqualTo(Complain.COMPLAIN_TYPE, 6);
-                example.orderBy(Complain.CREATE_DATE).desc();
-                List<Complain> complains = complainMapper.selectByExample(example);
-                if(complains !=null && complains.size()> 0){
-                    map.put("complainId",complains.get(0).getId());
+            Example example=new Example(HouseFlow.class);
+            example.createCriteria().andEqualTo(HouseFlow.WORKER_ID,workerId)
+                    .andEqualTo(HouseFlow.HOUSE_ID,order.getHouseId());
+            HouseFlow houseFlow = houseFlowMapper.selectOneByExample(example);
+            if (houseFlow != null) {
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+                HouseWorker houseWorker = null;
+                if (houseFlow.getWorkType() == 3) {//待支付
+                    houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
+                } else if (houseFlow.getWorkType() == 4) {//已支付
+                    houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 6);
                 }
-                if (houseWorker.getWorkType() == 6) {
-                    map.put("isSubstitution", complains.size() > 0 ? 0 : 1);//判断换人申请状态
+                map.put("workerName", workerType.getName());
+                map.put("houseFlowId", houseFlow.getId());
+                map.put("houseId", houseFlow.getHouseId());
+                map.put("houseWorkerId", houseWorker.getId());
+                if (workerType.getType() == 1 || workerType.getType() == 2) {//设计精算不展示换人按钮
+                    map.put("isSubstitution", 2);//0:审核中 1：申请换人 2：不显示
                 } else {
-                    map.put("isSubstitution", 2);
+                    mapData.put("isChangeButton",1);//是否显示更换按钮，1是，0否
+                    example = new Example(Complain.class);
+                    example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
+                            .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
+                            .andEqualTo(Complain.STATUS, 0)
+                            .andEqualTo(Complain.COMPLAIN_TYPE, 6);
+                    example.orderBy(Complain.CREATE_DATE).desc();
+                    List<Complain> complains = complainMapper.selectByExample(example);
+                    if(complains !=null && complains.size()> 0){
+                        map.put("complainId",complains.get(0).getId());
+                        if(complains.get(0).getStatus()==0){
+                            mapData.put("isChangeButton",0);//是否显示更换按钮，1是，0否
+                        }
+                    }
+                    if (houseWorker.getWorkType() == 6) {
+                        map.put("isSubstitution", complains.size() > 0 ? 0 : 1);//判断换人申请状态
+                    } else {
+                        map.put("isSubstitution", 2);
+                    }
                 }
+
+            }else{
+                mapData.put("isChangeButton",0);//是否显示更换按钮，1是，0否
             }
             mapData.put("houseWorker", map);
-        }
 
-        //查询保险徽章
-        Example example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseFlow.getWorkerId())
-                .andEqualTo(Insurance.DATA_STATUS, 0);
-        example.orderBy(Insurance.CREATE_DATE).desc();
-        List<Insurance> insurance = insuranceMapper.selectByExample(example);
-        List<Map<String, Object>> list = new ArrayList<>();
-        Map<String, Object> map = new HashMap<>();
-        if(insurance != null && insurance.size() >0){
-            if (new Date().getTime() <= insurance.get(0).getEndDate().getTime()) {
-                map.put("type",0);//保险期内
-            }else{
-                map.put("type",1);//保险期外
+            //查询保险徽章
+            example = new Example(Insurance.class);
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseFlow.getWorkerId())
+                    .andEqualTo(Insurance.DATA_STATUS, 0);
+            example.orderBy(Insurance.CREATE_DATE).desc();
+            List<Insurance> insurance = insuranceMapper.selectByExample(example);
+            List<Map<String, Object>> list = new ArrayList<>();
+             map = new HashMap<>();
+            if(insurance != null && insurance.size() >0){
+                if (new Date().getTime() >insurance.get(0).getEndDate().getTime()) {
+                    map.put("name","保险详情");
+                    map.put("code","H001");
+                    map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
+                    map.put("id",insurance.get(0).getId());
+                    list.add(map);
+                }
             }
-            map.put("name","保险详情");
-            map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
-            map.put("id",insurance.get(0).getId());
-            list.add(map);
+            //查询技能徽章
+            example = new Example(DjSkillCertification.class);
+            example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, houseFlow.getWorkerId())
+                    .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+            List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+            if(djSkillCertifications != null && djSkillCertifications.size() >0){
+                map = new HashMap<>();
+                map.put("name","技能培训");
+                map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
+                map.put("id",houseFlow.getWorkerId());
+                map.put("code","H002");
+                list.add(map);
+            }
+            //他的徽章
+            mapData.put("lists",list);
+
+            //查询我的精选案列
+            List<Map<String, Object>> workerCasesList = new ArrayList<>();
+            Map<String, Object> workerMap = new HashMap<>();
+            example = new Example(WorkerChoiceCase.class);
+            example.createCriteria().andEqualTo(WorkerChoiceCase.WORKER_ID,houseFlow.getWorkerId() )
+                    .andEqualTo(WorkerChoiceCase.DATA_STATUS, 0);
+            example.orderBy(WorkerChoiceCase.CREATE_DATE).desc();
+            List<WorkerChoiceCase> workerChoiceCases = iWorkerChoiceCaseMapper.selectByExample(example);
+            if(workerChoiceCases != null && workerChoiceCases.size() > 0){
+                workerMap.put("imageUrl", StringTool.getImage(workerChoiceCases.get(0).getImage(),address));
+                workerMap.put("remark",workerChoiceCases.get(0).getRemark());
+            }
+            workerCasesList.add(workerMap);
+            mapData.put("workerCasesList",workerCasesList);
+
+            return ServerResponse.createBySuccess("查询成功", mapData);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
 
-        //查询技能徽章
-        example = new Example(DjSkillCertification.class);
-        example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, houseFlow.getWorkerId())
-                .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
-        List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
-        if(djSkillCertifications != null && djSkillCertifications.size() >0){
-            map = new HashMap<>();
-            map.put("name","技能培训");
-            map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
-            map.put("id",houseFlow.getWorkerId());
-            list.add(map);
-        }
-        //他的徽章
-        mapData.put("lists",list);
-
-        //查询我的精选案列
-        List<Map<String, Object>> workerList = new ArrayList<>();
-        Map<String, Object> workerMap = new HashMap<>();
-        example = new Example(WorkerChoiceCase.class);
-        example.createCriteria().andEqualTo(WorkerChoiceCase.WORKER_ID,houseFlow.getWorkerId() )
-                .andEqualTo(WorkerChoiceCase.DATA_STATUS, 0);
-        example.orderBy(WorkerChoiceCase.CREATE_DATE).desc();
-        List<WorkerChoiceCase> workerChoiceCases = iWorkerChoiceCaseMapper.selectByExample(example);
-        if(workerChoiceCases != null && workerChoiceCases.size() > 0){
-            workerMap.put("textContent",getImage(workerChoiceCases.get(0).getTextContent()));
-            workerMap.put("remark",workerChoiceCases.get(0).getRemark());
-        }
-        workerList.add(workerMap);
-        mapData.put("workerList",workerList);
-
-        return ServerResponse.createBySuccess("查询成功", mapData);
     }
 
 

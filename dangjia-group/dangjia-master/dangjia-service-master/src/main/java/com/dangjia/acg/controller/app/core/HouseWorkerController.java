@@ -60,8 +60,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getWorkerInFo(String userToken, String houseFlowId) {
-        return houseWorkerService.getWorkerInFo(userToken, houseFlowId);
+    public ServerResponse getWorkerInFo(String userToken, String workerId,String orderId) {
+        return houseWorkerService.getWorkerInFo(userToken, workerId,orderId);
     }
 
     @Override
