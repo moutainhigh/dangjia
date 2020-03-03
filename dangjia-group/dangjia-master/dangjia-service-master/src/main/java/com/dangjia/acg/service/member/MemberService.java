@@ -1261,7 +1261,7 @@ public class MemberService {
         insuranceMoney = CommonUtil.isEmpty(insuranceMoney) ? "100" : insuranceMoney;
         Member operator = (Member) object;
         Example example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNotNull(Insurance.END_DATE);
         List<Insurance> insurances2 = insuranceMapper.selectByExample(example);
         Insurance insurance = new Insurance();
         insurance.setWorkerId(operator.getId());
