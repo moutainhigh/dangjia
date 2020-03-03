@@ -47,7 +47,7 @@ public class HomeShellProductDTO {
     @ApiModelProperty("排序")
     private Integer sort;
 
-    @ApiModelProperty("支付类型：1积分，2积分+金钱")
+    @ApiModelProperty("支付类型：1贝币，2贝币+金钱")
     private Integer payType;
 
     @ApiModelProperty("是否开启积分限时 1是，0否")

@@ -24,4 +24,6 @@ public interface IHomeShellProductMapper extends Mapper<HomeShellProduct> {
      * @return
      */
     List<HomeShellProductDTO> serachShellProductList(@Param("productType") String productType);
+
+    HomeShellProductDTO serachShellProductInfo();
 }

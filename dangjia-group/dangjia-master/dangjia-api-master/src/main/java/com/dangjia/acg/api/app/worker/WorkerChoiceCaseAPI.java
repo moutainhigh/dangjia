@@ -22,8 +22,12 @@ public interface WorkerChoiceCaseAPI {
     @PostMapping("worker/choice/list")
     @ApiOperation(value = "工人精选案例", notes = "工人精选案例")
     ServerResponse getWorkerChoiceCases(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("pageDTO") PageDTO pageDTO,
-                                        @RequestParam("workerId") String workerId);
+                                        @RequestParam("userToken") String userToken);
+
+    @PostMapping("worker/choice/listCount")
+    @ApiOperation(value = "工人精选案例数量", notes = "工人精选案例数量")
+    ServerResponse getWorkerChoiceCasesCount(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("userToken") String userToken);
 
     /**
      * 删除工人精选案例
@@ -55,7 +59,7 @@ public interface WorkerChoiceCaseAPI {
      */
     @PostMapping("/worker/choice/add")
     @ApiOperation(value = "新增工人精选案例", notes = "新增工人精选案例")
-    ServerResponse addWorkerChoiceCase(@RequestParam("request") HttpServletRequest request,
+    ServerResponse addWorkerChoiceCase(@RequestParam("userToken") String userToken,
                                        @RequestParam("workerChoiceCase") WorkerChoiceCase workerChoiceCase);
 
 }

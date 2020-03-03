@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.worker.WorkerChoiceCase;
 import com.dangjia.acg.service.worker.WorkerChoiceCaseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,10 +25,14 @@ public class WorkerChoiceCaseController implements WorkerChoiceCaseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getWorkerChoiceCases(HttpServletRequest request, PageDTO pageDTO, String workerId) {
-        return workerChoiceCaseService.getWorkerChoiceCases(pageDTO, workerId);
+    public ServerResponse getWorkerChoiceCases(HttpServletRequest request, String userToken) {
+        return workerChoiceCaseService.getWorkerChoiceCases( userToken);
     }
-
+    @Override
+    @ApiMethod
+    public ServerResponse getWorkerChoiceCasesCount(HttpServletRequest request, String userToken) {
+        return workerChoiceCaseService.getWorkerChoiceCasesCount( userToken);
+    }
     /**
      * 删除工人精选案例
      *
@@ -60,7 +65,7 @@ public class WorkerChoiceCaseController implements WorkerChoiceCaseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addWorkerChoiceCase(HttpServletRequest request, WorkerChoiceCase workerChoiceCase) {
-        return workerChoiceCaseService.addWorkerChoiceCase(workerChoiceCase);
+    public ServerResponse addWorkerChoiceCase(String userToken, WorkerChoiceCase workerChoiceCase) {
+        return workerChoiceCaseService.addWorkerChoiceCase(userToken,workerChoiceCase);
     }
 }
