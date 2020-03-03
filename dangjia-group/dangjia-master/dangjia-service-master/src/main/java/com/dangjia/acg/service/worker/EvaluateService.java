@@ -347,26 +347,9 @@ public class EvaluateService {
             if (houseFlowApply.getSupervisorCheck() == 1) {//大管家已审核通过过 不要重复
                 return ServerResponse.createByErrorMessage("重复审核");
             }
-            if(active!=null&&(active.equals("pre"))) {
-                ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
-                if (village != null && village.getLocationx() != null && village.getLocationy() != null
-                        && latitude != null && longitude != null) {
-                    try {
-                        double longitude1 = Double.valueOf(longitude);
-                        double latitude1 = Double.valueOf(latitude);
-                        double longitude2 = Double.valueOf(village.getLocationx());
-                        double latitude2 = Double.valueOf(village.getLocationy());
-                        double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-                        if (distance > 3000) {
-                            return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
-                        }
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
-//            ServerResponse serverResponse = getUserToHouseDistance(latitude, longitude, house.getVillageId());
-//            if (!serverResponse.isSuccess())
-//                return serverResponse;
+            ServerResponse serverResponse = getUserToHouseDistance(latitude, longitude, house.getVillageId());
+            if (!serverResponse.isSuccess())
+                return serverResponse;
             Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
             Evaluate evaluate = new Evaluate();
             evaluate.setContent(content);
@@ -462,7 +445,7 @@ public class EvaluateService {
                     double longitude2 = Double.valueOf(village.getLocationx());
                     double latitude2 = Double.valueOf(village.getLocationy());
                     double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-                    if (distance > 1500) {
+                    if (distance > 3000) {
                         return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
                     }
                 } catch (Exception ignored) {

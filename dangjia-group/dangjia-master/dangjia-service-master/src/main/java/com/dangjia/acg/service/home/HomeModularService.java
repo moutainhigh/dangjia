@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.matter.RenovationManualDTO;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
@@ -41,6 +42,8 @@ public class HomeModularService {
     @Autowired
     private IHouseFlowApplyMapper iHouseFlowApplyMapper;
     @Autowired
+    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
+    @Autowired
     private IRenovationManualMapper renovationManualMapper;
     @Autowired
     private IRenovationStageMapper renovationStageMapper;
@@ -58,10 +61,15 @@ public class HomeModularService {
         if (houseFlowApplies.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<Map<String, Object>> listMap = new ArrayList<>();
         for (HouseFlowApply houseFlowApply : houseFlowApplies) {
             Map<String, Object> map = new HashMap<>();
             StringBuilder describe = new StringBuilder();
+            String image = houseFlowApplyImageMapper.getHouseFlowApplyImage(houseFlowApply.getHouseId(), null);
+            if (CommonUtil.isEmpty(image)) {
+                image = houseFlowApplyImageMapper.getHouseFlowApplyImage(houseFlowApply.getHouseId(), 0);
+            }
             describe.append(houseFlowApply.getApplyDec());
             describe.append(" ");
             describe.append(houseFlowApply.getWorkerTypeId());
@@ -87,6 +95,7 @@ public class HomeModularService {
             }
             map.put("describe", describe.toString());
             map.put("houseId", houseFlowApply.getHouseId());
+            map.put("image",address + image);
             listMap.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", listMap);

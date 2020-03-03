@@ -1263,7 +1263,7 @@ public class MemberService {
         Example example = new Example(Insurance.class);
         example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNotNull(Insurance.END_DATE);
         List<Insurance> insurances2 = insuranceMapper.selectByExample(example);
-        Insurance  insurance = new Insurance();
+        Insurance insurance = new Insurance();
         insurance.setWorkerId(operator.getId());
         insurance.setWorkerMobile(operator.getMobile());
         insurance.setWorkerName(operator.getName());
