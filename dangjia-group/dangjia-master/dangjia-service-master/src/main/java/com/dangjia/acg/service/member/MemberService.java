@@ -1471,6 +1471,9 @@ public class MemberService {
      */
     public ServerResponse getMyInsigniaDetail(String userToken,String code){
         try{
+            if(code==null){
+                return ServerResponse.createByErrorMessage("请输入查询徽章的编码");
+            }
             Map<String,Object> map=new HashMap<>();
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1517,7 +1520,8 @@ public class MemberService {
                 map.put("remark","有了保险才能开工哦，安全第一");
                 map.put("countRemark","已有<font color='#F57341'>"+count+"</font>人获得");
 
-            }if("H002".equals(code)){//技能详情
+            }
+            if("H002".equals(code)){//技能详情
                 example = new Example(DjSkillCertification.class);
                 example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, worker.getId())
                         .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
