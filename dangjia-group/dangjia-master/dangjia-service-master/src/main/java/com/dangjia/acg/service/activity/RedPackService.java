@@ -411,9 +411,6 @@ public class RedPackService {
             Map<String,Object> map=new HashMap<>();
             List<ActivityRedPackRecordDTO> list=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,1,null);//查有效的
             map.put("list",list);
-            if(list==null){
-                list=new ArrayList<>();
-            }
             //查询当前用户优惠券数量
             Integer totalCount=activityRedPackRecordMapper.queryActivityRedCount(member.getId(),null);
             Integer totalCityCount=activityRedPackRecordMapper.queryActivityRedCount(member.getId(),1);
