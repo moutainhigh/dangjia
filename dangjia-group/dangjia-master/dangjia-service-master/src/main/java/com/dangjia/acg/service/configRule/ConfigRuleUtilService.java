@@ -254,6 +254,64 @@ public class ConfigRuleUtilService {
     }
 
     /**
+     *
+     * 主动验收未完成每次扣款
+     * 周计划未完成每次扣款
+     * 每周应巡查次数
+     * 减少维保：工序商品购买比阈值
+     * 减少维保：仅退款比例阈值
+     *
+     * @param typeId:
+     *              MK020	主动验收未完成每次扣款
+     *              MK021	周计划未完成每次扣款
+     *              MK023	减少维保：工序商品购买比阈值
+     *              MK024	减少维保：仅退款比例阈值
+     *
+     * @return
+     */
+    public Double getAllTowValue(String typeId) {
+        Double amount=1d;
+        Example example=new Example(DjConfigRuleModule.class);
+        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,typeId);
+        DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+
+        example=new Example(DjConfigRuleItemTwo.class);
+        example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
+        example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
+        PageHelper.startPage(1, 1);
+        List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
+        if (configRuleItemTwos.size() > 0) {
+            for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                amount=Double.parseDouble(configRuleItemTwo.getFieldValue());
+            }
+        }
+        return amount;
+    }
+
+    /**
+     * 每周应巡查次数
+     *
+     * @return
+     */
+    public String[] getTimesWeeklyPatrol() {
+        String[] amount= new String[]{"0","0"};
+        Example example=new Example(DjConfigRuleModule.class);
+        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK022);
+        DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+        example=new Example(DjConfigRuleItemTwo.class);
+        example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
+        example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
+        PageHelper.startPage(1, 2);
+        List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
+        if (configRuleItemTwos.size() > 0) {
+            for (int i = 0; i < configRuleItemTwos.size(); i++) {
+                amount[i]=configRuleItemTwos.get(i).getFieldValue();
+            }
+        }
+        return amount;
+    }
+
+    /**
      *  大管家自动派单
      * @param juli 距离
      * @param evaluationScore  积分
@@ -717,47 +775,15 @@ public class ConfigRuleUtilService {
      * @param evaluationScore 积分
      * @return
      */
-    public Double getRetentionRatio(BigDecimal evaluationScore) {
+    public Double[] getRetentionRatio(String  workerTypeId,BigDecimal evaluationScore) {
         Example example=new Example(DjConfigRuleRank.class);
         example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
         List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
-        Double amount=0d;
+        Double[] retentionRatio=new Double[2];
         if(configRuleRanks.size()>0){
             DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
             example=new Example(DjConfigRuleModule.class);
             example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK007);
-            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
-            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),null,null);
-            if(serverResponse.isSuccess()){
-                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
-                if(returnData.size()>0){
-                    for (Map returnDatum : returnData) {
-                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
-                            amount=(Double) returnDatum.get("integral");
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return amount;
-    }
-
-    /**
-     * 指定工种的滞留金上限
-     *
-     * @param evaluationScore 积分
-     * @return
-     */
-    public Double getRetentionUpperLimit(String workerTypeId,BigDecimal evaluationScore) {
-        Example example=new Example(DjConfigRuleRank.class);
-        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
-        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
-        Double amount=0d;
-        if(configRuleRanks.size()>0){
-            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
-            example=new Example(DjConfigRuleModule.class);
-            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK008);
             DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
             ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),workerTypeId,null);
             if(serverResponse.isSuccess()){
@@ -765,13 +791,48 @@ public class ConfigRuleUtilService {
                 if(returnData.size()>0){
                     for (Map returnDatum : returnData) {
                         if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
-                            amount=(Double) returnDatum.get("integral");
+                            retentionRatio[0]=(Double) returnDatum.get("integral");
+                            retentionRatio[1]=(Double) returnDatum.get("maxScore");
                             break;
                         }
                     }
                 }
             }
         }
-        return amount;
+        return retentionRatio;
+    }
+
+    /**
+     * 指定工种的滞留金上限
+     *
+     * @param evaluationScore 积分(暂时保留)
+     * @param typeId SG007=店铺   SG008=供应商
+     * @return
+     */
+    public Double[] getRetentionUpperLimit(String typeId,BigDecimal evaluationScore) {
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" id='DJ001' ");
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        Double[] retentionRatio=new Double[2];
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK008);
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),typeId,null);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            retentionRatio[0]=(Double) returnDatum.get("integral");
+                            retentionRatio[1]=(Double) returnDatum.get("maxScore");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return retentionRatio;
     }
 }

@@ -134,8 +134,6 @@ public class HouseFlowService {
 
 
     @Autowired
-    private MasterProductTemplateService masterProductTemplateService;
-    @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
     private DjMaintenanceRecordService maintenanceRecordService;

@@ -50,6 +50,7 @@ import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -126,6 +127,8 @@ public class HouseFlowApplyService {
     private ResidentialRangeMapper residentialRangeMapper;
     @Autowired
     private ResidentialBuildingMapper residentialBuildingMapper;
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
 
     @Autowired
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
@@ -570,20 +573,10 @@ public class HouseFlowApplyService {
      */
     public void deposit(HouseWorkerOrder hwo, HouseFlowApply hfa) {
         if (hfa.getWorkerType() >= 3 && hfa.getWorkerType() != 4) {//精算，设计，拆除除外
+
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-            /*
-             * 工匠积分70分以下每单滞留金无上限,70以上含80以下2000元
-             * 80含以上90以下1500元,90分含以上500元
-             */
-            if (worker.getEvaluationScore().doubleValue() >= 70 && worker.getEvaluationScore().doubleValue() < 80) {
-                worker.setDeposit(new BigDecimal(2000));//设置滞留金2000元
-            } else if (worker.getEvaluationScore().doubleValue() >= 80 && worker.getEvaluationScore().doubleValue() < 90) {
-                worker.setDeposit(new BigDecimal(1500));//设置滞留金上限1500元
-            } else if (worker.getEvaluationScore().doubleValue() >= 90) {
-                worker.setDeposit(new BigDecimal(500));//设置滞留金上限500元
-            } else {
-                worker.setDeposit(new BigDecimal(99999));//重新设置无上限
-            }
+            Double[] depositCfg= configRuleUtilService.getRetentionRatio(worker.getWorkerTypeId(),worker.getEvaluationScore());
+            worker.setDeposit(new BigDecimal(depositCfg[1]));//设置滞留金上限
             if (worker.getRetentionMoney() == null) {
                 worker.setRetentionMoney(new BigDecimal(0.0));
             }
@@ -622,12 +615,12 @@ public class HouseFlowApplyService {
                 worker.setRetentionMoney(retentionMoney);
             }
             //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
-            BigDecimal deposit = new BigDecimal(0.05);
+            BigDecimal deposit = new BigDecimal(depositCfg[0]);//获取滞留金比例 5%
 
             //申请的钱为空时将不考虑滞留金转入
             if (hfa != null && hfa.getApplyMoney() != null && worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()) {//押金没收够并且没有算过押金
                 //算订单的5%
-                BigDecimal mid = hwo.getWorkPrice().multiply(deposit);
+                BigDecimal mid = hwo.getWorkPrice().multiply(deposit).divide(new BigDecimal(100));
                 if (!(worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == -1 ||
                         worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == 0)) {
                     mid = worker.getDeposit().subtract(worker.getRetentionMoney());//只收这么多了
