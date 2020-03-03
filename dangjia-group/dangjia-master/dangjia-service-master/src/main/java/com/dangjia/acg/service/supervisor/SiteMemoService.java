@@ -14,12 +14,16 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.supervisor.ISiteMemoMapper;
+import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.supervisor.SiteMemo;
+import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -28,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
 
@@ -43,12 +48,17 @@ public class SiteMemoService {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private IMemberMapper memberMapper;
+
+    @Autowired
+    private IWorkIntegralMapper workIntegralMapper;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private ConfigMessageService configMessageService;
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
 
     /**
      * 添加备忘录/周报
@@ -94,6 +104,21 @@ public class SiteMemoService {
             }
         }
         siteMemo.setType(type);
+        if(type==1){//周计划获取积分
+            Double integral=configRuleUtilService.getWerkerIntegral(houseId, ConfigRuleService.SG001,worker.getEvaluationScore(),5);
+            WorkIntegral workIntegral = new WorkIntegral();
+            BigDecimal evaluationScore = worker.getEvaluationScore().add(new BigDecimal(integral));
+            worker.setEvaluationScore(evaluationScore);//减积分
+            workIntegral.setIntegral(new BigDecimal(integral));
+            workIntegral.setWorkerId(worker.getId());
+            workIntegral.setStar(0);
+            workIntegral.setStatus(0);
+            workIntegral.setHouseId(houseId);
+            workIntegral.setBriefed("周计划获取积分");
+            workIntegral.setAnyBusinessId(siteMemo.getId());
+            workIntegralMapper.insert(workIntegral);
+            memberMapper.updateByPrimaryKeySelective(worker);
+        }
         siteMemo.setState(1);
         siteMemo.setRemindMemberId(worker.getId());
         try {

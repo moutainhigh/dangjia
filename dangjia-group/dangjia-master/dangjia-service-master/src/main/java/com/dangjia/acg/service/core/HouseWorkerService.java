@@ -3,9 +3,7 @@ package com.dangjia.acg.service.core;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
-import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -141,8 +139,6 @@ public class HouseWorkerService {
     @Autowired
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
 
-    @Autowired
-    private IInsuranceMapper iInsuranceMapper;
 
     @Autowired
     private DjSkillCertificationMapper djSkillCertificationMapper;
@@ -381,7 +377,7 @@ public class HouseWorkerService {
         example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseFlow.getWorkerId())
                 .andEqualTo(Insurance.DATA_STATUS, 0);
         example.orderBy(Insurance.CREATE_DATE).desc();
-        List<Insurance> insurance = iInsuranceMapper.selectByExample(example);
+        List<Insurance> insurance = insuranceMapper.selectByExample(example);
         List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
         if(insurance != null && insurance.size() >0){
@@ -506,9 +502,24 @@ public class HouseWorkerService {
             }
             Member worker = (Member) object;
 
+            String[] amount;
+            if(worker.getWorkerType()==3){
+                amount= configRuleUtilService.getAbandonedCount(1);
+            }else{
+                amount= configRuleUtilService.getAbandonedCount(0);
+            }
+
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, worker.getId()).andEqualTo(HouseWorker.WORK_TYPE, 7)
+                    .andGreaterThan(HouseWorker.CREATE_DATE, DateUtil.delDateDays(new Date(),Integer.parseInt(amount[0])));
+            example.orderBy(HouseWorker.CREATE_DATE).desc();
+            List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
+            if(houseWorkers.size()>0){
+                return ServerResponse.createByErrorMessage("因存在放弃，在"+DateUtil.getDateString(DateUtil.addDateDays(houseWorkers.get(0).getCreateDate(),Integer.parseInt(amount[0])).getTime())+"前您无法接单！");
+            }
             if(type==1){
                 Order order =  orderMapper.selectByPrimaryKey(houseFlowId);
-                Example example = new Example(HouseWorker.class);
+                example = new Example(HouseWorker.class);
                 example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE,1).andEqualTo(HouseWorker.TYPE,type).andEqualTo(HouseWorker.BUSINESS_ID,order.getId());
                 Integer ordernum= houseWorkerMapper.selectCountByExample(example);
                 if (ordernum>0) {
@@ -539,7 +550,7 @@ public class HouseWorkerService {
                 return ServerResponse.createBySuccess("抢单成功", h);
             }else if(type==2){
                 DjMaintenanceRecord record=djMaintenanceRecordMapper.selectByPrimaryKey(houseFlowId);
-                Example example = new Example(HouseWorker.class);
+                example = new Example(HouseWorker.class);
                 example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE,1).andEqualTo(HouseWorker.TYPE,type).andEqualTo(HouseWorker.BUSINESS_ID,record.getId());
                 Integer ordernum= houseWorkerMapper.selectCountByExample(example);
                 if (ordernum>0) {
@@ -619,7 +630,7 @@ public class HouseWorkerService {
                     hwo.setWorkerId(houseWorker.getWorkerId());
                     houseWorkerOrderMapper.updateByPrimaryKey(hwo);
                 }
-                Example example = new Example(MemberCity.class);
+                example = new Example(MemberCity.class);
                 example.createCriteria()
                         .andEqualTo(MemberCity.MEMBER_ID, worker.getId())
                         .andEqualTo(MemberCity.CITY_ID, cityId);
@@ -1105,7 +1116,7 @@ public class HouseWorkerService {
         //延期扣积分（每天）
         if(hf.getEndDate()!=null&&hf.getEndDate().getTime()<new Date().getTime()){
            Double evaluation= configRuleUtilService.getDelayCount(1);
-           evaluateService.updateMemberIntegral(hf.getWorkerId(),hf.getHouseId(),new BigDecimal(evaluation),"延期扣积分");
+           evaluateService.updateMemberIntegral(hf.getWorkerId(),hf.getHouseId(),hf.getId(),new BigDecimal(evaluation),"延期扣积分");
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
