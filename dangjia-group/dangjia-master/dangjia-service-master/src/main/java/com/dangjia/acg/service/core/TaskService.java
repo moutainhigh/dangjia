@@ -2,6 +2,7 @@ package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.pay.domain.Data;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
@@ -169,7 +170,11 @@ public class TaskService {
                     }
                     buttonDTO.setInsuranceDay(daynum);
                 }
-                buttonDTO.setInsuranceMsg("您当前剩余保险天数为"+buttonDTO.getInsuranceDay()+"天，为给施工提供保障，请在"+DateUtil.getDateString(DateUtil.addDateMinutes(houseWorker.getCreateDate(),30).getTime())+"前购买保险再继续工作，未购买将自动放弃。");
+                Date endTime=DateUtil.addDateMinutes(houseWorker.getCreateDate(),30);
+                if(DateUtil.delDateDays(insurances.get(0).getEndDate(),30).getTime() > houseWorker.getCreateDate().getTime()){
+                    endTime=DateUtil.delDateDays(insurances.get(0).getEndDate(),30);
+                }
+                buttonDTO.setInsuranceMsg("您当前剩余保险天数为"+buttonDTO.getInsuranceDay()+"天，为给施工提供保障，请在"+DateUtil.getDateString(endTime.getTime())+"前购买保险再继续工作，未购买将自动放弃。");
             }
 
         }

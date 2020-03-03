@@ -1261,32 +1261,19 @@ public class MemberService {
         insuranceMoney = CommonUtil.isEmpty(insuranceMoney) ? "100" : insuranceMoney;
         Member operator = (Member) object;
         Example example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNotNull(Insurance.END_DATE);
-        example.orderBy(Insurance.END_DATE).desc();
-        List<Insurance> insurances = insuranceMapper.selectByExample(example);
-        example = new Example(Insurance.class);
         example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
         List<Insurance> insurances2 = insuranceMapper.selectByExample(example);
-        Insurance insurance;
-        if (insurances2.size() > 0) {
-            insurance = insurances2.get(0);
-        } else {
-            insurance = new Insurance();
-        }
+        Insurance insurance = new Insurance();
         insurance.setWorkerId(operator.getId());
         insurance.setWorkerMobile(operator.getMobile());
         insurance.setWorkerName(operator.getName());
         insurance.setMoney(new BigDecimal(insuranceMoney));
-        if (insurances.size() == 0) {
+        if (insurances2.size() == 0) {
             insurance.setType("0");
         } else {
             insurance.setType("1");
         }
-        if (insurances2.size() > 0) {
-            insuranceMapper.updateByPrimaryKeySelective(insurance);
-        } else {
-            insuranceMapper.insert(insurance);
-        }
+        insuranceMapper.insert(insurance);
         return ServerResponse.createBySuccess("ok", insurance.getId());
     }
 
