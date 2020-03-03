@@ -231,5 +231,104 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and t.order_id=t2.id
         and t.worker_type_id ='1'
    </select>
+
+    <select id="selectCountOrderByMemberId" resultType="java.lang.Integer">
+        SELECT
+             count(1)
+        FROM
+            dj_pay_business_order t1,
+            dj_deliver_order t2,
+            dj_member_address ma
+        where t1.number=t2.business_order_number
+        and (t2.house_id=ma.house_id or t2.address_id=ma.id)
+        and t1.state in(1,2)
+        and ma.member_id=#{memberId}
+    </select>
+
+    <select id="selectOrderItemByMemberId" resultType="java.lang.Integer">
+        SELECT
+             count(1)
+        FROM
+            dj_pay_business_order t1,
+            dj_deliver_order t2,
+          dj_deliver_order_item t3,
+            dj_member_address ma
+        where t1.number=t2.business_order_number
+        and t2.id=t3.order_id
+        and (t2.house_id=ma.house_id or t2.address_id=ma.id)
+        and t1.state=3
+        and t3.shop_count>(IFNULL(t3.ask_count,0)+IFNULL(t3.return_count,0))
+        and ma.member_id=#{memberId}
+    </select>
+
+    <select id="selectOrderSplitItemByMemberId" resultType="java.lang.Integer">
+        SELECT
+             count(1)
+        FROM
+            dj_deliver_order_split t1,
+            dj_deliver_order_split_item t2,
+            dj_member_address ma
+        WHERE
+            t1.id = t2.order_split_id
+        AND (
+            t1.house_id = ma.house_id
+            or t1.address_id = ma.id
+        )
+        and t1.apply_status in(1,4)
+        AND ma.member_id = #{memberId}
+    </select>
+
+    <select id="selectOrderSplitDeliverByMemberId" resultType="java.lang.Integer">
+        SELECT
+          count(1)
+        FROM
+            dj_deliver_split_deliver t1,
+            dj_member_address ma
+        WHERE
+            (
+                t1.house_id = ma.house_id
+                or t1.address_id = ma.id
+            )
+        AND (
+            t1.shipping_state IN (0, 1)
+            OR (
+                t1.shipping_state = 4
+                AND t1.apply_state IN (0, 2)
+            )
+        )
+        AND ma.member_id = #{memberId}
+    </select>
+
+    <select id="selectMendOrderByMemberId" resultType="java.lang.Integer">
+
+        SELECT
+          count(1)
+        FROM
+            dj_repair_mend_order t1,
+            dj_member_address ma
+        WHERE
+            (
+                t1.house_id = ma.house_id
+                or t1.address_id = ma.id
+            )
+        AND t1.state = 1
+        and t1.type in(2,4,5)
+        AND ma.member_id = #{memberId}
+    </select>
+    <select id="selectMendDeliverByMemberId" resultType="java.lang.Integer">
+
+        SELECT
+          count(1)
+        FROM
+            dj_repair_mend_deliver t1,
+            dj_member_address ma
+        WHERE
+            (
+                t1.house_id = ma.house_id
+                or t1.address_id = ma.id
+            )
+        AND t1.shipping_state in(0,4,5)
+        AND ma.member_id = #{memberId}
+    </select>
 </mapper>
 

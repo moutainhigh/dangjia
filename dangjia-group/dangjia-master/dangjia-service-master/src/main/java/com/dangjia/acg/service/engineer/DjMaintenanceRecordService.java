@@ -1540,12 +1540,12 @@ public class DjMaintenanceRecordService {
         if(manualAllocation!=null){
             maintenanceRecordId=manualAllocation.getMaintenanceRecordId();
             dimensionRecordDTOS.setMaintenanceType(2);//2最终责任通知
-            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地<font color=red>“" + dimensionRecordDTOS.getHouseName() + "”</font>," +
+            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地<font color='#F57341'>“" + dimensionRecordDTOS.getHouseName() + "”</font>," +
                     "业主申请了质保，业主申请了质保，根据维保服务项目责任划分，你需要负担一定的责任，已从您的滞留金中扣除总维保金额如下，请知悉。");
         }else{
-            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地" + "<font color=red>“" + dimensionRecordDTOS.getHouseName() + "”</font>," +
-                    "业主申请了质保，业主申请了质保，根据维保服务项目责任划分，你需要负担<font color=red>" + dimensionRecordDTOS.getProportion() + "%</font>的责任," +
-                    "已从您的滞留金中扣除总维保金额的" + dimensionRecordDTOS.getProportion() + "%，请悉知,如有疑问可在<font color=red>7天内</font>申诉。");
+            dimensionRecordDTOS.setStr("您于" + dateStr + "申请整体完工的工地" + "<font color='#F57341'>“" + dimensionRecordDTOS.getHouseName() + "”</font>," +
+                    "业主申请了质保，业主申请了质保，根据维保服务项目责任划分，你需要负担<font color='#F57341'>" + dimensionRecordDTOS.getProportion() + "%</font>的责任," +
+                    "已从您的滞留金中扣除总维保金额的" + dimensionRecordDTOS.getProportion() + "%，请悉知,如有疑问可在<font color='#F57341'>7天内</font>申诉。");
         }
 
         //查询报销信息

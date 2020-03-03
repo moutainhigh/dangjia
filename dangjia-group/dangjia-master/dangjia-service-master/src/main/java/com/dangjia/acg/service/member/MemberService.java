@@ -3,6 +3,7 @@ package com.dangjia.acg.service.member;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -27,6 +28,7 @@ import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.shell.IMasterOrderNodeMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
@@ -41,6 +43,7 @@ import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
+import com.dangjia.acg.modle.order.OrderNode;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.store.Store;
@@ -135,6 +138,8 @@ public class MemberService {
 
     @Autowired
     private DjSkillCertificationMapper djSkillCertificationMapper;
+    @Autowired
+    private IMasterOrderNodeMapper masterOrderNodeMapper;
 
     @Autowired
     private IOrderMapper iOrderMapper;
@@ -521,6 +526,84 @@ public class MemberService {
             return register(request, phone, password, invitationCode, userRole, longitude, latitude);
         }
     }
+    /**
+     * 注销账号
+     * @param userToken
+     * @return
+     */
+    public  ServerResponse cancellationAccountMember(String userToken){
+        try{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            Map map=new HashMap();
+            map.put("state",0);
+            //1.判断用户名下是否有未完工的房子
+            Example example =new Example(House.class);
+            example.createCriteria().andEqualTo(House.MEMBER_ID,member.getId()).andEqualTo(House.VISIT_STATE,1);
+            List<House> houseList=houseMapper.selectByExample(example);
+            if(houseList!=null&&houseList.size()>0){
+                map.put("stateName","用户名下有未完工的房子不能注销");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //2.判断是否有未支付完成的订单
+            Integer count=iOrderMapper.selectCountOrderByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在未支付完成的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有未要货的订单
+            count=iOrderMapper.selectOrderItemByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在已支付未要货的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有待发货的单
+            count=iOrderMapper.selectOrderSplitItemByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在已要货待处理的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有待收货的单
+            count=iOrderMapper.selectOrderSplitDeliverByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在待收货的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有待退款的订单
+            count=iOrderMapper.selectMendOrderByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在已申请退款待处理的订单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断是否有未处理完的退款单
+            count=iOrderMapper.selectMendDeliverByMemberId(member.getId());
+            if(count!=null&&count>0){
+                map.put("stateName","用户名下存在正在处理中的退款单");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            //判断账户是否有余额未提现
+            Member newMember=memberMapper.selectByPrimaryKey(member.getId());
+            if(newMember.getSurplusMoney()!=null&&newMember.getSurplusMoney().doubleValue()>0){
+                map.put("stateName","存在未提现的余额");
+                return ServerResponse.createBySuccess("注销失败 ",map);
+            }
+            newMember.setDataStatus(1);
+            newMember.setMobile("---delete----"+newMember.getMobile());
+            newMember.setName("--delet--"+member.getName());
+            newMember.setId("--delete--"+member.getId());
+            memberMapper.updateByPrimaryKey(newMember);
+            map.put("state",1);
+            map.put("stateName","注销成功");
+            return ServerResponse.createBySuccess("注销成功 ",map);
+        }catch (Exception e){
+            logger.error("注销失败",e);
+            return ServerResponse.createByErrorMessage("注销失败");
+        }
+    }
+
 
     private void updateOrInsertInfo(String memberid, String policyId, String pwd) {
         try {
@@ -1320,7 +1403,142 @@ public class MemberService {
             return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
         }
     }
+    /**
+     * 获取我的徽章
+     */
+    public ServerResponse getMyInsigniaList(String userToken){
+        try{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
+            Example example=new Example(OrderNode.class);
+            example.createCriteria().andEqualTo(OrderNode.TYPE,"MY_INSIGNIA");
+            example.orderBy(OrderNode.SORT);
+            List<OrderNode> nodeList=masterOrderNodeMapper.selectByExample(example);
+            if(nodeList==null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            List<Map<String,Object>> list=new ArrayList<>();
+            Map<String, Object> map ;
+            for(OrderNode orderNode:nodeList){
+                map = new HashMap<>();
+                map.put("head", address + orderNode.getNodeDescribe());
+                map.put("id",orderNode.getCode());
+                map.put("name",orderNode.getName());
+                map.put("code",orderNode.getCode());
+                map.put("type",0);//未获取
+                if("H001".equals(orderNode.getCode())){
+                    //判断当前人员是否有保险
+                    //查询保险徽章
+                    example = new Example(Insurance.class);
+                    example.createCriteria().andEqualTo(Insurance.WORKER_ID,worker.getId())
+                            .andEqualTo(Insurance.DATA_STATUS, 0)
+                    .andGreaterThanOrEqualTo(Insurance.END_DATE,new Date());
+                    example.orderBy(Insurance.CREATE_DATE).desc();
+                    List<Insurance> insurance = iInsuranceMapper.selectByExample(example);
+                    if(insurance!=null&&insurance.size()>0){
+                        map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
+                        map.put("id",insurance.get(0).getId());
+                        map.put("type",1);//已获取
+                    }
+                }if("H002".equals(orderNode.getCode())){//技能详情
+                    example = new Example(DjSkillCertification.class);
+                    example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, worker.getId())
+                            .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+                    List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+                    if(djSkillCertifications != null && djSkillCertifications.size() >0){
+                        map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
+                        map.put("id",worker.getId());
+                        map.put("type",1);//已获取
+                    }
+                }
 
+                list.add(map);
+            }
+           return ServerResponse.createBySuccess("查询成功",list);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+    }
+
+    /**
+     * 获取我的徽章--徽章详情
+     */
+    public ServerResponse getMyInsigniaDetail(String userToken,String code){
+        try{
+            Map<String,Object> map=new HashMap<>();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            Member worker = (Member) object;
+            Example example=new Example(OrderNode.class);
+            example.createCriteria().andEqualTo(OrderNode.TYPE,"MY_INSIGNIA")
+                    .andEqualTo(OrderNode.CODE,code);
+            List<OrderNode> nodeList=masterOrderNodeMapper.selectByExample(example);
+            if(nodeList!=null){
+                OrderNode orderNode=nodeList.get(0);
+                map.put("head", address + orderNode.getNodeDescribe());
+                map.put("id",orderNode.getCode());
+                map.put("name",orderNode.getName());
+                map.put("code",orderNode.getCode());
+                map.put("type",0);//未获取
+            }
+            if("H001".equals(code)){
+                //判断当前人员是否有保险
+                //查询保险徽章
+                example = new Example(Insurance.class);
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID,worker.getId())
+                        .andEqualTo(Insurance.DATA_STATUS, 0)
+                        .andGreaterThanOrEqualTo(Insurance.END_DATE,new Date());
+                example.orderBy(Insurance.CREATE_DATE).desc();
+                List<Insurance> insurance = iInsuranceMapper.selectByExample(example);
+                if(insurance!=null&&insurance.size()>0){
+                    Insurance rance=insurance.get(0);
+                    map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
+                    map.put("id",insurance.get(0).getId());
+                    map.put("startDate",rance.getStartDate());//保险开始时间
+                    map.put("ednDate",rance.getEndDate());//保险结束时间
+                    map.put("type",1);//已获取
+                }else{
+                    map.put("showButton","去购买");
+                }
+                //判断已有多少人获取
+                example = new Example(Insurance.class);
+                example.createCriteria().andEqualTo(Insurance.DATA_STATUS, 0)
+                        .andGreaterThanOrEqualTo(Insurance.END_DATE,new Date());
+                Integer count= iInsuranceMapper.selectCountByExample(example);
+                map.put("remark","有了保险才能开工哦，安全第一");
+                map.put("countRemark","已有<font color='#F57341'>"+count+"</font>人获得");
+
+            }if("H002".equals(code)){//技能详情
+                example = new Example(DjSkillCertification.class);
+                example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, worker.getId())
+                        .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+                List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+                if(djSkillCertifications != null && djSkillCertifications.size() >0){
+                    map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
+                    map.put("id",worker.getId());
+                    map.put("type",1);//已获取
+                }
+                example = new Example(DjSkillCertification.class);
+                example.createCriteria().andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+                Integer count= iInsuranceMapper.selectCountByExample(example);
+                map.put("remark","由当家人员联系您进行线下培训");
+                map.put("countRemark","已有<font color='#F57341'>"+count+"</font>人获得");
+            }
+            return ServerResponse.createBySuccess("查询成功",map);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     /**
      * 更新工匠保险信息

@@ -5,6 +5,7 @@ import com.dangjia.acg.dto.deliver.BudgetOrderItemDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
+import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -53,6 +54,19 @@ public interface IOrderMapper extends Mapper<Order> {
      */
     Double getDesgionTotalMoney(@Param("orderId") String orderId);
 
+    //未支付完成的订单
+    Integer selectCountOrderByMemberId(@Param("memberId") String memberId);
 
+    //查询已支付但未要货的单
+    Integer selectOrderItemByMemberId(@Param("memberId") String memberId);
+    //判断是否有待发货的单
+    Integer selectOrderSplitItemByMemberId(@Param("memberId") String memberId);
+    //判断是否有待收货的单
+    Integer selectOrderSplitDeliverByMemberId(@Param("memberId") String memberId);
+    //判断是否存在申请退款，待处理的单
+    Integer selectMendOrderByMemberId(@Param("memberId") String memberId);
+    //判断是否有正在处理中的退款单
+    Integer selectMendDeliverByMemberId(@Param("memberId") String memberId);
 
 }
+
