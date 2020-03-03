@@ -490,6 +490,7 @@ public class MemberService {
             if (wt != null) {
                 user.setWorkerTypeId(wt.getId());
                 user.setWorkerType(wt.getType());
+                user.setCheckType(0);
             }
         }
         memberMapper.insertSelective(user);

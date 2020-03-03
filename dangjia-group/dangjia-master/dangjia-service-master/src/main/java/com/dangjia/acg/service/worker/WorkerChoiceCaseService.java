@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.worker;
 
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -116,6 +117,36 @@ public class WorkerChoiceCaseService {
 
     }
 
+    /**
+     * 业主--查看案例
+     * @param workerId
+     * @return
+     */
+    public ServerResponse queryChoiceByWorkerId(String workerId){
+        try{
+            String jdAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            Example example = new Example(WorkerChoiceCase.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(WorkerChoiceCase.DATA_STATUS, 0);
+            criteria.andEqualTo(WorkerChoiceCase.WORKER_ID, workerId);
+            example.orderBy(Activity.MODIFY_DATE).desc();
+            List<WorkerChoiceCase> list = workerChoiceCaseMapper.selectByExample(example);
+            if (list.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            Map paramMap;
+            List<Map<String,Object>> newList=new ArrayList<>();
+            for (WorkerChoiceCase v : list) {
+                paramMap= BeanUtils.beanToMap(v);
+                paramMap.put("imageUrl",StringTool.getImage(v.getImage(),jdAddress));
+                newList.add(paramMap);
+            }
+            return ServerResponse.createBySuccess("查询成功",newList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
     /**
      * 删除
      *
