@@ -119,28 +119,30 @@ public interface DjDeliveryReturnSlipAPI {
                                                    @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimensionSupplyDetails")
-    @ApiOperation(value = "店铺利润统计-供应商供应详情", notes = "店铺利润统计-供应商供应详情")
+    @ApiOperation(value = "店铺利润统计-供应商维度--供应详情", notes = "店铺利润统计-供应商维度--供应详情")
     ServerResponse supplierDimensionSupplyDetails(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("pageDTO") PageDTO pageDTO,
-                                     @RequestParam("userId") String userId,
-                                     @RequestParam("cityId") String cityId,
+                                     @RequestParam("storefrontId") String storefrontId,
+                                     @RequestParam("supId") String supId,
                                      @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimensionOrderDetails")
-    @ApiOperation(value = "店铺利润统计-供应商货单详情", notes = "店铺利润统计-供应商货单详情")
+    @ApiOperation(value = "店铺利润统计--供应详情--货单详情", notes = "店铺利润统计--供应详情--货单详情")
     ServerResponse supplierDimensionOrderDetails(@RequestParam("request") HttpServletRequest request,
                                                   @RequestParam("pageDTO") PageDTO pageDTO,
-                                                  @RequestParam("userId") String userId,
-                                                  @RequestParam("cityId") String cityId,
+                                                  @RequestParam("storefrontId") String storefrontId,
+                                                  @RequestParam("supId") String supId,
+                                                  @RequestParam("addressId") String addressId,
                                                   @RequestParam("houseId") String houseId);
 
-    @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimensionGoodsDetails")
-    @ApiOperation(value = "店铺利润统计-供应商商品详情", notes = "店铺利润统计-供应商商品详情")
-    ServerResponse supplierDimensionGoodsDetails(@RequestParam("request") HttpServletRequest request,
+
+    @PostMapping("/delivery/djBasicsStorefrontProfit/storefrontProductDimensionDetail")
+    @ApiOperation(value = "店铺利润统计-商品维度--货单详情", notes = "店铺利润统计-商品维度--货单详情")
+    ServerResponse storefrontProductDimensionDetail(@RequestParam("request") HttpServletRequest request,
                                                   @RequestParam("pageDTO") PageDTO pageDTO,
-                                                  @RequestParam("userId") String userId,
-                                                  @RequestParam("cityId") String cityId,
-                                                  @RequestParam("orderSplitId") String searchKey);
+                                                  @RequestParam("storefrontId") String storefrontId,
+                                                  @RequestParam("productId") String productId,
+                                                  @RequestParam("type") Integer type);
 
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/storefrontProductDimension")
@@ -168,11 +170,13 @@ public interface DjDeliveryReturnSlipAPI {
                      @RequestParam("orderSplitId") String orderSplitId);
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/sellerSplitDeliverDetails")
-    @ApiOperation(value = "店铺利润统计-查看买家-发货单详情", notes = "店铺利润统计-查看买家-发货单详情")
+    @ApiOperation(value = "店铺利润统计-买家维度-货单列表", notes = "店铺利润统计-买家维度-货单列表")
     ServerResponse sellerSplitDeliverDetails(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("userId") String userId,  @RequestParam("cityId")String cityId,
-            @RequestParam("splitDeliverId") String splitDeliverId);
+            @RequestParam("storefrontId") String storefrontId,
+            @RequestParam("addressId") String addressId,
+            @RequestParam("houseId") String houseId,
+            @RequestParam("type") Integer type);
 
 }

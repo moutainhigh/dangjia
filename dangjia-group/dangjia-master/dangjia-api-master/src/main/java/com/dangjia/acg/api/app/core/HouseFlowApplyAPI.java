@@ -50,4 +50,9 @@ public interface HouseFlowApplyAPI {
     @ApiOperation(value = "管家验收详情", notes = "管家验收详情")
     ServerResponse stewardCheckDetail(@RequestParam("userToken") String userToken,
                                       @RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
+    @PostMapping("app/core/houseFlowApply/queryAcceptanceTrend")
+    @ApiOperation(value = "验收动态", notes = "验收动态")
+    ServerResponse queryAcceptanceTrend(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId);
+
 }

@@ -24,7 +24,7 @@ public class DjMaintenanceRecordDTO {
     private Date createDate;//发起时间
     private Integer stewardState;//管家处理状态 1：待处理 2：已处理
     private String ownerImage;//业主上传图片
-    private List<String> ownerImages;
+    private String ownerImages;
     private String ownerRemark;//业主备注
     private String supervisorId;//督导id
     private String supervisorName;//督导名称
@@ -41,7 +41,7 @@ public class DjMaintenanceRecordDTO {
     private String remark;//自购商品备注
     private Integer ownerState;//状态 1:待业主确认 2:业主已确认 3:业主已拒绝
     private String stewardImage;//管家上传图片
-    private List<String> stewardImages;
+    private String stewardImages;
     private String stewardRemark;//管家备注
 
     private Integer complainType;//申诉类型：9-业主申请质保
@@ -52,6 +52,6 @@ public class DjMaintenanceRecordDTO {
     private String workerMobile;//工匠手机号码
     private String workerCreateDate;//工匠接单时间
     private String workerImage;//工匠上传图片
-    private List<String> workerImages;//工匠上传图片list
+    private String workerImages;//工匠上传图片list
 
 }

@@ -24,6 +24,7 @@
         <if test="null!=typeId and ''!=typeId">
             AND o.type_id=#{typeId}
         </if>
+
         <if test="null!=batchCode and ''!=batchCode">
             AND o.batch_code=#{batchCode}
         </if>

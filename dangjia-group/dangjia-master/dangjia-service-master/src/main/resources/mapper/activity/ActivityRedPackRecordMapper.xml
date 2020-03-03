@@ -114,5 +114,114 @@
         FROM dj_activity_red_pack_record
         where business_order_number = #{businessOrderNumber}
     </select>
+
+    <select id="queryActivityRedPackRecordList" resultType="com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO">
+        SELECT
+            rpr.id,
+            rpr.sort,
+            rpr.pack_num packNum,
+          (case when rpr.member_id!=null then 1 else 0 end) isReceived,
+          (case when rpr.business_order_number!=null then 1 else 0 end) isApply,
+            rpr.have_receive haveReceive,
+            rpr.business_order_number businessOrderNumber
+        FROM
+            dj_activity_red_pack_record rpr
+        WHERE
+            rpr.red_pack_id = #{redPackId}
+        order by rpr.sort
+
+    </select>
+
+    <select id="queryMyAticvityList" resultType="com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO">
+        SELECT
+            r.id,
+            p.`name`,
+            p.from_object_type fromObjectType,
+            p.from_object fromObject,
+            p.storefront_id storefrontId,
+            p.from_object_name fromObjectName,
+            IFNULL(p.satisfy_money,0)  satisfyMoney,
+            p.type,
+            (
+                CASE
+                WHEN (
+                   (p.type = 0 || p.type = 1)
+                    AND p.satisfy_money > 0
+                ) THEN
+                CONCAT('满',p.satisfy_money,'元可用')
+                ELSE
+                '无门槛'
+                END
+            ) satisfyMoneyRemark,
+            (
+                CASE
+                WHEN p.source_type = 1 THEN
+                '平台券'
+                WHEN p.source_type = 2 THEN
+                '店铺券'
+                END
+            ) typeName,
+        <if test="searchType==2"><!--失效优惠券-->
+            (
+                CASE
+                WHEN r.business_order_number!=null THEN
+                '已使用'
+                else
+                '已失效'
+                END
+            ) statusName,
+        </if>
+            p.satisfy_money,
+            p.money,
+            p.source_type sourceType,
+            c.`name` cityName,
+            p.start_date startDate,
+            p.end_date endDate
+        FROM
+        dj_activity_red_pack p,
+        dj_activity_red_pack_record r,
+        dj_other_city c
+        WHERE
+        r.red_pack_id = p.id
+        AND p.city_id = c.id
+        <if test="searchType==1"> <!--有效优惠券-->
+            AND p.end_date >= DATE_FORMAT(NOW(), '%Y-%m-%d')
+            and r.business_order_number is null
+        </if>
+        <if test="searchType==2"><!--失效优惠券-->
+        <![CDATA[
+           AND( p.end_date < DATE_FORMAT(NOW(), '%Y-%m-%d')
+            or r.business_order_number is not null)]]>
+        </if>
+        <if test="searchType==3"> <!--可使用的有效优惠券-->
+            <![CDATA[
+            AND p.start_date <= DATE_FORMAT(NOW(), '%Y-%m-%d')
+            AND p.end_date >= DATE_FORMAT(NOW(), '%Y-%m-%d')
+            and r.business_order_number is null
+            ]]>
+        </if>
+        AND r.member_id = #{memberId}
+        <if test="null!=sourceType and ''!=sourceType">
+            and p.source_type=#{sourceType}
+        </if>
+        <if test="null!=activityRedPackId and ''!=activityRedPackId">
+            and r.id=#{activityRedPackId}
+        </if>
+        order by r.modify_date desc
+    </select>
+
+    <select id="queryActivityRedCount" resultType="java.lang.Integer">
+        SELECT
+            count(r.id)
+        FROM
+            dj_activity_red_pack p,
+            dj_activity_red_pack_record r
+        WHERE
+            r.red_pack_id = p.id
+        AND r.member_id = #{memberId}
+        <if test="null!=sourceType and ''!=sourceType">
+            and p.source_type=#{sourceType}
+        </if>
+    </select>
 </mapper>
 

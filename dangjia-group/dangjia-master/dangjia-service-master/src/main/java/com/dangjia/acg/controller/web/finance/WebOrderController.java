@@ -8,7 +8,9 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.finance.WebOrderService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,13 +34,23 @@ public class WebOrderController implements WebOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getAllOrders(HttpServletRequest request, PageDTO pageDTO, Integer state, String searchKey, String beginDate,String endDate) {
-        String cityId = request.getParameter(Constants.CITY_ID);
-        String userID = request.getParameter(Constants.USERID);
-        //通过缓存查询店铺信息
-        //StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID, StorefrontDTO.class);
-//        Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
-        return webOrderService.getAllOrders(pageDTO,cityId, state, searchKey,null,  beginDate, endDate);
+    public ServerResponse getAllOrders(HttpServletRequest request, PageDTO pageDTO,String cityId, Integer state, String searchKey, String beginDate,String endDate) {
+        if(StringUtils.isBlank(cityId)){
+            cityId = request.getParameter(Constants.CITY_ID);
+        }
+        return webOrderService.getAllOrders(pageDTO,cityId, state, searchKey,beginDate, endDate);
+    }
+
+    /**
+     * 财务--订单管理--订单详情
+     * @param request
+     * @param businessNumber
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getOrderItemInfoList(HttpServletRequest request,String businessNumber){
+        return webOrderService.getOrderItemInfoList(businessNumber);
     }
 
     @Override

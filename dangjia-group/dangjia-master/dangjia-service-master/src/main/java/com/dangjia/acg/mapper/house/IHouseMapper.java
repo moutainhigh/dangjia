@@ -116,6 +116,9 @@ public interface IHouseMapper extends Mapper<House> {
      * @return
      */
     List<HouseOrderDetailDTO> getBudgetDifferenceOrder(@Param("houseId") String houseId, @Param("workerTypeId") String workerTypeId);
+
+    Integer queryCoutHouseOrder(@Param("addressId") String addressId,@Param("houseId") String houseId,@Param("storefrontId") String storefrontId,@Param("applyStatus") Integer applyStatus);
+
     /***
      * 根据房子装修状态查询所有的房子
      * @param visitState 0待确认开工,1装修中,2休眠中,3已完工

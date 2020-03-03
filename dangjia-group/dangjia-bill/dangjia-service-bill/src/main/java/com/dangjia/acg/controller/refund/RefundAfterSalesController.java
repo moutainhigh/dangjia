@@ -104,6 +104,31 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     }
 
     /**
+     * 查询退货退款--退款订单
+     *
+     * @param cityId
+     * @param repairMendOrderId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryRefundHistoryOrderInfo(String cityId,String repairMendOrderId){
+        return refundAfterSalesService.queryRefundHistoryOrderInfo(cityId,repairMendOrderId);
+    }
+    /**
+     * 查询退货退款--退款详情
+     *
+     * @param cityId
+     * @param mendDeliverId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryMendDeliverInfo(String cityId,String mendDeliverId){
+        return refundAfterSalesService.queryMendDeliverInfo(cityId,mendDeliverId);
+    }
+
+    /**
      * 撤销退款申请
      * @param cityId
      * @param repairMendOrderId
@@ -125,14 +150,14 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
      * @param userToken
      * @param content  申诉内容
      * @param houseId  房子ID
-     * @param repairMendOrderId  申诉单号
+     * @param mendDeliverId  退货单号
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse addRepairComplain(String userToken,String content,String houseId,String repairMendOrderId){
+    public ServerResponse addRepairComplain(String userToken,String content,String houseId,String mendDeliverId){
         try{
-            return refundAfterSalesService.addRepairComplain(userToken,content,houseId,repairMendOrderId);
+            return refundAfterSalesService.addRepairComplain(userToken,content,houseId,mendDeliverId);
         }catch (Exception e){
             logger.error("申诉失败",e);
             return ServerResponse.createByErrorMessage("申诉失败");

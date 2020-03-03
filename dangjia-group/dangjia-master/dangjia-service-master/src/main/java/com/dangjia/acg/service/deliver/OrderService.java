@@ -479,70 +479,64 @@ public class OrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse confirmOrderSplit(String userToken, String houseId) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        Example example = new Example(OrderSplit.class);
+        example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
+                .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
+        List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+        if (orderSplitList.size() == 0) {
+            return ServerResponse.createByErrorMessage("没有生成要货单");
+        } else {
+            //将其他多余的单取消
+            if (orderSplitList.size() > 1) {
+                for (int i = 1; i < orderSplitList.size(); i++) {
+                    OrderSplit orderSplit = orderSplitList.get(i);
+                    orderSplit.setApplyStatus(5);
+                    orderSplitMapper.updateByPrimaryKey(orderSplit);
+                }
             }
-            Member worker = (Member) object;
-            Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
-                    .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
-            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
-            if (orderSplitList.size() == 0) {
-                return ServerResponse.createByErrorMessage("没有生成要货单");
-            } else {
-                //将其他多余的单取消
-                if (orderSplitList.size() > 1) {
-                    for (int i = 1; i < orderSplitList.size(); i++) {
-                        OrderSplit orderSplit = orderSplitList.get(i);
-                        orderSplit.setApplyStatus(5);
-                        orderSplitMapper.updateByPrimaryKey(orderSplit);
-                    }
-                }
-                OrderSplit orderSplit = orderSplitList.get(0);
-                //如果存在补货单，则告知业主补货支付
-                if (!CommonUtil.isEmpty(orderSplit.getMendNumber())) {
-                    orderSplit.setApplyStatus(4);
-                    orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
-                    return mendOrderService.confirmMendMaterial(userToken, houseId);
-                }
-                //setSplitOrderInfo
-                setSplitOrderInfo(orderSplit.getId());
-
-                /*example = new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
-                List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-                for (OrderSplitItem orderSplitItem : orderSplitItemList) {
-                    Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
-                    warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
-                    warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
-                    warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                }*/
-                orderSplit.setApplyStatus(1);//提交到后台
+            OrderSplit orderSplit = orderSplitList.get(0);
+            //如果存在补货单，则告知业主补货支付
+            if (!CommonUtil.isEmpty(orderSplit.getMendNumber())) {
+                orderSplit.setApplyStatus(4);
                 orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
-
-                //记录仓库流水
-                WarehouseDetail warehouseDetail = new WarehouseDetail();
-                warehouseDetail.setHouseId(houseId);
-                warehouseDetail.setRelationId(orderSplit.getId());//要货单
-                warehouseDetail.setRecordType(1);//要
-                warehouseDetailMapper.insert(warehouseDetail);
-
-                House house = houseMapper.selectByPrimaryKey(houseId);
-                if (worker.getWorkerType() == 3) {
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要服务",
-                            String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
-                } else {
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
-                            (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
-                }
-                return ServerResponse.createBySuccessMessage("操作成功");
+                return mendOrderService.confirmMendMaterial(userToken, houseId);
             }
+            //setSplitOrderInfo
+            setSplitOrderInfo(orderSplit.getId());
 
-        } catch (Exception e) {
-            logger.error("操作失败",e);
-            return ServerResponse.createByErrorMessage("失败");
+            /*example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
+            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
+                warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
+                warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
+                warehouseMapper.updateByPrimaryKeySelective(warehouse);
+            }*/
+            orderSplit.setApplyStatus(1);//提交到后台
+            orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+
+            //记录仓库流水
+            WarehouseDetail warehouseDetail = new WarehouseDetail();
+            warehouseDetail.setHouseId(houseId);
+            warehouseDetail.setRelationId(orderSplit.getId());//要货单
+            warehouseDetail.setRecordType(1);//要
+            warehouseDetailMapper.insert(warehouseDetail);
+
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            if (worker.getWorkerType() == 3) {
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要服务",
+                        String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
+            } else {
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
+                        (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
+            }
+            return ServerResponse.createBySuccessMessage("操作成功");
         }
     }
 
@@ -785,7 +779,8 @@ public class OrderService {
                     List<OrderItem> orderItems = orderItemMapper.selectByExample(example);
                     for (OrderItem orderItem : orderItems) {
                         //剩余量(可扣减量)
-                        Double surplus = MathUtil.sub(MathUtil.sub(orderItem.getShopCount(), orderItem.getAskCount()), orderItem.getReturnCount());
+                        Double surplus = MathUtil.sub(MathUtil.sub(orderItem.getShopCount()!=null?orderItem.getShopCount():0,
+                                orderItem.getAskCount()!=null?orderItem.getAskCount():0), orderItem.getReturnCount()!=null?orderItem.getReturnCount():0);
                         //判断订单剩余量是否大于要货量
                         if (surplus >= askCount) {
                             if(orderItem.getAskCount()==null){
@@ -797,28 +792,33 @@ public class OrderService {
                             splitItem.setNum(askCount);
                             splitItem.setTotalPrice(splitItem.getPrice()*splitItem.getNum());
                             //计算运费，搬运费
-                            Double transportationCost=orderItem.getTransportationCost();//运费
-                            Double stevedorageCost=orderItem.getStevedorageCost();//搬运费
+                            Double transportationCost=orderItem.getTransportationCost()!=null?orderItem.getTransportationCost():0;//运费
+                            Double stevedorageCost=orderItem.getStevedorageCost()!=null?orderItem.getStevedorageCost():0;//搬运费
                             //计算运费
                             if(transportationCost>0.0) {//（运费/总数量）*收货量
-                                splitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()),askCount));
+                                splitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()!=null?orderItem.getShopCount():0),askCount));
                             }else{
                                 splitItem.setTransportationCost(0d);
                             }
                             //计算搬运费
                             if(stevedorageCost>0.0){//（搬运费/总数量）*收货量
-                                splitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()),askCount));
+                                splitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()!=null?orderItem.getShopCount():0),askCount));
                             }else{
                                 splitItem.setStevedorageCost(0d);
+                            }
+                            if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
+                                splitItem.setDiscountPrice(MathUtil.mul(MathUtil.div(orderItem.getDiscountPrice(),orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                            }else{
+                                splitItem.setDiscountPrice(0d);
                             }
                             splitItem.setModifyDate(new Date());
                             orderSplitItemMapper.updateByPrimaryKeySelective(splitItem);
                             //修改订单中的要货量
-                            orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(),askCount));
+                            orderItem.setAskCount(MathUtil.add(orderItem.getAskCount()!=null?orderItem.getAskCount():0,askCount));
                             orderItem.setModifyDate(new Date());
                             orderItemMapper.updateByPrimaryKeySelective(orderItem);
                             totalAmount = MathUtil.add(totalAmount,MathUtil.add(MathUtil.add(splitItem.getPrice()*splitItem.getNum(),splitItem.getStevedorageCost()),splitItem.getTransportationCost()));
-
+                            totalAmount=MathUtil.sub(totalAmount,splitItem.getDiscountPrice());
                         }else if(surplus > 0 &&surplus < askCount){
                             //生成新的要货单明细
                             OrderSplitItem orderSplitItem=new OrderSplitItem();
@@ -838,28 +838,35 @@ public class OrderService {
                             orderSplitItem.setImage(splitItem.getImage());//货品图片
                             orderSplitItem.setHouseId(splitItem.getHouseId());
                             //计算运费，搬运费
-                            Double transportationCost=orderItem.getTransportationCost();//运费
-                            Double stevedorageCost=orderItem.getStevedorageCost();//搬运费
+                            Double transportationCost=orderItem.getTransportationCost()!=null?orderItem.getTransportationCost():0;//运费
+                            Double stevedorageCost=orderItem.getStevedorageCost()!=null?orderItem.getStevedorageCost():0;//搬运费
                             //计算运费
                             if(transportationCost>0.0) {//（运费/总数量）*收货量
-                                orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()),askCount));
+                                orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
                             }else{
                                 orderSplitItem.setTransportationCost(0d);
                             }
                             //计算搬运费
                             if(stevedorageCost>0.0){//（搬运费/总数量）*收货量
-                                orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()),askCount));
+                                orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
                             }else{
                                 orderSplitItem.setStevedorageCost(0d);
                             }
+                            if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
+                                orderSplitItem.setDiscountPrice(MathUtil.mul(MathUtil.div(orderItem.getDiscountPrice(),orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+                            }else{
+                                orderSplitItem.setDiscountPrice(0d);
+                            }
                             orderSplitItemMapper.insert(orderSplitItem);
                             //修改订单中的要货量
-                            orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(),surplus));
+                            orderItem.setAskCount(MathUtil.add(orderItem.getAskCount()!=null?orderItem.getAskCount():0,surplus));
                             orderItem.setModifyDate(new Date());
                             orderItemMapper.updateByPrimaryKeySelective(orderItem);
                             //重置要货量
                             askCount=MathUtil.sub(askCount,surplus);
-                            totalAmount = MathUtil.add(totalAmount,MathUtil.add(MathUtil.add(orderSplitItem.getPrice()*orderSplitItem.getNum(),orderSplitItem.getStevedorageCost()),orderSplitItem.getTransportationCost()));
+                            totalAmount = MathUtil.add(totalAmount,MathUtil.add(MathUtil.add(orderSplitItem.getPrice()*(orderSplitItem.getNum()!=null?orderSplitItem.getNum():0)
+                                    ,orderSplitItem.getStevedorageCost()!=null?orderSplitItem.getStevedorageCost():0),orderSplitItem.getTransportationCost()!=null?orderSplitItem.getTransportationCost():0));
+                            totalAmount=MathUtil.sub(totalAmount,orderSplitItem.getDiscountPrice());
                         }
                     }
                     orderSplit.setTotalAmount(BigDecimal.valueOf(totalAmount));
@@ -1000,10 +1007,15 @@ public class OrderService {
                     if (warehouseList.size() > 0) {
                         Warehouse warehouse = warehouseList.get(0);
                         orderSplitMap.put("shopCount", warehouse.getShopCount());//购买量
-                        orderSplitMap.put("surCount", warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
+                        orderSplitMap.put("surCount", warehouse.getShopCount() -
+                                (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
                     } else {
                         orderSplitMap.put("shopCount", 0D);//购买量
                         orderSplitMap.put("surCount", 0D);//剩余量
+                    }
+                    orderSplitMap.put("replenishment",0);
+                    if(MathUtil.sub(v.getNum(),Double.parseDouble(orderSplitMap.get("surCount").toString()))>0){
+                        orderSplitMap.put("replenishment",1);
                     }
                     resMapList.add(orderSplitMap);
                 }
@@ -1070,6 +1082,8 @@ public class OrderService {
                     mendMaterialMapper.deleteByExample(example);
                     orderSplit.setMendNumber("");
                 }
+                orderSplit.setCreateDate(new Date());
+                orderSplit.setModifyDate(new Date());
                 orderSplit.setMemberId(worker.getId());
                 orderSplit.setMemberName(worker.getName());
                 orderSplit.setMobile(worker.getMobile());
@@ -1607,7 +1621,7 @@ public class OrderService {
      * @param productArr 商品列表
      * @return
      */
-    public ServerResponse saveDesignOrderInfo(String userToken,String houseId,String taskId,String productArr){
+    public ServerResponse saveDesignOrderInfo(String userToken,String houseId,String taskId,String productArr,String activityRedPackId){
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -1630,7 +1644,7 @@ public class OrderService {
         String productJsons = getNewProductJsons(house,productArr);
         if(StringUtils.isNotEmpty(productJsons)){
             //2.生成订单信息
-            ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"1");
+            ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"1",activityRedPackId);
             if (serverResponse.getResultObj() != null) {
                 String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                 //3.生成houseflow待抢单的流程(设计师的待创单流程)

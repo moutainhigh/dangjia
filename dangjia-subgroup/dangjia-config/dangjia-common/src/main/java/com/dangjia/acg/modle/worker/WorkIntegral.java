@@ -43,8 +43,8 @@ public class WorkIntegral extends BaseEntity {
 	private Integer star;//
 
 	@Column(name = "status")
-	@Desc(value = "得分类型每日积分0，业主积分1，大管家积分2")
-	@ApiModelProperty("得分类型每日积分0，业主积分1，大管家积分2")
+	@Desc(value = "得分类型每日积分0，业主积分1，大管家积分2,当家贝币值3")
+	@ApiModelProperty("得分类型每日积分0，业主积分1，大管家积分2,当家贝币值3")
 	private Integer status;//
 
 	@Column(name = "house_id")
@@ -61,4 +61,14 @@ public class WorkIntegral extends BaseEntity {
 	@Desc(value = "积分增减分数")
 	@ApiModelProperty("积分增减分数")
 	private BigDecimal integral;
+
+	@Column(name = "integral_type")
+	@Desc(value = "获取类型：0评价获取，1充值获取，2兑换退款，3兑换商品")
+	@ApiModelProperty("获取类型：0评价获取，1充值获取，2兑换退款，3兑换商品")
+	private Integer integralType;
+
+	@Column(name = "any_business_id")
+	@Desc(value = "任意单ID（充值单号ID，订单ID，评价ID）")
+	@ApiModelProperty("任意单ID（充值单号ID，订单ID，评价ID）")
+	private String anyBusinessId;
 }

@@ -11,6 +11,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.dto.core.ButtonListBean;
 import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
 import com.dangjia.acg.dto.core.NodeDTO;
@@ -23,16 +24,21 @@ import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.matter.IMasterTechnologyMapper;
 import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
 import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supervisor.ISiteMemoMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.model.config.DjConfigRuleItemTwo;
+import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.deliver.Order;
@@ -44,7 +50,11 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.safe.WorkerTypeSafe;
+import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supervisor.SiteMemo;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
@@ -52,6 +62,7 @@ import com.dangjia.acg.service.design.QuantityRoomService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
 import com.dangjia.acg.util.HouseUtil;
+import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -92,9 +103,11 @@ public class CraftsmanConstructionService {
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
     @Autowired
     private DjMaintenanceRecordProductMapper djMaintenanceRecordProductMapper;
-    @Autowired
-    private WorkerTypeSafeOrderService workerTypeSafeOrderService;
 
+    @Autowired
+    private IWorkerTypeSafeMapper workerTypeSafeMapper;
+    @Autowired
+    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -127,6 +140,12 @@ public class CraftsmanConstructionService {
     @Autowired
     private IMasterProductTemplateMapper iMasterProductTemplateMapper;
     @Autowired
+    private IMasterTechnologyMapper masterTechnologyMapper;
+    @Autowired
+    private IMasterBasicsGoodsMapper iMasterBasicsGoodsMapper;
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+    @Autowired
     private IMasterUnitMapper iMasterUnitMapper;
     @Autowired
     private MasterProductTemplateService masterProductTemplateService;
@@ -152,14 +171,14 @@ public class CraftsmanConstructionService {
         if (worker.getWorkerType() == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "请上传资料");
         }
-        HouseWorker hw =null;
-        if(CommonUtil.isEmpty(houseWorkerId)) {
+        HouseWorker hw = null;
+        if (CommonUtil.isEmpty(houseWorkerId)) {
             object = getHouseWorker(bean, worker.getId());
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
             hw = (HouseWorker) object;
-        }else{
+        } else {
             hw = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
         }
         if (hw == null) {
@@ -167,7 +186,7 @@ public class CraftsmanConstructionService {
         }
         bean.setHouseWorkerId(hw.getId());
         bean.setHouseWorkerType(hw.getType());
-        if(hw.getType()==0) {
+        if (hw.getType() == 0) {
             House house = houseMapper.selectByPrimaryKey(hw.getHouseId());//查询房产信息
             if (house == null) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "房产信息不存在");
@@ -204,7 +223,7 @@ public class CraftsmanConstructionService {
             }
         }
 
-        if(hw.getType()==1) {
+        if (hw.getType() == 1) {
 
             List<ButtonListBean> buttonList = new ArrayList<>();
             Order order = iOrderMapper.selectByPrimaryKey(hw.getBusinessId());//查询房产信息
@@ -218,16 +237,16 @@ public class CraftsmanConstructionService {
             }
             bean.setWorkerType(worker.getWorkerType());//0:大管家；1：工匠；2：设计师；3：精算师
             Example example = new Example(HouseWorker.class);
-            example.createCriteria().andCondition(" work_type in(6,8) ").andEqualTo(HouseWorker.TYPE,hw.getType()).andEqualTo(HouseWorker.BUSINESS_ID,order.getId());
-            List<HouseWorker> houseWorkers= houseWorkerMapper.selectByExample(example);
-            HouseWorker houseWorker=null;
-            if(houseWorkers.size()>0){
-                houseWorker=houseWorkers.get(0);
+            example.createCriteria().andCondition(" work_type in(6,8) ").andEqualTo(HouseWorker.TYPE, hw.getType()).andEqualTo(HouseWorker.BUSINESS_ID, order.getId());
+            List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);
+            HouseWorker houseWorker = null;
+            if (houseWorkers.size() > 0) {
+                houseWorker = houseWorkers.get(0);
                 bean.setHouseFlowId(houseWorker.getId());
-                if(houseWorker.getWorkType()==6){
+                if (houseWorker.getWorkType() == 6) {
                     bean.setAlreadyMoney(new BigDecimal(0));//已得钱
                     bean.setAlsoMoney(houseWorker.getPrice());//已得钱
-                }else{
+                } else {
                     bean.setAlreadyMoney(houseWorker.getPrice());//已得钱
                     bean.setAlsoMoney(new BigDecimal(0));//还可得钱
                 }
@@ -239,25 +258,25 @@ public class CraftsmanConstructionService {
                 bean.setUserId(houseMember.getId());//
             }
             //查询我的单
-            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(order.getId(), null,hw.getType());
+            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(order.getId(), null, hw.getType());
             List<Map<String, Object>> mapDataList = new ArrayList<>();
-            if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
+            if (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0) {
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
                     setProductInfo(houseOrderDetailDTO, address);
                     Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
-                    dataMap.put("totalNodeNumber",1);//总节点数
-                    if(houseWorker!=null && houseWorker.getWorkType()==6) {
-                        dataMap.put("completedNodeNumber",0);//已完成节点数(已完成)
+                    dataMap.put("totalNodeNumber", 1);//总节点数
+                    if (houseWorker != null && houseWorker.getWorkType() == 6) {
+                        dataMap.put("completedNodeNumber", 0);//已完成节点数(已完成)
                         dataMap.put("labelName", "待验房");//节点名称
 
 
-                        JSONObject paramVal=new JSONObject();
-                        paramVal.put("orderItemId",houseOrderDetailDTO.getOrderItemId());
-                        paramVal.put("orderStatus",4);
+                        JSONObject paramVal = new JSONObject();
+                        paramVal.put("orderItemId", houseOrderDetailDTO.getOrderItemId());
+                        paramVal.put("orderStatus", 4);
                         buttonList.add(Utils.getButton("上传验房结果", 7001));
-                    }else{
-                        dataMap.put("completedNodeNumber",1);//已完成节点数(已完成)
+                    } else {
+                        dataMap.put("completedNodeNumber", 1);//已完成节点数(已完成)
                         dataMap.put("labelName", "已完成");//节点名称
                     }
                     mapDataList.add(dataMap);
@@ -267,21 +286,35 @@ public class CraftsmanConstructionService {
             }
             bean.setDataList(mapDataList);
             bean.setButtonList(buttonList);
-            return  ServerResponse.createBySuccess("获取施工列表成功", bean);
+            return ServerResponse.createBySuccess("获取施工列表成功", bean);
         }
 
-        if(hw.getType()==2) {
+        if (hw.getType() == 2) {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             List<ButtonListBean> buttonList = new ArrayList<>();
-            DjMaintenanceRecord record=djMaintenanceRecordMapper.selectByPrimaryKey(hw.getBusinessId());
+            DjMaintenanceRecord record = djMaintenanceRecordMapper.selectByPrimaryKey(hw.getBusinessId());
+            //查询保险订单对应的工种
+
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hw.getWorkerTypeId());
             House house = houseMapper.selectByPrimaryKey(record.getHouseId());
             bean.setHouseId(house.getId());
             bean.setHouseName(house.getHouseName());
             bean.setWorkerType(worker.getWorkerType());//0:大管家；1：工匠；2：设计师；3：精算师
+            bean.setWorkerTypeColor(workerType.getColor());
+            bean.setWorkerTypeName(workerType.getName());
+            bean.setWorkerTypeImage(imageAddress+workerType.getImage());
+
+            if(record.getOverProtection()==1){
+                bean.setWorkerTypeSlogan(workerType.getName()+"已过保");
+            }else {
+                bean.setWorkerTypeSlogan(workerType.getName()+"免费质保");
+            }
+            bean.setWorkerTypeColor(workerType.getColor());
             bean.setHouseFlowId(hw.getId());
-            if(hw.getWorkType()==6){
+            if (hw.getWorkType() == 6) {
                 bean.setAlreadyMoney(new BigDecimal(0));//已得钱
                 bean.setAlsoMoney(hw.getPrice());//已得钱
-            }else{
+            } else {
                 bean.setAlreadyMoney(hw.getPrice());//已得钱
                 bean.setAlsoMoney(new BigDecimal(0));//还可得钱
             }
@@ -291,32 +324,32 @@ public class CraftsmanConstructionService {
                 bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
                 bean.setUserId(houseMember.getId());//
             }
-            List<Map<String,Object>> workerTypeList=djMaintenanceRecordProductMapper.selectWorkerTypeListById(record.getId(),2);//查询是否已添加勘查费用的商品
-            if(record.getState()==null&&workerTypeList.size()>0&&worker.getWorkerType()==3){//大管家勘查
+            List<Map<String, Object>> workerTypeList = djMaintenanceRecordProductMapper.selectWorkerTypeListById(record.getId(), 2);//查询是否已添加勘查费用的商品
+            if (record.getState() == null && workerTypeList.size() > 0 && worker.getWorkerType() == 3) {//大管家勘查
                 buttonList.add(Utils.getButton("上传勘查结果", 6001));
             }
-            if(record.getState()==null) {//工匠开工/结束
+            if (record.getState() == null) {//工匠开工/结束
                 buttonList.add(Utils.getButton("提前结束", 6002));
                 buttonList.add(Utils.getButton("已确认可开工", 6003));
             }
-            if(record.getState()==5) {//工匠验收、报销
+            if (record.getState() == 5) {//工匠验收、报销
                 buttonList.add(Utils.getButton("申请报销", 6004));
                 buttonList.add(Utils.getButton("申请验收", 6005));
             }
             //查询我的单
             List<HouseOrderDetailDTO> houseOrderDetailDTOList = djMaintenanceRecordProductMapper.getBudgetOrderDetailByInFo(record.getId());
             List<Map<String, Object>> mapDataList = new ArrayList<>();
-            if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
+            if (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0) {
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
                     setProductInfo(houseOrderDetailDTO, address);
                     Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
-                    dataMap.put("totalNodeNumber",1);//总节点数
-                    if(hw!=null && hw.getWorkType()==6) {
-                        dataMap.put("completedNodeNumber",0);//已完成节点数(已完成)
+                    dataMap.put("totalNodeNumber", 1);//总节点数
+                    if (hw != null && hw.getWorkType() == 6) {
+                        dataMap.put("completedNodeNumber", 0);//已完成节点数(已完成)
                         dataMap.put("labelName", "未维修");//节点名称
-                    }else{
-                        dataMap.put("completedNodeNumber",1);//已完成节点数(已完成)
+                    } else {
+                        dataMap.put("completedNodeNumber", 1);//已完成节点数(已完成)
                         dataMap.put("labelName", "已完成");//节点名称
                     }
                     mapDataList.add(dataMap);
@@ -328,9 +361,9 @@ public class CraftsmanConstructionService {
 
             bean.setDataList(mapDataList);
             bean.setButtonList(buttonList);
-            return  ServerResponse.createBySuccess("获取施工列表成功", bean);
+            return ServerResponse.createBySuccess("获取施工列表成功", bean);
         }
-        return ServerResponse.createBySuccessMessage("OK" );
+        return ServerResponse.createBySuccessMessage("OK");
     }
 
     /**
@@ -421,7 +454,7 @@ public class CraftsmanConstructionService {
         }
         setMenus(bean, house, hf.getWorkerType());
         //查询精算师的订单数据
-        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), "2",null);
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), "2", null);
         bean.setDataList(getBudgetDataList(houseOrderDetailDTOList, house, 2));//查询已购买的精算师的商品
         List<ButtonListBean> buttonList = showActuaryButton(house.getId());//按钮显示
         bean.setButtonList(buttonList);
@@ -444,9 +477,9 @@ public class CraftsmanConstructionService {
                 Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
                 NodeDTO nodeDTO = new NodeDTO();
                 if (workertype == 1) {
-                    nodeDTO= HouseUtil.getDesignDatas(house,nodeDTO);
+                    nodeDTO = HouseUtil.getDesignDatas(house, nodeDTO);
                 } else {
-                    nodeDTO= HouseUtil.getBudgetDatas(house,nodeDTO);
+                    nodeDTO = HouseUtil.getBudgetDatas(house, nodeDTO);
                 }
                 dataMap.put("completedNodeNumber", nodeDTO.getRank());//已完成节点数(已完成)
                 dataMap.put("totalNodeNumber", nodeDTO.getTotal());//精算总节点数
@@ -507,7 +540,7 @@ public class CraftsmanConstructionService {
         try {
             //1.判断业主购买的精算单是否为已退款状态
             List<HouseOrderDetailDTO> orderInfo = houseMapper.getBudgetOrderNewInfo(houseId, "2");
-            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(houseId, "2",null);//判断是否有精算订单
+            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(houseId, "2", null);//判断是否有精算订单
             if ((orderInfo == null || orderInfo.size() == 0) && (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0)) {
                 buttonList.add(Utils.getButton("已结束", 2005));
                 return buttonList;
@@ -531,7 +564,7 @@ public class CraftsmanConstructionService {
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (house.getBudgetOk() == 1 && house.getDesignerOk() == 0) {//如果图纸未审核通过，且未有设计师
                 //4.1判断业主是否购买了当家平台设计，以及对应的支付状态
-                houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(houseId, "1",null);
+                houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(houseId, "1", null);
                 if (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0) {//购买了当家平台设计
                     //判断当前设计单的状态
                     HouseOrderDetailDTO houseOrderDetailDTO = houseOrderDetailDTOList.get(0);
@@ -558,9 +591,9 @@ public class CraftsmanConstructionService {
                 buttonList.add(Utils.getButton("审核图纸", 2002));
             } else if (house.getBudgetOk() == 1 && house.getDesignerOk() != 0 && house.getDesignerOk() != 3) {//若精算师为已他单，设计师为已抢单未完成状态
                 buttonList.add(Utils.getButton("请等待设计师制作完毕", 2004));
-            } else if (house.getBudgetOk() == 6 && house.getDesignerOk() != 7&& house.getDesignerOk() != 3) {//精算师为已审核完成，设计师为未审核,先上传平面图
+            } else if (house.getBudgetOk() == 6 && house.getDesignerOk() != 7 && house.getDesignerOk() != 3) {//精算师为已审核完成，设计师为未审核,先上传平面图
                 buttonList.add(Utils.getButton("上传平面图", 2006));
-            }else if(house.getBudgetOk() == 6 && house.getDesignerOk() == 7){//精算师为已审核完成，设计师为未审核,先上传施工图
+            } else if (house.getBudgetOk() == 6 && house.getDesignerOk() == 7) {//精算师为已审核完成，设计师为未审核,先上传施工图
                 buttonList.add(Utils.getButton("上传施工图", 2007));
             }
 
@@ -573,7 +606,7 @@ public class CraftsmanConstructionService {
     /**
      * 大管家
      */
-    private ServerResponse getHousekeeperBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf,Integer type) {
+    private ServerResponse getHousekeeperBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf, Integer type) {
         bean.setWorkerType(0);//0:大管家；1：工匠；2：设计师；3：精算师
         bean.setHouseFlowId(hf.getId());
         setMoney(bean, hw);
@@ -585,16 +618,16 @@ public class CraftsmanConstructionService {
         }
 
         //查询我的单
-        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), hw.getWorkerTypeId(),type);
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), hw.getWorkerTypeId(), type);
         List<Map<String, Object>> mapDataList = new ArrayList<>();
-        if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
+        if (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0) {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
                 setProductInfo(houseOrderDetailDTO, address);
                 Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
                 dataMap.put("totalNodeNumber", houseMapper.queryArrNumber(houseOrderDetailDTO.getProductTemplateId()));//总节点数
-                dataMap.put("completedNodeNumber", houseMapper.queryTestNumber(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//已完成节点数(已完成)
-                dataMap.put("labelName", houseMapper.getNoTechnologyName(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//节点名称
+                dataMap.put("completedNodeNumber", houseMapper.queryTestNumber(houseOrderDetailDTO.getProductTemplateId(), house.getId(), hw.getWorkerId()));//已完成节点数(已完成)
+                dataMap.put("labelName", houseMapper.getNoTechnologyName(houseOrderDetailDTO.getProductTemplateId(), house.getId(), hw.getWorkerId()));//节点名称
                 mapDataList.add(dataMap);
             }
             //获取维保id
@@ -655,7 +688,7 @@ public class CraftsmanConstructionService {
                 wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
                 wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
 
-                if(worker2!=null) {
+                if (worker2 != null) {
                     wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
                     wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
                     wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
@@ -665,8 +698,8 @@ public class CraftsmanConstructionService {
                     example = new Example(HouseWorker.class);
                     example.createCriteria()
                             .andEqualTo(HouseWorker.WORKER_ID, wfr.getWorkerId())
-                            .andEqualTo(HouseWorker.TYPE,0)
-                            .andIn(HouseWorker.WORK_TYPE, Arrays.asList(1,6,8));
+                            .andEqualTo(HouseWorker.TYPE, 0)
+                            .andIn(HouseWorker.WORK_TYPE, Arrays.asList(1, 6, 8));
                     Integer orderTakingNum = houseWorkerMapper.selectCountByExample(example);
                     wfr.setOrderTakingNum(orderTakingNum);
                     HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
@@ -706,7 +739,7 @@ public class CraftsmanConstructionService {
                     wfr.setState(6);
                 }
                 wfr.setTotalNodeNumber(7);
-                if(workerType.getType()==4){//拆除少无阶段完工，减去1节点数
+                if (workerType.getType() == 4) {//拆除少无阶段完工，减去1节点数
                     wfr.setTotalNodeNumber(6);
                 }
                 wfr.setCompletedNodeNumber(wfr.getState());//当前完成的节点数
@@ -771,9 +804,7 @@ public class CraftsmanConstructionService {
 
                 }
             }
-        } else if (houseFlowApplyList.size() != 0) {//今日已提交过有人巡查
-            buttonList.add(Utils.getButton("追加巡查", 3006));
-        } else {
+        }  else {
             buttonList.add(Utils.getButton("巡查工地", 3001));
         }
         bean.setPromptList(promptList);
@@ -803,9 +834,9 @@ public class CraftsmanConstructionService {
         }
 
         //查询我的单
-        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), hw.getWorkerTypeId(),type);
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), hw.getWorkerTypeId(), type);
         List<Map<String, Object>> mapDataList = new ArrayList<>();
-        if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
+        if (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0) {
             //获取维保id
             bean.setBusinessId(houseOrderDetailDTOList.get(0).getBusinessId());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -813,8 +844,8 @@ public class CraftsmanConstructionService {
                 setProductInfo(houseOrderDetailDTO, address);
                 Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
                 dataMap.put("totalNodeNumber", houseMapper.queryArrNumber(houseOrderDetailDTO.getProductTemplateId()));//总节点数
-                dataMap.put("completedNodeNumber", houseMapper.queryTestNumber(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//已完成节点数(已完成)
-                dataMap.put("labelName", houseMapper.getNoTechnologyName(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//节点名称
+                dataMap.put("completedNodeNumber", houseMapper.queryTestNumber(houseOrderDetailDTO.getProductTemplateId(), house.getId(), hw.getWorkerId()));//已完成节点数(已完成)
+                dataMap.put("labelName", houseMapper.getNoTechnologyName(houseOrderDetailDTO.getProductTemplateId(), house.getId(), hw.getWorkerId()));//节点名称
                 mapDataList.add(dataMap);
             }
         }
@@ -827,29 +858,29 @@ public class CraftsmanConstructionService {
                 .andNotEqualTo(HouseFlowApply.MEMBER_CHECK, 1);
         example.orderBy(HouseFlowApply.CREATE_DATE).desc();
         List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
-        if(houseFlowApplies != null && houseFlowApplies.size() > 0){
-            int zhengTiNum=0;
-            int jieDuanNum=0;
+        if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
+            int zhengTiNum = 0;
+            int jieDuanNum = 0;
             for (HouseFlowApply houseFlowApply : houseFlowApplies) {
-                if(houseFlowApply.getApplyType()==1){
+                if (houseFlowApply.getApplyType() == 1) {
                     jieDuanNum++;
                 }
-                if(houseFlowApply.getApplyType()==2){
+                if (houseFlowApply.getApplyType() == 2) {
                     zhengTiNum++;
                 }
             }
-            if(houseFlowApplies.get(0).getApplyType()==1){
+            if (houseFlowApplies.get(0).getApplyType() == 1) {
                 bean.setTrialNumber(jieDuanNum);
-                bean.setNodeTitle("阶段完工审核(第"+CommonUtil.numberToChinese(jieDuanNum)+"次)");
+                bean.setNodeTitle("阶段完工审核(第" + CommonUtil.numberToChinese(jieDuanNum) + "次)");
             }
-            if(houseFlowApplies.get(0).getApplyType()==2){
+            if (houseFlowApplies.get(0).getApplyType() == 2) {
                 bean.setTrialNumber(zhengTiNum);
-                bean.setNodeTitle("阶段完工审核(第"+CommonUtil.numberToChinese(jieDuanNum)+"次)");
+                bean.setNodeTitle("阶段完工审核(第" + CommonUtil.numberToChinese(jieDuanNum) + "次)");
             }
-            if(houseFlowApplies.get(0).getMemberCheck() != 1){
+            if (houseFlowApplies.get(0).getMemberCheck() != 1) {
                 //node 1-工匠发起 2-大管家审核通过 3-业主审核通过
                 bean.setNode(1);
-                if(houseFlowApplies.get(0).getSupervisorCheck() == 1){
+                if (houseFlowApplies.get(0).getSupervisorCheck() == 1) {
                     bean.setNode(2);
                 }
             }
@@ -857,9 +888,9 @@ public class CraftsmanConstructionService {
 
         //查询质保金是否为负数
         Member member = memberMapper.selectByPrimaryKey(hf.getWorkerId());
-        if(member.getRetentionMoney().intValue() < 0){
+        if (member.getRetentionMoney().intValue() < 0) {
             bean.setRetentionType(0);
-        }else{
+        } else {
             bean.setRetentionType(1);
         }
 
@@ -939,7 +970,7 @@ public class CraftsmanConstructionService {
                 promptList.add("该房子已提前结束装修,您的工钱已自动入账！");
             }
             bean.setIfBackOut(2);
-            buttonList.add(Utils.getButton("查看拿钱明细",  4002));
+            buttonList.add(Utils.getButton("查看拿钱明细", 4002));
         } else if (hf.getWorkType() == 4) {
 //            if(!isBX) {
 //                buttonList.add(Utils.getButton("购买保险", 4001));
@@ -1022,29 +1053,27 @@ public class CraftsmanConstructionService {
         List<ConstructionByWorkerIdBean.BigListBean> bigList = new ArrayList<>();
         ConstructionByWorkerIdBean.BigListBean bigListBean = new ConstructionByWorkerIdBean.BigListBean();
         bigListBean.setName("我的工具");
-        if(workerType==1){//设计师菜单
-            bigListBean.setListMap(bigListBean.getMenus(imageAddress,bigListBean.sheJi));
+        if (workerType == 1) {//设计师菜单
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.sheJi));
             bigList.add(bigListBean);
-        } else
-        if(workerType==2){//精算师菜单
-            if(house.getDecorationType()==1) {//远程设计菜单
+        } else if (workerType == 2) {//精算师菜单
+            if (house.getDecorationType() == 1) {//远程设计菜单
                 bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.jingSuanYc));
                 bigList.add(bigListBean);
             }
-            if(house.getDecorationType()==2) {//自带设计菜单
+            if (house.getDecorationType() == 2) {//自带设计菜单
                 bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.jingSuanZd));
                 bigList.add(bigListBean);
             }
-        } else
-        if(workerType==3){//大管家菜单
+        } else if (workerType == 3) {//大管家菜单
             Example example = new Example(SiteMemo.class);
             example.createCriteria().andEqualTo(SiteMemo.TYPE, 1).andEqualTo(SiteMemo.HOUSE_ID, house.getId())
                     .andCondition(" DATE_FORMAT(create_date, '%x年-第%v周' ) = DATE_FORMAT( SYSDATE(), '%x年-第%v周' ) ");
-            Integer num =iSiteMemoMapper.selectCountByExample(example);//本周是否有周计划
-            if(num>0){//是否设置了本周计划
+            Integer num = iSiteMemoMapper.selectCountByExample(example);//本周是否有周计划
+            if (num > 0) {//是否设置了本周计划
                 bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.daGuanJiaY));
                 bigList.add(bigListBean);
-            }else{
+            } else {
                 bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.daGuanJiaN));
                 bigList.add(bigListBean);
             }
@@ -1053,13 +1082,12 @@ public class CraftsmanConstructionService {
             bigListBean2.setName("工地记录");
             bigListBean2.setListMap(bigListBean2.getMenus(imageAddress, bigListBean2.daGuanJiaG));
             bigList.add(bigListBean2);
-        }else{//工匠菜单
+        } else {//工匠菜单
             bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.gongJiang));
             bigList.add(bigListBean);
         }
         bean.setBigList(bigList);//添加菜单到返回体中
     }
-
 
 
     /**
@@ -1140,7 +1168,7 @@ public class CraftsmanConstructionService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {
-            Member worker  = memberMapper.selectByPrimaryKey(userToken);
+            Member worker = memberMapper.selectByPrimaryKey(userToken);
             if (worker != null) {
                 return worker;
             }
@@ -1211,18 +1239,18 @@ public class CraftsmanConstructionService {
     /**
      * 工匠-工地进度详情
      */
-    public ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId,String houseFlowId){
+    public ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId, String houseFlowId) {
         Object object = getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
-        if (worker.getWorkerType() == null || worker.getWorkerType() !=3) {
+        if (worker.getWorkerType() == null || worker.getWorkerType() != 3) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "非大管家，无权访问");
         }
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         HouseFlow hfl = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询该房产下的工序
-            ConstructionByWorkerIdBean.WokerFlowListBean wfr = new ConstructionByWorkerIdBean.WokerFlowListBean();
+        ConstructionByWorkerIdBean.WokerFlowListBean wfr = new ConstructionByWorkerIdBean.WokerFlowListBean();
         Example example = new Example(HouseWorker.class);
         example.createCriteria()
                 .andEqualTo(HouseWorker.HOUSE_ID, hfl.getHouseId())
@@ -1237,10 +1265,11 @@ public class CraftsmanConstructionService {
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfl.getWorkerTypeId());
         wfr.setHouseFlowId(hfl.getId());//进程id
         wfr.setWorkerType(workerType.getType());//进程类型
+        wfr.setWorkerTypeId(workerType.getId());//进程ID
         wfr.setWorkerTypeName(workerType == null ? "" : workerType.getName());//大进程名
         wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
         wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
-        wfr.setWorkerHead(imageAddress + worker2 == null ? "" :worker2.getHead());
+        wfr.setWorkerHead(worker2 == null ? "" : imageAddress + worker2.getHead());
         wfr.setWorkerTypeColor(workerType == null ? "" : workerType.getColor());//工人id
         WorkerComprehensiveDTO workerComprehensive = workIntegralMapper.getComprehensiveWorker(worker.getId());
         wfr.setOverall(workerComprehensive.getOverall());
@@ -1248,36 +1277,45 @@ public class CraftsmanConstructionService {
         wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
         wfr.setPatrolSecond("" + houseFlowApplyMapper.countPatrol(hfl.getHouseId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
         wfr.setPatrolStandard("" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
+        example = new Example(HouseWorker.class);
+        example.createCriteria()
+                .andEqualTo(HouseWorker.WORKER_ID, wfr.getWorkerId())
+                .andEqualTo(HouseWorker.TYPE, 0)
+                .andIn(HouseWorker.WORK_TYPE, Arrays.asList(1, 6, 8));
+        Integer orderTakingNum = houseWorkerMapper.selectCountByExample(example);
+        wfr.setOrderTakingNum(orderTakingNum);
         HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(hfl.getHouseId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
         if (todayStart == null) {//没有今日开工记录
             wfr.setIsStart(0);//今日是否开工0:否；1：是；
         } else {
             wfr.setIsStart(1);//今日是否开工0:否；1：是；
         }
-        List<ButtonListBean> topButton=new ArrayList<>();//头部按钮
-        List<ButtonListBean> footButton=new ArrayList<>();//底部按钮
-        JSONObject paramVal=new JSONObject();
+        List<ButtonListBean> topButton = new ArrayList<>();//头部按钮
+        List<ButtonListBean> footButton = new ArrayList<>();//底部按钮
+        JSONObject paramVal = new JSONObject();
         HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hfl.getId(), worker2 == null ? "" : worker2.getId());//根据工种任务id和工人id查询此工人待审核
         if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
-            paramVal.put("houseFlowApplyId",houseFlowApp.getId());
-            footButton.add(Utils.getButton("审核阶段完工", JSON.toJSONString(paramVal), 3021));
-            topButton.add( Utils.getButton("奖罚", 3011));
-            if(houseWorker!=null&&houseWorker.getWorkType()!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
+            if (houseFlowApp.getSupervisorCheck() == 0) {
+                paramVal.put("houseFlowApplyId", houseFlowApp.getId());
+                footButton.add(Utils.getButton("审核阶段完工", JSON.toJSONString(paramVal), 3021));
+            }
+            topButton.add(Utils.getButton("奖罚", 3011));
+            if (houseWorker != null && houseWorker.getWorkType() != null && (houseWorker.getWorkType() == 2 || houseWorker.getWorkType() == 3 || houseWorker.getWorkType() == 4)) {
                 topButton.add(Utils.getButton("换人审核中", 3013));
-            }else{
+            } else {
                 topButton.add(Utils.getButton("更换工匠", 3012));
             }
             wfr.setState(4);//装修进度0：未进场；1：待审核工匠；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
-        } else if (houseFlowApp != null && houseFlowApp.getApplyType() == 2) {
-            paramVal.put("houseFlowApplyId",houseFlowApp.getId());
-            footButton.add(Utils.getButton("审核整体完工", JSON.toJSONString(paramVal),3022));
+        } else if (houseFlowApp != null && houseFlowApp.getApplyType() == 2 && houseFlowApp.getSupervisorCheck() == 0) {
+            paramVal.put("houseFlowApplyId", houseFlowApp.getId());
+            footButton.add(Utils.getButton("审核整体完工", JSON.toJSONString(paramVal), 3022));
             wfr.setState(6);
         } else {
             topButton.add(Utils.getButton("申请停工", 3010));
             topButton.add(Utils.getButton("奖罚", 3011));
-            if(houseWorker!=null&&houseWorker.getWorkType()!=null&&(houseWorker.getWorkType()==2 || houseWorker.getWorkType()==3 || houseWorker.getWorkType()==4)){
+            if (houseWorker != null && houseWorker.getWorkType() != null && (houseWorker.getWorkType() == 2 || houseWorker.getWorkType() == 3 || houseWorker.getWorkType() == 4)) {
                 topButton.add(Utils.getButton("换人审核中", 3013));
-            }else{
+            } else {
                 topButton.add(Utils.getButton("更换工匠", 3012));
             }
             if (hfl.getWorkType() < 2) {//未发布工种抢单
@@ -1319,7 +1357,7 @@ public class CraftsmanConstructionService {
             wfr.setButtonTitle("已停工");//按钮提示
         }
         wfr.setTotalNodeNumber(7);
-        if(workerType.getType()==4){//拆除少无阶段完工，减去1节点数
+        if (workerType.getType() == 4) {//拆除少无阶段完工，减去1节点数
             wfr.setTotalNodeNumber(6);
         }
         wfr.setCompletedNodeNumber(wfr.getState());//当前完成的节点数
@@ -1347,5 +1385,55 @@ public class CraftsmanConstructionService {
         wfr.setFinishedDay(everyEndDay == null ? 0 : everyEndDay);
         wfr.setSuspendDay((suspendDay == null ? 0 : suspendDay));
         return ServerResponse.createBySuccess("获取指定工程进度明细成功", wfr);
+    }
+
+    /**
+     * 工匠-任务详情
+     */
+    public ServerResponse getJobsInfo(HttpServletRequest request, String userToken, String houseId, String productId) {
+        Object object = getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+
+        List<ButtonListBean> footButton = new ArrayList<>();//底部按钮
+        Map map =new HashMap();
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<TechnologyDTO> technologies = new ArrayList<>();
+        StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+        if(storefrontProduct!=null&& StringUtils.isNotBlank(storefrontProduct.getId())) {//店铺商品(补人工为店铺商品)
+            DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+            if (!CommonUtil.isEmpty(djBasicsProductTemplate.getTechnologyIds())) {
+                List<Technology> technologyList = masterTechnologyMapper.queryTechnologyList(djBasicsProductTemplate.getTechnologyIds());
+                for (Technology technology : technologyList) {
+                    TechnologyDTO technologyResult = new TechnologyDTO();
+                    technologyResult.setId(technology.getId());
+                    technologyResult.setName(technology.getName());
+                    technologyResult.setImage(StringTool.getImage(technology.getImage(), imageAddress));
+                    technologyResult.setImageUrl(technology.getImage());
+                    technologyResult.setModifyDate(String.valueOf(technology.getModifyDate().getTime()));
+                    technologies.add(technologyResult);
+                }
+            }
+            BasicsGoods goods = iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
+            map.put(BasicsGoods.HOUSEKEEPER_ACCEPTANCE,goods.getHousekeeperAcceptance());//是否需要管家验收（1是，0否）
+            HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseId, 3);
+            map.put("technologies",technologies);//节点列表
+            map.put("productId",productId);//节点列表
+            map.put("houseFlowId",houseFlowDgj.getId());//节点列表
+
+            Example example = new Example(HouseFlowApply.class);
+            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
+                    .andEqualTo(HouseFlowApply.HOUSE_FLOW_APPLY_ID, productId)
+                    .andNotIn(HouseFlowApply.MEMBER_CHECK, Arrays.asList(0,1))
+                    .andEqualTo(HouseFlowApply.TYPE, 1);
+            Integer checkNum = houseFlowApplyMapper.selectCountByExample(example);
+            if(checkNum==0){
+                footButton.add(Utils.getButton("发起验收", 3007));
+                map.put("footButton",footButton);//底部按钮
+            }
+
+        }
+        return ServerResponse.createBySuccess("获取指定工程进度明细成功",map);
     }
 }

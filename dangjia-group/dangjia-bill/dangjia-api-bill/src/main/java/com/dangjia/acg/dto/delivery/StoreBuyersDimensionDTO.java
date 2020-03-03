@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class StoreBuyersDimensionDTO {
 
-    private String StorefrontId;//店铺id
+    private String storefrontId;//店铺id
     private String shipAddress; // 房子地址
     private String name; // 业主名称
     private Double income;//收入

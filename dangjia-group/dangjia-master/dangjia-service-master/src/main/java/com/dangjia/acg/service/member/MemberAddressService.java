@@ -100,7 +100,7 @@ public class MemberAddressService {
         setAddressDefaultType(defaultType, member.getId());
         int insert = iMasterMemberAddressMapper.insertSelective(memberAddress);
         if (insert > 0) {
-            return ServerResponse.createBySuccessMessage("新增成功");
+            return ServerResponse.createBySuccess("新增成功",memberAddress);
         } else {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
         }
@@ -162,7 +162,7 @@ public class MemberAddressService {
         memberAddress.setModifyDate(new Date());
         setAddressDefaultType(defaultType, member.getId());
         iMasterMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
-        return ServerResponse.createBySuccessMessage("修改成功");
+        return ServerResponse.createBySuccess("修改成功",memberAddress);
     }
 
     public ServerResponse updataAddress(House house) {
@@ -220,6 +220,26 @@ public class MemberAddressService {
             return ServerResponse.createByErrorMessage("未找到该地址");
         }
         return ServerResponse.createBySuccess("查询成功", memberAddress);
+    }
+
+    /**
+     * 查找用户地址
+     *
+     * @param houseId 地址ID
+     * @return ServerResponse
+     */
+    public MemberAddress getMemberAddressInfo(String addressId,String houseId) {
+        if(addressId!=null){
+            return iMasterMemberAddressMapper.selectByPrimaryKey(addressId);
+        } else if(houseId!=null){
+            Example example=new Example(MemberAddress.class);
+            example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
+            List<MemberAddress> list= iMasterMemberAddressMapper.selectByExample(example);
+            if(list!=null){
+                return list.get(0);
+            }
+        }
+        return null;
     }
 
     /**

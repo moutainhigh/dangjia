@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.activity.DjStoreActivityProductMapper">
+
+    <select id="queryWaitingSelectionProduct"
+            resultType="com.dangjia.acg.dto.activity.DjStoreActivityProductDTO">
+        SELECT
+            a.id AS productId,
+            c.`name` AS goodsName,
+            a.product_name AS productName,
+            b.product_sn AS productSn,
+            a.image,
+            a.sell_price AS sellPrice,
+            a.supplied_num AS inventory
+        FROM
+            dj_basics_storefront_product a,
+            dj_basics_product_template b,
+            dj_basics_goods c
+        WHERE
+            a.storefront_id =#{storefrontId}
+        AND a.prod_template_id = b.id
+        AND b.goods_id = c.id
+        AND NOT EXISTS (
+            SELECT
+                1
+            FROM
+                dj_store_activity_product d,
+                dj_store_participate_activities e
+            WHERE
+                d.store_participate_activities_id = e.id
+            AND a.id = d.product_id
+            AND e.store_activity_id =#{storeActivityId}
+            <if test="null!=activitySessionId and ''!=activitySessionId">
+                AND e.activity_session_id =#{activitySessionId}
+            </if>
+            AND e.storefront_id=#{storefrontId}
+        )
+    </select>
+
+
+    <select id="querySelectedProduct" resultType="com.dangjia.acg.dto.activity.DjStoreActivityProductDTO">
+        SELECT
+            a.id,
+            c.id AS productId,
+            e.`name` AS goodsName,
+            c.product_name AS productName,
+            d.product_sn AS productSn,
+            c.image,
+            c.sell_price AS sellPrice,
+            c.supplied_num AS inventory,
+            a.rush_purchase_price AS rushPurchasePrice
+        FROM
+            dj_store_activity_product a,
+            dj_store_participate_activities b,
+            dj_basics_storefront_product c,
+            dj_basics_product_template d,
+            dj_basics_goods e
+        WHERE
+            a.store_participate_activities_id = b.id
+        AND c.id = a.product_id
+        AND c.prod_template_id = d.id
+        AND d.goods_id = e.id
+        AND b.storefront_id =#{storefrontId}
+        AND b.store_activity_id =#{storeActivityId}
+        <if test="null!=activitySessionId and ''!=activitySessionId">
+            AND b.activity_session_id =#{activitySessionId}
+        </if>
+    </select>
+
+
+    <select id="queryHaveAttendProduct" resultType="com.dangjia.acg.modle.activity.DjStoreParticipateActivities">
+        SELECT
+            b.id,
+            b.create_date AS createDate,
+            b.modify_date AS modifyDate,
+            b.data_status AS dataStatus,
+            b.activity_type AS activityType,
+            b.store_activity_id AS storeActivityId,
+            b.activity_session_id AS activitySessionId,
+            b.storefront_id AS storefrontId,
+            b.registration_status AS registrationStatus
+        FROM
+            dj_store_activity_product a,
+            dj_store_participate_activities b
+        WHERE
+            a.store_participate_activities_id = b.id
+        AND a.product_id = #{productId}
+        AND b.storefront_id = #{storefrontId}
+    </select>
+
+
+    <select id="queryWhetherOverlap" resultType="java.lang.Integer">
+        SELECT
+          COUNT(*)
+        FROM
+          dj_activity_session
+        WHERE id =#{id}
+        AND NOT (
+            end_session &lt; (
+                SELECT
+                activity_start_time
+                FROM
+                dj_store_activity
+                WHERE
+                id = #{storeActivityId}
+            )
+            OR session_start_time &gt; (
+                SELECT
+                end_time
+                FROM
+                dj_store_activity
+                WHERE
+                id = #{storeActivityId}
+            )
+          <if test="null!=id1 and ''!=id1">
+              OR end_session &lt; (
+                  SELECT
+                  session_start_time
+                  FROM
+                  dj_activity_session
+                  WHERE
+                  id = #{id1}
+              )
+              OR session_start_time &gt; (
+                  SELECT
+                  end_session
+                  FROM
+                  dj_activity_session
+                  WHERE
+                  id = #{id1}
+              )
+          </if>
+        )
+    </select>
+
+
+    <select id="queryWhetherOverlap1" resultType="java.lang.Integer">
+        SELECT
+          COUNT(*)
+        FROM
+          dj_store_activity
+        WHERE id = #{id}
+        AND NOT (
+            end_time &lt; (
+                SELECT
+                activity_start_time
+                FROM
+                dj_store_activity
+                WHERE
+                id = #{id1}
+            )
+            OR activity_start_time &gt; (
+                SELECT
+                end_time
+                FROM
+                dj_store_activity
+                WHERE
+                id = #{id1}
+            )
+            <if test="null!=activitySessionId and ''!=activitySessionId">
+                OR end_time &lt; (
+                    SELECT
+                    session_start_time
+                    FROM
+                    dj_activity_session
+                    WHERE
+                    id = #{activitySessionId}
+                )
+                OR activity_start_time &gt; (
+                    SELECT
+                    end_session
+                    FROM
+                    dj_activity_session
+                    WHERE
+                    id = #{activitySessionId}
+                )
+            </if>
+        )
+    </select>
+
+
+    <select id="queryBillGoods" resultType="com.dangjia.acg.dto.activity.DjStoreActivityProductDTO">
+        SELECT
+            c.id AS productId,
+            e.`name` AS goodsName,
+            c.product_name AS productName,
+            d.product_sn AS productSn,
+            c.image,
+            c.sell_price AS sellPrice,
+            a.inventory AS inventory,
+            a.rush_purchase_price AS rushPurchasePrice,
+            b.registration_status AS registrationStatus
+        FROM
+            dj_store_activity_product a,
+            dj_store_participate_activities b,
+            dj_basics_storefront_product c,
+            dj_basics_product_template d,
+            dj_basics_goods e
+        WHERE
+            a.store_participate_activities_id = b.id
+        AND a.store_participate_activities_id =#{id}
+        AND a.product_id = c.id
+        AND c.prod_template_id = d.id
+        AND d.goods_id = e.id
+    </select>
+
+    <select id="queryHomeGroupActivities" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
+        SELECT
+            a.id,
+            b.id AS storefrontProductId,
+            b.image,
+            c.storefront_name AS storefrontName,
+            b.sell_price AS sellPrice,
+            a.rush_purchase_price AS rushPurchasePrice
+        FROM
+            dj_store_activity_product a,
+            dj_basics_storefront_product b,
+            dj_basics_storefront c,
+            dj_basics_product_template d,
+            dj_store_participate_activities e
+        WHERE
+            a.product_id = b.id
+        AND b.prod_template_id = d.id
+        AND c.id = b.storefront_id
+        AND e.id=a.store_participate_activities_id
+        <choose>
+            <when test="null!=activitySessionId and ''!=activitySessionId">
+                AND e.activity_session_id=#{activitySessionId}
+            </when>
+            <otherwise>
+                AND a.activity_type=2
+            </otherwise>
+        </choose>
+        AND e.registration_status=1
+        <if test="null!=limit and ''!=limit">
+            order by rand() limit #{limit}
+        </if>
+    </select>
+</mapper>

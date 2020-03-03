@@ -39,52 +39,54 @@
 
 
     <select id="queryDimensionRecord" resultType="com.dangjia.acg.dto.engineer.DimensionRecordDTO">
-        select
-        mr.id as mrId,
-        mrrp.proportion AS proportion,
-        mrrp.id as mrrpId,
-        mrrp.maintenance_total_price as maintenanceTotalPrice,
-        CONCAT(
-        h.residential,
-        IFNULL(h.building, '*'),
-        '栋',
-        IFNULL(CONCAT(h.unit, '单元'),'' ),
-        IFNULL(h.number, '*'),
-        '号'
-        ) houseName
-        from dj_maintenance_record_responsible_party mrrp
-        INNER JOIN dj_maintenance_record mr on mrrp.maintenance_record_id = mr.id
-        INNER JOIN dj_house h on mr.house_id = h.id
-        where mrrp.responsible_party_type= 2 and
-        mrrp.responsible_party_id = #{memberId}
+        SELECT
+            mr.id AS mrId,
+            mrrp.proportion AS proportion,
+            mrrp.id AS mrrpId,
+            mrrp.maintenance_total_price AS maintenanceTotalPrice,
+            h.address houseName,
+            mrrp.create_date paymentDate,
+            mrrp.maintenance_total_price paymentAmount
+        FROM
+            dj_maintenance_record_responsible_party mrrp
+        INNER JOIN dj_maintenance_record mr ON mrrp.maintenance_record_id = mr.id
+        INNER JOIN dj_member_address h ON (mr.house_id = h.house_id)
+        WHERE
+            mrrp.responsible_party_type = 2
+        AND mrrp.responsible_party_id = #{workerId}
+        AND mr.house_id = #{houseId}
     </select>
 
     <select id="queryDimensionRecordInFo" resultType="com.dangjia.acg.dto.engineer.DimensionRecordDTO">
         select
-        mr.house_id as houseId,
-        mr.id as mrId,
-        mr.owner_name as ownerName,
-        mr.worker_type_id as workerTypeId,
-        mrrp.proportion AS proportion,
-        mrrp.id as mrrpId,
-        mrrp.responsible_party_id AS responsiblePartyId,
-        mrrp.maintenance_total_price as maintenanceTotalPrice,
-        h.square as square,
-        mrrp.total_price as totalPrice,
-        CONCAT(
-        h.residential,
-        IFNULL(h.building, '*'),
-        '栋',
-        IFNULL(CONCAT(h.unit, '单元'),'' ),
-        IFNULL(h.number, '*'),
-        '号'
-        ) houseName
+            mr.house_id as houseId,
+            mr.id as mrId,
+            mr.owner_name as ownerName,
+            mr.worker_type_id as workerTypeId,
+            mrrp.proportion AS proportion,
+            mrrp.id as mrrpId,
+            mrrp.responsible_party_id AS responsiblePartyId,
+            mrrp.maintenance_total_price as maintenanceTotalPrice,
+            h.square as square,
+            mrrp.total_price as totalPrice,
+            CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) houseName,
+           (case when mrrp.create_date>=DATE_ADD(NOW(),INTERVAL -7 DAY) THEN 1 else 0 end ) isComplain,
+           IFNULL(mrrp.stevedorage_cost,0) stevedorageCost,
+           IFNULL(mrrp.transportation_cost,0) transportationCost,
+           mrrp.complain_id complainId
         from dj_maintenance_record mr
         INNER JOIN  dj_maintenance_record_responsible_party mrrp on mrrp.maintenance_record_id = mr.id
         INNER JOIN dj_house h on mr.house_id = h.id
         where  1=1
-        <if test="mrId != null and mrId == ''">
-            and mr.id = #{mrId}
+        <if test="mrrpId != null and mrrpId != ''">
+            and mrrp.id = #{mrrpId}
         </if>
         <if test="type == 2">
             and mrrp.responsible_party_type = #{type}

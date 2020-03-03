@@ -13,9 +13,12 @@ import java.util.Date;
  */
 @Data
 public class DjSupplierDeliverDTO {
-    private String id;
-    private String number;//单号
+    private String id;//货单ID
+    private String splitId;//货单ID
+    private String number;//货单号
     private String shipAddress;//地址
+    private String memberName;//地址
+    private String memberMobile;//地址
     private Double totalAmount;//货单金额
     private Double applyMoney;//结算金额
     private Integer applyState;//供应商申请结算的状态 0申请中(待处理)；1不通过(驳回)；2通过(同意)

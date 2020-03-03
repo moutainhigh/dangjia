@@ -3,7 +3,6 @@ package com.dangjia.acg.service.core;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -16,6 +15,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.nimserver.NIMPost;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.complain.ComplainInfoDTO;
 import com.dangjia.acg.dto.house.HouseChatDTO;
@@ -88,8 +88,6 @@ public class HouseWorkerService {
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IModelingVillageMapper modelingVillageMapper;//小区
     @Autowired
     private IHouseMapper houseMapper;
@@ -116,8 +114,6 @@ public class HouseWorkerService {
     @Autowired
     private HouseFlowService houseFlowService;
     @Autowired
-    private ForMasterAPI forMasterAPI;
-    @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
     private HouseFlowApplyService houseFlowApplyService;
@@ -127,8 +123,6 @@ public class HouseWorkerService {
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
-    @Autowired
-    private MessageAPI messageAPI;
     @Value("${spring.profiles.active}")
     private String active;
     @Autowired
@@ -256,7 +250,7 @@ public class HouseWorkerService {
             Map<String, Object> map = new HashMap<>();
             map.put("id", member1.getId());
             map.put("targetId", member1.getId());
-            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            map.put("targetAppKey", NIMPost.APPKEY);
             map.put("nickName", member1.getNickName());
             map.put("name", member1.getName());
             map.put("mobile", member1.getMobile());
@@ -298,7 +292,7 @@ public class HouseWorkerService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", member1.getId());
                 map.put("targetId", member1.getId());
-                map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+                map.put("targetAppKey", NIMPost.APPKEY);
                 map.put("nickName", member1.getNickName());
                 map.put("name", member1.getName());
                 map.put("mobile", member1.getMobile());
@@ -350,7 +344,7 @@ public class HouseWorkerService {
             Map<String, Object> map = new HashMap<>();
             map.put("id", member1.getId());
             map.put("targetId", member1.getId());
-            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            map.put("targetAppKey", NIMPost.APPKEY);
             map.put("nickName", member1.getNickName());
             map.put("name", member1.getName());
             map.put("mobile", member1.getMobile());
@@ -438,38 +432,55 @@ public class HouseWorkerService {
 
     /**
      * 查询申换工匠详情
-     * @param isSubstitution
+     * @param houseFlowId
      * @return
      */
-    public ServerResponse getWorkerComplainInFo(Integer isSubstitution,
-                                        String complainId) {
-        if (CommonUtil.isEmpty(isSubstitution)) {
-            return ServerResponse.createByErrorMessage("isSubstitution不能为空");
-        }
+    public ServerResponse getWorkerComplainInFo(String userToken,
+                                        String houseFlowId) {
+
         //0:审核中 1：申请换人
         ComplainInfoDTO complainInfoDTO = new ComplainInfoDTO();
-        if(isSubstitution == 0){
-            Complain complains = complainMapper.selectByPrimaryKey(complainId);
-            if(complains != null){
-                List<String> list = Arrays.asList(complains.getChangeReason().split(","));
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        Example example =new Example(Complain.class);
+        example.createCriteria()
+                .andIn(Complain.COMPLAIN_TYPE,Arrays.asList(3,6))
+                .andEqualTo(Complain.HOUSE_ID,houseFlow.getHouseId())
+                .andEqualTo(Complain.MEMBER_ID,houseFlow.getWorkerId())
+                .andNotEqualTo(Complain.STATUS,2);
+        List<Complain> complains = complainMapper.selectByExample(example);
+        if(complains != null&&complains.size()>0){
+            Complain complain =complains.get(0);
+            if(complain.getStatus()==0) {
+                List<String> list = Arrays.asList(complain.getChangeReason().split("@"));
                 complainInfoDTO.setChangeList(list);
-                complainInfoDTO.setImageList(getImage(complains.getImage()));
-                complainInfoDTO.setRejectReason(complains.getRejectReason());
+            }else{
+                //查询更换原因
+                example = new Example(ReasonMatchSurface.class);
+                example.orderBy(ReasonMatchSurface.CREATE_DATE);
+                List<ReasonMatchSurface> reasonMatchSurface =  reasonMatchMapper.selectByExample(example);
+                List<String> list = new ArrayList<>();
+                reasonMatchSurface.forEach(a ->{
+                    list.add(a.getRemark());
+                });
+                complainInfoDTO.setChangeList(list);
             }
-            return ServerResponse.createBySuccess("查询成功", complainInfoDTO);
-        }else if(isSubstitution == 1){
+            complainInfoDTO.setStatus(complain.getStatus());
+            complainInfoDTO.setImageList(Arrays.asList(complain.getImage()));
+            complainInfoDTO.setImageURLList(getImage(complain.getImage()));
+            complainInfoDTO.setRejectReason(complain.getRejectReason());
+        }else{
             //查询更换原因
-            Example example = new Example(ReasonMatchSurface.class);
+            example = new Example(ReasonMatchSurface.class);
             example.orderBy(ReasonMatchSurface.CREATE_DATE);
             List<ReasonMatchSurface> reasonMatchSurface =  reasonMatchMapper.selectByExample(example);
             List<String> list = new ArrayList<>();
             reasonMatchSurface.forEach(a ->{
                 list.add(a.getRemark());
             });
+            complainInfoDTO.setStatus(-1);
             complainInfoDTO.setChangeList(list);
-            return ServerResponse.createBySuccess("查询成功", complainInfoDTO);
         }
-        return ServerResponse.createByErrorMessage("查询失败");
+        return ServerResponse.createBySuccess("查询成功", complainInfoDTO);
     }
 
     private List<String> getImage(String image){
@@ -523,7 +534,7 @@ public class HouseWorkerService {
                 String text = "业主您好,我是体验师" +  worker.getName() + "，已成功抢单";
                 HouseChatDTO h = new HouseChatDTO();
                 h.setTargetId(order.getMemberId());
-                h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+                h.setTargetAppKey(NIMPost.APPKEY);
                 h.setText(text);
                 return ServerResponse.createBySuccess("抢单成功", h);
             }else if(type==2){
@@ -561,7 +572,7 @@ public class HouseWorkerService {
                 String text = "业主您好,我是"+ workerTypeMapper.getName(worker.getWorkerType())+"维保" +  worker.getName() + "，已成功抢单";
                 HouseChatDTO h = new HouseChatDTO();
                 h.setTargetId(record.getMemberId());
-                h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+                h.setTargetAppKey(NIMPost.APPKEY);
                 h.setText(text);
                 return ServerResponse.createBySuccess("抢单成功");
             }else {
@@ -667,7 +678,7 @@ public class HouseWorkerService {
                 String text = "业主您好,我是" + workerType.get(0).getName() + worker.getName() + "，已成功抢单";
                 HouseChatDTO h = new HouseChatDTO();
                 h.setTargetId(house.getMemberId());
-                h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+                h.setTargetAppKey(NIMPost.APPKEY);
                 h.setText(text);
                 return ServerResponse.createBySuccess("抢单成功", h);
             }
@@ -1037,25 +1048,8 @@ public class HouseWorkerService {
                 return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
             }
         }
-//        houseFlowApplyList = getLeave(hf);
-//        if (houseFlowApplyList.size() > 0) {
-//            for (HouseFlowApply hfa : houseFlowApplyList) {
-//                hfa.setMemberCheck(2);//不通过不通过
-//                hfa.setModifyDate(new Date());
-//                houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
-//            }
-//        }
-//        int nums=0;
-//        if(!CommonUtil.isEmpty(imageList)){
-//            JSONArray imageObjArr = JSON.parseArray(imageList);
-//            nums=imageObjArr.size();
-//        }
         HouseFlowApply hfa = getHouseFlowApply(hf, 4, null);
         hfa.setPayState(0);//是否付款
-//        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
-//        hfa.setApplyDec("尊敬的业主，您好！<br/>" +
-//                "好工匠在当家，当家工匠" + workerType.getName() + "【"+worker.getName()+"】已到吉屋准备开工，开工前工地现场实况如下，请您查收。<br/>" +
-//                "【配图"+nums+"张，工地情况与材料情况】");//描述
 
         hfa.setApplyDec("尊敬的业主，您好！<br/>" +
                 "好工匠在当家，当家工匠" + workerType.getName() + "【" + worker.getName() + "】已到吉屋准备开工");
@@ -1107,6 +1101,12 @@ public class HouseWorkerService {
         }
         hf.setPause(0);//0:正常；1暂停；
         houseFlowMapper.updateByPrimaryKeySelective(hf);//发每日开工将暂停状态改为正常
+
+        //延期扣积分（每天）
+        if(hf.getEndDate()!=null&&hf.getEndDate().getTime()<new Date().getTime()){
+           Double evaluation= configRuleUtilService.getDelayCount(1);
+           evaluateService.updateMemberIntegral(hf.getWorkerId(),hf.getHouseId(),new BigDecimal(evaluation),"延期扣积分");
+        }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
@@ -1240,6 +1240,30 @@ public class HouseWorkerService {
     }
 
     /**
+     * 保存水电管路图图片
+     */
+    public ServerResponse setHouseFlowImage(String houseId, String imageList) {
+        StringBuilder strbfr = new StringBuilder();
+        if (StringUtil.isNotEmpty(imageList)) {
+            JSONArray imageObjArr = JSON.parseArray(imageList);
+            for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片
+                JSONObject imageObj = imageObjArr.getJSONObject(i);
+                int imageType = Integer.parseInt(imageObj.getString("imageType"));
+                String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
+                String[] imageArr = imageUrl.split(",");
+                for (String anImageArr : imageArr) {
+                    HouseFlowApplyImage houseFlowApplyImage = new HouseFlowApplyImage();
+                    houseFlowApplyImage.setHouseId(houseId);
+                    houseFlowApplyImage.setImageUrl(anImageArr);
+                    houseFlowApplyImage.setImageType(imageType);//图片类型 0：材料照片；1：进度照片；2:现场照片；3:其他
+                    houseFlowApplyImage.setImageTypeName(imageObj.getString("imageTypeName"));//图片类型名称 例如：材料照片；进度照片
+                    houseFlowApplyImageMapper.insert(houseFlowApplyImage);
+                }
+            }
+        }
+        return ServerResponse.createBySuccessMessage("上传成功");
+    }
+    /**
      * 保存巡查图片,验收节点图片等信息
      */
     public String setHouseFlowApplyImage(HouseFlowApply hfa, House house, String imageList) {
@@ -1268,7 +1292,7 @@ public class HouseWorkerService {
                     String imageTypeId = imageObj.getString("imageTypeId");
                     String productId = imageObj.getString("productId");
                     Technology technology = iMasterTechnologyMapper.selectByPrimaryKey(imageTypeId);
-                   // forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
+                    // forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
                     if (technology == null) continue;
                     TechnologyRecord technologyRecord = new TechnologyRecord();
                     technologyRecord.setHouseId(house.getId());

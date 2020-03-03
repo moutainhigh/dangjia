@@ -8,6 +8,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
@@ -17,7 +18,9 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -28,6 +31,8 @@ import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.HouseFlowApplyService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -64,6 +69,8 @@ public class MendRecordService {
     private IWarehouseMapper warehouseMapper;
 
     @Autowired
+    private IHouseFlowMapper houseFlowMapper;
+    @Autowired
     private IMendDeliverMapper mendDeliverMapper;
     @Autowired
     private IHouseMapper houseMapper;
@@ -71,6 +78,8 @@ public class MendRecordService {
     private IMemberMapper memberMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private HouseFlowApplyService houseFlowApplyService;
 
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
@@ -142,7 +151,7 @@ public class MendRecordService {
     }
 
     /**
-     * 要补退明细
+     * 审/要/补/退明细
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货, 6 审核进程
      */
     public ServerResponse mendOrderDetail(String userToken, String mendOrderId, Integer type) {
@@ -162,14 +171,76 @@ public class MendRecordService {
                 HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(mendOrderId);
                 Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
                 mendOrderDetail.setHouseId(houseFlowApply.getHouseId());
-                mendOrderDetail.setApplicantId(houseFlowApply.getWorkerId());
-                mendOrderDetail.setApplicantName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
-                mendOrderDetail.setApplicantMobile(member.getMobile());
+                if(houseFlowApply.getApplyType()!=10){//被动验收
+                    mendOrderDetail.setApplicantId(houseFlowApply.getWorkerId());
+                    mendOrderDetail.setApplicantName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+                    mendOrderDetail.setApplicantMobile(member.getMobile());
+                    mendOrderDetail.setWorkerType(worker.getWorkerType());
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+                    mendOrderDetail.setWorkerTypeColor(workerType.getColor());
+                    mendOrderDetail.setWorkerTypeName(workerType.getName());
+                }
+                mendOrderDetail.setHouseFlowApplyType(houseFlowApply.getType());
                 mendOrderDetail.setNumber(houseFlowApply.getId());
                 mendOrderDetail.setType(6);
                 mendOrderDetail.setState(houseFlowApply.getApplyType());
                 mendOrderDetail.setCreateDate(houseFlowApply.getCreateDate());
+                //查是否评价
+                Evaluate evaluate = evaluateMapper.getForCountMoneySup(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), worker.getId());
+                if (evaluate == null) {
+                    List<Map<String, Object>> listMap = new ArrayList<>();//返回通讯录list
+                    if(houseFlowApply.getApplyType()==10){
+                        House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+                        Member worker2 = memberMapper.selectByPrimaryKey(house.getMemberId());
+                        Map<String, Object> map2 = new HashMap<>();
+                        map2.put("workerTypeName", "业主");
+                        map2.put("workerTypeColor", "#D67DAE");
+                        map2.put("workerName", worker2.getNickName() == null ? worker2.getName() : worker2.getNickName());
+                        map2.put("workerPhone", worker2.getMobile());
+                        map2.put("workerId", worker2.getId());
+                        listMap.add(map2);
+                    }else{
+                        House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+                        Member worker1 = memberMapper.selectByPrimaryKey(house.getMemberId());
+                        Map<String, Object> map2 = new HashMap<>();
+                        map2.put("workerTypeName", "业主");
+                        map2.put("workerTypeColor", "#D67DAE");
+                        map2.put("workerName", worker1.getNickName() == null ? worker1.getName() : worker1.getNickName());
+                        map2.put("workerPhone", worker1.getMobile());
+                        map2.put("workerId", worker1.getId());
+                        listMap.add(map2);
+
+                        HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseFlowApply.getHouseId(),"3");
+                        if(!worker.getId().equals(houseFlow.getWorkerId())) {
+                            Member worker2 = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+                            if (worker2 != null) {
+                                Map<String, Object> map = new HashMap<>();
+                                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId());
+                                map.put("workerTypeName", workerType.getName());
+                                map.put("workerTypeColor", workerType.getColor());
+                                map.put("workerName", worker2.getName());
+                                map.put("workerPhone", worker2.getMobile());
+                                map.put("workerId", worker2.getId());
+                                listMap.add(map);
+                            }
+                        }
+
+                        //工匠
+                        if(!worker.getId().equals(member.getId())) {
+                            Map<String, Object> map = new HashMap<>();
+                            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                            map.put("workerTypeName", workerType.getName());
+                            map.put("workerTypeColor", workerType.getColor());
+                            map.put("workerName", member.getName());
+                            map.put("workerPhone", member.getMobile());
+                            map.put("workerId", member.getId());
+                            listMap.add(map);
+                        }
+                    }
+                    mendOrderDetail.setWorkerList(listMap);
+                }
                 mendOrderDetail.setMapList(getFlowInfo(houseFlowApply));
+
             } else if (type == 5) {
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
                 if (worker != null && worker.getWorkerTypeId() != null && worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())) {
@@ -183,11 +254,29 @@ public class MendRecordService {
                 mendOrderDetail.setMendOrderId(orderSplit.getMendNumber());
                 mendOrderDetail.setType(5);
                 mendOrderDetail.setState(orderSplit.getApplyStatus());
+                switch (orderSplit.getApplyStatus()) {
+                    case 0:
+                        mendOrderDetail.setStateName("申请中");
+                        break;
+                    case 1:
+                    case 2:
+                        mendOrderDetail.setStateName("待发货");
+                        break;
+                    case 3:
+                        mendOrderDetail.setStateName("已拒绝");
+                        break;
+                    case 4:
+                        mendOrderDetail.setStateName("审核中");
+                        break;
+                    case 5:
+                        mendOrderDetail.setStateName("已撤回");
+                        break;
+                }
                 mendOrderDetail.setCreateDate(orderSplit.getCreateDate());
                 /*
                 计算要货单钱
                  */
-                mendOrderDetail.setTotalAmount(orderSplit.getTotalAmount().doubleValue());
+                mendOrderDetail.setTotalAmount(orderSplit.getTotalAmount()!=null?orderSplit.getTotalAmount().doubleValue():0d);
 
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 /*Example example = new Example(OrderSplitItem.class);
@@ -217,6 +306,25 @@ public class MendRecordService {
                     }
                     mapList.add(map);
                 }
+                List<Map> button = new ArrayList<>();
+                if(orderSplit.getApplyStatus()==0||orderSplit.getApplyStatus()==4||
+                        orderSplit.getApplyStatus()==1){
+                    Map map=new HashMap();
+                    map.put("buttonText","撤回货单");
+                    map.put("buttonType",1);
+                    map.put("buttonColour","#3B444D");
+                    map.put("mendOrderId",orderSplit.getMendNumber());
+                    button.add(map);
+                }
+                if(StringUtils.isNotBlank(orderSplit.getMendNumber())){
+                    Map map=new HashMap();
+                    map.put("buttonText","查看补货单");
+                    map.put("buttonType",2);
+                    map.put("buttonColour","#F57341");
+                    map.put("mendOrderId",orderSplit.getMendNumber());
+                    button.add(map);
+                }
+                mendOrderDetail.setButton(button);
                 mendOrderDetail.setMapList(mapList);
 
             } else {
@@ -436,7 +544,7 @@ public class MendRecordService {
             getMendOrderList(worker, roleType, houseId, 2, queryId, returnMap);
             sortMax(returnMap);
         } else if (type == 6) {
-            getHouseFlowApplies(worker, roleType, houseId, type, returnMap);
+            return houseFlowApplyService.queryAcceptanceTrend(userToken,houseId,worker.getWorkerType());
         } else if (type == 5) {
             getOrderSplitList(houseId, type, queryId, returnMap);
         } else {
@@ -544,10 +652,28 @@ public class MendRecordService {
             Map<String, Object> map = new HashMap<>();
             map.put("mendOrderId", orderSplit.getId());
             map.put("number", orderSplit.getNumber());
-            map.put("name", "要货记录");
+            map.put("name", "申请要货");
             map.put("state", orderSplit.getApplyStatus());
             map.put("createDate", orderSplit.getCreateDate());
             map.put("type", type);
+            switch (orderSplit.getApplyStatus()) {
+                case 0:
+                    map.put("applyStatus","申请中");
+                    break;
+                case 1:
+                case 2:
+                    map.put("applyStatus","待发货");
+                    break;
+                case 3:
+                    map.put("applyStatus","已拒绝");
+                    break;
+                case 4:
+                    map.put("applyStatus","审核中");
+                    break;
+                case 5:
+                    map.put("applyStatus","已撤回");
+                    break;
+            }
             if (!CommonUtil.isEmpty(queryId)) {
                 /*example = new Example(OrderSplitItem.class);
                 example.createCriteria()

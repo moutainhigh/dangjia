@@ -65,7 +65,8 @@ public interface AppActuaryOperationAPI {
     @ApiOperation(value = "商品详情", notes = "商品详情")
     ServerResponse getCommo(@RequestParam("request") HttpServletRequest request,
                             @RequestParam("productId") String productId,
-                            @RequestParam("cityId") String cityId);
+                            @RequestParam("cityId") String cityId,
+                            @RequestParam("storeActivityProductId") String storeActivityProductId);
 
     @PostMapping("/app/actuary/actuaryOperation/getAttributeData")
     @ApiOperation(value = "商品规格", notes = "商品规格")

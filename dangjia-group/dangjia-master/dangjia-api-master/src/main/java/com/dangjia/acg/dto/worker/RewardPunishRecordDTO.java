@@ -39,8 +39,12 @@ public class RewardPunishRecordDTO {
 	@ApiModelProperty("奖罚条件id")
 	private String rewardPunishCorrelationId;
 
-	@ApiModelProperty("操作人id")
-	private String operatorId;
+    @ApiModelProperty("操作人id")
+    private String operatorId;
+    @ApiModelProperty("操作人名称")
+    private String operatorName;
+    @ApiModelProperty("操作人工种名称")
+    private String operatorTypeName;
 
 	@ApiModelProperty("房子Id")
 	private String houseId;	//houseid
@@ -57,6 +61,10 @@ public class RewardPunishRecordDTO {
 	private Integer state;//0:启用;1:不启用
 
 	private String images;
+
+
+	private Integer isComplain;//-1：未投诉 0:待处理。1.驳回。2.接受
+	private String  complainId;//投诉ID
 
 	private RewardPunishCorrelationDTO correlation;
 

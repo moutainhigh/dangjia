@@ -19,6 +19,29 @@
           `data_status` AS dataStatus
     </sql>
 
+    <select id="selectStorefrontAll" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
+        SELECT
+            a.`id` AS shopId,
+            a.`user_id` AS userId,
+            a.`city_id` AS cityId,
+            a.`storefront_name` AS storefrontName,
+            a.`storefront_address` AS storefrontAddress,
+            a.`storefront_desc` AS storefrontDesc,
+            a.`storefront_logo` AS storefrontLogo,
+            a.`storekeeper_name` AS storekeeperName,
+            a.`mobile`,
+            a.`email`
+        FROM
+          dj_basics_storefront a
+        where a.city_id=#{cityId}
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            a.mobile LIKE CONCAT('%',#{searchKey},'%')
+            )
+          order by a.storefront_name
+        </if>
+    </select>
 
     <select id="querySupplierApplicationShopList" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
         SELECT

@@ -71,6 +71,10 @@ public interface BasicsStorefrontAPI {
     @ApiOperation(value = "修改店铺信息", notes = "修改店铺信息")
     ServerResponse updateStorefront(StorefrontDTO storefrontDTO);
 
+    @PostMapping("/web/queryAllStorefrontList")
+    @ApiOperation(value = "查询所有的店铺列表", notes = "查询所有的店铺列表")
+    ServerResponse queryAllStorefrontList(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("searchKey") String searchKey,@RequestParam("cityId") String cityId);
+
 
     @PostMapping("/web/querySupplierApplicationShopList")
     @ApiOperation(value = "查询供应商申请店铺列表", notes = "供应商申请店铺列表")
@@ -94,7 +98,7 @@ public interface BasicsStorefrontAPI {
     /**
      * 我的钱包
      */
-    @PostMapping("/web/queryStorefrontWallet")
+    @PostMapping("store/sup/myWallet/web/queryStorefrontWallet")
     @ApiOperation(value = "店铺-我的钱包", notes = "店铺-我的钱包")
     ServerResponse queryStorefrontWallet(@RequestParam("userId") String userId,
                                          @RequestParam("cityId") String cityId);
@@ -216,7 +220,6 @@ public interface BasicsStorefrontAPI {
      * 店铺-支出记录-查看货单详情
      *
      * @param request
-     * @param pageDTO
      * @param type 查询类型：1提现，9结算
      * @param accountFlowRecordId 支出流水ID
      * @return
@@ -224,7 +227,6 @@ public interface BasicsStorefrontAPI {
     @PostMapping("/web/storeRevenueRecordOrderDetail")
     @ApiOperation(value = "店铺-支出记录-查看货单详情", notes = "店铺-支出记录-查看货单详情")
     ServerResponse storeRevenueRecordOrderDetail(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                                  @RequestParam("accountFlowRecordId") String accountFlowRecordId,
                                                  @RequestParam("type") Integer type);
 

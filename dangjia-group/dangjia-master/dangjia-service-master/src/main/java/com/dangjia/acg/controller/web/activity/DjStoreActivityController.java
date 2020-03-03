@@ -64,6 +64,12 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse queryActivitiesOrSessionById(String id, Integer activityType) {
+        return djStoreActivityService.queryActivitiesOrSessionById(id,activityType);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse queryActivitiesByStorefront(String userId, String cityId, Integer activityType) {
         return djStoreActivityService.queryActivitiesByStorefront(userId,cityId,activityType);
     }
@@ -72,5 +78,101 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
     @ApiMethod
     public ServerResponse queryActivitiesSessionByStorefront(String userId, String cityId, String id) {
         return djStoreActivityService.queryActivitiesSessionByStorefront(userId,cityId,id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setStoreParticipateActivities(String userId, String cityId, String storeActivityId, String activitySessionId, Integer activityType) {
+        return djStoreActivityService.setStoreParticipateActivities(userId, cityId, storeActivityId, activitySessionId, activityType);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryWaitingSelectionProduct(String userId, String cityId, PageDTO pageDTO, String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.queryWaitingSelectionProduct(userId,cityId,pageDTO,storeActivityId,activitySessionId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySelectedWaitingSelectionCount(String userId, String cityId, String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.querySelectedWaitingSelectionCount(userId,cityId,storeActivityId,activitySessionId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySelectedProduct(String userId, String cityId, PageDTO pageDTO,String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.querySelectedProduct(userId,cityId,pageDTO,storeActivityId,activitySessionId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse deleteSelectedProduct(String id) {
+        return djStoreActivityService.deleteSelectedProduct(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setSelectActiveProduct(String userId, String cityId, String storeActivityId, String activitySessionId, String productId, Integer activityType, String storeParticipateActivitiesId) {
+        return djStoreActivityService.setSelectActiveProduct(userId,cityId,storeActivityId,activitySessionId,productId,activityType,storeParticipateActivitiesId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setCommit(String jsonStr, String storeParticipateActivitiesId) {
+        try {
+            return djStoreActivityService.setCommit(jsonStr,storeParticipateActivitiesId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryAuditstoresParticipateActivities(PageDTO pageDTO) {
+        return djStoreActivityService.queryAuditstoresParticipateActivities(pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryParticipatingShopsList(PageDTO pageDTO, Integer activityType,
+                                                      String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.queryParticipatingShopsList(pageDTO,activityType,storeActivityId, activitySessionId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryBillGoods(PageDTO pageDTO, String id) {
+        return djStoreActivityService.queryBillGoods(pageDTO,id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setBillGoods(String id, Integer registrationStatus, String backReason) {
+        return djStoreActivityService.setBillGoods(id,registrationStatus,backReason);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryHomeGroupActivities(Integer limit) {
+        return djStoreActivityService.queryHomeGroupActivities(limit);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryHomeLimitedPurchaseActivities(Integer limit) {
+        return djStoreActivityService.queryHomeLimitedPurchaseActivities(limit);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryBuyMoreLimitedTime(String id) {
+        return djStoreActivityService.queryBuyMoreLimitedTime(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setwithdraw(String storeParticipateActivitiesId) {
+        return djStoreActivityService.setwithdraw(storeParticipateActivitiesId);
     }
 }

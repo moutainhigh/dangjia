@@ -37,11 +37,21 @@ public interface RenovationSayAPI {
 
     @PostMapping("web/renovation/queryRenovationSayData")
     @ApiOperation(value = "查询装修说详情", notes = "查询装修说详情")
-    ServerResponse queryRenovationSayData(@RequestParam("id")String id);
+    ServerResponse queryRenovationSayData(@RequestParam("userToken") String userToken,
+                                          @RequestParam("id")String id);
 
     @PostMapping("app/renovation/queryAppRenovationSayList")
     @ApiOperation(value = "app查询装修说列表", notes = "app查询装修说列表")
-    ServerResponse queryAppRenovationSayList();
+    ServerResponse queryAppRenovationSayList(@RequestParam("userToken") String userToken);
+
+    @PostMapping("app/renovation/setThumbUp")
+    @ApiOperation(value = "装修说点赞", notes = "装修说点赞")
+    ServerResponse setThumbUp(@RequestParam("userToken") String userToken,
+                              @RequestParam("id") String id);
+
+    @PostMapping("app/renovation/setPageView")
+    @ApiOperation(value = "装修说浏览量", notes = "装修说浏览量")
+    ServerResponse setPageView(@RequestParam("id") String id);
 
 
 }

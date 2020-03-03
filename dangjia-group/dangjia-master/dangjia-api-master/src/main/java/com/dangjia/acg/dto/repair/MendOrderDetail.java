@@ -23,6 +23,7 @@ public class MendOrderDetail {
     private Double totalAmount;
     private Date createDate;
     private Date modifyDate;
+    private String stateName;
 
 
     private String houseId;//房ID
@@ -37,7 +38,17 @@ public class MendOrderDetail {
     private String applicantName;//申请人名称
     private String applicantMobile;//申请人手机号
 
+    private Integer workerType;//工种
+
+    private Integer houseFlowApplyType;//类型 1：主动验收 2：被动验收
+
+    private String workerTypeColor;//工种颜色
+    private String workerTypeName;//工种名称
+
     private ChangeOrder changeOrder;
     private List<Map<String,Object>> mapList;
+    private List<Map<String, Object>> workerList;
     private List<String> imageList;
+
+    private List<Map> button;
 }

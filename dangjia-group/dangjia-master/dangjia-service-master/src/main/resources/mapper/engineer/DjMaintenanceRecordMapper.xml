@@ -209,4 +209,21 @@
         AND t1.apply_collect_time <date_add(now(), interval -(select param_value from dj_config where param_key='MAINTENANCE_RECORD_ACCEPTANCE_TIME') hour)
     ]]>
     </select>
+
+    <select id="queryRecordContentList" resultType="java.util.Map">
+        SELECT
+            c.member_id memberId,
+            c.worker_type_id workerTypeId,
+            c.type,
+           c.create_date createDate,
+           c.image,
+           c.remark
+        FROM
+            dj_maintenance_record t,
+            dj_maintenance_record_content c
+        WHERE
+            t.id = c.maintenance_record_id
+         AND t.house_id = #{houseId}
+        order by t.create_date desc,c.create_date desc
+    </select>
 </mapper>

@@ -82,7 +82,12 @@ public class OrderController implements OrderAPI {
     @Override
     @ApiMethod
     public ServerResponse confirmOrderSplit(String houseId, String userToken) {
-        return orderService.confirmOrderSplit(userToken, houseId);
+        try {
+            return orderService.confirmOrderSplit(userToken, houseId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
     /**
@@ -185,9 +190,9 @@ public class OrderController implements OrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse saveDesignOrderInfo(String userToken,String houseId,String taskId,String productArr){
+    public ServerResponse saveDesignOrderInfo(String userToken,String houseId,String taskId,String productArr,String activityRedPackId){
         try{
-            return orderService.saveDesignOrderInfo(userToken, houseId, taskId, productArr);
+            return orderService.saveDesignOrderInfo(userToken, houseId, taskId, productArr,activityRedPackId);
         }catch (Exception e){
             logger.error("提交异常",e);
             return ServerResponse.createByErrorMessage("提交失败");

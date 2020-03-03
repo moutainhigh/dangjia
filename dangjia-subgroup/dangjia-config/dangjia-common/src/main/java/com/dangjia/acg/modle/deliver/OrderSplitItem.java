@@ -82,6 +82,11 @@ public class OrderSplitItem extends BaseEntity {
 	@ApiModelProperty("店铺搬运费")
 	private Double stevedorageCost;
 
+	@Column(name = "discount_price")
+	@Desc(value = "优惠价钱")
+	@ApiModelProperty("优惠价钱")
+	private Double discountPrice;//优惠价钱
+
 
 	@Column(name = "transportation_cost")
 	@Desc(value = "店铺运费")
@@ -116,6 +121,7 @@ public class OrderSplitItem extends BaseEntity {
 	@Column(name = "image")
 	private String image;//图片
 
+
 	@Column(name = "house_id")
 	private String houseId;//房子id
 
@@ -124,6 +130,7 @@ public class OrderSplitItem extends BaseEntity {
 
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
+		this.imageUrl = StringUtils.isEmpty(this.image)?null:address+this.image;
 	}
 
 	@Column(name = "address_id")
@@ -181,4 +188,6 @@ public class OrderSplitItem extends BaseEntity {
 	List<Map<String,Object>> supplierIdlist;
 	@Transient
 	private Integer isNonPlatformSupperlier;
+	@Transient
+	private String imageUrl;//图片
 }

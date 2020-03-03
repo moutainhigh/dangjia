@@ -14,10 +14,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
-import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
-import com.dangjia.acg.mapper.delivery.IOrderMapper;
-import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
+import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -31,6 +28,7 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplit;
+import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
@@ -128,6 +126,8 @@ public class MendOrderCheckService {
     private IMasterOrderProgressMapper iMasterOrderProgressMapper;
     @Autowired
     private RepairMendOrderService repairMendOrderService;
+    @Autowired
+    private IOrderSplitItemMapper iOrderSplitItemMapper;
 
     /**
      * 根据mendOrderId查询审核情况
@@ -731,6 +731,17 @@ public class MendOrderCheckService {
         }
     }
 
+    public void updateOrderSplitInfo(String splitItemId,Double shopCount,Double actualCount){
+        //修改要货订单中的退货量为最新的退货量(还原已预扣的多余的货口数量)
+        OrderSplitItem orderSplitItem=iOrderSplitItemMapper.selectByPrimaryKey(splitItemId);
+        if(orderSplitItem!=null){
+            Double newReturnCount=MathUtil.sub(shopCount,actualCount);
+            orderSplitItem.setReturnCount(MathUtil.sub(orderSplitItem.getReturnCount(),newReturnCount));
+            orderSplitItem.setModifyDate(new Date());
+            iOrderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+        }
+    }
+
     /**
      * 退货申请单ID
      * @param mendDeliverId 退货单ID
@@ -746,11 +757,19 @@ public class MendOrderCheckService {
             List<MendMateriel> mendMaterielList = mendMaterialMapper.selectByExample(example);
             for (MendMateriel mendMateriel : mendMaterielList) {
                 if (mendMateriel.getActualCount() != null && mendMateriel.getActualCount() > 0) {
+                    Double returnCount=mendMateriel.getActualCount();//确认数
+                    if(mendDeliver.getShippingState()==7){//按申请数量退
+                        returnCount = mendMateriel.getShopCount();//申请数
+                    }else if((mendDeliver.getShippingState()==6||mendDeliver.getShippingState()==8)&&mendMateriel.getShopCount()>mendMateriel.getActualCount()){
+                        //如果按部分退货，且实退数小于退货数,还原已减去的退货数
+                        String splitItemId=mendMateriel.getOrderItemId();
+                        updateOrderSplitInfo(splitItemId,mendMateriel.getShopCount(),mendMateriel.getActualCount());
+                    }
                     Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendDeliver.getHouseId());
                     if(warehouse!=null){
-                        warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getActualCount());//更新退数量
+                        warehouse.setBackCount(warehouse.getBackCount() + returnCount);//更新退数量
                         warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
-                        warehouse.setWorkBack(warehouse.getWorkBack() == null ? mendMateriel.getActualCount() : (warehouse.getWorkBack() + mendMateriel.getActualCount())); //收货数量+工匠退数量
+                        warehouse.setWorkBack(warehouse.getWorkBack() == null ? returnCount : (warehouse.getWorkBack() + returnCount)); //收货数量+工匠退数量
                         warehouseMapper.updateByPrimaryKeySelective(warehouse);
                     }
                 }

@@ -56,6 +56,12 @@ public class RenovationSay extends BaseEntity {
     private String contentImage;
 
 
+    @Transient
+    private Integer whetherThumbUp;//是否点赞 1:点赞 0:未点赞
 
+    @Transient
+    private String coverImageUrl;
 
+    @Transient
+    private String contentImageUrl;
 }

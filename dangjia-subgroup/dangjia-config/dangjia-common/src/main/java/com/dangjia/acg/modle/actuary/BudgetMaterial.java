@@ -112,4 +112,8 @@ public class BudgetMaterial extends GoodsBaseEntity{
 	@Column(name = "housekeeper_acceptance")
 	private Integer housekeeperAcceptance;//是否需要大管家验收（1是，0否）
 
+
+	@Column(name = "is_budget_data")
+	private Integer isBudgetData;//是否原始精算（1是，0否）即：精算师加入的数据
+
 }

@@ -6,13 +6,17 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.engineer.RenovationSayDTO;
+import com.dangjia.acg.mapper.say.DjThumbUpMapper;
 import com.dangjia.acg.mapper.say.RenovationSayMapper;
-import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.say.DjThumbUp;
 import com.dangjia.acg.modle.say.RenovationSay;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -32,6 +36,11 @@ public class RenovationSayService {
     private RenovationSayMapper renovationSayMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
+    @Autowired
+    private DjThumbUpMapper djThumbUpMapper;
+
     /**
      *  新增装修说
      * @param content
@@ -98,18 +107,31 @@ public class RenovationSayService {
 
 
     /**
-     *查询装修说
+     * 查询装修说
      * @param pageDTO
      * @return
      */
     public ServerResponse queryRenovationSayList(PageDTO pageDTO){
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(RenovationSay.class);
             example.createCriteria()
                     .andEqualTo(RenovationSay.DATA_STATUS, 0);
             example.orderBy(RenovationSay.CREATE_DATE).desc();
             List<RenovationSay> renovationSays = renovationSayMapper.selectByExample(example);
+            StringBuffer stringBuffer=new StringBuffer();
+            renovationSays.forEach(renovationSay -> {
+                renovationSay.setCoverImageUrl(imageAddress+renovationSay.getCoverImage());
+                String[] split = renovationSay.getContentImage().split(",");
+                for (int i = 0; i < split.length; i++) {
+                    stringBuffer.append(imageAddress+split[i]);
+                    if(i<split.length-1) {
+                        stringBuffer.append(",");
+                    }
+                }
+                renovationSay.setContentImageUrl(stringBuffer.toString());
+            });
             PageInfo pageResult = new PageInfo(renovationSays);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -125,8 +147,13 @@ public class RenovationSayService {
      * @param id
      * @return
      */
-    public ServerResponse queryRenovationSayData(String id){
+    public ServerResponse queryRenovationSayData(String userToken,String id){
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             RenovationSayDTO renovationSayDTO = new RenovationSayDTO();
             RenovationSay renovationSays = renovationSayMapper.selectByPrimaryKey(id);
             if(renovationSays != null){
@@ -141,7 +168,12 @@ public class RenovationSayService {
                 renovationSayDTO.setContentImages(getImage(renovationSays.getContentImage()));
                 renovationSayDTO.setCoverImage(renovationSays.getCoverImage());
                 renovationSayDTO.setCoverImages(imageAddress + renovationSays.getCoverImage());
-
+                Example example1=new Example(DjThumbUp.class);
+                example1.createCriteria().andEqualTo(DjThumbUp.DATA_STATUS,0)
+                        .andEqualTo(DjThumbUp.MEMBER_ID,member.getId())
+                        .andEqualTo(DjThumbUp.RECORD_ID,id);
+                DjThumbUp djThumbUp = djThumbUpMapper.selectOneByExample(example1);
+                renovationSayDTO.setWhetherThumbUp(djThumbUp!=null?1:0);
             }
             return ServerResponse.createBySuccess("查询成功", renovationSayDTO);
         } catch (Exception e) {
@@ -155,8 +187,13 @@ public class RenovationSayService {
      *app查询装修说列表
      * @return
      */
-    public ServerResponse queryAppRenovationSayList(){
+    public ServerResponse queryAppRenovationSayList(String userToken){
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             Example example = new Example(RenovationSay.class);
             example.createCriteria()
                     .andEqualTo(RenovationSay.DATA_STATUS, 0);
@@ -166,6 +203,12 @@ public class RenovationSayService {
                 String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
                 renovationSays.forEach(a->{
                     a.setCoverImage(imageAddress + a.getCoverImage());
+                    Example example1=new Example(DjThumbUp.class);
+                    example1.createCriteria().andEqualTo(DjThumbUp.DATA_STATUS,0)
+                            .andEqualTo(DjThumbUp.MEMBER_ID,member.getId())
+                            .andEqualTo(DjThumbUp.RECORD_ID,a.getId());
+                    DjThumbUp djThumbUp = djThumbUpMapper.selectOneByExample(example1);
+                    a.setWhetherThumbUp(djThumbUp!=null?1:0);
                 });
             }
 
@@ -191,6 +234,58 @@ public class RenovationSayService {
             strList.add(str);
         }
         return strList;
+    }
+
+
+    /**
+     * 装修说点赞
+     * @param userToken
+     * @param id
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setThumbUp(String userToken, String id) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        RenovationSay renovationSay = renovationSayMapper.selectByPrimaryKey(id);
+        Example example=new Example(DjThumbUp.class);
+        example.createCriteria().andEqualTo(DjThumbUp.DATA_STATUS,0)
+                .andEqualTo(DjThumbUp.MEMBER_ID,member.getId())
+                .andEqualTo(DjThumbUp.RECORD_ID,id);
+        DjThumbUp djThumbUp = djThumbUpMapper.selectOneByExample(example);
+        if(djThumbUp!=null){
+            djThumbUpMapper.delete(djThumbUp);
+            renovationSay.setFabulous(renovationSay.getFabulous()-1);
+        }else{
+            DjThumbUp djThumbUp1=new DjThumbUp();
+            djThumbUp1.setMemberId(member.getId());
+            djThumbUp1.setRecordId(id);
+            djThumbUpMapper.insert(djThumbUp1);
+            renovationSay.setFabulous(renovationSay.getFabulous()+1);
+        }
+        renovationSayMapper.updateByPrimaryKeySelective(renovationSay);
+        return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+
+    /**
+     * 装修说浏览量
+     * @param id
+     * @return
+     */
+    public ServerResponse setPageView(String id) {
+        try {
+            RenovationSay renovationSay = renovationSayMapper.selectByPrimaryKey(id);
+            renovationSay.setBrowse(renovationSay.getBrowse()+1);
+            renovationSayMapper.updateByPrimaryKeySelective(renovationSay);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
 }

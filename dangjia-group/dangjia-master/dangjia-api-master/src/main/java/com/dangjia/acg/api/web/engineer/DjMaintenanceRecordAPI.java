@@ -166,19 +166,26 @@ public interface DjMaintenanceRecordAPI {
     @ApiOperation(value = "修改消息状态", notes = "修改消息状态")
     ServerResponse updateTaskStackData(@RequestParam("id") String id);
 
+    @PostMapping(value = "app/engineer/queryMaintenanceRecordList")
+    @ApiOperation(value = "工匠--查询维保记录(当前房子的所有维保记录)", notes = "工匠--查询维保记录(当前房子的所有维保记录)")
+    ServerResponse queryMaintenanceRecordList(@RequestParam("userToken") String userToken,@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("houseId") String houseId);
 
     @PostMapping(value = "app/engineer/queryDimensionRecord")
     @ApiOperation(value = "查询维保责任记录", notes = "查询维保责任记录")
-    ServerResponse queryDimensionRecord(@RequestParam("memberId") String memberId);
+    ServerResponse queryDimensionRecord(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId);
 
     @PostMapping(value = "app/engineer/queryDimensionRecordInFo")
     @ApiOperation(value = "查询维保详情", notes = "查询维保详情")
-    ServerResponse queryDimensionRecordInFo(@RequestParam("mrId") String mrId);
+    ServerResponse queryDimensionRecordInFo(@RequestParam("mrrpId") String mrrpId);
 
+    @PostMapping(value = "app/engineer/queryDimensionInfoByTaskId")
+    @ApiOperation(value = "消息弹窗--查看维保定责", notes = "消息弹窗--查看维保定责")
+    ServerResponse queryDimensionInfoByTaskId(@RequestParam("taskId") String taskId);
 
     @PostMapping(value = "app/engineer/insertResponsibleParty")
     @ApiOperation(value = "新增工匠申诉", notes = "新增工匠申诉")
-    ServerResponse insertResponsibleParty(@RequestParam("responsiblePartyId") String responsiblePartyId,
+    ServerResponse insertResponsibleParty(@RequestParam("mrrpId") String mrrpId,
+                                          @RequestParam("responsiblePartyId") String responsiblePartyId,
                                           @RequestParam("houseId") String houseId,
                                           @RequestParam("description") String description,
                                           @RequestParam("image") String image);
@@ -269,8 +276,7 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/queryComplain")
     @ApiOperation(value = "查询报销记录", notes = "查询报销记录")
-    ServerResponse queryComplain(@RequestParam("userToken") String userToken,
-                                 @RequestParam("memberId") String memberId);
+    ServerResponse queryComplain(@RequestParam("userToken") String userToken,@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("maintenanceRecordId") String maintenanceRecordId);
 
     @PostMapping(value = "app/engineer/queryComplainInFo")
     @ApiOperation(value = "查询报销记录详情", notes = "查询报销记录详情")
@@ -301,5 +307,24 @@ public interface DjMaintenanceRecordAPI {
     ServerResponse setWorkerMaintenanceGoods(@RequestParam("userToken") String userToken,
                                              @RequestParam("maintenanceRecordId") String maintenanceRecordId,
                                              @RequestParam("houseId") String houseId);
+
+    /**
+     * 维保申诉成功后--人工定责列表查询
+     * @param status 查询状态：-1全部，1待处理，2处理
+     * @param searchKey 查询条：业主名称/电话
+     * @return
+     */
+    @PostMapping(value = "web/engineer/searchManualAllocation")
+    @ApiOperation(value = "申诉成功后平台人工定责--查询列表", notes = "申诉成功后平台人工定责--查询列表")
+    ServerResponse searchManualAllocation(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("status") Integer status,
+                                          @RequestParam("searchKey") String searchKey,@RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "web/engineer/searchManualAllocationDetail")
+    @ApiOperation(value = "申诉成功后平台人工定责--查询详情", notes = "申诉成功后平台人工定责--查询详情")
+    ServerResponse searchManualAllocationDetail(@RequestParam("manuaId") String manuaId);
+
+    @PostMapping(value = "web/engineer/saveNewPartyInfo")
+    @ApiOperation(value = "申诉成功后平台人工定责--责任分配", notes = "申诉成功后平台人工定责--责任分配")
+    ServerResponse saveNewPartyInfo(@RequestParam("manuaId") String manuaId,@RequestParam("newPartyInfo") String newPartyInfo);
 
 }

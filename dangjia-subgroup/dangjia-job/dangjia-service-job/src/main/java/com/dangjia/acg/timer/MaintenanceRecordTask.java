@@ -1,6 +1,5 @@
 package com.dangjia.acg.timer;
 
-import com.dangjia.acg.api.refund.RefundAfterSalesJobAPI;
 import com.dangjia.acg.api.web.engineer.DjMaintenanceRecordAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

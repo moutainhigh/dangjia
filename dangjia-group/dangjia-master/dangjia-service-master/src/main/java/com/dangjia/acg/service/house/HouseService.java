@@ -232,8 +232,6 @@ public class HouseService {
     private IMasterDeliverOrderAddedProductMapper iMasterDeliverOrderAddedProductMapper;
     @Autowired
     private IHouseFlowApplyMapper iHouseFlowApplyMapper;
-    @Autowired
-    private DjAcceptanceTaskMapper djAcceptanceTaskMapper;
 
     public House selectHouseById(String id) {
         return iHouseMapper.selectByPrimaryKey(id);
@@ -1839,6 +1837,7 @@ public class HouseService {
      * @param cityId              城市ID
      * @param houseType           房屋类型
      * @param addressId           地址ID
+     * @param activityRedPackId  优惠券ID
      * @param actuarialDesignAttr 设计精算列表 商品列表(
      *                            id	String	设计精算模板ID
      *                            configName	String	设计精算名称
@@ -1848,7 +1847,7 @@ public class HouseService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse applicationDecorationHouse(String userToken, String cityId, String houseType, String addressId, String actuarialDesignAttr) {
+    public ServerResponse applicationDecorationHouse(String userToken, String cityId, String houseType, String addressId,String activityRedPackId, String actuarialDesignAttr) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -1910,7 +1909,7 @@ public class HouseService {
         editHouseFlowWorker(house, desginInfo, actuaialInfo);
         //8.提交订单信息,生成待支付订单,生成待抢单信息
         String productJsons = getProductJsons(actuarialDesignAttr, memberAddress.getInputArea(),house);
-        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId);
+        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId,activityRedPackId);
     }
 
     /**
@@ -2094,7 +2093,7 @@ public class HouseService {
             String productStr = getEligibleProduct(houseOrderDetailDTOList, 1, square, inputArea,house);
             if (productStr != null && StringUtils.isNotBlank(productStr)) {
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productStr, null, memberAddress.getId(), 4,null);//补差价订单
+                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productStr, null, memberAddress.getId(), 4,null,null);//补差价订单
                 if (serverResponse.getResultObj() != null) {
                     String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                     //增加任务(补差价订单）
@@ -3794,26 +3793,42 @@ public class HouseService {
     /**
      * 大管家发起验收(主动验收)
      *
-     * @param houseFlowApplyId
+     * @param houseFlowId
      * @param supervisorCheck
      * @param image
      * @param applyDec
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse setHousekeeperInitiatedAcceptance(String houseFlowApplyId, Integer supervisorCheck, String image, String applyDec) {
-        HouseFlowApply houseFlowApply = iHouseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-        Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
-        House house = iHouseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-        if (houseFlowApply.getSupervisorCheck() == 1) {//大管家已审核通过过 不要重复
-            return ServerResponse.createByErrorMessage("重复审核");
-        }
+    public ServerResponse setHousekeeperInitiatedAcceptance(String houseFlowId,String productId, Integer supervisorCheck, String image, String applyDec) {
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        Member worker = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+        House house = iHouseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+
+        HouseFlowApply houseFlowApply = new HouseFlowApply();//发起申请任务
+        houseFlowApply.setHouseFlowId(houseFlow.getId());//工序id
+        houseFlowApply.setHouseFlowApplyId(productId);
+        houseFlowApply.setWorkerId(houseFlow.getWorkerId());//工人id
+        houseFlowApply.setOperator(houseFlow.getWorkerId());
+        houseFlowApply.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+        houseFlowApply.setWorkerType(houseFlow.getWorkerType());//工种类型
+        houseFlowApply.setHouseId(houseFlow.getHouseId());//房子id
+        houseFlowApply.setApplyType(10);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
+        houseFlowApply.setApplyMoney(new BigDecimal(0));//申请得钱
+        houseFlowApply.setSupervisorMoney(new BigDecimal(0));
+        houseFlowApply.setOtherMoney(new BigDecimal(0));
+        houseFlowApply.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+        houseFlowApply.setSupervisorCheck(supervisorCheck);//大管家审核状态0未审核，1审核通过，2审核不通过
         if (supervisorCheck == 1 && CommonUtil.isEmpty(applyDec)) {
             houseFlowApply.setApplyDec("尊敬的业主，您好！<br/>" +
                     "当家大管家【" + worker.getName() + "】为您新家质量保驾护航，已经根据平台施工验收标准进行验收，未发现漏项及施工不合格情况，请您查收。<br/>");//描述
         } else {
             houseFlowApply.setApplyDec(applyDec);
         }
+        houseFlowApply.setPayState(1);//是否付款
+        houseFlowApply.setType(1);
+        houseFlowApply.setIsReadType(0);
+
         //更新主动验收进程
         houseFlowApply.setSupervisorCheck(supervisorCheck);
         Calendar calendar = Calendar.getInstance();
@@ -3822,8 +3837,8 @@ public class HouseService {
         houseFlowApply.setModifyDate(new Date());
         houseFlowApply.setMemberCheck(0);
         //验收次数
-        houseFlowApply.setAcceptanceNumber(houseFlowApply.getAcceptanceNumber() != null ? houseFlowApply.getAcceptanceNumber() + 1 : 1);
-        iHouseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+        houseFlowApplyMapper.insert(houseFlowApply);
+        insertConstructionRecord(houseFlowApply);
         //上传照片
         String[] imageArr = image.split(",");
         for (String anImageArr : imageArr) {
@@ -3837,7 +3852,7 @@ public class HouseService {
         }
         //生成任务发送给业主
         taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
-        return ServerResponse.createBySuccess("操作成功");
+        return ServerResponse.createBySuccess("操作成功",houseFlowApply);
     }
 
 
@@ -3851,27 +3866,14 @@ public class HouseService {
     public ServerResponse setOwnerBy(String houseFlowApplyId, Integer memberCheck) {
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-        if (houseFlowApply.getMemberCheck() == 1) {//业主已审核通过过 不要重复
+        if (houseFlowApply.getMemberCheck() != 0) {//业主已审核通过过 不要重复
             return ServerResponse.createByErrorMessage("重复审核");
         }
+
         houseFlowApply.setMemberCheck(memberCheck);
         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-        DjAcceptanceTask djAcceptanceTask = djAcceptanceTaskMapper.selectByPrimaryKey(houseFlowApply.getAcceptanceTaskId());
-        if (memberCheck == 2 && djAcceptanceTask.getAcceptanceNumber() >= 3) {
-            return ServerResponse.createByErrorMessage("非平台工匠验收包含三次验收,还剩" + (3 - houseFlowApply.getAcceptanceNumber()) + "次");
-        } else {
-            //生成二次任务
-            houseFlowApply.setId((int) (Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
-            houseFlowApply.setApplyDec(null);
-            houseFlowApply.setMemberCheck(0);
-            houseFlowApply.setSupervisorCheck(0);
-            houseFlowApply.setCreateDate(new Date());
-            houseFlowApply.setModifyDate(new Date());
-            houseFlowApply.setAcceptanceNumber(0);
-            houseFlowApplyMapper.insert(houseFlowApply);
-            //生成任务发送给大管家
-            taskStackService.insertTaskStackInfo(houseFlowApply.getId(), houseFlowApply.getWorkerId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
-        }
+
+
         Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
         worker.initPath(address);
         return ServerResponse.createBySuccess("操作成功", worker);

@@ -33,9 +33,53 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         LEFT JOIN dj_house h ON hi.house_id = h.id
         WHERE
         hi.worker_id = #{workerId}
+		and hi.status in(0,1)
         ORDER BY hi.create_date DESC
     </select>
 
+	<!--当家贝流水明细-->
+	<select id="queryWorkerIntegerList" resultType="com.dangjia.acg.dto.worker.WorkIntegralDTO">
+		SELECT
+			t.briefed,
+			t.integral,
+			t.create_date createDate
+		FROM
+			dj_worker_work_integral t
+		WHERE
+			t.`status` = 3
+		and t.worker_id= #{memberId}
+		ORDER BY
+			t.create_date DESC
+	</select>
+
+	<select id="getTotalShellMoney" resultType="java.util.Map">
+
+		SELECT
+			IFNULL(a.incomeIntegral,0) incomeIntegral,
+			IFNULL(B.expendIntegral,0) expendIntegral
+		FROM
+			(
+				SELECT
+					sum(IFNULL(t.integral,0)) incomeIntegral
+				FROM
+					dj_worker_work_integral t
+				WHERE
+					t.`status` = 3
+				AND t.worker_id = #{memberId}
+				AND t.integral_type IN (0, 1, 2)
+			) a,
+			(
+				SELECT
+					sum(IFNULL(t.integral,0)) expendIntegral
+				FROM
+					dj_worker_work_integral t
+				WHERE
+					t.`status` = 3
+				AND t.worker_id = #{memberId}
+				AND t.integral_type = 3
+			) b
+
+	</select>
 
     <!--飙升榜 -->
     <select id="querySoaringWorker" resultType="com.dangjia.acg.dto.worker.WorkerRunkDTO">

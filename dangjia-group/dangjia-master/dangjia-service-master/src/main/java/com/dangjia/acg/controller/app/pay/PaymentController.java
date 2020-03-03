@@ -5,7 +5,10 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.pay.PayService;
 import com.dangjia.acg.service.pay.PaymentService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,8 +54,8 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber, Integer userRole) {
-        return payService.getWeiXinSign(businessOrderNumber, userRole);
+    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber,String openId, Integer userRole) {
+        return payService.getWeiXinSign(userToken,businessOrderNumber, openId, userRole);
     }
 
     @Override
@@ -75,8 +78,8 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse generateOrder(String userToken,String cityId,String productIds,String workerId, String addressId){
-        return paymentService.generateOrder(userToken, cityId,productIds, workerId,  addressId);
+    public ServerResponse generateOrder(String userToken,String cityId,String productIds,String workerId, String addressId,String activityRedPackId){
+        return paymentService.generateOrder(userToken, cityId,productIds, workerId,  addressId,activityRedPackId);
     }
 
     @Override
@@ -96,6 +99,17 @@ public class PaymentController implements PaymentAPI {
         return paymentService.queryInsuranceInfo(userToken,workerId);
     }
 
+    /**
+     * 查询符合条件的优惠券
+     * @param userToken
+     * @param productJsons
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivityRedPackInfo(String userToken,String productJsons){
+        return paymentService.queryActivityRedPackInfo(userToken,productJsons);
+    }
 
 
 }

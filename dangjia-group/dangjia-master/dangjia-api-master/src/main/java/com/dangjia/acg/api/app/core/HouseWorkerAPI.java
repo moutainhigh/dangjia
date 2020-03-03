@@ -96,8 +96,7 @@ public interface HouseWorkerAPI {
     @PostMapping("app/core/houseWorker/getWorkerComplainInFo")
     @ApiOperation(value = "申请更换工匠详情", notes = "申请更换工匠详情")
     ServerResponse getWorkerComplainInFo(@RequestParam("userToken") String userToken,
-                                         @RequestParam("isSubstitution") Integer isSubstitution,
-                                         @RequestParam("complainId") String complainId);
+                                         @RequestParam("houseFlowId") String houseFlowId);
 
 
     @PostMapping("app/core/houseWorker/getConstructionByWorkerId")
@@ -110,6 +109,10 @@ public interface HouseWorkerAPI {
     @PostMapping("app/core/houseWorker/getConstructionInfo")
     @ApiOperation(value = "大管家查看工地进度详情", notes = "大管家查看工地进度详情")
     ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId,String houseFlowId);
+
+    @PostMapping("app/core/houseWorker/getJobsInfo")
+    @ApiOperation(value = "大管家查看任务详情", notes = "大管家查看任务详情")
+    ServerResponse getJobsInfo(HttpServletRequest request, String userToken, String houseId, String productId);
 
     @PostMapping("app/core/houseWorker/getHouseFlowApply")
     @ApiOperation(value = "获取申请单明细", notes = "获取申请单明细")
@@ -149,6 +152,9 @@ public interface HouseWorkerAPI {
     ServerResponse getAdvanceInAdvance(@RequestParam("userToken") String userToken,
                                        @RequestParam("houseFlowId") String houseFlowId);
 
+    @PostMapping("app/core/houseWorker/setHouseFlowImage")
+    @ApiOperation(value = "上传水电管路图", notes = "上传水电管路图")
+    ServerResponse setHouseFlowImage(@RequestParam("houseId") String houseId, @RequestParam("imageList") String imageList);
 
     /**
      * showdoc

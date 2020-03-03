@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.order;
 
+import com.ctc.wstx.sw.EncodingXmlWriter;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -9,16 +10,26 @@ import com.dangjia.acg.dto.order.DecorationCostDTO;
 import com.dangjia.acg.dto.order.DecorationCostItemDTO;
 import com.dangjia.acg.dto.refund.DeliverOrderAddedProductDTO;
 import com.dangjia.acg.mapper.actuary.IBillBudgetMapper;
+import com.dangjia.acg.mapper.config.IBillConfigMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
+import com.dangjia.acg.mapper.delivery.IBillWorkerTypeMapper;
+import com.dangjia.acg.mapper.order.IBillBasicsGoodsCategoryMapper;
+import com.dangjia.acg.mapper.order.IBillCategoryLabelMapper;
 import com.dangjia.acg.mapper.order.IBillDeliverOrderAddedProductMapper;
 import com.dangjia.acg.mapper.order.IBillOrderNodeMapper;
 import com.dangjia.acg.mapper.refund.IBillBasicsGoodsMapper;
 import com.dangjia.acg.mapper.refund.IBillBrandMapper;
 import com.dangjia.acg.mapper.refund.IBillProductTemplateMapper;
+import com.dangjia.acg.mapper.refund.IBillUnitMapper;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.brand.Brand;
+import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.order.OrderNode;
 import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
+import com.dangjia.acg.modle.product.CategoryLabel;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.product.BillProductTemplateService;
 import com.dangjia.acg.service.refund.RefundAfterSalesService;
@@ -47,6 +58,8 @@ public class DecorationCostService {
     private IBillBrandMapper iBillBrandMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IBillUnitMapper billUnitMapper;
 
     @Autowired
     private BillProductTemplateService billProductTemplateService;
@@ -55,9 +68,13 @@ public class DecorationCostService {
     @Autowired
     private IBillDeliverOrderAddedProductMapper iBillDeliverOrderAddedProductMapper;
     @Autowired
-    private RefundAfterSalesService refundAfterSalesService;
+    private IBillConfigMapper iBillConfigMapper;
     @Autowired
     private IBillOrderNodeMapper iBillOrderNodeMapper;
+    @Autowired
+    private IBillWorkerTypeMapper iBillWorkerTypeMapper;
+    @Autowired
+    private IBillBasicsGoodsCategoryMapper billBasicsGoodsCategoryMapper;
     /**
      * 查询对应的当前花费信息
      * @param userToken 用户TOKEN
@@ -158,16 +175,15 @@ public class DecorationCostService {
                 image=pt.getImage();
             }
             if(image!=null&&StringUtils.isNotBlank(image)){
-                //添加图片详情地址字段
-                String[] imgArr = image.split(",");
-                StringBuilder imgStr = new StringBuilder();
-                StringBuilder imgUrlStr = new StringBuilder();
-                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-                ap.setImageUrl(imgStr.toString());//图片详情地址设置
+                ap.setImageUrl(StringTool.getImage(image,address));//图片详情地址设置
             }
             if(ap.getSteta()!=null&&ap.getSteta()==2){//自购商品
                 ap.setImage(purchaseIcon);
                 ap.setImageUrl(address+purchaseIcon);
+            }
+            Unit unit= billUnitMapper.selectByPrimaryKey(ap.getUnitId());
+            if(unit!=null){
+                ap.setUnitName(unit.getName());
             }
 
             BasicsGoods goods=iBillBasicsGoodsMapper.selectByPrimaryKey(pt.getGoodsId());
@@ -219,7 +235,7 @@ public class DecorationCostService {
     }
 
     /**
-     * 精算--按工序查询精算(已支付精算）
+     * 精算--按工序查询精算(原始精算，精算师精算数据）
      * @param userToken
      * @param cityId
      * @param houseId
@@ -229,13 +245,18 @@ public class DecorationCostService {
         try{
             Map<String,Object> map=new HashMap<>();
             //1.查询对应已支付精算的总金额
-            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null,null);//查询已支付精算的所有金额
+            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null);//查询已支付精算的所有金额
             //2.按工序查询已支付定单的汇总
             List<DecorationCostDTO> budgetList=iBillBudgetMapper.selectBudgetWorkerInfoList(houseId);
             //4.获取符合条件的据数返回给前端
-            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice);
+            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice,1);
             map.put("totalPrice",totalPrice);//总金额
-            map.put("workerTypeList",list);
+            Config config= iBillConfigMapper.selectConfigInfoByParamKey("ACTUARIAL_REMARK");//获取对应阶段需处理剩余时间
+            if(config!=null){
+                map.put("remark",config.getParamDesc());//文字描述
+            }
+            map.put("totalPrice",totalPrice);//总金额
+            map.put("list",list);
             return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
             logger.error("查询失败",e);
@@ -244,7 +265,7 @@ public class DecorationCostService {
     }
 
     /**
-     * 精算--按类别查询精算(已支付精算）
+     * 精算--按类别查询精算(原始精算，精算师精算数据）
      * @param userToken
      * @param cityId
      * @param houseId
@@ -255,13 +276,17 @@ public class DecorationCostService {
 
             Map<String,Object> map=new HashMap<>();
             //1.查询对应已支付精算的总金额
-            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null,null);//查询已支付精算的所有金额
+            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null);//查询已支付精算的所有金额
             //2.按类别查询已支付定单的汇总
             List<DecorationCostDTO> budgetList=iBillBudgetMapper.selectBudgetCategoryInfoList(houseId);
             //4.获取符合条件的据数返回给前端
-            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice);
+            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice,2);
             map.put("totalPrice",totalPrice);//总金额
-            map.put("categoryList",list);
+            Config config= iBillConfigMapper.selectConfigInfoByParamKey("ACTUARIAL_REMARK");//获取对应文字描述
+            if(config!=null){
+                map.put("remark",config.getParamDesc());//文字描述
+            }
+            map.put("list",list);
 
             return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
@@ -270,7 +295,43 @@ public class DecorationCostService {
         }
     }
 
-    List<Map<String,Object>> getCommonList(List<DecorationCostDTO> budgetList,Double totalPrice){
+    /**
+     * 筛选条件查贸易
+     * @param type 1按工序查，2按分类查
+     * @return
+     */
+    public ServerResponse selectScreeningConditions(String houseId,Integer type){
+        try{
+            if(type==1){//工种
+                List<DecorationCostDTO> list=iBillBudgetMapper.selectBudgetWorkerInfoList(houseId);
+                DecorationCostDTO decorationCostDTO=new DecorationCostDTO();
+                decorationCostDTO.setId("");
+                decorationCostDTO.setName("全部");
+                list.add(0,decorationCostDTO);
+                return ServerResponse.createBySuccess("查询成功",list);
+            }else{//顶级分类
+                List<DecorationCostDTO> list=iBillBudgetMapper.selectBudgetCategoryInfoList(houseId);
+                DecorationCostDTO decorationCostDTO=new DecorationCostDTO();
+                decorationCostDTO.setId("");
+                decorationCostDTO.setName("全部");
+                list.add(0,decorationCostDTO);
+              return ServerResponse.createBySuccess("查询成功",list);
+            }
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return  ServerResponse.createByErrorMessage("查询失败");
+        }
+
+    }
+
+    /**
+     *
+     * @param budgetList
+     * @param totalPrice
+     * @param type 1按工序查看，2按类别查看
+     * @return
+     */
+    List<Map<String,Object>> getCommonList(List<DecorationCostDTO> budgetList,Double totalPrice,Integer type){
         List<Map<String,Object>> list=new ArrayList<>();
         if(budgetList!=null&&budgetList.size()>0){
             Map<String,Object> map;
@@ -283,10 +344,8 @@ public class DecorationCostService {
             for(int i=0;i<budgetList.size();i++){
                 map=new HashMap<>();
                DecorationCostDTO dc=budgetList.get(i);
-               map.put("workerTypeId",dc.getWorkerTypeId());
-               map.put("workerTypeName",dc.getWorkerTypeName());
-               map.put("categoryId",dc.getCategoryId());
-               map.put("categoryName",dc.getCategoryName());
+                map.put("id",dc.getId());
+                map.put("name",dc.getName());
                 map.put("totalPrice",dc.getTotalPrice());
                 Double dul=MathUtil.round(MathUtil.div(dc.getTotalPrice(),totalPrice)*100);
                 if(i==budgetList.size()-1){
@@ -311,21 +370,24 @@ public class DecorationCostService {
      * @param userToken 用户TOKEN
      * @param cityId 城市ID
      * @param houseId 房子ID
-     * @param workerTypeId 工种ID
-     * @param categoryTopId 顶级分类ID
+     * @param searchTypeId 工种ID/顶级分类ID
      * @return
      */
     public ServerResponse searchBudgetCategoryLabelList(String userToken,String cityId,String houseId,
-                                                        String workerTypeId,String categoryTopId){
+                                                        String searchTypeId){
         logger.info("查询分类汇总花费信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
        try{
 
            Map<String,Object> decorationMap=new HashMap<>();
-           List<DecorationCostDTO> categoryLabelList=iBillBudgetMapper.searchBudgetCategoryLabelList(houseId,workerTypeId,categoryTopId);
-           Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,workerTypeId,categoryTopId,null);
-           Double totalzgPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,workerTypeId,categoryTopId,2);//自购商品汇总
+           List<DecorationCostDTO> categoryLabelList=iBillBudgetMapper.searchBudgetCategoryLabelList(houseId,searchTypeId);
+           Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,searchTypeId,null);
+           Double totalzgPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,searchTypeId,2);//自购商品汇总
            decorationMap.put("actualPaymentPrice",totalPrice);
            decorationMap.put("actualSelfPrice",totalzgPrice);
+           DecorationCostDTO decorationCostDTO=new DecorationCostDTO();
+           decorationCostDTO.setLabelValId("");
+           decorationCostDTO.setLabelValName("全部");
+           categoryLabelList.add(0,decorationCostDTO);
            decorationMap.put("categoryLabelList",categoryLabelList);
            return ServerResponse.createBySuccess("查询成功",decorationMap);
        }catch (Exception e){
@@ -338,20 +400,25 @@ public class DecorationCostService {
      * @param userToken 用户TOKEN
      * @param cityId 城市ID
      * @param houseId 房子ID
-     * @param workerTypeId 工种ID
-     * @param categoryTopId 顶级分类ID
+     * @param searchTypeId 工种ID/顶级分类ID
      * @param labelValId 类别标签 ID
      * @return
      */
-    public ServerResponse searchBudgetLastCategoryList(String userToken,String cityId,String houseId,
-                                                   String workerTypeId,String categoryTopId,String labelValId){
+    public ServerResponse searchBudgetLastCategoryList(String userToken,PageDTO pageDTO,String cityId,String houseId,
+                                                   String searchTypeId,String labelValId){
         logger.info("查询分类汇总信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
         try{
 
             Map<String,Object> decorationMap=new HashMap<>();
-            List<DecorationCostDTO> categoryList=iBillBudgetMapper.searchBudgetLastCategoryList(houseId,workerTypeId,categoryTopId,labelValId);
-            decorationMap.put("categoryList",categoryList);
-            return ServerResponse.createBySuccess("查询成功",decorationMap);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DecorationCostDTO> categoryList=iBillBudgetMapper.searchBudgetLastCategoryList(houseId,searchTypeId,labelValId);
+          //  Double totalPrice=iBillBudgetMapper.searchBudgetLastCategoryCount(houseId,searchTypeId);
+            PageInfo pageResult = new PageInfo(categoryList);
+            /*decorationMap.put("totalPrice",totalPrice);
+            Double totalzgPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,searchTypeId,2);//自购商品汇总
+            decorationMap.put("actualSelfPrice",totalzgPrice);
+            decorationMap.put("categoryList",pageResult);*/
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         }catch (Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
@@ -363,19 +430,18 @@ public class DecorationCostService {
      * @param userToken 用户TOKEN
      * @param cityId 城市ID
      * @param houseId 房子ID
-     * @param workerTypeId 工种ID
-     * @param categoryTopId 顶级分类ID
+     * @param searchTypeId 工种ID/顶级分类ID
      * @param labelValId 类别标签 ID
      * @return
      */
     public ServerResponse searchBudgetProductList(String userToken,String cityId,String houseId,
-                                                   String workerTypeId,String categoryTopId,String labelValId,
+                                                   String searchTypeId,String labelValId,
                                                   String categoryId){
         logger.info("查询商品信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
         try{
 
             //2.查询对应的分类下的货品商品信息
-            List<DecorationCostItemDTO> decorationProductList = iBillBudgetMapper.searchBudgetProductList(houseId,workerTypeId,categoryTopId,labelValId,categoryId);
+            List<DecorationCostItemDTO> decorationProductList = iBillBudgetMapper.searchBudgetProductList(houseId,searchTypeId,labelValId,categoryId);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             getProductList(decorationProductList,address);
             return ServerResponse.createBySuccess("查询成功",decorationProductList);

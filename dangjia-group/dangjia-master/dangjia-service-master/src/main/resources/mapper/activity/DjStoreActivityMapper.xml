@@ -4,22 +4,27 @@
 
     <select id="queryActivitiesByStorefront" resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
         SELECT
+            b.id AS storeParticipateActivitiesId,
+            a.id,
             a.activity_type AS activityType,
             a.state,
-            if(b.store_activity_id IS NULL OR b.store_activity_id="",0,b.attended) AS attended
+            if(b.store_activity_id IS NULL OR b.store_activity_id="",0,b.registration_status) AS registrationStatus
         FROM
             dj_store_activity a
         LEFT JOIN dj_store_participate_activities b ON a.id = b.store_activity_id
+        AND b.storefront_id = #{storefrontId}
         WHERE
             a.activity_type = #{activityType}
-        AND b.storefront_id = #{storefrontId}
     </select>
 
     <select id="queryActivitiesSessionByStorefront"
             resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
         SELECT
+            c.id AS storeParticipateActivitiesId,
+            a.id AS storeActivityId,
+            b.id AS activitySessionId,
             b.session,
-            d.name,
+            d.name AS city,
             a.activity_start_time AS activityStartTime,
             a.end_time AS endTime,
             a.registration_start_time AS registrationStartTime,
@@ -30,15 +35,51 @@
                 c.store_activity_id IS NULL
                 OR c.store_activity_id = "",
                 0,
-                c.attended
-            ) AS attended
+                c.registration_status
+            ) AS registrationStatus
         FROM
             dj_store_activity a
         INNER JOIN dj_activity_session b ON a.id = b.store_activity_id
-        LEFT JOIN dj_store_participate_activities c ON c.store_activity_id = a.id
+        LEFT JOIN dj_store_participate_activities c ON c.activity_session_id=b.id
+        AND c.storefront_id =#{storefrontId}
         INNER JOIN dj_other_city d ON d.id = a.city_id
         WHERE
-            c.storefront_id =#{storefrontId}
-        AND a.id =#{id}
+          a.id =#{id}
+          ORDER BY b.session asc
+    </select>
+
+    <select id="queryActivitiesOrSessionById" resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
+        SELECT
+            a.id as storeActivityId,
+            a.activity_start_time AS activityStartTime,
+            a.end_time AS endTime,
+            a.registration_start_time AS registrationStartTime,
+            a.end_time_registration AS endTimeRegistration,
+            c.`name` AS city,
+            a.activity_description AS activityDescription,
+            a.cycle_purchasing AS cyclePurchasing,
+            d.id AS storeParticipateActivitiesId
+            <if test="activityType==1">
+                ,b.id as activitySessionId
+            </if>
+        FROM
+            dj_store_activity a
+            <if test="activityType==1">
+                INNER JOIN dj_activity_session b
+                ON a.id = b.store_activity_id
+            </if>
+            INNER JOIN dj_other_city c
+            ON c.id=a.city_id
+            LEFT JOIN dj_store_participate_activities d
+            ON a.id=d.store_activity_id
+        WHERE 1=1
+        <choose>
+            <when test="activityType==1">
+                AND b.id=#{id}
+            </when>
+            <otherwise>
+                AND a.id=#{id}
+            </otherwise>
+        </choose>
     </select>
 </mapper>

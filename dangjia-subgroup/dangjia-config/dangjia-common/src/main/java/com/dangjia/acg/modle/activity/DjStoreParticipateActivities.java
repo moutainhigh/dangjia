@@ -44,4 +44,14 @@ public class DjStoreParticipateActivities extends BaseEntity {
     @Desc(value = "店铺id")
     @ApiModelProperty("店铺id")
     private String storefrontId;
+
+    @Column(name = "registration_status")
+    @Desc(value = "报名状态 1:已报名 2:申请中 3:审核中 4：被打回")
+    @ApiModelProperty("报名状态 1:已报名 2:申请中 3:审核中 4：被打回")
+    private Integer registrationStatus;
+
+    @Column(name = "back_reason")
+    @Desc(value = "打回原因")
+    @ApiModelProperty("打回原因")
+    private String backReason;
 }

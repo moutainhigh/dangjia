@@ -31,7 +31,8 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/changePayed")
     @ApiOperation(value = "已支付换工匠", notes = "已支付换工匠")
-    ServerResponse changePayed(@RequestParam("houseWorkerId") String houseWorkerId,
+    ServerResponse changePayed(@RequestParam("userToken") String userToken,
+                               @RequestParam("houseWorkerId") String houseWorkerId,
                                @RequestParam("workerId") String workerId);
 
     @PostMapping(value = "web/engineer/changeWorker")
@@ -100,6 +101,12 @@ public interface WebEngineerAPI {
                                @RequestParam("checkType") String checkType ,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping(value = "web/engineer/searchWorkerAllList")
+    @ApiOperation(value = "人工定责--查询所有工匠列表", notes = "人工定责--查询所有工匠列表")
+    ServerResponse searchWorkerAllList(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("searckKey") String searckKey ,
+                               @RequestParam("pageDTO") PageDTO pageDTO);
+
     @PostMapping(value = "web/engineer/setMemberStyle")
     @ApiOperation(value = "修改设计师绑定风格", notes = "修改设计师绑定风格")
      ServerResponse setMemberStyle(@RequestParam("request") HttpServletRequest request, @RequestParam("member") Member member) ;
@@ -110,6 +117,7 @@ public interface WebEngineerAPI {
     @PostMapping(value = "web/engineer/getWareHouse")
     @ApiOperation(value = "仓库列表", notes = "仓库列表")
     ServerResponse getWareHouse(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("searckKey") String searckKey ,
                                 @RequestParam("cityId") String cityId,
                                 @RequestParam("houseId") String houseId,
                                @RequestParam("pageDTO") PageDTO pageDTO);

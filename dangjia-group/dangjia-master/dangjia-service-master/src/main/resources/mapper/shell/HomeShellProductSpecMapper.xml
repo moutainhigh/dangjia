@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.shell.IHomeShellProductSpecMapper">
+
+    <!--查询商品列表信息-->
+     <select id="selectProductSpecByProductId" resultType="com.dangjia.acg.dto.shell.HomeShellProductSpecDTO">
+         SELECT
+            t.id productSpecId,
+            t.product_id productId,
+            t. NAME,
+            t.integral,
+            t.money,
+            t.stock_num stockNum,
+            t.converted_number convertedNumber
+        FROM
+            dj_home_shell_product_spec t
+        where t.product_id=#{productId}
+
+     </select>
+
+    <select id="selectProductSpecInfo" resultType="com.dangjia.acg.dto.shell.HomeShellProductSpecDTO">
+        SELECT
+            t.id productSpecId,
+            t.product_id productId,
+            t. NAME,
+            t.integral,
+            t.money,
+            t.stock_num stockNum,
+            t.converted_number convertedNumber
+        FROM
+            dj_home_shell_product_spec t
+        where t.product_id=#{productId}
+        order by t.integral,t.money asc
+        limit 1
+    </select>
+    <select id="selectProductSpecStockById" resultType="com.dangjia.acg.modle.shell.HomeShellProductSpec">
+       select t.id productSpecId,
+            t.product_id productId,
+            t. NAME,
+            t.integral,
+            t.money,
+            t.stock_num stockNum,
+            t.converted_number convertedNumber
+        from dj_home_shell_product_spec  t
+        where id=#{specId} and stock_num>0 for update
+    </select>
+</mapper>

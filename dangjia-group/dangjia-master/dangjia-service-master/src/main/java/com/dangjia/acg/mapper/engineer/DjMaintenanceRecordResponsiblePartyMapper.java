@@ -19,9 +19,9 @@ public interface DjMaintenanceRecordResponsiblePartyMapper extends Mapper<DjMain
 
     DjMaintenanceRecordResponsiblePartyDTO queryDjMaintenanceRecordResponsibleParty(@Param("id") String id, @Param("responsiblePartyType") Integer responsiblePartyType);
 
-    DimensionRecordDTO queryDimensionRecordInFo(@Param("mrId") String mrId,@Param("type") Integer type);
+    DimensionRecordDTO queryDimensionRecordInFo(@Param("mrrpId") String mrrpId,@Param("type") Integer type);
 
-    List<DimensionRecordDTO> queryDimensionRecord(@Param("memberId") String memberId);
+    List<DimensionRecordDTO> queryDimensionRecord(@Param("workerId") String workerId,@Param("houseId") String houseId);
 
     ComplainDataDTO queryResponsibleParty(@Param("responsiblePartyId") String responsiblePartyId, @Param("houseId") String houseId);
 

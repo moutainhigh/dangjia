@@ -62,14 +62,24 @@ public interface DecorationCostAPI {
                                             @RequestParam("cityId") String cityId,
                                             @RequestParam("houseId") String houseId);
 
+    /**
+     * 筛选条件查贸易
+     * @param userToken
+     * @param type 1按工序查，2按分类查
+     * @return
+     */
+    @PostMapping("/app/decoration/selectScreeningConditions")
+    @ApiOperation(value = "精算--查询筛选条件列表", notes = "精算--查询筛选条件列表")
+    ServerResponse selectScreeningConditions(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId,
+                                          @RequestParam("type") Integer type);
+
 
     /**
      * 精算--分类标签汇总信息查询
      * @param userToken 用户TOKEN
      * @param cityId 城市ID
      * @param houseId 房子ID
-     * @param workerTypeId 工种ID
-     * @param categoryTopId 顶级分类ID
+     * @param searchTypeId 工种ID/ 顶级分类ID
      * @return
      */
     @PostMapping("/app/decoration/searchBudgetCategoryLabelList")
@@ -77,26 +87,24 @@ public interface DecorationCostAPI {
     ServerResponse searchBudgetCategoryLabelList(@RequestParam("userToken") String userToken,
                                                  @RequestParam("cityId") String cityId,
                                                  @RequestParam("houseId") String houseId,
-                                                 @RequestParam("workerTypeId") String workerTypeId,
-                                                 @RequestParam("categoryTopId") String categoryTopId);
+                                                 @RequestParam("searchTypeId") String searchTypeId);
 
     /**
      * 精算--分类汇总信息，末级分类
      * @param userToken 用户TOKEN
      * @param cityId 城市ID
      * @param houseId 房子ID
-     * @param workerTypeId 工种ID
-     * @param categoryTopId 顶级分类ID
+     * @param searchTypeId 工种ID/顶级分类ID
      * @param labelValId 类别标签 ID
      * @return
      */
     @PostMapping("/app/decoration/searchBudgetLastCategoryList")
     @ApiOperation(value = "精算--分类汇总信息查询(末级分类） ", notes = "查询分类汇总信息（末级分类）")
     ServerResponse searchBudgetLastCategoryList(@RequestParam("userToken") String userToken,
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
                                              @RequestParam("cityId") String cityId,
                                              @RequestParam("houseId") String houseId,
-                                             @RequestParam("workerTypeId") String workerTypeId,
-                                             @RequestParam("categoryTopId") String categoryTopId,
+                                             @RequestParam("searchTypeId") String searchTypeId,
                                             @RequestParam("labelValId") String labelValId);
 
     @PostMapping("/app/decoration/searchBudgetProductList")
@@ -104,8 +112,7 @@ public interface DecorationCostAPI {
     ServerResponse searchBudgetProductList(@RequestParam("userToken") String userToken,
                                             @RequestParam("cityId") String cityId,
                                             @RequestParam("houseId") String houseId,
-                                            @RequestParam("workerTypeId") String workerTypeId,
-                                            @RequestParam("categoryTopId") String categoryTopId,
+                                            @RequestParam("searchTypeId") String workerTypeId,
                                             @RequestParam("labelValId") String labelValId,
                                             @RequestParam("categoryId") String categoryId);
 

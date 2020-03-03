@@ -43,8 +43,8 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse changePayed(String houseWorkerId, String workerId) {
-        return engineerService.changePayed(houseWorkerId, workerId);
+    public ServerResponse changePayed(String userToken,String houseWorkerId, String workerId) {
+        return engineerService.changePayed( userToken,houseWorkerId, workerId);
     }
 
     /**
@@ -167,6 +167,19 @@ public class WebEngineerController implements WebEngineerAPI {
     }
 
     /**
+     * 人工定责--查询所有工匠列表
+     * @param request
+     * @param searckKey 查询条件（用户名/电话）
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchWorkerAllList(HttpServletRequest request, String searckKey ,PageDTO pageDTO){
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return engineerService.searchWorkerAllList(cityId,searckKey ,pageDTO);
+    }
+    /**
      *  修改设计师绑定风格
      * @param request
      * @param member
@@ -187,8 +200,8 @@ public class WebEngineerController implements WebEngineerAPI {
     }
     @Override
     @ApiMethod
-    public ServerResponse getWareHouse( HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO) {
-        return engineerService.getWareHouse(request,cityId,houseId, pageDTO);
+    public ServerResponse getWareHouse( HttpServletRequest request,String searckKey ,String cityId,String houseId, PageDTO pageDTO) {
+        return engineerService.getWareHouse(request, searckKey ,cityId,houseId, pageDTO);
     }
 
     /**

@@ -44,6 +44,63 @@ public class WeiXinPayUtil {
      *
      * @return JSON形式的参数值
      */
+    public static ServerResponse getWeiXinH5Sign(String price, String out_trade_no, String basePath,String openId) {
+        Map<String, String> m = new HashMap<>();
+        try {
+            String price1 = Integer.toString((int) ((Double.parseDouble(price) * 100)));
+            //将获取到的map值转换为xml格式
+            m.put("appid", "wx17091542223c15eb");//微信的应用ID(固定值)
+            m.put("openid", openId);//微信的应用ID(固定值)
+            m.put("body", "当家App-微信支付");//商品描述（其实可有可无）
+            m.put("mch_id", WeiXinPayUtil.mch_id);//微信支付商户信息号（固定值）
+            m.put("nonce_str", out_trade_no);//支付订单号 不长于32位
+            m.put("notify_url", basePath + notify_url);//接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
+            m.put("out_trade_no", out_trade_no);//商户系统内部的订单号,32个字符内、可包含字母
+            m.put("total_fee", price1);//订单总金额，单位为分
+            m.put("trade_type", "JSAPI");//固定值
+            Map<String, String> sPara = WeiXinPayUtil.paraFilter(m);
+            String prestr = WeiXinPayUtil.createLinkString(sPara);
+            String mysign = WeiXinPayUtil.sign(prestr, WeiXinPayUtil.key, "utf-8").toUpperCase();
+            m.put("sign", mysign);//sign签名,第一次随机签名
+            //打包要发送的xml
+            String respXml = WeiXinPayUtil.getRequestXML(m);
+            //发起服务器请求
+            String result = HttpUtil.httpRequest(WeiXinPayUtil.url, "POST", respXml);
+            Map<?, ?> map = WeiXinPayUtil.doXMLParse(result);
+            //返回状态码
+            String return_code = (String) map.get("return_code");
+            //返回给APP端需要的参数
+            Map<String, String> callbackMap = new HashMap<>();
+            if (return_code.equals("SUCCESS")) {
+                //返回的预付单信息
+                String prepay_id = (String) map.get("prepay_id");
+                long timeStamp = System.currentTimeMillis() / 1000;
+                callbackMap.put("appId", "wx17091542223c15eb");
+                callbackMap.put("timeStamp", Long.toString(timeStamp));
+                callbackMap.put("nonceStr", map.get("nonce_str").toString());
+                callbackMap.put("package", "prepay_id="+prepay_id);
+                callbackMap.put("signType", "MD5");
+                Map<String, String> sPara2 = WeiXinPayUtil.paraFilter(callbackMap);
+                String prestrTow = WeiXinPayUtil.createLinkString(sPara2);
+                String mysignTow = WeiXinPayUtil.sign(prestrTow, WeiXinPayUtil.key, "utf-8").toUpperCase();
+                //sign签名,第二次随机签名
+                callbackMap.put("sign", mysignTow);
+                callbackMap.put("mch_id", WeiXinPayUtil.mch_id);//微信支付商户信息号（固定值）
+                callbackMap.put("returnCode", "SUCCESS");
+                callbackMap.put("returnMsg", "OK");
+                return ServerResponse.createBySuccess("获取成功", callbackMap);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("微信app支付下单出错");
+        }
+        return ServerResponse.createByErrorMessage("获取失败");
+    }
+    /**
+     * 微信支付调用接口
+     *
+     * @return JSON形式的参数值
+     */
     public static ServerResponse getWeiXinSign(String price, String out_trade_no, String basePath, Integer userRole) {
         Map<String, String> m = new HashMap<>();
         try {
@@ -78,6 +135,7 @@ public class WeiXinPayUtil {
                 callbackMap.put("appid", (userRole == null || userRole == 1) ? WeiXinPayUtil.appid : WeiXinPayUtil.appid2);
                 callbackMap.put("partnerid", WeiXinPayUtil.mch_id);//微信支付商户信息号（固定值）
                 callbackMap.put("prepayid", prepay_id);
+                callbackMap.put("prepay_id", prepay_id);
                 callbackMap.put("noncestr", map.get("nonce_str").toString());//随机字符串，不长于32位
                 callbackMap.put("timestamp", Long.toString(timeStamp));
                 callbackMap.put("package", "Sign=WXPay");

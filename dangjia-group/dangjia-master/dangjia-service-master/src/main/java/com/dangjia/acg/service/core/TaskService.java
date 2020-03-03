@@ -63,6 +63,8 @@ public class TaskService {
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
+    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
+    @Autowired
     private IMendOrderMapper mendOrderMapper;
     @Autowired
     private IHouseExpendMapper houseExpendMapper;
@@ -248,12 +250,37 @@ public class TaskService {
                 task.setImage(imageAddress + "icon/chaichu.png");
                 task.setHtmlUrl(address + String.format(DjConstants.GJPageAddress.COMFIRMAPPLY + "&houseFlowApplyId=%s",
                         userToken, house.getCityId(), "验收工匠完工申请", houseFlowApply.getId()));
-                task.setType(3);
-                task.setTaskId("");
+                if(workerType.getType()==6){
+                    Example example = new Example(HouseFlowApplyImage.class);
+                    example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_ID, houseId).andEqualTo(HouseFlowApplyImage.IMAGE_TYPE, 4);
+                    int num = houseFlowApplyImageMapper.selectCountByExample(example);//验收图
+                    if(num==0){
+                        task.setType(1016);
+                        task.setTaskId(houseId);
+                        taskList.add(task);
+                        continue;
+                    }
+                }
+                task.setType(1012);
+                task.setTaskId(houseFlowApply.getId());
                 taskList.add(task);
             }
 
-
+            HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,"6");
+           if( houseFlow.getWorkSteta()==4){
+               Example example = new Example(HouseFlowApplyImage.class);
+               example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_ID, houseId).andEqualTo(HouseFlowApplyImage.IMAGE_TYPE, 4);
+               int num = houseFlowApplyImageMapper.selectCountByExample(example);//验收图
+               if(num==0){
+                   Task task = new Task();
+                   task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
+                       task.setName("水电管路图待上传");
+                   task.setImage(imageAddress + "iconWork/type/icon_sd@2x.png");
+                   task.setType(1015);
+                   task.setTaskId(houseId);
+                   taskList.add(task);
+               }
+           }
             //查询待验收的维保申请
             Example example1 = new Example(DjMaintenanceRecord.class);
             example1.createCriteria()

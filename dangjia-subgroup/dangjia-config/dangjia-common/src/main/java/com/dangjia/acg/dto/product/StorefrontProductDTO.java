@@ -7,6 +7,8 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(prefix = "")
 public class StorefrontProductDTO {
+    private String id;
+
     private String storefrontId; //店铺ID;
 
     private String storefrontProductId; //店铺商品ID;
@@ -21,7 +23,7 @@ public class StorefrontProductDTO {
 
     private String productSn;//商品编码
 
-    private double cost;//平均成本价
+    private Double cost;//平均成本价
 
     private Double sellPrice;//商品售价
 
@@ -36,4 +38,8 @@ public class StorefrontProductDTO {
     private String unitId;//换算单位
 
     private String unitName;//换算单位
+
+    private String storefrontName;//店铺名称
+
+    private Double rushPurchasePrice;//抢购价
 }

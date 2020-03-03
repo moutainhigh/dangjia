@@ -12,15 +12,19 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.*;
+import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.*;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -59,6 +63,8 @@ public class RewardPunishService {
     private IHouseMapper houseMapper;
 
     @Autowired
+    private IComplainMapper complainMapper;
+    @Autowired
     private IWorkIntegralMapper iWorkIntegralMapper;
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
@@ -67,6 +73,9 @@ public class RewardPunishService {
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IMemberMapper memberMapper;
+
+    @Autowired
+    private UserMapper userMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
@@ -355,6 +364,15 @@ public class RewardPunishService {
         }
     }
 
+
+    public ServerResponse getMyRewardPunishRecord(String userToken,String houseId, PageDTO pageDTO) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        return queryRewardPunishRecord(null,member.getId(),houseId,pageDTO);
+    }
     /**
      * 根据userToken查询奖罚记录
      *
@@ -372,11 +390,12 @@ public class RewardPunishService {
                     return (ServerResponse) object;
                 }
                 Member member = (Member) object;
-                criteria.andNotEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
+                criteria.andEqualTo(RewardPunishRecord.OPERATOR_ID, member.getId());
             }
             if (!CommonUtil.isEmpty(workerId)) {
                 criteria.andEqualTo(RewardPunishRecord.MEMBER_ID, workerId);
-            }if (!CommonUtil.isEmpty(houseId)) {
+            }
+            if (!CommonUtil.isEmpty(houseId)) {
                 criteria.andEqualTo(RewardPunishRecord.HOUSE_ID, houseId);
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -389,6 +408,16 @@ public class RewardPunishService {
                     RewardPunishRecordDTO rewardPunishRecordDTO = new RewardPunishRecordDTO();
                     rewardPunishRecordDTO.setId(record.getId());
                     recordDTOS.addAll(rewardPunishRecordMapper.queryRewardPunishRecord(rewardPunishRecordDTO));
+                }
+                for (RewardPunishRecordDTO recordDTO : recordDTOS) {
+                    Member member=memberMapper.selectByPrimaryKey(recordDTO.getOperatorId());
+                    if(member!=null){
+                        recordDTO.setOperatorName(CommonUtil.isEmpty(member.getName())?member.getNickName():member.getName());
+                        recordDTO.setOperatorTypeName(workerTypeMapper.getName(member.getWorkerType()));
+                    }else{
+                        MainUser user=userMapper.selectByPrimaryKey(recordDTO.getOperatorId());
+                        recordDTO.setOperatorName(CommonUtil.isEmpty(user.getUsername())?user.getMobile():user.getUsername());
+                    }
                 }
                 pageResult.setList(recordDTOS);
                 return ServerResponse.createBySuccess("ok", pageResult);
@@ -419,6 +448,25 @@ public class RewardPunishService {
                 if(!CommonUtil.isEmpty(rewardPunishRecordDTO.getImages())){
                     rewardPunishRecordDTO.setImages(imageAddress+rewardPunishRecordDTO.getImages());
                 }
+                Member member=memberMapper.selectByPrimaryKey(rewardPunishRecordDTO.getOperatorId());
+                if(member!=null){
+                    rewardPunishRecordDTO.setOperatorName(CommonUtil.isEmpty(member.getName())?member.getNickName():member.getName());
+                    rewardPunishRecordDTO.setOperatorTypeName(workerTypeMapper.getName(member.getWorkerType()));
+                }else{
+                    MainUser user=userMapper.selectByPrimaryKey(rewardPunishRecordDTO.getOperatorId());
+                    rewardPunishRecordDTO.setOperatorName(CommonUtil.isEmpty(user.getUsername())?user.getMobile():user.getUsername());
+                    rewardPunishRecordDTO.setOperatorTypeName("");
+                }
+                rewardPunishRecordDTO.setIsComplain(-1);//未投诉
+                Example examples = new Example(Complain.class);
+                examples.createCriteria().andEqualTo(Complain.BUSINESS_ID,recordId)
+                            .andEqualTo(Complain.BUSINESS_ID, recordId)
+                            .andEqualTo(Complain.DATA_STATUS, 0);
+                List<Complain> complains = complainMapper.selectByExample(examples);
+                if(complains.size()>0){
+                    rewardPunishRecordDTO.setIsComplain(complains.get(0).getStatus());//-1：未投诉 0:待处理。1.驳回。2.接受
+                    rewardPunishRecordDTO.setComplainId(complains.get(0).getId());
+                }
                 return ServerResponse.createBySuccess("ok", rewardPunishRecordDTO);
             } else {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -435,7 +483,6 @@ public class RewardPunishService {
     /**
      * 奖罚-选择工匠列表
      *
-     * @param pageDTO
      * @param houseId
      * @return
      */

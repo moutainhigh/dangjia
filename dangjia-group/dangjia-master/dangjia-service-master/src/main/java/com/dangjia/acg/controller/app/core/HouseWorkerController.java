@@ -66,9 +66,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
 
     @Override
     @ApiMethod
-    public  ServerResponse getWorkerComplainInFo(String userToken, Integer isSubstitution,
-                                         String complainId){
-        return houseWorkerService.getWorkerComplainInFo( isSubstitution,complainId);
+    public  ServerResponse getWorkerComplainInFo(String userToken, String houseFlowId){
+        return houseWorkerService.getWorkerComplainInFo( userToken,houseFlowId);
     }
 
     /**
@@ -84,6 +83,12 @@ public class HouseWorkerController implements HouseWorkerAPI {
     @ApiMethod
     public ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId,String houseFlowId){
         return constructionService.getConstructionInfo(request,userToken,houseId,houseFlowId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getJobsInfo(HttpServletRequest request, String userToken, String houseId, String productId){
+        return constructionService.getJobsInfo(request,userToken,houseId,productId);
     }
     /**
      * 获取申请单明细
@@ -112,6 +117,11 @@ public class HouseWorkerController implements HouseWorkerAPI {
                 imageList, latitude, longitude,returnableMaterial,materialProductArr);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse setHouseFlowImage(String houseId, String imageList){
+        return houseWorkerService.setHouseFlowImage(houseId,imageList);
+    }
     /**
      * 提前进场
      */

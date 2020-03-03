@@ -7,7 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -96,18 +98,18 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
     /**
      * 店铺利润-买家维度
      * @param storefrontId
-     * @param cityId
+     * @param searchKey 地址/业主姓名
      * @return
      */
-    List<StoreBuyersDimensionDTO> sellerDimension(@Param("storefrontId") String storefrontId, @Param("cityId") String cityId,@Param("searchKey") String searchKey);
+    List<StoreBuyersDimensionDTO> sellerDimension(@Param("storefrontId") String storefrontId,@Param("searchKey") String searchKey);
 
 
-    List<SupplierDimensionSupplyDTO> supplierDimensionSupplyDetails(@Param("storefrontId") String storefrontId, @Param("cityId") String cityId, @Param("searchKey") String searchKey);
+    List<SupplierDimensionSupplyDTO> supplierDimensionSupplyDetails(@Param("storefrontId") String storefrontId, @Param("supId") String supId, @Param("searchKey") String searchKey);
 
 
-    List<SupplierDimensionOrderDetailDTO> supplierDimensionOrderDetails(@Param("houseId")  String houseId,@Param("storefrontId")  String storefrontId,@Param("cityId")  String cityId);
+    List<SupplierDimensionOrderDetailDTO> supplierDimensionOrderDetails(@Param("houseId")  String houseId,@Param("storefrontId")  String storefrontId,@Param("supId")  String supId,@Param("addressId")  String addressId);
 
-    List<SupplierDimensionGoodsDetailDTO> supplierDimensionGoodsDetails(@Param("orderSplitId")  String orderSplitId ,@Param("storefrontId")  String storefrontId );
+    List<SupplierDimensionGoodsDetailDTO> supplierDimensionGoodsDetails(@Param("splitDevlierId")  String splitDevlierId  );
 
     /**
      * 店铺利润-买家维度详情
@@ -127,12 +129,13 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
 
     /**
      * 店铺利润统计-供应商维度
-     * @param supId
      * @param storefrontId
-     * @param cityId
      * @return
      */
-    List<StoreSupplierDimensionDTO>  supplierDimension (@Param("supId") String supId,@Param("storefrontId") String storefrontId, @Param("cityId") String cityId);
+    List<StoreSupplierDimensionDTO>  supplierDimension (@Param("storefrontId") String storefrontId,
+                                                        @Param("startTime") Date startTime,
+                                                        @Param("endTime") Date endTime,
+                                                        @Param("searchKey") String searchKey);
 
 
     /**
@@ -156,6 +159,15 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
      */
 
     List<StoreSellerSplitDeliverDetailsDTO> sellerSplitDeliverDetails (@Param("splitDeliverId") String splitDeliverId,@Param("storefrontId") String storefrontId );
+
+    //利润统计--商品维度--发货单列表
+    List<StoreBuyersDimensionOrderDetailDTO> storefrontProductDimensionSplitDetail(@Param("storefrontId") String storefrontId,@Param("productId") String productId,@Param("addressId") String addressId,@Param("houseId") String houseId);
+    //利润统计--商品维度--退货单列表
+    List<StoreBuyersDimensionOrderDetailDTO> storefrontProductDimensionMendDetail(@Param("storefrontId") String storefrontId,@Param("productId") String productId,@Param("addressId") String addressId,@Param("houseId") String houseId);
+    //利润统计--商品维度--发货单总收入，支出
+    Map<String,Object> totalProductDimensionSplitDetail(@Param("storefrontId") String storefrontId, @Param("productId") String productId,@Param("addressId") String addressId,@Param("houseId") String houseId);
+    //利润统计--商品维度--退货单总收入，支出
+    Map<String,Object> totalProductDimensionMendDetail(@Param("storefrontId") String storefrontId, @Param("productId") String productId,@Param("addressId") String addressId,@Param("houseId") String houseId);
 
 }
 

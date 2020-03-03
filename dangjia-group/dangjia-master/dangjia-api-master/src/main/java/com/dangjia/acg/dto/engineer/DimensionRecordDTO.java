@@ -13,13 +13,12 @@ import java.util.Map;
  */
 @Data
 public class DimensionRecordDTO {
-
     private Date createDate;// 创建日期
     private Date paymentDate;//支付时间
     private Double sincePurchaseAmount;//维保金额
     private Double paymentAmount;//付款金额
     private Double proportion;//维保责任方占比
-    private String mrId;//
+    private String mrId;//totalPrice
     private String mrrpId;
     private String houseName;//房子名称
     private String houseId;//房子名称
@@ -41,6 +40,10 @@ public class DimensionRecordDTO {
     private Integer pageType;//1-工匠先进场,2管家先进场
     private Integer primaryType;//1-原工匠,2 非原工匠
 
-
+    private Integer maintenanceType;//维保通知类型：1，责任通知，2最终责任通知
+    private Integer isComplain;//是否可申诉（1可申诉，0不可申诉，已过期）
+    private Double stevedorageCost;//搬运费
+    private Double transportationCost;//运费
+    private String complainId;//申诉ID
     private List<Map<String,Object>> reimbursementInFo;//报销信息
 }

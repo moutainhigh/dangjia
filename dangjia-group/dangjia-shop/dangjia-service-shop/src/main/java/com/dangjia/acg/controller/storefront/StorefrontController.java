@@ -95,6 +95,18 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     }
 
+    /**
+     * 查贸易所有店铺
+     * @param pageDTO
+     * @param searchKey
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryAllStorefrontList( PageDTO pageDTO,String searchKey,String cityId){
+       return storefrontService.queryAllStorefrontList( pageDTO, searchKey,cityId);
+    }
+
     @Override
     @ApiMethod
     public ServerResponse querySupplierApplicationShopList(HttpServletRequest request, PageDTO pageDTO, String searchKey, String applicationStatus, String userId, String cityId) {
@@ -164,8 +176,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String accountFlowRecordId, Integer type) {
-        return storefrontService.storeRevenueRecordOrderDetail(request,pageDTO,accountFlowRecordId,type);
+    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, String accountFlowRecordId, Integer type) {
+        return storefrontService.storeRevenueRecordOrderDetail(accountFlowRecordId,type);
     }
 
     @Override

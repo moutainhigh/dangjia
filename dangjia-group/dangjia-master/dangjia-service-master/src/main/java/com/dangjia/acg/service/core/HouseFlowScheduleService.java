@@ -63,6 +63,7 @@ public class HouseFlowScheduleService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             map.put(HouseFlow.ID, houseFlow.getId());
             map.put(WorkerType.NAME, workerType.getName());
+            map.put(WorkerType.COLOR, workerType.getColor());
             map.put(HouseFlow.START_DATE, houseFlow.getStartDate());
             map.put(HouseFlow.END_DATE, houseFlow.getEndDate());
             if (houseFlow.getStartDate() != null) {
@@ -79,10 +80,15 @@ public class HouseFlowScheduleService {
             mapObj.put("houseId", houseId);
         }
         int numall = 0;
+        int shengyu = 0;
         if (startDate != null) {
-            numall = 1 + DateUtil.daysofTwo(startDate, endDate);//逾期工期天数
+            numall = 1 + DateUtil.daysofTwo(startDate, new Date());//施工第几天
         }
-        mapObj.put("totalNum", numall);
+        if (endDate != null) {
+            shengyu = 1 + DateUtil.daysofTwo(new Date(), endDate);//预计剩余工期
+        }
+        mapObj.put("startDayNum", numall);
+        mapObj.put("endDayNum", shengyu);
         mapObj.put("list", houseFlowMap);
         return ServerResponse.createBySuccess("查询成功", mapObj);
     }

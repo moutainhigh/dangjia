@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.activity.DjStoreParticipateActivitiesMapper">
+
+    <select id="queryRegistrationNumber" resultType="java.lang.Integer">
+        SELECT
+            COUNT(0)
+        FROM
+            dj_store_participate_activities
+        WHERE
+            store_activity_id=#{storeActivityId}
+            AND registration_status = 1
+        GROUP BY
+            storefront_id
+    </select>
+
+
+    <select id="queryParticipatingShopsList"
+            resultType="com.dangjia.acg.dto.activity.DjStoreParticipateActivitiesDTO">
+        SELECT
+            a.id AS storeParticipateActivities,
+            b.storefront_name AS storefrontName,
+            a.registration_status AS registrationStatus,
+            (SELECT COUNT(0) FROM dj_store_activity_product WHERE store_participate_activities_id=a.id) AS participatingCommodityQuantity
+        FROM
+            dj_store_participate_activities a,
+            dj_basics_storefront b
+        WHERE
+            a.storefront_id = b.id
+        <choose>
+            <when test="activityType==1">
+                AND a.activity_session_id = #{activitySessionId}
+            </when>
+            <otherwise>
+                AND (
+                a.activity_session_id IS NULL
+                OR a.activity_session_id = ''
+                )
+            </otherwise>
+        </choose>
+        AND a.activity_type = #{activityType}
+        AND a.registration_status != 2
+        AND a.store_activity_id = #{storeActivityId}
+    </select>
+</mapper>

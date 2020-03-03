@@ -22,4 +22,7 @@ public interface DjStoreActivityMapper extends Mapper<DjStoreActivity> {
 
     List<DjStoreActivityDTO> queryActivitiesSessionByStorefront(@Param("id") String id,
                                                                 @Param("storefrontId") String storefrontId);
+
+    List<DjStoreActivityDTO>  queryActivitiesOrSessionById(@Param("id") String id,
+                                                           @Param("activityType") Integer activityType);
 }

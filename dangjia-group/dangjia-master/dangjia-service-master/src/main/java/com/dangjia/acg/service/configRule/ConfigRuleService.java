@@ -128,12 +128,15 @@ public class ConfigRuleService {
                     List<Map> types=new ArrayList<>();
                     String[] paramtype = new String[0];
                     //施工流程分类获取
-                    if(MK003.equals(configRuleModule.getTypeId())||MK004.equals(configRuleModule.getTypeId())) {
+                    if(MK003.equals(configRuleModule.getTypeId())||MK004.equals(configRuleModule.getTypeId())||MK008.equals(configRuleModule.getTypeId())) {
                         if (MK003.equals(configRuleModule.getTypeId())) {
                             paramtype = new String[]{SG001, SG002, SG003, SG004};
                         }
                         if (MK004.equals(configRuleModule.getTypeId())) {
                             paramtype = new String[]{SG005, SG006};
+                        }
+                        if (MK008.equals(configRuleModule.getTypeId())) {
+                            paramtype = new String[]{SG007, SG008};
                         }
                         example = new Example(DjConfigRuleType.class);
                         example.createCriteria().andEqualTo(DjConfigRuleType.SOURCE, 3).andIn(DjConfigRuleType.ID, Arrays.asList(paramtype));
@@ -146,12 +149,12 @@ public class ConfigRuleService {
                         }
                     }
                     //工种分类获取
-                    if(MK008.equals(configRuleModule.getTypeId())||MK009.equals(configRuleModule.getTypeId())||MK011.equals(configRuleModule.getTypeId())) {
+                    if(MK009.equals(configRuleModule.getTypeId())||MK011.equals(configRuleModule.getTypeId())||MK007.equals(configRuleModule.getTypeId())) {
                         example = new Example(WorkerType.class);
                         if(MK009.equals(configRuleModule.getTypeId())){//工匠拿钱规则
                             example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                         }
-                        if(MK008.equals(configRuleModule.getTypeId())||MK011.equals(configRuleModule.getTypeId())){//滞留金上限
+                        if(MK011.equals(configRuleModule.getTypeId())||MK007.equals(configRuleModule.getTypeId())){//滞留金上限
                             example.createCriteria().andGreaterThan(WorkerType.TYPE ,2).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                         }
                         List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
@@ -191,6 +194,9 @@ public class ConfigRuleService {
                 List<Map> returnData = new ArrayList<>();
                 if(configRuleModule.getType()!=5) {
                     Example example = new Example(DjConfigRuleRank.class);
+                    if(!CommonUtil.isEmpty(typeId)&&(SG007.equals(typeId) || SG008.equals(typeId))){
+                        example.createCriteria().andEqualTo(DjConfigRuleRank.ID,"DJ001");
+                    }
                     List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
                     if (field.isEmpty()) {
                         return ServerResponse.createByErrorMessage("获取配置错误，配置参数字段错误！");
@@ -266,7 +272,7 @@ public class ConfigRuleService {
                     configRuleItemTwo.setBatchCode(batchCodeTow);
                     configRuleItemTwo.setFieldCode(key);
                     configRuleItemTwo.setFieldName(field.get(key));
-                    if(PQ101.equals(configRuleModule.getTypeId())||MK005.equals(configRuleModule.getTypeId())){
+                    if(PQ101.equals(configRuleModule.getTypeId())||MK005.equals(configRuleModule.getTypeId())||MK022.equals(configRuleModule.getTypeId())){
                         configRuleItemTwo.setFieldValue("0,0");
                         configRuleItemTwo.setFieldValues("0,0".split(","));
                     }else{
@@ -523,10 +529,9 @@ public class ConfigRuleService {
                 field.put("completed","竣工");
             }
 
-            if(MK008.equals(configRuleModule.getTypeId())) {
-                field.put("integral","配置上线(元)");
-            }
-            if(MK007.equals(configRuleModule.getTypeId())) {
+
+            if(MK007.equals(configRuleModule.getTypeId())||MK008.equals(configRuleModule.getTypeId())) {
+                field.put("maxScore","配置上限(元)");
                 field.put("integral","配置比例(百分比)");
             }
             if(MK006.equals(configRuleModule.getTypeId())) {
@@ -567,6 +572,24 @@ public class ConfigRuleService {
             if(MK018.equals(configRuleModule.getTypeId())){//抢单限制
                 field.put("protect","抢单限制");
             }
+
+            if(MK020.equals(configRuleModule.getTypeId())){//主动验收未完成每次扣款
+                field.put("protect","每次扣款");
+            }
+            if(MK021.equals(configRuleModule.getTypeId())){//周计划未完成每次扣款
+                field.put("protect","每次扣款");
+            }
+            if(MK022.equals(configRuleModule.getTypeId())){//每周应巡查次数
+                field.put("patrolNum","每周有效巡查");
+                field.put("patrolMoney","每次巡查拿钱");
+            }
+            if(MK023.equals(configRuleModule.getTypeId())){//减少维保：工序商品购买比阈值
+                field.put("protect","阈值");
+            }
+            if(MK024.equals(configRuleModule.getTypeId())){// 减少维保：仅退款比例阈值
+                field.put("protect","阈值");
+            }
+
             if(MK019.equals(configRuleModule.getTypeId())){//质保抢单时间配置
                 field.put("protect","质保抢单时间配置");
             }
@@ -585,8 +608,8 @@ public class ConfigRuleService {
     public static String   MK005 = "MK005";//放弃(派)单扣分
     public static String   MK010 = "MK010";//大管家拿钱规则
     public static String   MK009 = "MK009";//工匠拿钱规则
-    public static String   MK008 = "MK008";//滞留金上限
-    public static String   MK007 = "MK007";//滞留金每单比例
+    public static String   MK008 = "MK008";//商家质保金（原：滞留金上限）
+    public static String   MK007 = "MK007";//工匠质保金（原：滞留金每单比例）
     public static String   MK006 = "MK006";//月提现次数上限
     public static String   MK018 = "MK018";//抢单限制
     public static String   MK019 = "MK019";//质保抢单时间
@@ -597,6 +620,12 @@ public class ConfigRuleService {
     public static String   MK016 = "MK016";//搜索结果排序算法
     public static String   MK017 = "MK017";//管家派单算法
     public static String   MK014 = "MK014";//积分转化当家贝
+
+    public static String   MK020= "MK020";//主动验收未完成每次扣款
+    public static String   MK021= "MK021";//周计划未完成每次扣款
+    public static String   MK022= "MK022";//每周应巡查次数
+    public static String   MK023= "MK023";//减少维保：工序商品购买比阈值
+    public static String   MK024= "MK024";//减少维保：仅退款比例阈值
 
     public static String   PQ101 = "PQ101";//户型设置
     public static String   PQ102 = "PQ102";//平均工价
@@ -609,6 +638,10 @@ public class ConfigRuleService {
     public static String   SG004 = "SG004";//竣工
     public static String   SG005 = "SG005";//每日完工
     public static String   SG006 = "SG006";//被评价
+
+
+    public static String   SG007 = "SG007";//店铺
+    public static String   SG008 = "SG008";//供应商
 
     public static String   CS001 = "CS001";//店铺总销量
     public static String   CS002 = "CS002";//店铺上货数

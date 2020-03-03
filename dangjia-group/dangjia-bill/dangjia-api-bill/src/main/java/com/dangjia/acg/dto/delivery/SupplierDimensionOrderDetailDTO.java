@@ -14,15 +14,16 @@ import java.util.Date;
 @Data
 public class SupplierDimensionOrderDetailDTO {
 
-    private String orderSplitId;
+    private String splitDevlierId;//发货单ID
     private String shipAddress; // 房子地址
     private String name; // 业主名称
     private String mobile; //联系号码
     private  String  number;//发货单号
-    private String createDate;//要货时间
-    private String income;//收入
-    private String expenditure ;// 支出
-    private String profit;// 利润
+    private Date createDate;//要货时间
+    private Double income;//收入
+    private Double expenditure ;// 支出
+    private Double profit;// 利润
     private String houseId;//房子id
+    private Integer type;//货单类型：1发货单 2退货单
 
 }

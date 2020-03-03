@@ -3,9 +3,11 @@ package com.dangjia.acg.service.worker;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.*;
+import com.dangjia.acg.controller.web.red.ActivityController;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.*;
@@ -29,6 +31,8 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -42,6 +46,7 @@ import java.util.*;
  */
 @Service
 public class WorkerService {
+    private static Logger logger = LoggerFactory.getLogger(WorkerService.class);
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -231,33 +236,6 @@ public class WorkerService {
                 hwMap.put(House.BUILD_SQUARE, house.getBuildSquare());
                 hwMap.put(House.SQUARE, house.getSquare());
                 hwMap.put(House.VISIT_STATE, house.getVisitState());
-//                Long suspendDay = houseFlowApplyMapper.getSuspendApply(house.getId(), worker.getId());//根据房子id和工人id查询暂停天数
-//                Long everyEndDay = houseFlowApplyMapper.getEveryDayApply(house.getId(), worker.getId());//根据房子id和工人id查询每日完工申请天数
-//                long totalDay = 0;
-//                List<HouseFlowApply> earliestTime = houseFlowApplyMapper.getEarliestTimeHouseApply(house.getId(), worker.getId());//查询最早的每日开工申请
-//                if (earliestTime != null && earliestTime.size() > 0) {
-//                    Date EarliestDay = earliestTime.get(0).getCreateDate();//最早开工时间
-//                    Example example1 = new Example(HouseFlowApply.class);
-//                    example1.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID, worker.getId())
-//                            .andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.APPLY_TYPE, 2);
-//                    List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example1);
-//                    Date newDate = new Date();
-//                    if (houseFlowApplies.size() > 0) {
-//                        newDate = houseFlowApplies.get(0).getModifyDate();
-//                    }
-//                    long num = 1 + DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
-//                    if (suspendDay == null) {
-//                        totalDay = num;//总开工天数
-//                    } else {
-//                        long aa = num - suspendDay;
-//                        if (aa >= 0) {
-//                            totalDay = aa;
-//                        }
-//                    }
-//                }
-//                hwMap.put("suspendDay", suspendDay == null ? 0 : suspendDay);//暂停天数
-//                hwMap.put("everyEndDay", everyEndDay == null ? 0 : everyEndDay);//每日完工申请天数
-//                hwMap.put("totalDay", totalDay);//总开工数
             }
             hwMapList.add(hwMap);
         }
@@ -327,6 +305,9 @@ public class WorkerService {
             }
             mapList.add(map);
         }
+        if (mapList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         return ServerResponse.createBySuccess("获取我的银行卡成功", mapList);
     }
 
@@ -336,7 +317,7 @@ public class WorkerService {
      * @param bankCard
      * @return
      */
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard, String userId, String phone, int smscode) {
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard, String userId, String phone, Integer smscode) {
         try {
             if (CommonUtil.isEmpty(bankCard.getBankCardNumber())) {
                 return ServerResponse.createByErrorMessage("请输入银行卡卡号");
@@ -345,13 +326,13 @@ public class WorkerService {
                 return ServerResponse.createByErrorMessage("请选择银行卡类型");
             }
 
-            if (!Validator.isMobileNo(phone)) {
-                return ServerResponse.createBySuccessMessage("手机号不正确");
-            }
-            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
-            if (registerCode == null || smscode != registerCode) {
-                return ServerResponse.createByErrorMessage("无效验证码");
-            }
+//            if (!Validator.isMobileNo(phone)) {
+//                return ServerResponse.createBySuccessMessage("手机号不正确");
+//            }
+//            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
+//            if (registerCode == null || smscode != registerCode) {
+//                return ServerResponse.createByErrorMessage("无效验证码");
+//            }
 
             String id = null;
             //如果 userToken 为空，代表中台登录 供应商，店铺 添加银行卡 2019/11/7 添加
@@ -383,6 +364,7 @@ public class WorkerService {
             this.workerBankCardMapper.insertSelective(bankCard);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
+            logger.error("操作失败",e);
             return ServerResponse.createByErrorMessage("操作失败，请您稍后再试");
         }
     }

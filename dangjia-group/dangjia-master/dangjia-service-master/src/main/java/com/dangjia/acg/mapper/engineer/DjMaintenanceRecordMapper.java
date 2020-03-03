@@ -2,12 +2,14 @@ package com.dangjia.acg.mapper.engineer;
 
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
 import com.dangjia.acg.modle.house.TaskStack;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,4 +33,6 @@ public interface DjMaintenanceRecordMapper extends Mapper<DjMaintenanceRecord> {
      * @return
      */
     List<TaskStack> queryDjMaintenanceRecordListByStateTime();
+
+    List<Map<String,Object>> queryRecordContentList(@Param("houseId") String houseId);
 }

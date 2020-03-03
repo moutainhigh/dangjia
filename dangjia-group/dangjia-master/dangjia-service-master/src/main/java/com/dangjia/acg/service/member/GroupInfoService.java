@@ -1,9 +1,5 @@
 package com.dangjia.acg.service.member;
 
-import com.dangjia.acg.api.CrossAppAPI;
-import com.dangjia.acg.api.GroupAPI;
-import com.dangjia.acg.api.MessageAPI;
-import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -11,9 +7,12 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.nimserver.NIMPost;
+import com.dangjia.acg.common.util.nimserver.apply.NimGroupService;
+import com.dangjia.acg.common.util.nimserver.apply.NimMessageService;
+import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.CreateGroupResultDTO;
-import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.group.GroupDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.group.IGroupMapper;
@@ -38,10 +37,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -49,7 +45,6 @@ import java.util.Map;
 @Service
 public class GroupInfoService {
 
-    public final static String ADMIN_NAME = "dangjia";
 
     //客服
     public final static String KEFU = "业主您好！我是当家装修的客服NAME，我将负责帮您协调传达信息，有任何装修问题都可以给我发消息。";
@@ -78,14 +73,6 @@ public class GroupInfoService {
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper memberMapper;
-    @Autowired
-    private GroupAPI groupAPI;
-    @Autowired
-    private UserAPI userAPI;
-    @Autowired
-    private CrossAppAPI crossAppAPI;
-    @Autowired
-    private MessageAPI messageAPI;
 
 
     /**
@@ -115,7 +102,7 @@ public class GroupInfoService {
             if (!CommonUtil.isEmpty(g.getGroupId())) {
                 GroupDTO dto = new GroupDTO();
                 BeanUtils.beanToBean(g, dto);
-                List<Map> members = crossAppAPI.getCrossGroupMembers(AppType.GONGJIANG.getDesc(), Integer.parseInt(g.getGroupId()));
+                List<NimUserInfo> members = NimGroupService.getGroupInfoMembers(AppType.GONGJIANG.getDesc(),g.getGroupId());
                 if (members != null) {
                     dto.setMembers(members);
                 }
@@ -133,55 +120,11 @@ public class GroupInfoService {
      * @return
      */
     public ServerResponse sendGroupsNotify(HttpServletRequest request, GroupNotifyInfo groupNotifyInfo) {
-        groupNotifyInfo.setUserId(ADMIN_NAME);
-        messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupNotifyInfo.getGroupId(), ADMIN_NAME, groupNotifyInfo.getText());
+        NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupNotifyInfo.getGroupId(), groupNotifyInfo.getUserId(), groupNotifyInfo.getText());
         groupNotifyInfoMapper.insert(groupNotifyInfo);
         return ServerResponse.createBySuccessMessage("ok");
     }
 
-    /**
-     * 批量更新群组成员（本地）
-     *
-     * @param groupId    gid群组ID
-     * @param addList    添加到群组的用户,多个以逗号分割（任选）
-     * @param removeList 从群组删除的用户,多个以逗号分割（任选）addList和removeList  两者至少要有一个
-     */
-    public ServerResponse editManageLocalGroup(int groupId, String addList, String removeList) {
-        String[] adds = StringUtils.split(addList, ",");
-        String[] removes = StringUtils.split(removeList, ",");
-        if (!CommonUtil.isEmpty(addList)) {
-            registerJGUsers(AppType.GONGJIANG.getDesc(), adds, new String[adds.length]);
-        }
-        //夸应用添加删除
-        groupAPI.manageGroup(AppType.GONGJIANG.getDesc(), groupId, adds, removes);
-        if (CommonUtil.isEmpty(addList)) {
-            return ServerResponse.createBySuccessMessage("ok");
-        }
-        //给业主发送默认提示语
-        for (String userid : adds) {
-            Member member = memberMapper.selectByPrimaryKey(userid);
-            if (member != null) {
-                String text = "";
-                if (member.getWorkerType() == 1) {
-                    text = SHEJISHI;
-                }
-                if (member.getWorkerType() == 2) {
-                    text = JINGSUANSHI;
-                }
-                if (member.getWorkerType() == 3) {
-                    text = DAGUANGJIA;
-                }
-                if (member.getWorkerType() > 3) {
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                    text = GONGJIANG.replaceAll("WORKERNAME", workerType.getName());
-                }
-                if (!CommonUtil.isEmpty(text)) {
-                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
-                }
-            }
-        }
-        return ServerResponse.createBySuccessMessage("ok");
-    }
 
     /**
      * 批量更新群组成员(跨域)
@@ -190,14 +133,14 @@ public class GroupInfoService {
      * @param addList    添加到群组的用户,多个以逗号分割（任选）
      * @param removeList 从群组删除的用户,多个以逗号分割（任选）addList和removeList  两者至少要有一个
      */
-    public ServerResponse editManageGroup(int groupId, String addList, String removeList) {
+    public ServerResponse editManageGroup(String groupId, String addList, String removeList) {
         String[] adds = StringUtils.split(addList, ",");
         String[] removes = StringUtils.split(removeList, ",");
         if (!CommonUtil.isEmpty(addList)) {
             registerJGUsers(AppType.SALE.getDesc(), adds, new String[adds.length]);
         }
         //夸应用添加删除
-        crossAppAPI.addOrRemoveMembersFromCrossGroup(AppType.GONGJIANG.getDesc(), AppType.SALE.getDesc(), groupId, adds, removes);
+        NimGroupService.manageGroup(AppType.GONGJIANG.getDesc(), AppType.SALE.getDesc(), groupId, adds, removes);
         if (CommonUtil.isEmpty(addList)) {
             return ServerResponse.createBySuccessMessage("ok");
         }
@@ -220,7 +163,7 @@ public class GroupInfoService {
                     text = GONGJIANG.replaceAll("WORKERNAME", workerType.getName());
                 }
                 if (!CommonUtil.isEmpty(text)) {
-                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
+                    NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupId, userid, text);
                 }
             }
         }
@@ -240,31 +183,27 @@ public class GroupInfoService {
 
         House house = houseMapper.selectByPrimaryKey(group.getHouseId());
         group.setHouseName(house.getHouseName());
-        group.setAdminId(ADMIN_NAME);
+        group.setAdminId(house.getMemberId());
         //获取默认成员
-        String[] memberlist = StringUtils.split(members, ",");
-        String[] prefixlist = StringUtils.split(prefixs, ",");
-        if (prefixlist == null || prefixlist.length == 0) {
-            prefixlist = new String[memberlist.length];
-        }
+        List<String> memberlist=Arrays.asList(StringUtils.split(members, ","));
+        List<String> prefixlist=Arrays.asList(StringUtils.split(prefixs, ","));
+        memberlist.add(group.getUserId());
+        prefixlist.add("业主");
         //检查用户是否注册，不存在自动注册(工匠端)
-        if (memberlist != null && memberlist.length > 0) {
-            registerJGUsers(AppType.GONGJIANG.getDesc(), memberlist, prefixlist);
-        }
-        //检查用户是否注册，不存在自动注册(业主端口)
-        registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{group.getUserId()}, new String[]{"业主"});
+        registerJGUsers(AppType.GONGJIANG.getDesc(), memberlist.toArray(new String[0]), prefixlist.toArray(new String[0]));
+
         //创建群组
-        //TODO 创建群有问题
-        CreateGroupResultDTO groupResult = groupAPI.createGroup(AppType.GONGJIANG.getDesc(), group.getAdminId(), group.getHouseName(), memberlist, "", "", 1);
+        String groupResult = NimGroupService.createGroup(AppType.GONGJIANG.getDesc(), house.getMemberId(), group.getHouseName(), memberlist.toArray(new String[0]), "", "");
         if (groupResult != null) {
-            group.setGroupId(String.valueOf(groupResult.getGid()));
-            crossAppAPI.addOrRemoveMembersFromCrossGroup(AppType.GONGJIANG.getDesc(), AppType.ZHUANGXIU.getDesc(), groupResult.getGid(), new String[]{group.getUserId()}, new String[]{});
+            group.setGroupId(groupResult);
             if (memberlist != null)
                 for (String userid : memberlist) {
-                    String nickname = getUserName(userid);
-                    //给业主发送默认提示语
-                    String text = KEFU.replaceAll("NAME", nickname);
-                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), group.getGroupId(), userid, text);
+                    if(!group.getUserId().equals(userid)) {
+                        String nickname = getUserName(userid);
+                        //给业主发送默认提示语
+                        String text = KEFU.replaceAll("NAME", nickname);
+                        NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), group.getGroupId(), userid, text);
+                    }
                 }
         }
         if (this.groupMapper.insertSelective(group) > 0) {
@@ -287,10 +226,12 @@ public class GroupInfoService {
     }
 
     public void registerJGUsers(String appType, String[] username, String[] prefixs) {
-        if (username != null && username.length > 0) {
-            for (int i = 0; i < username.length; i++) {
-                UserInfoResultDTO userInfoResult = userAPI.getUserInfo(appType, username[i]);
-                if (userInfoResult == null || CommonUtil.isEmpty(userInfoResult.getUsername())) {
+        List<NimUserInfo> userInfos = NimUserService.getUserInfo(appType, Arrays.toString(username));
+        if (userInfos != null && userInfos.size() > 0) {
+            for (int i = 0; i < userInfos.size(); i++) {
+                NimUserInfo userInfoResult =userInfos.get(i);
+                boolean result  = Arrays.asList(username).contains(userInfoResult.getAccid());
+                if (result) {
                     String nickname;
                     String phone;
                     String avatar;
@@ -337,9 +278,14 @@ public class GroupInfoService {
                     if (!CommonUtil.isEmpty(prefix)) {
                         nickname = prefix + "-" + nickname;
                     }
-                    userAPI.registerUsers(appType, new String[]{username[i]}, new String[]{username[i]});
-                    userAPI.updateUserInfo(appType, username[i], nickname, null, signature, 0,
-                            phone, null, avatar);
+                    NimUserInfo userInfo=new NimUserInfo();
+                    userInfo.setAccid(username[i]);
+                    userInfo.setName(nickname);
+                    userInfo.setIcon(avatar);
+                    userInfo.setSign(signature);
+                    userInfo.setMobile(phone);
+                    userInfo.setEx(prefix);
+                    NimUserService.registerUsers(appType,  userInfo);
                 }
             }
         }
@@ -356,7 +302,7 @@ public class GroupInfoService {
         if (user!=null) {
             Map map = new HashMap();
             map.put("targetId", user.getId());
-            map.put("targetAppKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
+            map.put("targetAppKey", NIMPost.APPKEY);
             String text = null;
             if (type == 1) {
                 text = "业主您好！我是您的售前客服！";

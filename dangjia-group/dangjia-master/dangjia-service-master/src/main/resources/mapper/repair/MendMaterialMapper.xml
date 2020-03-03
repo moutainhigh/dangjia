@@ -270,7 +270,7 @@
             sum(t.price * IFNULL(t.actual_count, t.shop_count)) totalPrice,
             sum(IFNULL(t.transportation_cost,0)) totalTransportationCost,
             sum(IFNULL(t.stevedorage_cost,0)) totalStevedorageCost,
-            sum(IFNULL(t.price * IFNULL(t.actual_count, t.shop_count), 0)) - sum(IFNULL(t.transportation_cost,0)) - sum(IFNULL(t.stevedorage_cost,0)) totalAmount,
+            sum(IFNULL(t.price * IFNULL(t.actual_count, t.shop_count), 0)) - sum(IFNULL(t.transportation_cost,0)) - sum(IFNULL(t.stevedorage_cost,0))-sum(IFNULL(t.discount_price,0)) totalAmount,
             sum(IFNULL(t.cost * IFNULL(t.actual_count, t.shop_count), 0)) - sum(IFNULL(t.sup_stevedorage_cost, 0)) - t1.transportation_cost applyMoney
         FROM
             dj_repair_mend_materiel t,

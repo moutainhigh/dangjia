@@ -3,7 +3,6 @@ package com.dangjia.acg.service.delivery;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -14,8 +13,11 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
+import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.UserInfoResultDTO;
+import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.design.CollectDataDTO;
@@ -24,16 +26,17 @@ import com.dangjia.acg.dto.design.WorkChartListDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.dto.order.*;
 import com.dangjia.acg.mapper.delivery.*;
-import com.dangjia.acg.mapper.order.IBillHouseMapper;
-import com.dangjia.acg.mapper.order.IBillQuantityRoomImagesMapper;
-import com.dangjia.acg.mapper.order.IBillQuantityRoomMapper;
-import com.dangjia.acg.mapper.order.IBillWarehouseMapper;
+import com.dangjia.acg.mapper.member.IBillMemberAddressMapper;
+import com.dangjia.acg.mapper.order.*;
+import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
 import com.dangjia.acg.mapper.refund.IBillMendOrderMapper;
 import com.dangjia.acg.mapper.sale.IBillDjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.mapper.sale.IBillUserMapper;
 import com.dangjia.acg.mapper.shoppingCart.IBillShoppingCartMapper;
 import com.dangjia.acg.mapper.storeFront.IBillStorefrontMapper;
+import com.dangjia.acg.modle.activity.ActivityRedPack;
+import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -44,7 +47,9 @@ import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
@@ -78,8 +83,6 @@ public class DjDeliverOrderService {
     @Autowired
     private IBillUserMapper iBillUserMapper;
     @Autowired
-    private UserAPI userAPI;
-    @Autowired
     private IBillMemberMapper iBillMemberMapper;
     @Autowired
     private ConfigUtil configUtil;
@@ -104,7 +107,7 @@ public class DjDeliverOrderService {
     @Autowired
     private IBillHouseFlowApplyMapper iBillHouseFlowApplyMapper;
     @Autowired
-    private IBillMenuConfigurationMapper iBillMenuConfigurationMapper;
+    private IBillActivityRedPackRecordMapper billActivityRedPackRecordMapper;
 
     @Autowired
     private HouseAPI houseAPI;
@@ -131,7 +134,15 @@ public class DjDeliverOrderService {
     private IBillShoppingCartMapper iBillShoppingCartMapper;
     @Autowired
     private IBillQuantityRoomMapper iQuantityRoomMapper;
+    @Autowired
+    private IBillMemberAddressMapper iBillMemberAddressMapper;
+    @Autowired
+    private IBillHouseMapper houseMapper;
+    @Autowired
+    private IBillActivityRedPackMapper billActivityRedPackMapper;
 
+    @Autowired
+    private IBillBusinessOrderMapper billBusinessOrderMapper;
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -319,17 +330,13 @@ public class DjDeliverOrderService {
             }
         }
 
-
         //设置菜单
+        setMenus(workInFoDTO, house);
+
         example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
                 .andEqualTo(HouseFlow.DATA_STATUS, 0);
         List<HouseFlow> houseFlows = iBillHouseFlowMapper.selectByExample(example);
-        for (HouseFlow o : houseFlows) {
-            if (o.getWorkerType() <= 3) {
-                setMenus(workInFoDTO, house, o);
-            }
-        }
 
         //获取工序信息
         List<Object> workNodeListDTO = summationMethod(houseFlows, house);
@@ -352,9 +359,9 @@ public class DjDeliverOrderService {
                 map = new HashMap<>();
                 map.put("id", user.getId());
                 map.put("targetId", user.getId());
-                UserInfoResultDTO userInfoResult = userAPI.getUserInfo(AppType.SALE.getDesc(), userid);
-                if (userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
-                    map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
+                List<NimUserInfo> userInfoResult = NimUserService.getUserInfo(AppType.SALE.getDesc(), userid);
+                if (userInfoResult != null &&userInfoResult.size()>0&& !CommonUtil.isEmpty(userInfoResult.get(0).getName())) {
+                    map.put("nickName", "装修顾问 " + userInfoResult.get(0).getName());
                 } else {
                     map.put("nickName", "装修顾问 小" + user.getUsername().substring(0, 1));
                 }
@@ -379,35 +386,26 @@ public class DjDeliverOrderService {
     /**
      * 设置菜单
      */
-    private void setMenus(WorkInFoDTO workInFoDTO, House house, HouseFlow hf) {
+    private void setMenus(WorkInFoDTO workInFoDTO, House house) {
         String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-        List<WorkInFoDTO.ListMapBean> bigList = new ArrayList<>();
-        Example example = new Example(MenuConfiguration.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(MenuConfiguration.DATA_STATUS, 0);
-        if (hf.getWorkerType() == 1) {
-            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 2);
-        } else if (hf.getWorkerType() == 2) {
-            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 3);
-        } else {
-            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 4);
-        }
+        List<WorkInFoDTO.BigListBean> bigList = new ArrayList<>();
 
-        example.orderBy(MenuConfiguration.SORT).asc();
-        List<MenuConfiguration> menuConfigurations2 = iBillMenuConfigurationMapper.selectByExample(example);
-        for (MenuConfiguration configuration : menuConfigurations2) {
-            configuration.initPath(imageAddress, webAddress, house.getId(), hf.getId(), null);
-            WorkInFoDTO.ListMapBean mapBean = new WorkInFoDTO.ListMapBean();
-            mapBean.setName(configuration.getName());
-            mapBean.setUrl(configuration.getUrl());
-            mapBean.setApiUrl(configuration.getApiUrl());
-            mapBean.setImage(configuration.getImage());
-            mapBean.setType(configuration.getType());
-            bigList.add(mapBean);
+        WorkInFoDTO.BigListBean bigListBean = new WorkInFoDTO.BigListBean();
+        bigListBean.setName("我的工具");
+        if(workInFoDTO.getHouseType()==3){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shieji));
+            bigList.add(bigListBean);
+        }
+        if(workInFoDTO.getHouseType()==4){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.jingsuan));
+            bigList.add(bigListBean);
+        }
+        if(workInFoDTO.getHouseType()==5){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shigong));
+            bigList.add(bigListBean);
         }
         workInFoDTO.setBigList(bigList);//添加菜单到返回体中
-
     }
 
     public List<Map<String, Object>> optimizationHander(HouseFlow houseFlow) {
@@ -1143,6 +1141,21 @@ public class DjDeliverOrderService {
             map.put("state", 3);//只查已支付的
             map.put("storefontId", storefrontList.get(0).getId());
             List<DOrderInfoDTO> orderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);
+            if(orderInfoDTOS!=null){
+                for(DOrderInfoDTO orderInfoDTO:orderInfoDTOS){
+                    String discountId=orderInfoDTO.getDiscountId();
+                    if(orderInfoDTO.getTotalDiscountPrice()!=null&&orderInfoDTO.getTotalDiscountPrice()>0){
+                        ActivityRedPackRecord redPackRecord=billActivityRedPackRecordMapper.selectByPrimaryKey(discountId);
+                        ActivityRedPack activityRedPack=billActivityRedPackMapper.selectByPrimaryKey(redPackRecord.getRedPackId());
+                        if(activityRedPack.getSourceType()==2){
+                            orderInfoDTO.setDiscountType("1");
+                        }else{
+                            orderInfoDTO.setDiscountType("2");
+                        }
+                        orderInfoDTO.setDiscountNumber(redPackRecord.getPackNum());
+                    }
+                }
+            }
             PageInfo orderInfoDTOSs = new PageInfo(orderInfoDTOS);
             /*map = new HashMap<>();
             map.put("storefontId", storefrontList.get(0).getId());
@@ -1170,10 +1183,11 @@ public class DjDeliverOrderService {
             Order order=iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DOrderFineInfoDTO> dOrderArrInfoDTO = iBillDjDeliverOrderMapper.queryOrderFineInfo(orderId);
-
+            Double totalPrice=0d;//商品总额（单价*数量）
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             for (DOrderFineInfoDTO dOrderFineInfoDTO : dOrderArrInfoDTO) {
                 dOrderFineInfoDTO.setImage(StringTool.getImage(dOrderFineInfoDTO.getImage(),imageAddress));
+                totalPrice=MathUtil.add(totalPrice,dOrderFineInfoDTO.getTotalPrice());
             }
             PageInfo orderInfoDTOSs = new PageInfo(dOrderArrInfoDTO);
             Map<String, Object> map =iBillDjDeliverOrderMapper.selectDeliverOrderInfoById(orderId);
@@ -1182,13 +1196,41 @@ public class DjDeliverOrderService {
             if(quantityRoom!=null&& StringUtils.isNotBlank(quantityRoom.getId())){
                 Integer elevator=quantityRoom.getElevator();//是否电梯房
                 String floor=quantityRoom.getFloor();//楼层
-                map.put("floor", elevator);//楼层
-                map.put("elevator", floor);//是否电梯房
+                map.put("elevator", elevator);//是否电梯房
+                map.put("floor", floor);//楼层
             }
             //查询优惠卷信息
-            map.put("discountType", "");//优惠卷类型
-            map.put("discountNumber", "");//优惠卷编号
-            map.put("discountName", "");//优惠卷名称
+            map.put("totalPrice",totalPrice);//商品小计（单价*数量）
+
+            if(order.getTotalDiscountPrice()!=null&&order.getTotalDiscountPrice().doubleValue()>0){
+                Example example=new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.NUMBER,order.getBusinessOrderNumber());
+                BusinessOrder businessOrder=billBusinessOrderMapper.selectOneByExample(example);
+                String discountId=businessOrder.getRedPacketPayMoneyId();
+                ActivityRedPackRecord redPackRecord=billActivityRedPackRecordMapper.selectByPrimaryKey(discountId);
+                ActivityRedPack activityRedPack=billActivityRedPackMapper.selectByPrimaryKey(redPackRecord.getRedPackId());
+                if(activityRedPack.getSourceType()==2){
+                    map.put("discountType", "1");//店铺券
+                }else{
+                    map.put("discountType", "2");//平台券
+                }
+                map.put("discountNumber", redPackRecord.getPackNum());//优惠卷编号
+                if(activityRedPack.getType()==0){
+                    map.put("discountName", "满"+activityRedPack.getSatisfyMoney()+"减"+activityRedPack.getMoney());//优惠卷方式
+                    map.put("discountPrice", activityRedPack.getMoney()+"元");//优惠卷金额
+                }else if(activityRedPack.getType()==1){
+                    if(activityRedPack.getSatisfyMoney()!=null&&activityRedPack.getSatisfyMoney().doubleValue()>0){
+                        map.put("discountName", "满"+activityRedPack.getSatisfyMoney()+"打"+activityRedPack.getMoney()+"折");//优惠卷方式
+                        map.put("discountPrice", activityRedPack.getMoney()+"元");//优惠卷金额
+                    }else{
+                        map.put("discountName", "无门槛");//优惠卷方式
+                        map.put("discountPrice", activityRedPack.getMoney()+"折");//优惠卷金额
+                    }
+                }else{
+                    map.put("discountName", "无门槛");//优惠卷方式
+                    map.put("discountPrice", activityRedPack.getMoney()+"元");//优惠卷金额
+                }
+            }
             map.put("list",orderInfoDTOSs);//订单商品明细
             return ServerResponse.createBySuccess("查询成功", map);
         }catch (Exception e){
@@ -1281,12 +1323,18 @@ public class DjDeliverOrderService {
      * @return
      */
     public ServerResponse queryAppOrderList(PageDTO pageDTO,
+                                            String userToken,
                                             String houseId,
                                             String cityId,
                                             Integer orderStatus,
                                             String idList) {
         try {
-
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             String[] arr;
             if (!CommonUtil.isEmpty(idList)) {
@@ -1295,7 +1343,7 @@ public class DjDeliverOrderService {
                 arr = null;
             }
 
-            List<DjSplitDeliverOrderDTO> list = iBillDjDeliverOrderMapper.queryAppOrderList(cityId, houseId, orderStatus, arr);
+            List<DjSplitDeliverOrderDTO> list = iBillDjDeliverOrderMapper.queryAppOrderList(cityId,member.getId(), houseId, orderStatus, arr);
             if (list != null && list.size() > 0) {
                 for (DjSplitDeliverOrderDTO djSplitDeliverOrderDTO : list) {
 
@@ -1326,11 +1374,11 @@ public class DjDeliverOrderService {
 
                     OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(djSplitDeliverOrderDTO.getOrderSplitId());
                     if (orderSplit != null) {
-                        Member member = queryWorker(orderSplit.getHouseId(), orderSplit.getWorkerTypeId());
-                        if (member != null) {
+                        Member member1 = queryWorker(orderSplit.getHouseId(), orderSplit.getWorkerTypeId());
+                        if (member1 != null) {
                             //人工姓名
-                            djSplitDeliverOrderDTO.setName(member.getName());
-                            djSplitDeliverOrderDTO.setWorkerId(member.getId());
+                            djSplitDeliverOrderDTO.setName(member1.getName());
+                            djSplitDeliverOrderDTO.setWorkerId(member1.getId());
                         }
                     }
                 }
@@ -1355,13 +1403,19 @@ public class DjDeliverOrderService {
      * @param cityId
      * @return
      */
-    public ServerResponse queryAppHairOrderList(PageDTO pageDTO,
+    public ServerResponse queryAppHairOrderList(String userToken,
+                                                PageDTO pageDTO,
                                                 String houseId,
                                                 String cityId) {
         try {
-
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
-            List<DjSplitDeliverOrderDTO> list = iBillDjDeliverOrderMapper.queryAppHairOrderList(cityId, houseId);
+            List<DjSplitDeliverOrderDTO> list = iBillDjDeliverOrderMapper.queryAppHairOrderList(cityId, houseId,member.getId());
             if (list != null && list.size() > 0) {
                 for (DjSplitDeliverOrderDTO djSplitDeliverOrderDTO : list) {
                     //待发货
@@ -1389,11 +1443,11 @@ public class DjDeliverOrderService {
 
                     OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(djSplitDeliverOrderDTO.getOrderSplitId());
                     if (orderSplit != null) {
-                        Member member = queryWorker(orderSplit.getHouseId(), orderSplit.getWorkerTypeId());
-                        if (member != null) {
+                        Member member1 = queryWorker(orderSplit.getHouseId(), orderSplit.getWorkerTypeId());
+                        if (member1 != null) {
                             //人工姓名
-                            djSplitDeliverOrderDTO.setName(member.getName());
-                            djSplitDeliverOrderDTO.setWorkerId(member.getId());
+                            djSplitDeliverOrderDTO.setName(member1.getName());
+                            djSplitDeliverOrderDTO.setWorkerId(member1.getId());
                         }
                     }
                 }
@@ -1463,38 +1517,35 @@ public class DjDeliverOrderService {
                 Double num = JS.getDouble("shopCount");//发货数量(总数)
                 String productId = JS.getString("productId");//要货货品id
                 String houseId = JS.getString("houseId");//要货房子id
-                if (receive < num) {
+                Example example = new Example(OrderItem.class);
+                example.createCriteria().andEqualTo(OrderItem.HOUSE_ID, houseId)
+                        .andEqualTo(OrderItem.PRODUCT_ID, productId)
+                        .andEqualTo(OrderItem.ORDER_ID, id);
+                example.orderBy(OrderItem.CREATE_DATE).desc();
+                /*OrderItem item = iBillDjDeliverOrderItemMapper.selectOneByExample(example);
+                if (receive < item.getShopCount()) {
                     //部分收货
                     isFlag = true;
-                    Example example = new Example(OrderItem.class);
-                    example.createCriteria().andEqualTo(OrderItem.HOUSE_ID, houseId)
-                            .andEqualTo(OrderItem.PRODUCT_ID, productId);
-                    example.orderBy(OrderItem.CREATE_DATE).desc();
-                    List<OrderItem> orderItem = iBillDjDeliverOrderItemMapper.selectByExample(example);
                     Double retur = num - receive;//发货数量 减去 收货数量 =  退货数量
-                    for (OrderItem item : orderItem) {
-                        if (item.getAskCount() > retur) {
-                            //订单数量大于退货数量
-                            retur = item.getAskCount() - retur;
-                            item.setAskCount(retur);
-                            item.setModifyDate(new Date());
-                            //修改订单明细数量
-                            iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
-                            break;
-                        } else if (item.getAskCount() == retur) {
-                            retur = item.getAskCount() - retur;
-                            item.setAskCount(retur);
-                            item.setModifyDate(new Date());
-                            //修改订单明细数量
-                            iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
-                            break;
-                        } else if (item.getAskCount() < retur) {
-                            retur = retur - item.getAskCount();
-                            item.setAskCount(retur);
-                            item.setModifyDate(new Date());
-                            //修改订单明细数量
-                            iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
-                        }
+                    if (item.getAskCount() > retur) {
+                        //订单数量大于退货数量
+                        retur = item.getAskCount() - retur;
+                        item.setAskCount(retur);
+                        item.setModifyDate(new Date());
+                        //修改订单明细数量
+                        iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
+                    } else if (item.getAskCount() == retur) {
+                        retur = item.getAskCount() - retur;
+                        item.setAskCount(retur);
+                        item.setModifyDate(new Date());
+                        //修改订单明细数量
+                        iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
+                    } else if (item.getAskCount() < retur) {
+                        retur = retur - item.getAskCount();
+                        item.setAskCount(retur);
+                        item.setModifyDate(new Date());
+                        //修改订单明细数量
+                        iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(item);
                     }
 
                     //修改业主仓库数量
@@ -1509,7 +1560,7 @@ public class DjDeliverOrderService {
                         warehouse.setModifyDate(new Date());
                         iBillWarehouseMapper.updateByPrimaryKeySelective(warehouse);
                     }
-                }
+                }*/
                 orderSplit.setId(JS.getString("id"));
                 orderSplit.setReceive(JS.getDouble("receive"));
                 //修改要货单详情数量
@@ -1554,7 +1605,6 @@ public class DjDeliverOrderService {
             return ServerResponse.createByErrorMessage("收货失败");
         }
     }
-
 
     /**
      * App 详情拒绝收货
@@ -1714,9 +1764,19 @@ public class DjDeliverOrderService {
 
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         OrderCollectInFoDTO orderCollectInFoDTO = new OrderCollectInFoDTO();
-        House house = iBillHouseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-        String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
-        orderCollectInFoDTO.setHouseName(houseName);
+        MemberAddress memberAddress=iBillMemberAddressMapper.selectByPrimaryKey(splitDeliver.getAddressId());
+        House house = null;
+        if(memberAddress!=null){
+            orderCollectInFoDTO.setHouseId(memberAddress.getHouseId());
+            orderCollectInFoDTO.setHouseName( memberAddress.getAddress());
+
+        }else{
+            house=houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            if(house!=null){
+                orderCollectInFoDTO.setHouseId(house.getHouseId());
+                orderCollectInFoDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋 " + house.getUnit() + "单元" + house.getNumber() + "号");
+            }
+        }
         orderCollectInFoDTO.setCreateDate(splitDeliver.getCreateDate());
         orderCollectInFoDTO.setRecTime(splitDeliver.getRecTime());
         orderCollectInFoDTO.setSendTime(splitDeliver.getRecTime());
@@ -1792,7 +1852,7 @@ public class DjDeliverOrderService {
 
         //查询购物车数量
         example = new Example(ShoppingCart.class);
-        example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId());
+        example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house!=null?house.getMemberId():memberAddress.getMemberId());
         orderCollectInFoDTO.setShoppingCartsCount(iBillShoppingCartMapper.selectCountByExample(example));
 
         orderCollectInFoDTO.setOrderStorefrontDTOS(listArr);
@@ -1823,13 +1883,22 @@ public class DjDeliverOrderService {
 
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             OrderCollectInFoDTO orderCollectInFoDTO = new OrderCollectInFoDTO();
-            House house = houseAPI.selectHouseById(orderSplit.getHouseId());
-            String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
-            orderCollectInFoDTO.setHouseName(houseName);
+            MemberAddress memberAddress=iBillMemberAddressMapper.selectByPrimaryKey(orderSplit.getAddressId());
+            if(memberAddress!=null){
+                orderCollectInFoDTO.setHouseId(memberAddress.getHouseId());
+                orderCollectInFoDTO.setHouseName( memberAddress.getAddress());
+
+            }else{
+                House house=houseMapper.selectByPrimaryKey(orderSplit.getHouseId());
+                if(house!=null){
+                    orderCollectInFoDTO.setHouseId(house.getHouseId());
+                    orderCollectInFoDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + " 单元" + house.getNumber() + "号");
+                }
+            }
             orderCollectInFoDTO.setCreateDate(orderSplit.getCreateDate());
             orderCollectInFoDTO.setNumber(orderSplit.getNumber());
-            orderCollectInFoDTO.setActualPaymentPrice(orderSplit.getTotalAmount().doubleValue());
-            orderCollectInFoDTO.setTotalAmount(orderSplit.getTotalAmount().doubleValue());
+            orderCollectInFoDTO.setActualPaymentPrice(orderSplit.getTotalAmount()!=null?orderSplit.getTotalAmount().doubleValue():0);
+            orderCollectInFoDTO.setTotalAmount(orderSplit.getTotalAmount()!=null?orderSplit.getTotalAmount().doubleValue():0);
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId())
                     .andEqualTo(OrderSplitItem.DATA_STATUS, 0);
@@ -1883,7 +1952,7 @@ public class DjDeliverOrderService {
 
             //查询购物车数量
             example = new Example(ShoppingCart.class);
-            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId());
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, orderSplit.getMemberId());
             orderCollectInFoDTO.setShoppingCartsCount(iBillShoppingCartMapper.selectCountByExample(example));
             orderCollectInFoDTO.setOrderStorefrontDTOS(listArr);
             return ServerResponse.createBySuccess("查询成功", orderCollectInFoDTO);
@@ -1921,9 +1990,18 @@ public class DjDeliverOrderService {
 
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         OrderCollectInFoDTO orderCollectInFoDTO = new OrderCollectInFoDTO();
-        House house = iBillHouseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-        String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
-        orderCollectInFoDTO.setHouseName(houseName);
+        MemberAddress memberAddress=iBillMemberAddressMapper.selectByPrimaryKey(splitDeliver.getAddressId());
+        if(memberAddress!=null){
+            orderCollectInFoDTO.setHouseId(memberAddress.getHouseId());
+            orderCollectInFoDTO.setHouseName( memberAddress.getAddress());
+
+        }else{
+            House house=houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            if(house!=null){
+                orderCollectInFoDTO.setHouseId(house.getHouseId());
+                orderCollectInFoDTO.setHouseName( house.getResidential() + house.getBuilding() + " 栋" + house.getUnit() + "单元" + house.getNumber() + "号");
+            }
+        }
         orderCollectInFoDTO.setCreateDate(splitDeliver.getCreateDate());
         orderCollectInFoDTO.setSendTime(splitDeliver.getRecTime());
         orderCollectInFoDTO.setNumber(splitDeliver.getNumber());
@@ -2012,16 +2090,22 @@ public class DjDeliverOrderService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state) {
+    public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state, String userToken) {
         try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<OrderStorefrontDTO> orderStorefrontDTOS = null;
+            List<OrderStorefrontDTO> orderStorefrontDTOS;
             if (StringUtils.isBlank(state)) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             if (state.equals("2") || state.equals("4")) {
-                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(houseId, state);
+                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(member.getId(),houseId, state);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                     List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderItemObligation(orderStorefrontDTO.getOrderId());
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
@@ -2033,7 +2117,7 @@ public class DjDeliverOrderService {
                     }
                 });
             } else {
-                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(houseId);
+                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(member.getId(),houseId);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                     List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
@@ -2044,10 +2128,10 @@ public class DjDeliverOrderService {
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
                     if (orderStorefrontDTO.getStorefrontType().equals("worker")) {
-                        Member member = this.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
-                        if (member != null) {
-                            orderStorefrontDTO.setWorkerId(member.getId());
-                            orderStorefrontDTO.setWorkerName(member.getName());
+                        Member worker = this.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
+                        if (worker != null) {
+                            orderStorefrontDTO.setWorkerId(worker.getId());
+                            orderStorefrontDTO.setWorkerName(worker.getName());
                         }
                     }
                 });

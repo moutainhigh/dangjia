@@ -180,6 +180,18 @@ public class WorkerController implements WorkerAPI {
         return rewardPunishService.queryRewardPunishRecord(userToken, workerId, houseId,pageDTO);
     }
     /**
+     *奖罚记录（我的）
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMyRewardPunishRecord(String userToken, String houseId,PageDTO pageDTO){
+        return rewardPunishService.getMyRewardPunishRecord(userToken,  houseId,pageDTO);
+    }
+
+
+    /**
      *奖罚详情
      * @param recordId
      * @return

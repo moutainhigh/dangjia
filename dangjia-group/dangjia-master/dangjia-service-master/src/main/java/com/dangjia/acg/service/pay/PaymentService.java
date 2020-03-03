@@ -8,9 +8,11 @@ import com.dangjia.acg.api.StorefrontConfigAPI;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -23,6 +25,7 @@ import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
+import com.dangjia.acg.dto.pay.ActivityProductDTO;
 import com.dangjia.acg.dto.pay.PaymentDTO;
 import com.dangjia.acg.dto.pay.SafeTypeDTO;
 import com.dangjia.acg.dto.pay.UpgradeSafeDTO;
@@ -53,6 +56,7 @@ import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
+import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
@@ -74,11 +78,13 @@ import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
+import com.dangjia.acg.modle.shell.HomeShellOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -90,7 +96,11 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
+import com.dangjia.acg.service.shell.HomeShellOrderService;
+import com.dangjia.acg.util.StringTool;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,7 +184,7 @@ public class PaymentService {
     @Autowired
     private IWarehouseDetailMapper warehouseDetailMapper;//流水
     @Autowired
-    private BudgetMaterialAPI budgetMaterialAPI;
+    private IMasterBasicsGoodsCategoryMapper iMasterBasicsGoodsCategoryMapper;
     @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
     @Autowired
@@ -225,6 +235,8 @@ public class PaymentService {
     private TaskStackService taskStackService;
     @Autowired
     private IMemberMapper iMemberMapper;
+    @Autowired
+    private HomeShellOrderService homeShellOrderService;
 
 
     @Autowired
@@ -336,6 +348,10 @@ public class PaymentService {
                     //修改维保订单的支付状态为已支付
                     djMaintenanceRecordProductMapper.updateRecordProductInfoByBusinessNumber(businessOrder.getMaintenanceRecordId(),businessOrder.getNumber());
                 }
+            }else if(businessOrder.getType()==11){//当家贝商品兑换
+                homeShellOrderService.updateShellOrderInfo(businessOrder.getNumber());
+            }else if(businessOrder.getType()==12){//当家贝充值
+                homeShellOrderService.saveShellMoney(businessOrder);
             }
             if(!CommonUtil.isEmpty(businessOrder.getHouseId())) {
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
@@ -350,7 +366,7 @@ public class PaymentService {
             }
             return ServerResponse.createBySuccessMessage("支付成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("支付回调异常",e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createByErrorMessage("支付回调异常");
         }
@@ -375,6 +391,7 @@ public class PaymentService {
             if(active!=null&&(active.equals("dev"))) {
                 //开发回调
                 setServersSuccess(payOrder.getId());
+                payOrder = payOrderMapper.selectByPrimaryKey(payOrder.getId());
             }
             Example example = new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER, payOrder.getBusinessOrderNumber());
@@ -401,7 +418,7 @@ public class PaymentService {
                 returnMap.put("name", "当家装修担保平台");
                 returnMap.put("businessOrderNumber", businessOrderNumber);
                 returnMap.put("price", payOrder.getPrice());
-                return ServerResponse.createByErrorMessage("未支付成功");
+                return ServerResponse.createByErrorMessage("未支付成功",returnMap);
             }
         } catch (Exception e) {
             returnMap.put("name", "当家装修担保平台");
@@ -801,7 +818,7 @@ public class PaymentService {
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
-
+            BigDecimal totalDiscountPrice = new BigDecimal(0);//优惠总额
             Order orderNew = orderMapper.getStorefontOrder(queryShopGood.getShopId(),order.getId(),queryShopGood.getProductType());
             if(queryShopGoods.size()>1){
                 if(orderNew==null) {
@@ -852,6 +869,10 @@ public class PaymentService {
                     paymentPrice = paymentPrice.add(new BigDecimal(orderItem.getTotalPrice()));
                     freightPrice = freightPrice.add(new BigDecimal(orderItem.getTransportationCost()));
                     totalMoveDost = totalMoveDost.add(new BigDecimal(orderItem.getStevedorageCost()));
+                    if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
+                        totalDiscountPrice=totalDiscountPrice.add(new BigDecimal(orderItem.getDiscountPrice()));
+                    }
+
                     if(!CommonUtil.isEmpty(payState)) {
                         orderItem.setOrderStatus("2");
                     }else{
@@ -887,11 +908,12 @@ public class PaymentService {
                 orderNew.setTotalTransportationCost(freightPrice);//总运费
                 orderNew.setTotalStevedorageCost(totalMoveDost);//总搬运费
                 orderNew.setTotalAmount(paymentPrice);// 订单总额(工钱)
-
+                orderNew.setTotalDiscountPrice(totalDiscountPrice);//优惠总额
                 BigDecimal payPrice = orderNew.getTotalAmount().subtract(orderNew.getTotalDiscountPrice());
                 payPrice = payPrice.add(orderNew.getTotalStevedorageCost());
                 payPrice = payPrice.add(orderNew.getTotalTransportationCost());
-                orderNew.setActualPaymentPrice(payPrice);
+                payPrice = payPrice.subtract(totalDiscountPrice);
+                orderNew.setActualPaymentPrice(payPrice);//优惠总额
                 if(!CommonUtil.isEmpty(payState)) {
                     orderNew.setOrderStatus("2");
                     orderNew.setOrderPayTime(new Date());
@@ -1100,12 +1122,12 @@ public class PaymentService {
             businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
 
             //查看优惠
-            List<ActivityRedPackRecordDTO> rprList = discountPage(businessOrder.getNumber());
+           /* List<ActivityRedPackRecordDTO> rprList = discountPage(businessOrder.getNumber());
             if (rprList != null && rprList.size() > 0) {
                 paymentDTO.setDiscounts(1);//有优惠
             } else {
                 paymentDTO.setDiscounts(0);//
-            }
+            }*/
             paymentDTO.setTotalPrice(paymentPrice);
             paymentDTO.setDiscountsPrice(businessOrder.getDiscountsPrice());
             paymentDTO.setPayPrice(payPrice);//实付
@@ -1174,7 +1196,7 @@ public class PaymentService {
      * 提交订单
      * @return
      */
-    public ServerResponse generateOrder(String userToken,String cityId, String productJsons,String workerId, String addressId) {
+    public ServerResponse generateOrder(String userToken,String cityId, String productJsons,String workerId, String addressId,String activityRedPackId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1186,7 +1208,7 @@ public class PaymentService {
             if(house!= null) {
                 houseId=house.getId();
             }
-            return generateOrderCommon(member,houseId, cityId, productJsons, workerId,  addressId,2,null);
+            return generateOrderCommon(member,houseId, cityId, productJsons, workerId,  addressId,2,null,activityRedPackId);
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1203,9 +1225,10 @@ public class PaymentService {
      * @param workerId
      * @param addressId
      * @param orderSource (1设计精算订单提交，2购物车提交，4设计精算补差价订单提交）
+     * @param activityRedPackId 优惠券ID
      * @return
      */
-    public ServerResponse generateOrderCommon(Member member,String houseId,String cityId, String productJsons,String workerId, String addressId,Integer orderSource,String workerTypeId){
+    public ServerResponse generateOrderCommon(Member member,String houseId,String cityId, String productJsons,String workerId, String addressId,Integer orderSource,String workerTypeId,String activityRedPackId){
         JSONArray productArray= JSON.parseArray(productJsons);
         if(productArray.size()==0){
             return ServerResponse.createByErrorMessage("参数错误");
@@ -1222,6 +1245,11 @@ public class PaymentService {
         BigDecimal paymentPrice = new BigDecimal(0);//总共钱
         BigDecimal freightPrice = new BigDecimal(0);//总运费
         BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
+        Double totalMoney=0d;//优惠商品总额
+        Double concessionMoney=0d;//优惠总额
+        String concessionProducts="";//可优惠商品编码
+        ActivityProductDTO activityProductDTO;
+        List<ActivityProductDTO> activityProductDTOList=new ArrayList<>();
         for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
             BigDecimal totalSellPrice = new BigDecimal(0);//总价
             BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
@@ -1235,9 +1263,26 @@ public class PaymentService {
                 }
                 totalSellPrice = totalSellPrice.add(totalPrice);
                 paymentPrice = paymentPrice.add(totalPrice);
+
+                activityProductDTO=new ActivityProductDTO();
+                activityProductDTO.setProductId(parmDTO.getProductId());
+                activityProductDTO.setPrice(parmDTO.getPrice());
+                activityProductDTO.setShopCount(parmDTO.getShopCount());
+                activityProductDTOList.add(activityProductDTO);
             }
             shoppingCartDTO.setTotalMaterialPrice(totalMaterialPrice);
             shoppingCartDTO.setTotalPrice(totalSellPrice);
+        }
+        if(StringUtils.isNotBlank(activityRedPackId)){
+            //查询对应的优惠信息
+            Map map=discountPage(member.getId(),activityProductDTOList,activityRedPackId);
+            if(map!=null){
+                ActivityRedPackRecordDTO recommendCuponsPack=(ActivityRedPackRecordDTO)map.get("recommendCuponsPack");
+                totalMoney=recommendCuponsPack.getTotalMoney();
+                concessionMoney=recommendCuponsPack.getConcessionMoney();
+                concessionProducts=recommendCuponsPack.getProducts()+",";
+
+            }
         }
 
         if (shoppingCartDTOS!=null) {
@@ -1262,6 +1307,7 @@ public class PaymentService {
             order.setOrderSource(orderSource);//来源购物车
             order.setCreateBy(member.getId());
             order.setWorkerTypeId(workerTypeId);
+            order.setTotalDiscountPrice(BigDecimal.valueOf(concessionMoney));
             orderMapper.insert(order);
             for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
                 Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),shoppingCartDTO.getTotalMaterialPrice().doubleValue());
@@ -1287,6 +1333,13 @@ public class PaymentService {
                     orderItem.setActualPaymentPrice(0d);
                     orderItem.setStevedorageCost(0d);
                     orderItem.setTransportationCost(0d);
+                    //优惠价钱
+                    if(totalMoney>0&&concessionProducts.contains(good.getProductId()+",")){
+                        orderItem.setDiscountPrice(MathUtil.div(MathUtil.mul(orderItem.getTotalPrice(),totalMoney),concessionMoney));//每个商品的优惠总额
+                    }else{
+                        orderItem.setDiscountPrice(0d);
+                    }
+
                     if(orderSource==1||orderSource==4){
                         orderItem.setWorkerTypeId(good.getWorkerTypeId());
                     }
@@ -1352,9 +1405,10 @@ public class PaymentService {
                 businessOrder.setHouseId(houseId);
                 businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
                 businessOrder.setState(1);//刚生成
-                businessOrder.setTotalPrice(paymentPrice);
-                businessOrder.setDiscountsPrice(new BigDecimal(0));
-                businessOrder.setPayPrice(paymentPrice);
+                businessOrder.setTotalPrice(paymentPrice);//订单总额
+                businessOrder.setPayPrice(paymentPrice.add(totalMoveDost).add(freightPrice).subtract(order.getTotalDiscountPrice()));//实付总额
+                businessOrder.setDiscountsPrice(BigDecimal.valueOf(concessionMoney));
+                businessOrder.setRedPacketPayMoneyId(activityRedPackId);//优惠券ID
                 if(orderSource==1||orderSource==4){
                     businessOrder.setType(1);//记录支付类型任务类型(精算支付任务，走工序的）
                 }else{
@@ -1369,8 +1423,9 @@ public class PaymentService {
             order.setTotalStevedorageCost(totalMoveDost);//总搬运费
             order.setBusinessOrderNumber(businessOrder.getNumber());
             order.setTotalAmount(paymentPrice);// 订单总额(工钱)
+            order.setActualPaymentPrice(paymentPrice.add(totalMoveDost).add(freightPrice).subtract(order.getTotalDiscountPrice()));
             if(orderSource==4){
-                order.setWorkerTypeName(" 补差价订单");
+                order.setWorkerTypeName("补差价订单");
             }
             if(workerTypeId!=null&&"1".equals(workerTypeId)){
                 order.setWorkerTypeName("设计师人工订单");
@@ -1404,12 +1459,21 @@ public class PaymentService {
                 }
             }
 
+            if(totalMoney>0){
+                //优惠卷状态改为已使用
+                ActivityRedPackRecord activityRedPackRecord=activityRedPackRecordMapper.selectByPrimaryKey(activityRedPackId);
+                activityRedPackRecord.setHaveReceive(1);
+                activityRedPackRecord.setBusinessOrderNumber(businessOrder.getNumber());
+                activityRedPackRecord.setModifyDate(new Date());
+                activityRedPackRecordMapper.updateByPrimaryKeySelective(activityRedPackRecord);
+            }
+
             //清空购物车指定商品
             example = new Example(ShoppingCart.class);
             example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                     .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
             iShoppingCartMapper.deleteByExample(example);
-            return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
+            return ServerResponse.createBySuccess("提交成功", businessOrder);
         }
         return ServerResponse.createBySuccess("提交成功");
     }
@@ -2109,102 +2173,173 @@ public class PaymentService {
             return ServerResponse.createByErrorMessage("更新成功：原因："+e.getMessage());
         }
     }
+
+    /**
+     * 查询符合条件的优惠券
+     * @param userToken
+     * @param productJsons
+     * @return
+     */
+    public ServerResponse queryActivityRedPackInfo(String userToken,String productJsons){
+        try{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            JSONArray productArray= JSON.parseArray(productJsons);
+            List<ActivityProductDTO> activityProductDTOList=new ArrayList<>();
+            ActivityProductDTO activityProductDTO;
+            if(productArray.size()==0){
+                return ServerResponse.createByErrorMessage("参数错误");
+            }
+            Map<String,ShoppingCartListDTO> productMap = new HashMap<>();
+            String[] productIds=new String[productArray.size()];
+            for (int i = 0; i < productArray.size(); i++) {
+                JSONObject productObj = productArray.getJSONObject(i);
+                activityProductDTO=new ActivityProductDTO();
+                activityProductDTO.setProductId(productObj.getString("productId"));
+                activityProductDTO.setPrice(productObj.getDouble("price"));
+                activityProductDTO.setShopCount(productObj.getDouble("shopCount"));
+                activityProductDTOList.add(activityProductDTO);
+            }
+            Map<String,Object> map=discountPage(member.getId(),activityProductDTOList,null);
+            if(map==null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            return ServerResponse.createBySuccess("查询成功",map);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败",e);
+        }
+
+    }
     /**
      * 可用优惠券数据
      *
-     * @param businessOrderNumber 订单号
+     * @param activityProductDTOList 需支付商品列表
      * @return
      */
-    public List<ActivityRedPackRecordDTO> discountPage(String businessOrderNumber) {
+    public Map<String,Object> discountPage(String membreId,List<ActivityProductDTO> activityProductDTOList,String activityRedPackId) {
         try {
-            Example example = new Example(BusinessOrder.class);
-            example.createCriteria().andEqualTo("number", businessOrderNumber).andEqualTo("state", 1);
-            List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-            if (businessOrderList.size() == 0) {
+            Map<String,Object> redPackMap=new HashMap<>();
+            if (activityProductDTOList.size() == 0) {
                 return null;
             }
             //满足条件的优惠券记录
             List<ActivityRedPackRecordDTO> redPacetResultList = new ArrayList<>();
-            BusinessOrder businessOrder = businessOrderList.get(0);
-            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-            ActivityRedPackRecord activityRedPackRecord = new ActivityRedPackRecord();
-            activityRedPackRecord.setEndDate(new Date());
-            activityRedPackRecord.setMemberId(businessOrder.getMemberId());
-            activityRedPackRecord.setCityId(house.getCityId());
-            activityRedPackRecord.setHaveReceive(0);
-            List<ActivityRedPackRecordDTO> redPacketRecordList = activityRedPackRecordMapper.queryActivityRedPackRecords(activityRedPackRecord);
-
-            activityRedPackRecord.setHaveReceive(1);
-            activityRedPackRecord.setBusinessOrderNumber(businessOrder.getNumber());
-            List<ActivityRedPackRecordDTO> redPacketRecordSelectList = activityRedPackRecordMapper.queryActivityRedPackRecords(activityRedPackRecord);
-            if (redPacketRecordSelectList != null && redPacketRecordSelectList.size() > 0) {
-                redPacketRecordList.addAll(redPacketRecordSelectList);
-            }
-            if (redPacketRecordList.size() == 0) {
+            ActivityRedPackRecordDTO recommendCuponsPack=new ActivityRedPackRecordDTO();//推荐优惠券
+            List<ActivityRedPackRecordDTO> redPacketRecordSelectList = activityRedPackRecordMapper.queryMyAticvityList(membreId,null,3,activityRedPackId);
+            if (redPacketRecordSelectList.size() == 0) {
                 return null;
             }
-            String houseFlowId = businessOrder.getTaskId();
-            ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(house.getCityId(), houseFlowId);
-            ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(house.getCityId(), houseFlowId);
-
-            if (retMaterial.getResultObj() != null || retWorker.getResultObj() != null) {
-                List<BudgetMaterial> budgetMaterialList = JSONObject.parseArray(retMaterial.getResultObj().toString(), BudgetMaterial.class);
-                List<BudgetMaterial> budgetWorkerList = JSONObject.parseArray(retWorker.getResultObj().toString(), BudgetMaterial.class);
-
-                for (ActivityRedPackRecordDTO redPacketRecord : redPacketRecordList) {
-                    BigDecimal workerTotal = new BigDecimal(0);
-                    BigDecimal goodsTotal = new BigDecimal(0);
-                    BigDecimal productTotal = new BigDecimal(0);
-
-                    if (budgetWorkerList.size() > 0) {
-                        for (BudgetMaterial budgetWorker : budgetWorkerList) {
-                            //判断工种的优惠券是否匹配
-                            if (budgetWorker.getWorkerTypeId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 0) {
-                                workerTotal = workerTotal.add(new BigDecimal(budgetWorker.getTotalPrice()));
+            String prodTemplateId;//商品模板ID
+            String goodsId;//货品ID
+            String categoryId;//类别ID
+            String categoryTopId;//顶级类别id
+            String storefrontId;//店铺ID
+            Integer fromObjectType;
+            List productlist;
+            for (ActivityRedPackRecordDTO redPacketRecord : redPacketRecordSelectList) {
+                Double totalMoney=0d;//符合条件的商品总额
+                Double concessionMoney=0d;//可优惠金额
+                productlist=new ArrayList();
+                for (ActivityProductDTO activityProductDTO : activityProductDTOList) {
+                    //查询当前商品的商品模板ID，获取ID，类别ID，顶级类别Id，店铺ID
+                    Map<String,Object> product= iMasterProductTemplateMapper.queryPrductByStorefrontId(activityProductDTO.getProductId());
+                    prodTemplateId=(String)product.get("prodTemplateId");//商品模板ID
+                    goodsId=(String)product.get("goodsId");//货品ID
+                    categoryId=(String)product.get("categoryId");//类别ID
+                    categoryTopId=(String)product.get("categoryTopId");//顶级类别id
+                    storefrontId=(String)product.get("storefrontId");//店铺ID
+                    fromObjectType=redPacketRecord.getFromObjectType();//3类别，4货品，5商品，6城市，7店铺
+                    //判断优惠是城市券还是店铺券
+                    if(redPacketRecord.getSourceType()==1){//城市券
+                        if(fromObjectType==6){
+                            totalMoney=MathUtil.add(totalMoney,MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
+                            productlist.add(activityProductDTO.getProductId());
+                        }else if(fromObjectType==3){//类别
+                            BasicsGoodsCategory basicsGoodsCategory=iMasterBasicsGoodsCategoryMapper.selectByPrimaryKey(redPacketRecord.getFromObject());
+                            if(basicsGoodsCategory!=null&&(categoryId.equals(basicsGoodsCategory.getId())||categoryTopId.equals(basicsGoodsCategory.getParentTop())||categoryTopId.equals(basicsGoodsCategory.getId()))){
+                                totalMoney=MathUtil.add(totalMoney,MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
+                                productlist.add(activityProductDTO.getProductId());
                             }
+                        }else if(fromObjectType==4&&goodsId.equals(redPacketRecord.getFromObject())){//货品
+                            totalMoney=MathUtil.add(totalMoney,MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
+                            productlist.add(activityProductDTO.getProductId());
+                        }else if(fromObjectType==5&&prodTemplateId.equals(redPacketRecord.getFromObject())){//商品
+                            totalMoney=MathUtil.add(totalMoney,MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
+                            productlist.add(activityProductDTO.getProductId());
+                        }
+                    }else if(redPacketRecord.getSourceType()==2&&redPacketRecord.getStorefrontId().equals(storefrontId)){//店铺券
+                        if(fromObjectType==7){
+                            totalMoney=MathUtil.add(totalMoney,MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
+                            productlist.add(activityProductDTO.getProductId());
+                        }else if(fromObjectType==3){//类别
+                            BasicsGoodsCategory basicsGoodsCategory=iMasterBasicsGoodsCategoryMapper.selectByPrimaryKey(redPacketRecord.getFromObject());
+                            if(basicsGoodsCategory!=null&&(categoryId.equals(basicsGoodsCategory.getId())||categoryTopId.equals(basicsGoodsCategory.getParentTop())||categoryTopId.equals(basicsGoodsCategory.getId()))){
+                                totalMoney=MathUtil.add(totalMoney,MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
+                                productlist.add(activityProductDTO.getProductId());
+                            }
+                        }else if(fromObjectType==4&&goodsId.equals(redPacketRecord.getFromObject())){//货品
+                            totalMoney=MathUtil.add(totalMoney,MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
+                            productlist.add(activityProductDTO.getProductId());
+                        }else if(fromObjectType==5&&activityProductDTO.getProductId().equals(redPacketRecord.getFromObject())){//商品
+                            totalMoney=MathUtil.add(totalMoney,MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
+                            productlist.add(activityProductDTO.getProductId());
                         }
                     }
-                    if (budgetMaterialList.size() > 0) {
-                        for (BudgetMaterial budgetMaterial : budgetMaterialList) {
-                            //判断材料优惠券是否匹配
-                            if (budgetMaterial.getGoodsId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 1) {
-                                goodsTotal = goodsTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
-                            }
-                            //判断货品的优惠券是否匹配
-                            if (budgetMaterial.getProductId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 2) {
-                                productTotal = productTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
-                            }
+                }
+
+                //优惠券类型 0为减免金额券 1 为折扣券 2代金券
+                if ("0".equals(redPacketRecord.getType())||("1".equals(redPacketRecord.getType())&&redPacketRecord.getSatisfyMoney()>0)) {
+                    //判断符合条件商品总额是否满足条件
+                    if(MathUtil.sub(totalMoney,redPacketRecord.getSatisfyMoney())>0){
+                        //计算可优惠金额
+                        if("0".equals(redPacketRecord.getType())){
+                            concessionMoney=redPacketRecord.getMoney();
+                        }else if("1".equals(redPacketRecord.getType())){
+                            concessionMoney=MathUtil.mul(MathUtil.mul(totalMoney,redPacketRecord.getSatisfyMoney()),10);
                         }
-                    }
-                    //判断优惠券类型是否为满减券
-                    if (redPacketRecord.getRedPack().getType() == 0) {
-                        ///判断人工金额是否满足优惠上限金额
-                        if (redPacketRecord.getRedPack().getFromObjectType() == 0 && workerTotal.compareTo(redPacketRecord.getRedPackRule().getSatisfyMoney()) >= 0) {
-                            redPacetResultList.add(redPacketRecord);
-                        } else
-                            //判断材料金额是否满足优惠上限金额
-                            if (redPacketRecord.getRedPack().getFromObjectType() == 1 && goodsTotal.compareTo(redPacketRecord.getRedPackRule().getSatisfyMoney()) >= 0) {
-                                redPacetResultList.add(redPacketRecord);
-                            } else
-                                //判断货品金额是否满足优惠上限金额
-                                if (redPacketRecord.getRedPack().getFromObjectType() == 2 && productTotal.compareTo(redPacketRecord.getRedPackRule().getSatisfyMoney()) >= 0) {
-                                    redPacetResultList.add(redPacketRecord);
-                                }
-                    }
-                    //判断优惠券类型是否为折扣券或代金券
-                    if ((redPacketRecord.getRedPack().getType() == 1 || redPacketRecord.getRedPack().getType() == 2) &&
-                            (workerTotal.doubleValue() > 0 || goodsTotal.doubleValue() > 0 || productTotal.doubleValue() > 0)) {
+                        redPacketRecord.setTotalMoney(totalMoney);
+                        redPacketRecord.setConcessionMoney(concessionMoney);
+                        redPacketRecord.setProducts(StringUtils.strip(productlist.toString(),"[]"));
                         redPacetResultList.add(redPacketRecord);
+                        if(recommendCuponsPack==null||StringUtils.isBlank(recommendCuponsPack.getId())){
+                            recommendCuponsPack=redPacketRecord;
+                        }else if(MathUtil.sub(redPacketRecord.getConcessionMoney(),recommendCuponsPack.getConcessionMoney())>0){
+                            recommendCuponsPack=redPacketRecord;
+                        }
+
                     }
+
+                }else{
+                    if("2".equals(redPacketRecord.getType())){
+                        concessionMoney=redPacketRecord.getMoney();
+                    }else if("1".equals(redPacketRecord.getType())){
+                        concessionMoney=MathUtil.mul(MathUtil.mul(totalMoney,redPacketRecord.getSatisfyMoney()),10);
+                    }
+                    redPacketRecord.setTotalMoney(totalMoney);
+                    redPacketRecord.setConcessionMoney(concessionMoney);
+                    redPacketRecord.setProducts(StringUtils.strip(productlist.toString(),"[]"));
+                    redPacetResultList.add(redPacketRecord);
+                    if(recommendCuponsPack==null||StringUtils.isBlank(recommendCuponsPack.getId())){
+                        recommendCuponsPack=redPacketRecord;
+                    }else if(MathUtil.sub(redPacketRecord.getConcessionMoney(),recommendCuponsPack.getConcessionMoney())>0){
+                        recommendCuponsPack=redPacketRecord;
+                    }
+
                 }
 
             }
             if (redPacetResultList.size() == 0) {
                 return null;
             }
-            return redPacetResultList;
+            redPackMap.put("recommendCuponsPack",recommendCuponsPack);//推荐优惠券
+            redPackMap.put("redPacetResultList",redPacetResultList);//符合条件的优惠券
+            return redPackMap;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败",e);
             return null;
         }
     }
@@ -2221,8 +2356,11 @@ public class PaymentService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
 
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            Member member = (Member) object;
+            List<ActivityProductDTO> activityProductDTOList=new ArrayList<>();//汇总所有购买商品
+            ActivityProductDTO activityProductDTO;
             PaymentDTO paymentDTO = new PaymentDTO();
             paymentDTO.setType(4);
             paymentDTO.setDiscountsPrice(new BigDecimal(0));
@@ -2263,6 +2401,11 @@ public class PaymentService {
                                     BigDecimal totalAddedProduct = new BigDecimal(deliverOrderAddedProduct.getPrice()*good.getShopCount());
                                     totalPrice = totalPrice.add(totalAddedProduct);
                                 }
+                                activityProductDTO=new ActivityProductDTO();
+                                activityProductDTO.setProductId(good.getProductId());
+                                activityProductDTO.setPrice(good.getPrice().doubleValue());
+                                activityProductDTO.setShopCount(good.getShopCount());
+                                activityProductDTOList.add(activityProductDTO);
                             }
                         }
                     }
@@ -2341,6 +2484,8 @@ public class PaymentService {
                     BigDecimal totalSellPrice = new BigDecimal(0);//总价
                     for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
                         ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
+                        shoppingCartListDTO.setImageUrl(StringTool.getImage(shoppingCartListDTO.getImage(), imageAddress));//图多张
+                        shoppingCartListDTO.setImageSingle(StringTool.getImageSingle(shoppingCartListDTO.getImage(), imageAddress));//图一张
                         shoppingCartListDTO.setShopCount(parmDTO.getShopCount());
                         totalSellPrice = totalSellPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
                         totalPrice = totalPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
@@ -2391,6 +2536,11 @@ public class PaymentService {
                                 shoppingCartListDTO.setValueNameArr(strNewValueNameArr);
                             }
                         }
+                        activityProductDTO=new ActivityProductDTO();
+                        activityProductDTO.setProductId(parmDTO.getProductId());
+                        activityProductDTO.setPrice(parmDTO.getPrice());
+                        activityProductDTO.setShopCount(parmDTO.getShopCount());
+                        activityProductDTOList.add(activityProductDTO);
                     }
                     Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),totalSellPrice.doubleValue());
                     freightPrice=freightPrice.add(new BigDecimal(freight));
@@ -2401,6 +2551,17 @@ public class PaymentService {
             } else {
                 return ServerResponse.createByErrorMessage("参数错误");
             }
+            //获取符合条件的有效的优惠券
+            Map<String,Object> redPackMap=discountPage(member.getId(),activityProductDTOList,null);
+            if(redPackMap!=null){
+                //推荐优惠券
+                ActivityRedPackRecordDTO recommendCuponsPack=(ActivityRedPackRecordDTO)redPackMap.get("recommendCuponsPack");
+                paymentDTO.setDiscountsPrice(BigDecimal.valueOf(recommendCuponsPack.getConcessionMoney()));
+                paymentDTO.setRedPackRecordDTO(recommendCuponsPack);
+                //可选优惠券列表
+                paymentDTO.setRedPacetResultList((List)redPackMap.get("redPacetResultList"));
+            }
+
             paymentDTO.setDiscounts(0);
             paymentDTO.setFreight(freightPrice);//运费
             paymentDTO.setMoveDost(totalMoveDost);//搬运费
@@ -2410,9 +2571,11 @@ public class PaymentService {
             paymentDTO.setTotalPrice(totalPrice);
             paymentDTO.setPayPrice(payPrice);
             paymentDTO.setTaskId(taskId);
+
+
             return ServerResponse.createBySuccess("查询成功", paymentDTO);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }

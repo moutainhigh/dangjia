@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface IConfigMapper extends Mapper<Config> {
 
-  public List<Config> queryBasicConfig(Config config);
+  List<Config> queryBasicConfig(Config config);
 
   Config selectConfigInfoByParamKey(@Param("paramKey") String paramKey);
 }

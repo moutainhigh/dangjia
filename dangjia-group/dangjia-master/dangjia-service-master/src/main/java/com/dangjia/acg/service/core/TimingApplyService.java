@@ -1,19 +1,24 @@
 package com.dangjia.acg.service.core;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.WorkIntegral;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.matter.TechnologyRecordService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -33,6 +38,14 @@ public class TimingApplyService {
     private EvaluateService evaluateService;
 
     @Autowired
+    private IMemberMapper memberMapper;
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
+    @Autowired
+    private TechnologyRecordService technologyRecordService;
+
+
+    @Autowired
     private IWorkIntegralMapper workIntegralMapper;
     /**
      * 管家自动审核
@@ -50,11 +63,11 @@ public class TimingApplyService {
      * 旷工自动扣钱100
      */
     public void absenteeism(){
-//        List<HouseFlow> houseFlows=technologyRecordService.unfinishedFlow(null);
-//        for (HouseFlow houseFlow : houseFlows){
-//            //今日是否开工超时扣旷工钱
-//            evaluateService.absenteeismOvertime(houseFlow);
-//        }
+        List<HouseFlow> houseFlows=technologyRecordService.unfinishedFlow(null);
+        for (HouseFlow houseFlow : houseFlows){
+            //今日是否开工超时扣旷工积分
+            evaluateService.absenteeismOvertime(houseFlow,"旷工积分扣除");
+        }
 
         Example example =new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.PAUSE,1);
@@ -85,7 +98,7 @@ public class TimingApplyService {
                         Date end = new Date();
                         int suspendDay = DateUtil.daysofTwo(start, end);
                         if (suspendDay > 1) {
-                            evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(1), "申请停工超过2天，积分扣除");
+                            evaluateService.absenteeismOvertime(houseFlow,"申请停工超过2天，积分扣除");
                         }
                     }
                 }
@@ -131,11 +144,21 @@ public class TimingApplyService {
     public void couponApply(){
         List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.couponApply(new Date());
         for (HouseFlowApply houseFlowApply : houseFlowApplyList){
-            if(houseFlowApply.getWorkerType() == 3){
-                evaluateService.saveEvaluateSupervisor(null,houseFlowApply.getId(),"",5,true,null);
-            }else {
-                evaluateService.saveEvaluate(houseFlowApply.getId(),"",5,"",5,true);
+            JSONArray jsons =new JSONArray();
+            JSONObject json =new JSONObject();
+            json.put("workerId",houseFlowApply.getWorkerId());
+            json.put("content","");
+            json.put("star",5);
+            jsons.add(json);
+            if(houseFlowApply.getWorkerType() != 3) {
+                Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
+                json = new JSONObject();
+                json.put("workerId", supervisor.getId());
+                json.put("content", "");
+                json.put("star", 5);
+                jsons.add(json);
             }
+            evaluateService.saveEvaluate(houseFlowApply.getId(), JSON.toJSONString(jsons),true);
         }
     }
 }

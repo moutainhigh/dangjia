@@ -64,63 +64,46 @@
 
     <select id="getWebOrderList" resultType="com.dangjia.acg.dto.deliver.WebOrderDTO">
         SELECT
-        a.id AS id,
-        a.number AS orderId,
-        CONCAT(
-        c.residential,
-        IFNULL(c.building, '*'),
-        '栋',
-        IFNULL(CONCAT(c.unit, '单元'),'' ),
-        IFNULL(c.number, '*'),
-        '号'
-        ) AS houseName,
-        d.id AS memberId,
-        d.mobile AS mobile,
-        a.pay_order_number AS payOrderNumber,
-        a.total_price AS totalAmount,
-        a.discounts_price AS redPackAmount,
-        a.pay_price AS actualPayment,
-        a.type AS type,
-        a.image ,
-        a.storefront_id as storefrontId,
-        a.state AS state,
-        a.task_id AS taskId,
-        c.village_id storeName
+            a.id AS id,
+            a.number AS orderId,
+            m.address AS houseName,
+            m.member_id AS memberId,
+            m.mobile AS mobile,
+            a.pay_order_number AS payOrderNumber,
+            a.total_price AS totalAmount,
+            a.discounts_price AS redPackAmount,
+            a.pay_price AS actualPayment,
+            a.type AS type,
+            a.image ,
+            a.storefront_id as storefrontId,
+            a.state AS state,
+            a.task_id AS taskId,
+            c.village_id storeName,
+            a.red_packet_pay_money_id redPackId
         FROM
-        dj_pay_business_order AS a
-        INNER JOIN dj_member AS d ON d.id = a.member_id
-        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name  FROM dj_member_city c GROUP BY c.member_id )
-        mt ON mt.member_id = d.id AND FIND_IN_SET(#{cityId}, mt.city_id )
-        LEFT JOIN dj_house AS c ON a.house_id = c.id
+            dj_pay_business_order AS a
+        INNER JOIN dj_deliver_order t on a.number=t.business_order_number
+        INNER JOIN dj_member_address m  ON (t.address_id=m.id or t.house_id=m.house_id)
+        LEFT JOIN dj_house c on a.house_id=c.id
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            INNER JOIN dj_pay_pay_order AS pa ON pa.number = a.pay_order_number
+            INNER JOIN dj_pay_pay_order pa AS pa ON pa.number = a.pay_order_number
         </if>
-        WHERE
-        a.data_status = 0
+        WHERE a.data_status = 0
+        and m.city_id=#{cityId}
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and pa.create_date between #{beginDate} and #{endDate}
-        </if>
-        <if test="storefrontId!=null and storefrontId!=''">
-            and a.storefront_id = #{storefrontId}
         </if>
         <if test="state != -1">
             and a.state = #{state}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and ( d.mobile like CONCAT('%',#{searchKey},'%')
-            or CONCAT(
-            c.residential,
-            IFNULL(c.building, '*'),
-            '栋',
-            IFNULL(CONCAT(c.unit, '单元'),'' ),
-            IFNULL(c.number, '*'),
-            '号'
-            ) LIKE CONCAT('%',#{searchKey},'%')
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or m.address LIKE CONCAT('%',#{searchKey},'%')
             or a.pay_order_number like CONCAT('%',#{searchKey},'%')
             or a.number like CONCAT('%',#{searchKey},'%'))
         </if>
 
-        GROUP BY a.id
+        group by a.id
         ORDER BY
         a.create_date DESC
     </select>
@@ -148,5 +131,76 @@
 		it.worker_goods_sn
     ORDER BY 	it.product_sn DESC,it.worker_goods_sn DESC
 	</select>
+
+    <select id="selectBusinessOrderInfo" resultType="com.dangjia.acg.dto.deliver.BusinessOrderInfoDTO">
+        SELECT
+            p.id businessOrderId,
+            p.number businessNumber,
+            p.total_price totalAmount,
+            p.pay_price actualPaymentPrice,
+            sum(t.total_stevedorage_cost) totalStevedorageSost,
+            sum(t.total_transportation_cost) totalTransportationSost,
+            p.discounts_price totalDiscountPrice,
+            p.create_date orderGenerationTime,
+            m.member_id memberId,
+            m.`name` memberName,
+            m.mobile memberMobile,
+            m.address address,
+            p.red_packet_pay_money_id discountId,
+            p.state,
+            t.payment,
+            p.house_id houseId,
+            p.red_packet_pay_money_id redPackId,
+            p.discounts_price redPackAmount
+        FROM
+            dj_deliver_order t
+        INNER JOIN dj_pay_business_order p on t.business_order_number=p.number
+        LEFT JOIN dj_member_address m ON (
+            t.address_id = m.id
+            OR t.house_id = m.house_id
+        )
+        WHERE
+            p.number=#{businessNumber}
+        and (t.parent_order_id is null or t.parent_order_id=t.id)
+    </select>
+    <!-- 查询订单详情信息（按店铺汇总)-->
+    <select id="selectOrderInfoList" resultType="com.dangjia.acg.dto.deliver.OrderDTO">
+        SELECT
+            t.id orderId,
+            t.order_number orderNumber,
+            t.total_amount totalAmount,
+            t.actual_payment_price actualPaymentPrice,
+            t.total_stevedorage_cost totalStevedorageSost,
+            t.total_transportation_cost totalTransportationSost,
+            t.total_discount_price totalDiscountPrice,
+            s.id storefrontId,
+            s.storefront_name storefrontName
+        FROM
+            dj_deliver_order t
+        INNER JOIN dj_basics_storefront s ON t.storefont_id = s.id
+        WHERE
+            t.business_order_number = #{businessNumber}
+    </select>
+    <!-- 查询订单明细信息-->
+    <select id="queryOrderItemList" resultType="com.dangjia.acg.dto.deliver.OrderItemDTO">
+            select
+                bsp.image as image,
+                bpt.name as name,
+                bpt.product_sn as productSn,
+                doi.price as price,
+                doi.shop_count AS shopCount,
+                doi.ask_count as askCount,
+                doi.return_count as returnCount,
+                doi.stevedorage_cost stevedorageCost,
+                doi.transportation_cost transportationCost,
+                (doi.price*doi.shop_count) totalPrice,
+                (IFNULL(doi.shop_count,0) - IFNULL(doi.ask_count,0) - IFNULL(doi.return_count,0)) AS remnantCount,
+                (IFNULL(doi.shop_count,0) * IFNULL(doi.price,0)) AS remember
+            from
+                dj_deliver_order_item doi
+            INNER JOIN dj_basics_storefront_product bsp on doi.product_id = bsp.id
+            INNER JOIN dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
+            where doi.order_id = #{orderId}
+    </select>
 </mapper>
 

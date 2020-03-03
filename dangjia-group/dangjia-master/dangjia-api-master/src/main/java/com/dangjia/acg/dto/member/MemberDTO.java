@@ -18,6 +18,8 @@ public class MemberDTO {
     private String mobile;
 
     private Integer obligationCount;//待付款数量
+    private Integer deliverCount;//待发货数量
+    private Integer receiveCount;//待收货数量
 
     private Integer discountCouponCount;//优惠券数量
 

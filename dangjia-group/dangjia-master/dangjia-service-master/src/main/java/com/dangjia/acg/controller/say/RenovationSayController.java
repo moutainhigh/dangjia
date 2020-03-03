@@ -43,14 +43,31 @@ public class RenovationSayController implements RenovationSayAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryRenovationSayData(String id) {
-        return renovationSayService.queryRenovationSayData(id);
+    public ServerResponse queryRenovationSayData(String userToken,String id) {
+        return renovationSayService.queryRenovationSayData(userToken,id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryAppRenovationSayList() {
-        return renovationSayService.queryAppRenovationSayList();
+    public ServerResponse queryAppRenovationSayList(String userToken) {
+        return renovationSayService.queryAppRenovationSayList(userToken);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setThumbUp(String userToken, String id) {
+        try {
+            return renovationSayService.setThumbUp(userToken,id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("点赞失败");
+        }
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setPageView(String id) {
+        return renovationSayService.setPageView(id);
     }
 
 }

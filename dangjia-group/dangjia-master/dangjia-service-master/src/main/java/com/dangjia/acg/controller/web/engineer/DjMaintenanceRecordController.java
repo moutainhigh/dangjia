@@ -293,23 +293,34 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.updateTaskStackData(id);
     }
 
+
     @Override
     @ApiMethod
-    public ServerResponse queryDimensionRecord(String memberId) {
-        return djMaintenanceRecordService.queryDimensionRecord(memberId);
+    public ServerResponse queryMaintenanceRecordList(String userToken,PageDTO pageDTO,String houseId){
+        return djMaintenanceRecordService.queryMaintenanceRecordList(userToken,pageDTO,houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryDimensionRecordInFo(String mrId) {
-        return djMaintenanceRecordService.queryDimensionRecordInFo(mrId);
+    public ServerResponse queryDimensionRecord(String userToken,String houseId) {
+        return djMaintenanceRecordService.queryDimensionRecord(userToken,houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse insertResponsibleParty(String responsiblePartyId,String houseId,
+    public ServerResponse queryDimensionRecordInFo(String mrrpId) {
+        return djMaintenanceRecordService.queryDimensionRecordInFo(mrrpId);
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse queryDimensionInfoByTaskId(String taskId){
+        return djMaintenanceRecordService.queryDimensionInfoByTaskId(taskId);
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse insertResponsibleParty(String mrrpId,String responsiblePartyId,String houseId,
                                                  String description, String image) {
-        return djMaintenanceRecordService.insertResponsibleParty(responsiblePartyId,houseId,description,image);
+        return djMaintenanceRecordService.insertResponsibleParty(mrrpId,responsiblePartyId,houseId,description,image);
     }
 
     @Override
@@ -351,8 +362,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryComplain(String userToken,String memberId){
-        return djMaintenanceRecordService.queryComplain(userToken, memberId);
+    public ServerResponse queryComplain(String userToken,PageDTO pageDTO,String maintenanceRecordId){
+        return djMaintenanceRecordService.queryComplain(userToken,pageDTO,maintenanceRecordId);
     }
 
     @Override
@@ -446,11 +457,48 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         try {
             return djMaintenanceRecordService.setMaintenanceHandlesSubmissions(userToken,maintenanceRecordId,remark,image);
         } catch (Exception e) {
-            e.printStackTrace();
             logger.info("操作失败",e);
-            return ServerResponse.createByErrorMessage("操作成功");
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 
+    /**
+     * 维保申诉成功后--人工定责列表查询
+     * @param status 查询状态：-1全部，1待处理，2处理
+     * @param searchKey 查询条：业主名称/电话
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchManualAllocation(PageDTO pageDTO,Integer status,String searchKey,String cityId){
+        return djMaintenanceRecordService.searchManualAllocation(pageDTO,status,searchKey,cityId);
+    }
+    /**
+     * 维保申诉成功后--人工定责列表查询
+     * @param manuaId 定责流水记录ID
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchManualAllocationDetail(String manuaId){
+        return djMaintenanceRecordService.searchManualAllocationDetail(manuaId);
+    }
+
+    /**
+     * 平台人工定责，责任分配
+     * @param manuaId 责任流水ID
+     * @param newPartyInfo 定责信息 [{anyPartyId:”aa”,type:1,money:122},{anyPartyId:”aa”,type:2,money:122}]
+     *                     anyPartyId 店铺/工匠ID type:1店铺，2工匠 money:质保金额
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveNewPartyInfo(@RequestParam("manuaId") String manuaId,@RequestParam("newPartyInfo") String newPartyInfo){
+        try{
+            return djMaintenanceRecordService.saveNewPartyInfo(manuaId,newPartyInfo);
+        }catch (Exception e){
+            logger.error("责任分配失败",e);
+            return ServerResponse.createByErrorMessage("责任分配失败");
+        }
+    }
 }
 

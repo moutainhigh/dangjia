@@ -112,7 +112,8 @@ public interface DjDeliverOrderAPI {
     @ApiOperation(value = "我的订单,待付款,库存,已取消", notes = "我的订单,待付款,库存,已取消")
     ServerResponse queryDeliverOrderHump(@RequestParam("pageDTO") PageDTO pageDTO,
                                          @RequestParam("houseId") String houseId,
-                                         @RequestParam("state") String state);
+                                         @RequestParam("state") String state,
+                                         @RequestParam("userToken") String userToken);
 //    /**
 //     * 取消订单
 //     *

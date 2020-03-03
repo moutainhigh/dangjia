@@ -49,6 +49,8 @@ public class RefundOrderItemDTO {
 
     private Double transportationCost;//运费
 
+    private Double discountPrice;//优惠价钱
+
     private String unitId;//单位ID
 
     private String unitName;//单位名称

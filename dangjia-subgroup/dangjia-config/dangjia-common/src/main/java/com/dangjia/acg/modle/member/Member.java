@@ -247,6 +247,12 @@ public class Member extends BaseEntity {
     @ApiModelProperty("设计师装修风格,ID")
     private String styles;// 手机
 
+    @Column(name = "shell_money")
+    @Desc(value = "贝币值")
+    @ApiModelProperty("贝币值")
+    private BigDecimal shellMoney;// 手机
+
+
     @Column(name = "auto_order")
     @Desc(value = "是否自动接单 0=接单  1=不接单")
     @ApiModelProperty("是否自动接单 0=接单  1=不接单")

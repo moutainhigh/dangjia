@@ -41,6 +41,7 @@ public interface PaymentAPI {
     @ApiOperation(value = "获取微信签名信息", notes = "获取微信签名信息")
     ServerResponse getWeiXinSign(@RequestParam("userToken") String userToken,
                                  @RequestParam("businessOrderNumber") String businessOrderNumber,
+                                 @RequestParam("openId") String openId,
                                  @RequestParam("userRole")Integer userRole);
 
     @PostMapping("app/pay/payment/getAliSign")
@@ -69,7 +70,8 @@ public interface PaymentAPI {
                                  @RequestParam("cityId") String cityId,
                                  @RequestParam("productIds") String productIds,
                                  @RequestParam("workerId")String workerId,
-                                 @RequestParam("addressId")String addressId);
+                                 @RequestParam("addressId")String addressId,
+                                 @RequestParam("activityRedPackId") String activityRedPackId);
 
     @PostMapping("app/order/edit")
     @ApiOperation(value = "订单更新接口", notes = "订单更新接口")
@@ -90,5 +92,10 @@ public interface PaymentAPI {
     ServerResponse queryInsuranceInfo(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("userToken") String userToken,
                                       @RequestParam("workerId") String workerId);
+
+    @PostMapping("app/pay/payment/queryActivityRedPackInfo")
+    @ApiOperation(value = "查询可用优惠券", notes = "查询可用优惠券")
+    ServerResponse queryActivityRedPackInfo(@RequestParam("userToken") String userToken,
+                                    @RequestParam("productJsons") String productJsons);
 
 }

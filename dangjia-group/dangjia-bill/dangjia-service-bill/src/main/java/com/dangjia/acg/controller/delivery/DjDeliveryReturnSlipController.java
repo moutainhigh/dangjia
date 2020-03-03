@@ -6,6 +6,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.delivery.DjDeliveryReturnSlipService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -93,20 +94,20 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse supplierDimensionSupplyDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
-        return djDeliveryReturnSlipService.supplierDimensionSupplyDetails(request,pageDTO,userId,cityId,searchKey);
+    public ServerResponse supplierDimensionSupplyDetails(HttpServletRequest request, PageDTO pageDTO, String storefrontId, String supId, String searchKey) {
+        return djDeliveryReturnSlipService.supplierDimensionSupplyDetails(request,pageDTO,storefrontId,supId,searchKey);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse supplierDimensionOrderDetails(HttpServletRequest request,PageDTO pageDTO,  String userId, String cityId,String houseId) {
-        return djDeliveryReturnSlipService.supplierDimensionOrderDetails(request,pageDTO,userId,cityId,houseId);
+    public ServerResponse supplierDimensionOrderDetails(HttpServletRequest request,PageDTO pageDTO,  String storefrontId, String supId,String addressId,String houseId) {
+        return djDeliveryReturnSlipService.supplierDimensionOrderDetails(request,pageDTO,storefrontId,supId,addressId,houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse supplierDimensionGoodsDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String orderSplitId) {
-        return djDeliveryReturnSlipService.supplierDimensionGoodsDetails(request,pageDTO,userId,cityId,orderSplitId);
+    public ServerResponse storefrontProductDimensionDetail(HttpServletRequest request, PageDTO pageDTO,String storefrontId,String productId,Integer type) {
+        return djDeliveryReturnSlipService.storefrontProductDimensionDetail(request,pageDTO, storefrontId, productId, type);
     }
 
     @Override
@@ -130,7 +131,7 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse sellerSplitDeliverDetails(HttpServletRequest request, PageDTO pageDTO,String userId, String cityId, String splitDeliverId) {
-        return djDeliveryReturnSlipService.sellerSplitDeliverDetails(request,pageDTO, userId,  cityId,splitDeliverId);
+    public ServerResponse sellerSplitDeliverDetails(HttpServletRequest request, PageDTO pageDTO,String storefrontId,String addressId,String houseId,Integer type) {
+        return djDeliveryReturnSlipService.sellerSplitDeliverDetails(request,pageDTO,storefrontId, addressId,  houseId,type);
     }
 }

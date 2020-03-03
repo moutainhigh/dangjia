@@ -30,14 +30,20 @@ public class ComplainController implements ComplainAPI {
         return complainService.insertGroundComplain(request,userId,cityId,complainType,houseId,content,images);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse complainResponsibleParty(HttpServletRequest request, String userId, String cityId, String responsiblePartyId, String content, String images) {
+        return complainService.complainResponsibleParty(request,userId,cityId,responsiblePartyId,content,images);
+    }
+
 
     //添加申诉
     @Override
     @ApiMethod
     public ServerResponse addComplain(HttpServletRequest request, String userToken, String memberId, Integer complainType, String businessId,
-                                      String houseId, String files, String orderSplitItemId,String changeReason,String image) {
+                                      String houseId, String files, String changeReason,String image) {
         return complainService.addComplain(userToken, memberId, complainType,
-                businessId, houseId, files, orderSplitItemId,changeReason,image);
+                businessId, houseId, files, changeReason,image);
     }
 
     //查询申诉

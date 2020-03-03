@@ -39,7 +39,6 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.core.HouseWorkerService;
-import com.dangjia.acg.service.deliver.OrderSplitService;
 import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
@@ -115,7 +114,7 @@ public class EngineerService {
      * 已支付换工匠
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse changePayed(String houseWorkerId, String workerId) {
+    public ServerResponse changePayed(String userToken,String houseWorkerId, String workerId) {
         try {
             HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, 4, houseWorker.getWorkerId(), new Date());
@@ -142,7 +141,11 @@ public class EngineerService {
             hw.setCreateDate(houseWorker.getCreateDate());
             hw.setModifyDate(new Date());
             hw.setWorkerType(houseWorker.getWorkerType());
-            hw.setWorkType(4);//4已支付被平台换
+            if(CommonUtil.isEmpty(userToken)) {
+                hw.setWorkType(4);//4已支付被平台换
+            }else{
+                hw.setWorkType(2);//3已支付被管家换
+            }
             hw.setIsSelect(0);
             hw.setPrice(houseWorker.getPrice());
             hw.setType(houseWorker.getType());
@@ -867,17 +870,40 @@ public class EngineerService {
         }
     }
 
-    public ServerResponse getWareHouse( HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO) {
+    /**
+     * 人工定责--查询所有工匠列表
+     * @param searckKey 查询条件（用户名/电话）
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse searchWorkerAllList( String cityId,String searckKey ,PageDTO pageDTO){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<Map<String,Object>> memberList = memberMapper.searchWorkerAllList(cityId,searckKey);
+            PageInfo pageResult = new PageInfo(memberList);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    public ServerResponse getWareHouse( HttpServletRequest request,String searckKey ,String cityId,String houseId, PageDTO pageDTO) {
         String userID = request.getParameter("userId");
         //通过缓存查询店铺信息
-        Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
+        /*Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
         if(storefront==null)
         {
             return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-        }
+        }*/
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(Warehouse.class);
-        example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.STOREFRONT_ID,storefront.getId());
+        if(!CommonUtil.isEmpty(searckKey)){
+            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId)
+                    .andLike(Warehouse.PRODUCT_NAME, "%"+searckKey+"%");
+        }else {
+            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId);
+        }
         example.orderBy(Warehouse.PRODUCT_SN).desc();
         List<Warehouse> warehouseList = iWarehouseMapper.selectByExample(example);
         if (warehouseList == null) {

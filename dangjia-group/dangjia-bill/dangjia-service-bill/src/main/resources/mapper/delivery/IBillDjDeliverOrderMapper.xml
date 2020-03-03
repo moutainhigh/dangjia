@@ -349,6 +349,7 @@
           t4.id productTemplateId,
           t2.product_name productName,
           t4.product_sn productSn,
+          IFNULL(t4.convert_unit,t4.unit_id) unitId,
           t2.unit_name unitName,
           t4.image,
           t2.price price,
@@ -582,7 +583,9 @@
                 pbo.type AS type,
                 pbo.id AS pboId,
                 pbo.image AS pboImage,
-                ddo.cancellation_time AS cancellationTime
+                ddo.total_discount_price totalDiscountPrice,
+                ddo.cancellation_time AS cancellationTime,
+                pbo.red_packet_pay_money_id discountId
             FROM
                 dj_deliver_order ddo,
                 dj_pay_business_order pbo,
@@ -725,7 +728,14 @@
         WHERE
             t3.state = 3
         AND t1.payment IS NOT NULL
-        AND t1.house_id = #{houseId}
+        <choose>
+            <when test="null!=memberId and ''!=memberId">
+                AND t1.member_id=#{memberId}
+            </when>
+            <otherwise>
+                AND t1.house_id=#{houseId}
+            </otherwise>
+        </choose>
         AND t1.data_status=0
         AND EXISTS (
             SELECT
@@ -739,6 +749,7 @@
             )
             AND t2.data_status = 0
         )
+        ORDER BY t1.order_pay_time DESC
     </select>
 
     <select id="queryAppointmentHump" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
@@ -780,7 +791,7 @@
         AND t.order_id =  #{orderId}
         AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
         AND t.data_status = 0
-        ORDER BY t.create_date
+        ORDER BY t3.order_pay_time DESC
     </select>
 
     <select id="queryDeliverOrderObligation" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
@@ -816,8 +827,27 @@
                 AND t2.state=#{state}
             </otherwise>
         </choose>
-            AND t1.house_id=#{houseId}
             AND t1.data_status=0
+          <choose>
+              <when test="null!=houseId and ''!=houseId">
+                  AND t1.house_id=#{houseId}
+              </when>
+              <otherwise>
+                  AND EXISTS (
+                      SELECT
+                        *
+                      FROM
+                        dj_member_address ma
+                      WHERE
+                        ma.member_id=#{memberId}
+                      AND (
+                          ma.id = t1.address_id
+                          OR ma.house_id = t1.house_id
+                      )
+                  )
+              </otherwise>
+          </choose>
+        ORDER BY t1.create_date DESC
     </select>
 
     <select id="queryDeliverOrderItemObligation" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
@@ -858,8 +888,8 @@
         AND t2.product_id = t3.id
         AND t3.prod_template_id = t4.id
         AND t1.parent_order_id = #{orderId}
-        AND t1.id!=t1.parent_order_id
         AND t2.data_status=0
+        ORDER BY t1.create_date DESC
     </select>
 
 
@@ -904,7 +934,27 @@
         ddsd.order_split_id as orderSplitId
         from dj_deliver_split_deliver ddsd
         inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
-        where ddsd.house_id = #{houseId} and ddsd.data_status = 0
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND ddsd.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = ddsd.address_id
+                        OR ma.house_id = ddsd.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and ddsd.data_status = 0
         <if test="cityId!=null and cityId!=''">
             and  ddsd.city_id = #{cityId}
         </if>
@@ -944,8 +994,28 @@
         from dj_deliver_order_split dos
         LEFT JOIN dj_deliver_order_split_item dosi on dos.id = dosi.order_split_id
         LEFT JOIN dj_deliver_split_deliver ddsd on dosi.split_deliver_id = ddsd.id
-        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
-        where dos.house_id = #{houseId} and dos.data_status = 0 and dos.apply_status = 2
+        inner join dj_basics_storefront dbs on dbs.id=dosi.storefront_id
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND dos.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = dos.address_id
+                        OR ma.house_id = dos.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and dos.data_status = 0 and dos.apply_status = 2
         <if test="cityId!=null and cityId!=''">
             and  dos.city_id = #{cityId}
         </if>
@@ -1230,6 +1300,7 @@
             dj_deliver_order t
         LEFT JOIN dj_member_address m ON (t.address_id=m.id or t.house_id=m.house_id)
         where t.id=#{orderId}
+        limit 1
 
     </select>
 </mapper>

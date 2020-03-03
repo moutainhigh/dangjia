@@ -20,6 +20,7 @@ import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.dto.repair.*;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
+import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -48,6 +49,8 @@ import com.dangjia.acg.service.complain.ComplainService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
+import com.dangjia.acg.service.member.MemberAddressService;
+import com.dangjia.acg.service.node.NodeProgressService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.util.StringTool;
@@ -110,13 +113,18 @@ public class MendMaterielService {
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
-    private IComplainMapper iComplainMapper;
+    private MemberAddressService memberAddressService;
     @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
     private MasterProductTemplateService masterProductTemplateService;
     @Autowired
     private OrderSplitService orderSplitService;
+    @Autowired
+    private IMasterOrderProgressMapper iMasterOrderProgressMapper;
+    @Autowired
+    private NodeProgressService nodeProgressService;
+
     /**
      * 售后管理--退货退款--分发供应商列表
      * @param request
@@ -226,6 +234,12 @@ public class MendMaterielService {
                         mendMateriel.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderSplitItem.getReceive()),mendMateriel.getShopCount()));
                     }else{
                         mendMateriel.setStevedorageCost(0d);
+                    }
+                    //优惠总额
+                    if(orderSplitItem.getDiscountPrice()>0.0){//（优惠总额/收货量）*退货量
+                        mendMateriel.setDiscountPrice(MathUtil.mul(MathUtil.div(orderSplitItem.getDiscountPrice(),orderSplitItem.getReceive()),mendMateriel.getShopCount()));
+                    }else{
+                        mendMateriel.setDiscountPrice(0d);
                     }
                 }else{
                     mendMateriel.setTransportationCost(0d);
@@ -353,7 +367,7 @@ public class MendMaterielService {
      * @param mendDeliver 退货单信息
      * @param type 1按申请数量计算，2按退货数量计算
      */
-    private void updateNewMendMaterialList(MendDeliver mendDeliver,Integer type) {
+    public void updateNewMendMaterialList(MendDeliver mendDeliver,Integer type) {
         Double totalAmount=0d;//计算店铺收货时可得钱
         Double applyMoney=0d;//供应商可得钱
         Double totalPrice=0d;//供应商品总额
@@ -402,11 +416,17 @@ public class MendMaterielService {
                     if(totalReceiverNum>0){//运费
                         mendMateriel.setSupTransportationCost(MathUtil.mul(MathUtil.div(mendDeliver.getDeliveryFee(),totalReceiverNum),actualCount));
                     }
-
+                    //优惠总额
+                    if(orderSplitItem.getDiscountPrice()>0.0){//（优惠总额/收货量）*退货量
+                        mendMateriel.setDiscountPrice(MathUtil.mul(MathUtil.div(orderSplitItem.getDiscountPrice(),orderSplitItem.getReceive()),actualCount));
+                    }else{
+                        mendMateriel.setDiscountPrice(0d);
+                    }
                 }
                 if(mendMateriel.getSupStevedorageCost()==null)
                     mendMateriel.setSupStevedorageCost(0d);
                 totalAmount=MathUtil.add(totalAmount, MathUtil.sub(MathUtil.sub(MathUtil.mul(mendMateriel.getPrice(),actualCount),mendMateriel.getTransportationCost()),mendMateriel.getStevedorageCost()));
+                totalAmount=MathUtil.sub(totalAmount,mendMateriel.getDiscountPrice());
                 applyMoney=MathUtil.add(applyMoney,MathUtil.sub(MathUtil.mul(mendMateriel.getCost(),actualCount),mendMateriel.getSupStevedorageCost()));
                 totalPrice=MathUtil.add(totalPrice,MathUtil.mul(mendMateriel.getCost(),actualCount));
                 totalStevedorageCost=MathUtil.add(totalStevedorageCost,mendMateriel.getSupStevedorageCost());
@@ -455,12 +475,22 @@ public class MendMaterielService {
             updateNewMendMaterialList(mendDeliver,1);
             mendDeliver.setShippingState(1);//已确认全部退货
             mendDeliver.setApplyState(0);//供应商结算状态
+            mendDeliver.setModifyDate(new Date());
+            mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
             //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
             mendOrderCheckService.setMendMoneyOrder(mendDeliverId,userId);
+            //更新商家处理中按钮的状态为已删除
+            iMasterOrderProgressMapper.updateOrderStatusByNodeCode(mendDeliver.getMendOrderId(),"REFUND_AFTER_SALES","RA_002");
+            //添加对应的流水记录节点信息,商家已同意
+            nodeProgressService.updateOrderProgressInfo(mendDeliverId,"2","REFUND_AFTER_SALES","RA_003",userId);
+            //添加对应的流水记录节点信息，退款成功
+            nodeProgressService.updateOrderProgressInfo(mendDeliverId,"2","REFUND_AFTER_SALES","RA_008",userId);
         } else if (type == 2){//确认部分退货
             updateNewMendMaterialList(mendDeliver,2);
             mendDeliver.setShippingState(4);//部分退货
             mendDeliver.setReasons(partialReturnReason);//退货原因
+            mendDeliver.setModifyDate(new Date());
+            mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
             House house=houseMapper.selectByPrimaryKey(mendDeliver.getHouseId());
             //增加部分退货任务
             String image="";
@@ -469,9 +499,12 @@ public class MendMaterielService {
                 image=storefront.getSystemLogo();
             }
             taskStackService.insertTaskStackInfo(mendDeliver.getHouseId(),house.getMemberId(),"部分退货",image,17,mendDeliverId);
+            //更新平台介入按钮的状态为已删除
+            iMasterOrderProgressMapper.updateOrderStatusByNodeCode(mendDeliver.getMendOrderId(),"REFUND_AFTER_SALES","RA_005");
+            //添加对应的流水记录节点信息，商家确认部分退货
+            nodeProgressService.updateOrderProgressInfo(mendDeliverId,"2","REFUND_AFTER_SALES","RA_004",userId);
         }
-        mendDeliver.setModifyDate(new Date());
-        mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+
         return ServerResponse.createBySuccessMessage("确认退货成功");
     }
 
@@ -542,6 +575,10 @@ public class MendMaterielService {
         mendOrder.setState(4);//已结算
         mendOrder.setModifyDate(new Date());
         mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+        //更新店铺处理中按钮的状态为已删除
+        iMasterOrderProgressMapper.updateOrderStatusByNodeCode(mendOrderId,"REFUND_AFTER_SALES","RA_002");
+        //添加对应的流水记录节点信息商，商家已同意
+        nodeProgressService.updateOrderProgressInfo(mendOrderId,"2","REFUND_AFTER_SALES","RA_003",userId);
         return ServerResponse.createByErrorMessage("确认成功");
     }
 
@@ -716,6 +753,13 @@ public class MendMaterielService {
                 mendDeliverDTO.setIsNonPlatformSupplier(djSupplier.getIsNonPlatformSupperlier().toString());//是否非平台供应商
             }else{
                 mendDeliverDTO.setIsNonPlatformSupplier("0");//是否非平台供应商
+            }
+            //查询业主信息
+            MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(mendDeliver.getAddressId(),mendDeliver.getHouseId());
+            if(memberAddress!=null){
+                mendDeliverDTO.setAddress(memberAddress.getAddress());
+                mendDeliverDTO.setMemberMobile(memberAddress.getMobile());
+                mendDeliverDTO.setMemberName(memberAddress.getName());
             }
             mendDeliverDTO.setMendMaterielList(mendMaterielList);
             return ServerResponse.createBySuccess("查询成功", mendDeliverDTO);
@@ -945,15 +989,18 @@ public class MendMaterielService {
             Member member=memberMapper.selectByPrimaryKey(taskStack.getMemberId());
             complainService.insertUserComplain(member.getName(),member.getMobile(),member.getId(),mendDeliver.getId(),mendDeliver.getHouseId(),7,description,"",2);
             mendDeliver.setShippingState(5);//业主申诉部分退货
+            mendDeliver.setModifyDate(new Date());
+            mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
         }else if(type==2){//接受商家部分退货
             updateNewMendMaterialList(mendDeliver,2);
-            //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
-            mendOrderCheckService.setMendMoneyOrder(mendDeliver.getId(),taskStack.getMemberId());
             mendDeliver.setShippingState(6);//业主认可部分退货
             mendDeliver.setApplyState(0);//供应商结算状态
+            mendDeliver.setModifyDate(new Date());
+            mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+            //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
+            mendOrderCheckService.setMendMoneyOrder(mendDeliver.getId(),taskStack.getMemberId());
         }
-        mendDeliver.setModifyDate(new Date());
-        mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+
         taskStack.setState(1);//修改状态为已处理
         taskStack.setModifyDate(new Date());
         taskStackService.updateTaskStackInfo(taskStack);
@@ -969,18 +1016,31 @@ public class MendMaterielService {
         MendDeliver mendDeliver=mendDeliverMapper.selectByPrimaryKey(mendDeliverId);
         if(type==7){
             updateNewMendMaterialList(mendDeliver,1);
-            //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
-            mendOrderCheckService.setMendMoneyOrder(mendDeliver.getId(),userId);
+
             mendDeliver.setShippingState(7);//按业主申请退货
             mendDeliver.setApplyState(0);//供应商结算状态
+            //添加申诉成功流水记录
+            //更新平台介入按钮的状态为已删除
+            iMasterOrderProgressMapper.updateOrderStatusByNodeCode(mendDeliverId,"REFUND_AFTER_SALES","RA_005");
+            //添加对应的流水记录节点信息,平台已同意
+            nodeProgressService.updateOrderProgressInfo(mendDeliverId,"2","REFUND_AFTER_SALES","RA_006",userId);
+            //添加对应的流水记录节点信息，退款关闭
+            nodeProgressService.updateOrderProgressInfo(mendDeliverId,"2","REFUND_AFTER_SALES","RA_008",userId);
         }else{
             updateNewMendMaterialList(mendDeliver,2);
-            //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
-            mendOrderCheckService.setMendMoneyOrder(mendDeliver.getId(),userId);
             mendDeliver.setShippingState(8);//按平台同意退货
             mendDeliver.setApplyState(0);//供应商结算状态
+            //添加申诉失败流水记录
+            //更新平台介入按钮的状态为已删除
+            iMasterOrderProgressMapper.updateOrderStatusByNodeCode(mendDeliverId,"REFUND_AFTER_SALES","RA_005");
+            //添加对应的流水记录节点信息,平台已拒绝
+            nodeProgressService.updateOrderProgressInfo(mendDeliverId,"2","REFUND_AFTER_SALES","RA_007",userId);
+            //添加对应的流水记录节点信息，退款关闭
+            nodeProgressService.updateOrderProgressInfo(mendDeliverId,"2","REFUND_AFTER_SALES","RA_009",userId);
         }
         mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+        //打钱给业主（扣店铺的总额和可提现余额),业主仓库中的退货量减少
+        mendOrderCheckService.setMendMoneyOrder(mendDeliver.getId(),userId);
     }
 
 }

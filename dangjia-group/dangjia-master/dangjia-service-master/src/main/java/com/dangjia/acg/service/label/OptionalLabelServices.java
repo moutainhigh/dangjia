@@ -2,6 +2,7 @@ package com.dangjia.acg.service.label;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.label.ChildChildTags;
@@ -115,6 +116,7 @@ public class OptionalLabelServices {
         try {
             Example example = new Example(OptionalLabel.class);
             example.createCriteria().andCondition(" DATA_STATUS =0").andCondition("parent_id is null");
+            example.orderBy(OptionalLabel.CREATE_DATE).desc();
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<OptionalLabel> optionalLabels = optionalLabelMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(optionalLabels);
@@ -134,41 +136,55 @@ public class OptionalLabelServices {
      */
     public ServerResponse queryOptionalLabelById(String id) {
         try {
-            OptionalLaelDetail optionalLaelDetail = new OptionalLaelDetail();
-            OptionalLabel optionalLabel = optionalLabelMapper.selectByPrimaryKey(id);
-            optionalLaelDetail.setId(id);
-            optionalLaelDetail.setTopTitle(optionalLabel.getLabelName());
-            Example example = new Example(OptionalLabel.class);
-            example.createCriteria().andEqualTo(OptionalLabel.PARENT_ID, id)
-                    .andEqualTo(OptionalLabel.DATA_STATUS, 0);
-            List<OptionalLabel> optionalLabels = optionalLabelMapper.selectByExample(example);
-            List<ChildTags> childTagsList = new ArrayList<>();
-            optionalLabels.forEach(optionalLabel1 -> {
-                ChildTags childTags = new ChildTags();
-                childTags.setId(optionalLabel1.getId());
-                childTags.setSubTitle(optionalLabel1.getLabelName());
-                childTags.setParentId(optionalLabel1.getParentId());
-                Example example1 = new Example(OptionalLabel.class);
-                example1.createCriteria().andEqualTo(OptionalLabel.PARENT_ID, optionalLabel1.getId())
-                        .andEqualTo(OptionalLabel.DATA_STATUS, 0);
-                List<OptionalLabel> optionalLabels1 = optionalLabelMapper.selectByExample(example1);
-                List<ChildChildTags> childChildTagsList = new ArrayList<>();
-                optionalLabels1.forEach(optionalLabel2 -> {
-                    ChildChildTags childChildTags = new ChildChildTags();
-                    childChildTags.setId(optionalLabel2.getId());
-                    childChildTags.setTagName(optionalLabel2.getLabelName());
-                    childChildTags.setParentId(optionalLabel2.getParentId());
-                    childChildTagsList.add(childChildTags);
-                });
-                childTags.setTagName(childChildTagsList);
-                childTagsList.add(childTags);
-            });
-            optionalLaelDetail.setLabels(childTagsList);
-            return ServerResponse.createBySuccess("查询成功", optionalLaelDetail);
+            return ServerResponse.createBySuccess("查询成功", queryOptionalLabelById1(id,null));
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+
+    public OptionalLaelDetail queryOptionalLabelById1(String id, String[] optionalLabelIds){
+        OptionalLaelDetail optionalLaelDetail = new OptionalLaelDetail();
+        OptionalLabel optionalLabel = optionalLabelMapper.selectByPrimaryKey(id);
+        optionalLaelDetail.setId(id);
+        optionalLaelDetail.setTopTitle(optionalLabel.getLabelName());
+        Example example = new Example(OptionalLabel.class);
+        example.createCriteria().andEqualTo(OptionalLabel.PARENT_ID, id)
+                .andEqualTo(OptionalLabel.DATA_STATUS, 0);
+        List<OptionalLabel> optionalLabels = optionalLabelMapper.selectByExample(example);
+        List<ChildTags> childTagsList = new ArrayList<>();
+        optionalLabels.forEach(optionalLabel1 -> {
+            ChildTags childTags = new ChildTags();
+            childTags.setId(optionalLabel1.getId());
+            childTags.setSubTitle(optionalLabel1.getLabelName());
+            childTags.setParentId(optionalLabel1.getParentId());
+            Example example1 = new Example(OptionalLabel.class);
+            example1.createCriteria().andEqualTo(OptionalLabel.PARENT_ID, optionalLabel1.getId())
+                    .andEqualTo(OptionalLabel.DATA_STATUS, 0);
+            List<OptionalLabel> optionalLabels1 = optionalLabelMapper.selectByExample(example1);
+            List<ChildChildTags> childChildTagsList = new ArrayList<>();
+            optionalLabels1.forEach(optionalLabel2 -> {
+                ChildChildTags childChildTags = new ChildChildTags();
+                childChildTags.setId(optionalLabel2.getId());
+                childChildTags.setTagName(optionalLabel2.getLabelName());
+                childChildTags.setParentId(optionalLabel2.getParentId());
+                childChildTags.setStatus("1");
+                if(optionalLabelIds!=null) {
+                    for (String optionalLabelId : optionalLabelIds) {
+                        if (optionalLabelId.equals(optionalLabel2.getId())) {
+                            childChildTags.setStatus("0");
+                            break;
+                        }
+                    }
+                }
+                childChildTagsList.add(childChildTags);
+            });
+            childTags.setTagName(childChildTagsList);
+            childTagsList.add(childTags);
+        });
+        optionalLaelDetail.setLabels(childTagsList);
+        return optionalLaelDetail;
     }
 
     /**
@@ -208,52 +224,93 @@ public class OptionalLabelServices {
                 oldOptionalLabel.setLabelName(jsonObject.getString("topTitle"));
                 optionalLabelMapper.updateByPrimaryKeySelective(oldOptionalLabel);
             }
-            String labels = jsonObject.getString("labels");
-            JSONArray jsonArray = JSONArray.parseArray(labels);
-            for (Object o : jsonArray) {
-                JSONObject obj = (JSONObject) o;
-                String optionalLabelId = obj.getString("id");//标签id
-                String parentId = obj.getString("parentId");//父id
-                String tagName = obj.getString("tagName");//标签名称
-                //没有id则新增
-                if (StringUtils.isBlank(optionalLabelId)) {
+            //要删除的标签id数组，逗号分隔
+            String deleteLabels1 = jsonObject.getString("deleteLabels");
+            if(StringUtils.isNotBlank(deleteLabels1)) {
+                String[] deleteLabels = deleteLabels1.split(",");
+                for (String deleteLabel : deleteLabels) {
                     Example example = new Example(OptionalLabel.class);
-                    example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, tagName)
-                            .andEqualTo(OptionalLabel.DATA_STATUS, 0);
-                    if (optionalLabelMapper.selectByExample(example).size() > 0) {
-                        throw new Exception("标题已存在");
-                    }
-                    OptionalLabel optionalLabel = new OptionalLabel();
-                    optionalLabel.setParentId(parentId);
-                    optionalLabel.setLabelName(tagName);
-                    optionalLabelMapper.insert(optionalLabel);
-                } else {
-                    oldOptionalLabel = optionalLabelMapper.selectByPrimaryKey(optionalLabelId);
-                    if (!oldOptionalLabel.getLabelName().equals(tagName)) {
-                        Example example = new Example(OptionalLabel.class);
-                        example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, tagName)
-                                .andEqualTo(OptionalLabel.DATA_STATUS, 0);
-                        if (optionalLabelMapper.selectByExample(example).size() > 0) {
-                            throw new Exception("标题已存在");
-                        }
-                        oldOptionalLabel.setLabelName(tagName);
-                        optionalLabelMapper.updateByPrimaryKeySelective(oldOptionalLabel);
-                    }
+                    example.createCriteria().andCondition("(id =" + deleteLabel + " or parent_id =" + deleteLabel + ")");
+                    optionalLabelMapper.deleteByExample(example);
                 }
             }
-            //要删除的标签id数组，逗号分隔
-            String[] deleteLabels = jsonObject.getString("deleteLabels").split(",");
-            for (String deleteLabel : deleteLabels) {
-                Example example=new Example(OptionalLabel.class);
-                example.createCriteria().andCondition("(id ="+ deleteLabel +" or parent_id ="+ deleteLabel +")");
-                int i = optionalLabelMapper.deleteByExample(example);
-                if(i>0){
-                    return ServerResponse.createBySuccessMessage("操作成功");
-                }else{
-                    throw new Exception("操作失败");
+
+            String labels = jsonObject.getString("labels");
+            JSONArray jsonArray = JSONArray.parseArray(labels);
+            //二级标题
+            for (Object o : jsonArray) {
+                JSONObject obj = (JSONObject) o;
+                String id = obj.getString("id");//标签标题id
+                String subTitle = obj.getString("subTitle");//标签标题
+                id = this.commonality(id, subTitle, jsonObject.getString("id"));
+                String tagName = obj.getString("tagName");
+                JSONArray jsonArray1 = JSONArray.parseArray(tagName);
+                //标签
+                for (Object o1 : jsonArray1) {
+                    JSONObject obj1 = (JSONObject) o1;
+                    String id1 = obj1.getString("id");//标签id
+                    String tagName1 = obj1.getString("tagName");//标签名称
+                    this.commonality(id1, tagName1, id);
                 }
             }
         }
         return ServerResponse.createBySuccessMessage("编辑成功");
+    }
+
+
+    private String commonality(String id,String labelName,String parentId) throws Exception{
+        //没有id则新增
+        if (StringUtils.isBlank(id)) {
+            Example example = new Example(OptionalLabel.class);
+            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, labelName)
+                    .andEqualTo(OptionalLabel.DATA_STATUS, 0);
+            if (optionalLabelMapper.selectByExample(example).size() > 0) {
+                throw new Exception("标题已存在");
+            }
+            OptionalLabel optionalLabel = new OptionalLabel();
+            optionalLabel.setParentId(parentId);
+            optionalLabel.setLabelName(labelName);
+            optionalLabelMapper.insert(optionalLabel);
+            return optionalLabel.getId();
+        } else {
+            OptionalLabel oldOptionalLabel = optionalLabelMapper.selectByPrimaryKey(id);
+            if (!oldOptionalLabel.getLabelName().equals(labelName)) {
+                Example example = new Example(OptionalLabel.class);
+                example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, labelName)
+                        .andEqualTo(OptionalLabel.DATA_STATUS, 0);
+                if (optionalLabelMapper.selectByExample(example).size() > 0) {
+                    throw new Exception("标题已存在");
+                }
+                oldOptionalLabel.setLabelName(labelName);
+                optionalLabelMapper.updateByPrimaryKeySelective(oldOptionalLabel);
+            }
+            return id;
+        }
+    }
+
+
+    /**
+     * 精算选配标签
+     * @return
+     */
+    public ServerResponse queryActuarialOptionalLabel() {
+        try {
+            Example example=new Example(OptionalLabel.class);
+            example.createCriteria().andEqualTo(OptionalLabel.DATA_STATUS,0)
+                    .andIsNull(OptionalLabel.PARENT_ID);
+            List<OptionalLabel> optionalLabels = optionalLabelMapper.selectByExample(example);
+            List<OptionalLaelDetail> optionalLaelDetailList = new ArrayList<>();
+            for (OptionalLabel label : optionalLabels) {
+                OptionalLaelDetail optionalLaelDetail =
+                        this.queryOptionalLabelById1(label.getId(),null);
+                optionalLaelDetailList.add(optionalLaelDetail);
+            }
+            if(optionalLaelDetailList.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功",optionalLaelDetailList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 }
