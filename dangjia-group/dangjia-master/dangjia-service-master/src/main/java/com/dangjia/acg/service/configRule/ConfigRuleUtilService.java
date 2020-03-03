@@ -7,11 +7,8 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.configRule.*;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.operation.IOperationFlowMapper;
-import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.model.config.*;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.house.House;
@@ -37,8 +34,6 @@ public class ConfigRuleUtilService {
     @Autowired
     private IConfigRuleItemLadderMapper configRuleItemLadderMapper;
     @Autowired
-    private IConfigRuleItemOneMapper configRuleItemOneMapper;
-    @Autowired
     private IConfigRuleItemThreeMapper configRuleItemThreeMapper;
     @Autowired
     private IConfigRuleItemTwoMapper configRuleItemTwoMapper;
@@ -47,18 +42,9 @@ public class ConfigRuleUtilService {
     @Autowired
     private IConfigRuleRankMapper configRuleRankMapper;
     @Autowired
-    private IConfigRuleTypeMapper configRuleTypeMapper;
-    @Autowired
-    private IOperationFlowMapper operationFlowMapper;
-
-    @Autowired
     private RedisClient redisClient;
     @Autowired
     private IMemberMapper memberMapper;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private ConfigRuleService configRuleService;
 
