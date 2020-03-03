@@ -430,7 +430,7 @@ public class HouseService {
                     houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
                     houseChoiceCase.setLabel(srcHouse.getStyle());
                     houseChoiceCase.setSource("房源来自当家装修精选推荐");
-                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
+                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase,house.getCityId());
                 } else {
                     houseChoiceCaseService.delHouseChoiceCase(house.getId());
                 }
