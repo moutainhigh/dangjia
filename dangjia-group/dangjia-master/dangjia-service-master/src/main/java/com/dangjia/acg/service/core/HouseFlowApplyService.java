@@ -50,6 +50,7 @@ import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
@@ -410,24 +411,8 @@ public class HouseFlowApplyService {
     private void updateDayIntegral(HouseFlowApply houseFlowApply) {
         try {
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
-            BigDecimal score = new BigDecimal("0.05");
-            if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) == -1) {
-
-                score = score.multiply(new BigDecimal("1.6"));
-            } else if ((worker.getEvaluationScore().compareTo(new BigDecimal("70")) == 1 ||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("70")) == 0) &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == -1) {
-
-                score = score.multiply(new BigDecimal("0.8"));
-            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("80")) >= 0 &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90")) == -1) {
-
-                score = score.multiply(new BigDecimal("0.4"));
-            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0) {
-
-                score = score.multiply(new BigDecimal("0.2"));
-            }
-
+            Double integral= configRuleUtilService.getWerkerIntegral(houseFlowApply.getHouseId(), ConfigRuleService.SG005, worker.getEvaluationScore(), 0);
+            BigDecimal score = new BigDecimal(integral);
             if (worker.getEvaluationScore() == null) {
                 worker.setEvaluationScore(new BigDecimal("60.0"));
             }
@@ -442,6 +427,7 @@ public class HouseFlowApplyService {
                 workIntegral.setStatus(0);
                 workIntegral.setIntegral(score);
                 workIntegral.setBriefed("每日完工");
+                workIntegral.setAnyBusinessId(houseFlowApply.getId());
                 workIntegralMapper.insert(workIntegral);
             }
         } catch (Exception e) {

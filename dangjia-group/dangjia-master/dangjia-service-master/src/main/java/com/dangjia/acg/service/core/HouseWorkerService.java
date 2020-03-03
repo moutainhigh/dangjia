@@ -34,6 +34,7 @@ import com.dangjia.acg.mapper.reason.ReasonMatchMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.sale.DjRoyaltyMatchMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
+import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerChoiceCaseMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
@@ -52,9 +53,11 @@ import com.dangjia.acg.modle.reason.ReasonMatchSurface;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.worker.Insurance;
+import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerChoiceCase;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.deliver.RepairMendOrderService;
 import com.dangjia.acg.service.house.HouseService;
@@ -130,6 +133,8 @@ public class HouseWorkerService {
     @Autowired
     private EvaluateService evaluateService;
 
+    @Autowired
+    private IWorkIntegralMapper workIntegralMapper;
     @Autowired
     private ConfigRuleUtilService configRuleUtilService;
     @Autowired
@@ -1191,6 +1196,17 @@ public class HouseWorkerService {
                 workerDetail.setApplyMoney(haveMoneys);
                 workerDetail.setWalletMoney(supervisor.getSurplusMoney());
                 workerDetailMapper.insert(workerDetail);
+            }
+            Double  integral= configRuleUtilService.getWerkerIntegral(hfa.getHouseId(), ConfigRuleService.SG002, supervisor.getEvaluationScore(),0);
+            if (integral>0) {
+                WorkIntegral workIntegral = new WorkIntegral();
+                workIntegral.setWorkerId(supervisor.getId());
+                workIntegral.setHouseId(hfa.getHouseId());
+                workIntegral.setStatus(0);
+                workIntegral.setIntegral(new BigDecimal(integral));
+                workIntegral.setBriefed("巡查获取积分！");
+                workIntegral.setAnyBusinessId(hfa.getId());
+                workIntegralMapper.insert(workIntegral);
             }
         } else {
             hfa = getHouseFlowApply(supervisorHF, applyType, supervisorHF);

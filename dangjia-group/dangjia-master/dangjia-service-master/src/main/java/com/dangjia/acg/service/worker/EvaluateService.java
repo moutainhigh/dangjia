@@ -430,7 +430,7 @@ public class EvaluateService {
         evaluate.setMemberId(house.getMemberId());
         evaluate.setHouseId(houseId);
         evaluate.setButlerId(supervisorId);//存管家id
-        if (star == 0) {
+        if (star==null || star == 0) {
             evaluate.setStar(5);//0星为5星
         } else {
             evaluate.setStar(star);
@@ -443,7 +443,7 @@ public class EvaluateService {
         evaluate.setApplyType(applyType);
         evaluate.setImage(image);
         evaluateMapper.insert(evaluate);
-        updateIntegral(evaluate);//工人积分
+        updateIntegral(evaluate,ConfigRuleService.SG006);//工人积分
     }
 
     /**
@@ -580,8 +580,15 @@ public class EvaluateService {
                     evaluate.setStar(star);//工人
                     evaluateMapper.updateByPrimaryKeySelective(evaluate);
                 }
-
-                updateIntegral(evaluate);//工人积分
+                String typeId="";
+                if(houseFlow.getWorkerType()==3){
+                    typeId=ConfigRuleService.SG004;
+                }else if(worker.getWorkerType()==3){
+                    typeId=ConfigRuleService.SG003;
+                }else{
+                    typeId=ConfigRuleService.SG006;
+                }
+                updateIntegral(evaluate,typeId);//工人积分
                 updateCrowned(worker.getId());//皇冠
 
                 //评价之后修改工人的好评率
@@ -619,7 +626,7 @@ public class EvaluateService {
     /**
      * 业主对工人评价之后计算积分
      */
-    public void updateIntegral(Evaluate evaluate) {
+    public void updateIntegral(Evaluate evaluate,String typeId) {
         Member worker = memberMapper.selectByPrimaryKey(evaluate.getWorkerId());
         String desc = "";
         if (evaluate.getApplyType() == 1) {
@@ -637,12 +644,9 @@ public class EvaluateService {
         if (evaluate.getState() == 3) {
             desc = desc + " 大管家";
         }
-        Double integral;
-        if(worker.getWorkerType()==3){
-            integral=configRuleUtilService.getWerkerIntegral(evaluate.getHouseId(), ConfigRuleService.SG003,worker.getEvaluationScore(),evaluate.getStar());
-        }else{
-            integral=configRuleUtilService.getWerkerIntegral(evaluate.getHouseId(), ConfigRuleService.SG006,worker.getEvaluationScore(),evaluate.getStar());
-
+        Double integral=0d;
+        if(!CommonUtil.isEmpty(typeId)){
+            integral= configRuleUtilService.getWerkerIntegral(evaluate.getHouseId(), typeId, worker.getEvaluationScore(), evaluate.getStar());
         }
         BigDecimal score = new BigDecimal(integral);
 
