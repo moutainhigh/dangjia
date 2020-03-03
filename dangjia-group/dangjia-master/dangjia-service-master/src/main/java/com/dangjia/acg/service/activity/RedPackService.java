@@ -411,10 +411,22 @@ public class RedPackService {
             Map<String,Object> map=new HashMap<>();
             List<ActivityRedPackRecordDTO> list=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,1,null);//查有效的
             map.put("list",list);
+            if(list==null){
+                list=new ArrayList<>();
+            }
             //查询当前用户优惠券数量
-            map.put("totalCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),null));//全部券
-            map.put("totalCityCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),1));//城市平台券
-            map.put("totalStorefrontCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),2));//店铺券
+            Integer totalCount=activityRedPackRecordMapper.queryActivityRedCount(member.getId(),null);
+            Integer totalCityCount=activityRedPackRecordMapper.queryActivityRedCount(member.getId(),1);
+            Integer totalStorefrontCount=activityRedPackRecordMapper.queryActivityRedCount(member.getId(),2);
+            map.put("totalCount",totalCount);//全部券
+            map.put("totalCityCount",totalCityCount);//城市平台券
+            map.put("totalStorefrontCount",totalStorefrontCount);//店铺券
+            map.put("isExpireRed",0);//是否有失效的优惠券（1是，0否）
+            PageHelper.startPage(1, 1);
+            List<ActivityRedPackRecordDTO> expireList=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,2,null);
+            if(expireList!=null&&expireList.size()>0){
+                map.put("isExpireRed",1);//是否有失效的优惠券（1是，0否）
+            }
             return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
             logger.error("查询失败",e);

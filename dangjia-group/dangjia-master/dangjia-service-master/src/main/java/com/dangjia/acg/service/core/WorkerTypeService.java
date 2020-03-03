@@ -1,9 +1,11 @@
 package com.dangjia.acg.service.core;
 
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ public class WorkerTypeService {
 
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
+    @Autowired
+    private ConfigUtil configUtil;
 
     public ServerResponse unfinishedFlow(String houseId) {
         try {
@@ -74,8 +78,10 @@ public class WorkerTypeService {
                     , "查无数据");
         }
         List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         for (Map map : maps) {
             map.put("workerTypeId", map.get(WorkerType.ID));
+            map.put("image", address+map.get(WorkerType.IMAGE));
         }
         return ServerResponse.createBySuccess("查询成功", maps);
     }

@@ -16,7 +16,10 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.dto.member.MemberDTO;
+import com.dangjia.acg.dto.shell.HomeShellProductDTO;
+import com.dangjia.acg.dto.shell.HomeShellProductSpecDTO;
 import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
+import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -28,6 +31,8 @@ import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.shell.IHomeShellProductMapper;
+import com.dangjia.acg.mapper.shell.IHomeShellProductSpecMapper;
 import com.dangjia.acg.mapper.shell.IMasterOrderNodeMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
@@ -46,6 +51,7 @@ import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.order.OrderNode;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.shell.HomeShellProduct;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -59,6 +65,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.RKIDCardUtil;
+import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.TokenUtil;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
@@ -165,7 +172,11 @@ public class MemberService {
     @Autowired
     private IWorkerBankCardMapper iWorkerBankCardMapper;
     @Autowired
-    private IBusinessOrderMapper iBusinessOrderMapper;
+    private IActivityRedPackRecordMapper activityRedPackRecordMapper;
+    @Autowired
+    private IHomeShellProductMapper homeShellProductMapper;
+    @Autowired
+    private IHomeShellProductSpecMapper productSpecMapper;
 
     /**
      * 获取用户手机号
@@ -1400,6 +1411,19 @@ public class MemberService {
             }
             //他的徽章
             homePageBean.setList(list);
+            //查询当这贝商品
+            HomeShellProductDTO homeShellProductDTO=homeShellProductMapper.serachShellProductInfo();
+            if(homeShellProductDTO!=null){
+                homeShellProductDTO.setImageUrl(StringTool.getImage(homeShellProductDTO.getImage(),address));
+                HomeShellProductSpecDTO productSpecDTO=productSpecMapper.selectProductSpecInfo(homeShellProductDTO.getShellProductId());
+                if(productSpecDTO!=null){
+                    homeShellProductDTO.setProductSpecId(productSpecDTO.getProductSpecId());
+                    homeShellProductDTO.setIntegral(productSpecDTO.getIntegral());
+                    homeShellProductDTO.setMoney(productSpecDTO.getMoney());
+                }
+            }
+            homePageBean.setHomeShellProduct(homeShellProductDTO);
+
             return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
         }
     }
@@ -1739,7 +1763,7 @@ public class MemberService {
             example.createCriteria().andEqualTo(WorkerBankCard.DATA_STATUS,0)
                     .andEqualTo(WorkerBankCard.WORKER_ID,member.getId());
             memberDTO.setBankCardCount(iWorkerBankCardMapper.selectCountByExample(example));//银行卡数量
-            memberDTO.setDiscountCouponCount(0);//优惠券数量
+            memberDTO.setDiscountCouponCount(activityRedPackRecordMapper.queryActivityRedCount(member.getId(),null));//优惠券数量(有效的）
 
 
             example = new Example(Order.class);

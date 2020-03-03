@@ -47,10 +47,6 @@ public class WorkerChoiceCase extends BaseEntity {
     @ApiModelProperty("图片内容，多长，逗号分隔")
     private String textContent;
 
-    //所有图片字段加入域名和端口，形成全路径
-    public void initPath(String address) {
-        this.image = StringUtils.isEmpty(this.image) ? null : address + this.image;
-        this.textContent = ImageUtil.getImageAddress(address,this.textContent);
-    }
+
 
 }
