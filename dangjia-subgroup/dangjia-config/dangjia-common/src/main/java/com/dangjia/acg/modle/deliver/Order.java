@@ -153,9 +153,9 @@ public class Order extends BaseEntity {
 
 
 	@Column(name = "order_status")
-	@Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭8待安装 ）")
-	@ApiModelProperty("订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭8待安装 ）")
-	private String orderStatus;//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
+	@Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 9拼团中）")
+	@ApiModelProperty("订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 9拼团中）")
+	private String orderStatus;//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 9拼团中）
 
 	@Column(name = "order_generation_time")
 	@Desc(value = "订单生成时间")
@@ -168,9 +168,9 @@ public class Order extends BaseEntity {
 	private Date orderPayTime;//订单支付时间
 
 	@Column(name = "order_source")
-	@Desc(value = "订单来源(1,工序订单，2购物车，3补货单，4补差价订单，5维修订单）")
-	@ApiModelProperty("订单来源(1,工序订单，2购物车，3补货单，4补差价订单，5维修订单）")
-	private Integer orderSource;//订单来源(1,精算制作，2购物车，3补货单，4补差价订单）
+	@Desc(value = "订单来源(1,工序订单，2购物车，3补货单，4补差价订单，5维修订单 6拼团订单 7限时购订单）")
+	@ApiModelProperty("订单来源(1,工序订单，2购物车，3补货单，4补差价订单，5维修订单 6拼团订单 7限时购订单）")
+	private Integer orderSource;//订单来源(1,工序订单，2购物车，3补货单，4补差价订单，5维修订单 6拼团订单 7限时购订单）
 
 	@Column(name = "create_by")
 	@Desc(value = "创建人")
@@ -191,4 +191,13 @@ public class Order extends BaseEntity {
 	@ApiModelProperty("订单取消时间")
 	private Date CancellationTime;//修改人
 
+	@Column(name = "store_activity_id")
+	@Desc(value = "活动ID")
+	@ApiModelProperty("活动ID")
+	private String storeActivityId;//活动ID
+
+	@Column(name = "store_activity_product_id")
+	@Desc(value = "店铺活动商品表ID")
+	@ApiModelProperty("店铺活动商品表ID")
+	private String storeActivityProductId;//店铺活动商品表ID
 }

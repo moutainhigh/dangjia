@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.StorefrontConfigAPI;
-import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
-import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -33,6 +30,8 @@ import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartListDTO;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
+import com.dangjia.acg.mapper.activity.DjStoreActivityProductMapper;
+import com.dangjia.acg.mapper.activity.DjStoreParticipateActivitiesMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.*;
@@ -56,8 +55,9 @@ import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
-import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
+import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
+import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
@@ -84,7 +84,6 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
-import com.dangjia.acg.modle.shell.HomeShellOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -95,12 +94,11 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.deliver.OrderService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
-import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
 import com.dangjia.acg.service.shell.HomeShellOrderService;
 import com.dangjia.acg.util.StringTool;
-import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,8 +184,6 @@ public class PaymentService {
     @Autowired
     private IMasterBasicsGoodsCategoryMapper iMasterBasicsGoodsCategoryMapper;
     @Autowired
-    private BudgetWorkerAPI budgetWorkerAPI;
-    @Autowired
     private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
@@ -204,8 +200,6 @@ public class PaymentService {
     @Autowired
     private IMasterDeliverOrderAddedProductMapper masterDeliverOrderAddedProductMapper;
     @Autowired
-    private IProductChangeOrderMapper productChangeOrderMapper;
-    @Autowired
     private HouseDesignPayService houseDesignPayService;
     @Autowired
     private CraftsmanConstructionService constructionService;
@@ -218,8 +212,6 @@ public class PaymentService {
     private MasterCostAcquisitionService masterCostAcquisitionService;
     @Autowired
     private PayService payService;
-    @Autowired
-    private IMasterSupplierPayOrderMapper iMasterSupplierPayOrderMapper;
     @Autowired
     private IMasterSupplierMapper iMaterSupplierMapper;
     @Autowired
@@ -237,6 +229,15 @@ public class PaymentService {
     private IMemberMapper iMemberMapper;
     @Autowired
     private HomeShellOrderService homeShellOrderService;
+
+    @Autowired
+    private DjStoreActivityProductMapper djStoreActivityProductMapper;
+
+    @Autowired
+    private DjStoreParticipateActivitiesMapper djStoreParticipateActivitiesMapper;
+
+    @Autowired
+    private OrderService orderService;
 
 
     @Autowired
@@ -352,6 +353,10 @@ public class PaymentService {
                 homeShellOrderService.updateShellOrderInfo(businessOrder.getNumber());
             }else if(businessOrder.getType()==12){//当家贝充值
                 homeShellOrderService.saveShellMoney(businessOrder);
+            }else if(businessOrder.getType()==13){//拼团购
+                return orderService.spellDeals(businessOrder);
+            }else if(businessOrder.getType()==14){//限时购
+                orderService.timeToBuy(businessOrder);
             }
             if(!CommonUtil.isEmpty(businessOrder.getHouseId())) {
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
@@ -1208,7 +1213,7 @@ public class PaymentService {
             if(house!= null) {
                 houseId=house.getId();
             }
-            return generateOrderCommon(member,houseId, cityId, productJsons, workerId,  addressId,2,null,activityRedPackId);
+            return generateOrderCommon(member,houseId, cityId, productJsons, workerId,  addressId,2,null,activityRedPackId,null);
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1224,11 +1229,14 @@ public class PaymentService {
      * @param productJsons
      * @param workerId
      * @param addressId
-     * @param orderSource (1设计精算订单提交，2购物车提交，4设计精算补差价订单提交）
+     * @param orderSource 订单来源(1,工序订单，2购物车，3补货单，4补差价订单，5维修订单 6拼团订单 7限时购订单)
      * @param activityRedPackId 优惠券ID
      * @return
      */
-    public ServerResponse generateOrderCommon(Member member,String houseId,String cityId, String productJsons,String workerId, String addressId,Integer orderSource,String workerTypeId,String activityRedPackId){
+    public ServerResponse generateOrderCommon(Member member,String houseId,String cityId,
+                                              String productJsons,String workerId, String addressId,
+                                              Integer orderSource,String workerTypeId,String activityRedPackId,
+                                              String storeActivityProductId){
         JSONArray productArray= JSON.parseArray(productJsons);
         if(productArray.size()==0){
             return ServerResponse.createByErrorMessage("参数错误");
@@ -1241,7 +1249,12 @@ public class PaymentService {
             productIds[i]=productObj.getString(ProductDTO.PRODUCT_ID);
 
         }
-        List<ShoppingCartDTO> shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS(productIds);
+        List<ShoppingCartDTO> shoppingCartDTOS;
+        if(StringUtils.isNotBlank(storeActivityProductId)){
+            shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS1(storeActivityProductId);
+        }else{
+            shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS(productIds);
+        }
         BigDecimal paymentPrice = new BigDecimal(0);//总共钱
         BigDecimal freightPrice = new BigDecimal(0);//总运费
         BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
@@ -1308,6 +1321,14 @@ public class PaymentService {
             order.setCreateBy(member.getId());
             order.setWorkerTypeId(workerTypeId);
             order.setTotalDiscountPrice(BigDecimal.valueOf(concessionMoney));
+            if(StringUtils.isNotBlank(storeActivityProductId)){
+                DjStoreActivityProduct djStoreActivityProduct =
+                        djStoreActivityProductMapper.selectByPrimaryKey(storeActivityProductId);
+                DjStoreParticipateActivities djStoreParticipateActivities =
+                        djStoreParticipateActivitiesMapper.selectByPrimaryKey(djStoreActivityProduct.getStoreParticipateActivitiesId());
+                order.setStoreActivityId(djStoreParticipateActivities.getStoreActivityId());
+                order.setStoreActivityProductId(storeActivityProductId);
+            }
             orderMapper.insert(order);
             for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
                 Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),shoppingCartDTO.getTotalMaterialPrice().doubleValue());
@@ -1411,6 +1432,10 @@ public class PaymentService {
                 businessOrder.setRedPacketPayMoneyId(activityRedPackId);//优惠券ID
                 if(orderSource==1||orderSource==4){
                     businessOrder.setType(1);//记录支付类型任务类型(精算支付任务，走工序的）
+                }else if(orderSource==6) {
+                    businessOrder.setType(13);//拼团购
+                }else if(orderSource==7){
+                    businessOrder.setType(14);//限时购
                 }else{
                     businessOrder.setType(2);//记录支付类型任务类型
                 }

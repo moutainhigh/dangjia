@@ -208,7 +208,23 @@ public class OrderController implements OrderAPI {
      * @param orderStatus 状态 4=已上传验收  5=结束
      * @return
      */
+    @Override
+    @ApiMethod
     public ServerResponse checkExperience(String userToken, String orderItemId,String remark,String images,String orderStatus){
         return orderService.checkExperience(userToken, orderItemId, remark, images,orderStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setSpellGroup(String userToken, String addressId, String productId,
+                                                    String activityRedPackId, String storeActivityProductId,
+                                                    Double shopCount,String orderId,Integer orderSource) {
+        try {
+            return orderService.setSpellGroup(userToken,addressId,productId,activityRedPackId,
+                    storeActivityProductId,shopCount,orderId,orderSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
     }
 }
