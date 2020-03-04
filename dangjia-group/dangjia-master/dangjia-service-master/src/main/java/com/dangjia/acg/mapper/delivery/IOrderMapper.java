@@ -54,6 +54,7 @@ public interface IOrderMapper extends Mapper<Order> {
      */
     Double getDesgionTotalMoney(@Param("orderId") String orderId);
 
+    Order getGroupBooking(@Param("orderId") String orderId);
     //未支付完成的订单
     Integer selectCountOrderByMemberId(@Param("memberId") String memberId);
 

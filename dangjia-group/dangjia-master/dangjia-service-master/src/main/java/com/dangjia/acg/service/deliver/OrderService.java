@@ -17,11 +17,12 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.*;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.IConfigMapper;
+import com.dangjia.acg.mapper.activity.DjStoreActivityMapper;
+import com.dangjia.acg.mapper.activity.DjStoreActivityProductMapper;
 import com.dangjia.acg.mapper.config.IMasterActuarialProductConfigMapper;
 import com.dangjia.acg.mapper.config.IMasterActuarialTemplateConfigMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.*;
-import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
@@ -34,6 +35,9 @@ import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.model.Config;
+import com.dangjia.acg.modle.activity.DjStoreActivity;
+import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
+import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
 import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
 import com.dangjia.acg.modle.actuary.DjActuarialTemplateConfig;
 import com.dangjia.acg.modle.brand.Unit;
@@ -131,8 +135,6 @@ public class OrderService {
     @Autowired
     private IMemberMapper iMemberMapper;
     @Autowired
-    private IWarehouseMapper iWarehouseMapper;
-    @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
     private IMasterProductTemplateMapper iMasterProductTemplateMapper;
@@ -153,13 +155,15 @@ public class OrderService {
     @Autowired
     private TaskStackService taskStackService;
     @Autowired
-    private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
-    @Autowired
     private IMasterActuarialProductConfigMapper iMasterActuarialProductConfigMapper;
     @Autowired
     private IMasterActuarialTemplateConfigMapper iMasterActuarialTemplateConfigMapper;
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private DjStoreActivityMapper djStoreActivityMapper;
+    @Autowired
+    private DjStoreActivityProductMapper djStoreActivityProductMapper;
     /**
      * 删除订单
      */
@@ -1644,7 +1648,7 @@ public class OrderService {
         String productJsons = getNewProductJsons(house,productArr);
         if(StringUtils.isNotEmpty(productJsons)){
             //2.生成订单信息
-            ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"1",activityRedPackId);
+            ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"1",activityRedPackId,null);
             if (serverResponse.getResultObj() != null) {
                 String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                 //3.生成houseflow待抢单的流程(设计师的待创单流程)
@@ -1836,5 +1840,314 @@ public class OrderService {
             return ServerResponse.createByErrorMessage("体验单处理异常");
         }
 
+    }
+
+
+    /**
+     * 发起拼团
+     * @param userToken
+     * @param addressId 地址id
+     * @param productId 商品id
+     * @param activityRedPackId 优惠券id
+     * @param storeActivityProductId 活动商品表id
+     * @param shopCount 数量
+     * @param orderId 参与拼团订单id(参与拼团传发起拼团订单id、发起拼团不传)
+     * @param orderSource 6拼团订单 7限时购
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setSpellGroup(String userToken, String addressId,
+                                        String productId, String activityRedPackId,
+                                        String storeActivityProductId, Double shopCount,
+                                        String orderId,Integer orderSource) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        JSONArray productJsons = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("shopCount", shopCount);
+        jsonObject.put("productId",productId);
+        productJsons.add(jsonObject);
+        MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(addressId);
+        ServerResponse serverResponse = paymentService.generateOrderCommon(member, memberAddress != null ? memberAddress.getHouseId() : null,
+                memberAddress != null ? memberAddress.getCityId() : null, productJsons.toJSONString(), null, addressId,  orderSource,
+                null, activityRedPackId, storeActivityProductId);
+        if(StringUtils.isNotEmpty(orderId)){//参与拼团
+            Order parentOrder = orderMapper.selectByPrimaryKey(orderId);
+            Example example;
+            //该团人数已满
+            if("2".equals(parentOrder.getOrderStatus())){
+                //参与其他人数未满的拼团
+                example=new Example(Order.class);
+                example.createCriteria().andEqualTo(Order.DATA_STATUS,0)
+                        .andIsNotNull(Order.STORE_ACTIVITY_ID)
+                        .andIsNull(Order.PARENT_ORDER_ID)
+                        .andEqualTo(Order.ORDER_SOURCE,6)
+                        .andEqualTo(Order.ORDER_STATUS,9);
+                example.orderBy(Order.ORDER_GENERATION_TIME).asc();
+                parentOrder=orderMapper.selectOneByExample(example);
+            }
+            if(null!=parentOrder) {
+                JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
+                example = new Example(Order.class);
+                example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER, obj.getString("number"))
+                        .andEqualTo(Order.DATA_STATUS, 0);
+                Order order = orderMapper.selectOneByExample(example);
+                order.setParentOrderId(parentOrder.getId());
+                orderMapper.updateByPrimaryKeySelective(order);
+            }
+        }
+        return serverResponse;
+    }
+
+
+    /**
+     * 拼团购支付后操作
+     * @param businessOrder
+     */
+    public ServerResponse spellDeals(BusinessOrder businessOrder){
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        Example example = new Example(Order.class);
+        example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER, businessOrder.getNumber())
+                .andEqualTo(Order.DATA_STATUS, 0);
+        Order order = orderMapper.selectOneByExample(example);
+        GroupBooking groupBooking=new GroupBooking();
+        List<Map<String,Object>> list=new ArrayList<>();
+        DjStoreActivity djStoreActivity;
+        //该订单为参团人
+        if(StringUtils.isNotEmpty(order.getParentOrderId())){
+            Order parentOrder = orderMapper.selectByPrimaryKey(order.getParentOrderId());
+            djStoreActivity = djStoreActivityMapper.selectByPrimaryKey(parentOrder.getStoreActivityId());
+            DjStoreActivityProduct djStoreActivityProduct
+                    = djStoreActivityProductMapper.selectByPrimaryKey(order.getStoreActivityProductId());
+            StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(djStoreActivityProduct.getProductId());
+            DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+            groupBooking.setProductId(storefrontProduct.getId());
+            groupBooking.setImage(imageAddress+storefrontProduct.getImage());
+            groupBooking.setProductName(storefrontProduct.getProductName());
+            groupBooking.setRushPurchasePrice(djStoreActivityProduct.getRushPurchasePrice());
+            groupBooking.setUnitName(djBasicsProductTemplate.getUnitName());
+            groupBooking.setSellPrice(storefrontProduct.getSellPrice());
+            groupBooking.setSpellGroup(djStoreActivity.getSpellGroup());
+            //参与团人数已满
+            if("2".equals(parentOrder.getOrderStatus())){
+                //参与其他人数未满的拼团
+                example=new Example(Order.class);
+                example.createCriteria().andEqualTo(Order.DATA_STATUS,0)
+                        .andEqualTo(Order.STORE_ACTIVITY_ID,parentOrder.getStoreActivityId())
+                        .andEqualTo(Order.STORE_ACTIVITY_PRODUCT_ID,parentOrder.getStoreActivityProductId())
+                        .andEqualTo(Order.ORDER_SOURCE,6)
+                        .andEqualTo(Order.ORDER_STATUS,9);
+                example.orderBy(Order.ORDER_GENERATION_TIME).asc();
+                parentOrder=orderMapper.selectOneByExample(example);
+                //存在其他团参与其他团
+                if(null!=parentOrder){
+                    order.setOrderStatus("9");
+                    order.setParentOrderId(parentOrder.getId());
+                    orderMapper.updateByPrimaryKeySelective(order);
+                    example=new Example(Order.class);
+                    example.createCriteria().andEqualTo(Order.PARENT_ORDER_ID,parentOrder.getParentOrderId())
+                            .andEqualTo(Order.DATA_STATUS,0)
+                            .andEqualTo(Order.ORDER_STATUS,9);
+                    List<Order> orders = orderMapper.selectByExample(example);
+                    //拼团人数拼满，拼团成功并且为材料商品，生成要货单
+                    if(djStoreActivity.getSpellGroup()==orders.size()){
+                        //拼团成功修改拼团所有成员状态
+                        order=new Order();
+                        order.setId(null);
+                        order.setCreateDate(null);
+                        order.setOrderStatus("2");
+                        orderMapper.updateByExampleSelective(order,example);
+                        orders.forEach(order1 -> {
+                            //拼团人数拼满，拼团成功并且为材料商品，生成要货单
+                            if(order1.getProductType()==0) {
+                                this.setOrderSplit(order1);
+                            }
+                            Map<String,Object> map=new HashMap<>();
+                            Member member = iMemberMapper.selectByPrimaryKey(order1.getMemberId());
+                            member.initPath(imageAddress);
+                            map.put("administrator",0);
+                            if(StringUtils.isEmpty(order1.getParentOrderId())) {
+                                map.put("administrator",1);
+                            }
+                            map.put("head",member.getHead());
+                            list.add(map);
+                        });
+                        groupBooking.setShortProple(djStoreActivity.getSpellGroup()-orders.size());
+                        groupBooking.setOrderGenerationTime(parentOrder.getOrderGenerationTime());
+                        return ServerResponse.createBySuccess("该团人数已满,参与其他团成功",groupBooking);
+                    }else{//拼团人数未满 不生成要货单
+                        orders.forEach(order1 -> {
+                            Map<String,Object> map=new HashMap<>();
+                            Member member = iMemberMapper.selectByPrimaryKey(order1.getMemberId());
+                            member.initPath(imageAddress);
+                            map.put("administrator",0);
+                            if(StringUtils.isEmpty(order1.getParentOrderId())) {
+                                map.put("administrator",1);
+                            }
+                            map.put("head",member.getHead());
+                            list.add(map);
+                        });
+                        groupBooking.setShortProple(djStoreActivity.getSpellGroup()-orders.size());
+                        groupBooking.setOrderGenerationTime(parentOrder.getOrderGenerationTime());
+                        return ServerResponse.createBySuccess("拼团成功",groupBooking);
+                    }
+                }else{//不存在其他团,自己作为新团发起人
+                    order.setOrderStatus("9");
+                    order.setParentOrderId(null);
+                    orderMapper.updateByPrimaryKeySelective(order);
+                    Map<String,Object> map=new HashMap<>();
+                    Member member = iMemberMapper.selectByPrimaryKey(order.getMemberId());
+                    member.initPath(imageAddress);
+                    map.put("administrator",1);
+                    map.put("head",member.getHead());
+                    list.add(map);
+                    groupBooking.setShortProple(djStoreActivity.getSpellGroup()-1);
+                    groupBooking.setOrderGenerationTime(order.getOrderGenerationTime());
+                    groupBooking.setList(list);
+                    return ServerResponse.createBySuccess("该团人数已满,已成功为你发起拼团",groupBooking);
+                }
+            }else{//参与团人数未满
+                order.setOrderStatus("9");
+                orderMapper.updateByPrimaryKeySelective(order);
+                Map<String,Object> map=new HashMap<>();
+                Member member = iMemberMapper.selectByPrimaryKey(order.getMemberId());
+                member.initPath(imageAddress);
+                map.put("administrator",0);
+                map.put("head",member.getHead());
+                list.add(map);
+                example=new Example(Order.class);
+                example.createCriteria().andEqualTo(Order.PARENT_ORDER_ID,parentOrder.getParentOrderId())
+                        .andEqualTo(Order.DATA_STATUS,0)
+                        .andEqualTo(Order.ORDER_STATUS,9);
+                groupBooking.setShortProple(djStoreActivity.getSpellGroup()-orderMapper.selectCountByExample(example));
+                groupBooking.setOrderGenerationTime(parentOrder.getOrderGenerationTime());
+                groupBooking.setList(list);
+                return ServerResponse.createBySuccess("拼团成功",groupBooking);
+            }
+        }else{//该订单为发起拼团人
+            order.setOrderStatus("9");
+            orderMapper.updateByPrimaryKeySelective(order);
+            Map<String,Object> map=new HashMap<>();
+            Member member = iMemberMapper.selectByPrimaryKey(order.getMemberId());
+            member.initPath(imageAddress);
+            map.put("administrator",1);
+            map.put("head",member.getHead());
+            list.add(map);
+            djStoreActivity=djStoreActivityMapper.selectByPrimaryKey(order.getStoreActivityId());
+            groupBooking.setShortProple(djStoreActivity.getSpellGroup()-1);
+            groupBooking.setOrderGenerationTime(order.getOrderGenerationTime());
+            return ServerResponse.createBySuccess("拼团成功",groupBooking);
+        }
+    }
+
+
+    /**
+     * 限时购支付后操作
+     * @param businessOrder
+     */
+    public void timeToBuy(BusinessOrder businessOrder){
+        Example example = new Example(Order.class);
+        example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER, businessOrder.getNumber())
+                .andEqualTo(Order.DATA_STATUS, 0);
+        Order order = orderMapper.selectOneByExample(example);
+        order.setOrderStatus("2");
+        orderMapper.updateByPrimaryKeySelective(order);
+        this.setOrderSplit(order);
+    }
+
+
+    /**
+     * 生成要货单
+     * @param order
+     */
+    private void setOrderSplit(Order order){
+        OrderSplit orderSplit = new OrderSplit();
+        Example example1 = new Example(OrderSplit.class);
+        orderSplit.setNumber("DJ" + 200000 + orderItemMapper.selectCountByExample(example1));//要货单号
+        orderSplit.setHouseId(order.getHouseId());
+        orderSplit.setApplyStatus(1);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
+        orderSplit.setMemberId(order.getMemberId());
+        Member member = iMemberMapper.selectByPrimaryKey(order.getMemberId());
+        orderSplit.setMemberName(member.getName());
+        orderSplit.setMobile(member.getMobile());
+        orderSplit.setWorkerTypeId(member.getWorkerTypeId());
+        orderSplit.setStorefrontId(order.getStorefontId());
+        orderSplit.setCityId(order.getCityId());
+        orderSplit.setOrderId(order.getId());
+        orderSplit.setAddressId(order.getAddressId());
+        Double totalPrice=0d;
+        example1=new Example(OrderItem.class);
+        example1.createCriteria().andEqualTo(OrderItem.ORDER_ID,order.getId())
+                .andEqualTo(OrderItem.DATA_STATUS,0);
+        List<OrderItem> orderItems = orderItemMapper.selectByExample(example1);
+        for(OrderItem orderItem:orderItems) {
+            OrderSplitItem orderSplitItem = new OrderSplitItem();
+            orderSplitItem.setOrderSplitId(orderSplit.getId());
+            orderSplitItem.setProductId(orderItem.getProductId());
+            orderSplitItem.setProductSn(orderItem.getProductSn());
+            orderSplitItem.setProductName(orderItem.getProductName());
+            orderSplitItem.setPrice(orderItem.getPrice());
+            orderSplitItem.setCost(orderItem.getCost());
+            orderSplitItem.setShopCount(orderItem.getShopCount());
+            orderSplitItem.setNum(orderItem.getShopCount());
+            orderSplitItem.setUnitName(orderItem.getUnitName());
+            orderSplitItem.setTotalPrice(orderItem.getPrice() * orderItem.getShopCount());//单项总价 销售价
+            orderSplitItem.setProductType(orderItem.getProductType());
+            orderSplitItem.setCategoryId(orderItem.getCategoryId());
+            orderSplitItem.setImage(orderItem.getImage());//货品图片
+            orderSplitItem.setHouseId(orderItem.getHouseId());
+            orderSplitItem.setCityId(orderItem.getCityId());
+            orderSplitItem.setAddressId(order.getAddressId());
+            orderSplitItem.setStorefrontId(orderItem.getStorefontId());
+            StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(orderItem.getProductId());
+            orderSplitItem.setIsDeliveryInstall(storefrontProduct.getIsDeliveryInstall());
+            orderSplitItem.setOrderItemId(orderItem.getId());
+
+            //扣除业主仓库数据
+            example1=new Example(Warehouse.class);
+            example1.createCriteria().andEqualTo(Warehouse.HOUSE_ID,orderSplit.getHouseId())
+                    .andEqualTo(Warehouse.PRODUCT_ID,orderSplitItem.getProductId());
+            Warehouse warehouse = warehouseMapper.selectOneByExample(example1);
+            warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
+            warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
+            warehouseMapper.updateByPrimaryKeySelective(warehouse);
+
+            //计算运费，搬运费
+            Double transportationCost=orderItem.getTransportationCost()!=null?orderItem.getTransportationCost():0;//运费
+            Double stevedorageCost=orderItem.getStevedorageCost()!=null?orderItem.getStevedorageCost():0;//搬运费
+            Double askCount=orderItem.getShopCount();
+            //计算运费
+            if(transportationCost>0.0) {//（运费/总数量）*收货量
+                orderSplitItem.setTransportationCost(MathUtil.mul(MathUtil.div(transportationCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+            }else{
+                orderSplitItem.setTransportationCost(0d);
+            }
+            //计算搬运费
+            if(stevedorageCost>0.0){//（搬运费/总数量）*收货量
+                orderSplitItem.setStevedorageCost(MathUtil.mul(MathUtil.div(stevedorageCost,orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+            }else{
+                orderSplitItem.setStevedorageCost(0d);
+            }
+            //优惠券
+            if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
+                orderSplitItem.setDiscountPrice(MathUtil.mul(MathUtil.div(orderItem.getDiscountPrice(),orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
+            }else{
+                orderSplitItem.setDiscountPrice(0d);
+            }
+            totalPrice=MathUtil.add(totalPrice,MathUtil.add(orderSplitItem.getTotalPrice(),MathUtil.add(orderSplitItem.getTransportationCost(),orderSplitItem.getStevedorageCost())));
+            totalPrice=MathUtil.sub(totalPrice,orderSplitItem.getDiscountPrice());
+            orderSplitItemMapper.insert(orderSplitItem);
+
+            //修改订单明细中的要货量
+            if(orderItem.getAskCount()==null)
+                orderItem.setAskCount(0d);
+            orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(),orderItem.getShopCount()));
+            orderItemMapper.updateByPrimaryKey(orderItem);
+        }
+        orderSplit.setTotalAmount(BigDecimal.valueOf(totalPrice));
+        orderSplitMapper.insert(orderSplit);
     }
 }

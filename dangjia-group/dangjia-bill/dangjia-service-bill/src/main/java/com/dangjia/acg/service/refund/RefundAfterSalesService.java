@@ -235,14 +235,7 @@ public class RefundAfterSalesService {
     public ServerResponse queryRefundonlyInfoList(String userToken,String cityId,String houseId,String orderProductAttr){
         try{
             Map<String,Object> map=new HashMap<String,Object>();
-            //查询房子信息，获取房子对应的楼层
-            QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
-            Integer elevator= 1;//是否电梯房
-            String floor="1";
-            if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
-                 elevator=quantityRoom.getElevator();//是否电梯房
-                 floor=quantityRoom.getFloor();//楼层
-            }
+
             Double actualTotalAmountT=0.0;//退货总额
             Double totalRransportationCostT = 0.0;//可退运费
             Double totalStevedorageCostT = 0.0;//可退搬运费
@@ -255,6 +248,18 @@ public class RefundAfterSalesService {
                 for (int i = 0; i < orderArrayList.size(); i++) {
                     JSONObject obj = (JSONObject) orderArrayList.get(i);
                     String orderId = (String) obj.get("orderId");
+                    String houseIdNew = (String) obj.get("houseId");
+                    if(houseIdNew!=null){
+                        houseId=houseIdNew;
+                    }
+                    //查询房子信息，获取房子对应的楼层
+                    QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
+                    Integer elevator= 1;//是否电梯房
+                    String floor="1";
+                    if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
+                        elevator=quantityRoom.getElevator();//是否电梯房
+                        floor=quantityRoom.getFloor();//楼层
+                    }
                     RefundOrderDTO orderInfo = refundAfterSalesMapper.queryRefundOrderInfoById(orderId);
                     Double totalRransportationCost = 0.0;//可退运费
                     Double totalStevedorageCost = 0.0;//可退搬运费
@@ -291,7 +296,7 @@ public class RefundAfterSalesService {
                         }
                         //优惠金额
                         Double discountPrice=0d;
-                        if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                        if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                             discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         }
                         actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
@@ -345,14 +350,7 @@ public class RefundAfterSalesService {
         }
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Member member = (Member) object;
-        //查询房子信息，获取房子对应的楼层
-        QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
-        Integer elevator= 1;//是否电梯房
-        String floor="1";
-        if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
-            elevator=quantityRoom.getElevator();//是否电梯房
-            floor=quantityRoom.getFloor();//楼层
-        }
+
         MendOrder mendOrder;
         Example example;
         JSONArray orderArrayList=JSONArray.parseArray(orderProductAttr);
@@ -361,6 +359,18 @@ public class RefundAfterSalesService {
                 JSONObject obj = (JSONObject) orderArrayList.get(i);
                 String orderId = (String) obj.get("orderId");
                 String storefrontId = (String) obj.get("storefrontId");
+                String houseIdNew = (String) obj.get("houseId");
+                if(houseIdNew!=null){
+                    houseId=houseIdNew;
+                }
+                //查询房子信息，获取房子对应的楼层
+                QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
+                Integer elevator= 1;//是否电梯房
+                String floor="1";
+                if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
+                    elevator=quantityRoom.getElevator();//是否电梯房
+                    floor=quantityRoom.getFloor();//楼层
+                }
                 example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
                 mendOrder.setNumber("DJZX" + 40000 + iBillMendOrderMapper.selectCountByExample(example));//订单号
@@ -417,7 +427,7 @@ public class RefundAfterSalesService {
                     }
                     //优惠金额
                     Double discountPrice=0d;
-                    if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                    if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                         discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         refundOrderItemDTO.setDiscountPrice(discountPrice);
                     }
@@ -1058,14 +1068,6 @@ public class RefundAfterSalesService {
     public ServerResponse queryReturnRefundInfoList(String userToken,String cityId,String houseId,String orderProductAttr){
         try{
             Map<String,Object> map=new HashMap<String,Object>();
-            //查询房子信息，获取房子对应的楼层
-            QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
-            Integer elevator= 1;//是否电梯房
-            String floor="1";
-            if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
-                elevator=quantityRoom.getElevator();//是否电梯房
-                floor=quantityRoom.getFloor();//楼层
-            }
             Double actualTotalAmountT=0.0;//退货总额
             Double totalRransportationCostT = 0.0;//可退运费
             Double totalStevedorageCostT = 0.0;//可退搬运费
@@ -1078,6 +1080,18 @@ public class RefundAfterSalesService {
                 for (int i = 0; i < orderArrayList.size(); i++) {
                     JSONObject obj = (JSONObject) orderArrayList.get(i);
                     String orderSplitId = (String) obj.get("orderSplitId");//退货退款订单号
+                    String houseIdNew = (String) obj.get("houseId");
+                    if(houseIdNew!=null){
+                        houseId=houseIdNew;
+                    }
+                    //查询房子信息，获取房子对应的楼层
+                    QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
+                    Integer elevator= 1;//是否电梯房
+                    String floor="1";
+                    if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
+                        elevator=quantityRoom.getElevator();//是否电梯房
+                        floor=quantityRoom.getFloor();//楼层
+                    }
                     RefundOrderDTO orderInfo = billDjDeliverOrderSplitMapper.queryReturnRefundOrderInfo(orderSplitId);
                     Double totalRransportationCost = 0.0;//可退运费
                     Double totalStevedorageCost = 0.0;//可退搬运费
@@ -1114,7 +1128,7 @@ public class RefundAfterSalesService {
                         }
                         //优惠金额
                         Double discountPrice=0d;
-                        if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                        if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                             discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         }
                         actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
@@ -1166,14 +1180,6 @@ public class RefundAfterSalesService {
         }
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Member member = (Member) object;
-        //查询房子信息，获取房子对应的楼层
-        QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
-        Integer elevator= 1;//是否电梯房
-        String floor="1";
-        if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
-            elevator=quantityRoom.getElevator();//是否电梯房
-            floor=quantityRoom.getFloor();//楼层
-        }
         MendOrder mendOrder;
         Example example;
         JSONArray orderArrayList=JSONArray.parseArray(orderProductAttr);
@@ -1183,6 +1189,18 @@ public class RefundAfterSalesService {
                 String orderSplitId = (String) obj.get("orderSplitId");
                 String storefrontId = (String) obj.get("storefrontId");
                 String imageArr = (String)obj.get("imageArr");
+                String houseIdNew = (String) obj.get("houseId");
+                if(houseIdNew!=null){
+                    houseId=houseIdNew;
+                }
+                //查询房子信息，获取房子对应的楼层
+                QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
+                Integer elevator= 1;//是否电梯房
+                String floor="1";
+                if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
+                    elevator=quantityRoom.getElevator();//是否电梯房
+                    floor=quantityRoom.getFloor();//楼层
+                }
                 example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
                 mendOrder.setNumber("DJZX" + 40000 + iBillMendOrderMapper.selectCountByExample(example));//订单号
@@ -1240,7 +1258,7 @@ public class RefundAfterSalesService {
                     }
                     //优惠金额
                     Double discountPrice=0d;
-                    if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                    if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                         discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         refundOrderItemDTO.setDiscountPrice(discountPrice);
                     }
@@ -1372,7 +1390,7 @@ public class RefundAfterSalesService {
                     }
                     //优惠金额
                     Double discountPrice=0d;
-                    if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                    if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                         discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         refundOrderItemDTO.setDiscountPrice(discountPrice);
                     }
@@ -1602,8 +1620,10 @@ public class RefundAfterSalesService {
                 returnWorkOrderDTO.setApplyMemberName(member.getName());//
                 if("2".equals(returnWorkOrderDTO.getType())||"3".equals(returnWorkOrderDTO.getType())){//业主补、退人工
                     returnWorkOrderDTO.setApplyMemberTypeName("业主");//申请人类型名称
+                    returnWorkOrderDTO.setWorkerTypeColor("#D67DAE");
                 }else{
                     returnWorkOrderDTO.setApplyMemberTypeName(returnWorkOrderDTO.getWorkTypeName());//申请人类型名称
+                    returnWorkOrderDTO.setWorkerTypeColor(returnWorkOrderDTO.getWorkerTypeColor());
                 }
                 //查询对应的流水节点信息(根据订单ID）
                 List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,null);//退款历史记录

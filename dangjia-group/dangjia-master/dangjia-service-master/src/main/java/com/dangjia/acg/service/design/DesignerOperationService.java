@@ -446,7 +446,7 @@ public class DesignerOperationService {
             String productJsons = orderService.getBudgetProductJsons(house);
             if(productJsons!=null&&StringUtils.isNotBlank(productJsons)){
                 //2.生成订单信息
-                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"2",null);
+                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"2",null,null);
                 if (serverResponse.getResultObj() != null) {
                     String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                     taskStackService.insertTaskStackInfo(house.getId(),member.getId(),"待支付精算费",workerType.getImage(),1,obj);//支付精算的任务

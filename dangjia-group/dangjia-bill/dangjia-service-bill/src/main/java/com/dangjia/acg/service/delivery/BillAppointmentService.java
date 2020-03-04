@@ -15,8 +15,10 @@ import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.mapper.delivery.*;
+import com.dangjia.acg.mapper.order.IBillWarehouseMapper;
 import com.dangjia.acg.mapper.storeFront.BillStoreFrontProductMapper;
 import com.dangjia.acg.modle.deliver.*;
+import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.github.pagehelper.PageHelper;
@@ -62,6 +64,8 @@ public class BillAppointmentService {
 
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IBillWarehouseMapper iBillWarehouseMapper;
 
     /**
      * 我的预约查询
@@ -128,7 +132,7 @@ public class BillAppointmentService {
                 Example example = new Example(OrderSplit.class);
                 orderSplit.setNumber("DJ" + 200000 + djDeliverOrderItemMapper.selectCountByExample(example));//要货单号
                 orderSplit.setHouseId(order.getHouseId());
-                orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
+                orderSplit.setApplyStatus(1);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
                 orderSplit.setMemberId(member.getId());
                 orderSplit.setMemberName(member.getName());
                 orderSplit.setMobile(member.getMobile());
@@ -168,6 +172,16 @@ public class BillAppointmentService {
                     orderSplitItem.setOrderItemId(orderItem.getId());
                     orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
                     orderSplitItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
+
+                    //扣除业主仓库数据
+                    example=new Example(Warehouse.class);
+                    example.createCriteria().andEqualTo(Warehouse.HOUSE_ID,orderSplit.getHouseId())
+                            .andEqualTo(Warehouse.PRODUCT_ID,orderSplitItem.getProductId());
+                    Warehouse warehouse = iBillWarehouseMapper.selectOneByExample(example);
+                    warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
+                    warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
+                    iBillWarehouseMapper.updateByPrimaryKeySelective(warehouse);
+
                     //计算运费，搬运费
                     Double transportationCost=orderItem.getTransportationCost()!=null?orderItem.getTransportationCost():0;//运费
                     Double stevedorageCost=orderItem.getStevedorageCost()!=null?orderItem.getStevedorageCost():0;//搬运费
@@ -184,6 +198,7 @@ public class BillAppointmentService {
                     }else{
                         orderSplitItem.setStevedorageCost(0d);
                     }
+                    //优惠券
                     if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
                         orderSplitItem.setDiscountPrice(MathUtil.mul(MathUtil.div(orderItem.getDiscountPrice(),orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
                     }else{
@@ -192,6 +207,8 @@ public class BillAppointmentService {
                     totalPrice=MathUtil.add(totalPrice,MathUtil.add(orderSplitItem.getTotalPrice(),MathUtil.add(orderSplitItem.getTransportationCost(),orderSplitItem.getStevedorageCost())));
                     totalPrice=MathUtil.sub(totalPrice,orderSplitItem.getDiscountPrice());
                     billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
+
+                    //修改订单明细中的要货量
                     if(orderItem.getAskCount()==null)
                         orderItem.setAskCount(0d);
                     orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(),orderItem.getShopCount()));
@@ -214,7 +231,7 @@ public class BillAppointmentService {
                     Example example = new Example(OrderSplit.class);
                     orderSplit.setNumber("DJ" + 200000 + djDeliverOrderItemMapper.selectCountByExample(example));//要货单号
                     orderSplit.setHouseId(djDeliverOrder.getHouseId());
-                    orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
+                    orderSplit.setApplyStatus(1);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
                     orderSplit.setMemberId(member.getId());
                     orderSplit.setMemberName(member.getName());
                     orderSplit.setMobile(member.getMobile());
@@ -252,6 +269,16 @@ public class BillAppointmentService {
                         orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
                         orderSplitItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                         Double askCount=orderItem.getShopCount();
+
+                        //扣除业主仓库数据
+                        example=new Example(Warehouse.class);
+                        example.createCriteria().andEqualTo(Warehouse.HOUSE_ID,orderSplit.getHouseId())
+                                .andEqualTo(Warehouse.PRODUCT_ID,orderSplitItem.getProductId());
+                        Warehouse warehouse = iBillWarehouseMapper.selectOneByExample(example);
+                        warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
+                        warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
+                        iBillWarehouseMapper.updateByPrimaryKeySelective(warehouse);
+
                         //计算运费，搬运费
                         Double transportationCost=orderItem.getTransportationCost()!=null?orderItem.getTransportationCost():0;//运费
                         Double stevedorageCost=orderItem.getStevedorageCost()!=null?orderItem.getStevedorageCost():0;//搬运费
@@ -267,6 +294,7 @@ public class BillAppointmentService {
                         }else{
                             orderSplitItem.setStevedorageCost(0d);
                         }
+                        //优惠券
                         if(orderItem.getDiscountPrice()!=null&&orderItem.getDiscountPrice()>0){
                             orderSplitItem.setDiscountPrice(MathUtil.mul(MathUtil.div(orderItem.getDiscountPrice(),orderItem.getShopCount()!=null?orderItem.getShopCount():1),askCount));
                         }else{
@@ -275,6 +303,8 @@ public class BillAppointmentService {
                         totalPrice=MathUtil.add(totalPrice,MathUtil.add(orderSplitItem.getTotalPrice(),MathUtil.add(orderSplitItem.getTransportationCost(),orderSplitItem.getStevedorageCost())));
                         totalPrice=MathUtil.sub(totalPrice,orderSplitItem.getDiscountPrice());
                         billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
+
+                        //修改订单明细中的要货量
                         if(orderItem.getAskCount()==null)
                             orderItem.setAskCount(0d);
                         orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(),orderSplitItem.getShopCount()));
@@ -317,14 +347,10 @@ public class BillAppointmentService {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
                 AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
                 List<AppointmentDTO> appointmentDTOS = djDeliverOrderMapper.queryReserved(orderStorefrontDTO.getOrderSplitId());
+                OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(orderStorefrontDTO.getOrderSplitId());
                 if (appointmentDTOS.size() > 0) {
                     appointmentDTOS.forEach(appointmentDTO -> {
-                        OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(appointmentDTO.getOrderSplitId());
-                        Order order = djDeliverOrderMapper.selectByPrimaryKey(orderSplit.getOrderId());
-                        appointmentDTO.setOrderStatus(order.getOrderStatus());
-                        if(CommonUtil.isEmpty(order.getOrderStatus())){
-                            appointmentDTO.setOrderStatus("0");
-                        }
+                        appointmentDTO.setApplyStatus(orderSplit.getApplyStatus());
                         appointmentDTO.setImage(imageAddress + appointmentDTO.getImage());
                     });
                     appointmentListDTO.setAppointmentDTOS(appointmentDTOS);

@@ -10,6 +10,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -208,6 +209,9 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("工艺集合")
     private List<TechnologyDTO> technologies;
     /***********************商品明细相关内容**************************/
+
+    //拼团
+    private Map<String,Object> map;//拼团
 
 
 }

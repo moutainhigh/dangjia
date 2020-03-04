@@ -93,6 +93,8 @@ public class AppActuaryOperationService {
     private IGoodsDjActivitySessionMapper iGoodsDjActivitySessionMapper;
     @Autowired
     private IGoodsDjStoreParticipateActivitiesMapper iGoodsDjStoreParticipateActivitiesMapper;
+    @Autowired
+    private IGoodsDjStoreActivityMapper iGoodsDjStoreActivityMapper;
 
 
     @Autowired
@@ -350,6 +352,16 @@ public class AppActuaryOperationService {
                             iGoodsDjActivitySessionMapper.selectByPrimaryKey(djStoreParticipateActivities.getActivitySessionId());
                     goodsDTO.setEndSession(djActivitySession.getEndSession());
                     goodsDTO.setSessionStartTime(djActivitySession.getSessionStartTime());
+                }else if(djStoreActivityProduct.getActivityType()==2) {
+                    String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                    Map map=new HashMap();
+                    List<Map> list = iGoodsDjStoreActivityMapper.querySpellDeals(storeActivityProductId);
+                    list.forEach(a ->{
+                        a.put("head",imageAddress+a.get("head"));
+                    });
+                    map.put("spellGroup",list.size());
+                    map.put("list",list);
+                    goodsDTO.setMap(map);
                 }
             }
             //如果商品为0：材料；1：服务

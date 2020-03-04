@@ -21,6 +21,8 @@ public class ReturnWorkOrderDTO {
 
     private String applyMemberTypeName;//申请人类型名称
 
+    private String workerTypeColor;//颜色
+
     private String houseId;//房子ID
 
     private String workTypeId;//工种ID

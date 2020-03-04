@@ -271,7 +271,7 @@ public class MemberService {
         //验证码登陆
         if ("2".equals(loginMode)) {
             Integer registerCode = redisClient.getCache(Constants.SMS_LOGIN_CODE + phone, Integer.class);
-            if (registerCode == null || !password.equals(registerCode)) {
+            if (!password.equals(registerCode + "")) {
                 return ServerResponse.createByErrorMessage("验证码错误");
             }
             user = memberMapper.getByPhone(phone);
