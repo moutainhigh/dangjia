@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.StorefrontConfigAPI;
-import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
-import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -51,14 +48,12 @@ import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
-import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
-import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
 import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
@@ -88,7 +83,6 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
-import com.dangjia.acg.modle.shell.HomeShellOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -169,8 +163,6 @@ public class PaymentService {
     @Autowired
     private IMendOrderMapper mendOrderMapper;
     @Autowired
-    private IMendMaterialMapper mendMaterialMapper;
-    @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
     @Autowired
     private DjMaintenanceRecordProductMapper djMaintenanceRecordProductMapper;
@@ -189,8 +181,6 @@ public class PaymentService {
     @Autowired
     private IMasterBasicsGoodsCategoryMapper iMasterBasicsGoodsCategoryMapper;
     @Autowired
-    private BudgetWorkerAPI budgetWorkerAPI;
-    @Autowired
     private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
@@ -207,8 +197,6 @@ public class PaymentService {
     @Autowired
     private IMasterDeliverOrderAddedProductMapper masterDeliverOrderAddedProductMapper;
     @Autowired
-    private IProductChangeOrderMapper productChangeOrderMapper;
-    @Autowired
     private HouseDesignPayService houseDesignPayService;
     @Autowired
     private CraftsmanConstructionService constructionService;
@@ -221,8 +209,6 @@ public class PaymentService {
     private MasterCostAcquisitionService masterCostAcquisitionService;
     @Autowired
     private PayService payService;
-    @Autowired
-    private IMasterSupplierPayOrderMapper iMasterSupplierPayOrderMapper;
     @Autowired
     private IMasterSupplierMapper iMaterSupplierMapper;
     @Autowired
