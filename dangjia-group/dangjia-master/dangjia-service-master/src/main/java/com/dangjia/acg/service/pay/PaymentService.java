@@ -92,6 +92,7 @@ import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.core.TaskStackService;
@@ -134,7 +135,6 @@ public class PaymentService {
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
-
     @Autowired
     private IMasterProductTemplateMapper iMasterProductTemplateMapper;
     @Autowired
@@ -143,10 +143,8 @@ public class PaymentService {
     private IWorkerTypeSafeMapper workerTypeSafeMapper;
     @Autowired
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
-
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
-
     @Autowired
     private IMasterBasicsGoodsMapper iMasterBasicsGoodsMapper;
     @Autowired
@@ -166,8 +164,6 @@ public class PaymentService {
     @Autowired
     private IMendOrderMapper mendOrderMapper;
     @Autowired
-    private IMendMaterialMapper mendMaterialMapper;
-    @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
     @Autowired
     private DjMaintenanceRecordProductMapper djMaintenanceRecordProductMapper;
@@ -186,8 +182,6 @@ public class PaymentService {
     @Autowired
     private IMasterBasicsGoodsCategoryMapper iMasterBasicsGoodsCategoryMapper;
     @Autowired
-    private BudgetWorkerAPI budgetWorkerAPI;
-    @Autowired
     private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
@@ -204,8 +198,6 @@ public class PaymentService {
     @Autowired
     private IMasterDeliverOrderAddedProductMapper masterDeliverOrderAddedProductMapper;
     @Autowired
-    private IProductChangeOrderMapper productChangeOrderMapper;
-    @Autowired
     private HouseDesignPayService houseDesignPayService;
     @Autowired
     private CraftsmanConstructionService constructionService;
@@ -218,8 +210,6 @@ public class PaymentService {
     private MasterCostAcquisitionService masterCostAcquisitionService;
     @Autowired
     private PayService payService;
-    @Autowired
-    private IMasterSupplierPayOrderMapper iMasterSupplierPayOrderMapper;
     @Autowired
     private IMasterSupplierMapper iMaterSupplierMapper;
     @Autowired
@@ -237,8 +227,8 @@ public class PaymentService {
     private IMemberMapper iMemberMapper;
     @Autowired
     private HomeShellOrderService homeShellOrderService;
-
-
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
     @Autowired
     private HouseWorkerService houseWorkerService;
 
@@ -734,6 +724,8 @@ public class PaymentService {
         houseFlow.setTotalPrice(hwo.getTotalPrice());
         houseFlow.setModifyDate(new Date());
         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+
 
         if(houseFlow.getWorkType()>2) {
             /*不统计设计精算人工*/
