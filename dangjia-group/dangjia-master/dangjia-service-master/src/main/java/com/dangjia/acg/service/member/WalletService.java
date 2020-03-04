@@ -23,6 +23,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.worker.*;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.engineer.EngineerService;
 import com.github.pagehelper.PageHelper;
@@ -75,6 +76,9 @@ public class WalletService {
     private String ruleDate = "2019年12月20日";//收费规则生效时间
 
 
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
+
     /**
      * 完成验证提现
      */
@@ -118,6 +122,16 @@ public class WalletService {
         BankCard bankCard = bankCardMapper.selectByPrimaryKey(workerBankCard.getBankCardId());
         if (bankCard == null) {
             return ServerResponse.createByErrorMessage("银行卡信息不正确,请重新选择或添加");
+        }
+        Integer monthCount= configRuleUtilService.getWithdrawDepositCount(member.getEvaluationScore());//月提现次数上限
+        if(monthCount>0){
+            Example example = new Example(WithdrawDeposit.class);
+            example.createCriteria().andEqualTo(WithdrawDeposit.WORKER_ID, member.getId())
+                    .andGreaterThanOrEqualTo(WithdrawDeposit.CREATE_DATE, DateUtil.getThisMonthFirst());
+            Integer wdList = withdrawDepositMapper.selectCountByExample(example);
+            if(wdList>monthCount){
+                return ServerResponse.createByErrorMessage("超过月提现次数上限，每月最多"+monthCount+"次，无法提现");
+            }
         }
         boolean isOwner = isOwner(member);
         double applyMoney = money;//实际申请金额
