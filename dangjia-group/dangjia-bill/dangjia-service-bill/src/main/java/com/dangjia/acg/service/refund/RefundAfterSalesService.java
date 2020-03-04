@@ -296,7 +296,7 @@ public class RefundAfterSalesService {
                         }
                         //优惠金额
                         Double discountPrice=0d;
-                        if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                        if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                             discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         }
                         actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
@@ -427,7 +427,7 @@ public class RefundAfterSalesService {
                     }
                     //优惠金额
                     Double discountPrice=0d;
-                    if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                    if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                         discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         refundOrderItemDTO.setDiscountPrice(discountPrice);
                     }
@@ -1128,7 +1128,7 @@ public class RefundAfterSalesService {
                         }
                         //优惠金额
                         Double discountPrice=0d;
-                        if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                        if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                             discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         }
                         actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
@@ -1258,7 +1258,7 @@ public class RefundAfterSalesService {
                     }
                     //优惠金额
                     Double discountPrice=0d;
-                    if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                    if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                         discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         refundOrderItemDTO.setDiscountPrice(discountPrice);
                     }
@@ -1390,7 +1390,7 @@ public class RefundAfterSalesService {
                     }
                     //优惠金额
                     Double discountPrice=0d;
-                    if(refundOrderItemDTO.getDiscountPrice()>0.0){
+                    if(refundOrderItemDTO.getDiscountPrice()!=null&&refundOrderItemDTO.getDiscountPrice()>0.0){
                         discountPrice=MathUtil.mul(MathUtil.div(refundOrderItemDTO.getDiscountPrice(),refundOrderItemDTO.getShopCount()),returnCount);
                         refundOrderItemDTO.setDiscountPrice(discountPrice);
                     }
@@ -1620,8 +1620,10 @@ public class RefundAfterSalesService {
                 returnWorkOrderDTO.setApplyMemberName(member.getName());//
                 if("2".equals(returnWorkOrderDTO.getType())||"3".equals(returnWorkOrderDTO.getType())){//业主补、退人工
                     returnWorkOrderDTO.setApplyMemberTypeName("业主");//申请人类型名称
+                    returnWorkOrderDTO.setWorkerTypeColor("#D67DAE");
                 }else{
                     returnWorkOrderDTO.setApplyMemberTypeName(returnWorkOrderDTO.getWorkTypeName());//申请人类型名称
+                    returnWorkOrderDTO.setWorkerTypeColor(returnWorkOrderDTO.getWorkerTypeColor());
                 }
                 //查询对应的流水节点信息(根据订单ID）
                 List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,null);//退款历史记录

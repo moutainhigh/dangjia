@@ -63,6 +63,7 @@
             t4.`name` workerName,
             t4.mobile workerMobile,
             t1.sup_id supId,
+            t2.color workerTypeColor,
             t1.type
         FROM
             dj_repair_change_order t1,
