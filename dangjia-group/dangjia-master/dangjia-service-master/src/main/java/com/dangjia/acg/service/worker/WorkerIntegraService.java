@@ -69,13 +69,17 @@ public class WorkerIntegraService {
             if(myWorkerRunk==null){
                 myWorkerRunk= new WorkerRunkDTO();
                 myWorkerRunk.setWorkerId(member.getId());
-                myWorkerRunk.setWorkerHead(imageAddress+member.getHead());
+                myWorkerRunk.setWorkerHead(member.getHead());
                 myWorkerRunk.setWorkerName(member.getName());
                 myWorkerRunk.setRankNo(-1);
                 myWorkerRunk.setIntegral(new BigDecimal(0));
             }
             map.put("worker",myWorkerRunk);
-            for (int i = 0; i < 20; i++) {
+            Integer count=list.size();
+            if(count>20){
+                count=20;
+            }
+            for (int i = 0; i < count; i++) {
                 WorkerRunkDTO  workerRunk=list.get(i);
                 workerRunk.setWorkerHead(imageAddress+workerRunk.getWorkerHead());
                 listnew.add(workerRunk);
@@ -83,20 +87,23 @@ public class WorkerIntegraService {
             map.put("list",listnew);
         }else{
             List<WorkerRunkDTO> list = workIntegralMapper.queryRankingWorker(member.getWorkerType());
+            for (WorkerRunkDTO workerRunkDTO:list) {
+                workerRunkDTO.setWorkerHead(imageAddress+workerRunkDTO.getWorkerHead());
+            }
             map.put("list",list);
 
             Example example=new Example(Member.class);
 
             if(member.getWorkerType()!=null&&member.getWorkerType()>3){
-                example.createCriteria().andCondition(" (("+member.getEvaluationScore()+" < m.evaluation_score) OR ("+member.getEvaluationScore()+" = m.evaluation_score AND '"+DateUtil.getDateString(member.getCreateDate().getTime())+"' >= m.create_date)) AND m.worker_type > 3 ");
+                example.createCriteria().andCondition(" (("+member.getEvaluationScore()+" < evaluation_score) OR ("+member.getEvaluationScore()+" = evaluation_score AND '"+DateUtil.getDateString(member.getCreateDate().getTime())+"' >= create_date)) AND worker_type > 3 ");
             }
             if(member.getWorkerType()!=null&&member.getWorkerType()==3){
-                example.createCriteria().andCondition(" (("+member.getEvaluationScore()+" < m.evaluation_score) OR ("+member.getEvaluationScore()+" = m.evaluation_score AND '"+DateUtil.getDateString(member.getCreateDate().getTime())+"' >= m.create_date)) AND m.worker_type = 3 ");
+                example.createCriteria().andCondition(" (("+member.getEvaluationScore()+" < evaluation_score) OR ("+member.getEvaluationScore()+" = evaluation_score AND '"+DateUtil.getDateString(member.getCreateDate().getTime())+"' >= create_date)) AND worker_type = 3 ");
             }
             Integer rankNo= memberMapper.selectCountByExample(example);
             myWorkerRunk= new WorkerRunkDTO();
             myWorkerRunk.setWorkerId(member.getId());
-            myWorkerRunk.setWorkerHead(imageAddress+member.getHead());
+            myWorkerRunk.setWorkerHead(member.getHead());
             myWorkerRunk.setWorkerName(member.getName());
             myWorkerRunk.setRankNo(rankNo);
             myWorkerRunk.setIntegral(member.getEvaluationScore());

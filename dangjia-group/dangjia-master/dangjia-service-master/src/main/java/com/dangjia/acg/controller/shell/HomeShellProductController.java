@@ -51,7 +51,18 @@ public class HomeShellProductController implements HomeShellProductAPI {
     public ServerResponse queryHomeShellProductInfo(HttpServletRequest request,String shellProductId){
         return billHomeShellProductService.queryHomeShellProductInfo(shellProductId);
     }
-
+    /**
+     * 商品上下架
+     * @param request
+     * @param shellProductId 商品上下架
+     * @param shelfStatus   上下架状态 1：上架  0:下架
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse updateHomeShellProductStatus( HttpServletRequest request,String shellProductId,String shelfStatus){
+        return billHomeShellProductService.updateHomeShellProductStatus(shellProductId,shelfStatus);
+    }
     /**
      * 添加修改商品
      * @param request

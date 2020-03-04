@@ -18,11 +18,15 @@
         INNER JOIN dj_deliver_order_split_item t3 ON t3.order_split_id = t.id
         INNER JOIN dj_basics_storefront t1 ON t.storefront_id = t1.id
         INNER JOIN dj_deliver_split_deliver t2 ON t3.split_deliver_id = t2.id
+        INNER JOIN dj_member_address ma on(t.address_id=ma.id or t.house_id=ma.house_id)
         WHERE
             t3.receive > IFNULL(t3.return_count,0)
         AND t2.shipping_state IN (2, 4, 5, 7, 8)
         AND t3.is_reservation_deliver = '1'
-        AND t.house_id = #{houseId}
+        and ma.member_id=#{memberId}
+        <if test="null!=houseId and ''!=houseId">
+            AND t.house_id = #{houseId}
+        </if>
         and t3.data_status = '0'
         and EXISTS(select 1 from dj_basics_product_template t4,dj_basics_goods t5,dj_basics_storefront_product t6 where t3.product_id=t6.id and t6.prod_template_id=t4.id and t4.goods_id=t5.id and t5.sales='0')
         <if test="null!=searchKey and ''!=searchKey">

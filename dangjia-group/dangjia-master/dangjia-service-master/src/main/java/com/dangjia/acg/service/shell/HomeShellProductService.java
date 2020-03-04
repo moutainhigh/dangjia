@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -81,6 +82,30 @@ public class HomeShellProductService {
         }
     }
 
+    /**
+     * 商品上下架
+     * @param shellProductId 商品上下架
+     * @param shelfStatus   上下架状态 1：上架  0:下架
+     * @return
+     */
+    public ServerResponse updateHomeShellProductStatus( String shellProductId, String shelfStatus){
+        try{
+            if(shellProductId==null){
+                return ServerResponse.createBySuccessMessage("商品ID不能为空");
+            }
+            if(shelfStatus==null){
+                return ServerResponse.createBySuccessMessage("修改状态不能为空");
+            }
+            HomeShellProduct homeShellProduct=homeShellProductMapper.selectByPrimaryKey(shellProductId);
+            homeShellProduct.setShelfStatus(shelfStatus);
+            homeShellProduct.setModifyDate(new Date());
+            homeShellProductMapper.updateByPrimaryKeySelective(homeShellProduct);
+            return ServerResponse.createBySuccessMessage("修改成功");
+        }catch(Exception e){
+            logger.error("修改失败",e);
+            return ServerResponse.createBySuccessMessage("修改失败");
+        }
+    }
     /**
      * 商品详情
      * @param shellProductId 当家贝商品ID

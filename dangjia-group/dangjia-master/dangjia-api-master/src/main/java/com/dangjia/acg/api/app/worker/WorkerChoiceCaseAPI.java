@@ -29,6 +29,10 @@ public interface WorkerChoiceCaseAPI {
     ServerResponse getWorkerChoiceCasesCount(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("userToken") String userToken);
 
+    @PostMapping("app/choice/queryChoiceByWorkerId")
+    @ApiOperation(value = "业主查看==工人精选案例", notes = "业主查看==工人精选案例")
+    ServerResponse queryChoiceByWorkerId(@RequestParam("workerId") String workerId);
+
     /**
      * 删除工人精选案例
      *

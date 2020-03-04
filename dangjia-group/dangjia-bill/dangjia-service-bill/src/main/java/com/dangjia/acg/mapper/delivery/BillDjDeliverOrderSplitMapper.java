@@ -22,7 +22,7 @@ public interface BillDjDeliverOrderSplitMapper extends Mapper<OrderSplit> {
      * @param searchKey
      * @return
      */
-    List<RefundOrderDTO> queryReturnRefundOrderList(@Param("houseId") String houseId, @Param("searchKey") String searchKey);
+    List<RefundOrderDTO> queryReturnRefundOrderList(@Param("memberId") String memberId,@Param("houseId") String houseId, @Param("searchKey") String searchKey);
     /**
      * 查询可退货退款信息，根据ID
      * @param orderSplitId

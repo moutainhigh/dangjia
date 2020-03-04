@@ -50,6 +50,19 @@ public interface HomeShellProductAPI {
                                              @RequestParam("shellProductId") String shellProductId);
 
     /**
+     * 商品上下架
+     * @param request
+     * @param shellProductId 商品上下架
+     * @param shelfStatus   上下架状态 1：上架  0:下架
+     * @return
+     */
+    @PostMapping("/web/homeShell/updateHomeShellProductStatus")
+    @ApiOperation(value = "商品上下架", notes = "商品上下架")
+    ServerResponse updateHomeShellProductStatus(@RequestParam("request") HttpServletRequest request,
+                                             @RequestParam("shellProductId") String shellProductId,
+                                             @RequestParam("shelfStatus") String shelfStatus);
+
+    /**
      * 添加修改商品
      * @param request
      * @param homeShellProductDTO 商品内容
