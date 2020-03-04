@@ -1409,8 +1409,8 @@ public class CraftsmanConstructionService {
                     TechnologyDTO technologyResult = new TechnologyDTO();
                     technologyResult.setId(technology.getId());
                     technologyResult.setName(technology.getName());
-                    technologyResult.setImage(StringTool.getImage(technology.getImage(), imageAddress));
-                    technologyResult.setImageUrl(technology.getImage());
+                    technologyResult.setImage(technology.getImage());
+                    technologyResult.setImageUrl(StringTool.getImage(technology.getImage(), imageAddress));
                     technologyResult.setModifyDate(String.valueOf(technology.getModifyDate().getTime()));
                     technologies.add(technologyResult);
                 }
@@ -1422,15 +1422,17 @@ public class CraftsmanConstructionService {
             map.put("productId",productId);//节点列表
             map.put("houseFlowId",houseFlowDgj.getId());//节点列表
 
-            Example example = new Example(HouseFlowApply.class);
-            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
-                    .andEqualTo(HouseFlowApply.HOUSE_FLOW_APPLY_ID, productId)
-                    .andNotIn(HouseFlowApply.MEMBER_CHECK, Arrays.asList(0,1))
-                    .andEqualTo(HouseFlowApply.TYPE, 1);
-            Integer checkNum = houseFlowApplyMapper.selectCountByExample(example);
-            if(checkNum==0){
-                footButton.add(Utils.getButton("发起验收", 3007));
-                map.put("footButton",footButton);//底部按钮
+            if(goods.getHousekeeperAcceptance()==1) {
+                Example example = new Example(HouseFlowApply.class);
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
+                        .andEqualTo(HouseFlowApply.HOUSE_FLOW_APPLY_ID, productId)
+                        .andNotIn(HouseFlowApply.MEMBER_CHECK, Arrays.asList(0, 1))
+                        .andEqualTo(HouseFlowApply.TYPE, 1);
+                Integer checkNum = houseFlowApplyMapper.selectCountByExample(example);
+                if (checkNum == 0) {
+                    footButton.add(Utils.getButton("发起验收", 3007));
+                    map.put("footButton", footButton);//底部按钮
+                }
             }
 
         }
