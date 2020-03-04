@@ -4,6 +4,7 @@ package com.dangjia.acg.service.refund;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -117,6 +118,8 @@ public class RefundAfterSalesService {
     private IBillTaskStackMapper iBillTaskStackMapper;
     @Autowired
     private IBillBusinessOrderMapper iBillBusinessOrderMapper;
+    @Autowired
+    private MemberAPI memberAPI;
 
     /**
      * 查询可退款的商品
@@ -124,11 +127,17 @@ public class RefundAfterSalesService {
      * @param houseId 房屋ID
      * @return
      */
-    public ServerResponse<PageInfo> queryRefundOnlyOrderList(PageDTO pageDTO, String cityId, String houseId, String searchKey){
+    public ServerResponse<PageInfo> queryRefundOnlyOrderList(PageDTO pageDTO,String userToken, String cityId, String houseId, String searchKey){
         try{
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             logger.info("queryRefundOrderList查询可退款的商品：city={},houseId{}",cityId,houseId);
-            List<RefundOrderDTO> orderlist = refundAfterSalesMapper.queryRefundOrderList(houseId,searchKey);
+            List<RefundOrderDTO> orderlist = refundAfterSalesMapper.queryRefundOrderList(member.getId(),houseId,searchKey);
             if(orderlist!=null&&orderlist.size()>0){
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 for(RefundOrderDTO order:orderlist){
@@ -1010,11 +1019,17 @@ public class RefundAfterSalesService {
      * @param searchKey 订单号或商品名称
      * @return
      */
-    public ServerResponse queryReturnRefundOrderList(PageDTO pageDTO,String cityId,String houseId,String searchKey){
+    public ServerResponse queryReturnRefundOrderList(PageDTO pageDTO,String userToken,String cityId,String houseId,String searchKey){
         try{
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             logger.info("queryReturnRefundOrderList查询可退货退款的商品：city={},houseId={}",cityId,houseId);
-            List<RefundOrderDTO> orderlist = billDjDeliverOrderSplitMapper.queryReturnRefundOrderList(houseId,searchKey);
+            List<RefundOrderDTO> orderlist = billDjDeliverOrderSplitMapper.queryReturnRefundOrderList(member.getId(),houseId,searchKey);
             if(orderlist!=null&&orderlist.size()>0){
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 for(RefundOrderDTO order:orderlist){

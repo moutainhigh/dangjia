@@ -40,7 +40,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> queryRefundOnlyOrderList(PageDTO pageDTO, String userToken, String cityId, String houseId, String searchKey){
-        return refundAfterSalesService.queryRefundOnlyOrderList(pageDTO,cityId,houseId,searchKey);
+        return refundAfterSalesService.queryRefundOnlyOrderList(pageDTO,userToken,cityId,houseId,searchKey);
     }
 
     /**
@@ -205,7 +205,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> queryReturnRefundOrderList(PageDTO pageDTO,String userToken,String cityId,String houseId,String searchKey){
-        return refundAfterSalesService.queryReturnRefundOrderList(pageDTO,cityId,houseId,searchKey);
+        return refundAfterSalesService.queryReturnRefundOrderList(pageDTO,userToken,cityId,houseId,searchKey);
     }
 
     /**
