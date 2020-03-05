@@ -350,6 +350,9 @@ public class BillAppointmentService {
                 OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(orderStorefrontDTO.getOrderSplitId());
                 if (appointmentDTOS.size() > 0) {
                     appointmentDTOS.forEach(appointmentDTO -> {
+                        if(orderSplit.getApplyStatus()==0){
+                            appointmentDTO.setApplyStatusName("取消预约");
+                        }
                         appointmentDTO.setApplyStatus(orderSplit.getApplyStatus());
                         appointmentDTO.setImage(imageAddress + appointmentDTO.getImage());
                     });

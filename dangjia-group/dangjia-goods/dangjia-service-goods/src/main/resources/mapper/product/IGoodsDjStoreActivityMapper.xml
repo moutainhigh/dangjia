@@ -14,11 +14,9 @@
                     FROM
                         dj_deliver_order d
                     WHERE
-                        d.store_activity_id IS NOT NULL
-                    AND d.order_source = 6
+                        d.order_source = 6
                     AND d.order_status = 9
                     AND d.parent_order_id = a.id
-                    AND d.store_activity_product_id = #{storeActivityProductId}
                 )
             ) AS shortPeople
         FROM
