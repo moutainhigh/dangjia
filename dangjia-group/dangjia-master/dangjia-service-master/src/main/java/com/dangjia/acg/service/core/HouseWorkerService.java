@@ -738,9 +738,9 @@ public class HouseWorkerService {
         }else if (houseFlow.getWorkerType() == 3) {
             //在这里算出大管家每次巡查拿的钱 和 每次验收拿的钱 记录到大管家的 houseflow里 houseflow,新增两个字段.
             WorkDepositDTO workDepositDTO=configRuleUtilService.getSupervisorTakeMoney(house.getId(),houseFlow.getWorkerTypeId(),worker.getEvaluationScore());
-            String[] patrolCfg=configRuleUtilService.getTimesWeeklyPatrol();
+            JSONObject patrolCfg=configRuleUtilService.getAllTowValue(ConfigRuleService.MK022);
             List<HouseFlow> houseFlowList = houseFlowMapper.getForCheckMoney(house.getId());  //拿到这个大管家工钱
-            int check =  (int)((houseFlow.getWorkPrice().doubleValue()*(workDepositDTO.getPatrol().doubleValue()/100))/Double.parseDouble(patrolCfg[1]));//累计大管家总巡查次数
+            int check =  (int)((houseFlow.getWorkPrice().doubleValue()*(workDepositDTO.getPatrol().doubleValue()/100))/patrolCfg.getDouble("patrolMoney"));//累计大管家总巡查次数
             int time = 0;//累计管家总阶段验收和完工验收次数
             for (HouseFlow hf : houseFlowList) {
                 //累计总验收
@@ -759,7 +759,7 @@ public class HouseWorkerService {
             }
             //保存到大管家的houseFlow
             houseFlow.setPatrol(check);
-            houseFlow.setPatrolMoney(new BigDecimal(Double.parseDouble(patrolCfg[1])));
+            houseFlow.setPatrolMoney(patrolCfg.getBigDecimal("patrolMoney"));
             houseFlow.setCheckMoney(checkMoney);
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
@@ -1205,9 +1205,9 @@ public class HouseWorkerService {
                     .andEqualTo(HouseFlowApply.APPLY_TYPE, 5)
                     .andCondition(" DATE_FORMAT(create_date, '%x年-第%v周' ) = DATE_FORMAT( SYSDATE(), '%x年-第%v周' ) ");
             Integer patrolNum = houseFlowApplyMapper.selectCountByExample(example2);
-            String[] patrolCfg=configRuleUtilService.getTimesWeeklyPatrol();
+            JSONObject patrolCfg=configRuleUtilService.getAllTowValue(ConfigRuleService.MK022);
             //工人houseflow
-            if (supervisorHF.getPatrol()!=null&&hfalist.size() < supervisorHF.getPatrol()&&patrolNum<Integer.parseInt(patrolCfg[0])) {//该工种没有巡查够，每次要拿钱
+            if (supervisorHF.getPatrol()!=null&&hfalist.size() < supervisorHF.getPatrol()&&patrolNum<patrolCfg.getInteger("patrolNum")) {//该工种没有巡查够，每次要拿钱
                 HouseWorkerOrder supervisorHWO = houseWorkerOrderMapper.getHouseWorkerOrder(supervisorHF.getHouseId(), supervisor.getId(), supervisorHF.getWorkerTypeId());
                 if (supervisorHWO.getCheckMoney() == null) {
                     supervisorHWO.setCheckMoney(new BigDecimal(0));

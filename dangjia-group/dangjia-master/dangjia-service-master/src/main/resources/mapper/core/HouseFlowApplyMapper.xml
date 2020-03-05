@@ -26,7 +26,21 @@
         modify_date as modifyDate
     </sql>
 
-
+    <!--管家未主动验收的商品数量 -->
+    <select id="getSupplierNoActiveProductNum" parameterType="java.lang.String" resultType="java.lang.Integer">
+		SELECT
+            COUNT(m.id)
+        FROM
+            dj_actuary_budget_material m
+        LEFT JOIN dj_core_house_flow_apply a ON a.house_id = m.house_id
+        AND a.house_flow_apply_id = m.product_id
+        AND a.apply_type = 10
+        AND a.member_check = 1
+        WHERE
+            m.housekeeper_acceptance = 1
+        AND a.id IS NULL
+        AND m.house_id =#{houseId}
+    </select>
     <!--管家已审核业主未审核超过时间申请 -->
     <select id="couponApply" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select
