@@ -3796,7 +3796,6 @@ public class HouseService {
         houseFlowApply.setEndDate(calendar.getTime());
         houseFlowApply.setModifyDate(new Date());
         houseFlowApply.setMemberCheck(0);
-        //验收次数
         houseFlowApplyMapper.insert(houseFlowApply);
         insertConstructionRecord(houseFlowApply);
         //上传照片

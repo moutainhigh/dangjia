@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.supervisor;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -9,18 +10,23 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.other.WorkDepositDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.supervisor.ISiteMemoMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
+import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.supervisor.SiteMemo;
 import com.dangjia.acg.modle.worker.WorkIntegral;
+import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.configRule.ConfigRuleService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
@@ -60,6 +66,10 @@ public class SiteMemoService {
     @Autowired
     private ConfigRuleUtilService configRuleUtilService;
 
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
+    @Autowired
+    private IWorkerDetailMapper workerDetailMapper;
     /**
      * 添加备忘录/周报
      *
@@ -117,7 +127,41 @@ public class SiteMemoService {
             workIntegral.setBriefed("周计划获取积分");
             workIntegral.setAnyBusinessId(siteMemo.getId());
             workIntegralMapper.insert(workIntegral);
-            memberMapper.updateByPrimaryKeySelective(worker);
+
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, worker.getWorkerTypeId());
+            if (hwo.getWeekPlanMoney() == null) {//大管家每次巡查得到的钱 累计 赋初始值为0
+                hwo.setWeekPlanMoney(new BigDecimal(0.0));
+            }
+            WorkDepositDTO workDepositDTO=configRuleUtilService.getSupervisorTakeMoney(house.getId(),worker.getWorkerTypeId(),worker.getEvaluationScore());
+            BigDecimal totalPrice=hwo.getWorkPrice().divide(workDepositDTO.getWeekPlan().divide(new BigDecimal(100)));//得到周计划能拿到的总钱
+            BigDecimal surPrice=totalPrice.subtract(hwo.getWeekPlanMoney());//得到剩余总钱
+            JSONObject patrolCfg = configRuleUtilService.getAllTowValue(ConfigRuleService.MK021);
+            if(surPrice.doubleValue() > 0) {
+                if(surPrice.doubleValue() > patrolCfg.getDouble("completed")) {
+                    surPrice=patrolCfg.getBigDecimal("completed");
+                }
+                BigDecimal haveMoney = worker.getHaveMoney().add(surPrice);
+                BigDecimal surplusMoney = worker.getSurplusMoney().add(surPrice);
+                //记录流水
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName("周计划拿钱");
+                workerDetail.setWorkerId(worker.getId());
+                workerDetail.setWorkerName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
+                workerDetail.setHouseId(houseId);
+                workerDetail.setMoney(surPrice);
+                workerDetail.setApplyMoney(surPrice);
+                workerDetail.setWalletMoney(surplusMoney);
+                workerDetail.setState(0);//进钱//业主退0
+                workerDetailMapper.insert(workerDetail);
+
+                worker.setHaveMoney(haveMoney);
+                worker.setSurplusMoney(surplusMoney);
+                memberMapper.updateByPrimaryKeySelective(worker);
+
+                hwo.setHaveMoney(hwo.getHaveMoney().add(surPrice));
+                hwo.setWeekPlanMoney(hwo.getWeekPlanMoney().add(surPrice));
+                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
+            }
         }
         siteMemo.setState(1);
         siteMemo.setRemindMemberId(worker.getId());

@@ -33,5 +33,8 @@ public class PaymentToBeMadeDTO{
     private Integer shoppingCartsCount;//购物车数量
     private Integer orderSource;//订单来源(1,精算制作，2购物车，3补货单，4补差价订单）
     private String orderId;
+    private Integer shortPeople;
+    private Date orderGenerationTime;
+    private List<String> headList;//拼团购头像
 
 }

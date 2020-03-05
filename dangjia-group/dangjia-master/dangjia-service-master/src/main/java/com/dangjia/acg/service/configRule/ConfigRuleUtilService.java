@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.configRule;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -252,17 +253,17 @@ public class ConfigRuleUtilService {
      * @param typeId:
      *              MK020	主动验收未完成每次扣款
      *              MK021	周计划未完成每次扣款
+     *              MK022	每周应巡查次数
      *              MK023	减少维保：工序商品购买比阈值
      *              MK024	减少维保：仅退款比例阈值
      *
      * @return
      */
-    public Double getAllTowValue(String typeId) {
-        Double amount=1d;
+    public JSONObject getAllTowValue(String typeId) {
         Example example=new Example(DjConfigRuleModule.class);
         example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,typeId);
         DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
-
+        JSONObject amount= new JSONObject();
         example=new Example(DjConfigRuleItemTwo.class);
         example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
         example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
@@ -270,34 +271,12 @@ public class ConfigRuleUtilService {
         List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
         if (configRuleItemTwos.size() > 0) {
             for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
-                amount=Double.parseDouble(configRuleItemTwo.getFieldValue());
+                amount.put(configRuleItemTwo.getFieldCode(),configRuleItemTwo.getFieldValue());
             }
         }
         return amount;
     }
 
-    /**
-     * 每周应巡查次数
-     *
-     * @return
-     */
-    public String[] getTimesWeeklyPatrol() {
-        String[] amount= new String[]{"0","0"};
-        Example example=new Example(DjConfigRuleModule.class);
-        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK022);
-        DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
-        example=new Example(DjConfigRuleItemTwo.class);
-        example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
-        example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
-        PageHelper.startPage(1, 2);
-        List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
-        if (configRuleItemTwos.size() > 0) {
-            for (int i = 0; i < configRuleItemTwos.size(); i++) {
-                amount[i]=configRuleItemTwos.get(i).getFieldValue();
-            }
-        }
-        return amount;
-    }
 
     /**
      *  大管家自动派单

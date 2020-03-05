@@ -115,7 +115,7 @@
         INNER JOIN dj_basics_product_template t3 ON t1.prod_template_id=t3.id
         INNER JOIN dj_basics_goods t4 on t3.goods_id=t4.id
         LEFT JOIN (select t5.* from dj_deliver_cart t5 where t5.member_id=#{workerId} and t5.house_id=#{houseId} and t5.product_type=2) tt on t2.id=tt.product_id
-        WHERE  (t1.worker_id = #{workerId} or t1.worker_id =(select m.worker_type_id from dj_member m where m.id=#{workerId}))
+        WHERE  (t1.skill_certification_id = #{workerId} or t1.skill_certification_id =(select m.worker_type_id from dj_member m where m.id=#{workerId}))
         and t4.type=2
         and t2.is_shelf_status=1
         <if test="searchKey!=null and searchKey!=''">

@@ -15,7 +15,8 @@
             t2.`name` workTypeName,
             t3.worker_id workerId ,
             t4.`name` workerName,
-            t4.mobile workerMobile
+            t4.mobile workerMobile,
+            t1.type
         FROM
             dj_repair_change_order t1,
             dj_core_worker_type t2,

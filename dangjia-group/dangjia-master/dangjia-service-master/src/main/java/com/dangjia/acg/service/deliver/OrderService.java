@@ -1976,7 +1976,6 @@ public class OrderService {
                             list.add(map);
                         });
                         groupBooking.setShortProple(djStoreActivity.getSpellGroup()-orders.size());
-                        groupBooking.setOrderGenerationTime(parentOrder.getOrderGenerationTime());
                         return ServerResponse.createBySuccess("该团人数已满,参与其他团成功",groupBooking);
                     }else{//拼团人数未满 不生成要货单
                         orders.forEach(order1 -> {
@@ -1991,7 +1990,7 @@ public class OrderService {
                             list.add(map);
                         });
                         groupBooking.setShortProple(djStoreActivity.getSpellGroup()-orders.size());
-                        groupBooking.setOrderGenerationTime(parentOrder.getOrderGenerationTime());
+                        groupBooking.setOrderGenerationTime(order.getOrderGenerationTime());
                         return ServerResponse.createBySuccess("拼团成功",groupBooking);
                     }
                 }else{//不存在其他团,自己作为新团发起人
@@ -2023,7 +2022,7 @@ public class OrderService {
                         .andEqualTo(Order.DATA_STATUS,0)
                         .andEqualTo(Order.ORDER_STATUS,9);
                 groupBooking.setShortProple(djStoreActivity.getSpellGroup()-orderMapper.selectCountByExample(example));
-                groupBooking.setOrderGenerationTime(parentOrder.getOrderGenerationTime());
+                groupBooking.setOrderGenerationTime(order.getOrderGenerationTime());
                 groupBooking.setList(list);
                 return ServerResponse.createBySuccess("拼团成功",groupBooking);
             }

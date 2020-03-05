@@ -272,7 +272,12 @@ public class ConfigRuleService {
                     configRuleItemTwo.setBatchCode(batchCodeTow);
                     configRuleItemTwo.setFieldCode(key);
                     configRuleItemTwo.setFieldName(field.get(key));
-                    if(PQ101.equals(configRuleModule.getTypeId())||MK005.equals(configRuleModule.getTypeId())||MK022.equals(configRuleModule.getTypeId())){
+                    if(PQ101.equals(configRuleModule.getTypeId())||
+                            MK005.equals(configRuleModule.getTypeId())||
+                            MK021.equals(configRuleModule.getTypeId())||
+                            MK022.equals(configRuleModule.getTypeId())||
+                            MK023.equals(configRuleModule.getTypeId())||
+                            MK024.equals(configRuleModule.getTypeId())){
                         configRuleItemTwo.setFieldValue("0,0");
                         configRuleItemTwo.setFieldValues("0,0".split(","));
                     }else{
@@ -577,19 +582,17 @@ public class ConfigRuleService {
                 field.put("protect","每次扣款");
             }
             if(MK021.equals(configRuleModule.getTypeId())){//周计划未完成每次扣款
-                field.put("protect","每次扣款");
+                field.put("completed","每次完成得到(元)");
+                field.put("wnfinished","每次未完成扣款(元)");
             }
             if(MK022.equals(configRuleModule.getTypeId())){//每周应巡查次数
-                field.put("patrolNum","每周有效巡查");
-                field.put("patrolMoney","每次巡查拿钱");
+                field.put("patrolNum","每周有效巡查(次)");
+                field.put("patrolMoney","每次巡查拿钱(元)");
             }
-            if(MK023.equals(configRuleModule.getTypeId())){//减少维保：工序商品购买比阈值
-                field.put("protect","阈值");
+            if(MK023.equals(configRuleModule.getTypeId())||MK024.equals(configRuleModule.getTypeId())){//减少维保：工序商品购买比阈值
+                field.put("maxProtect","最小年限阈值(%)");
+                field.put("minProtect","0年限阈值(%)");
             }
-            if(MK024.equals(configRuleModule.getTypeId())){// 减少维保：仅退款比例阈值
-                field.put("protect","阈值");
-            }
-
             if(MK019.equals(configRuleModule.getTypeId())){//质保抢单时间配置
                 field.put("protect","质保抢单时间配置");
             }
