@@ -45,7 +45,7 @@ public class MendWorkerController implements MendWorkerAPI {
     /**
      * 查询符合条件的人工商品
      * @param request
-     * @param workerId
+     * @param userToken
      * @param searchKey
      * @param pageDTO
      * @param cityId
@@ -53,8 +53,8 @@ public class MendWorkerController implements MendWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getWorkerProductList(HttpServletRequest request,String workerId,String houseId,String searchKey,PageDTO pageDTO,String cityId){
-        return mendWorkerService.getWorkerProductList(workerId,houseId,searchKey,pageDTO,cityId);
+    public ServerResponse getWorkerProductList(HttpServletRequest request,String userToken,String houseId,String searchKey,PageDTO pageDTO,String cityId){
+        return mendWorkerService.getWorkerProductList(userToken,houseId,searchKey,pageDTO,cityId);
     }
 
 }

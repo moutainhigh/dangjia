@@ -21,11 +21,13 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.QuantityRoom;
@@ -37,12 +39,15 @@ import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.sun.xml.internal.xsom.impl.UName;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +104,9 @@ public class RepairMendOrderService {
     @Autowired
     private IOrderSplitItemMapper iOrderSplitItemMapper;
     @Autowired
-    private IBusinessOrderMapper iBusinessOrderMapper;
+    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
+    @Autowired
+    private MasterProductTemplateService masterProductTemplateService;
     @Autowired
     private ICartMapper iCartMapper;
     @Autowired
@@ -565,27 +572,23 @@ public class RepairMendOrderService {
      * @param changeOrderId 变更申请单ID
      * @return
      */
-    public MendOrder insertSupplementLaborOrder(String houseId,String workerId,String workerTypeId,String changeOrderId){
-        /**
-         * 查询选中的人工商品
-         */
-        House house=iHouseMapper.selectByPrimaryKey(houseId);
-        Example example=new Example(MemberAddress.class);
-        example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
-        MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
-        String addressId="";
-        if(memberAddress!=null&&StringUtils.isNotBlank(memberAddress.getId())){
-            addressId=memberAddress.getId();
-        }
-        String memberId=house.getId();//业主信息
-
-        example=new Example(Cart.class);
+    public MendOrder insertSupplementLaborOrder(String houseId,String workerId,String workerTypeId,String changeOrderId,String productArr){
+        JSONArray orderItemProductList= JSONArray.parseArray(productArr);
+        Example example;
+        if(orderItemProductList!=null&&orderItemProductList.size()>0) {
+            example=new Example(MemberAddress.class);
+            example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
+            MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+            String addressId="";
+            if(memberAddress!=null&&StringUtils.isNotBlank(memberAddress.getId())){
+                addressId=memberAddress.getId();
+            }
+            JSONObject obj = (JSONObject) orderItemProductList.get(0);
+      /*  example=new Example(Cart.class);
         example.createCriteria().andEqualTo(Cart.HOUSE_ID,houseId)
-                .andEqualTo(Cart.MEMBER_ID,workerId);
-        List<Cart> cartList=iCartMapper.selectByExample(example);
-        if(cartList!=null&&cartList.size()>0){
-            Cart cart=cartList.get(0);
-            StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(cart.getProductId());//获取商品信息
+                .andEqualTo(Cart.MEMBER_ID,workerId);*/
+       // List<Cart> cartList=iCartMapper.selectByExample(example);
+            StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey((String) obj.get("productId"));//获取商品信息
             //生成补货单
             MendOrder mendOrder;
             example = new Example(MendOrder.class);
@@ -602,18 +605,25 @@ public class RepairMendOrderService {
             mendOrder.setAddressId(addressId);
             Double totalAmount=0d;
             //补货单明细
-            for(Cart ct:cartList){
-                storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(ct.getProductId());//获取商品信息
+            for (int i = 0; i < orderItemProductList.size(); i++) {
+                JSONObject productObj = (JSONObject) orderItemProductList.get(i);
+                String productId = (String) productObj.get("productId");//商品
+                Double shopCount = productObj.getDouble("count");//购买量
+                storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(productId);//获取商品信息
+                DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
                 MendWorker mendWorker = new MendWorker();//补退人工
                 mendWorker.setMendOrderId(mendOrder.getId());
-                mendWorker.setWorkerGoodsId(ct.getProductId());
-                mendWorker.setWorkerGoodsName(ct.getProductName());
-                mendWorker.setWorkerGoodsSn(ct.getProductSn());
-                mendWorker.setUnitName(ct.getUnitName());
-                mendWorker.setPrice(ct.getPrice());
+                mendWorker.setWorkerGoodsId(productId);
+                mendWorker.setWorkerGoodsName(storefrontProduct.getProductName());
+                mendWorker.setWorkerGoodsSn(djBasicsProductTemplate.getProductSn());
+                Unit unit=masterProductTemplateService.getUnitInfoByTemplateId(storefrontProduct.getProdTemplateId());
+                if(unit!=null){
+                    mendWorker.setUnitName(djBasicsProductTemplate.getUnitName());
+                }
+                mendWorker.setPrice(storefrontProduct.getSellPrice());
                 mendWorker.setImage(storefrontProduct.getImage());
-                mendWorker.setShopCount(ct.getShopCount());
-                Double totalPrice=MathUtil.mul(ct.getPrice(),ct.getShopCount());
+                mendWorker.setShopCount(shopCount);
+                Double totalPrice=MathUtil.mul(storefrontProduct.getSellPrice(),shopCount);
                 totalAmount=MathUtil.add(totalAmount,totalPrice);
                 mendWorker.setTotalPrice(totalPrice);
                 iMendWorkerMapper.insertSelective(mendWorker);
@@ -622,11 +632,11 @@ public class RepairMendOrderService {
             iMendOrderMapper.insert(mendOrder);//添加补人工单
 
 
-            //删除已生成补货单的购物车
+          /*  //删除已生成补货单的购物车
             example=new Example(Cart.class);
             example.createCriteria().andEqualTo(Cart.HOUSE_ID,houseId)
                     .andEqualTo(Cart.MEMBER_ID,workerId);
-            iCartMapper.deleteByExample(example);
+            iCartMapper.deleteByExample(example);*/
             return mendOrder;//申请补货单号
         }
         return null;
@@ -664,7 +674,7 @@ public class RepairMendOrderService {
             for (int i = 0; i < orderItemProductList.size(); i++) {
                 JSONObject productObj = (JSONObject) orderItemProductList.get(i);
                 String orderItemId = (String) productObj.get("orderItemId");//订单详情号
-                Double returnCount = productObj.getDouble("returnCount");//退货量
+                Double returnCount = productObj.getDouble("count");//退货量
                 OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(orderItemId);
                 if(orderItem.getReturnCount()==null){
                     orderItem.setReturnCount(0d);
