@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.core;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -227,33 +228,59 @@ public class HouseFlowApplyService {
 //                extraOrderSplitFare(hwo);
 //                //收取工匠退货运费
 //                extraMendOrderFare(hwo);
-                //临时代码-补充未生成的质保卡
-                if (wtso == null) {//默认生成一条
-                    //该工钟所有保险
-                    Example example = new Example(WorkerTypeSafe.class);
-                    example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
-                    List<WorkerTypeSafe> wtsList = workerTypeSafeMapper.selectByExample(example);
-                    if (wtsList.size() > 0) {
-                        House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-                        wtso = new WorkerTypeSafeOrder();
-                        wtso.setWorkerTypeSafeId(wtsList.get(0).getId()); // 向保险订单中存入保险服务类型的id
-                        wtso.setHouseId(houseFlow.getHouseId()); // 存入房子id
-                        wtso.setWorkerTypeId(houseFlow.getWorkerTypeId()); // 工种id
-                        wtso.setWorkerType(houseFlow.getWorkerType());
-                        wtso.setPrice(wtsList.get(0).getPrice().multiply(house.getSquare()));
-                        wtso.setState(1);
-                        workerTypeSafeOrderMapper.insert(wtso);
+
+                //减少维保：工序商品购买比阈值/减少维保：仅退款比例阈值
+                WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
+                Map  map= workerTypeSafeOrderMapper.getPayThreshold(hwo.getWorkerTypeId(), hwo.getHouseId());
+                JSONObject patrolCfg=configRuleUtilService.getAllTowValue(ConfigRuleService.MK023);
+                JSONObject mapjson=JSONObject.parseObject(JSON.toJSONString(map));
+                Double bf=(mapjson.getDouble("nNum")/mapjson.getDouble("allNum")*100);
+                if(bf>patrolCfg.getDouble("minProtect")){//最小年限阈值(%)
+                     wts.setMonth(0);
+                }else if(bf>patrolCfg.getDouble("maxProtect")){//0年限阈值(%)
+                     wts.setMonth(12);
+                }
+                if(wts.getMonth()>12){
+                    JSONObject patrolGoods=configRuleUtilService.getAllTowValue(ConfigRuleService.MK024);
+                    List<Map>  maps= workerTypeSafeOrderMapper.getMendProduct(hwo.getWorkerTypeId(), hwo.getHouseId());
+                    for (Map map1 : maps) {
+                        JSONObject mapjsons=JSONObject.parseObject(JSON.toJSONString(map1));
+                        Double bfs=(mapjsons.getDouble("owner_back")/mapjsons.getDouble("shop_count")*100);
+                        if(wts.getMonth()>0&&bfs>patrolGoods.getDouble("minProtect")){//最小年限阈值(%)
+                            wts.setMonth(0);
+                            break;
+                        }else if(wts.getMonth()>12&&bfs>patrolGoods.getDouble("maxProtect")){//0年限阈值(%)
+                            wts.setMonth(12);
+                        }
                     }
                 }
-                if (wtso != null) {
-                    WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
-                    int month = (wts.getMonth()); //获取保险时长(月)
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.MONTH, month);
-                    wtso.setState(2);  //已生效
-                    wtso.setForceTime(new Date());//设置生效时间
-                    wtso.setExpirationDate(cal.getTime()); //设置到期时间
-                    workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
+                if(wts.getMonth()>0) {
+                    //临时代码-补充未生成的质保卡
+                    if (wtso == null) {//默认生成一条
+                        //该工钟所有保险
+                        Example example = new Example(WorkerTypeSafe.class);
+                        example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
+                        List<WorkerTypeSafe> wtsList = workerTypeSafeMapper.selectByExample(example);
+                        if (wtsList.size() > 0) {
+                            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+                            wtso = new WorkerTypeSafeOrder();
+                            wtso.setWorkerTypeSafeId(wtsList.get(0).getId()); // 向保险订单中存入保险服务类型的id
+                            wtso.setHouseId(houseFlow.getHouseId()); // 存入房子id
+                            wtso.setWorkerTypeId(houseFlow.getWorkerTypeId()); // 工种id
+                            wtso.setWorkerType(houseFlow.getWorkerType());
+                            wtso.setPrice(wtsList.get(0).getPrice().multiply(house.getSquare()));
+                            wtso.setState(1);
+                            workerTypeSafeOrderMapper.insert(wtso);
+                        }
+                    }
+                    if (wtso != null) {
+                        wtso.setState(2);  //已生效
+                        wtso.setForceTime(new Date());//设置生效时间
+                        wtso.setExpirationDate(DateUtil.addDateMonths(new Date(), wts.getMonth())); //设置到期时间
+                        workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
+                    }
+                }else{
+                    workerTypeSafeOrderMapper.deleteByPrimaryKey(wtso.getId());
                 }
             } else if (hfa.getApplyType() == 1) {//阶段完工
                 //修改进程
