@@ -274,7 +274,7 @@ public class ChangeOrderService {
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_016",member.getId());// 工匠审核中
         }else if(type==1){//工匠补人工
             //生成补人工订单
-            MendOrder mendOrder=repairMendOrderService.insertSupplementLaborOrder(houseId,member.getId(),member.getWorkerTypeId(),changeOrder.getId());
+            MendOrder mendOrder=repairMendOrderService.insertSupplementLaborOrder(houseId,member.getId(),member.getWorkerTypeId(),changeOrder.getId(),productArr);
             //生成审核任务
             if (!mendOrderService.createMendCheck(mendOrder)) {
                 return ServerResponse.createByErrorMessage("添加审核流程失败");
