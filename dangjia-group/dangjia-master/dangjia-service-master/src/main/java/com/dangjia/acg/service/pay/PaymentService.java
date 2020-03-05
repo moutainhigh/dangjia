@@ -567,7 +567,7 @@ public class PaymentService {
             order.setOrderPayTime(new Date());
             order.setPayment(payState);// 支付方式
             orderMapper.updateByPrimaryKeySelective(order);
-            budgetCorrect(order,  payState,  order.getWorkerTypeId());
+            budgetCorrect(order,  payState, null);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -926,6 +926,7 @@ public class PaymentService {
                 orderMapper.updateByPrimaryKeySelective(orderNew);
             }
         }
+
         BigDecimal payPrice = order.getTotalAmount().subtract(order.getTotalDiscountPrice());
         payPrice = payPrice.add(order.getTotalStevedorageCost());
         payPrice = payPrice.add(order.getTotalTransportationCost());

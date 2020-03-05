@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.repair;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -160,7 +162,7 @@ public class FillWorkerService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member worker = (Member) object;
+            Member worker = JSON.toJavaObject( (JSONObject) object,Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<ProductAppDTO> workerProductList = workerGoodsMapper.getWorkerProductList(worker.getId(), houseId, searchKey, cityId);
             if (workerProductList == null || workerProductList.size() <= 0) {
