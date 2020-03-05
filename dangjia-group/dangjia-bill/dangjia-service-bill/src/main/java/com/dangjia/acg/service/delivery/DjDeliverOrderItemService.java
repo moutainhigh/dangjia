@@ -18,11 +18,14 @@ import com.dangjia.acg.dto.order.PaymentToBeMadeDTO;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverSplitDeliverMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
+import com.dangjia.acg.mapper.delivery.IBillDjStoreActivityMapper;
 import com.dangjia.acg.mapper.member.IBillMemberAddressMapper;
 import com.dangjia.acg.mapper.order.IBillDjAcceptanceEvaluationMapper;
 import com.dangjia.acg.mapper.order.IBillHouseMapper;
 import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
+import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.mapper.shoppingCart.IBillShoppingCartMapper;
+import com.dangjia.acg.modle.activity.DjStoreActivity;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
@@ -42,6 +45,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -74,6 +78,10 @@ public class DjDeliverOrderItemService {
     private BillDjDeliverSplitDeliverMapper billDjDeliverSplitDeliverMapper;
     @Autowired
     private IBillHouseMapper houseMapper;
+    @Autowired
+    private IBillDjStoreActivityMapper iBillDjStoreActivityMapper;
+    @Autowired
+    private IBillMemberMapper iBillMemberMapper;
 
     /**
      * 待付款/已取消订单详情
@@ -133,8 +141,34 @@ public class DjDeliverOrderItemService {
      */
     public ServerResponse queryHumpDetail(String orderId) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Order order = iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
             PaymentToBeMadeDTO paymentToBeMadeDTO=new PaymentToBeMadeDTO();
+            if("6".equals(order.getOrderSource())){
+                Example example=new Example(Order.class);
+                Example.Criteria criteria = example.createCriteria().andEqualTo(Order.DATA_STATUS, 0)
+                        .andEqualTo(Order.ORDER_STATUS, 9);
+                if(org.apache.commons.lang.StringUtils.isNotBlank(order.getParentOrderId())){
+                    criteria.andEqualTo(Order.PARENT_ORDER_ID,order.getParentOrderId())
+                            .orEqualTo(Order.ID,order.getParentOrderId());
+                    Order parentOrder = iBillDjDeliverOrderMapper.selectByPrimaryKey(order.getParentOrderId());
+                    paymentToBeMadeDTO.setOrderGenerationTime(parentOrder.getOrderGenerationTime());
+                }else{
+                    criteria.andEqualTo(Order.PARENT_ORDER_ID,order.getId())
+                            .orEqualTo(Order.ID,order.getId());
+                    paymentToBeMadeDTO.setOrderGenerationTime(order.getOrderGenerationTime());
+                }
+                DjStoreActivity djStoreActivity =
+                        iBillDjStoreActivityMapper.selectByPrimaryKey(order.getStoreActivityId());
+                List<Order> orders = iBillDjDeliverOrderMapper.selectByExample(example);
+                List<String> list=new ArrayList<>();
+                orders.forEach(order1 -> {
+                    Member member = iBillMemberMapper.selectByPrimaryKey(order1.getMemberId());
+                    list.add(imageAddress+member.getHead());
+                });
+                paymentToBeMadeDTO.setHeadList(list);
+                paymentToBeMadeDTO.setShortPeople(djStoreActivity.getSpellGroup()-orders.size());
+            }
             paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
             paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
             paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice()!=null?order.getTotalDiscountPrice():new BigDecimal(0));
