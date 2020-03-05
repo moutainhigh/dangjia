@@ -404,6 +404,9 @@ public class RefundAfterSalesService {
                     refundOrderItemDTO.setReturnCount(returnCount);
                     //修改订单中的退货量为当前退货的量
                     OrderItem orderItem=iBillDjDeliverOrderItemMapper.selectByPrimaryKey(refundOrderItemDTO.getOrderItemId());
+                    if(orderItem.getReturnCount()==null){
+                        orderItem.setReturnCount(0d);
+                    }
                     orderItem.setId(refundOrderItemDTO.getOrderItemId());
                     orderItem.setReturnCount(MathUtil.add(orderItem.getReturnCount(),returnCount));
                     iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
@@ -1503,6 +1506,7 @@ public class RefundAfterSalesService {
                 returnWorkOrderDTO.setRepairWorkOrderNumber(mendOrder.getNumber());//设置申请单号
                 returnWorkOrderDTO.setActualTotalAmount(mendOrder.getActualTotalAmount());
                 returnWorkOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
+                returnWorkOrderDTO.setMendOrderId(mendOrder.getId());
             }
             List<RefundRepairOrderMaterialDTO> repairWorkerList=iBillMendWorkerMapper.queryBillMendOrderId(mendOrder.getId());//退款商品列表查询
             getRepairOrderProductList(repairWorkerList,address);
