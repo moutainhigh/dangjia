@@ -1,5 +1,7 @@
 package com.dangjia.acg.common.response;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -13,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.security.crypto.codec.Hex;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -20,6 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static com.dangjia.acg.common.util.AES.decrypt;
 import static com.dangjia.acg.common.util.AES.encrypt;
 
 /**
@@ -45,13 +49,24 @@ public class JsonResponseAdvice implements ResponseBodyAdvice<Object> {
                 return o;
             }
             if (StringUtils.isEmpty(header)) {
-                Gson gson = new Gson();
-                if (o != null&& CommonUtil.isEmpty(request.getAttribute("isShow"))&&CommonUtil.isEmpty(request.getParameter("isShow"))) {
-                    o = BeanUtils.beanToMap(o);
-                }
-                JsonResponse jsonResponse = new JsonResponse(ServerCode.SUCCESS.getCode(), o);
-                String toString = gson.toJson(jsonResponse);
                 try {
+                    String isShow=null;
+                    if(!CommonUtil.isEmpty(request.getParameter("uuidKey"))){
+                        byte[] dec = decrypt(Hex.decode(request.getParameter("uuidKey")), Constants.DANGJIA_SESSION_KEY.getBytes(), Constants.DANGJIA_IV.getBytes());
+                        if(!CommonUtil.isEmpty(dec)){
+                            JSONObject json = JSON.parseObject(new String(dec));
+                            isShow=json.getString("isShow");
+                        }
+                    }else {
+                        isShow=CommonUtil.isEmpty(request.getAttribute("isShow"))?request.getParameter("isShow"):(String)request.getAttribute("isShow");
+                    }
+                    Gson gson = new Gson();
+                    if (o != null&& CommonUtil.isEmpty(isShow)) {
+                        o = BeanUtils.beanToMap(o);
+                    }
+                    JsonResponse jsonResponse = new JsonResponse(ServerCode.SUCCESS.getCode(), o);
+                    String toString = gson.toJson(jsonResponse);
+
                     return encrypt(toString, Constants.DANGJIA_SESSION_KEY, Constants.DANGJIA_IV);
                 } catch (Exception e) {
                     e.printStackTrace();

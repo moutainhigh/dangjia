@@ -1,5 +1,7 @@
 package com.dangjia.acg.aspect;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -11,11 +13,14 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+
+import static com.dangjia.acg.common.util.AES.decrypt;
 
 /**
  * 拦截器：检查用户是否登录……
@@ -40,18 +45,23 @@ public class UserToKenAspect {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                 .getRequest();
         String userToken = request.getParameter(Constants.USER_TOKEY);
-        if (!CommonUtil.isEmpty(userToken) && !request.getServletPath().equals("/member/login") && !request.getServletPath().equals("/config/adverts/list")) {
-            try {
+        Object  result;
+        try {
+            if(!CommonUtil.isEmpty(request.getParameter("uuidKey"))){
+                byte[] dec = decrypt(Hex.decode(request.getParameter("uuidKey")), Constants.DANGJIA_SESSION_KEY.getBytes(), Constants.DANGJIA_IV.getBytes());
+                if(!CommonUtil.isEmpty(dec)){
+                    JSONObject json = JSON.parseObject(new String(dec));
+                    userToken=json.getString(Constants.USER_TOKEY);
+                }
+            }else {
+                userToken=CommonUtil.isEmpty(request.getAttribute(Constants.USER_TOKEY))?request.getParameter(Constants.USER_TOKEY):(String)request.getAttribute(Constants.USER_TOKEY);
+            }
+            if (!CommonUtil.isEmpty(userToken) && !request.getServletPath().equals("/member/login") && !request.getServletPath().equals("/config/adverts/list")) {
                 AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
                 if (accessToken == null) {//无效的token
                     return ServerResponse.createbyUserTokenError();
                 }
-            } catch (Exception e) {
-                return ServerResponse.createbyUserTokenError();
             }
-        }
-        Object result;
-        try {
             result = joinPoint.proceed();
         } catch (Throwable e) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.WRONG_PARAM.getCode(), ServerCode.WRONG_PARAM.getDesc());
