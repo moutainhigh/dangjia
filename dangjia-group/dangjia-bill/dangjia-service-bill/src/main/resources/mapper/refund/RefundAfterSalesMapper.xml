@@ -126,6 +126,7 @@
 
     <!--查询历史退货单表-->
     <select id="queryRefundOnlyHistoryOrderList" resultType="com.dangjia.acg.dto.refund.RefundRepairOrderDTO">
+
         SELECT
             t.id repairMendOrderId,
             t.storefront_id storefrontId,
@@ -147,10 +148,15 @@
         FROM
             dj_repair_mend_order t,
             dj_basics_storefront t1,
-            dj_member t2
+            dj_member t2,
+            dj_member_address ma
         where t.storefront_id=t1.id
         and t.apply_member_id=t2.id
-        and t.house_id=#{houseId}
+        and (t.house_id=ma.house_id or t.address_id=ma.id)
+        and ma.member_id=#{memberId}
+        <if test="null!=houseId and ''!=houseId">
+            and t.house_id=#{houseId}
+        </if>
         <if test="type ==4 ">
             and t.type in(4,6)
         </if>
@@ -163,29 +169,30 @@
     </select>
 
     <select id="queryRefundOnlyHistoryOrderMaterialList"  resultType="com.dangjia.acg.dto.refund.RefundRepairOrderMaterialDTO">
+
         SELECT
             t.mend_order_id repairMendOrderId,
-          t.id repairOrderMaterialId,
-          t.storefront_id storefrontId,
-          t.product_id productId,
-          t.product_name productName,
-          t.product_sn productSn,
-          t.product_type productType,
-          t.price price,
-          t.unit_name unitName,
-            IFNULL((CASEWHEN s.shipping_state = 7 THEN t.shop_count
-                 ELSE t.actual_count END
+            t.id repairOrderMaterialId,
+            t.storefront_id storefrontId,
+            t.product_id productId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            t.unit_name unitName,
+            IFNULL((CASE WHEN t2.shipping_state = 7 THEN t.shop_count
+            ELSE t.actual_count END
             ),t.shop_count) returnCount,
-          IFNULL(t.stevedorage_cost,0) stevedorageCost,
-          IFNULL(t.transportation_cost,0) transportationCost,
-          IFNULL(t.image,t1.image) image,
-          t1.prod_template_id productTemplateId,
-          t.order_item_id orderItemId
+            IFNULL(t.stevedorage_cost,0) stevedorageCost,
+            IFNULL(t.transportation_cost,0) transportationCost,
+            IFNULL(t.image,t1.image) image,
+            t1.prod_template_id productTemplateId,
+            t.order_item_id orderItemId
         FROM
-            dj_repair_mend_materiel t,
-          dj_basics_storefront_product t1
-        where t.product_id = t1.id
-        and t.mend_order_id=#{repairMendOrderId}
+            dj_repair_mend_materiel t
+        INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
+        LEFT JOIN dj_repair_mend_deliver t2 on t.repair_mend_deliver_id=t2.id
+        where t.mend_order_id=#{repairMendOrderId}
         <if test="null!=mendDeliverId and ''!=mendDeliverId">
             and t.repair_mend_deliver_id=#{mendDeliverId}
         </if>

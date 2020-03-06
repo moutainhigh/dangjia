@@ -88,7 +88,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     @ApiMethod
     public ServerResponse<PageInfo> queryRefundOnlyHistoryOrderList(PageDTO pageDTO, String userToken,
                                                              String cityId,String houseId,String searchKey){
-        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,cityId,houseId,searchKey,4);
+        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,userToken,cityId,houseId,searchKey,4);
     }
 
     /**
@@ -250,7 +250,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     @ApiMethod
     public ServerResponse<PageInfo> queryReturnRefundHistoryOrderList(PageDTO pageDTO,String userToken,String cityId,String houseId,
                                                                String searchKey){
-        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,cityId,houseId,searchKey,5);
+        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,userToken,cityId,houseId,searchKey,5);
     }
 
     /**
