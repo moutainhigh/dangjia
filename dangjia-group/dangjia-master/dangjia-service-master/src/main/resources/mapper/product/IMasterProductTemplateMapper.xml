@@ -144,8 +144,8 @@
             dj_basics_product_template c,
           dj_basics_goods g
         WHERE c.city_id=#{cityId}
-        <if test="goodsId!=null and goodsId!=''">
-            and c.goods_id=#{goodsId}
+        <if test="categoryId!=null and categoryId!=''">
+            and c.category_id=#{categoryId}
         </if>
         and c.goods_id=g.id
         and c.maket=1
@@ -169,8 +169,8 @@
           dj_basics_goods g,
           dj_basics_storefront_product p
         WHERE c.goods_id=g.id
-        <if test="goodsId!=null and goodsId!=''">
-            and c.goods_id=#{goodsId}
+        <if test="categoryId!=null and categoryId!=''">
+            and c.category_id=#{categoryId}
         </if>
         and c.data_status=0
         and c.id=p.prod_template_id
