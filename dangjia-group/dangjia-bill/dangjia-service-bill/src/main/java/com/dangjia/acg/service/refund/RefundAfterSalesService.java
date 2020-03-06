@@ -705,6 +705,9 @@ public class RefundAfterSalesService {
            if(refundRepairOrderDTO.getType()==6){
                refundRepairOrderDTO.setRepairNewNode("退款成功");
            }
+            if("5".equals(refundRepairOrderDTO.getState())){
+                refundRepairOrderDTO.setShowRepairDateType(2);
+            }
             refundRepairOrderDTO.setMobile(refundRepairOrderDTO.getStorefrontMobile());//拨打电话
             refundRepairOrderDTO.setStorefrontIcon(address+refundRepairOrderDTO.getStorefrontIcon());
             //相关凭证图片地址存储
@@ -793,6 +796,7 @@ public class RefundAfterSalesService {
             //查询对应的流水节点信息(根据订单ID）
             List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(refundRepairOrderDTO.getRepairMendOrderId(),mendDeliverId);//仅退款
             refundRepairOrderDTO.setShowRepairDateType(1);//显示时间判断（1订单剩余时间，2最新处理时间）
+
             if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                 OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
                 refundRepairOrderDTO.setRepairNewNode(orderProgressDTO.getNodeName());
@@ -810,6 +814,9 @@ public class RefundAfterSalesService {
                 if("RA_008".equals(orderProgressDTO.getNodeCode())||"RA_009".equals(orderProgressDTO.getNodeCode())||"RA_010".equals(orderProgressDTO.getNodeCode())){
                     refundRepairOrderDTO.setShowRepairDateType(2);
                 }
+            }
+            if("5".equals(refundRepairOrderDTO.getState())){
+                refundRepairOrderDTO.setShowRepairDateType(2);
             }
             refundRepairOrderDTO.setMobile(refundRepairOrderDTO.getStorefrontMobile());//拨打电话
             refundRepairOrderDTO.setStorefrontIcon(address+refundRepairOrderDTO.getStorefrontIcon());

@@ -454,6 +454,27 @@ public class RedPackService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+    /**
+     * 优惠券状态修改
+     * @param redPackId 优惠券ID
+     * @param stateStatus 0继续发放,0停止发放
+     * @return
+     */
+    public ServerResponse updateRedPackInfo(String redPackId,Integer stateStatus){
+        try{
+            if(redPackId==null){
+                return ServerResponse.createByErrorMessage("查询失败");
+            }
+            ActivityRedPack activityRedPack=activityRedPackMapper.selectByPrimaryKey(redPackId);
+            activityRedPack.setDeleteState(stateStatus);
+            activityRedPack.setModifyDate(new Date());
+            activityRedPackMapper.updateByPrimaryKeySelective(activityRedPack);
+            return ServerResponse.createBySuccessMessage("更新成功");
+        }catch (Exception e){
+            logger.error("修改失败",e);
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+    }
 
 
     /**

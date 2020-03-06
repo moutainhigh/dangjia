@@ -198,6 +198,18 @@ public class ActivityController  implements ActivityAPI {
     public ServerResponse queryMyExpireRedList(String userToken,Integer sourceType,String cityId,PageDTO pageDTO){
         return redPackService.queryMyExpireRedList(userToken,sourceType,cityId,pageDTO);
     }
+
+    /**
+     * 优惠券状态修改
+     * @param redPackId 优惠券ID
+     * @param stateStatus 0继续发放,0停止发放
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse updateRedPackInfo(String redPackId,Integer stateStatus){
+        return redPackService.updateRedPackInfo(redPackId,stateStatus);
+    }
     /**
      * 中台--优惠卷详情
      * @param request
