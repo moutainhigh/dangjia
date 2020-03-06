@@ -32,6 +32,7 @@ import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.complain.Complain;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.design.QuantityRoom;
@@ -363,6 +364,7 @@ public class RefundAfterSalesService {
                 if(houseIdNew!=null){
                     houseId=houseIdNew;
                 }
+                RefundOrderDTO orderInfo = refundAfterSalesMapper.queryRefundOrderInfoById(orderId);
                 //查询房子信息，获取房子对应的楼层
                 QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
                 Integer elevator= 1;//是否电梯房
@@ -374,12 +376,13 @@ public class RefundAfterSalesService {
                 example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
                 mendOrder.setNumber("DJZX" + 40000 + iBillMendOrderMapper.selectCountByExample(example));//订单号
-                mendOrder.setHouseId(houseId);
+                mendOrder.setHouseId(orderInfo.getHouseId());
+                mendOrder.setAddressId(orderInfo.getAddressId());
                 mendOrder.setApplyMemberId(member.getId());
                 mendOrder.setType(4);//业主退材料
                 mendOrder.setOrderName("业主退材料退款");
                 mendOrder.setState(0);//生成中
-                mendOrder.setStorefrontId(storefrontId);
+                mendOrder.setStorefrontId(orderInfo.getStorefrontId());
                 mendOrder.setOrderId(orderId);
                 Double totalRransportationCost = 0.0;//可退运费
                 Double totalStevedorageCost = 0.0;//可退搬运费
@@ -546,11 +549,16 @@ public class RefundAfterSalesService {
      * @param type (0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料;5业主退货退款,6系统自动退款)
      * @return
      */
-    public ServerResponse<PageInfo> queryRefundOnlyHistoryOrderList(PageDTO pageDTO,String cityId,String houseId,String searchKey,Integer type){
+    public ServerResponse<PageInfo> queryRefundOnlyHistoryOrderList(PageDTO pageDTO,String userToken,String cityId,String houseId,String searchKey,Integer type){
         try{
+            Object object = getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             logger.info("queryRefundOrderList查询可退款的商品：city={},houseId={}",cityId,houseId);
-            List<RefundRepairOrderDTO> repairOrderDTOList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderList(houseId,type);
+            List<RefundRepairOrderDTO> repairOrderDTOList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderList(member.getId(),houseId,type);
 
             if(repairOrderDTOList!=null&&repairOrderDTOList.size()>0){
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -1034,12 +1042,11 @@ public class RefundAfterSalesService {
      */
     public ServerResponse queryReturnRefundOrderList(PageDTO pageDTO,String userToken,String cityId,String houseId,String searchKey){
         try{
-            Object object = memberAPI.getMember(userToken);
+            Object object = getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            JSONObject job = (JSONObject) object;
-            Member member = job.toJavaObject(Member.class);
+            Member member = (Member) object;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             logger.info("queryReturnRefundOrderList查询可退货退款的商品：city={},houseId={}",cityId,houseId);
             List<RefundOrderDTO> orderlist = billDjDeliverOrderSplitMapper.queryReturnRefundOrderList(member.getId(),houseId,searchKey);
@@ -1181,8 +1188,8 @@ public class RefundAfterSalesService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Member member = (Member) object;
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         MendOrder mendOrder;
         Example example;
         JSONArray orderArrayList=JSONArray.parseArray(orderProductAttr);
@@ -1204,15 +1211,17 @@ public class RefundAfterSalesService {
                     elevator=quantityRoom.getElevator();//是否电梯房
                     floor=quantityRoom.getFloor();//楼层
                 }
+                RefundOrderDTO orderInfo = billDjDeliverOrderSplitMapper.queryReturnRefundOrderInfo(orderSplitId);
                 example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
                 mendOrder.setNumber("DJZX" + 40000 + iBillMendOrderMapper.selectCountByExample(example));//订单号
-                mendOrder.setHouseId(houseId);
+                mendOrder.setHouseId(orderInfo.getHouseId());
+                mendOrder.setAddressId(orderInfo.getAddressId());
                 mendOrder.setApplyMemberId(member.getId());
                 mendOrder.setType(5);//业主退材料
                 mendOrder.setOrderName("业主退材料退货退款");
                 mendOrder.setState(0);//生成中
-                mendOrder.setStorefrontId(storefrontId);
+                mendOrder.setStorefrontId(orderInfo.getStorefrontId());
                 mendOrder.setImageArr(imageArr);//相关凭证
                 mendOrder.setOrderId(orderSplitId);//订单申请ID(要货表中的订单ID）
                 Double totalRransportationCost = 0.0;//可退运费
@@ -1307,8 +1316,6 @@ public class RefundAfterSalesService {
         }
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Member member = (Member) object;
-
-
         //查询房子信息，获取房子对应的楼层
         QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
         Integer elevator= 1;//是否电梯房
@@ -1507,6 +1514,15 @@ public class RefundAfterSalesService {
                 returnWorkOrderDTO.setActualTotalAmount(mendOrder.getActualTotalAmount());
                 returnWorkOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
                 returnWorkOrderDTO.setMendOrderId(mendOrder.getId());
+                Member member=iBillMemberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
+                returnWorkOrderDTO.setApplyMemberName(member.getName());//
+                if("2".equals(returnWorkOrderDTO.getType())||"3".equals(returnWorkOrderDTO.getType())){//业主补、退人工
+                    returnWorkOrderDTO.setApplyMemberTypeName("业主");//申请人类型名称
+                    returnWorkOrderDTO.setWorkerTypeColor("#D67DAE");
+                }else{
+                    returnWorkOrderDTO.setApplyMemberTypeName(returnWorkOrderDTO.getWorkTypeName());//申请人类型名称
+                    returnWorkOrderDTO.setWorkerTypeColor(returnWorkOrderDTO.getWorkerTypeColor());
+                }
             }
             List<RefundRepairOrderMaterialDTO> repairWorkerList=iBillMendWorkerMapper.queryBillMendOrderId(mendOrder.getId());//退款商品列表查询
             getRepairOrderProductList(repairWorkerList,address);
