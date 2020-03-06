@@ -16,7 +16,7 @@
 		<module>dangjia-job</module>
         <module>dangjia-search</module>
         <module>dangjia-upload</module>
-        <module>dangjia-message</module>
+        <!--<module>dangjia-message</module>-->
     </modules>
     <packaging>pom</packaging>
 </project>
