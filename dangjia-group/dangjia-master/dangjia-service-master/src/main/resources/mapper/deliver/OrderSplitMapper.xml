@@ -114,6 +114,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             dj_deliver_order_split t
         WHERE
             t.house_id =#{houseId}
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND t.worker_type_id = #{workerTypeId}
+        </if>
         AND  t.split_parent_id is null
         ORDER BY t.create_date desc
     </select>

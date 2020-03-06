@@ -42,8 +42,8 @@ public class MendRecordController implements MendRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse recordList(String userToken, Integer roleType, String houseId, String queryId, Integer type) {
-        return mendRecordService.recordList(userToken, roleType, houseId, queryId, type);
+    public ServerResponse recordList(PageDTO pageDTO,String userToken, Integer roleType, String houseId, String queryId, Integer type) {
+        return mendRecordService.recordList(pageDTO,userToken, roleType, houseId, queryId, type);
     }
 
     /**

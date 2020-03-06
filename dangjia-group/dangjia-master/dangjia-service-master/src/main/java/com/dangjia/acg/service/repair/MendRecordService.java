@@ -2,10 +2,12 @@ package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -32,6 +34,8 @@ import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,9 +82,6 @@ public class MendRecordService {
     private IMemberMapper memberMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
-    @Autowired
-    private HouseFlowApplyService houseFlowApplyService;
-
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
@@ -526,9 +527,9 @@ public class MendRecordService {
 
     /**
      * 记录列表
-     * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货,6，审核记录
+     * 1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
      */
-    public ServerResponse recordList(String userToken, int roleType, String houseId, String queryId, Integer type) {
+    public ServerResponse recordList(PageDTO pageDTO, String userToken, Integer roleType, String houseId, String queryId, Integer type) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -538,121 +539,153 @@ public class MendRecordService {
             roleType=2;
         }
         List<Map<String, Object>> returnMap = new ArrayList<>();
-        if (CommonUtil.isEmpty(type) || type == -1) {
-            getHouseFlowApplies(worker, roleType, houseId, 6, returnMap);
-//            getOrderSplitList(houseId, 5, queryId, returnMap);
-            getMendOrderList(worker, roleType, houseId, 2, queryId, returnMap);
-            sortMax(returnMap);
-        } else if (type == 6) {
-            return houseFlowApplyService.queryAcceptanceTrend(userToken,houseId,worker.getWorkerType());
-        } else if (type == 5) {
-            getOrderSplitList(houseId, type, queryId, returnMap);
+        PageInfo pageInfo;
+        if (type == 5) {
+            pageInfo=getOrderSplitList(pageDTO,worker, roleType,houseId, type,returnMap);
+        } else if (type == 1||type == 3) {
+            pageInfo=getChangeOrderList(pageDTO,worker, roleType,houseId, type,returnMap);
         } else {
-            getMendOrderList(worker, roleType, houseId, type, queryId, returnMap);
+            pageInfo=getMendOrderList(pageDTO,worker, roleType, houseId, type,returnMap);
         }
-        return ServerResponse.createBySuccess("查询成功", returnMap);
+        return ServerResponse.createBySuccess("查询成功", pageInfo);
     }
 
-    private void sortMax(List<Map<String, Object>> arr) {
-        //让左边是最大的值，右边是最小的
-        for (int i = 0; i < arr.size() - 1; i++) {
-            for (int j = 1; j < arr.size() - i; j++) {
-                Map<String, Object> a;
-                Date date = (Date) arr.get(j - 1).get("createDate");
-                Date date2 = (Date) arr.get(j).get("createDate");
-                if (date.getTime() < date2.getTime()) { // 比较两个整数的大小
-                    a = arr.get(j - 1);
-                    arr.set((j - 1), arr.get(j));
-                    arr.set(j, a);
-                }
+    private PageInfo getChangeOrderList(PageDTO pageDTO,Member worker, Integer roleType, String houseId, Integer type,
+                                      List<Map<String, Object>> returnMap) {
+        Example example = new Example(ChangeOrder.class);
+        Example.Criteria  criteria = example.createCriteria();
+        criteria.andEqualTo(ChangeOrder.HOUSE_ID, houseId);
+        //补退人工按工种区分
+        if (type == 1) {//补人工
+            criteria.andIn(ChangeOrder.TYPE,  Arrays.asList(new Integer[]{1,3}));
+        } else {//退人工
+            criteria.andEqualTo(ChangeOrder.TYPE, 2);
+        }
+        if(roleType==3){
+            criteria.andEqualTo(ChangeOrder.WORKER_TYPE_ID, worker.getWorkerTypeId());
+        }
+        example.orderBy(MendOrder.CREATE_DATE).desc();
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<ChangeOrder> mendOrderList = changeOrderMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(mendOrderList);
+        for (ChangeOrder mendOrder : mendOrderList) {
+            List<OrderProgressDTO> orderProgressDTOList=iMasterOrderProgressMapper.queryProgressListByOrderId(mendOrder.getId());//退款历史记录
+
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
+            Map<String, Object> map = new HashMap<>();
+            map.put("mendOrderId", mendOrder.getId());
+            map.put("number", "");
+            if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
+                OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
+                map.put("applyStatus",CommonUtil.getStateWorkerName(orderProgressDTO.getNodeCode()));
+            }else{
+                map.put("applyStatus",CommonUtil.getChangeStateName(String.valueOf(mendOrder.getState()),String.valueOf(mendOrder.getType())));
             }
+            map.put("applyStatus","申请中");
+            map.put("state", mendOrder.getState());
+            map.put("createDate", mendOrder.getCreateDate());
+            map.put("type", mendOrder.getType());
+            switch (mendOrder.getType()) {
+                case 1:
+                    map.put("name", workerType.getName()+"申请补人工");
+                    break;
+                case 2:
+                    map.put("name", "业主申请退"+workerType.getName());
+                    break;
+                case 3:
+                    map.put("name", "业主申请补"+workerType.getName());
+                    break;
+            }
+            returnMap.add(map);
         }
+        pageResult.setList(returnMap);
+        return pageResult;
     }
-
-    private void getMendOrderList(Member worker, int roleType, String houseId, Integer type, String queryId,
+    private PageInfo getMendOrderList(PageDTO pageDTO,Member worker, Integer roleType, String houseId, Integer type,
                                   List<Map<String, Object>> returnMap) {
         Example example = new Example(MendOrder.class);
-        Example.Criteria criteria;
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(MendOrder.HOUSE_ID, houseId);
         //补退人工按工种区分
-        if (roleType == 3 && (type == 1 || type == 3)) {//工匠
-            criteria = example.createCriteria();
-            criteria.andEqualTo(MendOrder.HOUSE_ID, houseId);
+        if (roleType == 3) {//工匠
             criteria.andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId());
-            criteria.andNotEqualTo(MendOrder.STATE, 0);
+        }
+        if (type == 4) {
+            criteria.andIn(ChangeOrder.TYPE,  Arrays.asList(new Integer[]{4,5}));
         } else {
-            criteria = example.createCriteria();
-            criteria.andEqualTo(MendOrder.HOUSE_ID, houseId);
-            criteria.andNotEqualTo(MendOrder.STATE, 0);
+            criteria.andEqualTo(ChangeOrder.TYPE, type);
         }
         if (!CommonUtil.isEmpty(type)) {
             criteria.andEqualTo(MendOrder.TYPE, type);
         }
         example.orderBy(MendOrder.CREATE_DATE).desc();
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(mendOrderList);
         for (MendOrder mendOrder : mendOrderList) {
             Map<String, Object> map = new HashMap<>();
             map.put("mendOrderId", mendOrder.getId());
             map.put("number", mendOrder.getNumber());
             map.put("state", mendOrder.getState());
-            map.put("totalAmount", "¥" + String.format("%.2f", +mendOrder.getTotalAmount()));
             map.put("createDate", mendOrder.getCreateDate());
             map.put("type", mendOrder.getType());
+
+            example=new Example(MendDeliver.class);
+            example.createCriteria().andEqualTo(MendDeliver.MEND_ORDER_ID,mendOrder.getId());
+            List<MendDeliver> mendDeliverList=mendDeliverMapper.selectByExample(example);
             switch (mendOrder.getType()) {
-                //0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
-                case 0:
-                    map.put("name", "补材料记录");
-                    break;
-                case 1:
-                    map.put("name", "补人工记录");
-                    break;
                 case 2:
-                    map.put("name", "退材料记录");
-                    break;
-                case 3:
-                    map.put("name", "退人工记录");
+                    map.put("name", "申请退货");
                     break;
                 case 4:
-                    map.put("name", "业主退材料记录");
+                case 5:
+                    map.put("name", "申请退库存");
                     break;
             }
-            if (!CommonUtil.isEmpty(queryId)) {
-                if (mendOrder.getType() == 1 || mendOrder.getType() == 3) {
-                    example = new Example(MendWorker.class);
-                    example.createCriteria()
-                            .andEqualTo(MendWorker.MEND_ORDER_ID, mendOrder.getId())
-                            .andEqualTo(MendWorker.WORKER_GOODS_ID, queryId);
-                    List<MendWorker> mendWorkerList = mendWorkerMapper.selectByExample(example);
-                    if (mendWorkerList.size() > 0) {
-                        returnMap.add(map);
-                    }
-                } else {
-                    example = new Example(MendMateriel.class);
-                    example.createCriteria()
-                            .andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId())
-                            .andEqualTo(MendMateriel.PRODUCT_ID, queryId);
-                    List<MendMateriel> mendMaterielList = mendMaterialMapper.selectByExample(example);
-                    if (mendMaterielList.size() > 0) {
-                        returnMap.add(map);
-                    }
+            //因发货状态存在多条，则取其中一条做状态参考
+            if(mendOrder.getState()!=4&&mendDeliverList.size()>0){
+                map.put("applyStatus", CommonUtil.getDeliverStateName(mendDeliverList.get(0).getShippingState()));
+            }else {
+                switch (mendOrder.getState()) {
+                    case 0:
+                        map.put("applyStatus", "待申请");
+                        break;
+                    case 1:
+                        map.put("applyStatus", "处理中");
+                        break;
+                    case 2:
+                        map.put("applyStatus", "已拒绝");
+                        break;
+                    case 3:
+                        map.put("applyStatus", "已通过");
+                        break;
+                    case 4:
+                        map.put("applyStatus", "已结算");
+                        break;
+                    case 5:
+                        map.put("applyStatus", "已撤回");
+                        break;
+                    case 6:
+                        map.put("applyStatus", "已关闭");
+                        break;
                 }
-            } else {
-                returnMap.add(map);
             }
+            returnMap.add(map);
         }
+        pageResult.setList(returnMap);
+        return pageResult;
     }
 
-    private void getOrderSplitList(String houseId, Integer type, String queryId, List<Map<String, Object>> returnMap) {
-       /* Example example = new Example(OrderSplit.class);
-        example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId)
-                .andNotEqualTo(OrderSplit.APPLY_STATUS, 0);
-        example.orderBy(OrderSplit.CREATE_DATE).desc();*/
-        Example example;
-        List<OrderSplit> orderSplitList = orderSplitMapper.selectOrderSplitList(houseId);//selectByExample(example);
+    private PageInfo getOrderSplitList(PageDTO pageDTO,Member worker, Integer roleType,String houseId, Integer type,  List<Map<String, Object>> returnMap) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<OrderSplit> orderSplitList = orderSplitMapper.selectOrderSplitList(houseId,roleType == 3?worker.getWorkerTypeId():null);
+        PageInfo pageResult = new PageInfo(orderSplitList);
         for (OrderSplit orderSplit : orderSplitList) {
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(orderSplit.getWorkerTypeId());
             Map<String, Object> map = new HashMap<>();
             map.put("mendOrderId", orderSplit.getId());
             map.put("number", orderSplit.getNumber());
-            map.put("name", "申请要货");
+            map.put("name", workerType.getName()+"申请要货");
             map.put("state", orderSplit.getApplyStatus());
             map.put("createDate", orderSplit.getCreateDate());
             map.put("type", type);
@@ -674,69 +707,12 @@ public class MendRecordService {
                     map.put("applyStatus","已撤回");
                     break;
             }
-            if (!CommonUtil.isEmpty(queryId)) {
-                /*example = new Example(OrderSplitItem.class);
-                example.createCriteria()
-                        .andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId())
-                        .andEqualTo(OrderSplitItem.PRODUCT_ID, queryId);*/
-                List<OrderSplitItem> orderSplitItems  = orderSplitItemMapper.selectSplitItemList(orderSplit.getId(),queryId);
-                if (orderSplitItems.size() > 0) {
-                    returnMap.add(map);
-                }
-            } else {
-                returnMap.add(map);
-            }
-        }
-    }
-
-    private void getHouseFlowApplies(Member worker, int roleType, String houseId, Integer type, List<Map<String, Object>> returnMap) {
-        Example example = new Example(HouseFlowApply.class);
-        Example.Criteria criteria=example.createCriteria();
-        criteria.andEqualTo(HouseFlowApply.HOUSE_ID, houseId);
-        criteria.andCondition(" apply_type <3 and apply_type!=0 ");
-        criteria.andCondition(" (`apply_money` > '0' OR `supervisor_money` > '0') ");
-        /*审核记录*/
-        if (roleType == 3) {//工匠
-            criteria.andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
-        }
-        example.orderBy(HouseFlowApply.CREATE_DATE).desc();
-        List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
-        for (HouseFlowApply houseFlowApply : houseFlowApplies) {
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
-            Map<String, Object> map = new HashMap<>();
-            map.put("mendOrderId", houseFlowApply.getId());
-            if(roleType ==3){
-                if (houseFlowApply.getApplyType() == 1) {
-                    map.put("number","阶段完工审核");
-                    map.put("name","阶段完工审核");
-                }
-                if (houseFlowApply.getApplyType() == 2) {
-                    String name = workerType.getType() == 3 ? "竣工审核" : "整体完工审核";
-                    map.put("number", name);
-                    map.put("name", name);
-                }
-            }
-            else {
-                if (houseFlowApply.getApplyType() == 0) {
-                    map.put("number", workerType.getName() + "每日完工审核");
-                    map.put("name", workerType.getName() + "每日完工审核");
-                }
-                if (houseFlowApply.getApplyType() == 1) {
-                    map.put("number", workerType.getName() + "阶段完工审核");
-                    map.put("name", workerType.getName() + "阶段完工审核");
-                }
-                if (houseFlowApply.getApplyType() == 2) {
-                    String name = workerType.getType() == 3 ? "竣工审核" : "整体完工审核";
-                    map.put("number", workerType.getName() + name);
-                    map.put("name", workerType.getName() + name);
-                }
-            }
-            map.put("state", houseFlowApply.getApplyType());
-            map.put("createDate", houseFlowApply.getCreateDate());
-            map.put("type", type);
             returnMap.add(map);
         }
+        pageResult.setList(returnMap);
+        return pageResult;
     }
+
 
     /**
      * 要补退记录
@@ -755,12 +731,11 @@ public class MendRecordService {
             if(worker.getWorkerType()!=null&&worker.getWorkerType()==3){
                 roleType=2;
             }
-            List<MendOrder> mendOrderList;
+            String workerTypeId="";
             if (roleType == 3) {//工匠
-                mendOrderList = mendOrderMapper.workerMendOrder(houseId, 1, worker.getWorkerTypeId());
-            } else {
-                mendOrderList = mendOrderMapper.workerMendOrder(houseId, 1, "");
+                workerTypeId= worker.getWorkerTypeId();
             }
+            List<MendOrder> mendOrderList = mendOrderMapper.workerMendOrder(houseId, 1, workerTypeId);
             if (mendOrderList.size() > 0) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("houseId", houseId);
@@ -770,9 +745,15 @@ public class MendRecordService {
                 map.put("size", "共" + mendOrderList.size() + "条");
                 returnMap.add(map);
             }
+
             Example example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
-                    .andNotEqualTo(MendOrder.STATE, 0);
+            Example.Criteria criteria= example.createCriteria();
+            criteria.andEqualTo(MendOrder.HOUSE_ID, houseId);
+            criteria.andEqualTo(MendOrder.TYPE, 2);
+            criteria.andNotEqualTo(MendOrder.STATE, 0);
+            if(!CommonUtil.isEmpty(workerTypeId)){
+                criteria.andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId);
+            }
             mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() > 0) {
                 Map<String, Object> map = new HashMap<>();
@@ -783,11 +764,8 @@ public class MendRecordService {
                 map.put("size", "共" + mendOrderList.size() + "条");
                 returnMap.add(map);
             }
-            if (roleType == 3) {//工匠
-                mendOrderList = mendOrderMapper.workerMendOrder(houseId, 3, worker.getWorkerTypeId());
-            } else {
-                mendOrderList = mendOrderMapper.workerMendOrder(houseId, 3, "");
-            }
+
+            mendOrderList = mendOrderMapper.workerMendOrder(houseId, 3, workerTypeId);
             if (mendOrderList.size() > 0) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("houseId", houseId);
@@ -797,24 +775,30 @@ public class MendRecordService {
                 map.put("size", "共" + mendOrderList.size() + "条");
                 returnMap.add(map);
             }
-            example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId)
-                    .andEqualTo(MendOrder.TYPE, 4)
-                    .andNotEqualTo(MendOrder.STATE, 0);
-            mendOrderList = mendOrderMapper.selectByExample(example);
-            if (mendOrderList.size() > 0) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("houseId", houseId);
-                map.put("type", 4);
-                map.put("image", address + "iconWork/four.png");
-                map.put("name", "退库存记录");
-                map.put("size", "共" + mendOrderList.size() + "条");
-                returnMap.add(map);
+            if (roleType != 3) {//工匠
+                example = new Example(MendOrder.class);
+                example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId)
+                        .andEqualTo(MendOrder.TYPE, 4)
+                        .andNotEqualTo(MendOrder.STATE, 0);
+                mendOrderList = mendOrderMapper.selectByExample(example);
+                if (mendOrderList.size() > 0) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("houseId", houseId);
+                    map.put("type", 4);
+                    map.put("image", address + "iconWork/four.png");
+                    map.put("name", "退库存记录");
+                    map.put("size", "共" + mendOrderList.size() + "条");
+                    returnMap.add(map);
+                }
             }
             /*要货单记录*/
             example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId)
-                    .andGreaterThan(OrderSplit.APPLY_STATUS, 0);
+            Example.Criteria criterias= example.createCriteria();
+            criterias.andEqualTo(OrderSplit.HOUSE_ID, houseId);
+            criterias.andGreaterThan(OrderSplit.APPLY_STATUS, 0);
+            if(!CommonUtil.isEmpty(workerTypeId)){
+                criterias.andEqualTo(OrderSplit.WORKER_TYPE_ID, workerTypeId);
+            }
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() > 0) {
                 Map<String, Object> map = new HashMap<>();
@@ -823,26 +807,6 @@ public class MendRecordService {
                 map.put("image", address + "iconWork/five.png");
                 map.put("name", "要货记录");
                 map.put("size", "共" + orderSplitList.size() + "条");
-                returnMap.add(map);
-            }
-            example = new Example(HouseFlowApply.class);
-            /*审核记录*/
-            if (roleType == 3) {//工匠
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
-                        .andCondition(" apply_type <3 and apply_type!=0  ")
-                        .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
-            } else {
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
-                        .andCondition(" apply_type <3 and apply_type!=0  ");
-            }
-            List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
-            if (houseFlowApplies.size() > 0) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("houseId", houseId);
-                map.put("type", 6);
-                map.put("image", address + "iconWork/zero.png");
-                map.put("name", "审核记录");
-                map.put("size", "共" + houseFlowApplies.size() + "条");
                 returnMap.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", returnMap);
