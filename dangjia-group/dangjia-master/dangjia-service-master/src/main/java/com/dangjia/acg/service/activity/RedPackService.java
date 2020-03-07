@@ -454,6 +454,27 @@ public class RedPackService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+    /**
+     * 优惠券状态修改
+     * @param redPackId 优惠券ID
+     * @param stateStatus 0继续发放,0停止发放
+     * @return
+     */
+    public ServerResponse updateRedPackInfo(String redPackId,Integer stateStatus){
+        try{
+            if(redPackId==null){
+                return ServerResponse.createByErrorMessage("查询失败");
+            }
+            ActivityRedPack activityRedPack=activityRedPackMapper.selectByPrimaryKey(redPackId);
+            activityRedPack.setDeleteState(stateStatus);
+            activityRedPack.setModifyDate(new Date());
+            activityRedPackMapper.updateByPrimaryKeySelective(activityRedPack);
+            return ServerResponse.createBySuccessMessage("更新成功");
+        }catch (Exception e){
+            logger.error("修改失败",e);
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+    }
 
 
     /**
@@ -575,19 +596,21 @@ public class RedPackService {
      * @param sourceType 发行级别：1城市卷，2店铺卷
      * @param userId 用户ID
      * @param cityId 城市ID
-     * @param goodsId 货品ID
+     * @param categoryId 类别ID
      * @return
      */
-    public ServerResponse queryPrductByType(Integer sourceType,String userId,String cityId,String goodsId,String searchKey){
+    public ServerResponse queryPrductByType(PageDTO pageDTO,Integer sourceType,String userId,String cityId,String categoryId,String searchKey){
         try{
             String storefrontId=null;
             List<Map<String,Object>> productList=null;
             if(sourceType==2){
                 Storefront storefront=masterStorefrontService.getStorefrontByUserId(userId,cityId);
                 storefrontId=storefront.getId();
-                productList=masterProductTemplateMapper.queryPrductByType(goodsId,storefrontId,searchKey);
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                productList=masterProductTemplateMapper.queryPrductByType(categoryId,storefrontId,searchKey);
             }else{
-                productList=masterProductTemplateMapper.queryPrductTemplateByType(goodsId,searchKey,cityId);
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                productList=masterProductTemplateMapper.queryPrductTemplateByType(categoryId,searchKey,cityId);
             }
             if(productList!=null){
                 String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
@@ -596,7 +619,8 @@ public class RedPackService {
                      map.put("imageUrl", StringTool.getImage(image,address));
                  }
             }
-            return ServerResponse.createBySuccess("查询成功",productList);
+            PageInfo pageResult = new PageInfo(productList);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         }catch (Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createBySuccessMessage("查询失败");

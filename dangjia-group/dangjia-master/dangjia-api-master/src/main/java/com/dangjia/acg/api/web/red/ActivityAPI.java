@@ -154,6 +154,15 @@ public interface ActivityAPI {
                                           @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
+     * 优惠券状态修改
+     * @param redPackId 优惠券ID
+     * @param stateStatus 0继续发放,0停止发放
+     * @return
+     */
+    @PostMapping("web/activity/red/updateRedPackInfo")
+    @ApiOperation(value = "优惠券状态修改", notes = "优惠券状态修改")
+    ServerResponse updateRedPackInfo(@RequestParam("redPackId") String redPackId,@RequestParam("stateStatus") Integer stateStatus);
+    /**
      * 中台--查询优惠卷列表
      *
      * @param status 优惠卷状态：1发行中，2暂停发放，3已过期，4发送完毕
@@ -253,16 +262,17 @@ public interface ActivityAPI {
      * @param sourceType 发行级别：1城市卷，2店铺卷
      * @param userId 用户ID
      * @param cityId 城市ID
-     * @param goodsId 货品ID
+     * @param categoryId 货品ID
      * @return
      */
     @PostMapping("web/activity/red/queryPrductByType")
     @ApiOperation(value = "中台--新增优惠卷--查询商品", notes = "中台--新增优惠卷--查询商品")
     ServerResponse queryPrductByType(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("pageDTO") PageDTO pageDTO,
                                          @RequestParam("sourceType") Integer sourceType,
                                          @RequestParam("userId") String userId,
                                          @RequestParam("cityId") String cityId,
-                                         @RequestParam("goodsId") String goodsId,
+                                         @RequestParam("categoryId") String categoryId,
                                      @RequestParam("searchKey") String searchKey);
 
 

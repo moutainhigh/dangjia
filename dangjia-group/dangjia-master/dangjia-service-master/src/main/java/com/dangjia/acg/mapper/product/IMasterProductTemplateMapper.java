@@ -31,9 +31,9 @@ public interface IMasterProductTemplateMapper extends Mapper<DjBasicsProductTemp
     //根据模板ID查询对应符合条件的商品信息
     StorefrontProductDTO getStorefrontProductByTemplateId(@Param("prodTemplateId") String prodTemplateId);
 
-    List<Map<String,Object>> queryPrductByType(@Param("goodsId") String goodsId, @Param("storefrontId") String storefrontId, @Param("searchKey") String searchKey);
+    List<Map<String,Object>> queryPrductByType(@Param("categoryId") String categoryId, @Param("storefrontId") String storefrontId, @Param("searchKey") String searchKey);
 
-    List<Map<String,Object>> queryPrductTemplateByType(@Param("goodsId") String goodsId,@Param("searchKey") String searchKey,@Param("cityId") String cityId);
+    List<Map<String,Object>> queryPrductTemplateByType(@Param("categoryId") String categoryId,@Param("searchKey") String searchKey,@Param("cityId") String cityId);
 
 
     //根据店铺ID查询店铺所有信息
