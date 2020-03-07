@@ -12,6 +12,8 @@ public class RefundRepairOrderMaterialDTO {
 
     private String repairOrderMaterialId;//退款申请单详情ID
 
+    private String repairMendDeliverId;
+
     private String storefrontId;//店铺ID
 
     private String storefrontIcon;//店铺图标
@@ -35,6 +37,8 @@ public class RefundRepairOrderMaterialDTO {
     private Double cost;//平均成本价
 
     private Double returnCount;//退货量
+
+    private Double actualCount;
 
     private Double stevedorageCost;//搬运费
 

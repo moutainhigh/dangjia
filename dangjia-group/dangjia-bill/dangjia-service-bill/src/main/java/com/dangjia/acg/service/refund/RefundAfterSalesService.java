@@ -302,6 +302,7 @@ public class RefundAfterSalesService {
                         }
                         actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
                         actualTotalAmount=MathUtil.sub(actualTotalAmount,discountPrice);
+                        refundOrderItemDTO.setReturnCount(returnCount);
                         orderItemList.add(refundOrderItemDTO);
                     }
 
@@ -636,6 +637,13 @@ public class RefundAfterSalesService {
             ap.setCategoryId(pt.getCategoryId());
             if(ap.getStorefrontIcon()!=null&&StringUtils.isNotBlank(ap.getStorefrontIcon())){
                 ap.setStorefrontIcon(address+ap.getStorefrontIcon());
+            }
+            String repairMendDeliverId=ap.getRepairMendDeliverId();
+            if(repairMendDeliverId!=null){
+                 MendDeliver mendDeliver=billMendDeliverMapper.selectByPrimaryKey(repairMendDeliverId);
+                 if(mendDeliver!=null&&mendDeliver.getShippingState()==7){
+                     ap.setReturnCount(ap.getActualCount());
+                 }
             }
             //添加图片详情地址字段
             String[] imgArr = image.split(",");

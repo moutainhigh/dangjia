@@ -347,7 +347,8 @@ public class RedPackService {
         //优惠卷赋值
         ActivityRedPack activityRedPack=new ActivityRedPack();
         BeanUtils.beanToBean(activityRedPackInfo,activityRedPack);
-        String name="";
+        activityRedPack.setSatisfyMoney(activityRedPackInfo.getSatisfyMoney());
+        activityRedPack.setMoney(activityRedPackInfo.getMoney());
 
         if(activityRedPackInfo.getSourceType()==2){//店铺券
           //1.查询店铺ID
@@ -457,7 +458,7 @@ public class RedPackService {
     /**
      * 优惠券状态修改
      * @param redPackId 优惠券ID
-     * @param stateStatus 0继续发放,0停止发放
+     * @param stateStatus 0继续发放,1停止发放
      * @return
      */
     public ServerResponse updateRedPackInfo(String redPackId,Integer stateStatus){
