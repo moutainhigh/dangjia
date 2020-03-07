@@ -16,7 +16,7 @@
         <module>dangjia-bill</module><!-- 订单服务 -->
         <module>dangjia-shop</module><!-- 卖家服务 -->
         <module>dangjia-store</module><!--供货商/库存服务 -->
-
+        <module>dangjia-recommend</module><!--推荐服务 -->
     </modules>
     <packaging>pom</packaging>
 </project>
