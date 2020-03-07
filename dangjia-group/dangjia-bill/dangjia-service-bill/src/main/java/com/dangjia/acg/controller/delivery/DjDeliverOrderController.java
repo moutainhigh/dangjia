@@ -100,11 +100,6 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
         return djDeliverOrderService.deliverOrderItemDetail(orderId, orderStatus);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse orderSnapshop(String orderId, Integer orderStatus) {
-        return djDeliverOrderService.orderSnapshop(orderId, orderStatus);
-    }
 
     @Override
     @ApiMethod

@@ -1241,21 +1241,6 @@ public class DjDeliverOrderService {
     }
 
 
-    /**
-     * 订单快照
-     *
-     * @param orderId
-     * @param orderStatus
-     * @return
-     */
-    public ServerResponse orderSnapshop(String orderId, Integer orderStatus) {
-        try {
-            return null;
-        } catch (Exception e) {
-            logger.error("订单快照异常", e);
-            return ServerResponse.createByErrorMessage("订单快照异常" + e);
-        }
-    }
 
     /**
      * 发货详情
