@@ -160,7 +160,7 @@ public class HomeShellOrderService {
         }
         //修改对应的货单状态
         HomeShellOrder homeShellOrder=homeShellOrderMapper.selectByPrimaryKey(homeOrderId);
-        if(homeShellOrder.getStatus()!=1&&homeShellOrder.getStatus()!=4||homeShellOrder.getStatus()!=7){
+        if(homeShellOrder.getStatus()!=1&&homeShellOrder.getStatus()!=4&&homeShellOrder.getStatus()!=7){
             return ServerResponse.createBySuccess("此单处理，请勿重复操作");
         }
         homeShellOrder.setStatus(status);

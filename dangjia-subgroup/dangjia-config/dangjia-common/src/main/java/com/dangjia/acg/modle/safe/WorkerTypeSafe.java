@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @Table(name = "dj_safe_worker_type_safe")
-@ApiModel(description = "补材料表")
+@ApiModel(description = "工种保险时效配置")
 @FieldNameConstants(prefix = "")
 public class WorkerTypeSafe extends BaseEntity {
 

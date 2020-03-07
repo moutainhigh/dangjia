@@ -219,6 +219,8 @@
         WHERE
             r.red_pack_id = p.id
         AND r.member_id = #{memberId}
+        AND p.end_date >= DATE_FORMAT(NOW(), '%Y-%m-%d')
+        and r.business_order_number is null
         <if test="null!=sourceType and ''!=sourceType">
             and p.source_type=#{sourceType}
         </if>

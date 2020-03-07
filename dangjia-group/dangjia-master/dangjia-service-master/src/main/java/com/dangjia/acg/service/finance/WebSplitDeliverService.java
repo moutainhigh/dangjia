@@ -10,6 +10,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
@@ -33,6 +34,8 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
+import com.dangjia.acg.service.configRule.ConfigRuleService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -76,7 +80,8 @@ public class WebSplitDeliverService {
     private IMasterSupplierMapper iMasterSupplierMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
-
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
     /**
@@ -294,16 +299,13 @@ public class WebSplitDeliverService {
                 AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
                 AccountFlowRecord accountFlowRecord2=new AccountFlowRecord();
                 if(sourceType.equals("1")){
-                    if(storefront.getSurplusMoney()<settlementAmount) {
-                        return ServerResponse.createByErrorMessage("余额不足");
-                    }
+                    Double[] depositCfg= configRuleUtilService.getRetentionUpperLimit(ConfigRuleService.SG008,null);
                     //扣除店铺余额
                     //入账前金额
-                    accountFlowRecord2.setAmountBeforeMoney(storefront.getTotalAccount());
-//                    storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
-                    storefront.setTotalAccount(storefront.getTotalAccount()-settlementAmount);
+                    accountFlowRecord2.setAmountBeforeMoney(storefront.getSurplusMoney());
+                    storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
                     //入账后金额
-                    accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());
+                    accountFlowRecord.setAmountAfterMoney(storefront.getSurplusMoney());
                     iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
                     accountFlowRecord2.setFlowType("1");
                     accountFlowRecord2.setMoney(settlementAmount);
@@ -313,19 +315,53 @@ public class WebSplitDeliverService {
                     accountFlowRecord2.setCreateBy(userId);
                     //供应商加余额
                     DjSupplier djSupplier = iMasterSupplierMapper.selectByPrimaryKey(supplierId);
+
                     //入账前金额
-                    accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());
-//                    djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+settlementAmount);
-                    djSupplier.setTotalAccount(CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount()+settlementAmount);
+                    accountFlowRecord.setAmountBeforeMoney(djSupplier.getSurplusMoney());
+
+                    BigDecimal workPrice =new BigDecimal(settlementAmount);
+                    BigDecimal retentionPrice  =new BigDecimal(djSupplier.getRetentionMoney());
+                    //算订单的5%
+                    BigDecimal mid = workPrice.multiply(new BigDecimal(depositCfg[0])).divide(new BigDecimal(100));
+                    if (!(retentionPrice.add(mid).compareTo(new BigDecimal(depositCfg[1])) == -1 ||
+                            retentionPrice.add(mid).compareTo(new BigDecimal(depositCfg[1])) == 0)) {
+                        mid = new BigDecimal(depositCfg[1]).subtract(retentionPrice);//只收这么多了
+                    }
+                    if (djSupplier.getRetentionMoney() < depositCfg[1]) {//押金没收够并且没有算过押金
+                        //实际滞留金减上限
+                        djSupplier.setRetentionMoney(MathUtil.add(retentionPrice.doubleValue(),mid.doubleValue()));
+                    }
+
+                    BigDecimal applyMoney = workPrice.subtract(mid);
+                    djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+applyMoney.doubleValue());
+                    djSupplier.setTotalAccount(CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount()+applyMoney.doubleValue());
                     //入账后金额
-                    accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());
-                    iMasterSupplierMapper.updateByPrimaryKeySelective(djSupplier);
+                    accountFlowRecord.setAmountAfterMoney(djSupplier.getSurplusMoney());
+
                     accountFlowRecord.setFlowType("2");
                     accountFlowRecord.setMoney(settlementAmount);
                     accountFlowRecord.setState(0);
                     accountFlowRecord.setDefinedAccountId(supplierId);
                     accountFlowRecord.setDefinedName("合并結算");
                     accountFlowRecord.setCreateBy(userId);
+
+                    //供应商滞留金收取
+                    if(mid.doubleValue()>0){
+                        AccountFlowRecord flow=new AccountFlowRecord();
+                        flow.setAmountAfterMoney(djSupplier.getSurplusMoney());
+                        flow.setFlowType("2");
+                        flow.setMoney(settlementAmount);
+                        flow.setDefinedAccountId(supplierId);
+                        flow.setDefinedName("滞留金收取");
+                        flow.setCreateBy(userId);
+                        flow.setState(5);
+                        flow.setHouseOrderId(receipt.getId());
+                        flow.setAmountBeforeMoney(retentionPrice.doubleValue());//更新前总额
+                        flow.setAmountAfterMoney(djSupplier.getRetentionMoney());//更新后总额
+                        flow.setCreateBy(userId);
+                        flow.setUpdateBy(userId);
+                        iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+                    }
                 }
                 if(sourceType.equals("1")){
                     //供应商流水

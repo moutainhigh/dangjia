@@ -29,6 +29,7 @@ public class BeanUtils {
   private static final Logger logger = LoggerFactory.getLogger(BeanUtils.class);
 
   public static ObjectMapper mapper = new ObjectMapper();
+  public static String isShow;
 
   public static Object getResult(Object result){
     Object resultValue =null;
@@ -57,7 +58,11 @@ public class BeanUtils {
             BigDecimal  value =new BigDecimal((Double)result).setScale(2,BigDecimal.ROUND_HALF_UP);
             resultValue = String.valueOf(value.doubleValue());
           }else  if (result instanceof String && Validator.isMobileNo((String)result)) {
-            resultValue = ((String)result).replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2");
+            if(CommonUtil.isEmpty(isShow)) {
+              resultValue = ((String) result).replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2");
+            }else{
+              resultValue = result;
+            }
           }else {
             resultValue = result;
           }
@@ -67,6 +72,10 @@ public class BeanUtils {
       }
     }
     return resultValue;
+  }
+  public static Map beanToMap(Object obj,String isShows){
+    isShow=isShows;
+    return beanToMap(obj);
   }
   /**
    * Bean转Map 忽略_ignore 结尾的字段

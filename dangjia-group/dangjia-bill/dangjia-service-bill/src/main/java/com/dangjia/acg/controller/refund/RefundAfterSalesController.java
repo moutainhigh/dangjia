@@ -40,7 +40,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> queryRefundOnlyOrderList(PageDTO pageDTO, String userToken, String cityId, String houseId, String searchKey){
-        return refundAfterSalesService.queryRefundOnlyOrderList(pageDTO,cityId,houseId,searchKey);
+        return refundAfterSalesService.queryRefundOnlyOrderList(pageDTO,userToken,cityId,houseId,searchKey);
     }
 
     /**
@@ -88,7 +88,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     @ApiMethod
     public ServerResponse<PageInfo> queryRefundOnlyHistoryOrderList(PageDTO pageDTO, String userToken,
                                                              String cityId,String houseId,String searchKey){
-        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,cityId,houseId,searchKey,4);
+        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,userToken,cityId,houseId,searchKey,4);
     }
 
     /**
@@ -205,7 +205,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> queryReturnRefundOrderList(PageDTO pageDTO,String userToken,String cityId,String houseId,String searchKey){
-        return refundAfterSalesService.queryReturnRefundOrderList(pageDTO,cityId,houseId,searchKey);
+        return refundAfterSalesService.queryReturnRefundOrderList(pageDTO,userToken,cityId,houseId,searchKey);
     }
 
     /**
@@ -250,7 +250,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     @ApiMethod
     public ServerResponse<PageInfo> queryReturnRefundHistoryOrderList(PageDTO pageDTO,String userToken,String cityId,String houseId,
                                                                String searchKey){
-        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,cityId,houseId,searchKey,5);
+        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,userToken,cityId,houseId,searchKey,5);
     }
 
     /**

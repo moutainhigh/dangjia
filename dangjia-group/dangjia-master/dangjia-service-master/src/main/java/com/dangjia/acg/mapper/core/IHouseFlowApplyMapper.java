@@ -20,6 +20,8 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
 
     List<HouseFlowApply> noPassList(@Param("houseFlowId") String houseFlowId);
 
+    //管家未主动验收的商品数量
+    Integer getSupplierNoActiveProductNum(@Param("houseId") String houseId);
     /**
      * 删除未审核申请
      */

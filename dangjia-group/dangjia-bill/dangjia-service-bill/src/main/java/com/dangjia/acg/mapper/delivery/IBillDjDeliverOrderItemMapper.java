@@ -4,7 +4,6 @@ package com.dangjia.acg.mapper.delivery;
 import com.dangjia.acg.dto.delivery.DjDeliverOrderItemDTO;
 import com.dangjia.acg.dto.delivery.MaterialNumberDTO;
 import com.dangjia.acg.dto.delivery.NodeNumberDTO;
-import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

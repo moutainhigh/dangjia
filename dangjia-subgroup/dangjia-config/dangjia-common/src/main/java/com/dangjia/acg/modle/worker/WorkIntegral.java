@@ -43,8 +43,8 @@ public class WorkIntegral extends BaseEntity {
 	private Integer star;//
 
 	@Column(name = "status")
-	@Desc(value = "得分类型每日积分0，业主积分1，大管家积分2,当家贝币值3")
-	@ApiModelProperty("得分类型每日积分0，业主积分1，大管家积分2,当家贝币值3")
+	@Desc(value = "得分类型 每日积分0，业主积分1，大管家积分2,当家贝币值3")
+	@ApiModelProperty("得分类型 每日积分0，业主积分1，大管家积分2,当家贝币值3")
 	private Integer status;//
 
 	@Column(name = "house_id")

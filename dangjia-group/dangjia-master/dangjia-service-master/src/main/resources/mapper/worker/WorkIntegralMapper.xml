@@ -104,10 +104,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         AND   #{endTime}
                     )
                 <if test="workerType!=null and workerType > 3 ">
-                    m.worker_type > 3
+                    and m.worker_type > 3
                 </if>
                 <if test="workerType!=null and workerType = 3 ">
-                    m.worker_type = 3
+                   and  m.worker_type = 3
                 </if>
                 GROUP BY
                     m.id

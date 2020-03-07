@@ -87,10 +87,11 @@ public interface HouseWorkerAPI {
                                   @RequestParam("houseFlowId") String houseFlowId);
 
 
-    @PostMapping("app/core/houseWorker/getWorkerInFo")
+    @PostMapping("app/core/houseWorker/getWorkerInfo")
     @ApiOperation(value = "新获取工匠详情", notes = "新获取工匠详情")
     ServerResponse getWorkerInFo(@RequestParam("userToken") String userToken,
-                                  @RequestParam("houseFlowId") String houseFlowId);
+                                  @RequestParam("workerId") String workerId,
+                                 @RequestParam("orderId") String orderId);
 
 
     @PostMapping("app/core/houseWorker/getWorkerComplainInFo")

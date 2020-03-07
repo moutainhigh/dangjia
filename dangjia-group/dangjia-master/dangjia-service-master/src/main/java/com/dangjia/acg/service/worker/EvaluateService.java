@@ -44,6 +44,7 @@ import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
@@ -280,7 +281,7 @@ public class EvaluateService {
         Member member = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
         if (member != null) {
             Double evaluation = configRuleUtilService.getAbsenteeismCount(member.getEvaluationScore());
-            updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(evaluation), desc);
+            updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), houseFlow.getId(),new BigDecimal(evaluation), desc);
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
 
             configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
@@ -429,7 +430,7 @@ public class EvaluateService {
         evaluate.setMemberId(house.getMemberId());
         evaluate.setHouseId(houseId);
         evaluate.setButlerId(supervisorId);//存管家id
-        if (star == 0) {
+        if (star==null || star == 0) {
             evaluate.setStar(5);//0星为5星
         } else {
             evaluate.setStar(star);
@@ -442,7 +443,7 @@ public class EvaluateService {
         evaluate.setApplyType(applyType);
         evaluate.setImage(image);
         evaluateMapper.insert(evaluate);
-        updateIntegral(evaluate);//工人积分
+        updateIntegral(evaluate,ConfigRuleService.SG006);//工人积分
     }
 
     /**
@@ -579,8 +580,15 @@ public class EvaluateService {
                     evaluate.setStar(star);//工人
                     evaluateMapper.updateByPrimaryKeySelective(evaluate);
                 }
-
-                updateIntegral(evaluate);//工人积分
+                String typeId="";
+                if(houseFlow.getWorkerType()==3){
+                    typeId=ConfigRuleService.SG004;
+                }else if(worker.getWorkerType()==3){
+                    typeId=ConfigRuleService.SG003;
+                }else{
+                    typeId=ConfigRuleService.SG006;
+                }
+                updateIntegral(evaluate,typeId);//工人积分
                 updateCrowned(worker.getId());//皇冠
 
                 //评价之后修改工人的好评率
@@ -618,7 +626,7 @@ public class EvaluateService {
     /**
      * 业主对工人评价之后计算积分
      */
-    public void updateIntegral(Evaluate evaluate) {
+    public void updateIntegral(Evaluate evaluate,String typeId) {
         Member worker = memberMapper.selectByPrimaryKey(evaluate.getWorkerId());
         String desc = "";
         if (evaluate.getApplyType() == 1) {
@@ -636,58 +644,23 @@ public class EvaluateService {
         if (evaluate.getState() == 3) {
             desc = desc + " 大管家";
         }
-        BigDecimal evaluationXA = new BigDecimal("1.0");
-        BigDecimal score = new BigDecimal(0);
-        if (worker.getWorkerType() == 3) {//管家加分
-            if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) == -1) {
-                score = evaluationXA.multiply(new BigDecimal("0.6"));
-            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == -1) {
-                score = evaluationXA.multiply(new BigDecimal("0.6"));
-            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("80")) >= 0 &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90")) == -1) {
-                score = evaluationXA.multiply(new BigDecimal("0.15"));
-            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0) {
-                score = evaluationXA.multiply(new BigDecimal("0.07"));
-            }
-        } else {
-            if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) == -1) {
-                score = evaluationXA.multiply(new BigDecimal("1.6"));
-            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == -1) {
-
-                score = evaluationXA.multiply(new BigDecimal("0.8"));
-            } else if ((worker.getEvaluationScore().compareTo(new BigDecimal("80")) == 1 ||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == 0) &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90")) == -1) {
-
-                score = evaluationXA.multiply(new BigDecimal("0.4"));
-            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("90")) == 1 ||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90")) == 0) {
-
-                score = evaluationXA.multiply(new BigDecimal("0.2"));
-            }
+        Double integral=0d;
+        if(!CommonUtil.isEmpty(typeId)){
+            integral= configRuleUtilService.getWerkerIntegral(evaluate.getHouseId(), typeId, worker.getEvaluationScore(), evaluate.getStar());
         }
+        BigDecimal score = new BigDecimal(integral);
 
         if (worker.getEvaluationScore() == null) {
             worker.setEvaluationScore(new BigDecimal("60.0"));
         }
         WorkIntegral workIntegral = new WorkIntegral();
-
-        if (evaluate.getStar() == 5) {
-            workIntegral.setIntegral(score);
-        } else if (evaluate.getStar() == 1 || evaluate.getStar() == 2) {
-            workIntegral.setIntegral(score.multiply(new BigDecimal(-2)));
-        } else {
-            workIntegral.setIntegral(new BigDecimal(0));  //不增不减
-        }
+        workIntegral.setIntegral(score);
         workIntegral.setWorkerId(worker.getId());
         workIntegral.setMemberId(evaluate.getMemberId());
         workIntegral.setButlerId(evaluate.getButlerId());
         workIntegral.setStar(evaluate.getStar());
         workIntegral.setStatus(1);
         workIntegral.setHouseId(evaluate.getHouseId());
-
         workIntegral.setBriefed(desc + evaluate.getStar() + "星评价");
         workIntegralMapper.insert(workIntegral);
 
@@ -699,7 +672,7 @@ public class EvaluateService {
     /**
      * 扣除指定用户的积分
      */
-    public void updateMemberIntegral(String workerId, String houseId, BigDecimal score, String desc) {
+    public void updateMemberIntegral(String workerId, String houseId, String anyBusinessId,BigDecimal score, String desc) {
         Member worker = memberMapper.selectByPrimaryKey(workerId);
         WorkIntegral workIntegral = new WorkIntegral();
         BigDecimal evaluationScore = worker.getEvaluationScore().subtract(score);
@@ -712,6 +685,7 @@ public class EvaluateService {
         workIntegral.setStatus(0);
         workIntegral.setHouseId(houseId);
         workIntegral.setBriefed(desc);
+        workIntegral.setAnyBusinessId(anyBusinessId);
         workIntegralMapper.insert(workIntegral);
         memberMapper.updateByPrimaryKeySelective(worker);
     }

@@ -81,8 +81,6 @@ public class StorefrontService {
     @Autowired
     private IShopReceiptMapper iShopReceiptMapper;
     @Autowired
-    private IShopSplitDeliverMapper ishopSplitDeliverMapper;
-    @Autowired
     private IShopMendDeliverMapper ishopMendDeliverMapper;
     @Autowired
     private IStorefrontAccountFlowRecordMapper storefrontAccountFlowRecordMapper ;

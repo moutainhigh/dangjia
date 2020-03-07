@@ -91,7 +91,30 @@
 				#{item}
 			</foreach>
 		</if>
-   </select>
+   	</select>
+
+	<select id="queryShoppingCartDTOS1" resultMap="shoppingCarts">
+		SELECT
+			b.storefront_id AS storefrontId,
+			a.rush_purchase_price AS price,
+			d.type AS productType,
+			b.id AS productId,
+			b.product_name AS productName,
+			c.product_sn AS productSn,
+			c.category_id AS categoryId,
+			b.image,
+			b.sell_price AS sellPrice,
+			d.is_reservation_deliver AS isReservationDeliver,
+			c.value_name_arr AS valueNameArr,
+			c.value_id_arr AS valueIdArr
+		FROM
+			dj_store_activity_product a
+		INNER JOIN dj_basics_storefront_product b ON b.id = a.product_id
+		INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
+		INNER JOIN dj_basics_goods d ON c.goods_id = d.id
+		WHERE a.id = #{storeActivityProductId}
+	</select>
+
   	<select id="queryCartList" resultType="com.dangjia.acg.dto.product.ShoppingCartListDTO">
 		SELECT
 			a.id,

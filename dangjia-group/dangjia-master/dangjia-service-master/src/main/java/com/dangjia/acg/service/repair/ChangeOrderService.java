@@ -256,7 +256,8 @@ public class ChangeOrderService {
         changeOrderMapper.insert(changeOrder);
         //增加节点（退人工流水记录状态)
         if (type == 2) {//业主退人工
-            changeOrder.setWorkerTypeId(houseFlow.getWorkerId());
+            changeOrder.setWorkerId(houseFlow.getWorkerId());
+            changeOrderMapper.updateByPrimaryKey(changeOrder);
             //生成退人工订单
             MendOrder mendOrder=repairMendOrderService.insertRefundOrder(houseId,member.getId(),workerTypeId,changeOrder.getId(),productArr);
             //生成审核任务
@@ -273,8 +274,9 @@ public class ChangeOrderService {
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_012",member.getId());//您的退人工申请已提交
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_016",member.getId());// 工匠审核中
         }else if(type==1){//工匠补人工
+            changeOrderMapper.updateByPrimaryKey(changeOrder);
             //生成补人工订单
-            MendOrder mendOrder=repairMendOrderService.insertSupplementLaborOrder(houseId,member.getId(),member.getWorkerTypeId(),changeOrder.getId());
+            MendOrder mendOrder=repairMendOrderService.insertSupplementLaborOrder(houseId,member.getId(),member.getWorkerTypeId(),changeOrder.getId(),productArr);
             //生成审核任务
             if (!mendOrderService.createMendCheck(mendOrder)) {
                 return ServerResponse.createByErrorMessage("添加审核流程失败");

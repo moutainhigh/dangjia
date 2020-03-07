@@ -35,7 +35,7 @@ public class ActivityRedPackDTO{
 	private String fromObjectName;//workertypeid
 
 	@ApiModelProperty("来源数据类型 0为人工 1为材料 2为单品,3类别，4货品，5商品，6城市，7店铺")
-	private int fromObjectType;//
+	private Integer fromObjectType;//
 
 
 	@ApiModelProperty("有效开始时间")

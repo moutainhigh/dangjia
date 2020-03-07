@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.shell;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -28,9 +30,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -79,6 +83,30 @@ public class HomeShellProductService {
     }
 
     /**
+     * 商品上下架
+     * @param shellProductId 商品上下架
+     * @param shelfStatus   上下架状态 1：上架  0:下架
+     * @return
+     */
+    public ServerResponse updateHomeShellProductStatus( String shellProductId, String shelfStatus){
+        try{
+            if(shellProductId==null){
+                return ServerResponse.createBySuccessMessage("商品ID不能为空");
+            }
+            if(shelfStatus==null){
+                return ServerResponse.createBySuccessMessage("修改状态不能为空");
+            }
+            HomeShellProduct homeShellProduct=homeShellProductMapper.selectByPrimaryKey(shellProductId);
+            homeShellProduct.setShelfStatus(shelfStatus);
+            homeShellProduct.setModifyDate(new Date());
+            homeShellProductMapper.updateByPrimaryKeySelective(homeShellProduct);
+            return ServerResponse.createBySuccessMessage("修改成功");
+        }catch(Exception e){
+            logger.error("修改失败",e);
+            return ServerResponse.createBySuccessMessage("修改失败");
+        }
+    }
+    /**
      * 商品详情
      * @param shellProductId 当家贝商品ID
      * @return
@@ -97,7 +125,7 @@ public class HomeShellProductService {
             BeanUtils.beanToBean(homeShellProduct,homeShellProductDTO);
             homeShellProductDTO.setShellProductId(homeShellProduct.getId());
             homeShellProductDTO.setImageUrl(StringTool.getImage(homeShellProductDTO.getImage(),address));
-            homeShellProductDTO.setDetailImageUrl(StringTool.getImage(homeShellProductDTO.getDetailImageUrl(),address));
+            homeShellProductDTO.setDetailImageUrl(StringTool.getImage(homeShellProductDTO.getDetailImage(),address));
             List<HomeShellProductSpecDTO> productSpecDTO=productSpecMapper.selectProductSpecByProductId(shellProductId);
             homeShellProductDTO.setProductSpecList(productSpecDTO);
             return ServerResponse.createBySuccess("查询成功",homeShellProductDTO);
@@ -128,9 +156,10 @@ public class HomeShellProductService {
             homeShellProductMapper.insertSelective(homeShellProduct);
             shellProductId=homeShellProduct.getId();
         }
+        JSONArray jsonArr = JSONArray.parseArray(homeShellProductDTO.getProductSpecListStr());
         //修改商品规格信息
-        List<HomeShellProductSpecDTO> productSpecList=homeShellProductDTO.getProductSpecList();
-        if(productSpecList!=null){
+        if(jsonArr!=null){
+            List<HomeShellProductSpecDTO> productSpecList= JSONObject.parseArray(jsonArr.toJSONString(), HomeShellProductSpecDTO.class);
             for(HomeShellProductSpecDTO productSpecDTO:productSpecList){
                 if(homeShellProductDTO.getPayType()==1){//如果支付类型选择了积分支付，则金钱自动改为0
                     productSpecDTO.setMoney(0d);

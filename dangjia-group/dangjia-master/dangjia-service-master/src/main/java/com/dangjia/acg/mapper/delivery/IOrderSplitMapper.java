@@ -24,7 +24,7 @@ public interface IOrderSplitMapper extends Mapper<OrderSplit> {
 
     List<OrderSplitDTO> searchOrderSplistByAddressId(@Param("addressId") String addressId,@Param("houseId") String houseId,@Param("storefrontId") String storefrontId);
 
-    List<OrderSplit> selectOrderSplitList(@Param("houseId") String houseId);
+    List<OrderSplit> selectOrderSplitList(@Param("houseId") String houseId, @Param("workerTypeId") String workerTypeId);
 
     void updateOrderSplitStatus(@Param("orderSplitId") String orderSplitId);
 }

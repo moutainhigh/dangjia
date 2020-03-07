@@ -23,6 +23,7 @@ import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.core.AcceptanceDynamicDTO;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.dto.house.*;
+import com.dangjia.acg.dto.other.WorkDepositDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO;
 import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
@@ -72,6 +73,7 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.core.TaskStackService;
@@ -230,8 +232,6 @@ public class HouseService {
     private IConfigMapper iConfigMapper;
     @Autowired
     private IMasterDeliverOrderAddedProductMapper iMasterDeliverOrderAddedProductMapper;
-    @Autowired
-    private IHouseFlowApplyMapper iHouseFlowApplyMapper;
 
     public House selectHouseById(String id) {
         return iHouseMapper.selectByPrimaryKey(id);
@@ -1909,7 +1909,7 @@ public class HouseService {
         editHouseFlowWorker(house, desginInfo, actuaialInfo);
         //8.提交订单信息,生成待支付订单,生成待抢单信息
         String productJsons = getProductJsons(actuarialDesignAttr, memberAddress.getInputArea(),house);
-        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId,activityRedPackId);
+        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId,activityRedPackId,null);
     }
 
     /**
@@ -2093,7 +2093,7 @@ public class HouseService {
             String productStr = getEligibleProduct(houseOrderDetailDTOList, 1, square, inputArea,house);
             if (productStr != null && StringUtils.isNotBlank(productStr)) {
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productStr, null, memberAddress.getId(), 4,null,null);//补差价订单
+                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productStr, null, memberAddress.getId(), 4,null,null,null);//补差价订单
                 if (serverResponse.getResultObj() != null) {
                     String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                     //增加任务(补差价订单）
@@ -2622,46 +2622,6 @@ public class HouseService {
 //                temp_para.put("house_name", house.getHouseName());
 //                JsmsUtil.sendSMS("13574147081", "165204", temp_para);
 
-                //在这里算出大管家每次巡查拿的钱 和 每次验收拿的钱 记录到大管家的 houseflow里 houseflow,新增两个字段.
-                List<HouseFlow> houseFlowList = houseFlowMapper.getForCheckMoney(houseId);
-                int check = 0;//累计大管家总巡查次数
-                int time = 0;//累计管家总阶段验收和完工验收次数
-                for (HouseFlow hf : houseFlowList) {
-                    //查出该工种工钱
-                    Double workerTotal = iMasterBudgetMapper.getMasterBudgetWorkerPrice(houseId, hf.getWorkerTypeId());
-                    int inspectNumber = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId()).getInspectNumber();//该工种配置默认巡查次数
-                    int thisCheck = (int) (workerTotal / workDeposit.getPatrolPrice().intValue());//该工种钱算出来的巡查次数
-                    if (thisCheck > inspectNumber) {
-                        thisCheck = inspectNumber;
-                    }
-                    hf.setPatrol(thisCheck);//保存巡查次数
-                    houseFlowMapper.updateByPrimaryKeySelective(hf);
-                    //累计总巡查
-                    check += thisCheck;
-                    //累计总验收
-                    if (hf.getWorkerType() == 4) {
-                        time++;
-                    } else {
-                        time += 2;
-                    }
-                }
-                //拿到这个大管家工钱
-                Double moneySup = iMasterBudgetMapper.getMasterBudgetWorkerPrice(houseId, "3");
-                //算管家每次巡查钱
-                double patrolMoney = 0;
-                if (check > 0) {
-                    patrolMoney = moneySup * 0.2 / check;
-                }
-                //算管家每次验收钱
-                double checkMoney = 0;
-                if (time > 0) {
-                    checkMoney = moneySup * 0.3 / time;
-                }
-                //保存到大管家的houseFlow
-                houseFlow.setPatrol(check);
-                houseFlow.setPatrolMoney(new BigDecimal(patrolMoney));
-                houseFlow.setCheckMoney(new BigDecimal(checkMoney));
-                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             }
             if (budgetOk == 2) {
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "2");
@@ -3836,7 +3796,6 @@ public class HouseService {
         houseFlowApply.setEndDate(calendar.getTime());
         houseFlowApply.setModifyDate(new Date());
         houseFlowApply.setMemberCheck(0);
-        //验收次数
         houseFlowApplyMapper.insert(houseFlowApply);
         insertConstructionRecord(houseFlowApply);
         //上传照片

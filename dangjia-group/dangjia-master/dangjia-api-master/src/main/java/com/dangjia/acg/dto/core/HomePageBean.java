@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.core;
 
+import com.dangjia.acg.dto.shell.HomeShellProductDTO;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -26,6 +27,8 @@ public class HomePageBean {
 
 
     private List list;//徽章
+
+    private HomeShellProductDTO homeShellProduct;//当家贝商品
 //
 //    @Data
 //    public static class ListBean {

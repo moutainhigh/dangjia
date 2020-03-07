@@ -16,8 +16,6 @@ import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
 import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.UserInfoResultDTO;
-import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.design.CollectDataDTO;
@@ -37,6 +35,7 @@ import com.dangjia.acg.mapper.shoppingCart.IBillShoppingCartMapper;
 import com.dangjia.acg.mapper.storeFront.IBillStorefrontMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
+import com.dangjia.acg.modle.activity.DjStoreActivity;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -48,7 +47,6 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
-import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -143,6 +141,8 @@ public class DjDeliverOrderService {
 
     @Autowired
     private IBillBusinessOrderMapper billBusinessOrderMapper;
+    @Autowired
+    private IBillDjStoreActivityMapper iBillDjStoreActivityMapper;
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -1867,7 +1867,7 @@ public class DjDeliverOrderService {
      */
     public ServerResponse queryAppHairOrderInFo(String id) {
         try {
-
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             if (CommonUtil.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("id不能为空");
             }
@@ -1894,6 +1894,22 @@ public class DjDeliverOrderService {
                     orderCollectInFoDTO.setHouseId(house.getHouseId());
                     orderCollectInFoDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + " 单元" + house.getNumber() + "号");
                 }
+            }
+            Order order = iBillDjDeliverOrderMapper.selectByPrimaryKey(orderSplit.getOrderId());
+            if("6".equals(order.getOrderSource())){
+                Example example=new Example(Order.class);
+                example.createCriteria().andEqualTo(Order.DATA_STATUS, 0)
+                        .andEqualTo(Order.ORDER_STATUS, 2)
+                        .orEqualTo(Order.PARENT_ORDER_ID,order.getParentOrderId())
+                        .orEqualTo(Order.ID,order.getId());
+                example.orderBy(Order.ORDER_GENERATION_TIME).asc();
+                List<Order> orders = iBillDjDeliverOrderMapper.selectByExample(example);
+                List<String> list=new ArrayList<>();
+                orders.forEach(order1 -> {
+                    Member member = iBillMemberMapper.selectByPrimaryKey(order1.getMemberId());
+                    list.add(imageAddress+member.getHead());
+                });
+                orderCollectInFoDTO.setHeadList(list);
             }
             orderCollectInFoDTO.setCreateDate(orderSplit.getCreateDate());
             orderCollectInFoDTO.setNumber(orderSplit.getNumber());
@@ -2119,6 +2135,19 @@ public class DjDeliverOrderService {
             } else {
                 orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(member.getId(),houseId);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
+                    if("6".equals(orderStorefrontDTO.getOrderSource())){
+                        Example example=new Example(Order.class);
+                        Example.Criteria criteria = example.createCriteria().andEqualTo(Order.DATA_STATUS, 0)
+                                .andEqualTo(Order.ORDER_STATUS, 9);
+                        if(StringUtils.isNotBlank(orderStorefrontDTO.getParentOrderId())){
+                            criteria.andEqualTo(Order.PARENT_ORDER_ID,orderStorefrontDTO.getParentOrderId());
+                        }else{
+                            criteria.andEqualTo(Order.PARENT_ORDER_ID,orderStorefrontDTO.getOrderId());
+                        }
+                        DjStoreActivity djStoreActivity =
+                                iBillDjStoreActivityMapper.selectByPrimaryKey(orderStorefrontDTO.getStoreActivityId());
+                        orderStorefrontDTO.setShortPeople(djStoreActivity.getSpellGroup()-iBillDjDeliverOrderMapper.selectCountByExample(example));
+                    }
                     List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
                     orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS, imageAddress));

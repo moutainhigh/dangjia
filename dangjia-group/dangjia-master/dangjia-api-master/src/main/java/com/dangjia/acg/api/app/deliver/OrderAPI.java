@@ -2,6 +2,7 @@ package com.dangjia.acg.api.app.deliver;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.deliver.Order;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -138,4 +139,14 @@ public interface OrderAPI {
                                    @RequestParam("images") String images,
                                    @RequestParam("orderStatus") String orderStatus);
 
+    @PostMapping("app/order/setSpellGroup")
+    @ApiOperation(value = "发起/参与拼团", notes = "发起/参与拼团")
+    ServerResponse setSpellGroup(@RequestParam("userToken") String userToken,
+                                 @RequestParam("addressId") String addressId,
+                                 @RequestParam("productId") String productId,
+                                 @RequestParam("activityRedPackId") String activityRedPackId,
+                                 @RequestParam("storeActivityProductId") String storeActivityProductId,
+                                 @RequestParam("shopCount") Double shopCount,
+                                 @RequestParam("orderId") String orderId,
+                                 @RequestParam("orderSource") Integer orderSource);
 }

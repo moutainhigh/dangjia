@@ -50,6 +50,7 @@ import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.engineer.DjMaintenanceRecordService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.service.worker.EvaluateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -111,6 +112,8 @@ public class HouseFlowService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private EvaluateService evaluateService;
     @Autowired
     private IBusinessOrderMapper businessOrderMapper;
     @Autowired
@@ -931,6 +934,13 @@ public class HouseFlowService {
             if (member == null) {
                 return ServerResponse.createbyUserTokenError();
             }
+            String[] amount;
+            if(member.getWorkerType()==3){
+                amount= configRuleUtilService.getAbandonedCount(1);
+            }else{
+                amount= configRuleUtilService.getAbandonedCount(0);
+            }
+
             if(type==1){
                 Order order =  orderMapper.selectByPrimaryKey(houseFlowId);
                 Example example = new Example(HouseWorker.class);
@@ -957,6 +967,7 @@ public class HouseFlowService {
                 order.setWorkerId(null);
                 order.setWorkerTypeId(null);
                 orderMapper.updateByPrimaryKey(order);
+                evaluateService.updateMemberIntegral(member.getId(),order.getHouseId(),order.getId(),new BigDecimal(amount[1]),"放弃抢(派)体验单扣分");
             }else if(type==2){
                 DjMaintenanceRecord record=djMaintenanceRecordMapper.selectByPrimaryKey(houseFlowId);
                 Example example = new Example(HouseWorker.class);
@@ -991,6 +1002,8 @@ public class HouseFlowService {
                     record.setWorkerCreateDate(null);
                     djMaintenanceRecordMapper.updateByPrimaryKey(record);
                 }
+
+                evaluateService.updateMemberIntegral(member.getId(),record.getHouseId(),record.getId(),new BigDecimal(amount[1]),"放弃抢(派)维保单扣分");
             }else{
 
                 HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
@@ -1085,6 +1098,7 @@ public class HouseFlowService {
                                 String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
                     }
 
+                    evaluateService.updateMemberIntegral(member.getId(),hf.getHouseId(),hf.getId(),new BigDecimal(amount[1]),"放弃抢(派)装修单扣分");
                 }
             }
             return ServerResponse.createBySuccessMessage("放弃成功！");

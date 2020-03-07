@@ -64,7 +64,8 @@ public class DjBasicsLabelService {
             }
             example=new Example(DjBasicsLabelValue.class);
             example.createCriteria().andIn(DjBasicsLabelValue.NAME,strings)
-                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
+                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0)
+                    .andEqualTo(DjBasicsLabelValue.CITY_ID,cityId);
             List<DjBasicsLabelValue> djBasicsLabelValues = djBasicsLabelValueMapper.selectByExample(example);
             if(djBasicsLabelValues.size()>0) {
                 return ServerResponse.createByErrorMessage("标签值已存在");
@@ -130,7 +131,8 @@ public class DjBasicsLabelService {
             djBasicsLabelValueMapper.deleteByExample(example);
             example=new Example(DjBasicsLabelValue.class);
             example.createCriteria().andIn(DjBasicsLabelValue.NAME,strings)
-                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
+                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0)
+                    .andEqualTo(DjBasicsLabelValue.CITY_ID,cityId);
             List<DjBasicsLabelValue> djBasicsLabelValues = djBasicsLabelValueMapper.selectByExample(example);
             if(djBasicsLabelValues.size()>0) {
                 return ServerResponse.createByErrorMessage("标签值已存在");

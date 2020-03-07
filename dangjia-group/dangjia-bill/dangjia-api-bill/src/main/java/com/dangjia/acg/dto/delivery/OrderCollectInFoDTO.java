@@ -61,4 +61,5 @@ public class OrderCollectInFoDTO {
 
     private Integer shoppingCartsCount;//购物车数量
 
+    private List<String> headList;//拼团购头像
 }

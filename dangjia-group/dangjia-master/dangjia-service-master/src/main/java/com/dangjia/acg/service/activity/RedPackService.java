@@ -412,9 +412,18 @@ public class RedPackService {
             List<ActivityRedPackRecordDTO> list=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,1,null);//查有效的
             map.put("list",list);
             //查询当前用户优惠券数量
-            map.put("totalCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),null));//全部券
-            map.put("totalCityCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),1));//城市平台券
-            map.put("totalStorefrontCount",activityRedPackRecordMapper.queryActivityRedCount(member.getId(),2));//店铺券
+            Integer totalCount=activityRedPackRecordMapper.queryActivityRedCount(member.getId(),null);
+            Integer totalCityCount=activityRedPackRecordMapper.queryActivityRedCount(member.getId(),1);
+            Integer totalStorefrontCount=activityRedPackRecordMapper.queryActivityRedCount(member.getId(),2);
+            map.put("totalCount",totalCount);//全部券
+            map.put("totalCityCount",totalCityCount);//城市平台券
+            map.put("totalStorefrontCount",totalStorefrontCount);//店铺券
+            map.put("isExpireRed",0);//是否有失效的优惠券（1是，0否）
+            PageHelper.startPage(1, 1);
+            List<ActivityRedPackRecordDTO> expireList=activityRedPackRecordMapper.queryMyAticvityList(member.getId(),sourceType,2,null);
+            if(expireList!=null&&expireList.size()>0){
+                map.put("isExpireRed",1);//是否有失效的优惠券（1是，0否）
+            }
             return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
             logger.error("查询失败",e);
@@ -443,6 +452,27 @@ public class RedPackService {
         }catch (Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    /**
+     * 优惠券状态修改
+     * @param redPackId 优惠券ID
+     * @param stateStatus 0继续发放,0停止发放
+     * @return
+     */
+    public ServerResponse updateRedPackInfo(String redPackId,Integer stateStatus){
+        try{
+            if(redPackId==null){
+                return ServerResponse.createByErrorMessage("查询失败");
+            }
+            ActivityRedPack activityRedPack=activityRedPackMapper.selectByPrimaryKey(redPackId);
+            activityRedPack.setDeleteState(stateStatus);
+            activityRedPack.setModifyDate(new Date());
+            activityRedPackMapper.updateByPrimaryKeySelective(activityRedPack);
+            return ServerResponse.createBySuccessMessage("更新成功");
+        }catch (Exception e){
+            logger.error("修改失败",e);
+            return ServerResponse.createByErrorMessage("修改失败");
         }
     }
 
@@ -566,19 +596,21 @@ public class RedPackService {
      * @param sourceType 发行级别：1城市卷，2店铺卷
      * @param userId 用户ID
      * @param cityId 城市ID
-     * @param goodsId 货品ID
+     * @param categoryId 类别ID
      * @return
      */
-    public ServerResponse queryPrductByType(Integer sourceType,String userId,String cityId,String goodsId,String searchKey){
+    public ServerResponse queryPrductByType(PageDTO pageDTO,Integer sourceType,String userId,String cityId,String categoryId,String searchKey){
         try{
             String storefrontId=null;
             List<Map<String,Object>> productList=null;
             if(sourceType==2){
                 Storefront storefront=masterStorefrontService.getStorefrontByUserId(userId,cityId);
                 storefrontId=storefront.getId();
-                productList=masterProductTemplateMapper.queryPrductByType(goodsId,storefrontId,searchKey);
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                productList=masterProductTemplateMapper.queryPrductByType(categoryId,storefrontId,searchKey);
             }else{
-                productList=masterProductTemplateMapper.queryPrductTemplateByType(goodsId,searchKey,cityId);
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                productList=masterProductTemplateMapper.queryPrductTemplateByType(categoryId,searchKey,cityId);
             }
             if(productList!=null){
                 String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
@@ -587,7 +619,8 @@ public class RedPackService {
                      map.put("imageUrl", StringTool.getImage(image,address));
                  }
             }
-            return ServerResponse.createBySuccess("查询成功",productList);
+            PageInfo pageResult = new PageInfo(productList);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         }catch (Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createBySuccessMessage("查询失败");

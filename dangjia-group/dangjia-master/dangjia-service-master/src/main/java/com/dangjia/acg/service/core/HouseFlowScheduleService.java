@@ -209,6 +209,8 @@ public class HouseFlowScheduleService {
             numall = 1 + DateUtil.daysofTwo(startDate, endDate);//逾期工期天数
         }
         mapObj.put("totalNum", numall);
+        mapObj.put("completedDate",house.getCompletedDate()==null?new Date():house.getCompletedDate());
+        mapObj.put("startDate",startDate);
         mapObj.put("list", mapList);
         return ServerResponse.createBySuccess("查询成功", mapObj);
     }

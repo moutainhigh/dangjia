@@ -44,7 +44,7 @@ public interface MendWorkerAPI {
     /**
      * 查询符合条件的人工商品
      * @param request
-     * @param workerId
+     * @param userToken
      * @param searchKey
      * @param pageDTO
      * @param cityId
@@ -53,7 +53,7 @@ public interface MendWorkerAPI {
     @PostMapping("/repair/mendWorker/getWorkerProductList")
     @ApiOperation(value = "查询当前工匠认证的所有人工商品", notes = "查询当前工匠认证的所有人工商品")
     ServerResponse getWorkerProductList(@RequestParam("request") HttpServletRequest request,
-                                      @RequestParam("workerId") String workerId,
+                                      @RequestParam("userToken") String userToken,
                                       @RequestParam("houseId") String houseId,
                                       @RequestParam("searchKey") String searchKey,
                                       @RequestParam("pageDTO") PageDTO pageDTO,

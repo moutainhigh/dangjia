@@ -1,21 +1,21 @@
 package com.dangjia.acg.service.configRule;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.dto.other.WorkDepositDTO;
 import com.dangjia.acg.mapper.configRule.*;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.operation.IOperationFlowMapper;
-import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.model.config.*;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.other.WorkDeposit;
 import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +37,6 @@ public class ConfigRuleUtilService {
     @Autowired
     private IConfigRuleItemLadderMapper configRuleItemLadderMapper;
     @Autowired
-    private IConfigRuleItemOneMapper configRuleItemOneMapper;
-    @Autowired
     private IConfigRuleItemThreeMapper configRuleItemThreeMapper;
     @Autowired
     private IConfigRuleItemTwoMapper configRuleItemTwoMapper;
@@ -47,18 +45,9 @@ public class ConfigRuleUtilService {
     @Autowired
     private IConfigRuleRankMapper configRuleRankMapper;
     @Autowired
-    private IConfigRuleTypeMapper configRuleTypeMapper;
-    @Autowired
-    private IOperationFlowMapper operationFlowMapper;
-
-    @Autowired
     private RedisClient redisClient;
     @Autowired
     private IMemberMapper memberMapper;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private ConfigRuleService configRuleService;
 
@@ -264,17 +253,17 @@ public class ConfigRuleUtilService {
      * @param typeId:
      *              MK020	主动验收未完成每次扣款
      *              MK021	周计划未完成每次扣款
+     *              MK022	每周应巡查次数
      *              MK023	减少维保：工序商品购买比阈值
      *              MK024	减少维保：仅退款比例阈值
      *
      * @return
      */
-    public Double getAllTowValue(String typeId) {
-        Double amount=1d;
+    public JSONObject getAllTowValue(String typeId) {
         Example example=new Example(DjConfigRuleModule.class);
         example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,typeId);
         DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
-
+        JSONObject amount= new JSONObject();
         example=new Example(DjConfigRuleItemTwo.class);
         example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
         example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
@@ -282,34 +271,12 @@ public class ConfigRuleUtilService {
         List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
         if (configRuleItemTwos.size() > 0) {
             for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
-                amount=Double.parseDouble(configRuleItemTwo.getFieldValue());
+                amount.put(configRuleItemTwo.getFieldCode(),configRuleItemTwo.getFieldValue());
             }
         }
         return amount;
     }
 
-    /**
-     * 每周应巡查次数
-     *
-     * @return
-     */
-    public String[] getTimesWeeklyPatrol() {
-        String[] amount= new String[]{"0","0"};
-        Example example=new Example(DjConfigRuleModule.class);
-        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK022);
-        DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
-        example=new Example(DjConfigRuleItemTwo.class);
-        example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
-        example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
-        PageHelper.startPage(1, 2);
-        List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
-        if (configRuleItemTwos.size() > 0) {
-            for (int i = 0; i < configRuleItemTwos.size(); i++) {
-                amount[i]=configRuleItemTwos.get(i).getFieldValue();
-            }
-        }
-        return amount;
-    }
 
     /**
      *  大管家自动派单
@@ -735,6 +702,86 @@ public class ConfigRuleUtilService {
         return amount;
     }
 
+    /**
+     * 获取工匠拿钱
+     * @param houseId 房子ID
+     * @param workerTypeId 类型：
+     * @param evaluationScore 工匠当前积分
+     * @return
+     */
+    public WorkDepositDTO getWerkerTakeMoney(String houseId, String workerTypeId, BigDecimal evaluationScore) {
+        String batchCode = redisClient.getCache(Constants.HOUSE_BATCH + houseId+"-"+workerTypeId, String.class);
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        WorkDepositDTO amount=new WorkDepositDTO();
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            String[] typeIds= new String[]{ConfigRuleService.MK009};
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andIn(DjConfigRuleModule.TYPE_ID,Arrays.asList(typeIds));
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),workerTypeId,batchCode);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(CommonUtil.isEmpty(batchCode)){
+                            batchCode=(String)returnDatum.get(DjConfigRuleItemOne.BATCH_CODE);
+                            redisClient.put(Constants.HOUSE_BATCH + houseId+"-"+workerTypeId,batchCode);
+                        }
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            amount.setLimitPay(new BigDecimal((Double) returnDatum.get("unlimited")));
+                            amount.setStagePay(new BigDecimal((Double) returnDatum.get("stageRatio")));
+                            amount.setWholePay(new BigDecimal((Double) returnDatum.get("completedRatio")));
+                            amount.setEverydayPay(new BigDecimal((Double) returnDatum.get("daily")));
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
+    /**
+     * 获取管家拿钱
+     * @param houseId 房子ID
+     * @param workerTypeId 类型：
+     * @param evaluationScore 管家当前积分
+     * @return
+     */
+    public WorkDepositDTO getSupervisorTakeMoney(String houseId, String workerTypeId, BigDecimal evaluationScore) {
+        String batchCode = redisClient.getCache(Constants.HOUSE_BATCH + houseId+"-"+workerTypeId, String.class);
+        Example example=new Example(DjConfigRuleRank.class);
+        example.createCriteria().andCondition(" score_start >= "+evaluationScore.doubleValue()+"  and  score_end<= "+evaluationScore);
+        List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+        WorkDepositDTO amount=new WorkDepositDTO();
+        if(configRuleRanks.size()>0){
+            DjConfigRuleRank configRuleRank=configRuleRanks.get(0);
+            String[] typeIds= new String[]{ConfigRuleService.MK010};
+            example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andIn(DjConfigRuleModule.TYPE_ID,Arrays.asList(typeIds));
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),null,batchCode);
+            if(serverResponse.isSuccess()){
+                List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+                if(returnData.size()>0){
+                    for (Map returnDatum : returnData) {
+                        if(CommonUtil.isEmpty(batchCode)){
+                            batchCode=(String)returnDatum.get(DjConfigRuleItemOne.BATCH_CODE);
+                            redisClient.put(Constants.HOUSE_BATCH + houseId+"-"+workerTypeId,batchCode);
+                        }
+                        if(configRuleRank.getId().equals(returnDatum.get(DjConfigRuleItemOne.RANK_ID))){
+                            amount.setWeekPlan(new BigDecimal((Double) returnDatum.get("weekPlan")));
+                            amount.setPatrol(new BigDecimal((Double) returnDatum.get("patrol")));
+                            amount.setTested(new BigDecimal((Double) returnDatum.get("tested")));
+                            amount.setCompleted(new BigDecimal((Double) returnDatum.get("completed")));
+                        }
+                    }
+                }
+            }
+        }
+        return amount;
+    }
 
     /**
      * 月提现次数上限

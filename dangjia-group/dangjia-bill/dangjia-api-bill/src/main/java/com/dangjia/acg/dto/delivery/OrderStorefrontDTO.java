@@ -40,4 +40,8 @@ public class OrderStorefrontDTO {
     private String workerName;//工匠名称
     private String workerId;//工人id
     private String workerTypeId;
+    private String storeActivityId;//店铺活动id
+    private String orderSource;//订单来源(1,工序订单，2购物车，3补货单，4补差价订单，5维修订单 6拼团订单 7限时购订单）
+    private String parentOrderId;//父订单ID
+    private Integer shortPeople;//拼团还差人数
 }

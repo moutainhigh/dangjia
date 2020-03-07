@@ -5,6 +5,9 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/7 0007
@@ -16,4 +19,9 @@ public interface IWorkerTypeSafeOrderMapper extends Mapper<WorkerTypeSafeOrder> 
     WorkerTypeSafeOrder getByWorkerTypeId(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId);
 
     WorkerTypeSafeOrder getByNotPay(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId);
+
+    List<Map> getMendProduct(@Param("workerTypeId")String workerTypeId, @Param("houseId")String houseId);
+
+    Map getPayThreshold(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId);
+
 }

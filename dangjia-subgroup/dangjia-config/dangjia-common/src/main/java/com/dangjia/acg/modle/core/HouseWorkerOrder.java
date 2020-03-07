@@ -115,6 +115,11 @@ public class HouseWorkerOrder extends BaseEntity {
 	@ApiModelProperty("大管家每次巡查得到的钱 累计")
 	private BigDecimal checkMoney;
 
+	@Column(name = "week_plan_money")
+	@Desc(value = "大管家每次周计划得到的钱 累计")
+	@ApiModelProperty("大管家每次巡查得到的钱 累计")
+	private BigDecimal  weekPlanMoney;
+
 	public HouseWorkerOrder(){
 
 	}
