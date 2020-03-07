@@ -17,4 +17,6 @@ public class BasicsStorefrontProductMdPriceDTO {
     private String suppliedNum; // 供货数
     private String adjustedPrice;//调后价格
     private String modityPriceTime; //调价时间
+    private String isUpstairsCost;//是否按一层收取上楼费(1是，0否）
+    private Double moveCost;//搬动费
 }

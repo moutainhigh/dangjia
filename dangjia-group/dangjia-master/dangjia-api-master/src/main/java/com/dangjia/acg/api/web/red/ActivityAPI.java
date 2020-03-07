@@ -156,7 +156,7 @@ public interface ActivityAPI {
     /**
      * 优惠券状态修改
      * @param redPackId 优惠券ID
-     * @param stateStatus 0继续发放,0停止发放
+     * @param stateStatus 0继续发放,1停止发放
      * @return
      */
     @PostMapping("web/activity/red/updateRedPackInfo")
@@ -168,7 +168,7 @@ public interface ActivityAPI {
      * @param status 优惠卷状态：1发行中，2暂停发放，3已过期，4发送完毕
      * @param sourceType 发行级别：1城市卷，2店铺卷
      * @param userId 用户Id
-     * @param cityId 城市Id
+     * @param cityId 城市IdqueryProductAdjustmentPriceListByKeyWord
      * @return
      */
     @PostMapping("web/activity/red/queryNewActivityRedList")

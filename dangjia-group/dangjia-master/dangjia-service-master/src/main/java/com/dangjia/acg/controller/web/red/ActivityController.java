@@ -202,7 +202,7 @@ public class ActivityController  implements ActivityAPI {
     /**
      * 优惠券状态修改
      * @param redPackId 优惠券ID
-     * @param stateStatus 0继续发放,0停止发放
+     * @param stateStatus 0继续发放,1停止发放
      * @return
      */
     @Override
