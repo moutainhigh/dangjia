@@ -1158,6 +1158,7 @@ public class RefundAfterSalesService {
                         }
                         actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
                         actualTotalAmount=MathUtil.sub(actualTotalAmount,discountPrice);
+                        refundOrderItemDTO.setReturnCount(returnCount);
                         orderItemList.add(refundOrderItemDTO);
                     }
                     orderInfo.setTotalRransportationCost(totalRransportationCost);//可退运费
