@@ -2,17 +2,13 @@ package com.dangjia.acg.service.config;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.ElasticSearchAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.ElasticSearchDTO;
 import com.dangjia.acg.mapper.config.IServiceTypeMapper;
-import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import com.dangjia.acg.modle.config.ServiceType;
-import com.dangjia.acg.service.actuary.ActuarialTemplateService;
 import com.dangjia.acg.service.actuary.DjBasicsActuarialConfigurationServices;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
