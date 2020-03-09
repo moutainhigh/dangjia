@@ -105,7 +105,7 @@
         SELECT
         b.id,
         b.NAME,
-        b.image
+        b.image,
         b.create_date AS createDate,
         b.modify_date AS modifyDate
         FROM
