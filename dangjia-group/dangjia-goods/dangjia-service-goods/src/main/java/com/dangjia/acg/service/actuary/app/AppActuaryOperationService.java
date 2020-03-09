@@ -566,8 +566,7 @@ public class AppActuaryOperationService {
             goodsDTO.setShop(shop);
             goodsDTO.setStorefrontId(shop.getId());
             goodsDTO.setStorefrontName(shop.getStorefrontName());
-            goodsDTO.setStorefrontIcon(shop.getSystemLogo());
-
+            goodsDTO.setStorefrontIcon(shop.getStorefrontLogo());
             goodsDTO.setDetailImage(StringTool.getImage(product.getDetailImage(), imageAddress));//图多张
 
             if (!CommonUtil.isEmpty(goodsDTO.getWorkerTypeId())) {
