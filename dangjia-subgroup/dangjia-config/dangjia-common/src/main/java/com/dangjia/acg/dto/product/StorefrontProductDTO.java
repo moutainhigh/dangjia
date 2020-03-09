@@ -3,6 +3,8 @@ package com.dangjia.acg.dto.product;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
+import java.util.Date;
+
 
 @Data
 @FieldNameConstants(prefix = "")
@@ -12,6 +14,8 @@ public class StorefrontProductDTO {
     private String storefrontId; //店铺ID;
 
     private String storefrontProductId; //店铺商品ID;
+
+    private String productId;
 
     private String productTemplateId;//商品模板表ID
 
@@ -42,4 +46,14 @@ public class StorefrontProductDTO {
     private String storefrontName;//店铺名称
 
     private Double rushPurchasePrice;//抢购价
+
+    private String storeActivityId;
+
+    private Integer activityType;
+
+    private Integer spellGroup;
+
+    private Date endSession;
+
+    private Date sessionStartTime;
 }

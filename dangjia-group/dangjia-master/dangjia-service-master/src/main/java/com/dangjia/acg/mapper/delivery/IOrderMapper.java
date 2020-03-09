@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.delivery;
 
 import com.dangjia.acg.dto.deliver.BudgetOrderDTO;
 import com.dangjia.acg.dto.deliver.BudgetOrderItemDTO;
+import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
@@ -68,6 +69,28 @@ public interface IOrderMapper extends Mapper<Order> {
     Integer selectMendOrderByMemberId(@Param("memberId") String memberId);
     //判断是否有正在处理中的退款单
     Integer selectMendDeliverByMemberId(@Param("memberId") String memberId);
+
+    /**
+     * 待付款 数量
+     */
+    Integer queryDeliverOrderObligation(@Param("memberId") String memberId,
+                                        @Param("houseId") String houseId);
+
+    /**
+     * 待发货数量
+     * @param cityId
+     * @param houseId
+     * @param memberId
+     * @return
+     */
+    Integer queryAppHairOrderList(@Param("cityId") String cityId,
+                                  @Param("houseId") String houseId,
+                                  @Param("memberId") String memberId);
+
+    Integer queryAppOrderList(@Param("cityId") String cityId,
+                              @Param("memberId") String memberId,
+                              @Param("houseId") String houseId);
+
 
 }
 
