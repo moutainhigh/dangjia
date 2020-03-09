@@ -125,9 +125,9 @@
         b.modify_date AS modifyDate
         FROM
         dj_basics_brand b
-        INNER JOIN dj_basics_product_template p ON (p.`name` LIKE CONCAT('%', b. NAME, '%'))
+        INNER JOIN dj_basics_category_brand p ON  FIND_IN_SET(b.id,p.brand_id)
         INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
-        WHERE p.maket = 1 AND p.type = 1
+        WHERE b.data_status= 0
         <if test="wordKey!=null and wordKey!=''">
             AND p.`name` LIKE CONCAT('%',#{wordKey},'%')
         </if>

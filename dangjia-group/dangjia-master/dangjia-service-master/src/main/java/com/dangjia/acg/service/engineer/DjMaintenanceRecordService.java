@@ -1445,7 +1445,7 @@ public class DjMaintenanceRecordService {
 
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Map<String,Object>> list=djMaintenanceRecordMapper.queryRecordContentList(houseId);
-            if(list==null){
+            if(list==null||list.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);

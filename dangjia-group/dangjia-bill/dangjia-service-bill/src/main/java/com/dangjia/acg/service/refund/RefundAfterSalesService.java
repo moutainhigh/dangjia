@@ -1214,8 +1214,16 @@ public class RefundAfterSalesService {
                 JSONObject obj = (JSONObject) orderArrayList.get(i);
                 String orderSplitId = (String) obj.get("orderSplitId");
                 String storefrontId = (String) obj.get("storefrontId");
-                String imageArr = (String)obj.get("imageArr");
+                String imageArr = (String)obj.get("imageArr");//源生传入的相关凭证图片
                 String houseIdNew = (String) obj.get("houseId");
+                JSONArray imageList = obj.getJSONArray("imageList");//小程序传入图片特殊处理
+                if(imageList!=null&&imageList.size()>0){
+                    List lists = new ArrayList<>();
+                    for(int m=0;m<imageList.size();m++){
+                        lists.add(imageList.get(m));
+                    }
+                    imageArr=String.join(",", lists);
+                }
                 if(houseIdNew!=null){
                     houseId=houseIdNew;
                 }
