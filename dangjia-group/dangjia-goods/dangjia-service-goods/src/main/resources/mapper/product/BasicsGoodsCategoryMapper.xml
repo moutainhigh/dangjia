@@ -130,14 +130,14 @@
         WHERE b.data_status= 0
         <if test="wordKey!=null and wordKey!='' and categoryId!=null and categoryId!=''">
             AND(
-              b.`name` LIKE CONCAT('%',#{wordKey},'%')
+            c.`name` LIKE CONCAT('%',#{wordKey},'%')
             OR
                (c.id = #{categoryId} OR c.parent_top = #{categoryId})
             )
         </if>
 
         <if test="(categoryId==null || categoryId=='') and wordKey!=null and wordKey!=''">
-            AND b.`name` LIKE CONCAT('%',#{wordKey},'%')
+            AND c.`name` LIKE CONCAT('%',#{wordKey},'%')
         </if>
         <if test="(wordKey==null || wordKey=='') and categoryId!=null and categoryId!=''">
             AND (c.id = #{categoryId} OR c.parent_top = #{categoryId})
