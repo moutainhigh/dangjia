@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,4 +26,6 @@ public interface DjStoreActivityMapper extends Mapper<DjStoreActivity> {
 
     List<DjStoreActivityDTO>  queryActivitiesOrSessionById(@Param("id") String id,
                                                            @Param("activityType") Integer activityType);
+
+    List<Map> querySpellDeals(@Param("storeActivityProductId") String storeActivityProductId);
 }

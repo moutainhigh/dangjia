@@ -1302,6 +1302,12 @@ public class PaymentService {
             if(orderSource==1||orderSource==4){
                 workerTypeName="设计、精算订单";
             }
+            if(orderSource==6){
+                workerTypeName="拼团购订单";
+            }
+            if(orderSource==7){
+                workerTypeName="限时购订单";
+            }
             order.setWorkerTypeName(workerTypeName);
             order.setCityId(cityId);
             order.setMemberId(member.getId());
@@ -1466,8 +1472,9 @@ public class PaymentService {
                 House house=houseMapper.selectByPrimaryKey(houseId);
                 setHouseWorkerOrderInfo(house,workerTypeId,order,businessOrder,paymentPrice);
             }
-
-            budgetCorrect(order,null,null);
+            if(orderSource!=6||orderSource!=7) {
+                budgetCorrect(order, null, null);
+            }
 
             //清空增值商品
             example = new Example(ShoppingCart.class);

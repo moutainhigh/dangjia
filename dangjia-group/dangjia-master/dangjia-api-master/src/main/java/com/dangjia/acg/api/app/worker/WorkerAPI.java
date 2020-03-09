@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
  * Time: 18:56
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "工匠管理接口", description = "工匠管理关联接口")
+@Api(value = "工匠管理关联接口", description = "工匠管理关联接口")
 public interface WorkerAPI {
 
     @PostMapping("app/worker/integral/ranking")

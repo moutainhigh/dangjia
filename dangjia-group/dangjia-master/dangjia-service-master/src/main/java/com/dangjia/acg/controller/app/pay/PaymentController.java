@@ -111,5 +111,11 @@ public class PaymentController implements PaymentAPI {
         return paymentService.queryActivityRedPackInfo(userToken,productJsons);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse setServersSuccess(String payOrderId) {
+        return paymentService.setServersSuccess(payOrderId);
+    }
+
 
 }
