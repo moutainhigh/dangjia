@@ -566,15 +566,13 @@ public class AppActuaryOperationService {
             goodsDTO.setShop(shop);
             goodsDTO.setStorefrontId(shop.getId());
             goodsDTO.setStorefrontName(shop.getStorefrontName());
-            goodsDTO.setStorefrontIcon(shop.getSystemLogo());
-
+            goodsDTO.setStorefrontIcon(shop.getStorefrontLogo());
             goodsDTO.setDetailImage(StringTool.getImage(product.getDetailImage(), imageAddress));//图多张
 
             if (!CommonUtil.isEmpty(goodsDTO.getWorkerTypeId())) {
                 WorkerType workerType = iGoodsWorkerTypeMapper.selectByPrimaryKey(goodsDTO.getWorkerTypeId());
                 goodsDTO.setWorkerTypeName(workerType.getName());
             }
-
             //将工艺列表返回
             List<TechnologyDTO> technologies = new ArrayList<>();
             if (!CommonUtil.isEmpty(goodsDTO.getTechnologyIds())) {
