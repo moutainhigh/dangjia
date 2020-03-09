@@ -128,7 +128,7 @@ public class AppCategoryGoodsService {
                     Map<String, Object> mapTwo = new HashMap<>();
                     mapTwo.put("id", goodsCategory2.getId());
                     mapTwo.put("name", goodsCategory2.getName());
-                    mapTwo.put("image", address+goodsCategory.getImage());
+                    mapTwo.put("image", address+goodsCategory2.getImage());
                     mapTwo.put("type",0);//type: 0=分类ID  1=品牌ID
                     mapTwoList.add(mapTwo);
                 }
