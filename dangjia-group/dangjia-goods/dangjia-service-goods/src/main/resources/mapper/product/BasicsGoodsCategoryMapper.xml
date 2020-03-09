@@ -9,7 +9,7 @@
         NAME,
         parent_id AS parentId,
         parent_top AS parentTop,
-        image,
+        cover_image AS image,
         create_date AS createDate,
         modify_date AS modifyDate,
         is_last_category AS isLastCategory,
