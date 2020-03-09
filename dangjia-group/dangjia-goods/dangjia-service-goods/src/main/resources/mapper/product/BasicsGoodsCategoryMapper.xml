@@ -27,15 +27,28 @@
     <!-- 根据父id查询下属商品类别 -->
     <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
         SELECT
-        <include refid="all_columns"/>
-        FROM dj_basics_goods_category where parent_id =#{parentId}
-        <if test="categoryLabelId!=null and categoryLabelId!=''">
-            AND  FIND_IN_SET(#{categoryLabelId},category_label_ids)
-        </if>
-        <if test="ownerDisplay!=null and ownerDisplay!=''">
-            and owner_display = #{ownerDisplay}
-        </if>
-        ORDER BY sort,create_date asc
+            t.id,
+            t.NAME,
+            t.parent_id AS parentId,
+            t.parent_top AS parentTop,
+            t.cover_image AS image,
+            t.create_date AS createDate,
+            t.modify_date AS modifyDate,
+            t.is_last_category AS isLastCategory,
+            t.purchase_restrictions AS purchaseRestrictions,
+            t.cover_image AS coverImage,
+            t.category_label_ids categoryLabelId,
+            t.owner_display ownerDisplay
+        FROM
+          dj_basics_goods_category t,dj_basics_goods_category t1
+        WHERE
+          t.parent_id = #{parentId}
+          and ( t.id=t1.parent_top or t.parent_top=t1.parent_top)
+          and FIND_IN_SET(#{categoryLabelId},t1.category_label_ids)
+        GROUP BY t.id
+        ORDER BY
+          t.sort,
+          t.create_date ASC
     </select>
 
     <!-- 根据父id查询下属商品类别 -->
