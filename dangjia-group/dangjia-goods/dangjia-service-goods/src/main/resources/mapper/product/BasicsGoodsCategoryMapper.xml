@@ -44,7 +44,9 @@
         WHERE
           t.parent_id = #{parentId}
           and ( t.id=t1.parent_top or t.parent_top=t1.parent_top)
+        <if test="categoryLabelId!=null and categoryLabelId!=''">
           and FIND_IN_SET(#{categoryLabelId},t1.category_label_ids)
+        </if>
         GROUP BY t.id
         ORDER BY
           t.sort,
