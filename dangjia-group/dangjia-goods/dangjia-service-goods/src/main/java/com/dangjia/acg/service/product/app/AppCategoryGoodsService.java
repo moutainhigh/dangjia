@@ -94,7 +94,7 @@ public class AppCategoryGoodsService {
      * @return
      */
 
-    public ServerResponse queryRightCategoryByDatas(String parentId) {
+    public ServerResponse queryRightCategoryByDatas(String parentId,String categoryLabelId) {
         //查询两级商品分类
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -117,7 +117,7 @@ public class AppCategoryGoodsService {
                 mapList.add(mapBrand);
             }
 
-            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(parentId,null, null);
+            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(parentId,categoryLabelId, null);
             for (BasicsGoodsCategory goodsCategory : goodsCategoryList) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", goodsCategory.getId());
@@ -125,7 +125,7 @@ public class AppCategoryGoodsService {
                 map.put("image", address+goodsCategory.getImage());
                 map.put("type",0);//type: 0=分类ID  1=品牌ID
                 List<Map<String, Object>> mapTwoList = new ArrayList<>();
-                List<BasicsGoodsCategory> goodsCategoryList2 = iBasicsGoodsCategoryMapper.queryCategoryByParentId(goodsCategory.getId(),null, "1");
+                List<BasicsGoodsCategory> goodsCategoryList2 = iBasicsGoodsCategoryMapper.queryCategoryByParentId(goodsCategory.getId(),categoryLabelId, "1");
                 for (BasicsGoodsCategory goodsCategory2 : goodsCategoryList2) {
                     Map<String, Object> mapTwo = new HashMap<>();
                     mapTwo.put("id", goodsCategory2.getId());
