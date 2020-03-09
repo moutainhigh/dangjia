@@ -750,11 +750,20 @@ public class DjStoreActivityService {
      */
     public ServerResponse queryBuyMoreLimitedTime(String id) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Map<String,Object> map=new HashMap<>();
             List<StorefrontProductDTO> storefrontProductDTOS =
                     djStoreActivityProductMapper.queryHomeGroupActivities(3,id);
+            storefrontProductDTOS.forEach(storefrontProductDTO -> {
+                storefrontProductDTO.setImage(imageAddress+storefrontProductDTO.getImage());
+            });
             map.put("tabList",storefrontProductDTOS);
-            map.put("panicBuying",djStoreActivityProductMapper.queryHomeGroupActivities(null,id));
+            List<StorefrontProductDTO> storefrontProductDTOS1 =
+                    djStoreActivityProductMapper.queryHomeGroupActivities(null, id);
+            storefrontProductDTOS1.forEach(storefrontProductDTO -> {
+                storefrontProductDTO.setImage(imageAddress+storefrontProductDTO.getImage());
+            });
+            map.put("panicBuying",storefrontProductDTOS1);
             return ServerResponse.createBySuccess("查询成功 ",map);
         } catch (Exception e) {
             e.printStackTrace();
@@ -790,7 +799,6 @@ public class DjStoreActivityService {
     public ServerResponse querySpellGroupList(String storeActivityProductId) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            Map map=new HashMap();
             List<Map> list = djStoreActivityMapper.querySpellDeals(storeActivityProductId);
             list.forEach(a ->{
                 a.put("head",imageAddress+a.get("head"));

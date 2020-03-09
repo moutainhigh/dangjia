@@ -182,8 +182,8 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryMember(HttpServletRequest request, String userToken) {
-        return memberService.queryMember(userToken);
+    public ServerResponse queryMember(HttpServletRequest request, String userToken,String houseId,String cityId) {
+        return memberService.queryMember(userToken,houseId,cityId);
     }
 }
 
