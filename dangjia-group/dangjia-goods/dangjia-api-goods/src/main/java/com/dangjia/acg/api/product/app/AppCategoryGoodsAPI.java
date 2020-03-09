@@ -29,7 +29,7 @@ public interface AppCategoryGoodsAPI {
 
     @PostMapping("/app/category/right/data")
     @ApiOperation(value = " 第三部分：右侧侧分类集合", notes = " 第三部分：右侧侧分类集合")
-    ServerResponse queryRightCategoryByDatas(@RequestParam("cityId") String cityId,@RequestParam("parentId") String parentId);
+    ServerResponse queryRightCategoryByDatas(@RequestParam("cityId") String cityId,@RequestParam("parentId") String parentId,@RequestParam("categoryLabelId") String categoryLabelId);
 
 
     @PostMapping("/app/category/goods/data")
