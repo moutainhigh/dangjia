@@ -128,10 +128,18 @@
         INNER JOIN dj_basics_category_brand p ON  FIND_IN_SET(b.id,p.brand_id)
         INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
         WHERE b.data_status= 0
-        <if test="wordKey!=null and wordKey!=''">
-            AND p.`name` LIKE CONCAT('%',#{wordKey},'%')
+        <if test="wordKey!=null and wordKey!='' and categoryId!=null and categoryId!=''">
+            AND(
+              b.`name` LIKE CONCAT('%',#{wordKey},'%')
+            OR
+               (c.id = #{categoryId} OR c.parent_top = #{categoryId})
+            )
         </if>
-        <if test="categoryId!=null and categoryId!=''">
+
+        <if test="(categoryId==null || categoryId=='') and wordKey!=null and wordKey!=''">
+            AND b.`name` LIKE CONCAT('%',#{wordKey},'%')
+        </if>
+        <if test="(wordKey==null || wordKey=='') and categoryId!=null and categoryId!=''">
             AND (c.id = #{categoryId} OR c.parent_top = #{categoryId})
         </if>
         GROUP BY b.id
