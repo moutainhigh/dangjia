@@ -760,6 +760,7 @@ public class RefundAfterSalesService {
                             param.put("productName",rm.getProductName());//商品名称
                         }
                         param.put("image",getStartTwoImage(repairMaterialList,address));//图片
+                        param.put("imageUrl",param.get("image"));//图片
                         deliverList.add(param);
                         refundRepairOrderDTO.setRepairNewDate(mendDeliver.getCreateDate());//处理时间
                     }
