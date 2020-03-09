@@ -573,7 +573,6 @@ public class AppActuaryOperationService {
                 WorkerType workerType = iGoodsWorkerTypeMapper.selectByPrimaryKey(goodsDTO.getWorkerTypeId());
                 goodsDTO.setWorkerTypeName(workerType.getName());
             }
-
             //将工艺列表返回
             List<TechnologyDTO> technologies = new ArrayList<>();
             if (!CommonUtil.isEmpty(goodsDTO.getTechnologyIds())) {
