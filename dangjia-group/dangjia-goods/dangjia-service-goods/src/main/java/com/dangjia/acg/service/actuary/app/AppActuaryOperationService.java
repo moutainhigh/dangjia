@@ -508,7 +508,7 @@ public class AppActuaryOperationService {
             goodsDTO.setPrice(new BigDecimal(product.getSellPrice()));
             goodsDTO.setProductSn(productTemplate.getProductSn());
             goodsDTO.setUnit(productTemplate.getConvertUnit());
-            goodsDTO.setOtherName(productTemplate.getOtherName());
+            goodsDTO.setOtherName(null);
             goodsDTO.setWorkerTypeId(productTemplate.getWorkerTypeId());
 
             //当前时间小于调价的时间时则展示调价预告信息
@@ -535,7 +535,6 @@ public class AppActuaryOperationService {
             goodsDTO.setWorkerDec(StringTool.getImage(productTemplate.getWorkerDec(), imageAddress));
             goodsDTO.setWorkerDecUrl(productTemplate.getWorkerDec());
             goodsDTO.setUnit(productTemplate.getConvertUnit());
-            goodsDTO.setOtherName(productTemplate.getOtherName());
             goodsDTO.setWorkExplain(productTemplate.getWorkExplain());
             goodsDTO.setWorkerStandard(productTemplate.getWorkerStandard());
             goodsDTO.setAdjustedPrice(productTemplate.getAdjustedPrice());
