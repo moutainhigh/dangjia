@@ -88,22 +88,22 @@ public class ServiceTypeService {
      * @return
      */
     public ServerResponse<PageInfo> selectServiceTypeList( PageDTO pageDTO,String cityId) {
-        ElasticSearchDTO elasticSearchDTO=new ElasticSearchDTO();
+       // ElasticSearchDTO elasticSearchDTO=new ElasticSearchDTO();
         //表名字
-        elasticSearchDTO.setTableTypeName(ServiceType.class.getSimpleName());
+       // elasticSearchDTO.setTableTypeName(ServiceType.class.getSimpleName());
         //排序字段
         Map<String, Integer> sortMap = new HashMap<>();
         sortMap.put(ServiceType.CREATE_DATE, 1);
-        elasticSearchDTO.setSortMap(sortMap);
+      //  elasticSearchDTO.setSortMap(sortMap);
         //分页数据
-        elasticSearchDTO.setPageDTO(pageDTO);
+      //  elasticSearchDTO.setPageDTO(pageDTO);
         //筛选数据
         Map<String, String> paramMap = new HashMap<>();
         if (!CommonUtil.isEmpty(cityId)) {
             paramMap.put(ServiceType.CITY_ID, cityId);
         }
         if(!paramMap.isEmpty()){
-            elasticSearchDTO.setParamMap(paramMap);
+        //    elasticSearchDTO.setParamMap(paramMap);
         }
         PageInfo<JSONObject> redata =elasticSearchAPI.searchESJsonPage(elasticSearchDTO);
         if(redata!=null && redata.getList()!=null && redata.getList().size()>0){
