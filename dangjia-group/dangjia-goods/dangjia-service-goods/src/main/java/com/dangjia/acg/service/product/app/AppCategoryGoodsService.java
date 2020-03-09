@@ -112,8 +112,10 @@ public class AppCategoryGoodsService {
                 mapTwo.put("type",1);//type: 0=分类ID  1=品牌ID
                 mapTwoBrandList.add(mapTwo);
             }
-            mapBrand.put("nextList", mapTwoBrandList);
-            mapList.add(mapBrand);
+            if(mapTwoBrandList.size()>0) {
+                mapBrand.put("nextList", mapTwoBrandList);
+                mapList.add(mapBrand);
+            }
 
             List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(parentId,null, null);
             for (BasicsGoodsCategory goodsCategory : goodsCategoryList) {
@@ -132,8 +134,10 @@ public class AppCategoryGoodsService {
                     mapTwo.put("type",0);//type: 0=分类ID  1=品牌ID
                     mapTwoList.add(mapTwo);
                 }
-                map.put("nextList", mapTwoList);
-                mapList.add(map);
+                if(mapTwoList.size()>0) {
+                    map.put("nextList", mapTwoList);
+                    mapList.add(map);
+                }
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
