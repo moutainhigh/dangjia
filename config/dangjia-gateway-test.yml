@@ -36,6 +36,9 @@ zuul:
     shop:
       path: /shop/**
       service-id: dangjia-service-shop
+    recommend:
+      path: /recommend/**
+      service-id: dangjia-service-recommend
     store:
       path: /store/**
       service-id: dangjia-service-store

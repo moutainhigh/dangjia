@@ -33,6 +33,9 @@ zuul:
       bill:
         path: /bill/**
         service-id: dangjia-service-bill
+      recommend:
+        path: /recommend/**
+        service-id: dangjia-service-recommend
       shop:
         path: /shop/**
         service-id: dangjia-service-shop
