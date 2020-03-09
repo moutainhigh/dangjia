@@ -38,8 +38,8 @@ public class ServiceTypeService {
     @Autowired
     private IServiceTypeMapper iServiceTypeMapper;
 
-    @Autowired
-    private ElasticSearchAPI elasticSearchAPI;
+   // @Autowired
+   // private ElasticSearchAPI elasticSearchAPI;
     @Autowired
     private DjBasicsActuarialConfigurationServices actuarialConfigurationServices;
     /**
