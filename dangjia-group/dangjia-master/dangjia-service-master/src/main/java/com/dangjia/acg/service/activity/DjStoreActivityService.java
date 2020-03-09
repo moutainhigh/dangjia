@@ -12,18 +12,25 @@ import com.dangjia.acg.dto.activity.DjStoreActivityDTO;
 import com.dangjia.acg.dto.activity.DjStoreActivityProductDTO;
 import com.dangjia.acg.dto.activity.DjStoreParticipateActivitiesDTO;
 import com.dangjia.acg.dto.activity.HomeLimitedPurchaseActivitieDTO;
+import com.dangjia.acg.dto.deliver.GroupBooking;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.activity.DjActivitySessionMapper;
 import com.dangjia.acg.mapper.activity.DjStoreActivityMapper;
 import com.dangjia.acg.mapper.activity.DjStoreActivityProductMapper;
 import com.dangjia.acg.mapper.activity.DjStoreParticipateActivitiesMapper;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.modle.activity.DjActivitySession;
 import com.dangjia.acg.modle.activity.DjStoreActivity;
 import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
 import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
+import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.City;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.product.MasterStorefrontService;
@@ -65,6 +72,12 @@ public class DjStoreActivityService {
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IOrderMapper orderMapper;
+    @Autowired
+    private IMemberMapper iMemberMapper;
+    @Autowired
+    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
 
     /**
      * 添加活动
@@ -100,7 +113,7 @@ public class DjStoreActivityService {
                 List<String> intervalTimeList = getIntervalTimeList(convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getActivityStartTime())
                         , convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getEndTime()),
                         djStoreActivity.getCyclePurchasing());
-                for (int i = 0; i <intervalTimeList.size()/2+1; i++) {
+                for (int i = 0; i <intervalTimeList.size()-1; i++) {
                     list.add("第"+(i+1)+"场："+intervalTimeList.get(i)
                             +" 至 "+intervalTimeList.get(i+1));
                 }
@@ -168,7 +181,7 @@ public class DjStoreActivityService {
             List<String> intervalTimeList = getIntervalTimeList(convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getActivityStartTime())
                     , convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getEndTime()),
                     djStoreActivity.getCyclePurchasing());
-            for (int i = 0; i <intervalTimeList.size()/2+1; i++) {
+            for (int i = 0; i <intervalTimeList.size()-1; i++) {
                 DjActivitySession djActivitySession=new DjActivitySession();
                 djActivitySession.setSessionStartTime(convertString2Date("yyyy-MM-dd HH:mm:ss",intervalTimeList.get(i)));
                 djActivitySession.setEndSession(convertString2Date("yyyy-MM-dd HH:mm:ss",intervalTimeList.get(i+1)));
@@ -189,6 +202,7 @@ public class DjStoreActivityService {
         try {
             Example example=new Example(DjStoreActivity.class);
             example.createCriteria().andEqualTo(DjStoreActivity.DATA_STATUS,0);
+            example.orderBy(DjStoreActivity.CREATE_DATE).desc();
             PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
             List<DjStoreActivity> djStoreActivities = djStoreActivityMapper.selectByExample(example);
             djStoreActivities.forEach(djStoreActivity -> {
@@ -703,8 +717,7 @@ public class DjStoreActivityService {
     public ServerResponse queryHomeLimitedPurchaseActivities(Integer limit) {
         try {
             Example example=new Example(DjActivitySession.class);
-            example.createCriteria().andLessThanOrEqualTo(DjActivitySession.SESSION_START_TIME,new Date())
-                    .andGreaterThanOrEqualTo(DjActivitySession.END_SESSION,new Date());
+            example.createCriteria().andGreaterThanOrEqualTo(DjActivitySession.END_SESSION,new Date());
             List<DjActivitySession> djActivitySessions = djActivitySessionMapper.selectByExample(example);
             List<HomeLimitedPurchaseActivitieDTO> homeLimitedPurchaseActivitieDTOS=new ArrayList<>();
             djActivitySessions.forEach(djActivitySession -> {
@@ -714,8 +727,10 @@ public class DjStoreActivityService {
                 homeLimitedPurchaseActivitieDTO.setEndSession(djActivitySession.getEndSession());
                 List<StorefrontProductDTO> storefrontProductDTOS =
                         djStoreActivityProductMapper.queryHomeGroupActivities(limit,djActivitySession.getId());
-                homeLimitedPurchaseActivitieDTO.setStorefrontProductDTOS(storefrontProductDTOS);
-                homeLimitedPurchaseActivitieDTOS.add(homeLimitedPurchaseActivitieDTO);
+                if(storefrontProductDTOS.size()>0) {
+                    homeLimitedPurchaseActivitieDTO.setStorefrontProductDTOS(storefrontProductDTOS);
+                    homeLimitedPurchaseActivitieDTOS.add(homeLimitedPurchaseActivitieDTO);
+                }
             });
             if(homeLimitedPurchaseActivitieDTOS.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
@@ -729,15 +744,18 @@ public class DjStoreActivityService {
 
 
     /**
-     * 限时购(更多)
+     * 限时购/拼团购(更多、超值抢购)
      * @param id
      * @return
      */
     public ServerResponse queryBuyMoreLimitedTime(String id) {
         try {
+            Map<String,Object> map=new HashMap<>();
             List<StorefrontProductDTO> storefrontProductDTOS =
-                    djStoreActivityProductMapper.queryHomeGroupActivities(null,id);
-            return ServerResponse.createBySuccess("查询成功 ",storefrontProductDTOS);
+                    djStoreActivityProductMapper.queryHomeGroupActivities(3,id);
+            map.put("tabList",storefrontProductDTOS);
+            map.put("panicBuying",djStoreActivityProductMapper.queryHomeGroupActivities(null,id));
+            return ServerResponse.createBySuccess("查询成功 ",map);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -760,6 +778,79 @@ public class DjStoreActivityService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+
+
+    /**
+     * 拼团列表
+     * @param storeActivityProductId
+     * @return
+     */
+    public ServerResponse querySpellGroupList(String storeActivityProductId) {
+        try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            Map map=new HashMap();
+            List<Map> list = djStoreActivityMapper.querySpellDeals(storeActivityProductId);
+            list.forEach(a ->{
+                a.put("head",imageAddress+a.get("head"));
+            });
+            return ServerResponse.createBySuccess("查询成功",list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 参与拼团(未满/已满)
+     * @param orderId
+     * @return
+     */
+    public ServerResponse setSpellGroup(String orderId) {
+        try {
+            Order order = orderMapper.selectByPrimaryKey(orderId);
+            DjStoreActivity djStoreActivity = djStoreActivityMapper.selectByPrimaryKey(order.getStoreActivityId());
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            if(StringUtils.isNotBlank(order.getParentOrderId()))
+                orderId=order.getParentOrderId();
+            Example example=new Example(Order.class);
+            example.createCriteria().andEqualTo(Order.PARENT_ORDER_ID,orderId)
+                    .orEqualTo(Order.ID,orderId)
+                    .andEqualTo(Order.DATA_STATUS,0)
+                    .andEqualTo(Order.ORDER_STATUS,9);
+            List<Order> orders = orderMapper.selectByExample(example);
+            DjStoreActivityProduct djStoreActivityProduct
+                    = djStoreActivityProductMapper.selectByPrimaryKey(order.getStoreActivityProductId());
+            StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(djStoreActivityProduct.getProductId());
+            DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+            GroupBooking groupBooking=new GroupBooking();
+            List<Map<String,Object>> list=new ArrayList<>();
+            groupBooking.setProductId(storefrontProduct.getId());
+            groupBooking.setImage(imageAddress+storefrontProduct.getImage());
+            groupBooking.setProductName(storefrontProduct.getProductName());
+            groupBooking.setRushPurchasePrice(djStoreActivityProduct.getRushPurchasePrice());
+            groupBooking.setUnitName(djBasicsProductTemplate.getUnitName());
+            groupBooking.setSellPrice(storefrontProduct.getSellPrice());
+            groupBooking.setSpellGroup(djStoreActivity.getSpellGroup());
+            orders.forEach(order1 -> {
+                Map<String, Object> map = new HashMap<>();
+                Member member = iMemberMapper.selectByPrimaryKey(order1.getMemberId());
+                member.initPath(imageAddress);
+                map.put("administrator", 0);
+                if (cn.jiguang.common.utils.StringUtils.isEmpty(order1.getParentOrderId())) {
+                    map.put("administrator", 1);
+                }
+                map.put("head", member.getHead());
+                list.add(map);
+            });
+            groupBooking.setList(list);
+            groupBooking.setShortProple(djStoreActivity.getSpellGroup() - orders.size());
+            return ServerResponse.createBySuccess("查询成功",groupBooking);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 

@@ -175,4 +175,16 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
     public ServerResponse setwithdraw(String storeParticipateActivitiesId) {
         return djStoreActivityService.setwithdraw(storeParticipateActivitiesId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySpellGroupList(String storeActivityProductId) {
+        return djStoreActivityService.querySpellGroupList(storeActivityProductId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setSpellGroup(String orderId) {
+        return djStoreActivityService.setSpellGroup(orderId);
+    }
 }

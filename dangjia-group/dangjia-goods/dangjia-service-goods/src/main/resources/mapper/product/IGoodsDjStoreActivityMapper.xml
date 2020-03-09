@@ -29,5 +29,6 @@
         AND a.order_status = 9
         AND parent_order_id IS NULL
         AND a.store_activity_product_id = #{storeActivityProductId}
+        ORDER BY a.order_generation_time asc limit 2
     </select>
 </mapper>

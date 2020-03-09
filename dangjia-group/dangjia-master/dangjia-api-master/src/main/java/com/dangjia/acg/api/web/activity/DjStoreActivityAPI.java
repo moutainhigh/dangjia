@@ -144,4 +144,12 @@ public interface DjStoreActivityAPI {
     @ApiOperation(value = "撤回", notes = "撤回")
     ServerResponse setwithdraw(@RequestParam("storeParticipateActivitiesId") String storeParticipateActivitiesId);
 
+    @PostMapping("app/activity/querySpellGroupList")
+    @ApiOperation(value = "拼团列表", notes = "拼团列表")
+    ServerResponse querySpellGroupList(@RequestParam("storeActivityProductId") String storeActivityProductId);
+
+    @PostMapping("app/activity/setSpellGroup")
+    @ApiOperation(value = "参与拼团(未满/已满)", notes = "参与拼团(未满/已满)")
+    ServerResponse setSpellGroup(@RequestParam("orderId") String orderId);
+
 }

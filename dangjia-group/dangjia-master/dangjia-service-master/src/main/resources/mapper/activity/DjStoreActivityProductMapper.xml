@@ -207,31 +207,29 @@
     <select id="queryHomeGroupActivities" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
         SELECT
             a.id,
-            b.id AS storefrontProductId,
-            b.image,
-            c.storefront_name AS storefrontName,
-            b.sell_price AS sellPrice,
-            a.rush_purchase_price AS rushPurchasePrice
+            c.id AS storefrontProductId,
+            c.image,
+            c.product_name AS productName,
+            d.storefront_name AS storefrontName,
+            c.sell_price AS sellPrice,
+            b.rush_purchase_price AS rushPurchasePrice,
+            e.unit_name AS unitName
         FROM
-            dj_store_activity_product a,
-            dj_basics_storefront_product b,
-            dj_basics_storefront c,
-            dj_basics_product_template d,
-            dj_store_participate_activities e
-        WHERE
-            a.product_id = b.id
-        AND b.prod_template_id = d.id
-        AND c.id = b.storefront_id
-        AND e.id=a.store_participate_activities_id
+          dj_store_participate_activities a
+        INNER JOIN dj_store_activity_product b ON a.id = b.store_participate_activities_id
+        INNER JOIN dj_basics_storefront_product c ON c.id = b.product_id
+        INNER JOIN dj_basics_storefront d ON d.id = c.storefront_id
+        INNER JOIN dj_basics_product_template e ON e.id = c.prod_template_id
         <choose>
             <when test="null!=activitySessionId and ''!=activitySessionId">
-                AND e.activity_session_id=#{activitySessionId}
+                AND a.activity_session_id=#{activitySessionId}
+                AND a.activity_type = 1
             </when>
             <otherwise>
                 AND a.activity_type=2
             </otherwise>
         </choose>
-        AND e.registration_status=1
+        AND a.registration_status=1
         <if test="null!=limit and ''!=limit">
             order by rand() limit #{limit}
         </if>

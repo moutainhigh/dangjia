@@ -98,4 +98,8 @@ public interface PaymentAPI {
     ServerResponse queryActivityRedPackInfo(@RequestParam("userToken") String userToken,
                                     @RequestParam("productJsons") String productJsons);
 
+    @PostMapping("app/pay/payment/setServersSuccess")
+    @ApiOperation(value = "服务器回调", notes = "服务器回调")
+    ServerResponse setServersSuccess(@RequestParam("payOrderId") String payOrderId);
+
 }

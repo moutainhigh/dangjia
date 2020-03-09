@@ -15,6 +15,7 @@
         AND b.storefront_id = #{storefrontId}
         WHERE
             a.activity_type = #{activityType}
+            ORDER BY a.create_date
     </select>
 
     <select id="queryActivitiesSessionByStorefront"
@@ -81,5 +82,35 @@
                 AND a.id=#{id}
             </otherwise>
         </choose>
+    </select>
+
+    <select id="querySpellDeals" resultType="java.util.Map">
+        SELECT
+            a.id AS orderId,
+            a.order_generation_time AS orderGenerationTime,
+            c.head,
+            (
+                b.spell_group - (
+                    SELECT
+                        COUNT(0)+1
+                    FROM
+                        dj_deliver_order d
+                    WHERE
+                        d.order_source = 6
+                    AND d.order_status = 9
+                    AND d.parent_order_id = a.id
+                )
+            ) AS shortPeople
+        FROM
+            dj_deliver_order a
+        INNER JOIN dj_store_activity b ON a.store_activity_id = b.id
+        INNER JOIN dj_member c ON a.member_id = c.id
+        WHERE
+            a.store_activity_id IS NOT NULL
+        AND a.order_source = 6
+        AND a.order_status = 9
+        AND parent_order_id IS NULL
+        AND a.store_activity_product_id = #{storeActivityProductId}
+        ORDER BY a.order_generation_time asc limit 10
     </select>
 </mapper>
