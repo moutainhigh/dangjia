@@ -1241,21 +1241,6 @@ public class DjDeliverOrderService {
     }
 
 
-    /**
-     * 订单快照
-     *
-     * @param orderId
-     * @param orderStatus
-     * @return
-     */
-    public ServerResponse orderSnapshop(String orderId, Integer orderStatus) {
-        try {
-            return null;
-        } catch (Exception e) {
-            logger.error("订单快照异常", e);
-            return ServerResponse.createByErrorMessage("订单快照异常" + e);
-        }
-    }
 
     /**
      * 发货详情
@@ -1776,6 +1761,23 @@ public class DjDeliverOrderService {
                 orderCollectInFoDTO.setHouseId(house.getHouseId());
                 orderCollectInFoDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋 " + house.getUnit() + "单元" + house.getNumber() + "号");
             }
+        }
+        OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(splitDeliver.getOrderSplitId());
+        Order order = iBillDjDeliverOrderMapper.selectByPrimaryKey(orderSplit.getOrderId());
+        if("6".equals(order.getOrderSource())){
+            example=new Example(Order.class);
+            example.createCriteria().andEqualTo(Order.DATA_STATUS, 0)
+                    .andEqualTo(Order.ORDER_STATUS, 2)
+                    .orEqualTo(Order.PARENT_ORDER_ID,order.getParentOrderId())
+                    .orEqualTo(Order.ID,order.getId());
+            example.orderBy(Order.ORDER_GENERATION_TIME).asc();
+            List<Order> orders = iBillDjDeliverOrderMapper.selectByExample(example);
+            List<String> list=new ArrayList<>();
+            orders.forEach(order1 -> {
+                Member member = iBillMemberMapper.selectByPrimaryKey(order1.getMemberId());
+                list.add(address+member.getHead());
+            });
+            orderCollectInFoDTO.setHeadList(list);
         }
         orderCollectInFoDTO.setCreateDate(splitDeliver.getCreateDate());
         orderCollectInFoDTO.setRecTime(splitDeliver.getRecTime());

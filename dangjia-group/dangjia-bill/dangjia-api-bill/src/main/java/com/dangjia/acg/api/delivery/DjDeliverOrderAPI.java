@@ -91,9 +91,6 @@ public interface DjDeliverOrderAPI {
     ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId, @RequestParam("orderStatus") Integer orderStatus);
 
 
-    @PostMapping("app/deliverOrderItem/orderSnapshop")
-    @ApiOperation(value = "订单快照", notes = "订单快照")
-    ServerResponse orderSnapshop(@RequestParam("orderId") String orderId, @RequestParam("orderStatus") Integer orderStatus);
 
     @PostMapping("app/deliverOrderItem/shippingDetail")
     @ApiOperation(value = "订单-发货详情", notes = "订单-发货详情")

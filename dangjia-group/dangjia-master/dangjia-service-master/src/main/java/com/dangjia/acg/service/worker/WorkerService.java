@@ -299,7 +299,7 @@ public class WorkerService {
             Map<String, Object> map = BeanUtils.beanToMap(wb);
             BankCard bankCard = bankCardMapper.selectByPrimaryKey(wb.getBankCardId());
             if (bankCard != null) {
-                bankCard.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                bankCard.initPath(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class));
                 map.put("bankCardName", bankCard.getBankName());//银行名称
                 map.put("bankCardImage", bankCard.getBankCardImage());//银行卡图片
             }

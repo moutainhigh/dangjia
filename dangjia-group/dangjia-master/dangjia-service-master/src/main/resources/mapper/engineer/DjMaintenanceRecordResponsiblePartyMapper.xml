@@ -177,7 +177,7 @@
             c.reject_reason complainReason,
             c.image complainImage,
             c.content complainContent,
-            (case when rrp.complain_id is null and DATE_ADD(rrp.create_date,INTERVAL 3 DAY)>NOW() then 1 else 2 end ) isComplain
+            IFNULL((case when rrp.complain_id is null and DATE_ADD(rrp.create_date,INTERVAL 3 DAY)>NOW() then 1 else 0 end ),0) isComplain
         FROM
             dj_maintenance_record dmr
         INNER JOIN dj_maintenance_record_responsible_party rrp ON rrp.maintenance_record_id = dmr.id
