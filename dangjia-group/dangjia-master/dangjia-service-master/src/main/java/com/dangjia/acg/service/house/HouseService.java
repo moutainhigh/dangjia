@@ -2842,9 +2842,12 @@ public class HouseService {
             member.initPath(address);
             map.put("workerHead", member.getHead());//工人头像
             if (member.getWorkerType() != null && member.getWorkerType() >= 1) {
-                map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                WorkerType workerType=workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                map.put("workerTypeName", workerType.getName());//工匠类型
+                map.put("workerTypeColor",workerType.getColor());
             } else {
                 map.put("workerTypeName", "业主");//工匠类型
+                map.put("workerTypeColor","#D67DAE");
             }
             map.put("workerName", member.getName());//工人名称
         }
