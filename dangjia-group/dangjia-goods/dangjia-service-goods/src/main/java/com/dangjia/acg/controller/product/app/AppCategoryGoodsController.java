@@ -40,8 +40,8 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryRightCategoryByDatas(String cityId,String parentId) {
-        return appCategoryGoodsService.queryRightCategoryByDatas(parentId);
+    public ServerResponse queryRightCategoryByDatas(String cityId,String parentId,String categoryLabelId) {
+        return appCategoryGoodsService.queryRightCategoryByDatas(parentId, categoryLabelId);
     }
 
     /**
