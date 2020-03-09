@@ -30,7 +30,13 @@
         <include refid="all_columns"/>
         FROM dj_basics_goods_category where parent_id =#{parentId}
         <if test="categoryLabelId!=null and categoryLabelId!=''">
-            and FIND_IN_SET(#{categoryLabelId},category_label_ids)
+            AND id IN (
+                SELECT
+                  parent_top
+                FROM
+                   dj_basics_goods_category
+                WHERE   FIND_IN_SET(#{categoryLabelId},category_label_ids)
+            )
         </if>
         <if test="ownerDisplay!=null and ownerDisplay!=''">
             and owner_display = #{ownerDisplay}
