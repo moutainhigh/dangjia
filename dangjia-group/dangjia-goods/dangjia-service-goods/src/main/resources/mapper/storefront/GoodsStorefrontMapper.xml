@@ -26,6 +26,7 @@
         from dj_basics_storefront
         where city_id=#{cityId}
         and storefront_type=#{storefrontType}
+        limit 1
     </select>
 
 </mapper>

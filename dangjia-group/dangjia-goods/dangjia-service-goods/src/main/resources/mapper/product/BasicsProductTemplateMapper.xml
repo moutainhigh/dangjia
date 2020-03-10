@@ -707,6 +707,7 @@
         AND t1.type = 2
         AND t.maket = 1
         AND t.data_status = 0
+        and t.city_id=#{cityId}
         <if test="name!=null and name!=''">
             and t.name like CONCAT('%',#{name},'%')
         </if>

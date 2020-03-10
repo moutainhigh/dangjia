@@ -1226,7 +1226,7 @@ public class DjBasicsProductTemplateService {
     public ServerResponse queryAllWorkerProductList(String name,String cityId){
         try{
             LOG.info("查询人工商品接口name={},cityId={}",name,cityId);
-            List<Map<String,Object>> productList=iBasicsProductTemplateMapper.queryAllWorkerProductList(name);
+            List<Map<String,Object>> productList=iBasicsProductTemplateMapper.queryAllWorkerProductList(name,cityId);
             return ServerResponse.createBySuccess("查询成功",productList);
         }catch (Exception e){
             LOG.error("查询失败",e);

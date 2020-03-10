@@ -31,4 +31,6 @@ public interface IStorefrontProductMapper  extends Mapper<StorefrontProduct> {
 
     Integer  getStorefrontProductCount(@Param("storefrontId") String storefrontId);
 
+    /** 通过货品或者商品名称查询 */
+    List<BasicsStorefrontProductViewDTO> queryProductGroundByKeyWord(@Param("keyWord") String keyWord);
 }

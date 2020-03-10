@@ -64,14 +64,11 @@ public class UserFeedbackService {
                                           Integer appType,String image,String remark) {
         try {
 
-            Object object = constructionService.getAccessToken(userToken);
+            Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            AccessToken accessToken = (AccessToken) object;
-            if (CommonUtil.isEmpty(accessToken.getUserId())) {
-                return ServerResponse.createbyUserTokenError();
-            }
+            Member member = (Member) object;
 
             if (CommonUtil.isEmpty(appType)) {
                 return ServerResponse.createByErrorMessage("appType不能为空");
@@ -87,7 +84,7 @@ public class UserFeedbackService {
 
             //新增反馈详情
             UserFeedbackItem userFeedbackItem = new UserFeedbackItem();
-            userFeedbackItem.setUserId(accessToken.getUserId());
+            userFeedbackItem.setUserId(member.getId());
             userFeedbackItem.setImage(image);
             userFeedbackItem.setRemark(remark);
             userFeedbackItemMapper.insert(userFeedbackItem);
@@ -96,7 +93,7 @@ public class UserFeedbackService {
             UserFeedback userFeedback = new UserFeedback();
             userFeedback.setFeedbackId(userFeedbackItem.getId());
             userFeedback.setAppType(appType);
-            userFeedback.setUserId(accessToken.getUserId());
+            userFeedback.setUserId(member.getId());
             userFeedback.setFeedbackType(0);
             userFeedback.setCreateDate(userFeedbackItem.getCreateDate());
             userFeedbackMapper.insert(userFeedback);

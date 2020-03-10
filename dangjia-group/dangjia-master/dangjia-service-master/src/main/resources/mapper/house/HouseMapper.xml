@@ -1409,6 +1409,24 @@
         WHERE pho.task_id = #{taskId} AND pay_order_number IS NOT NULL
     </select>
 
+    <!-- 查询房子列表 - 根据小区名 -->
+    <select id="queryHouseListByResidential" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        id
+        , residential
+        , building
+        , unit
+        , number
+        , image
+        , visit_state 'visitState'
+        FROM
+        dj_house
+        WHERE
+        data_status = 0
+        <if test="residential != null and residential != ''">
+            AND residential LIKE CONCAT('%',#{residential},'%')
+        </if>
+    </select>
 
 </mapper>
 

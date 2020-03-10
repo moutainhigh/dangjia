@@ -122,7 +122,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      * @param name
      * @return
      */
-    List<Map<String,Object>> queryAllWorkerProductList(@Param("name") String name);
+    List<Map<String,Object>> queryAllWorkerProductList(@Param("name") String name,@Param("cityId") String cityId);
 
     /**
      * 修改其它维保勘查高品为否（保证只有一个维保商品存在）

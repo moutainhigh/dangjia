@@ -193,4 +193,17 @@ public class HouseChoiceCaseService {
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
+
+    /** 查询案例列表 */
+    public ServerResponse queryHouseChoiceCasesList(String title, PageDTO pageDTO){
+
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<HouseChoiceCase> houseChoiceCaseList = houseChoiceCaseMapper.queryHouseChoiceCaseList(title);
+        if( houseChoiceCaseList == null || houseChoiceCaseList.size() < 1 ){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+
+        PageInfo pageResult = new PageInfo(houseChoiceCaseList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
 }
