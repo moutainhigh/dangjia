@@ -64,18 +64,19 @@ public class WaterfallFlowConfigService {
 
         //判断名称是否存在
         Example example=new Example(WaterfallFlowConfig.class);
-        example.createCriteria().andEqualTo(WaterfallFlowConfig.NAME,name);
+        example.createCriteria().andEqualTo(WaterfallFlowConfig.NAME,name)
+        .andEqualTo(WaterfallFlowConfig.CITY_ID,cityId);
         if(StringUtils.isNotBlank(waterfallConfigId)){
             example.createCriteria().andNotEqualTo(WaterfallFlowConfig.ID,waterfallConfigId);
         }
         List<WaterfallFlowConfig> list=waterfallFlowConfigMapper.selectByExample(example);
-        if(list!=null&&list.size()>0){
-            return ServerResponse.createByErrorMessage("标签名称重复，请修改");
-        }
         //先添加标签，再添加标签值
         WaterfallFlowConfig waterfallFlowConfig=new WaterfallFlowConfig();
         if(StringUtils.isNotBlank(waterfallConfigId)){
             waterfallFlowConfig=waterfallFlowConfigMapper.selectByPrimaryKey(waterfallConfigId);
+            if(list!=null&&list.size()>0&&!name.equals(waterfallFlowConfig.getName())){
+                return ServerResponse.createByErrorMessage("标签名称重复，请修改");
+            }
             waterfallFlowConfig.setName(name);
             waterfallFlowConfig.setSort(sort);
             waterfallFlowConfig.setModifyDate(new Date());
@@ -85,6 +86,9 @@ public class WaterfallFlowConfigService {
             example.createCriteria().andEqualTo(WaterfallFlowConfig.PARENT_ID,waterfallConfigId);
             waterfallFlowConfigMapper.deleteByExample(example);
         }else{
+            if(list!=null&&list.size()>0){
+                return ServerResponse.createByErrorMessage("标签名称重复，请修改");
+            }
             waterfallFlowConfig.setName(name);
             waterfallFlowConfig.setSort(sort);
             waterfallFlowConfig.setParentId("1");
@@ -133,7 +137,7 @@ public class WaterfallFlowConfigService {
 
         }
 
-        return ServerResponse.createBySuccess("保存成功");
+        return ServerResponse.createBySuccessMessage("保存成功");
     }
 
     //查询瀑布流详情

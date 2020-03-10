@@ -760,15 +760,24 @@ public class RefundAfterSalesService {
                             param.put("productName",rm.getProductName());//商品名称
                         }
                         param.put("image",getStartTwoImage(repairMaterialList,address));//图片
+                        param.put("imageUrl",param.get("image"));//图片
                         deliverList.add(param);
                         refundRepairOrderDTO.setRepairNewDate(mendDeliver.getCreateDate());//处理时间
                     }
                 }
+                refundRepairOrderDTO.setRepairNewNode("已生成"+mendDeliverList.size()+"个退货单");
                 refundRepairOrderDTO.setMendDeliverList(deliverList);
             }else{//未分配供应商（1待处理（可撤销），5已撤销）
                 List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId,null);//退款商品列表查询
                 getRepairOrderProductList(repairMaterialList,address);
                 refundRepairOrderDTO.setOrderMaterialList(repairMaterialList);//将退款材料明细放入对象中
+                if("1".equals(refundRepairOrderDTO.getState())){
+                    refundRepairOrderDTO.setRepairNewNode("请等待商家处理");
+                }else if("5".equals(refundRepairOrderDTO.getState())){
+                    refundRepairOrderDTO.setRepairNewNode("已撤销");
+                }
+
+
             }
             //相关凭证图片地址存储
             refundRepairOrderDTO.setImageArrUrl(StringTool.getImage(refundRepairOrderDTO.getImageArr(),address));//图片详情地址设置

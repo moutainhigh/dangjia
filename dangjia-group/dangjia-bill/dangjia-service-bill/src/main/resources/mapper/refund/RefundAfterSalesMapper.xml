@@ -263,17 +263,14 @@
     FROM
         (
             SELECT
-                IFNULL(
-                    (
-                        CASE
-                        WHEN s.shipping_state = 7 THEN
-                            t.shop_count
-                        ELSE
-                            t.actual_count,
-                        END
-                    ),
-                    t.shop_count
-                ) AS returnCount,
+                (
+                    CASE
+                    WHEN s.shipping_state = 7 THEN
+                        t.shop_count
+                    ELSE
+                        IFNULL(t.actual_count,t.shop_count)
+                    END
+                 ) AS returnCount,
                 t.cost AS supPrice,
                 t.price AS price,
                 IFNULL(t.transportation_cost, 0) transportation_cost,

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.recommend.IRecommendConfigMapper">
+
+    <!-- 查询列表 -->
+    <select id="queryList" resultType="com.dangjia.acg.modle.recommend.RecommendConfig">
+
+        SELECT
+            id
+            , config_code 'configCode'
+            , config_name 'configName'
+            , config_value 'configValue'
+        FROM
+            dj_recommend_config
+        WHERE data_status = 0
+    </select>
+
+    <!-- 修改单个推荐配置 -->
+    <update id="updateSingle">
+        update dj_recommend_target_info
+        set modify_date = #{modifyDate}
+            , config_value = #{configValue}
+        WHERE
+        id = #{id} and config_code = #{configCode}
+    </update>
+
+</mapper>

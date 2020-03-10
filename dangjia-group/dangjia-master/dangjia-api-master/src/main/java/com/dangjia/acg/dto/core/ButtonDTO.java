@@ -17,5 +17,6 @@ public class ButtonDTO {
     private Integer insuranceDay;//工人保险剩余天数
     private String insuranceMsg;//描述
     private String houseId;
+    private String houseName;
     private List<Task> taskList;
 }
