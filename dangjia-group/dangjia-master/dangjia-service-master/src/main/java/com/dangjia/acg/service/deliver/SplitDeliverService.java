@@ -131,10 +131,10 @@ public class SplitDeliverService {
             splitDeliver.setApplyMoney(applyMoney);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
 
-            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-            //业主
-            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料部分收货", String.format
-                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
+//            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+//            //业主
+//            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料部分收货", String.format
+//                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -262,8 +262,8 @@ public class SplitDeliverService {
                             0, splitDeliver.getId(), splitDeliver.getTotalAmount(),"确认收货流水记录", operator.getId());
            }
             //第五步：给业主发送短信
-            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料已收货", String.format
-                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
+//            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料已收货", String.format
+//                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             logger.error("操作失败",e);

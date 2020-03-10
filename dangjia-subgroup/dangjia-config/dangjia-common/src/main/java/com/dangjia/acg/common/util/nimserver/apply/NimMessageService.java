@@ -53,48 +53,6 @@ public class NimMessageService {
         }
     }
 
-    /**
-     * 系统通告，通知所有人
-     *
-     * @param appType 应用类型（zx=当家装修，gj=当家工匠）
-     * @param alert   通知内容
-     */
-    public static void sendSysPush(String appType, String alert) {
-        try {
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("body", alert));
-            //UTF-8编码,解决中文问题
-            HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
-            String res = NIMPost.postNIMServer(NIMPost.BROADCAST_MSG, entity, NIMPost.APPKEY, NIMPost.SECRET);
-            LOG.info(res);
-        } catch (Exception e) {
-            LOG.error("Error response from JPush server. sendSysPush： ", e);
-        }
-    }
 
-    /**
-     * 系统通告，通知指定注册ID
-     *
-     * @param appType  应用类型（zx=当家装修，gj=当家工匠）
-     * @param memberId memberID数组集合
-     * @param alert    通知内容
-     * @param speak    语音通知内容
-     */
-    public static void sendMemberIdPush(String appType, String[] memberId,String alert, String speak) {
-        try {
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("fromAccid", NIMPost.SYS_ACCID));
-            params.add(new BasicNameValuePair("toAccids", Arrays.toString(memberId)));
-            JSONObject json=new JSONObject();
-            json.put("content",alert);
-            params.add(new BasicNameValuePair("attach", JSON.toJSONString(json)));
-            //UTF-8编码,解决中文问题
-            HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
-            String res = NIMPost.postNIMServer(NIMPost.SEND_BATCH_ATTACH_MSG, entity, NIMPost.APPKEY, NIMPost.SECRET);
-            LOG.info(res);
-        } catch (Exception e) {
-            LOG.error("Error response from JPush server. SendRegistrationIdPush： ", e);
-        }
-    }
 }
 

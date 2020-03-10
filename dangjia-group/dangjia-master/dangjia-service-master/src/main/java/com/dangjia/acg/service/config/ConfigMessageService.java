@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.config;
 
+import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -41,6 +42,8 @@ public class ConfigMessageService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private MessageAPI messageAPI;
     /**
      * 获取所有公共消息(web端列表)
      *
@@ -239,10 +242,10 @@ public class ConfigMessageService {
                         }
                     }
                     if (!CommonUtil.isEmpty(configMessage.getTargetUid()) && configMessage.getTargetType().equals("0")) {
-                        NimMessageService.sendMemberIdPush(appType.getDesc(), new String[]{configMessage.getTargetUid()}, configMessage.getText(), configMessage.getSpeak());
+                        messageAPI.sendMemberIdPush(appType.getDesc(), new String[]{configMessage.getTargetUid()}, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
                     }
                     if (configMessage.getTargetType().equals("1")) {
-                        NimMessageService.sendSysPush(appType.getDesc(),  configMessage.getText());
+                        messageAPI.sendSysPush(appType.getDesc(), configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
                     }
                 }).start();
             }

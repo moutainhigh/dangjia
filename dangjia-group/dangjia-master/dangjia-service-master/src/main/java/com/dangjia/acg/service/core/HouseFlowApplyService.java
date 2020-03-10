@@ -795,13 +795,13 @@ public class HouseFlowApplyService {
             house.setVisitState(3);//新状态 已完工
             house.setCompletedDate(new Date());
             houseMapper.updateByPrimaryKeySelective(house);
-            List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-            if (ms != null) {
-                for (Customer m : ms) {
-                    configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "竣工提醒",
-                            "您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6);
-                }
-            }
+//            List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+//            if (ms != null) {
+//                for (Customer m : ms) {
+//                    configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "竣工提醒",
+//                            "您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6);
+//                }
+//            }
 
 
 

@@ -284,14 +284,14 @@ public class ActuaryService {
                 house.setModifyDate(new Date());
                 houseMapper.updateByPrimaryKeySelective(house);
                 //推送任务给当家平台设计师
-                HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,"1");
-                String desginWorkerId=houseFlow.getWorkerId();//设计师ID
-                houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,"2");//精算师信息
-                Member member=memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
-                Example example=new Example(MemberAddress.class);
-                example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
-                MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "", String.format("精算师【%s】审核图纸不合格，房子地址为【%s】，请注意查看。", member.getName(),memberAddress.getAddress()), "");
+//                HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,"1");
+//                String desginWorkerId=houseFlow.getWorkerId();//设计师ID
+//                houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,"2");//精算师信息
+//                Member member=memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+//                Example example=new Example(MemberAddress.class);
+//                example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
+//                MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "", String.format("精算师【%s】审核图纸不合格，房子地址为【%s】，请注意查看。", member.getName(),memberAddress.getAddress()), "");
             }
             return ServerResponse.createBySuccessMessage("审核不通过保存成功");
         }

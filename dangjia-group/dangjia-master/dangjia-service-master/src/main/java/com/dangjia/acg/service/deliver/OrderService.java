@@ -532,14 +532,14 @@ public class OrderService {
             warehouseDetail.setRecordType(1);//要
             warehouseDetailMapper.insert(warehouseDetail);
 
-            House house = houseMapper.selectByPrimaryKey(houseId);
-            if (worker.getWorkerType() == 3) {
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要服务",
-                        String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
-            } else {
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
-                        (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
-            }
+//            House house = houseMapper.selectByPrimaryKey(houseId);
+//            if (worker.getWorkerType() == 3) {
+//                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要服务",
+//                        String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
+//            } else {
+//                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
+//                        (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
+//            }
             return ServerResponse.createBySuccessMessage("操作成功");
         }
     }

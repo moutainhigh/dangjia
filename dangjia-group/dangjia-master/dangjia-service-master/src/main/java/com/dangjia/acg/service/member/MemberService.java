@@ -515,7 +515,7 @@ public class MemberService {
             try {
                 //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
                 redPackPayService.checkUpActivity(request, user.getMobile(), "1");
-                configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
+//                configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
             } catch (Exception e) {
                 logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
             }

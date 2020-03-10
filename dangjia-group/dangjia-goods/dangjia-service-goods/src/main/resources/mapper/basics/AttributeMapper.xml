@@ -107,7 +107,10 @@
 			*
 		from
 		dj_basics_attribute
-		where type=1
+		where 1=1
+		<if test="type!=null and type!=''">
+			and type=#{type}
+		</if>
 		<if test="categoryId!=null and categoryId!=''">
 				and  category_id =#{categoryId}
 			</if>
