@@ -9,6 +9,7 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
@@ -78,6 +79,7 @@ import com.dangjia.acg.service.deliver.RepairMendOrderService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.util.StringTool;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
@@ -761,18 +763,18 @@ public class HouseService {
         try {
 
             //通知业主确认开工
-//            configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
-//                    String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
-            //通知设计师/精算师/大管家 抢单
-//            Example example = new Example(WorkerType.class);
-//            example.createCriteria().andCondition(WorkerType.TYPE + " in(1,2) ");
-//            List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
-//            for (WorkerType workerType : workerTypeList) {
-//                List<String> workerTypes = new ArrayList<>();
-//                workerTypes.add(Utils.md5("wtId" + workerType.getId()));
-//                configMessageService.addConfigMessage(AppType.GONGJIANG, StringUtils.join(workerTypes, ","),
-//                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
-//            }
+            configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
+                    String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
+//            通知设计师/精算师/大管家 抢单
+            Example example = new Example(WorkerType.class);
+            example.createCriteria().andCondition(WorkerType.TYPE + " in(1,2) ");
+            List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
+            for (WorkerType workerType : workerTypeList) {
+                List<String> workerTypes = new ArrayList<>();
+                workerTypes.add(Utils.md5("wtId" + workerType.getId()));
+                configMessageService.addConfigMessage(AppType.GONGJIANG, StringUtils.join(workerTypes, ","),
+                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
+            }
 
         } catch (Exception e) {
             logger.error("建群失败，异常：", e);
@@ -3833,6 +3835,18 @@ public class HouseService {
         Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
         worker.initPath(address);
         return ServerResponse.createBySuccess("操作成功", worker);
+    }
+
+    /** 查询房子列表 - 根据小区名 */
+    public ServerResponse queryHouseListByResidential(String residential, PageDTO pageDTO) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<House> houseList = iHouseMapper.queryHouseListByResidential(residential);
+        if( houseList == null || houseList.size() < 1 ){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+
+        PageInfo pageResult = new PageInfo(houseList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 }
 

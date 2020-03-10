@@ -118,7 +118,8 @@ public class ConfigMessageService {
         } else if (!CommonUtil.isEmpty(typeText) && "7".equals(typeText)) {
             data = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JIANGFALIST,
                     "", "", "奖罚记录");
-        } else if (!StringUtils.isNumeric(typeText)) {
+        } else
+            if (!StringUtils.isNumeric(typeText)) {
             data = typeText;
         } else {
             type = Integer.parseInt(typeText);

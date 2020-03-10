@@ -31,115 +31,22 @@ public class DjConstants {
     public static class GJPageAddress {
 
 
-        public final static String SERVICEMANAGE = "serviceManage?userToken=%s&cityId=%s&title=%s";// 服务管理
-        public final static String ADDARTIFICIAL = "addArtificial?userToken=%s&cityId=%s&title=%s";// 补人工
-        public final static String CHANGEARTIFICIAL = "changeArtificial?userToken=%s&cityId=%s&title=%s";// 人工变更
-        public final static String BTPEOPLE = "btPeople?userToken=%s&cityId=%s&title=%s";// 补退人工变更
-        public final static String REFUNDITEMDETAIL = "refundItemDetail?userToken=%s&cityId=%s&title=%s";// 退人工审核
-        public final static String MATERIALCONSUMPTION = "materialConsumption?userToken=%s&cityId=%s&title=%s";// 材料用量
-        public final static String HPMANAGE = "hpManage?userToken=%s&cityId=%s&title=%s";//货品管理
-        public final static String MYINVITECODE = "myInviteCode?userToken=%s&cityId=%s&title=%s";//我的邀请码
-        public final static String HPDETAIL = "hpDetail?userToken=%s&cityId=%s&title=%s";//货品详情
-        public final static String REQUIREGOODSLIST = "requireGoodsList?userToken=%s&cityId=%s&title=%s";//要货(补货、退货)
-        public final static String COMFIRMGOODSLIST = "comfirmGoodsList?userToken=%s&cityId=%s&title=%s";//要货确认
-        public final static String CONFIRMBTWORKER = "confirmBTworker?userToken=%s&cityId=%s&title=%s";//补退人工
-        public final static String BTRECORDLIST = "btRecordList?userToken=%s&cityId=%s&title=%s";//补货退货记录
-        public final static String BTRECORDDETAIL = "btRecordDetail?userToken=%s&cityId=%s&title=%s";//补货退货记录详情
-        public final static String GJGYLIST = "gjgyList?userToken=%s&cityId=%s&title=%s";//工价工艺
-        public final static String GJGYDETAIL = "gjgyDetail?userToken=%s&cityId=%s&title=%s";//工价工艺详情
-        public final static String GJGYGOODSDETAIL = "gjgyGoodsDetail?userToken=%s&cityId=%s&title=%s";//商品详情(工价工艺)
-        public final static String RECIVEGOODSLIST = "reciveGoodsList?userToken=%s&cityId=%s&title=%s";//收货
-        public final static String RECIVEGOODSDETAIL = "reciveGoodsDetail?userToken=%s&cityId=%s&title=%s";//收货清单
-        public final static String PARTGOODSRECIVE = "partGoodsRecive?userToken=%s&cityId=%s&title=%s";//部分收货
-        public final static String INTEGRATIONLIST = "integrationList?userToken=%s&cityId=%s&title=%s";//积分记录
         public final static String JUGLELIST = "jugleList?userToken=%s&cityId=%s&title=%s";//评价记录
-        public final static String GJREGISTERPROTOCOL = "gjRegisterProtocol?userToken=%s&cityId=%s&title=%s";//注册协议
-        public final static String PROJECTDRAWINGLIST = "projectDrawingList?userToken=%s&cityId=%s&title=%s";//施工图
-        public final static String QRCODE = "qrCode?userToken=%s&cityId=%s&title=%s";//二维码
-        public final static String PROJECTRECORD = "projectRecord?userToken=%s&cityId=%s&title=%s";//工地记录
-        public final static String PROJECTADRESSLIST = "projectAdressList?userToken=%s&cityId=%s&title=%s";//工地通讯录
-        public final static String GJJINGSUANLIST = "jsCraftsman?userToken=%s&cityId=%s&title=%s";//精算
-        public final static String CONFIRMQIANGDAN = "confirmQiangdan?userToken=%s&cityId=%s&title=%s";//抢单确认
-        public final static String GJMANAGERJINGSUAN = "gjManagerJingSuan?userToken=%s&cityId=%s&title=%s";//精算
-        public final static String GJMANAGERISOK = "gjManagerIsOk?title=%s";//已抢单
         public final static String COMFIRMAPPLY = "comfirmApply?userToken=%s&cityId=%s&title=%s";//审核申请
-        public final static String COMFIRMSTOPPROJECT = "comfirmStopProject?userToken=%s&cityId=%s&title=%s";//审核停工
-        public final static String COMFIRMFAIL = "comfirmFail?userToken=%s&cityId=%s&title=%s";//审核不通过
         public final static String READPROJECTINFO = "readProjectInfo?userToken=%s&cityId=%s&title=%s";//阅读交底项目
-        public final static String ABOUTUS = "aboutUs?userToken=%s&cityId=%s&title=%s";//关于我们
         public final static String JIANGFALIST = "jiangFaList?userToken=%s&cityId=%s&title=%s";//奖罚记录
-        public final static String JIANGFADETAIL = "jiangFaDetail?userToken=%s&cityId=%s&title=%s";//奖罚详情
-        public final static String COMPALIN = "compalin?userToken=%s&cityId=%s&title=%s";//申诉
-        public final static String HELPCENTER = "helpCenter?userToken=%s&cityId=%s&title=%s";//帮助中心
-        public final static String ORDERRECORD = "orderRecord?userToken=%s&cityId=%s&title=%s";//接单记录
         public final static String AFFIRMGRAB = "affirmGrab?userToken=%s&cityId=%s&title=%s";//抢单确认页
-        public final static String PROCESSREQUIRE = "processRequire?userToken=%s&cityId=%s&title=%s";//工艺要求
-        public final static String PROCESSDETAIL = "processDetail?userToken=%s&cityId=%s&title=%s";//工艺详情
-        public final static String GJPRICE = "gjPrice?userToken=%s&cityId=%s&title=%s";//工匠报价
-        public final static String CASHRECORD = "cashRecord?userToken=%s&cityId=%s&title=%s";//提现记录
-        public final static String MYTASK = "myTask?userToken=%s&cityId=%s&title=%s";//我的任务
-        public final static String MYBANKCARD = "myBankCard?userToken=%s&cityId=%s&title=%s";//银行卡（添加）
-        public final static String MYBANKCARDYES = "myBankCardYes?userToken=%s&cityId=%s&title=%s";//银行卡（已添加）
-        public final static String GJBJDETAILS = "gjbjDetails?userToken=%s&cityId=%s&title=%s";//工匠报价详情
         public final static String JFREGULATIONS = "jfRegulations?userToken=%s&cityId=%s&title=%s";//选择奖罚条例
-        public final static String JFREASON = "jfReason?userToken=%s&cityId=%s&title=%s";//奖罚原因
-        public final static String JSCRAFTSMAN = "jsCraftsman?userToken=%s&cityId=%s&title=%s";//精算（工匠）
-        public final static String JSDETAILS = "jsDetails?userToken=%s&cityId=%s&title=%s";//精算（工匠）详情
     }
 
     /**
      * PageAddress 业主端页面跳转地址
      */
     public static class YZPageAddress {
-        //        public final static String *-="*-?userToken=%s&cityId=%s&title=%s";//施工现场
-        //        public final static String *-="*-?userToken=%s&cityId=%s&title=%s";//参考报价
-        //        public final static String **-="**-?userToken=%s&cityId=%s&title=%s";//联系客服
-        public final static String INDEX = "index?userToken=%s&cityId=%s&title=%s";//首页
-        public final static String GJDETAIL = "gjDetail?userToken=%s&cityId=%s&title=%s";//直连工匠
-        public final static String TMGJDETAIL = "tmgjDetail?userToken=%s&cityId=%s&title=%s";//透明工价
-        public final static String BGGYDETAIL = "bggyDetail?userToken=%s&cityId=%s&title=%s";//标杆工艺
-        public final static String BGGYMARKDETAIL = "bggyMarkDetail?userToken=%s&cityId=%s&title=%s";//标杆工艺详情
-        public final static String YXCLDETAIL = "yxclDetail?userToken=%s&cityId=%s&title=%s";//严选材料
-        public final static String NEWDECORATEDETAIL = "newDecorateDetail?userToken=%s&cityId=%s&title=%s";//新装修
-        public final static String JGGJDETAIL = "jggjDetail?userToken=%s&cityId=%s&title=%s";//精干工匠
-        public final static String QCJGDETAIL = "qcjgDetail?userToken=%s&cityId=%s&title=%s";//全程监管
-        public final static String REFERCEPRICEDETAIL = "refercePriceDetail?userToken=%s&cityId=%s&title=%s";//参考估算报价
-        public final static String HOUSEINSPECTION = "houseInspection?userToken=%s&cityId=%s&title=%s";//我要验房
-        public final static String ZHINAN = "zhinan?userToken=%s&cityId=%s&title=%s";//装修指南
-        public final static String CONFIRMAPPLY = "confirmApply?userToken=%s&cityId=%s&title=%s";//审核申请
-        public final static String TingGong = "examineShutdown?userToken=%s&cityId=%s&title=%s";//业主审核停工
-
-        public final static String JOBLOCATIONDETAIL = "jobLocationDetails?userToken=%s&cityId=%s&title=%s";//施工现场详情
-        public final static String SHIGONG = "shigong?userToken=%s&cityId=%s&title=%s";//施工流程
-        public final static String BANKCARDALREADYADD = "bankCardAlreadyAdd?userToken=%s&cityId=%s&title=%s";//我的-银行卡
-        public final static String BANDCARD = "bandCard?userToken=%s&cityId=%s&title=%s";//我的-银行卡（add）
-        public final static String ORDERLIST = "orderList?userToken=%s&cityId=%s&title=%s";//我的-我的订单
-        public final static String ORDERDETAIL = "orderDetail?userToken=%s&cityId=%s&title=%s";//我的-订单详情
-        public final static String MYQUALITYASSURANCECARD = "myQualityAssuranceCard?userToken=%s&cityId=%s&title=%s";//我的-我的质保卡
-        public final static String MYQUALITYASSURANCECARDDETAILS = "myQualityAssuranceCardDetails?userToken=%s&cityId=%s&title=%s";//我的-我的质保卡详情
-        public final static String WORKINGDETAILS = "workingDetails?userToken=%s&cityId=%s&title=%s";//工序记录及工匠详情
-        public final static String MYGOODS = "myGoods?userToken=%s&cityId=%s&title=%s";//我购买的
-        public final static String MYWAREDETAILS = "myWareDetails?userToken=%s&cityId=%s&title=%s";//我购买的-商品详情
-        public final static String MYGOODSAPPLYRETURN = "myGoodsApplyReturn?userToken=%s&cityId=%s&title=%s";//我的商品-申请退款
-        public final static String COMFIRMAPPLYRETURN = "comfirmApplyReturn?userToken=%s&cityId=%s&title=%s";//我的商品-确认退款
-        public final static String REFUNDLIST = "refundList?userToken=%s&cityId=%s&title=%s";//要补退记录
-        public final static String APPLYRETURNDETAIL = "applyReturnDetail?userToken=%s&cityId=%s&title=%s";//我的商品-退款记录详情
-        public final static String RECEIVING = "receiving?userToken=%s&cityId=%s&title=%s";//收货
-        public final static String CONSIGNMENTGOODS = "consignmentGoods?userToken=%s&cityId=%s&title=%s";//收货清单
-        public final static String CONSIGNMENTSHEET = "consignmentSheet?userToken=%s&cityId=%s&title=%s";//部分收货
-        public final static String CONFIRMACTUARY = "confirmActuary?userToken=%s&cityId=%s&title=%s";//确认精算
         public final static String CONFIRMACTUARYDETAIL = "confirmActuaryDetail?userToken=%s&cityId=%s&title=%s";//精算明细(材料明细)
         public final static String COMMO = "commo?userToken=%s&cityId=%s&title=%s";//精算-商品详情
         public final static String GOODSDETAIL = "goodsDetail?userToken=%s&cityId=%s&title=%s";//精算-商品详情
         public final static String COMMODITY = "commodity?userToken=%s&cityId=%s&title=%s";//精算-商品更换
-        public final static String WAITINGPAYDETAIL = "waitingPayDetail?userToken=%s&cityId=%s&title=%s";//待付款明细
-        public final static String MYSHOPLIST = "myShopList?userToken=%s&cityId=%s&title=%s";//自购清单
-        public final static String DESIGNLIST = "applyDesign?userToken=%s&cityId=%s&title=%s";//审核平面图/设计图
-        public final static String JINGSUANLIST = "jingsuanList?userToken=%s&cityId=%s&title=%s";//精算
-        public final static String CONSTUCTIONRECORD = "constuctionRecord?userToken=%s&cityId=%s&title=%s";//施工记录
-        public final static String YZREGISTERPROTOCOL = "yzRegisterProtocol?userToken=%s&cityId=%s&title=%s";//注册协议
-
-        public final static String TUIPRODUCTEXAMINE = "tuiProductExamine?userToken=%s&cityId=%s&title=%s";//大管家确认退货审核
 
     }
 

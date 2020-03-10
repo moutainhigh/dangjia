@@ -40,11 +40,19 @@
             t.category_label_ids categoryLabelId,
             t.owner_display ownerDisplay
         FROM
-          dj_basics_goods_category t,dj_basics_goods_category t1
+          dj_basics_goods_category t
+            <if test="categoryLabelId!=null and categoryLabelId!=''">
+                ,dj_basics_goods_category t1
+            </if>
         WHERE
           t.parent_id = #{parentId}
-          and ( t.id=t1.parent_top or t.parent_top=t1.parent_top)
         <if test="categoryLabelId!=null and categoryLabelId!=''">
+            <if test="parentId!=null and parentId=='1'">
+                and  t.id=t1.parent_top
+            </if>
+            <if test="parentId!=null and parentId!='1'">
+                and (t.id=t1.parent_id or t.id=t1.id)
+            </if>
           and FIND_IN_SET(#{categoryLabelId},t1.category_label_ids)
         </if>
         GROUP BY t.id

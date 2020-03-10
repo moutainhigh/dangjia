@@ -385,8 +385,8 @@ public class RepairMendOrderService {
                 iMendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 if(orderSource==4){
                     //推送消息给业主退货退款通知
-//                    configMessageService.addConfigMessage( AppType.ZHUANGXIU, member.getId(),
-//                            "0", "有退款到账啦", String.format(DjConstants.PushMessage.YEZHUTUIHUO),7, "量房后发现，支付面积大于施工面积");
+                    configMessageService.addConfigMessage( AppType.ZHUANGXIU, member.getId(),
+                            "0", "有退款到账啦", String.format(DjConstants.PushMessage.YEZHUTUIHUO),7, "量房后发现，支付面积大于施工面积");
 
                 }
             }

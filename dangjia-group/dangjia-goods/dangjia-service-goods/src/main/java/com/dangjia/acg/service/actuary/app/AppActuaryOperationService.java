@@ -19,6 +19,7 @@ import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.mapper.sup.IShopMapper;
 import com.dangjia.acg.mapper.sup.IShopProductMapper;
 import com.dangjia.acg.modle.activity.DjActivitySession;
+import com.dangjia.acg.modle.activity.DjStoreActivity;
 import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
 import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
@@ -346,7 +347,7 @@ public class AppActuaryOperationService {
             DjStoreActivityProduct djStoreActivityProduct =
                     iGoodsDjStoreActivityProductMapper.selectByPrimaryKey(storeActivityProductId);
             if(djStoreActivityProduct!=null){
-                goodsDTO.setRushPurchasePrice(djStoreActivityProduct.getRushPurchasePrice());
+                goodsDTO.setRushPurchasePrice(new BigDecimal(djStoreActivityProduct.getRushPurchasePrice()));
                 if(djStoreActivityProduct.getActivityType()==1) {
                     DjStoreParticipateActivities djStoreParticipateActivities
                             = iGoodsDjStoreParticipateActivitiesMapper.selectByPrimaryKey(djStoreActivityProduct.getStoreParticipateActivitiesId());
@@ -354,16 +355,23 @@ public class AppActuaryOperationService {
                             iGoodsDjActivitySessionMapper.selectByPrimaryKey(djStoreParticipateActivities.getActivitySessionId());
                     goodsDTO.setEndSession(djActivitySession.getEndSession());
                     goodsDTO.setSessionStartTime(djActivitySession.getSessionStartTime());
+                    goodsDTO.setActivityType(djStoreActivityProduct.getActivityType());
                 }else if(djStoreActivityProduct.getActivityType()==2) {
+                    DjStoreParticipateActivities djStoreParticipateActivities
+                            = iGoodsDjStoreParticipateActivitiesMapper.selectByPrimaryKey(djStoreActivityProduct.getStoreParticipateActivitiesId());
+                    DjStoreActivity djStoreActivity =
+                            iGoodsDjStoreActivityMapper.selectByPrimaryKey(djStoreParticipateActivities.getStoreActivityId());
                     String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
                     Map map=new HashMap();
-                    List<Map> list = iGoodsDjStoreActivityMapper.querySpellDeals(storeActivityProductId);
+                    List<Map> list = iGoodsDjStoreActivityMapper.querySpellDeals(djStoreActivityProduct.getId());
                     list.forEach(a ->{
                         a.put("head",imageAddress+a.get("head"));
                     });
                     map.put("spellGroup",list.size());
                     map.put("list",list);
                     goodsDTO.setMap(map);
+                    goodsDTO.setSpellGroup(djStoreActivity.getSpellGroup());
+                    goodsDTO.setActivityType(djStoreActivityProduct.getActivityType());
                 }
             }
             //如果商品为0：材料；1：服务
@@ -475,6 +483,14 @@ public class AppActuaryOperationService {
             goodsDTO.setValueIdArr(productTemplate.getValueIdArr());
             goodsDTO.setValueNameArr(productTemplate.getValueNameArr());
             goodsDTO.setBrandId(goods.getBrandId());
+            if (!CommonUtil.isEmpty(goods.getBrandId())) {
+                Brand brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
+                goodsDTO.setBrandName(brand.getName());
+                goodsDTO.setBrandImage(imageAddress+brand.getImage());//品牌图片
+                if (!CommonUtil.isEmpty(goodsDTO.getValueNameArr())) {
+                    goodsDTO.setValueNameArr(goodsDTO.getBrandName() + " " + productTemplate.getValueNameArr());
+                }
+            }
 
             if (!CommonUtil.isEmpty(goodsDTO.getValueNameArr())) {
                 goodsDTO.setValueNameArr(goodsDTO.getValueNameArr().replaceAll(",", " "));
@@ -639,6 +655,20 @@ public class AppActuaryOperationService {
                                 avDTO.setAttributeValueId(atId.getId());
                                 avDTO.setState(0);//未选中
                             }
+                        }
+                    }
+                }
+            }
+
+            //给未匹配到的属性设置商品ID
+            for (DjBasicsProductTemplate atId : productList) {
+                List<String> attributeTempVals = Arrays.asList(atId.getValueIdArr().split(","));
+                if(attributeDTOList.size()>0) {
+                    AttributeDTO attributeDTO = attributeDTOList.get(0);
+                    for (AttributeValueDTO avDTO : attributeDTO.getValueDTOList()) {
+                        if (avDTO.getState() == 2 && attributeTempVals.contains(avDTO.getAttributeValueId())) {//如果包含该属性
+                            avDTO.setAttributeValueId(atId.getId());
+                            avDTO.setState(0);//未选中
                         }
                     }
                 }

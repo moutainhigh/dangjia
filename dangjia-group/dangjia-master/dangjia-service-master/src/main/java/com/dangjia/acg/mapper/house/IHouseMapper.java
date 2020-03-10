@@ -183,4 +183,7 @@ public interface IHouseMapper extends Mapper<House> {
 
     Date getModifyDate(@Param("taskId") String taskId);
 
+    /** 查询房子列表 - 根据小区名 */
+    List<House> queryHouseListByResidential(@Param("residential") String residential);
+
 }

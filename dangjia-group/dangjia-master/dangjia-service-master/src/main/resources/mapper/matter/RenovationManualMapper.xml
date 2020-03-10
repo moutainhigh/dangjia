@@ -138,5 +138,17 @@
         </if>
     </select>
 
+    <!-- 根据名称查询攻略 -->
+    <select id="getRenovationManualByName" resultType="com.dangjia.acg.modle.matter.RenovationManual">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_matter_renovation_manual
+        WHERE state=0
+        <if test="name != null and name != ''" >
+            AND `name` LIKE CONCAT('%',#{name},'%')
+        </if>
+        AND data_status = 0
+    </select>
+
 </mapper>
 

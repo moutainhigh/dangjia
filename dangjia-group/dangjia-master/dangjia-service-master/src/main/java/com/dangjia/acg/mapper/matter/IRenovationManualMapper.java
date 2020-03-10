@@ -17,5 +17,8 @@ public interface IRenovationManualMapper extends Mapper<RenovationManual> {
     List<RenovationManual> getRenovationManualByWorkertyId(String workertyid);
 
     List<RenovationManualDTO> getStrategyList(@Param("workerTypeIds") String[] workerTypeIds,@Param("type") Integer type);
+
+    /** 根据名称查询攻略 */
+    List<RenovationManual> getRenovationManualByName(@Param("name")String name);
 }
 
