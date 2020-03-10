@@ -43,12 +43,7 @@
           dj_basics_goods_category t,dj_basics_goods_category t1
         WHERE
           t.parent_id = #{parentId}
-        <if test="parentId!=null and parentId=='1'">
-            and t.id=t1.parent_top
-        </if>
-        <if test="parentId!=null and parentId!='1'">
-            and ( t.id=t1.parent_id or t.id=t1.id)
-        </if>
+          and ( t.id=t1.parent_top or t.parent_top=t1.parent_top)
         <if test="categoryLabelId!=null and categoryLabelId!=''">
           and FIND_IN_SET(#{categoryLabelId},t1.category_label_ids)
         </if>
