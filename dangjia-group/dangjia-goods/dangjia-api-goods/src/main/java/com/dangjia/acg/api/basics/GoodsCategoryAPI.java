@@ -78,7 +78,8 @@ public interface GoodsCategoryAPI {
                                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                                  @RequestParam("goodsCategoryId") String goodsCategoryId,
                                                  @RequestParam("likeAttrName") String likeAttrName,
-                                                 @RequestParam("cityId") String cityId);
+                                                 @RequestParam("cityId") String cityId,
+                                                 @RequestParam("type") Integer type);
 
     /**
      * 根据属性名称模糊查询属性

@@ -170,7 +170,7 @@ public class TaskService {
                 buttonDTO.setState(0);
             }
         }
-        MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(null,houseId);
+        MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(null,buttonDTO.getHouseId());
         if(memberAddress!=null){
             buttonDTO.setHouseName(memberAddress.getAddress());
         }

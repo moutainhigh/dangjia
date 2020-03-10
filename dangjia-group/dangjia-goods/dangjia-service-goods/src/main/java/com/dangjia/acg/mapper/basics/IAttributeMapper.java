@@ -29,7 +29,7 @@ public interface IAttributeMapper extends Mapper<Attribute> {
 	AttributePO queryPOById(String id);
 
 	//根据类别id查询关联属性
-	List<Attribute> queryAttributeByCategoryId(@Param("categoryId") String categoryId,@Param("likeAttrName") String likeAttrName,@Param("cityId")String cityId);
+	List<Attribute> queryAttributeByCategoryId(@Param("categoryId") String categoryId,@Param("likeAttrName") String likeAttrName,@Param("cityId")String cityId,@Param("type") Integer type);
 
 	List<Attribute> queryAttributeByCategoryIdAndAttrName(@Param("categoryId") String categoryId,@Param("attrName") String attrName,@Param("cityId")String cityId);
 
