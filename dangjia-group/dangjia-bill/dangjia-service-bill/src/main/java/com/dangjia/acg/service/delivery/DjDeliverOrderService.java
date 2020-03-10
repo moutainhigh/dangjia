@@ -395,15 +395,15 @@ public class DjDeliverOrderService {
         bigListBean.setName("我的工具");
         if(workInFoDTO.getHouseType()==3){
             bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shieji));
-            bigList.add(bigListBean);
+           // bigList.add(bigListBean);
         }
         if(workInFoDTO.getHouseType()==4){
             bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.jingsuan));
-            bigList.add(bigListBean);
+           // bigList.add(bigListBean);
         }
         if(workInFoDTO.getHouseType()==5){
             bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shigong));
-            bigList.add(bigListBean);
+           // bigList.add(bigListBean);
         }
         workInFoDTO.setBigList(bigList);//添加菜单到返回体中
     }

@@ -28,11 +28,13 @@ import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseExpend;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.house.MyHouseService;
+import com.dangjia.acg.service.member.MemberAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -95,6 +97,9 @@ public class TaskService {
 
     @Autowired
     private TaskStackService taskStackService;
+    @Autowired
+    private MemberAddressService memberAddressService;
+
     /**
      * 任务列表
      */
@@ -164,6 +169,10 @@ public class TaskService {
             } else {
                 buttonDTO.setState(0);
             }
+        }
+        MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(null,houseId);
+        if(memberAddress!=null){
+            buttonDTO.setHouseName(memberAddress.getAddress());
         }
 
         buttonDTO.setInsuranceDay(-1);

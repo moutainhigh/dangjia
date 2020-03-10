@@ -39,9 +39,9 @@ public class MasterProductTemplateService {
                 AttributeValue attributeValue = iMasterAttributeValueMapper.selectByPrimaryKey(valueId);
                 if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
                     Attribute attribute=iMasterAttributeMapper.selectByPrimaryKey(attributeValue.getAttributeId());
-                    if (attribute!=null&&attribute.getType()==2&&StringUtils.isBlank(strNewValueNameArr)) {
+                    if (attribute!=null&&attribute.getType()==1&&StringUtils.isBlank(strNewValueNameArr)) {
                         strNewValueNameArr = attributeValue.getName();
-                    } else if (attribute!=null&&attribute.getType()==2){
+                    } else if (attribute!=null&&attribute.getType()==1){
                         strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
                     }
                 }
