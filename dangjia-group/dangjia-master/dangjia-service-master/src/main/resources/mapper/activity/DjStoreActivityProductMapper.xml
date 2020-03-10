@@ -206,7 +206,7 @@
 
     <select id="queryHomeGroupActivities" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
         SELECT
-            a.id,
+            b.id,
             c.id AS productId,
             c.image,
             c.product_name AS productName,
@@ -225,8 +225,8 @@
         INNER JOIN dj_basics_storefront_product c ON c.id = b.product_id
         INNER JOIN dj_basics_storefront d ON d.id = c.storefront_id
         INNER JOIN dj_basics_product_template e ON e.id = c.prod_template_id
-        INNER JOIN dj_store_activity f ON a.store_activity_id=f.id
         LEFT JOIN dj_activity_session g ON g.id = a.activity_session_id
+        INNER JOIN dj_store_activity f ON a.store_activity_id=f.id
         <choose>
             <when test="null!=activitySessionId and ''!=activitySessionId">
                 AND a.activity_session_id=#{activitySessionId}

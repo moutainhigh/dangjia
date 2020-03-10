@@ -98,6 +98,9 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("品牌名称")
     private String brandName;
 
+    @ApiModelProperty("品牌图片")
+    private String brandImage;
+
     @ApiModelProperty("商品类型（类型0：材料；1：服务；2：人工；3：体验；4：增值；5：维保）")
     private Integer productType;
 
@@ -190,7 +193,7 @@ public class ActuarialProductAppDTO {
     private String srcGroupId;
 
     @ApiModelProperty("抢购价格")
-    private Double rushPurchasePrice;
+    private BigDecimal rushPurchasePrice;
 
     @Desc(value = "场次开始时间")
     @ApiModelProperty("场次开始时间")
@@ -199,6 +202,10 @@ public class ActuarialProductAppDTO {
     @Desc(value = "场次结束时间")
     @ApiModelProperty("场次结束时间")
     private Date endSession;
+
+    @Desc(value = "拼团人数")
+    @ApiModelProperty("拼团人数")
+    private Integer spellGroup;
 
     @ApiModelProperty("关联的工艺ID，多个逗号分割")
     private String technologyIds;
@@ -212,6 +219,8 @@ public class ActuarialProductAppDTO {
 
     //拼团
     private Map<String,Object> map;//拼团
+
+    private Integer activityType;//1:限时购 2：拼团购
 
 
 }
