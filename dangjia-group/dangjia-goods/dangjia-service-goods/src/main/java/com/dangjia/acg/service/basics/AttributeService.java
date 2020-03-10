@@ -49,11 +49,11 @@ public class AttributeService {
     private static Logger LOG = LoggerFactory.getLogger(AttributeService.class);
 
     //根据类别id查询关联属性
-    public ServerResponse<PageInfo> queryGoodsAttribute(PageDTO pageDTO, String goodsCategoryId, String likeAttrName,String cityId) {
+    public ServerResponse<PageInfo> queryGoodsAttribute(PageDTO pageDTO, String goodsCategoryId, String likeAttrName,String cityId,Integer type) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try {
-            List<Attribute> caList  = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, likeAttrName,cityId);
+            List<Attribute> caList  = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, likeAttrName,cityId,type);
             List<Map<String, Object>> rListMap = new ArrayList<>();
             PageInfo pageResult = new PageInfo(caList);
             for (Attribute ca : caList) {
@@ -174,7 +174,7 @@ public class AttributeService {
     //新增属性及其属性选项
     public ServerResponse insertGoodsAttribute(String goodsCategoryId, String attributeName, Integer type, String jsonStr,String cityId) {
         try {
-            List<Attribute> attributeList = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, null,cityId);
+            List<Attribute> attributeList = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, null,cityId,null);
             for (Attribute attribute : attributeList) {
                 if (attribute.getName().equals(attributeName))
                     return ServerResponse.createByErrorMessage("不能重复添加属性名称");
