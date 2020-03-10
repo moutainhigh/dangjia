@@ -221,4 +221,31 @@
         from
         dj_basics_storefront_product where id=#{id}
     </select>
+
+    <!-- 通过货品或者商品名称查询 -->
+    <select id="queryProductGroundByKeyWord" resultType="com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO">
+
+        SELECT
+        bsp.id,
+        IFNULL(bsp.product_name,'')  AS productName
+        FROM
+        dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
+        where bsp.data_status=0
+        and
+        (
+        bsp.detail_image is null  or
+        bsp.image is null   or
+        bsp.product_name is null or
+        bsp.sell_price is null or
+        bsp.supplied_num is  null
+        )
+        <if test="null!=keyWord and ''!=keyWord">
+            and (
+            bg.NAME LIKE CONCAT('%',#{keyWord},'%') or
+            bsp.product_name LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+    </select>
+
 </mapper>

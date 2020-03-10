@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.recommend.IRecommendTargetMapper">
+
+    <!-- 查询列表 -->
+    <select id="queryList" resultType="com.dangjia.acg.modle.recommend.RecommendTargetInfo">
+
+        SELECT
+            id
+            , item_sub_id 'itemSubId'
+            , target_type 'targetType'
+            , target_id 'targetId'
+            , target_name 'targetName'
+            , sort
+            , click_number 'clickNumber'
+        FROM
+            dj_recommend_target_info
+        WHERE
+            item_sub_id = #{itemSubId}
+        <if test="null != targetType and ''!=targetType">
+            AND target_type = #{targetType}
+        </if>
+        <if test="null != targetName and ''!=targetName">
+            AND target_name LIKE CONCAT('%',#{targetName},'%')
+        </if>
+            AND data_status = 0
+
+    </select>
+
+    <!-- 删除单个 -->
+    <update id="deleteSingle">
+        DELETE FROM dj_recommend_target_info WHERE id = #{id}
+    </update>
+
+    <!-- 查询单个 -->
+    <select id="querySingle" resultType="com.dangjia.acg.modle.recommend.RecommendTargetInfo">
+        SELECT
+            id
+            , item_sub_id 'itemSubId'
+            , target_type 'targetType'
+            , target_id 'targetId'
+            , target_name 'targetName'
+            , sort
+            , click_number 'clickNumber'
+        FROM
+            dj_recommend_target_info
+        WHERE
+            id = #{id}
+            AND data_status = 0
+    </select>
+
+    <!-- 修改单个 -->
+    <update id="updateSingle">
+        update dj_recommend_target_info
+        set modify_date = #{modifyDate}
+        <if test="null != sort">
+            , sort = #{sort}
+        </if>
+        <if test="null != clickNumber">
+            , click_number = #{clickNumber}
+        </if>
+        WHERE
+            id = #{id}
+    </update>
+
+    <!-- 查询推荐目标个数 -->
+    <select id="queryCount" resultType="java.lang.Integer">
+        SELECT
+            count(*)
+        FROM
+            dj_recommend_target_info
+        WHERE
+            item_sub_id = #{itemSubId}
+            AND target_type = #{targetType}
+            AND target_id = #{targetId}
+    </select>
+
+    <!-- 新增单个 -->
+    <insert id="addSingle" parameterType="com.dangjia.acg.modle.recommend.RecommendTargetInfo">
+        INSERT INTO dj_recommend_target_info  (
+            id,create_date,modify_date,data_status,
+            item_sub_id,target_type,target_id,target_name,
+            image,sort,click_number )
+        VALUES(
+            #{id},#{createDate},#{modifyDate},#{dataStatus}
+            ,#{itemSubId},#{targetType},#{targetId},#{targetName}
+            ,#{image},#{sort},#{clickNumber} )
+
+    </insert>
+
+</mapper>
