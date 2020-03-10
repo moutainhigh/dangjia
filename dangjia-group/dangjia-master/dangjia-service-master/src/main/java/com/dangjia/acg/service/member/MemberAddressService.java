@@ -260,8 +260,13 @@ public class MemberAddressService {
         Example example = new Example(MemberAddress.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(MemberAddress.MEMBER_ID, member.getId());
-        if (renovationType != null && renovationType != -1)
+
+        if(renovationType != null &&renovationType==2){//查未被装修过的装修地址
+            criteria.andEqualTo(MemberAddress.RENOVATION_TYPE, 1);
+            criteria.andIsNull(MemberAddress.HOUSE_ID);
+        }else if (renovationType != null && renovationType != -1){
             criteria.andEqualTo(MemberAddress.RENOVATION_TYPE, renovationType);
+        }
         criteria.andEqualTo(MemberAddress.DATA_STATUS, 0);
         example.orderBy(MemberAddress.CREATE_DATE).desc();
         List<MemberAddress> memberAddresses = iMasterMemberAddressMapper.selectByExample(example);
