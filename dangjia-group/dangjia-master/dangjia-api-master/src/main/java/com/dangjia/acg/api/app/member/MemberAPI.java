@@ -585,6 +585,8 @@ public interface MemberAPI {
     @RequestMapping(value = "member/insurances/queryMember")
     @ApiOperation(value = "我的界面", notes = "我的界面")
     ServerResponse  queryMember(@RequestParam("request") HttpServletRequest request,
-                                @RequestParam("userToken") String userToken);
+                                @RequestParam("userToken") String userToken,
+                                @RequestParam("houseId") String houseId,
+                                @RequestParam("cityId") String cityId);
 }
 

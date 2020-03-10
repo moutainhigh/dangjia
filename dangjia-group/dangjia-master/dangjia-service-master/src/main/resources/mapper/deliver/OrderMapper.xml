@@ -334,5 +334,109 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         AND t1.shipping_state in(0,4,5)
         AND ma.member_id = #{memberId}
     </select>
+
+    <select id="queryDeliverOrderObligation" resultType="java.lang.Integer">
+        SELECT
+          count(0)
+        FROM
+            dj_deliver_order t1,
+            dj_pay_business_order t2
+        WHERE
+          t1.business_order_number = t2.number
+        AND (t1.id = t1.parent_order_id or t1.parent_order_id is null)
+        AND t2.state in(1,2)
+        AND t1.data_status=0
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND t1.house_id=#{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = t1.address_id
+                        OR ma.house_id = t1.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+    </select>
+
+
+    <select id="queryAppHairOrderList" resultType="java.lang.Integer">
+        select
+          count(0)
+        from dj_deliver_order_split dos
+        LEFT JOIN dj_deliver_order_split_item dosi on dos.id = dosi.order_split_id
+        LEFT JOIN dj_deliver_split_deliver ddsd on dosi.split_deliver_id = ddsd.id
+        inner join dj_basics_storefront dbs on dbs.id=dosi.storefront_id
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND dos.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = dos.address_id
+                        OR ma.house_id = dos.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and dos.data_status = 0 and dos.apply_status = 2
+        <if test="cityId!=null and cityId!=''">
+            and  dos.city_id = #{cityId}
+        </if>
+        and (
+        (dosi.split_deliver_id is null or dosi.split_deliver_id = '')
+        or
+        (dosi.split_deliver_id is not null and ddsd.shipping_state = 0)
+        )
+    </select>
+
+
+    <select id="queryAppOrderList" resultType="java.lang.Integer">
+        select
+          count(0)
+        from dj_deliver_split_deliver ddsd
+        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND ddsd.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = ddsd.address_id
+                        OR ma.house_id = ddsd.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and ddsd.data_status = 0
+        <if test="cityId!=null and cityId!=''">
+            and  ddsd.city_id = #{cityId}
+        </if>
+            and   (ddsd.shipping_state = 1 or ddsd.shipping_state = 7)
+    </select>
 </mapper>
 

@@ -1753,7 +1753,7 @@ public class MemberService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryMember(String userToken) {
+    public ServerResponse queryMember(String userToken,String houseId,String cityId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1772,26 +1772,15 @@ public class MemberService {
             memberDTO.setDiscountCouponCount(activityRedPackRecordMapper.queryActivityRedCount(member.getId(), null));//优惠券数量(有效的）
 
 
-            example = new Example(Order.class);
             //待付款
-            example.createCriteria()
-                    .andEqualTo(Order.DATA_STATUS, 0)
-                    .andEqualTo(Order.ORDER_STATUS, 1);
-            memberDTO.setObligationCount(iOrderMapper.selectCountByExample(example));
+            memberDTO.setObligationCount(iOrderMapper.queryDeliverOrderObligation(member.getId(),houseId));
 
-            //已付款
-            example = new Example(Order.class);
-            example.createCriteria()
-                    .andEqualTo(Order.DATA_STATUS, 0)
-                    .andEqualTo(Order.ORDER_STATUS, 2);
-            memberDTO.setDeliverCount(iOrderMapper.selectCountByExample(example));
+            //待发货
+            memberDTO.setDeliverCount(iOrderMapper.queryAppHairOrderList(cityId,houseId,member.getId()));
 
             //待收货
-            example = new Example(Order.class);
-            example.createCriteria()
-                    .andEqualTo(Order.DATA_STATUS, 0)
-                    .andEqualTo(Order.ORDER_STATUS, 3);
-            memberDTO.setReceiveCount(iOrderMapper.selectCountByExample(example));
+            memberDTO.setReceiveCount(iOrderMapper.queryAppOrderList(cityId,member.getId(),houseId));
+
             memberDTO.setSurplusMoney(member.getSurplusMoney());
             return ServerResponse.createBySuccess("查询成功", memberDTO);
         } catch (Exception e) {
