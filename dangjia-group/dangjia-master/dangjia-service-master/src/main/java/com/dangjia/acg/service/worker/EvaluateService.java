@@ -230,10 +230,10 @@ public class EvaluateService {
                 member.setHaveMoney(haveMoney);
                 memberMapper.updateByPrimaryKeySelective(member);
             }
-            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(),
-                    "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,
-                            house.getHouseName()), "5");
+//            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+//            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(),
+//                    "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,
+//                            house.getHouseName()), "5");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -269,9 +269,9 @@ public class EvaluateService {
             houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(), 1));
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
-                    "阶段/整体审核超时扣钱提醒", String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI, house.getHouseName(),
-                            workerType.getName()), "0");
+//            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
+//                    "阶段/整体审核超时扣钱提醒", String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI, house.getHouseName(),
+//                            workerType.getName()), "0");
         }
     }
 
@@ -282,11 +282,11 @@ public class EvaluateService {
         if (member != null) {
             Double evaluation = configRuleUtilService.getAbsenteeismCount(member.getEvaluationScore());
             updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), houseFlow.getId(),new BigDecimal(evaluation), desc);
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+//            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
 
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
-                    workerType.getName() + desc,
-                    String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
+//            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
+//                    workerType.getName() + desc,
+//                    String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
         }
     }
 
@@ -498,24 +498,24 @@ public class EvaluateService {
                 temp_para.put("worker_name", workerType.getName());
                 JsmsUtil.sendSMS("15675101794", "164425", temp_para);
             }
-            Customer customer = customerMapper.getCustomerByMemberId(house.getMemberId());
-            if (customer != null && !CommonUtil.isEmpty(customer.getUserId())) {
-                //竣工消息推送
-                //获取线索ID
-                Example example1 = new Example(Clue.class);
-                example1.createCriteria()
-                        .andEqualTo(Clue.CUS_SERVICE, customer.getUserId())
-                        .andEqualTo(Clue.DATA_STATUS, 0)
-                        .andEqualTo(Clue.MEMBER_ID, house.getMemberId());
-                List<Clue> djAlreadyRobSingle = clueMapper.selectByExample(example1);
-                if (djAlreadyRobSingle.size() > 0) {
-                    MainUser user = userMapper.selectByPrimaryKey(customer.getUserId());
-                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                    configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "竣工提醒",
-                            "您有已竣工的房子【" + house.getHouseName() + "】", 0, url
-                                    + Utils.getCustomerDetails(house.getMemberId(), djAlreadyRobSingle.get(0).getId(), 1, "4"));
-                }
-            }
+//            Customer customer = customerMapper.getCustomerByMemberId(house.getMemberId());
+//            if (customer != null && !CommonUtil.isEmpty(customer.getUserId())) {
+//                //竣工消息推送
+//                //获取线索ID
+//                Example example1 = new Example(Clue.class);
+//                example1.createCriteria()
+//                        .andEqualTo(Clue.CUS_SERVICE, customer.getUserId())
+//                        .andEqualTo(Clue.DATA_STATUS, 0)
+//                        .andEqualTo(Clue.MEMBER_ID, house.getMemberId());
+//                List<Clue> djAlreadyRobSingle = clueMapper.selectByExample(example1);
+//                if (djAlreadyRobSingle.size() > 0) {
+//                    MainUser user = userMapper.selectByPrimaryKey(customer.getUserId());
+//                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+//                    configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "竣工提醒",
+//                            "您有已竣工的房子【" + house.getHouseName() + "】", 0, url
+//                                    + Utils.getCustomerDetails(house.getMemberId(), djAlreadyRobSingle.get(0).getId(), 1, "4"));
+//                }
+//            }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -593,11 +593,11 @@ public class EvaluateService {
 
                 //评价之后修改工人的好评率
                 updateFavorable(worker.getId());
-                if(worker.getWorkerType()==3){
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
-                }else {
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
-                }
+//                if(worker.getWorkerType()==3){
+//                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
+//                }else {
+//                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+//                }
             }
 //            if(houseFlow.getWorkerType()==3&&houseFlowApply.getApplyType()==2){
 //                //大管家竣工

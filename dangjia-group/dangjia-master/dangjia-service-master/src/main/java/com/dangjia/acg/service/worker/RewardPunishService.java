@@ -266,11 +266,11 @@ public class RewardPunishService {
             rewardPunishRecordMapper.insert(rewardPunishRecord);
             //工人ID账户奖罚积分和金额变更
             updateWorkerInfo(rewardPunishRecord.getId());
-            if (!CommonUtil.isEmpty(rewardPunishRecord.getHouseId()) && rewardPunishRecord.getHouseId() != null && rewardPunishRecord.getMemberId() != null) {
-                House house = houseMapper.selectByPrimaryKey(rewardPunishRecord.getHouseId());
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, rewardPunishRecord.getMemberId(),
-                        "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), "7");
-            }
+//            if (!CommonUtil.isEmpty(rewardPunishRecord.getHouseId()) && rewardPunishRecord.getHouseId() != null && rewardPunishRecord.getMemberId() != null) {
+//                House house = houseMapper.selectByPrimaryKey(rewardPunishRecord.getHouseId());
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, rewardPunishRecord.getMemberId(),
+//                        "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), "7");
+//            }
             //添加记录到督导工作记录中
             patrolRecordServices.addPatrolRecord(rewardPunishRecord.getOperatorId(),
                     rewardPunishRecord.getHouseId(), rewardPunishRecord.getRemarks(),

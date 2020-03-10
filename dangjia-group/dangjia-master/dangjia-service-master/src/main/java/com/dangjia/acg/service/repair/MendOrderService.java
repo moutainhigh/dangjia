@@ -354,14 +354,14 @@ public class MendOrderService {
                 changeOrder.setScheduleDay(dateNum);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKey(changeOrder);
-                House house = houseMapper.selectByPrimaryKey(houseId);
-                String urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=1";
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "退人工变更", String.format
-                        (DjConstants.PushMessage.YZ_T_003, house.getHouseName()), urlyz);
-
-                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=3";
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, mendOrder.getApplyMemberId(), "0", "退人工变更", String.format
-                        (DjConstants.PushMessage.GJ_T_010, house.getHouseName()), url);
+//                House house = houseMapper.selectByPrimaryKey(houseId);
+//                String urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=1";
+//                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "退人工变更", String.format
+//                        (DjConstants.PushMessage.YZ_T_003, house.getHouseName()), urlyz);
+//
+//                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=3";
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, mendOrder.getApplyMemberId(), "0", "退人工变更", String.format
+//                        (DjConstants.PushMessage.GJ_T_010, house.getHouseName()), url);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } catch (Exception e) {
@@ -476,18 +476,18 @@ public class MendOrderService {
             }
 
             if (this.addMendWorker(workerGoodsArr, mendOrder, workerTypeId)) {
-                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
-                if (workType.getType() != 3) {
-                    House house = houseMapper.selectByPrimaryKey(houseId);
-                    HouseFlow subHouseFlow = houseFlowMapper.getByWorkerTypeId(houseId, "3");
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=2";
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, subHouseFlow.getWorkerId(), "0", "退人工", String.format
-                            (DjConstants.PushMessage.DGJ_T_002, house.getHouseName()), url);
-
-                    url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=3";
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "退人工", String.format
-                            (DjConstants.PushMessage.GJ_T_003, house.getHouseName()), url);
-                }
+//                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
+//                if (workType.getType() != 3) {
+//                    House house = houseMapper.selectByPrimaryKey(houseId);
+//                    HouseFlow subHouseFlow = houseFlowMapper.getByWorkerTypeId(houseId, "3");
+//                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=2";
+//                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, subHouseFlow.getWorkerId(), "0", "退人工", String.format
+//                            (DjConstants.PushMessage.DGJ_T_002, house.getHouseName()), url);
+//
+//                    url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=3";
+//                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "退人工", String.format
+//                            (DjConstants.PushMessage.GJ_T_003, house.getHouseName()), url);
+//                }
                 return ServerResponse.createBySuccessMessage("保存成功");
             } else {
                 return ServerResponse.createByErrorMessage("添加明细失败");
@@ -530,10 +530,10 @@ public class MendOrderService {
                 houseService.insertConstructionRecordAll(mendOrder, changeOrder);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
-                House house = houseMapper.selectByPrimaryKey(houseId);
-                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=3";
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, mendOrder.getApplyMemberId(), "0", "补人工变更", String.format
-                        (DjConstants.PushMessage.GJ_B_002, house.getHouseName()), url);
+//                House house = houseMapper.selectByPrimaryKey(houseId);
+//                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=3";
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, mendOrder.getApplyMemberId(), "0", "补人工变更", String.format
+//                        (DjConstants.PushMessage.GJ_B_002, house.getHouseName()), url);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } catch (Exception e) {
@@ -679,15 +679,15 @@ public class MendOrderService {
             }
 
             if (this.addMendWorker(workerGoodsArr, mendOrder, workerTypeId)) {
-                HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseId, 3);
-                House house = houseMapper.selectByPrimaryKey(houseId);
-                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
-                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=2";
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "补人工", String.format
-                        (DjConstants.PushMessage.DGJ_B_001, house.getHouseName(), workType.getName()), url);
-
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "补人工", String.format
-                        (DjConstants.PushMessage.YZ_Y_001, house.getHouseName(), workType.getName()), "");
+//                HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseId, 3);
+//                House house = houseMapper.selectByPrimaryKey(houseId);
+//                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
+//                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=2";
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "补人工", String.format
+//                        (DjConstants.PushMessage.DGJ_B_001, house.getHouseName(), workType.getName()), url);
+//
+//                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "补人工", String.format
+//                        (DjConstants.PushMessage.YZ_Y_001, house.getHouseName(), workType.getName()), "");
                 return ServerResponse.createBySuccessMessage("保存成功");
             } else {
                 return ServerResponse.createByErrorMessage("添加明细失败");
@@ -939,14 +939,14 @@ public class MendOrderService {
                 mendOrder.setModifyDate(new Date());
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 houseService.insertConstructionRecord(mendOrder);
-                House house = houseMapper.selectByPrimaryKey(houseId);
-                if (worker.getWorkerType() == 3) {
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家补包工包料", String.format
-                            (DjConstants.PushMessage.STEWARD_B_SERVER, house.getHouseName()), "");
-                } else {
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠补材料", String.format
-                            (DjConstants.PushMessage.CRAFTSMAN_B_MATERIAL, house.getHouseName()), "");
-                }
+//                House house = houseMapper.selectByPrimaryKey(houseId);
+//                if (worker.getWorkerType() == 3) {
+//                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家补包工包料", String.format
+//                            (DjConstants.PushMessage.STEWARD_B_SERVER, house.getHouseName()), "");
+//                } else {
+//                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠补材料", String.format
+//                            (DjConstants.PushMessage.CRAFTSMAN_B_MATERIAL, house.getHouseName()), "");
+//                }
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } catch (Exception e) {

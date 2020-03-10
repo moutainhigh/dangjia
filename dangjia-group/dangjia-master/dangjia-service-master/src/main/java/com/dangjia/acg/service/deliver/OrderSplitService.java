@@ -164,10 +164,10 @@ public class OrderSplitService {
             splitDeliver.setSendTime(new Date());
             splitDeliver.setShippingState(1);//已发待收
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-            //业主
-            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "供应商发货", String.format
-                    (DjConstants.PushMessage.YZ_F_001, house.getHouseName()), "");
+//            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+//            //业主
+//            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "供应商发货", String.format
+//                    (DjConstants.PushMessage.YZ_F_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();

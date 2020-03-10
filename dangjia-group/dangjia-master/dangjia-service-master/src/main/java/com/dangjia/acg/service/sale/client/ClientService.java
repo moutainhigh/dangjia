@@ -394,9 +394,9 @@ public class ClientService {
 
 
             if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
-                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
-                        "您收到了一个跨域客户【"+ name +"】，快去分配给销售吧。", 0, url
-                                + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ,"待分配",store.getId()));
+//                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
+//                        "您收到了一个跨域客户【"+ name +"】，快去分配给销售吧。", 0, url
+//                                + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ,"待分配",store.getId()));
             return ServerResponse.createBySuccessMessage("提交成功");
         }
         //转入给对应的销售
@@ -465,17 +465,17 @@ public class ClientService {
         }
 
 //        String name=member.getNickName()!=null?member.getNickName():clue.getOwername()!=null?clue.getOwername():"线索客户";
-        if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
-            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
-                    "您收到了一个跨域客户【"+ name +"】，请及时跟进。", 0, url
-                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0"));
-
-        //店长推送消息
-        MainUser us = userMapper.selectByPrimaryKey(store.getUserId());
-        if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
-            configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "分配提醒",
-                    "您的销售【"+ user.getUsername() +"】，收到了一个跨域客户。", 0, url
-                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ," ",store.getId()));
+//        if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
+//            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
+//                    "您收到了一个跨域客户【"+ name +"】，请及时跟进。", 0, url
+//                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0"));
+//
+//        //店长推送消息
+//        MainUser us = userMapper.selectByPrimaryKey(store.getUserId());
+//        if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
+//            configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "分配提醒",
+//                    "您的销售【"+ user.getUsername() +"】，收到了一个跨域客户。", 0, url
+//                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ," ",store.getId()));
 
         return ServerResponse.createBySuccessMessage("提交成功");
     }
@@ -553,22 +553,22 @@ public class ClientService {
             user = userMapper.selectByPrimaryKey(customer.getUserId());
         }
         clueMapper.setFollow(clueId,phaseStatus,mcId);
-        if (user != null) {
-            Example example = new Example(StoreUser.class);
-            example.createCriteria().andEqualTo(StoreUser.USER_ID, user.getId())
-                    .andEqualTo(StoreUser.DATA_STATUS, 0);
-            List<StoreUser> storeUserList = iStoreUserMapper.selectByExample(example);
-            if (storeUserList.size() > 0) {
-                Store store = iStoreMapper.selectByPrimaryKey(storeUserList.get(0).getStoreId());
-                if (store != null) {
-                    MainUser userStore = userMapper.selectByPrimaryKey(store.getUserId());
-                    if (userStore != null && !CommonUtil.isEmpty(userStore.getMemberId()))
-                        configMessageService.addConfigMessage(AppType.SALE, userStore.getMemberId(), "沉睡客户",
-                                "收到了【" + user.getUsername() + "】放弃跟进的客户，快去分配给员工吧。", 0, url
-                                        + Utils.getCustomerDetails(memberId, clueId, phaseStatus, "2","待分配",store.getId()));
-                }
-            }
-        }
+//        if (user != null) {
+//            Example example = new Example(StoreUser.class);
+//            example.createCriteria().andEqualTo(StoreUser.USER_ID, user.getId())
+//                    .andEqualTo(StoreUser.DATA_STATUS, 0);
+//            List<StoreUser> storeUserList = iStoreUserMapper.selectByExample(example);
+//            if (storeUserList.size() > 0) {
+//                Store store = iStoreMapper.selectByPrimaryKey(storeUserList.get(0).getStoreId());
+//                if (store != null) {
+//                    MainUser userStore = userMapper.selectByPrimaryKey(store.getUserId());
+//                    if (userStore != null && !CommonUtil.isEmpty(userStore.getMemberId()))
+//                        configMessageService.addConfigMessage(AppType.SALE, userStore.getMemberId(), "沉睡客户",
+//                                "收到了【" + user.getUsername() + "】放弃跟进的客户，快去分配给员工吧。", 0, url
+//                                        + Utils.getCustomerDetails(memberId, clueId, phaseStatus, "2","待分配",store.getId()));
+//                }
+//            }
+//        }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
@@ -899,12 +899,12 @@ public class ClientService {
             clue.setTurnStatus(1);
             clueMapper.updateByPrimaryKey(clue);
             //消息推送
-            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
-            String name=clue.getOwername()!=null?clue.getOwername():clue.getPhone();
-            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
-                    "有一个待分配客户【"+ name +"】快去分配给员工吧", 0, url
-                            + Utils.getCustomerDetails("", id, 0, "0","待分配",storeId));
+//            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+//            String name=clue.getOwername()!=null?clue.getOwername():clue.getPhone();
+//            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+//            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
+//                    "有一个待分配客户【"+ name +"】快去分配给员工吧", 0, url
+//                            + Utils.getCustomerDetails("", id, 0, "0","待分配",storeId));
 
         } else if (phaseStatus == 1) {
             Customer customer = iCustomerMapper.selectByPrimaryKey(id);
@@ -941,13 +941,13 @@ public class ClientService {
             customer.setTurnStatus(1);
             iCustomerMapper.updateByPrimaryKey(customer);
             //消息推送
-            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
-            Member member = iMemberMapper.selectByPrimaryKey(customer.getMemberId());
-            String name= clue.getOwername()!=null?clue.getOwername():member.getNickName();
-            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
-                    "有一个待分配客户 【"+ name +"】快去分配给员工吧", 0, url
-                            + Utils.getCustomerDetails(customer.getMemberId(),clue.getId(), 1, customer.getStage().toString(),"待分配" , storeId));
+//            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+//            Member member = iMemberMapper.selectByPrimaryKey(customer.getMemberId());
+//            String name= clue.getOwername()!=null?clue.getOwername():member.getNickName();
+//            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+//            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
+//                    "有一个待分配客户 【"+ name +"】快去分配给员工吧", 0, url
+//                            + Utils.getCustomerDetails(customer.getMemberId(),clue.getId(), 1, customer.getStage().toString(),"待分配" , storeId));
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
