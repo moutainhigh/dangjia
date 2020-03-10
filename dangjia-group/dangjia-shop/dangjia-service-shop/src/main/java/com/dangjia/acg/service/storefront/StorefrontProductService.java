@@ -599,7 +599,39 @@ public class StorefrontProductService {
         }
     }
 
+    /**
+     * 供货设置-上架商品-通过货品或者商品名称查询
+     * @param keyWord
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse queryProductGroundByKeyWord(String keyWord, PageDTO pageDTO){
+        try {
 
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryProductGroundByKeyWord(keyWord);
+            //图片前缀路径
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (BasicsStorefrontProductViewDTO basicsStorefrontProductViewDTO : list) {
+                String id = basicsStorefrontProductViewDTO.getId();
+                StorefrontProduct spdto = istorefrontProductMapper.queryStorefrontProductById(id);
+                if (spdto == null) {
+                    basicsStorefrontProductViewDTO.setStorefrontProduct(null);
+                }else{
+                    spdto.setImageUrl(StringTool.getImageSingle(spdto.getImage(),address));
+                    spdto.setDetailImageUrl(StringTool.getImageSingle(spdto.getDetailImage(),address));
+                    basicsStorefrontProductViewDTO.setStorefrontProduct(spdto);
+                }
+            }
+            if(list.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("供货设置-上架商品-通过货品或者商品名称查询异常：", e);
+            return ServerResponse.createByErrorMessage("供货设置-上架商品-通过货品或者商品名称查询异常");
+        }
+    }
 
 
 }
