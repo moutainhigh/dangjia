@@ -643,6 +643,20 @@ public class AppActuaryOperationService {
                     }
                 }
             }
+
+            //给未匹配到的属性设置商品ID
+            for (DjBasicsProductTemplate atId : productList) {
+                List<String> attributeTempVals = Arrays.asList(atId.getValueIdArr().split(","));
+                if(attributeDTOList.size()>0) {
+                    AttributeDTO attributeDTO = attributeDTOList.get(0);
+                    for (AttributeValueDTO avDTO : attributeDTO.getValueDTOList()) {
+                        if (avDTO.getState() == 2 && attributeTempVals.contains(avDTO.getAttributeValueId())) {//如果包含该属性
+                            avDTO.setAttributeValueId(atId.getId());
+                            avDTO.setState(0);//未选中
+                        }
+                    }
+                }
+            }
         }
         List<StorefrontProductAddedRelation> list = iProductAddedRelationMapper.getAddedrelationGoodsData(product.getId());
         if (list.size() > 0) {
