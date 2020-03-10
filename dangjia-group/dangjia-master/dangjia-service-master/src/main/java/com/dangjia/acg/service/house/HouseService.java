@@ -3834,6 +3834,18 @@ public class HouseService {
         worker.initPath(address);
         return ServerResponse.createBySuccess("操作成功", worker);
     }
+
+    /** 查询房子列表 - 根据小区名 */
+    public ServerResponse queryHouseListByResidential(String residential, PageDTO pageDTO) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<House> houseList = iHouseMapper.queryHouseListByResidential(residential);
+        if( houseList == null || houseList.size() < 1 ){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+
+        PageInfo pageResult = new PageInfo(houseList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
 }
 
 
