@@ -600,6 +600,30 @@
         group by t1.product_name
     </select>
 
+
+    <select  id="getProductStorefontAttribute" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+            t1.id,
+            t1.product_name name,
+            t.type,
+            t1.sell_price price,
+            t.value_id_arr valueIdArr,
+            t.value_name_arr valueNameArr
+       FROM
+            dj_basics_storefront_product t1
+        INNER JOIN dj_basics_product_template t on t.id=t1.prod_template_id
+        WHERE
+            t.id = t1.prod_template_id
+        and t1.is_shelf_status = '1'
+        <if test="valueIdArr!=null and valueIdArr!=''">
+            AND
+            <foreach collection="valueIdArr" index="index" item="item" open="(" separator="AND" close=")">
+                and FIND_IN_SET(#{item},t1.value_id_arr)
+            </foreach>
+        </if>
+        and t1.goods_id = #{goodsId}
+        group by t1.product_name
+    </select>
     <!--根据商品模板ID查询对应店铺商品信息-->
     <select id="getStorefrontInfoByprodTemplateId" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
         SELECT
