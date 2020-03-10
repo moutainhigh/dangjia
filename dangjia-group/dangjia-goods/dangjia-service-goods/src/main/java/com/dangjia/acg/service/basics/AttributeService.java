@@ -64,9 +64,9 @@ public class AttributeService {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 caMap.put("createDate", sdf.format(ca.getCreateDate()));
                 caMap.put("modifyDate", sdf.format(ca.getModifyDate()));
-                List<AttributeValuePO> avList = iAttributeValueMapper.queryPOByAttributeId(ca.getId(),cityId);
+                List<AttributeValue> avList = iAttributeValueMapper.queryPOByAttributeId(ca.getId(),cityId);
                 List<Map<String, Object>> avListMap = new ArrayList<>();
-                for (AttributeValuePO av : avList) {
+                for (AttributeValue av : avList) {
                     Map<String, Object> avMap = new HashMap<>();
                     avMap.put("avId", av.getId());
                     avMap.put("avName", av.getName());

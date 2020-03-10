@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.actuary.app;
 
 import com.dangjia.acg.api.app.product.ShopCartAPI;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -80,7 +81,8 @@ public class AppActuaryOperationService {
 
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
-
+    @Autowired
+    private IAttributeValueMapper iAttributeValueMapper;
     @Autowired
     private IProductAddedRelationMapper iProductAddedRelationMapper;
     @Autowired
@@ -473,13 +475,6 @@ public class AppActuaryOperationService {
             goodsDTO.setValueIdArr(productTemplate.getValueIdArr());
             goodsDTO.setValueNameArr(productTemplate.getValueNameArr());
             goodsDTO.setBrandId(goods.getBrandId());
-            if (!CommonUtil.isEmpty(goods.getBrandId())) {
-                Brand brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
-                goodsDTO.setBrandName(brand.getName());
-                if (!CommonUtil.isEmpty(goodsDTO.getValueNameArr())) {
-                    goodsDTO.setValueNameArr(goodsDTO.getBrandName() + " " + productTemplate.getValueNameArr());
-                }
-            }
 
             if (!CommonUtil.isEmpty(goodsDTO.getValueNameArr())) {
                 goodsDTO.setValueNameArr(goodsDTO.getValueNameArr().replaceAll(",", " "));
@@ -602,40 +597,52 @@ public class AppActuaryOperationService {
 
     //根据品牌系列找属性品牌
     private List<AttributeDTO> getAllAttributes(StorefrontProduct product, List<DjBasicsProductTemplate> productList, BasicsGoods goods) {
-        List<AttributeDTO> attributeDTOList = new ArrayList<>();
-        //品牌
-        if (productList.size() > 0) {
+        DjBasicsProductTemplate productTemplate=iBasicsProductTemplateMapper.selectByPrimaryKey(product.getProdTemplateId());
+        List<AttributeDTO> attributeDTOList = iAttributeValueMapper.queryAttributeResult(goods.getId());
+        if(attributeDTOList==null||attributeDTOList.size()==0){
+            attributeDTOList= new ArrayList<>();
             AttributeDTO attributeDTO = new AttributeDTO();
             attributeDTO.setId("0");
             attributeDTO.setName("规格");
             List<AttributeValueDTO> attributeValueDTOList = new ArrayList<>();
-            Brand brand = null;
-            if (!CommonUtil.isEmpty(goods.getBrandId())) {
-                brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
-            }
-            for (DjBasicsProductTemplate atId : productList) {
-                StringBuilder strbuf = new StringBuilder();
-                if (brand != null) {
-                    strbuf.append(brand.getName()).append(" ");
-                }
-                if (!CommonUtil.isEmpty(atId.getValueNameArr())) {
-                    strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
-                } else {
-                    strbuf.append(atId.getName());
-                }
-                AttributeValueDTO avDTO = new AttributeValueDTO();
-                avDTO.setAttributeValueId(atId.getId());
-                avDTO.setName(strbuf.toString().trim());
-                if (atId.getId().equals(product.getId())) {//如果包含该属性
-                    avDTO.setState(1);//选中
-                } else {
-                    avDTO.setState(0);//未选中
-                }
-                avDTO.setType(0);
-                attributeValueDTOList.add(avDTO);//添加属性值
-            }
-            attributeDTO.setValueDTOList(attributeValueDTOList);
+            AttributeValueDTO avDTO = new AttributeValueDTO();
+            avDTO.setAttributeValueId(product.getId());
+            avDTO.setName(product.getProductName());
+            avDTO.setState(1);//选中
+            avDTO.setType(0);
+            attributeValueDTOList.add(avDTO);//添加属性值
             attributeDTOList.add(attributeDTO);
+        }else {
+            //设置选中项目
+            List<String> attributeVals = Arrays.asList(productTemplate.getValueIdArr().split(","));
+            for (AttributeDTO attributeDTO : attributeDTOList) {
+                for (AttributeValueDTO avDTO : attributeDTO.getValueDTOList()) {
+                    if (attributeVals.contains(avDTO.getAttributeValueId())) {//如果包含该属性
+                        avDTO.setAttributeValueId(product.getId());
+                        avDTO.setState(1);//选中
+                    }
+                }
+            }
+            //设置选项的id变更为指定的商品ID
+            for (DjBasicsProductTemplate atId : productList) {
+                List<String> attributeTempVals = Arrays.asList(atId.getValueIdArr().split(","));
+                int num=0;//匹配次数
+                for (String attributeTempVal : attributeTempVals) {
+                    if(attributeVals.contains(attributeTempVal)){
+                        num++;
+                    }
+                }
+                if((attributeVals.size()-1)==num){
+                    for (AttributeDTO attributeDTO : attributeDTOList) {
+                        for (AttributeValueDTO avDTO : attributeDTO.getValueDTOList()) {
+                            if (avDTO.getState()!=1&&attributeTempVals.contains(avDTO.getAttributeValueId())) {//如果包含该属性
+                                avDTO.setAttributeValueId(atId.getId());
+                                avDTO.setState(0);//未选中
+                            }
+                        }
+                    }
+                }
+            }
         }
         List<StorefrontProductAddedRelation> list = iProductAddedRelationMapper.getAddedrelationGoodsData(product.getId());
         if (list.size() > 0) {

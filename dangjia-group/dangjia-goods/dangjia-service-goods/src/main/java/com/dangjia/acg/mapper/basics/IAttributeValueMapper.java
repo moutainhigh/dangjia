@@ -1,6 +1,7 @@
 
 package com.dangjia.acg.mapper.basics;
 
+import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.pojo.attribute.AttributeValuePO;
 import org.apache.ibatis.annotations.Param;
@@ -22,14 +23,14 @@ public interface IAttributeValueMapper extends Mapper<AttributeValue> {
 	//根据id查询属性选项对象
 	AttributeValue queryById(String id);
 
-	//根据id查询属性选项PO对象
-	AttributeValuePO getPOById(String id);
 
 	//查询所有属性选项
 	List<AttributeValue> query();
 
+	List<AttributeDTO> queryAttributeResult(@Param("goodsId")String goodsId);
+
 	//根据属性id查询所有属性选项PO对象
-	List<AttributeValuePO> queryPOByAttributeId(@Param("attributeId")String attributeId,@Param("cityId")String cityId);
+	List<AttributeValue> queryPOByAttributeId(@Param("attributeId")String attributeId,@Param("cityId")String cityId);
 
 	//根据属性id查询所有属性选项
 	List<AttributeValue> queryByAttributeId(@Param("attributeId")String attributeId,@Param("cityId")String cityId);
