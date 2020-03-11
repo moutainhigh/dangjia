@@ -26,7 +26,7 @@
             resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
         SELECT
             a.image,
-            a.id AS storefrontProductId,
+            a.id AS productId,
             a.product_name AS productName,
             e.storefront_name AS storefrontName,
             a.sell_price AS sellPrice,

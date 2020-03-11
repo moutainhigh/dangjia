@@ -70,7 +70,6 @@ public class AppActuaryOperationService {
     private IShopProductMapper iShopProductMapper;
     @Autowired
     private IShopMapper iShopMapper;
-
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
@@ -79,7 +78,6 @@ public class AppActuaryOperationService {
     private IGoodsGroupMapper iGoodsGroupMapper;
     @Autowired
     private IBrandMapper iBrandMapper;
-
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
@@ -98,8 +96,6 @@ public class AppActuaryOperationService {
     private IGoodsDjStoreParticipateActivitiesMapper iGoodsDjStoreParticipateActivitiesMapper;
     @Autowired
     private IGoodsDjStoreActivityMapper iGoodsDjStoreActivityMapper;
-
-
     @Autowired
     private IGoodsDeliverOrderAddedProductMapper goodsDeliverOrderAddedProductMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(AppActuaryOperationService.class);
