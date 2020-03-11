@@ -194,9 +194,6 @@ public class HouseWorkerService {
         if (houseWorker == null) {
             return ServerResponse.createByErrorMessage("该工匠订单不存在");
         }
-        if (houseWorker.getWorkType() == 6) {
-            return ServerResponse.createByErrorMessage("已支付不能换人,请联系当家装修");
-        }
         houseWorker.setWorkType(2);//被业主换
         HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
         if (houseFlow == null) {
@@ -209,15 +206,17 @@ public class HouseWorkerService {
         houseFlow.setRefuseNumber(houseFlow.getRefuseNumber() + 1);
         if (!CommonUtil.isEmpty(workerId)) {
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             if (house != null) {
+                //提醒原工匠
                 configMessageService.addConfigMessage(null, AppType.GONGJIANG, workerId, "0", "业主换人提醒",
-                        String.format(DjConstants.PushMessage.STEWARD_REPLACE, house.getHouseName()), "5");
-                HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                if (houseFlowDgj != null && !CommonUtil.isEmpty(houseFlowDgj.getWorkerId())) {
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0",
-                            "业主换人提醒", String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_REPLACE,
-                                    house.getHouseName()), "5");
-                }
+                        String.format(DjConstants.PushMessage.STEWARD_REPLACE, workerType.getName(),house.getHouseName()), "5");
+
+                //提醒业主
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "换人提醒",
+                        String.format(DjConstants.PushMessage.CRAFTSMAN_NEW_REPLACE, workerType.getName(),workerType.getName()), "5");
+
+
             }
         }
         houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
@@ -685,7 +684,6 @@ public class HouseWorkerService {
                     }
                     //通知业主大管家抢单成功
                     if (worker.getWorkerType() == 3) {//大管家
-
                         configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家抢单提醒",
                                 String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), "");
                     }
@@ -1423,9 +1421,15 @@ public class HouseWorkerService {
             houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
-            configMessageService.addConfigMessage(AppType.GONGJIANG,
-                    CommonUtil.md5("wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId()),
-                    "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
+
+            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            String msg="业主您好！您的美宅"+house+","+workerType.getType()+"即将进场，请即时支付相关费用。";
+            configMessageService.addConfigMessage(AppType.ZHUANGXIU,house.getMemberId(),
+                    workerType.getType()+"工序进场支付", msg, 4, houseFlow.getId(), msg);
+
+
+
             return ServerResponse.createBySuccessMessage("提前进场成功");
         } catch (Exception e) {
             e.printStackTrace();

@@ -5,7 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.refund.RefundAfterSalesAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -56,6 +58,7 @@ import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
@@ -129,6 +132,8 @@ public class ComplainService {
     @Autowired
     private HouseService houseService;
 
+    @Autowired
+    private ConfigMessageService configMessageService;
     @Autowired
     private OrderSplitService orderSplitService;
     @Autowired
@@ -629,12 +634,16 @@ public class ComplainService {
                             member.setHaveMoney(haveMoney);
                             memberMapper.updateByPrimaryKeySelective(member);
                         }
+                        House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主验收竣工未通过",
+                                String.format(DjConstants.PushMessage.GZ_G_WORK_N, house.getHouseName()), "");
+
                         break;
                     case 4:// 4:部分收货申诉，计算金钱给到对应的店铺
                         orderSplitService.platformComplaint(complain.getBusinessId(), null, 3, userId, complain.getApplicationStatus());//部分收货，平台申诉通过
                         break;
                     case 5://提前结束装修
-                        House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
+                        house = houseMapper.selectByPrimaryKey(complain.getHouseId());
                         if (house == null) {
                             return ServerResponse.createByErrorMessage("没有查询到相关房子");
                         }

@@ -1093,9 +1093,6 @@ public class HouseFlowService {
                         House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
                         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
                         configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
-                        HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
-                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠放弃",
-                                String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
                     }
 
                     evaluateService.updateMemberIntegral(member.getId(),hf.getHouseId(),hf.getId(),new BigDecimal(amount[1]),"放弃抢(派)装修单扣分");
@@ -1363,7 +1360,7 @@ public class HouseFlowService {
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
             houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家开工",String.format( DjConstants.PushMessage.STEWARD_CONSTRUCTION, house.getHouseName()), "");
 
             //开始建群
             Group group = new Group();

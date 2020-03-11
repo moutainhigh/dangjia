@@ -765,6 +765,9 @@ public class PaymentService {
             taskStack.setModifyDate(new Date());
             taskStackService.updateTaskStackInfo(taskStack);
         }
+        configMessageService.addConfigMessage(AppType.GONGJIANG,
+                "wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId(),
+                "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
     }
 
 

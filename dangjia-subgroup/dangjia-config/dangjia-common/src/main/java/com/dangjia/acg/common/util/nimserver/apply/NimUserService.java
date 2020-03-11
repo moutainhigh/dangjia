@@ -48,7 +48,7 @@ public class NimUserService {
                 params.add(new BasicNameValuePair(NimUserInfo.NAME, infoResultDTO.getName()));
                 params.add(new BasicNameValuePair(NimUserInfo.BIRTH, infoResultDTO.getBirth()));
                 params.add(new BasicNameValuePair(NimUserInfo.EMAIL, infoResultDTO.getEmail()));
-                params.add(new BasicNameValuePair(NimUserInfo.EX, infoResultDTO.getEx()));
+                params.add(new BasicNameValuePair(NimUserInfo.EX, infoResultDTO.getAccid()));
                 params.add(new BasicNameValuePair(NimUserInfo.TOKEN, UUIDUtil.getUserTag(appType,infoResultDTO.getAccid())));
                 params.add(new BasicNameValuePair(NimUserInfo.GENDER, infoResultDTO.getGender()!=null?String.valueOf(infoResultDTO.getGender()):"0"));
                 params.add(new BasicNameValuePair(NimUserInfo.ICON, infoResultDTO.getIcon()));
