@@ -24,6 +24,6 @@ public interface DjBasicsAttributeMapper extends Mapper<DjBasicsAttribute> {
 
     List<DjBasicsAttribute> queryAttributeByCategoryIdAndAttrName(@Param("categoryId") String categoryId, @Param("attrName") String attrName);
 
-    List<AttributeDTO> queryAttributeDatas(@Param("categoryId") String categoryId,@Param("wordKey") String wordKey);
+    List<AttributeDTO> queryAttributeDatas(@Param("cityId") String cityId,@Param("categoryId") String categoryId,@Param("wordKey") String wordKey);
 
 }

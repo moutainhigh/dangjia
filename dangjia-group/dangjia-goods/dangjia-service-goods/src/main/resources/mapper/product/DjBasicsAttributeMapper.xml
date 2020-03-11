@@ -73,6 +73,10 @@
         <if test="categoryId!=null and categoryId!=''">
             AND p.category_id = #{categoryId}
         </if>
+        <if test="cityId!=null and cityId!=''">
+            AND p.city_id = #{cityId}
+        </if>
+
         GROUP BY
           vl.id
         ORDER BY

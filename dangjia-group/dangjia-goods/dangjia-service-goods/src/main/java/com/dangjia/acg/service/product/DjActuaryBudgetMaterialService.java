@@ -542,7 +542,7 @@ public class DjActuaryBudgetMaterialService {
             if(!CommonUtil.isEmpty(name)){
                 names=name.split(",");
             }
-            List<ActuarialProductAppDTO> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, goodsId,names, brandVals, attributeVals, orderKey);
+            List<ActuarialProductAppDTO> pList = iBasicsProductTemplateMapper.serchCategoryProduct(cityId,categoryId, goodsId,names, brandVals, attributeVals, orderKey);
             pageResult = new PageInfo<>(pList);
             if (!pList.isEmpty()) {
                 searchActuarialConfigServices.getProductList(pList, imageAddress,new BigDecimal(0));
