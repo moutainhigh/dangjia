@@ -82,6 +82,7 @@ public class DjBasicsGoodsService {
      * @param labels
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse addLabels(String goodsId, String labels,String cityId) {
         Example example=new Example(DjBasicsProductTemplate.class);
         example.createCriteria().andEqualTo(DjBasicsProductTemplate.GOODS_ID,goodsId)
