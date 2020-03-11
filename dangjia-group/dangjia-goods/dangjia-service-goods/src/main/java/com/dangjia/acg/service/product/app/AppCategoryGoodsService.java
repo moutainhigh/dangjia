@@ -83,7 +83,6 @@ public class AppCategoryGoodsService {
      */
 
     public ServerResponse queryLeftCategoryByDatas(String cityId,String categoryLabelId) {
-        UUIDUtil.getUserTag(cityId);
         List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(cityId,"1",categoryLabelId, null);
         return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
     }
