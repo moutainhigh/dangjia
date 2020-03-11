@@ -72,6 +72,8 @@ public class DjBasicsGoodsService {
     private IProductTemplateRatioMapper iProductTemplateRatioMapper;
     @Autowired
     private IGoodsStorefrontMapper iGoodsStorefrontMapper;
+    @Autowired
+    private DjBasicsProductLabelValMapper djBasicsProductLabelValMapper;
 
     /**
      * 货品打标签
@@ -80,7 +82,22 @@ public class DjBasicsGoodsService {
      * @param labels
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse addLabels(String goodsId, String labels,String cityId) {
+        Example example=new Example(DjBasicsProductTemplate.class);
+        example.createCriteria().andEqualTo(DjBasicsProductTemplate.GOODS_ID,goodsId)
+                .andEqualTo(DjBasicsProductTemplate.DATA_STATUS,0);
+        List<String> productIds = iBasicsProductTemplateMapper.selectByExample(example)
+                .stream().map(DjBasicsProductTemplate::getId).collect(Collectors.toList());
+        if(StringUtils.isBlank(labels)){
+            example=new Example(DjBasicsProductLabelVal.class);
+            example.createCriteria().andIn(DjBasicsProductLabelVal.PRODUCT_ID,productIds)
+                    .andNotIn(DjBasicsProductLabelVal.LABEL_ID, Arrays.asList(labels.split(",")));
+        }else {
+            example=new Example(DjBasicsProductLabelVal.class);
+            example.createCriteria().andIn(DjBasicsProductLabelVal.PRODUCT_ID,productIds);
+        }
+        djBasicsProductLabelValMapper.deleteByExample(example);
         BasicsGoods djBasicsGoods = new BasicsGoods();
         djBasicsGoods.setCityId(cityId);
         djBasicsGoods.setId(goodsId);

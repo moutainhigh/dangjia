@@ -801,6 +801,14 @@ public class DjStoreActivityService {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             List<Map> list = djStoreActivityMapper.querySpellDeals(storeActivityProductId);
             list.forEach(a ->{
+                SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String d = format.format(a.get("orderPayTime"));
+                try {
+                    Date date=format.parse(d);
+                    a.put("orderPayTime", DateUtil.daysBetweenTime(new Date(),DateUtil.addDateHours(date,24)));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 a.put("head",imageAddress+a.get("head"));
             });
             return ServerResponse.createBySuccess("查询成功",list);

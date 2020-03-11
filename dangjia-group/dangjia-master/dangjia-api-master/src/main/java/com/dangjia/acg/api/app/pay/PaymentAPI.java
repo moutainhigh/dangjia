@@ -62,7 +62,8 @@ public interface PaymentAPI {
                                   @RequestParam("cityId") String cityId,
                                   @RequestParam("houseId") String houseId,
                                   @RequestParam("productIds") String productIds,
-                                  @RequestParam("type") Integer type);
+                                  @RequestParam("type") Integer type,
+                                  @RequestParam("storeActivityProductId") String storeActivityProductId);
 
     @PostMapping("app/order/generate/shop")
     @ApiOperation(value = "购物车提交订单接口", notes = "购物车提交订单接口")

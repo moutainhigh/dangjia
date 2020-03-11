@@ -5,7 +5,7 @@
     <select id="querySpellDeals" resultType="java.util.Map">
         SELECT
             a.id AS orderId,
-            a.order_generation_time AS orderGenerationTime,
+            a.order_pay_time AS orderPayTime,
             c.head,
             (
                 b.spell_group - (
@@ -29,6 +29,6 @@
         AND a.order_status = 9
         AND parent_order_id IS NULL
         AND a.store_activity_product_id = #{storeActivityProductId}
-        ORDER BY a.order_generation_time asc limit 2
+        ORDER BY a.order_pay_time asc limit 10
     </select>
 </mapper>

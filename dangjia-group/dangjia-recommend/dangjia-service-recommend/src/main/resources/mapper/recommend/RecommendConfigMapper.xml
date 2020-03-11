@@ -26,4 +26,29 @@
         id = #{id} and config_code = #{configCode}
     </update>
 
+    <!-- 查询单个 -->
+    <select id="querySingle" resultType="com.dangjia.acg.modle.recommend.RecommendConfig">
+
+        SELECT
+            id
+            , config_code 'configCode'
+            , config_name 'configName'
+            , config_value 'configValue'
+        FROM
+            dj_recommend_config
+        WHERE data_status = 0
+          AND config_code = #{configCode}
+    </select>
+
+    <!-- 查询单个值 -->
+    <select id="queryConfigValue" resultType="java.lang.Integer">
+
+        SELECT
+            config_value
+        FROM
+            dj_recommend_config
+        WHERE data_status = 0
+          AND config_code = #{configCode}
+    </select>
+
 </mapper>

@@ -2383,7 +2383,8 @@ public class PaymentService {
      * @param taskId houseFlowId,mendOrderId,houseFlowApplyId
      * @param type   1精算商品,2购物车商品,3立即购商品
      */
-    public ServerResponse getPaymentPage(String userToken,  String taskId, String cityId,String houseId,String productJsons,int type) {
+    public ServerResponse getPaymentPage(String userToken,  String taskId, String cityId,String houseId,
+                                         String productJsons,int type,String storeActivityProductId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -2512,7 +2513,12 @@ public class PaymentService {
                         houseId=house.getId();
                     }
                 }
-                List<ShoppingCartDTO> shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS(productIds);
+                List<ShoppingCartDTO> shoppingCartDTOS;
+                if(StringUtils.isNotBlank(storeActivityProductId)){
+                    shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS1(storeActivityProductId);
+                }else{
+                    shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS(productIds);
+                }
                 for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
                     BigDecimal totalSellPrice = new BigDecimal(0);//总价
                     for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {

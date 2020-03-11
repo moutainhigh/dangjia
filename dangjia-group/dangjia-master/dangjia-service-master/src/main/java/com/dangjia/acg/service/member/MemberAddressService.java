@@ -95,7 +95,7 @@ public class MemberAddressService {
             memberAddress.setLatitude(latitude);
             memberAddress.setLongitude(longitude);
         }
-        memberAddress.setRenovationType(renovationType);
+        memberAddress.setRenovationType(0);//默认创建 的是非装修地址
         memberAddress.setDefaultType(defaultType);
         setAddressDefaultType(defaultType, member.getId());
         int insert = iMasterMemberAddressMapper.insertSelective(memberAddress);

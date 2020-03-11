@@ -7,6 +7,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.dto.actuary.AttributeValueDTO;
@@ -47,6 +48,8 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -70,7 +73,6 @@ public class AppActuaryOperationService {
     private IShopProductMapper iShopProductMapper;
     @Autowired
     private IShopMapper iShopMapper;
-
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
@@ -79,7 +81,6 @@ public class AppActuaryOperationService {
     private IGoodsGroupMapper iGoodsGroupMapper;
     @Autowired
     private IBrandMapper iBrandMapper;
-
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
@@ -98,8 +99,6 @@ public class AppActuaryOperationService {
     private IGoodsDjStoreParticipateActivitiesMapper iGoodsDjStoreParticipateActivitiesMapper;
     @Autowired
     private IGoodsDjStoreActivityMapper iGoodsDjStoreActivityMapper;
-
-
     @Autowired
     private IGoodsDeliverOrderAddedProductMapper goodsDeliverOrderAddedProductMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(AppActuaryOperationService.class);
@@ -355,6 +354,7 @@ public class AppActuaryOperationService {
                             iGoodsDjActivitySessionMapper.selectByPrimaryKey(djStoreParticipateActivities.getActivitySessionId());
                     goodsDTO.setEndSession(djActivitySession.getEndSession());
                     goodsDTO.setSessionStartTime(djActivitySession.getSessionStartTime());
+                    goodsDTO.setMerchandiseCountdown(DateUtil.daysBetweenTime(new Date(),djActivitySession.getEndSession()));
                     goodsDTO.setActivityType(djStoreActivityProduct.getActivityType());
                 }else if(djStoreActivityProduct.getActivityType()==2) {
                     DjStoreParticipateActivities djStoreParticipateActivities
@@ -366,10 +366,21 @@ public class AppActuaryOperationService {
                     List<Map> list = iGoodsDjStoreActivityMapper.querySpellDeals(djStoreActivityProduct.getId());
                     list.forEach(a ->{
                         a.put("head",imageAddress+a.get("head"));
+                        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String d = format.format(a.get("orderPayTime"));
+                        try {
+                            Date date=format.parse(d);
+                            a.put("orderPayTime", DateUtil.daysBetweenTime(new Date(),DateUtil.addDateHours(date,24)));
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     });
                     map.put("spellGroup",list.size());
+
                     map.put("list",list);
-                    goodsDTO.setMap(map);
+                    if(list.size()>0) {
+                        goodsDTO.setMap(map);
+                    }
                     goodsDTO.setSpellGroup(djStoreActivity.getSpellGroup());
                     goodsDTO.setActivityType(djStoreActivityProduct.getActivityType());
                 }

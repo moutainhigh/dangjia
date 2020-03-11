@@ -374,4 +374,20 @@ public class RecommendTargetService {
             return ServerResponse.createByErrorMessage("新增操作失败");
         }
     }
+
+    /**
+     * @Description: 查询推荐目标 分页
+     * @author: luof
+     * @date: 2020-3-9
+     */
+    public ServerResponse queryPage(PageDTO pageDTO, String itemSubId, Integer targetType) {
+
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<RecommendTargetInfo> recommendTargetInfoList = recommendTargetMapper.queryListOfOrder(itemSubId, targetType, null);
+        if ( recommendTargetInfoList == null || recommendTargetInfoList.size() == 0 ) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+        }
+        PageInfo pageResult = new PageInfo(recommendTargetInfoList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
 }

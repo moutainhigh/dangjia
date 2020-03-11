@@ -1945,6 +1945,7 @@ public class OrderService {
                 //存在其他团参与其他团
                 if(null!=parentOrder){
                     order.setOrderStatus("9");
+                    order.setOrderPayTime(new Date());
                     order.setParentOrderId(parentOrder.getId());
                     orderMapper.updateByPrimaryKeySelective(order);
                     example=new Example(Order.class);
@@ -1995,6 +1996,7 @@ public class OrderService {
                     }
                 }else{//不存在其他团,自己作为新团发起人
                     order.setOrderStatus("9");
+                    order.setOrderPayTime(new Date());
                     order.setParentOrderId(null);
                     orderMapper.updateByPrimaryKeySelective(order);
                     Map<String,Object> map=new HashMap<>();
@@ -2010,6 +2012,7 @@ public class OrderService {
                 }
             }else{//参与团人数未满
                 order.setOrderStatus("9");
+                order.setOrderPayTime(new Date());
                 orderMapper.updateByPrimaryKeySelective(order);
                 Map<String,Object> map=new HashMap<>();
                 Member member = iMemberMapper.selectByPrimaryKey(order.getMemberId());
@@ -2028,6 +2031,7 @@ public class OrderService {
             }
         }else{//该订单为发起拼团人
             order.setOrderStatus("9");
+            order.setOrderPayTime(new Date());
             orderMapper.updateByPrimaryKeySelective(order);
             Map<String,Object> map=new HashMap<>();
             Member member = iMemberMapper.selectByPrimaryKey(order.getMemberId());
