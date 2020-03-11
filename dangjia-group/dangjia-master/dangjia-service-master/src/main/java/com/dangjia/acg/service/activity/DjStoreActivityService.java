@@ -45,6 +45,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -870,4 +871,22 @@ public class DjStoreActivityService {
         }
     }
 
+
+    /**
+     * 查询限时购/拼团购轮播
+     * @param storeActivityProductId
+     * @param activityType
+     * @return
+     */
+    public ServerResponse queryActivityPurchaseRotation(String storeActivityProductId, Integer activityType) {
+        try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            List<Member> members = orderMapper.queryActivityPurchaseRotation(activityType, storeActivityProductId);
+            members.forEach(member -> member.setHead(imageAddress+member.getHead()));
+            return ServerResponse.createBySuccess("查询成功",members);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 }

@@ -187,4 +187,10 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
     public ServerResponse setSpellGroup(String orderId) {
         return djStoreActivityService.setSpellGroup(orderId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivityPurchaseRotation(String storeActivityProductId, Integer activityType) {
+        return djStoreActivityService.queryActivityPurchaseRotation(storeActivityProductId,activityType);
+    }
 }

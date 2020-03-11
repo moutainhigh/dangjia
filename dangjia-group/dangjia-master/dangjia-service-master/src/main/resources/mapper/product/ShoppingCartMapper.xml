@@ -95,6 +95,8 @@
 
 	<select id="queryShoppingCartDTOS1" resultMap="shoppingCarts">
 		SELECT
+			e.storefront_name AS storefrontName,
+			e.storefront_logo AS storefrontIcon,
 			b.storefront_id AS storefrontId,
 			a.rush_purchase_price AS price,
 			d.type AS productType,
@@ -112,6 +114,7 @@
 		INNER JOIN dj_basics_storefront_product b ON b.id = a.product_id
 		INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
 		INNER JOIN dj_basics_goods d ON c.goods_id = d.id
+		INNER JOIN dj_basics_storefront e ON e.id = b.storefront_id
 		WHERE a.id = #{storeActivityProductId}
 	</select>
 
