@@ -222,5 +222,7 @@ public class ActuarialProductAppDTO {
 
     private Integer activityType;//1:限时购 2：拼团购
 
+    private long merchandiseCountdown;//活动商品倒计时时间戳
+
 
 }
