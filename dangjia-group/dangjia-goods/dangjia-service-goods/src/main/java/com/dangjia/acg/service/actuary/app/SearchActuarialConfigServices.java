@@ -76,6 +76,7 @@ public class SearchActuarialConfigServices {
             if(actuarialTemplateConfigAppDTOS!=null&&actuarialTemplateConfigAppDTOS.size()>0){
                 for(ActuarialTemplateConfigAppDTO atc:actuarialTemplateConfigAppDTOS){
                     getProductList(atc.getProductList(),address,new BigDecimal(0));
+                    atc.setConfigIcon(address+configUtil.getValue(SysConfig.ORDER_DANGJIA_ICON, String.class));
                 }
             }
 

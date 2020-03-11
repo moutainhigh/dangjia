@@ -358,15 +358,28 @@ public class HouseService {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
+//        Example example = new Example(House.class);
+//        example.createCriteria()
+//                .andEqualTo(House.MEMBER_ID, member.getId())
+//                .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
+//                .andEqualTo(House.DATA_STATUS, 0);
+//        List<House> houseList = iHouseMapper.selectByExample(example);
+//        return ServerResponse.createBySuccess("查询成功", houseList);
+        return queryMyHouseByMemberId(member.getId());
+    }
+
+    /**
+     * 我的房子
+     */
+    public ServerResponse queryMyHouseByMemberId(String memberId) {
         Example example = new Example(House.class);
         example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, member.getId())
+                .andEqualTo(House.MEMBER_ID, memberId)
                 .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询成功", houseList);
     }
-
 
     /**
      * 开工页面
@@ -1643,7 +1656,7 @@ public class HouseService {
         editHouseFlowWorker(house, desginInfo, actuaialInfo);
         //8.提交订单信息,生成待支付订单,生成待抢单信息
         String productJsons = getProductJsons(actuarialDesignAttr, memberAddress.getInputArea(),house);
-        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId,activityRedPackId,null);
+        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, "firstOrder", addressId, 1,workerTypeId,activityRedPackId,null);
     }
 
     /**
