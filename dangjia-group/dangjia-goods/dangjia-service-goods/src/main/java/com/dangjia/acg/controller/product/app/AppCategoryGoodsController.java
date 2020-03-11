@@ -35,13 +35,13 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
     @ApiMethod
 
     public ServerResponse queryLeftCategoryByDatas(String cityId,String categoryLabelId) {
-        return appCategoryGoodsService.queryLeftCategoryByDatas(categoryLabelId);
+        return appCategoryGoodsService.queryLeftCategoryByDatas( cityId,categoryLabelId);
     }
 
     @Override
     @ApiMethod
     public ServerResponse queryRightCategoryByDatas(String cityId,String parentId,String categoryLabelId) {
-        return appCategoryGoodsService.queryRightCategoryByDatas(parentId, categoryLabelId);
+        return appCategoryGoodsService.queryRightCategoryByDatas( cityId,parentId, categoryLabelId);
     }
 
     /**
@@ -70,7 +70,7 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
     @Override
     @ApiMethod
     public ServerResponse queryAttributeDatas(String cityId,String categoryId,String wordKey) {
-        return appCategoryGoodsService.queryAttributeDatas(categoryId, wordKey);
+        return appCategoryGoodsService.queryAttributeDatas(cityId,categoryId, wordKey);
     }
 
     /**
