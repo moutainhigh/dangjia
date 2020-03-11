@@ -47,4 +47,11 @@ public interface IHouseFlowMapper extends Mapper<HouseFlow> {
     HouseFlow getNextHouseFlow(@Param("houseId") String houseId);
 
     List<HouseFlow> getWorkerFlow(@Param("houseId") String houseId);
+
+    /**
+     * @Description:根据用户id查询[所有房子][正在施工][所有工序]
+     * @author: luof
+     * @date: 2020-3-11
+     */
+    List<Integer> queryWorkerTypeListByMemberId(@Param("memberId")String memberId);
 }
