@@ -26,6 +26,15 @@ public interface IRecommendTargetMapper extends Mapper<RecommendTargetInfo> {
                                         @Param("targetName") String targetName);
 
     /**
+     * @Description: 查询推荐目标列表 - 带排序
+     * @author: luof
+     * @date: 2020-3-9
+     */
+    List<RecommendTargetInfo> queryListOfOrder(@Param("itemSubId") String itemSubId,
+                                               @Param("targetType") Integer targetType,
+                                               @Param("targetName") String targetName);
+
+    /**
      * @Description: 删除单个推荐目标
      * @author: luof
      * @date: 2020-3-9

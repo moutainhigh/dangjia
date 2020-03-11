@@ -29,4 +29,18 @@ public interface IRecommendConfigMapper extends Mapper<RecommendConfig> {
      * @date: 2020-3-9
      */
     int updateSingle(@Param("id") String id, @Param("modifyDate") Date modifyDate, @Param("configCode") String configCode, @Param("configValue") Integer configValue);
+
+    /**
+     * @Description: 查询推荐配置单个
+     * @author: luof
+     * @date: 2020-3-10
+     */
+    RecommendConfig querySingle(@Param("configCode")String configCode);
+
+    /**
+     * @Description: 查询推荐配置值
+     * @author: luof
+     * @date: 2020-3-10
+     */
+    Integer queryConfigValue(@Param("configCode")String configCode);
 }

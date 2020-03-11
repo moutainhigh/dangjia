@@ -27,7 +27,7 @@ public class RecommendConfigService {
     private IRecommendConfigMapper recommendConfigMapper;
 
     /**
-     * @Description: 查询推荐目标列表
+     * @Description: 查询推荐配置列表
      * @author: luof
      * @date: 2020-3-9
      */
@@ -65,5 +65,30 @@ public class RecommendConfigService {
             return ServerResponse.createByErrorMessage("设置失败");
         }
         return ServerResponse.createBySuccessMessage("设置成功");
+    }
+
+    /**
+     * @Description: 查询推荐配置单个
+     * @author: luof
+     * @date: 2020-3-10
+     */
+    public RecommendConfig querySingle(String configCode){
+        return recommendConfigMapper.querySingle(configCode);
+    }
+
+    /**
+     * @Description: 查询推荐配置值
+     * @author: luof
+     * @date: 2020-3-10
+     */
+    public int queryConfigValue(String configCode){
+        Integer value = recommendConfigMapper.queryConfigValue(configCode);
+        if( value == null )return 0;
+        try{
+            return value.intValue();
+        }catch(Exception e){
+            logger.error("查询推荐配置值 异常:", e);
+            return 0;
+        }
     }
 }
