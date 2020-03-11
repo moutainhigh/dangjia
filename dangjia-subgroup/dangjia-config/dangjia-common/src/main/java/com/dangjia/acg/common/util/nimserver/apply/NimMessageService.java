@@ -38,7 +38,7 @@ public class NimMessageService {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             JSONObject json =new JSONObject();
-            params.add(new BasicNameValuePair("from", UUIDUtil.getUserTag(appType,fromId)0);
+            params.add(new BasicNameValuePair("from", UUIDUtil.getUserTag(appType,fromId)));
             params.add(new BasicNameValuePair("to", UUIDUtil.getUserTag(appType,targetId)));
             params.add(new BasicNameValuePair("ope", "1"));
             params.add(new BasicNameValuePair("type", "0"));
