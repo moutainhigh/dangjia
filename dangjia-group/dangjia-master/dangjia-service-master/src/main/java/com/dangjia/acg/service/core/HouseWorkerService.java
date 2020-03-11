@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -49,7 +48,6 @@ import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
-import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.reason.ReasonMatchSurface;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
@@ -71,12 +69,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -1428,9 +1423,9 @@ public class HouseWorkerService {
             houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
-//            configMessageService.addConfigMessage(AppType.GONGJIANG,
-//                    DigestUtils.md5Hex("wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId()),
-//                    "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
+            configMessageService.addConfigMessage(AppType.GONGJIANG,
+                    CommonUtil.md5("wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId()),
+                    "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             return ServerResponse.createBySuccessMessage("提前进场成功");
         } catch (Exception e) {
             e.printStackTrace();

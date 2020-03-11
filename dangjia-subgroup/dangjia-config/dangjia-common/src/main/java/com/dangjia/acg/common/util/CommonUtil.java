@@ -13,6 +13,8 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -790,4 +792,22 @@ public class CommonUtil {
     }
     return section_chinese.toString();
   }
+
+  public static String md5(String string) {
+    byte[] hash;
+    try {
+      hash = MessageDigest.getInstance("MD5").digest(string.getBytes("UTF-8"));
+    } catch (NoSuchAlgorithmException e) {
+      return string;
+    } catch (UnsupportedEncodingException e) {
+      return string;
+    }
+    StringBuilder hex = new StringBuilder(hash.length * 2);
+    for (byte b : hash) {
+      if ((b & 0xFF) < 0x10) hex.append("0");
+      hex.append(Integer.toHexString(b & 0xFF));
+    }
+    return hex.toString();
+  }
+
 }

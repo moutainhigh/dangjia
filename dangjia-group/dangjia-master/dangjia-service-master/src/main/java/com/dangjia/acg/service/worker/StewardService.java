@@ -250,10 +250,10 @@ public class StewardService {
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             hf.setWorkSteta(4);//施工中
             houseFlowMapper.updateByPrimaryKeySelective(hf);
-//            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-//            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-//            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家交底",
-//                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_FINISHED, house.getHouseName(), workerType.getName()), "");
+            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家交底",
+                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_FINISHED, house.getHouseName(), workerType.getName()), "");
             return ServerResponse.createBySuccessMessage("交底成功");
         } catch (Exception e) {
             e.printStackTrace();

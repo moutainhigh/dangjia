@@ -1,5 +1,6 @@
 package com.dangjia.acg.service;
 
+import com.dangjia.acg.common.util.CommonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,9 +42,9 @@ public class BaseService {
 
     public String getUserTag(String userid) {
         if (!("pre".equals(active))) {
-            return "test_" + userid;
+            return CommonUtil.md5("test_" + userid);
         } else {
-            return userid;
+            return CommonUtil.md5(userid);
         }
     }
 

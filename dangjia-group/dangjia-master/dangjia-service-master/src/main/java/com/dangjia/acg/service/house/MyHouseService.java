@@ -38,6 +38,7 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -50,6 +51,10 @@ import java.util.*;
  */
 @Service
 public class MyHouseService {
+
+    @Value("${spring.profiles.active}")
+    private String active;
+
     @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
@@ -254,7 +259,7 @@ public class MyHouseService {
                 map.put("id", user.getId());
                 map.put("targetId", user.getId());
                 map.put("targetAppKey", NIMPost.APPKEY);
-                List<NimUserInfo> userInfoResult = NimUserService.getUserInfo(AppType.SALE.getDesc(), userid);
+                List<NimUserInfo> userInfoResult = NimUserService.getUserInfo(active, userid);
                 if (userInfoResult != null &&userInfoResult.size()>0&& !CommonUtil.isEmpty(userInfoResult.get(0).getName())) {
                     map.put("nickName", "装修顾问 " + userInfoResult.get(0).getName());
                 } else {

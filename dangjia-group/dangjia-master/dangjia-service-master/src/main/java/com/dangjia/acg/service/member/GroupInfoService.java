@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.member;
 
+import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -13,6 +14,7 @@ import com.dangjia.acg.common.util.nimserver.apply.NimMessageService;
 import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
 import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.group.GroupDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.group.IGroupMapper;
@@ -33,6 +35,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -45,6 +48,9 @@ import java.util.*;
 @Service
 public class GroupInfoService {
 
+
+    @Value("${spring.profiles.active}")
+    private String active;
 
     //客服
     public final static String KEFU = "业主您好！我是当家装修的客服NAME，我将负责帮您协调传达信息，有任何装修问题都可以给我发消息。";
@@ -73,6 +79,8 @@ public class GroupInfoService {
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private UserAPI userAPI;
 
 
     /**
@@ -102,7 +110,7 @@ public class GroupInfoService {
             if (!CommonUtil.isEmpty(g.getGroupId())) {
                 GroupDTO dto = new GroupDTO();
                 BeanUtils.beanToBean(g, dto);
-                List<NimUserInfo> members = NimGroupService.getGroupInfoMembers(AppType.GONGJIANG.getDesc(),g.getGroupId());
+                List<NimUserInfo> members = NimGroupService.getGroupInfoMembers(active,g.getGroupId());
                 if (members != null) {
                     dto.setMembers(members);
                 }
@@ -120,7 +128,7 @@ public class GroupInfoService {
      * @return
      */
     public ServerResponse sendGroupsNotify(HttpServletRequest request, GroupNotifyInfo groupNotifyInfo) {
-        NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupNotifyInfo.getGroupId(), groupNotifyInfo.getUserId(), groupNotifyInfo.getText());
+        NimMessageService.sendGroupTextByAdmin(active, groupNotifyInfo.getGroupId(), groupNotifyInfo.getUserId(), groupNotifyInfo.getText());
         groupNotifyInfoMapper.insert(groupNotifyInfo);
         return ServerResponse.createBySuccessMessage("ok");
     }
@@ -140,7 +148,7 @@ public class GroupInfoService {
             registerJGUsers(AppType.SALE.getDesc(), adds, new String[adds.length]);
         }
         //夸应用添加删除
-        NimGroupService.manageGroup(AppType.GONGJIANG.getDesc(), AppType.SALE.getDesc(), groupId, adds, removes);
+        NimGroupService.manageGroup(active, AppType.SALE.getDesc(), groupId, adds, removes);
         if (CommonUtil.isEmpty(addList)) {
             return ServerResponse.createBySuccessMessage("ok");
         }
@@ -163,7 +171,7 @@ public class GroupInfoService {
                     text = GONGJIANG.replaceAll("WORKERNAME", workerType.getName());
                 }
                 if (!CommonUtil.isEmpty(text)) {
-                    NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupId, userid, text);
+                    NimMessageService.sendGroupTextByAdmin(active, groupId, userid, text);
                 }
             }
         }
@@ -193,7 +201,7 @@ public class GroupInfoService {
         registerJGUsers(AppType.GONGJIANG.getDesc(), memberlist.toArray(new String[0]), prefixlist.toArray(new String[0]));
 
         //创建群组
-        String groupResult = NimGroupService.createGroup(AppType.GONGJIANG.getDesc(), house.getMemberId(), group.getHouseName(), memberlist.toArray(new String[0]), "", "");
+        String groupResult = NimGroupService.createGroup(active, house.getMemberId(), group.getHouseName(), memberlist.toArray(new String[0]), "", "");
         if (groupResult != null) {
             group.setGroupId(groupResult);
             if (memberlist != null)
@@ -202,7 +210,7 @@ public class GroupInfoService {
                         String nickname = getUserName(userid);
                         //给业主发送默认提示语
                         String text = KEFU.replaceAll("NAME", nickname);
-                        NimMessageService.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), group.getGroupId(), userid, text);
+                        NimMessageService.sendGroupTextByAdmin(active, group.getGroupId(), userid, text);
                     }
                 }
         }
@@ -226,7 +234,7 @@ public class GroupInfoService {
     }
 
     public void registerJGUsers(String appType, String[] username, String[] prefixs) {
-        List<NimUserInfo> userInfos = NimUserService.getUserInfo(appType, Arrays.toString(username));
+        List<NimUserInfo> userInfos = NimUserService.getUserInfo(active, Arrays.toString(username));
         if (userInfos != null && userInfos.size() > 0) {
             for (int i = 0; i < userInfos.size(); i++) {
                 NimUserInfo userInfoResult =userInfos.get(i);
@@ -285,7 +293,15 @@ public class GroupInfoService {
                     userInfo.setSign(signature);
                     userInfo.setMobile(phone);
                     userInfo.setEx(prefix);
-                    NimUserService.registerUsers(appType,  userInfo);
+                    NimUserService.registerUsers(active,  userInfo); //注册网易云用户
+
+                    //注册激光用户
+                    UserInfoResultDTO userJG = userAPI.getUserInfo(appType, username[i]);
+                    if (userJG == null) {
+                        userAPI.registerUsers(appType, new String[]{username[i]}, new String[]{username[i]});
+                        userAPI.updateUserInfo(appType, username[i], nickname, null, signature, 0,
+                                phone, null, avatar);
+                    }
                 }
             }
         }

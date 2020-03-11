@@ -64,6 +64,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
@@ -74,6 +75,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class DjDeliverOrderService {
+
+
+    @Value("${spring.profiles.active}")
+    private String active;
     @Autowired
     private IBillDjDeliverOrderMapper iBillDjDeliverOrderMapper;
     @Autowired
@@ -359,7 +364,7 @@ public class DjDeliverOrderService {
                 map = new HashMap<>();
                 map.put("id", user.getId());
                 map.put("targetId", user.getId());
-                List<NimUserInfo> userInfoResult = NimUserService.getUserInfo(AppType.SALE.getDesc(), userid);
+                List<NimUserInfo> userInfoResult = NimUserService.getUserInfo(active, user.getMemberId());
                 if (userInfoResult != null &&userInfoResult.size()>0&& !CommonUtil.isEmpty(userInfoResult.get(0).getName())) {
                     map.put("nickName", "装修顾问 " + userInfoResult.get(0).getName());
                 } else {
