@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.nimserver.NIMPost;
+import com.dangjia.acg.common.util.nimserver.UUIDUtil;
 import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -42,13 +43,13 @@ public class NimUserService {
      */
     public static   void registerUsers(String appType,NimUserInfo infoResultDTO) {
         try {
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair(NimUserInfo.ACCID, infoResultDTO.getAccid()));
+                List<NameValuePair> params = new ArrayList<>();
+                params.add(new BasicNameValuePair(NimUserInfo.ACCID, UUIDUtil.getUserTag(appType,infoResultDTO.getAccid())));
                 params.add(new BasicNameValuePair(NimUserInfo.NAME, infoResultDTO.getName()));
                 params.add(new BasicNameValuePair(NimUserInfo.BIRTH, infoResultDTO.getBirth()));
                 params.add(new BasicNameValuePair(NimUserInfo.EMAIL, infoResultDTO.getEmail()));
                 params.add(new BasicNameValuePair(NimUserInfo.EX, infoResultDTO.getEx()));
-                params.add(new BasicNameValuePair(NimUserInfo.TOKEN, infoResultDTO.getToken()));
+                params.add(new BasicNameValuePair(NimUserInfo.TOKEN, UUIDUtil.getUserTag(appType,infoResultDTO.getAccid())));
                 params.add(new BasicNameValuePair(NimUserInfo.GENDER, infoResultDTO.getGender()!=null?String.valueOf(infoResultDTO.getGender()):"0"));
                 params.add(new BasicNameValuePair(NimUserInfo.ICON, infoResultDTO.getIcon()));
                 params.add(new BasicNameValuePair(NimUserInfo.MOBILE, infoResultDTO.getMobile()));
@@ -74,7 +75,7 @@ public class NimUserService {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             JSONArray json = new JSONArray();
-            json.addAll(Arrays.asList(username.split(",")));
+            json.addAll(Arrays.asList(UUIDUtil.getUserTags(appType,username.split(","))));
             params.add(new BasicNameValuePair("accids", JSON.toJSONString(json)));
             //UTF-8编码,解决中文问题
             HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");

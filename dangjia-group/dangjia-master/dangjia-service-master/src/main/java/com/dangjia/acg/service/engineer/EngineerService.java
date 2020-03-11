@@ -34,7 +34,6 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;

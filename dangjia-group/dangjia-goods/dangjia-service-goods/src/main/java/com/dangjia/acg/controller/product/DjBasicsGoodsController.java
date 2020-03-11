@@ -23,7 +23,12 @@ public class DjBasicsGoodsController implements DjBasicsGoodsAPI {
     @Override
     @ApiMethod
     public ServerResponse addLabels(HttpServletRequest request, String goodsId, String labels,String cityId) {
-        return djBasicsGoodsService.addLabels(goodsId, labels,cityId);
+        try {
+            return djBasicsGoodsService.addLabels(goodsId, labels,cityId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
     @Override

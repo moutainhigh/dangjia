@@ -3,7 +3,6 @@ package com.dangjia.acg.service.member;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -28,9 +27,7 @@ import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
-import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
-import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellProductMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellProductSpecMapper;
 import com.dangjia.acg.mapper.shell.IMasterOrderNodeMapper;
@@ -43,15 +40,12 @@ import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.order.OrderNode;
 import com.dangjia.acg.modle.other.City;
-import com.dangjia.acg.modle.pay.BusinessOrder;
-import com.dangjia.acg.modle.shell.HomeShellProduct;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -515,7 +509,7 @@ public class MemberService {
             try {
                 //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
                 redPackPayService.checkUpActivity(request, user.getMobile(), "1");
-//                configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
+                configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
             } catch (Exception e) {
                 logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
             }

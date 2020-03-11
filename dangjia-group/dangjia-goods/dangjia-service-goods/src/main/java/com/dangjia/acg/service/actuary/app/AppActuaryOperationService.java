@@ -70,7 +70,6 @@ public class AppActuaryOperationService {
     private IShopProductMapper iShopProductMapper;
     @Autowired
     private IShopMapper iShopMapper;
-
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
@@ -79,7 +78,6 @@ public class AppActuaryOperationService {
     private IGoodsGroupMapper iGoodsGroupMapper;
     @Autowired
     private IBrandMapper iBrandMapper;
-
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
@@ -98,8 +96,6 @@ public class AppActuaryOperationService {
     private IGoodsDjStoreParticipateActivitiesMapper iGoodsDjStoreParticipateActivitiesMapper;
     @Autowired
     private IGoodsDjStoreActivityMapper iGoodsDjStoreActivityMapper;
-
-
     @Autowired
     private IGoodsDeliverOrderAddedProductMapper goodsDeliverOrderAddedProductMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(AppActuaryOperationService.class);
@@ -664,13 +660,15 @@ public class AppActuaryOperationService {
             for (DjBasicsProductTemplate atId : productList) {
                 List<String> attributeTempVals = Arrays.asList(atId.getValueIdArr().split(","));
                 if(attributeDTOList.size()>0) {
-                    AttributeDTO attributeDTO = attributeDTOList.get(0);
-                    for (AttributeValueDTO avDTO : attributeDTO.getValueDTOList()) {
-                        if (avDTO.getState() == 2 && attributeTempVals.contains(avDTO.getAttributeValueId())) {//如果包含该属性
-                            avDTO.setAttributeValueId(atId.getId());
-                            avDTO.setState(0);//未选中
+                    for (int i = 0; i < attributeDTOList.size()-1; i++) {
+                        for (AttributeValueDTO avDTO : attributeDTOList.get(i).getValueDTOList()) {
+                            if (avDTO.getState() == 2 && attributeTempVals.contains(avDTO.getAttributeValueId())) {//如果包含该属性
+                                avDTO.setAttributeValueId(atId.getId());
+                                avDTO.setState(0);//未选中
+                            }
                         }
                     }
+
                 }
             }
         }

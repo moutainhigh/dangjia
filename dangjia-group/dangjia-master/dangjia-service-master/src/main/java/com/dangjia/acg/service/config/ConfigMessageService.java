@@ -9,13 +9,11 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.nimserver.apply.NimMessageService;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.IConfigMessageMapper;
 import com.dangjia.acg.modle.config.ConfigMessage;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -81,11 +79,11 @@ public class ConfigMessageService {
             }
             Member member = (Member) object;
             criteria.andCondition("(" +
-                    "target_uid='" + member.getId() + "' or " +
-                    "target_uid='" + cityId + "' or " +
-                    "target_uid='" + Utils.md5("wtId" + member.getWorkerTypeId()) + "' or " +
+                    "target_uid='" + CommonUtil.md5(member.getId()) + "' or " +
+                    "target_uid='" + CommonUtil.md5(cityId) + "' or " +
+                    "target_uid='" + CommonUtil.md5("wtId" + member.getWorkerTypeId()) + "' or " +
                     "target_type=1  or " +
-                    "target_uid='" + Utils.md5("wtId" + member.getWorkerTypeId() + cityId) + "'" +
+                    "target_uid='" + CommonUtil.md5("wtId" + member.getWorkerTypeId() + cityId) + "'" +
                     ")");
 //            criteria.andEqualTo("targetUid", accessToken.getMember().getId()).orEqualTo("targetType","1");
         } else {

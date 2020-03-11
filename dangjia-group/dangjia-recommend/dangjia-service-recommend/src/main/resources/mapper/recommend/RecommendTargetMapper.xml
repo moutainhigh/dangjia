@@ -13,19 +13,53 @@
             , target_type 'targetType'
             , target_id 'targetId'
             , target_name 'targetName'
+            , image
             , sort
             , click_number 'clickNumber'
         FROM
             dj_recommend_target_info
-        WHERE
-            item_sub_id = #{itemSubId}
-        <if test="null != targetType and ''!=targetType">
+        <where>
+            <if test="null != itemSubId and ''!=itemSubId">
+            AND item_sub_id = #{itemSubId}
+            </if>
+            <if test="null != targetType and ''!=targetType">
             AND target_type = #{targetType}
-        </if>
-        <if test="null != targetName and ''!=targetName">
+            </if>
+            <if test="null != targetName and ''!=targetName">
             AND target_name LIKE CONCAT('%',#{targetName},'%')
-        </if>
+            </if>
             AND data_status = 0
+        </where>
+
+    </select>
+
+    <!-- 查询列表 带排序 -->
+    <select id="queryListOfOrder" resultType="com.dangjia.acg.modle.recommend.RecommendTargetInfo">
+
+        SELECT
+        id
+        , item_sub_id 'itemSubId'
+        , target_type 'targetType'
+        , target_id 'targetId'
+        , target_name 'targetName'
+        , image
+        , sort
+        , click_number 'clickNumber'
+        FROM
+        dj_recommend_target_info
+        <where>
+            <if test="null != itemSubId and ''!=itemSubId">
+                AND item_sub_id = #{itemSubId}
+            </if>
+            <if test="null != targetType and ''!=targetType">
+                AND target_type = #{targetType}
+            </if>
+            <if test="null != targetName and ''!=targetName">
+                AND target_name LIKE CONCAT('%',#{targetName},'%')
+            </if>
+            AND data_status = 0
+        </where>
+        ORDER BY sort ASC, click_number DESC
 
     </select>
 

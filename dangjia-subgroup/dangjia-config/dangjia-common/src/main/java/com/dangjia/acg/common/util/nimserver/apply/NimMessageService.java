@@ -3,6 +3,7 @@ package com.dangjia.acg.common.util.nimserver.apply;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.nimserver.NIMPost;
+import com.dangjia.acg.common.util.nimserver.UUIDUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -37,8 +38,8 @@ public class NimMessageService {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             JSONObject json =new JSONObject();
-            params.add(new BasicNameValuePair("from", fromId));
-            params.add(new BasicNameValuePair("to", targetId));
+            params.add(new BasicNameValuePair("from", UUIDUtil.getUserTag(appType,fromId)));
+            params.add(new BasicNameValuePair("to", UUIDUtil.getUserTag(appType,targetId)));
             params.add(new BasicNameValuePair("ope", "1"));
             params.add(new BasicNameValuePair("type", "0"));
             json.put("msg",text);

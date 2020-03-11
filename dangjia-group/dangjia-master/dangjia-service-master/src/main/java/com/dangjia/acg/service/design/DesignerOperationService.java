@@ -132,8 +132,8 @@ public class DesignerOperationService {
                     if (order.getOperationState() == 0) {
                         order.setOperationState(1);
                         designBusinessOrderMapper.updateByPrimaryKeySelective(order);
-//                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
-//                                String.format("业主您好！您的美宅【%s】设计图已经上传，请确认。", house.getHouseName()), "");
+                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
+                                String.format("业主您好！您的美宅【%s】设计图已经上传，请确认。", house.getHouseName()), "");
                         return ServerResponse.createBySuccessMessage("发送成功");
                     }
                 }
@@ -145,8 +145,8 @@ public class DesignerOperationService {
                     if (order.getOperationState() == 0) {
                         order.setOperationState(2);
                         designBusinessOrderMapper.updateByPrimaryKeySelective(order);
-//                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
-//                                String.format("业主您好！您的美宅【%s】设计图已经上传。", house.getHouseName()), "");
+                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
+                                String.format("业主您好！您的美宅【%s】设计图已经上传。", house.getHouseName()), "");
                         return ServerResponse.createBySuccessMessage("发送成功");
                     }
                 }
@@ -202,8 +202,8 @@ public class DesignerOperationService {
         hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-//        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
-//                String.format(DjConstants.PushMessage.PLANE_UPLOADING, house.getHouseName()), "");
+        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
+                String.format(DjConstants.PushMessage.PLANE_UPLOADING, house.getHouseName()), "");
         return ServerResponse.createBySuccessMessage("发送成功");
     }
 
@@ -261,8 +261,8 @@ public class DesignerOperationService {
         hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-//        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
-//                String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName()), "");
+        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
+                String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName()), "");
         return ServerResponse.createBySuccessMessage("发送成功");
     }
 
@@ -327,9 +327,9 @@ public class DesignerOperationService {
                     quantityRoom.setType(1);
                     quantityRoomMapper.insert(quantityRoom);
 
-//                    if (hwo != null) {
-//                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
-//                    }
+                    if (hwo != null) {
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
+                    }
                     house.setDataStatus(0);
                     houseMapper.updateByPrimaryKeySelective(house);
                     return ServerResponse.createBySuccessMessage("操作成功");
@@ -384,9 +384,9 @@ public class DesignerOperationService {
                     }
                     //生成精算订单，及精算师抢单流程
                     manageBudgetInfo(house);
-//                    if (hwo != null) {
-//                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图已通过", String.format(DjConstants.PushMessage.CONSTRUCTION_OK, house.getHouseName()), "");
-//                    }
+                    if (hwo != null) {
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图已通过", String.format(DjConstants.PushMessage.CONSTRUCTION_OK, house.getHouseName()), "");
+                    }
                     house.setDataStatus(0);
                     houseMapper.updateByPrimaryKeySelective(house);
                     return ServerResponse.createBySuccessMessage("操作成功");
@@ -412,7 +412,7 @@ public class DesignerOperationService {
             // return ServerResponse.createByErrorMessage("设计通过生成精算houseFlow异常");
             HouseFlow houseFlow=houseFlowList.get(0);
             if(StringUtils.isNotBlank(houseFlow.getWorkerId())){//若已有工匠，则通知精算工匠继续进行精算
-//                configMessageService.addConfigMessage(null,AppType.GONGJIANG,houseFlow.getWorkerId(),"0","设计图纸已完成",String.format(DjConstants.PushMessage.GZ_T_WORK, house.getHouseName()),"");
+                configMessageService.addConfigMessage(null,AppType.GONGJIANG,houseFlow.getWorkerId(),"0","设计图纸已完成",String.format(DjConstants.PushMessage.GZ_T_WORK, house.getHouseName()),"");
             }else{//若没有工匠，但有流程，则将其流程改为抢单状态，让对应的工匠抢单
                 houseFlow.setWorkSteta(2);//已支付待工匠抢单
                 houseFlow.setModifyDate(new Date());

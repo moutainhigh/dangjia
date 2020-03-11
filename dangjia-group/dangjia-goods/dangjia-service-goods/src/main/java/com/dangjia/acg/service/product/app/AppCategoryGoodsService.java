@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.nimserver.UUIDUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
@@ -43,8 +44,6 @@ public class AppCategoryGoodsService {
     protected static final Logger logger = LoggerFactory.getLogger(AppCategoryGoodsService.class);
 
     @Autowired
-    private IUnitMapper iUnitMapper;
-    @Autowired
     private ICategoryLabelMapper iCategoryLabelMapper;
     @Autowired
     private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
@@ -58,7 +57,6 @@ public class AppCategoryGoodsService {
     private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private ConfigUtil configUtil;
-
 
     @Autowired
     private SearchActuarialConfigServices searchActuarialConfigServices;

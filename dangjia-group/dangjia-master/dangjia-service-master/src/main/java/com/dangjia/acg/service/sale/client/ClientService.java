@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.sale.client;
 
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -44,7 +43,6 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
-import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;

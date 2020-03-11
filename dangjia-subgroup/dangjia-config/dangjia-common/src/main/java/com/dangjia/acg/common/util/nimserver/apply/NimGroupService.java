@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.nimserver.NIMPost;
+import com.dangjia.acg.common.util.nimserver.UUIDUtil;
 import com.dangjia.acg.common.util.nimserver.dto.NimGroup;
 import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import org.apache.http.HttpEntity;
@@ -45,8 +46,8 @@ public class NimGroupService {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("tname", name));
-            params.add(new BasicNameValuePair("owner", ownerUsername));
-            params.add(new BasicNameValuePair("members", Arrays.toString(membersUsername)));
+            params.add(new BasicNameValuePair("owner", UUIDUtil.getUserTag(appType,ownerUsername)));
+            params.add(new BasicNameValuePair("members", Arrays.toString(UUIDUtil.getUserTags(appType,membersUsername))));
             params.add(new BasicNameValuePair("intro", desc));
             params.add(new BasicNameValuePair("icon", avatar));
             params.add(new BasicNameValuePair("joinmode", "0"));
@@ -81,8 +82,8 @@ public class NimGroupService {
             if(addList!=null&&addList.length>0) {
                 List<NameValuePair> params = new ArrayList<NameValuePair>();
                 params.add(new BasicNameValuePair("tid", groupId));
-                params.add(new BasicNameValuePair("owner", ownerUsername));
-                params.add(new BasicNameValuePair("members", Arrays.toString(addList)));
+                params.add(new BasicNameValuePair("owner", UUIDUtil.getUserTag(appType,ownerUsername)));
+                params.add(new BasicNameValuePair("members", Arrays.toString(UUIDUtil.getUserTags(appType,addList))));
                 params.add(new BasicNameValuePair("magree", "0"));
                 HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
                 NIMPost.postNIMServer(NIMPost.TEAM_ADD, entity, NIMPost.APPKEY, NIMPost.SECRET);
@@ -90,8 +91,8 @@ public class NimGroupService {
             if(removeList!=null&&removeList.length>0) {
                 List<NameValuePair> params = new ArrayList<NameValuePair>();
                 params.add(new BasicNameValuePair("tid", groupId));
-                params.add(new BasicNameValuePair("owner", ownerUsername));
-                params.add(new BasicNameValuePair("members", Arrays.toString(removeList)));
+                params.add(new BasicNameValuePair("owner", UUIDUtil.getUserTag(appType,ownerUsername)));
+                params.add(new BasicNameValuePair("members", Arrays.toString(UUIDUtil.getUserTags(appType,removeList))));
                 HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
                 NIMPost.postNIMServer(NIMPost.TEAM_KICK, entity, NIMPost.APPKEY, NIMPost.SECRET);
             }
@@ -133,7 +134,7 @@ public class NimGroupService {
 
 
                 if(!CommonUtil.isEmpty(accids)) {
-                    resultMap = NimUserService.getUserInfo(appType, accids.toString());
+                    resultMap = NimUserService.getUserInfo("N", accids.toString());
                 }
             }
             return resultMap;
