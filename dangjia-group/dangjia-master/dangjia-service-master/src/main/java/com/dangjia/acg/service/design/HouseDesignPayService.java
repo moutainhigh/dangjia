@@ -98,9 +98,9 @@ public class HouseDesignPayService {
                 house.setPlaneFrequency(planeFrequency + 1);
                 house.setDataStatus(0);
                 house.setDesignerOk(6);
-//                if (hwo != null) {
+                if (hwo != null) {
                     configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图未通过", String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), "");
-//                }
+                }
                 houseMapper.updateByPrimaryKeySelective(house);
                 //增加平面审核流水
                 QuantityRoom quantityRoom = new QuantityRoom();

@@ -490,14 +490,6 @@ public class EvaluateService {
 
             //业主审核管家
             houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
-            //短信通知业务本门
-            Map<String, String> temp_para = new HashMap();
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
-            if (workerType.getType() == 9) {
-                temp_para.put("house_name", house.getHouseName());
-                temp_para.put("worker_name", workerType.getName());
-                JsmsUtil.sendSMS("15675101794", "164425", temp_para);
-            }
             Customer customer = customerMapper.getCustomerByMemberId(house.getMemberId());
             if (customer != null && !CommonUtil.isEmpty(customer.getUserId())) {
                 //竣工消息推送

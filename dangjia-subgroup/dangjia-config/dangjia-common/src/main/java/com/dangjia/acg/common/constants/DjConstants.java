@@ -168,26 +168,26 @@ public class DjConstants {
         public final static String CONSTRUCTION_OK = "恭喜！您设计的【%s】施工图已通过，请查看。";
         public final static String ACTUARY_UPLOADING = "业主您好！您的美宅【%s】精算已经上传，请确认。";
         public final static String ACTUARY_ERROR = "抱歉，您设计的【%s】精算未通过，请联系业主修改后再上传。";
-        public final static String ACTUARY_OK = "恭喜！您设计的【%s】施工图已通过，请查看。";
+        public final static String ACTUARY_OK = "恭喜！您设计的【%s】精算已通过，请查看。";
         public final static String STEWARD_RUSH_TO_PURCHASE = "业主您好！您的美宅【%s】已有大管家抢单，赶快去看看吧~";
-        public final static String STEWARD_REPLACE = "您好！【%s】业主已将您更换，请重新抢单，再接再厉！";
+        public final static String STEWARD_REPLACE = "您好【%s】！【%s】业主已申请将您更换，请知晓。！";
         public final static String STEWARD_ABANDON = "业主您好！您的美宅【%s】大管家已经放弃，请等待其他大管家抢单。";
         public final static String STEWARD_PAYMENT = "大管家您好！业主已支付【%s】大管家费，请及时查看";
-        public final static String STEWARD_CONSTRUCTION = "业主您好，大管家已经做好施工排期并启动了装修施工，施工工匠会逐步进场，请您关注装修过程!";
+        public final static String STEWARD_CONSTRUCTION = "业主您好！您的美宅【%s】大管家已经做好排期并开始了装修，施工工匠会逐步进场，请即时支付相关费用。";
         public final static String RECORD_OF_REWARDS_AND_PENALTIES = "工匠您好！【%s】有一条您的奖罚记录，请查看。";
         public final static String STEWARD_NEW_REPLACE = "业主您好！经多方协调，当家装修已为您更换了新的大管家，立即查看";
         public final static String CRAFTSMAN_RUSH_TO_PURCHASE = "业主您好！您的美宅【%s】已有工匠抢单，赶快去看看吧~";
         public final static String CRAFTSMAN_ABANDON = "业主您好！您的美宅【%s】【%s】已放弃，请等待新工匠抢单。";
         public final static String CRAFTSMAN_PAYMENT = "工匠您好！业主已支付【%s】工匠费用，请及时查看";
         public final static String STEWARD_CRAFTSMAN_FINISHED = "业主，您好！【%s】大管家已经与工匠完成开工交底，【%s】工序施工正式开始";
-        public final static String CRAFTSMAN_NOT_START = "工匠您好！【%s】今日未开工，如有不便需要请假请申请停工。";
-        public final static String STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE = "业主您好！【%s】有工匠申请停工，请查看";
-        public final static String CRAFTSMAN_NEW_REPLACE = "业主您好！经多方协调，当家装修已为您更换了新的工匠，立即查看";
+        public final static String CRAFTSMAN_NOT_START = "工匠您好！【%s】今日未开工，请在12点前开工，如有不便需要请假请申请停工。";
+        public final static String STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE = "业主您好！【%s】有工匠停工，请查看";
+        public final static String CRAFTSMAN_NEW_REPLACE = "业主您好！经多方协调，当家为您更换新的【%s】，请等待新【%s】抢单。";
         public final static String STEWARD_APPLY_FINISHED = "大管家您好！【%s】【%s】申请阶段/整体完工，请审核！";
         public final static String STEWARD_APPLY_FINISHED_NOT_PASS = "工匠您好！您申请的【%s】阶段/整体完工未通过大管家的审核，请及时整改！";
         public final static String STEWARD_APPLY_FINISHED_PASS = "工匠您好！您申请的【%s】阶段/整体完工已通过大管家的审核，请查看。";
         public final static String CRAFTSMAN_EVALUATE = "工匠您好！【%s】业主已对您进行评价，立即查看";
-        public final static String CRAFTSMAN_ALL_FINISHED = "业主您好！【%s】所有工匠都已完工，大管家申请竣工验收，请查看。";
+        public final static String CRAFTSMAN_ALL_FINISHED = "业主您好！您的美宅【%s】大管家已申请竣工验收，请确认。";
         public final static String STEWARD_EVALUATE = "大管家您好！【%s】业主已对您进行评价，立即查看";
         public final static String REFUND_SUCCESS = "业主您好！您发起的退款操作成功，请查看";
         public final static String REFUND_ERROR = "业主您好！您发起的退款操作未成功，请重新提交";
@@ -286,6 +286,14 @@ public class DjConstants {
 
 
         public final static String GZ_T_WORK = "工匠您好！【%s】图纸已设计完成，请查看";
+        public final static String GZ_G_WORK_N = "大管家您好！【%s】竣工验收未通过，请整改后再次申请。";
+        public final static String GZ_G_WORK_Y = "大管家您好！【%s】竣工验收已通过，恭喜！";
+
+        public final static String GZ_G_YANSHOU_Y = "业主您好！您的美宅【%s】大管家已申请验收%s，请确认。";
+        public final static String YZ_G_YANSHOU_Y = "大管家您好！【%s】主动验收%s已通过，恭喜！";
+        public final static String YZ_G_YANSHOU_N = "大管家您好！【%s】主动验收%s未通过，请现场达到标准后再次申请。";
+
+
     }
 
     public static class CommonMessage {

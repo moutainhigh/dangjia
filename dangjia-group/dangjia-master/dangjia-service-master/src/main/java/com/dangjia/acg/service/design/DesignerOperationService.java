@@ -202,7 +202,7 @@ public class DesignerOperationService {
         hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
+        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计师上传平面图",
                 String.format(DjConstants.PushMessage.PLANE_UPLOADING, house.getHouseName()), "");
         return ServerResponse.createBySuccessMessage("发送成功");
     }
@@ -261,7 +261,7 @@ public class DesignerOperationService {
         hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
+        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "施工图上传提醒",
                 String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName()), "");
         return ServerResponse.createBySuccessMessage("发送成功");
     }
@@ -418,6 +418,9 @@ public class DesignerOperationService {
                 houseFlow.setModifyDate(new Date());
                 houseFlow.setReleaseTime(new Date());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                configMessageService.addConfigMessage(AppType.GONGJIANG,
+                        "wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId(),
+                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             }
 
         } else {//若未有精算流程，则生成精算流程，及对应的待支付的精算订单

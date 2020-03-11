@@ -365,16 +365,14 @@
 
         FROM
         dj_basics_goods bg
-        INNER JOIN dj_basics_product_template bp ON bp.goods_id = bg.id
-        INNER JOIN dj_basics_storefront_product p ON bp.id = p.prod_template_id
-        INNER JOIN dj_basics_storefront s ON s.id = p.storefront_id
+        INNER JOIN dj_basics_product_template bp ON bp.goods_id = bg.id  AND bp.city_id = #{cityId}
+        INNER JOIN dj_basics_storefront_product p ON bp.id = p.prod_template_id  AND p.city_id = #{cityId}
+        INNER JOIN dj_basics_storefront s ON s.id = p.storefront_id  AND s.city_id = #{cityId}
         WHERE
         p.is_shelf_status = 1
         AND bg.data_status = 0
         AND bg.type &lt;4
-        <if test="cityId!=null and cityId!=''">
-            AND p.city_id = #{cityId}
-        </if>
+        AND bg.city_id = #{cityId}
         <if test="name!=null and name!=''">
             AND (
             <foreach collection="name" index="index" item="item" open="(" separator="OR" close=")">

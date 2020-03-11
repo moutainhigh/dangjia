@@ -42,6 +42,8 @@ import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.sale.*;
 import com.dangjia.acg.mapper.store.IStoreMapper;
@@ -68,6 +70,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.sale.royalty.*;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -211,6 +214,8 @@ public class HouseService {
     @Autowired
     private MasterProductTemplateService masterProductTemplateService;
 
+    @Autowired
+    private IMasterStorefrontProductMapper masterStorefrontProductMapper;
     @Autowired
     private PaymentService paymentService;
     @Autowired
@@ -2310,6 +2315,7 @@ public class HouseService {
                 if (price == 0) {
                     return ServerResponse.createByErrorMessage("大管家没有精算人工费,请重新添加");
                 }else{
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "精算师上传精算", String.format(DjConstants.PushMessage.ACTUARY_UPLOADING, house.getHouseName()), houseId);
                     //精算审核任务
                     taskStackService.insertTaskStackInfo(houseId,house.getMemberId(),"精算审核","icon/jingsuan.png",16,houseId);
                 }
@@ -2320,9 +2326,9 @@ public class HouseService {
             if (house.getBudgetState() == 3) {
                 return ServerResponse.createBySuccessMessage("精算已审核通过");
             }
+            //订单拿钱更新
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, "2");
             if (budgetOk == 3) {//精算审核通过，调用此方法查询所有验收节点并保存
-                //订单拿钱更新
-                HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, "2");
                 if (hwo != null) {
                     hwo.setHaveMoney(hwo.getWorkPrice());
                     houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
@@ -2358,16 +2364,13 @@ public class HouseService {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 //生成任务
                 taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),"大管家待支付",workerType.getImage(),1,houseFlow.getId());
-//                configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
-//                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
-                //推送消息给业主等待大管家抢单
-//                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
-//                        "0", "大管家待支付", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
-//                                house.getHouseName()), "");
-//                //告知工程部精算已通过
-//                Map<String, String> temp_para = new HashMap();
-//                temp_para.put("house_name", house.getHouseName());
-//                JsmsUtil.sendSMS("13574147081", "165204", temp_para);
+                configMessageService.addConfigMessage(AppType.GONGJIANG,  hwo.getWorkerId(),
+                        "业主审核精算通过", String.format(DjConstants.PushMessage.ACTUARY_OK, house.getHouseName()), 0, null, "");
+
+            }
+            if (budgetOk == 4) {
+                configMessageService.addConfigMessage(AppType.GONGJIANG,  hwo.getWorkerId(),
+                        "业主审核精算未通过", String.format(DjConstants.PushMessage.ACTUARY_ERROR, house.getHouseName()), 0, null, "");
 
             }
             if (budgetOk == 2) {
@@ -3559,6 +3562,10 @@ public class HouseService {
             houseFlowApplyImage.setImageTypeName("现场照片");//图片类型名称 例如：材料照片；进度照片
             houseFlowApplyImageMapper.insert(houseFlowApplyImage);
         }
+        StorefrontProduct storefrontProduct=masterStorefrontProductMapper.selectByPrimaryKey(productId);
+        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家主动验收",
+                String.format(DjConstants.PushMessage.GZ_G_YANSHOU_Y, house.getHouseName(), storefrontProduct.getProductName()), "");
+
         //生成任务发送给业主
         taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
         return ServerResponse.createBySuccess("操作成功",houseFlowApply);
@@ -3581,10 +3588,19 @@ public class HouseService {
 
         houseFlowApply.setMemberCheck(memberCheck);
         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
+        House house = iHouseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+        StorefrontProduct storefrontProduct=masterStorefrontProductMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowApplyId());
 
         Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
         worker.initPath(address);
+        if(memberCheck==1){
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主审核主动验收通过",
+                    String.format(DjConstants.PushMessage.YZ_G_YANSHOU_Y, house.getHouseName(), storefrontProduct.getProductName()), "");
+        }else{
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主审核主动验收未通过",
+                    String.format(DjConstants.PushMessage.YZ_G_YANSHOU_N, house.getHouseName(), storefrontProduct.getProductName()), "");
+
+        }
         return ServerResponse.createBySuccess("操作成功", worker);
     }
 

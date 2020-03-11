@@ -911,6 +911,8 @@ public class HouseFlowApplyService {
             }
             worker.setVolume(worker.getVolume().add(new BigDecimal(1)));
             memberMapper.updateByPrimaryKeySelective(worker);
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, hfa.getWorkerId(), "0", "业主验收竣工通过",
+                    String.format(DjConstants.PushMessage.GZ_G_WORK_Y, house.getHouseName()), "");
 
             //超过免费要货次数,收取管家运费
 //            extraOrderSplitFare(hwo);
