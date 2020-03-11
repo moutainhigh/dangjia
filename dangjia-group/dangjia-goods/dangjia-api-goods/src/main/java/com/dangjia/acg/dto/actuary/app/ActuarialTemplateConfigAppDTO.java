@@ -28,6 +28,9 @@ public class ActuarialTemplateConfigAppDTO {
     @ApiModelProperty("描述")
     private String configDetail;
 
+    @ApiModelProperty("图片")
+    private String configIcon;
+
 
     @ApiModelProperty("阶段下面的商品列表")
     private List<ActuarialProductAppDTO>  productList;//阶段下面的商品列表

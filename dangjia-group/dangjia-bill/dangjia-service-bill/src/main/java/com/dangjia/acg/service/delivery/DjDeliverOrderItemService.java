@@ -46,6 +46,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -326,6 +327,26 @@ public class DjDeliverOrderItemService {
             businessOrder.setCreateDate(null);
             businessOrder.setDataStatus(null);
             businessOrder.setState(4);
+            if(order.getType()==1&&order.getWorkerId()!=null&&"firstOrder".equals(order.getWorkerId())){//若为装修房子订单，首次提交的订单取消时，需将地址中绑定的房子解除，房子状态改为用户已撤回
+                //判断是否为设计、精算提交的订单
+                MemberAddress memberAddress=billMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
+                if(memberAddress!=null){//解除房子地址的绑定
+                    memberAddress.setHouseId(null);
+                    memberAddress.setRenovationType(0);//改为非装修地址
+                    memberAddress.setModifyDate(new Date());
+                    billMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
+                }
+                House house=houseMapper.selectByPrimaryKey(order.getHouseId());
+                if(house!=null){//撤销房子信息
+                    house.setMemberId(null);
+                    house.setDataStatus(1);
+                    house.setType(3);
+                    house.setShowHouse(0);
+                    house.setModifyDate(new Date());
+                    houseMapper.updateByPrimaryKeySelective(house);
+                }
+            }
+
             iBillBusinessOrderMapper.updateByExampleSelective(businessOrder,example);
             return ServerResponse.createBySuccessMessage("取消订单成功");
         } catch (Exception e) {

@@ -1656,7 +1656,7 @@ public class HouseService {
         editHouseFlowWorker(house, desginInfo, actuaialInfo);
         //8.提交订单信息,生成待支付订单,生成待抢单信息
         String productJsons = getProductJsons(actuarialDesignAttr, memberAddress.getInputArea(),house);
-        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId,activityRedPackId,null);
+        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, "firstOrder", addressId, 1,workerTypeId,activityRedPackId,null);
     }
 
     /**
