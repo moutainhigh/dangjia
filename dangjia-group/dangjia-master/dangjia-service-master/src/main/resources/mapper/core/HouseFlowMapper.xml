@@ -258,5 +258,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and worker_type not in (1,2,3)
         order by sort asc
     </select>
+
+    <!-- 根据用户id查询[所有房子][正在施工][所有工序] -->
+    <select id="queryWorkerTypeListByMemberId" resultType="java.lang.Integer">
+        SELECT worker_type
+        FROM dj_core_house_flow chf
+        LEFT JOIN dj_house h ON chf.house_id = h.id
+        WHERE h.member_id = #{memberId}
+          AND work_steta in (0,1,4)
+    </select>
 </mapper>
 
