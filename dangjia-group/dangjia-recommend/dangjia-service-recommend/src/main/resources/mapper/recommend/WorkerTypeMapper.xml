@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.recommend.IWorkerTypeMapper">
+
+    <!-- 根据用户id查询[所有房子][正在施工][所有工序与排期] -->
+    <select id="queryWorkerTypeListByMemberId" resultType="com.dangjia.acg.modle.core.WorkerType">
+        SELECT cwt.type, cwt.sort
+        FROM dj_core_house_flow chf
+        LEFT JOIN dj_house h ON chf.house_id = h.id
+        LEFT JOIN dj_core_worker_type cwt ON chf.worker_type = cwt.type
+        where h.member_id = #{memberId}
+          AND chf.work_steta in (0,1,4)
+    </select>
+
+    <!-- 查询工序 根据排期 -->
+    <select id="queryTypeBySort" resultType="java.lang.Integer">
+        SELECT `type`
+        FROM dj_core_worker_type
+        WHERE sort in
+        <foreach collection="sortList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+</mapper>
+
