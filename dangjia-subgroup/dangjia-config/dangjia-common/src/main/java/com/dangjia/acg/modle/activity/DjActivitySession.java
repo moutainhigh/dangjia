@@ -36,10 +36,10 @@ public class DjActivitySession extends BaseEntity {
     @ApiModelProperty("场次开始时间")
     private Date sessionStartTime;
 
-    @Column(name = "end_session")
+    @Column(name = "session_end_time")
     @Desc(value = "场次结束时间")
     @ApiModelProperty("场次结束时间")
-    private Date endSession;
+    private Date sessionEndTime;
 
     @Column(name = "store_activity_id")
     @Desc(value = "店铺活动配置id")

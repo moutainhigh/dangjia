@@ -2,7 +2,9 @@ package com.dangjia.acg.service.activity;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -24,16 +26,21 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
+import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.activity.DjActivitySession;
 import com.dangjia.acg.modle.activity.DjStoreActivity;
 import com.dangjia.acg.modle.activity.DjStoreActivityProduct;
 import com.dangjia.acg.modle.activity.DjStoreParticipateActivities;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.member.MemberAddressService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -43,6 +50,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -80,6 +88,12 @@ public class DjStoreActivityService {
     private IMemberMapper iMemberMapper;
     @Autowired
     private IMasterProductTemplateMapper iMasterProductTemplateMapper;
+    @Autowired
+    private IWorkerDetailMapper iWorkerDetailMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private MemberAddressService memberAddressService;
 
     /**
      * 添加活动
@@ -107,13 +121,13 @@ public class DjStoreActivityService {
         //限时购
         if(djStoreActivity.getActivityType() == 1){
             //场次开始时间跟活动结束时间小于等于限购周期则只有一场
-            if (DateUtil.getHourDays(djStoreActivity.getEndTime(),
+            if (DateUtil.getHourDays(djStoreActivity.getActivityendTime(),
                     djStoreActivity.getActivityStartTime()) <= djStoreActivity.getCyclePurchasing()) {
                 list.add("第1场："+convertDate2String("yyyy-MM-dd HH:mm:ss",djStoreActivity.getActivityStartTime())
-                        +" 至 "+convertDate2String("yyyy-MM-dd HH:mm:ss",djStoreActivity.getEndTime()));
+                        +" 至 "+convertDate2String("yyyy-MM-dd HH:mm:ss",djStoreActivity.getActivityendTime()));
             }else{
                 List<String> intervalTimeList = getIntervalTimeList(convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getActivityStartTime())
-                        , convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getEndTime()),
+                        , convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getActivityendTime()),
                         djStoreActivity.getCyclePurchasing());
                 for (int i = 0; i <intervalTimeList.size()-1; i++) {
                     list.add("第"+(i+1)+"场："+intervalTimeList.get(i)
@@ -171,22 +185,22 @@ public class DjStoreActivityService {
     }
 
     private void commonality(DjStoreActivity djStoreActivity){
-        if (DateUtil.getHourDays(djStoreActivity.getEndTime(),
+        if (DateUtil.getHourDays(djStoreActivity.getActivityendTime(),
                 djStoreActivity.getActivityStartTime()) <= djStoreActivity.getCyclePurchasing()) {
             DjActivitySession djActivitySession=new DjActivitySession();
             djActivitySession.setSessionStartTime(djStoreActivity.getActivityStartTime());
-            djActivitySession.setEndSession(djStoreActivity.getEndTime());
+            djActivitySession.setSessionEndTime(djStoreActivity.getActivityendTime());
             djActivitySession.setSession(1);
             djActivitySession.setStoreActivityId(djStoreActivity.getId());
             djActivitySessionMapper.insert(djActivitySession);
         }else{
             List<String> intervalTimeList = getIntervalTimeList(convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getActivityStartTime())
-                    , convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getEndTime()),
+                    , convertDate2String("yyyy-MM-dd HH:mm:ss", djStoreActivity.getActivityendTime()),
                     djStoreActivity.getCyclePurchasing());
             for (int i = 0; i <intervalTimeList.size()-1; i++) {
                 DjActivitySession djActivitySession=new DjActivitySession();
                 djActivitySession.setSessionStartTime(convertString2Date("yyyy-MM-dd HH:mm:ss",intervalTimeList.get(i)));
-                djActivitySession.setEndSession(convertString2Date("yyyy-MM-dd HH:mm:ss",intervalTimeList.get(i+1)));
+                djActivitySession.setSessionEndTime(convertString2Date("yyyy-MM-dd HH:mm:ss",intervalTimeList.get(i+1)));
                 djActivitySession.setSession(i+1);
                 djActivitySession.setStoreActivityId(djStoreActivity.getId());
                 djActivitySessionMapper.insert(djActivitySession);
@@ -233,10 +247,10 @@ public class DjStoreActivityService {
         if(djStoreActivity.getActivityType()==1){
             DjStoreActivity djStoreActivity1 = djStoreActivityMapper.selectByPrimaryKey(djStoreActivity.getId());
             if(djStoreActivity.getRegistrationStartTime().before(djStoreActivity.getActivityStartTime())||
-                    djStoreActivity.getEndTimeRegistration().after(djStoreActivity.getEndTime())){
+                    djStoreActivity.getRegistrationEndTime().after(djStoreActivity.getActivityendTime())){
                 throw new Exception("请正确填写报名时间和活动时间");
             }
-            if(!djStoreActivity1.getActivityStartTime().equals(djStoreActivity.getActivityStartTime())&&!djStoreActivity1.getEndTime().equals(djStoreActivity.getEndTime())){
+            if(!djStoreActivity1.getActivityStartTime().equals(djStoreActivity.getActivityStartTime())&&!djStoreActivity1.getActivityendTime().equals(djStoreActivity.getActivityendTime())){
                 Example example=new Example(DjActivitySession.class);
                 example.createCriteria().andEqualTo(DjActivitySession.STORE_ACTIVITY_ID,djStoreActivity.getId());
                 djActivitySessionMapper.deleteByExample(example);
@@ -265,7 +279,7 @@ public class DjStoreActivityService {
                 List<String> list=new ArrayList<>();
                 for (int i = 0; i < djActivitySessions.size(); i++) {
                     list.add("第"+(djActivitySessions.get(i).getSession())+"场："+convertDate2String("yyyy-MM-dd HH:mm:ss",djActivitySessions.get(i).getSessionStartTime())
-                            +" 至 "+convertDate2String("yyyy-MM-dd HH:mm:ss",djActivitySessions.get(i).getEndSession()));
+                            +" 至 "+convertDate2String("yyyy-MM-dd HH:mm:ss",djActivitySessions.get(i).getSessionEndTime()));
                 }
                 djStoreActivity.setList(list);
             }
@@ -719,14 +733,14 @@ public class DjStoreActivityService {
     public ServerResponse queryHomeLimitedPurchaseActivities(Integer limit) {
         try {
             Example example=new Example(DjActivitySession.class);
-            example.createCriteria().andGreaterThanOrEqualTo(DjActivitySession.END_SESSION,new Date());
+            example.createCriteria().andGreaterThanOrEqualTo(DjActivitySession.SESSION_END_TIME,new Date());
             List<DjActivitySession> djActivitySessions = djActivitySessionMapper.selectByExample(example);
             List<HomeLimitedPurchaseActivitieDTO> homeLimitedPurchaseActivitieDTOS=new ArrayList<>();
             djActivitySessions.forEach(djActivitySession -> {
                 HomeLimitedPurchaseActivitieDTO homeLimitedPurchaseActivitieDTO=new HomeLimitedPurchaseActivitieDTO();
                 homeLimitedPurchaseActivitieDTO.setId(djActivitySession.getId());
                 homeLimitedPurchaseActivitieDTO.setSessionStartTime(djActivitySession.getSessionStartTime());
-                homeLimitedPurchaseActivitieDTO.setEndSession(djActivitySession.getEndSession());
+                homeLimitedPurchaseActivitieDTO.setEndSession(djActivitySession.getSessionEndTime());
                 List<StorefrontProductDTO> storefrontProductDTOS =
                         djStoreActivityProductMapper.queryHomeGroupActivities(limit,djActivitySession.getId());
                 if(storefrontProductDTOS.size()>0) {
@@ -896,5 +910,53 @@ public class DjStoreActivityService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+
+    /**
+     * 检测拼团购是否拼团失败
+     * @return
+     */
+    @Transactional
+    public void checkGroupPurchaseOrder() {
+        Example example=new Example(Order.class);
+        example.createCriteria().andEqualTo(Order.DATA_STATUS,0)
+                .andEqualTo(Order.ORDER_STATUS,9)
+                .andEqualTo(Order.ORDER_SOURCE,6)
+                .andCondition("TIMESTAMPDIFF( HOUR, order_pay_time, SYSDATE()) >= 24");
+        List<Order> orders = orderMapper.selectByExample(example);
+        orders.forEach(order -> {
+            //拼团失败
+            order.setOrderStatus("10");
+            orderMapper.updateByPrimaryKeySelective(order);
+            //退款，记录流水
+            //用户入账
+            Member member = iMemberMapper.selectByPrimaryKey(order.getMemberId());
+            if (member != null) {
+                BigDecimal haveMoney = member.getHaveMoney().add(order.getTotalAmount());
+                BigDecimal surplusMoney = member.getSurplusMoney().add(order.getTotalAmount());
+                member.setHaveMoney(haveMoney);//添加已获总钱
+                member.setSurplusMoney(surplusMoney);//添加余额
+                iMemberMapper.updateByPrimaryKeySelective(member);
+                //添加流水
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName("业主拼团失败退款");
+                workerDetail.setWorkerId(member.getId());
+                workerDetail.setWorkerName(member.getName()!=null?member.getName():member.getNickName());
+                workerDetail.setHouseId(order.getHouseId());
+                workerDetail.setMoney(order.getTotalAmount());
+                workerDetail.setState(2);//进工钱
+                workerDetail.setWalletMoney(surplusMoney);//
+                workerDetail.setHaveMoney(order.getTotalAmount());
+                workerDetail.setHouseWorkerOrderId(order.getId());
+                workerDetail.setApplyMoney(order.getTotalAmount());
+                iWorkerDetailMapper.insert(workerDetail);
+                MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(order.getAddressId(),order.getHouseId());
+                if(memberAddress!=null) {
+                    configMessageService.addConfigMessage(AppType.ZHUANGXIU, order.getMemberId(), "0", "拼团失败", String.format
+                            (DjConstants.PushMessage.YZ_PT_FAIL, memberAddress.getAddress()), 3, null, null);
+                }
+            }
+        });
     }
 }

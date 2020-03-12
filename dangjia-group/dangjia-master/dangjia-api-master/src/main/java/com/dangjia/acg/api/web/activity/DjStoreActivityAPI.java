@@ -157,4 +157,8 @@ public interface DjStoreActivityAPI {
     ServerResponse queryActivityPurchaseRotation(@RequestParam("storeActivityProductId") String storeActivityProductId,
                                                  @RequestParam("activityType") Integer activityType);
 
+    @PostMapping("app/activity/checkGroupPurchaseOrder")
+    @ApiOperation(value = "检测拼团购是否拼团失败", notes = "检测拼团购是否拼团失败")
+    void checkGroupPurchaseOrder();
+
 }

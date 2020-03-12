@@ -59,6 +59,7 @@ import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.member.MemberAddressService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.repair.MendOrderService;
@@ -164,6 +165,9 @@ public class OrderService {
     private DjStoreActivityMapper djStoreActivityMapper;
     @Autowired
     private DjStoreActivityProductMapper djStoreActivityProductMapper;
+    @Autowired
+    private MemberAddressService memberAddressService;
+
     /**
      * 删除订单
      */
@@ -1961,22 +1965,10 @@ public class OrderService {
                         order.setCreateDate(null);
                         order.setOrderStatus("2");
                         orderMapper.updateByExampleSelective(order,example);
-                        orders.forEach(order1 -> {
-                            //拼团人数拼满，拼团成功并且为材料商品，生成要货单
-                            if(order1.getProductType()==0) {
-                                this.setOrderSplit(order1);
-                            }
-                            Map<String,Object> map=new HashMap<>();
-                            Member member = iMemberMapper.selectByPrimaryKey(order1.getMemberId());
-                            member.initPath(imageAddress);
-                            map.put("administrator",0);
-                            if(StringUtils.isEmpty(order1.getParentOrderId())) {
-                                map.put("administrator",1);
-                            }
-                            map.put("head",member.getHead());
-                            list.add(map);
-                        });
+                        //生成发货单
+                        this.spellGroupSuccess(orders,imageAddress,list);
                         groupBooking.setShortProple(djStoreActivity.getSpellGroup()-orders.size());
+                        groupBooking.setList(list);
                         return ServerResponse.createBySuccess("该团人数已满,参与其他团成功",groupBooking);
                     }else{//拼团人数未满 不生成要货单
                         orders.forEach(order1 -> {
@@ -1992,6 +1984,7 @@ public class OrderService {
                         });
                         groupBooking.setShortProple(djStoreActivity.getSpellGroup()-orders.size());
                         groupBooking.setOrderGenerationTime(order.getOrderGenerationTime());
+                        groupBooking.setList(list);
                         return ServerResponse.createBySuccess("拼团成功",groupBooking);
                     }
                 }else{//不存在其他团,自己作为新团发起人
@@ -2014,6 +2007,25 @@ public class OrderService {
                 order.setOrderStatus("9");
                 order.setOrderPayTime(new Date());
                 orderMapper.updateByPrimaryKeySelective(order);
+                example=new Example(Order.class);
+                example.createCriteria().andEqualTo(Order.PARENT_ORDER_ID,parentOrder.getParentOrderId())
+                        .andEqualTo(Order.DATA_STATUS,0)
+                        .andEqualTo(Order.ORDER_STATUS,9);
+                List<Order> orders = orderMapper.selectByExample(example);
+                //拼团人数拼满，拼团成功并且为材料商品，生成要货单
+                if(djStoreActivity.getSpellGroup()==orders.size()){
+                    //拼团成功修改拼团所有成员状态
+                    order=new Order();
+                    order.setId(null);
+                    order.setCreateDate(null);
+                    order.setOrderStatus("2");
+                    orderMapper.updateByExampleSelective(order,example);
+                    //生成要货单
+                    this.spellGroupSuccess(orders,imageAddress,list);
+                    groupBooking.setShortProple(djStoreActivity.getSpellGroup()-orders.size());
+                    groupBooking.setList(list);
+                    return ServerResponse.createBySuccess("拼团成功",groupBooking);
+                }
                 Map<String,Object> map=new HashMap<>();
                 Member member = iMemberMapper.selectByPrimaryKey(order.getMemberId());
                 member.initPath(imageAddress);
@@ -2046,6 +2058,29 @@ public class OrderService {
         }
     }
 
+
+    public void spellGroupSuccess(List<Order> orders,String imageAddress,List<Map<String,Object>> list){
+        orders.forEach(order1 -> {
+            //拼团人数拼满，拼团成功并且为材料商品，生成要货单
+            if(order1.getProductType()==0) {
+                this.setOrderSplit(order1);
+            }
+            Map<String,Object> map=new HashMap<>();
+            Member member = iMemberMapper.selectByPrimaryKey(order1.getMemberId());
+            MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(order1.getAddressId(),order1.getHouseId());
+            if(memberAddress!=null) {
+                configMessageService.addConfigMessage(AppType.ZHUANGXIU, member.getId(), "0", "拼团成功", String.format
+                        (DjConstants.PushMessage.YZ_PT_SUCCESS, memberAddress.getAddress()), 3, null, null);
+            }
+            member.initPath(imageAddress);
+            map.put("administrator",0);
+            if(StringUtils.isEmpty(order1.getParentOrderId())) {
+                map.put("administrator",1);
+            }
+            map.put("head",member.getHead());
+            list.add(map);
+        });
+    }
 
     /**
      * 限时购支付后操作

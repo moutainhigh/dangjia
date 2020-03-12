@@ -96,7 +96,7 @@
           dj_activity_session
         WHERE id =#{id}
         AND NOT (
-            end_session &lt; (
+            session_end_time &lt; (
                 SELECT
                 activity_start_time
                 FROM
@@ -106,14 +106,14 @@
             )
             OR session_start_time &gt; (
                 SELECT
-                end_time
+                activity_end_time
                 FROM
                 dj_store_activity
                 WHERE
                 id = #{storeActivityId}
             )
           <if test="null!=id1 and ''!=id1">
-              OR end_session &lt; (
+              OR session_end_time &lt; (
                   SELECT
                   session_start_time
                   FROM
@@ -123,7 +123,7 @@
               )
               OR session_start_time &gt; (
                   SELECT
-                  end_session
+                  session_end_time
                   FROM
                   dj_activity_session
                   WHERE
@@ -141,7 +141,7 @@
           dj_store_activity
         WHERE id = #{id}
         AND NOT (
-            end_time &lt; (
+            session_end_time &lt; (
                 SELECT
                 activity_start_time
                 FROM
@@ -151,14 +151,14 @@
             )
             OR activity_start_time &gt; (
                 SELECT
-                end_time
+                activity_end_time
                 FROM
                 dj_store_activity
                 WHERE
                 id = #{id1}
             )
             <if test="null!=activitySessionId and ''!=activitySessionId">
-                OR end_time &lt; (
+                OR activity_end_time &lt; (
                     SELECT
                     session_start_time
                     FROM
@@ -168,7 +168,7 @@
                 )
                 OR activity_start_time &gt; (
                     SELECT
-                    end_session
+                    session_end_time
                     FROM
                     dj_activity_session
                     WHERE

@@ -35,7 +35,7 @@ public class DjStoreActivityDTO extends BaseEntity {
 
     @Desc(value = "报名结束时间")
     @ApiModelProperty("报名结束时间")
-    private Date endTimeRegistration;
+    private Date registrationEndTime;
 
     @Desc(value = "活动开始时间")
     @ApiModelProperty("活动开始时间")
@@ -43,7 +43,7 @@ public class DjStoreActivityDTO extends BaseEntity {
 
     @Desc(value = "活动结束时间")
     @ApiModelProperty("活动结束时间")
-    private Date endTime;
+    private Date activityEndTime;
 
     @Desc(value = "场次开始时间")
     @ApiModelProperty("场次开始时间")
@@ -51,7 +51,7 @@ public class DjStoreActivityDTO extends BaseEntity {
 
     @Desc(value = "场次结束时间")
     @ApiModelProperty("场次结束时间")
-    private Date endSession;
+    private Date sessionEndTime;
 
     @Desc(value = "活动地区")
     @ApiModelProperty("活动地区")
