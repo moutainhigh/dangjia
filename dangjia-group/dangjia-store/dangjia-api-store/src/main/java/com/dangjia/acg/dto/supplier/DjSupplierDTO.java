@@ -64,4 +64,8 @@ public class DjSupplierDTO  {
     private String contractState;
 
     private Integer listSize;
+
+    private Double transportationCost;
+
+    private String email;
 }
