@@ -152,4 +152,9 @@ public interface DjStoreActivityAPI {
     @ApiOperation(value = "参与拼团(未满/已满)", notes = "参与拼团(未满/已满)")
     ServerResponse setSpellGroup(@RequestParam("orderId") String orderId);
 
+    @PostMapping("app/activity/queryActivityPurchaseRotation")
+    @ApiOperation(value = "查询限时购/拼团购轮播", notes = "查询限时购/拼团购轮播")
+    ServerResponse queryActivityPurchaseRotation(@RequestParam("storeActivityProductId") String storeActivityProductId,
+                                                 @RequestParam("activityType") Integer activityType);
+
 }

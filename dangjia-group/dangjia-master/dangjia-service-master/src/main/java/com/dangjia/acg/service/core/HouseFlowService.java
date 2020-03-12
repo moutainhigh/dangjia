@@ -1416,4 +1416,13 @@ public class HouseFlowService {
             return null;
         }
     }
+
+    /**
+     * @Description:根据用户id查询[所有房子][正在施工][所有工序]
+     * @author: luof
+     * @date: 2020-3-11
+     */
+    public List<Integer> queryWorkerTypeListByMemberId(String memberId){
+        return houseFlowMapper.queryWorkerTypeListByMemberId(memberId);
+    }
 }

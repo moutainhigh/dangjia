@@ -6,6 +6,7 @@ import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
+import com.dangjia.acg.modle.member.Member;
 import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -91,6 +92,9 @@ public interface IOrderMapper extends Mapper<Order> {
                               @Param("memberId") String memberId,
                               @Param("houseId") String houseId);
 
+
+    List<Member> queryActivityPurchaseRotation(@Param("activityType") Integer activityType,
+                                               @Param("storeActivityProductId") String storeActivityProductId);
 
 }
 
