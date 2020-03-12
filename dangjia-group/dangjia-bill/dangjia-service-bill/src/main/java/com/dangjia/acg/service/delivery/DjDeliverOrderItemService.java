@@ -334,7 +334,7 @@ public class DjDeliverOrderItemService {
                     memberAddress.setHouseId(null);
                     memberAddress.setRenovationType(0);//改为非装修地址
                     memberAddress.setModifyDate(new Date());
-                    billMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
+                    billMemberAddressMapper.updateByPrimaryKey(memberAddress);
                 }
                 House house=houseMapper.selectByPrimaryKey(order.getHouseId());
                 if(house!=null){//撤销房子信息
@@ -343,8 +343,17 @@ public class DjDeliverOrderItemService {
                     house.setType(3);
                     house.setShowHouse(0);
                     house.setModifyDate(new Date());
+                    houseMapper.updateByPrimaryKey(house);
+                }
+                example=new Example(House.class);
+                example.createCriteria().andEqualTo(House.MEMBER_ID,businessOrder.getMemberId());
+                List<House> houseList=houseMapper.selectByExample(example);
+                if(houseList!=null&&houseList.size()>0){//设置默认的房产地址
+                    house=houseList.get(0);
+                    house.setIsSelect(1);
                     houseMapper.updateByPrimaryKeySelective(house);
                 }
+
             }
 
             iBillBusinessOrderMapper.updateByExampleSelective(businessOrder,example);

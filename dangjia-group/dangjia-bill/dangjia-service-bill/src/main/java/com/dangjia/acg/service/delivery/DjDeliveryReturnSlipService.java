@@ -3,9 +3,12 @@ package com.dangjia.acg.service.delivery;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
+import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -15,11 +18,17 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
 import com.dangjia.acg.mapper.delivery.*;
+import com.dangjia.acg.mapper.member.IBillMemberAddressMapper;
+import com.dangjia.acg.mapper.order.IBillHouseMapper;
 import com.dangjia.acg.mapper.refund.IBillMendMaterialMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -75,11 +84,15 @@ public class DjDeliveryReturnSlipService {
     @Autowired
     private IBillDjDeliverOrderMapper ibillDjDeliverOrderMapper;
     @Autowired
-    private IBillMendDeliverMapper iBillMendDeliverMapper;
+    private IBillMemberAddressMapper billMemberAddressMapper;
     @Autowired
-    private IBillMendMaterialMapper iBillMendMaterialMapper;
+    private ConfigMessageAPI configMessageAPI;
     @Autowired
     private BillStorefrontService billStorefrontService;
+    @Autowired
+    private IBillHouseMapper houseMapper;
+    @Autowired
+    private IBillHouseFlowMapper houseFlowMapper;
 
     /**
      * 供货任务列表
@@ -188,6 +201,29 @@ public class DjDeliveryReturnSlipService {
                 //修改发货单
                 splitDeliver.setShippingState(1);
                 billDjDeliverSplitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+                example=new Example(MemberAddress.class);
+                if(splitDeliver.getAddressId()!=null){
+                    example.createCriteria().andEqualTo(MemberAddress.ID,splitDeliver.getAddressId());
+                }else if(splitDeliver.getHouseId()!=null){
+                    example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,splitDeliver.getHouseId());
+                }
+                MemberAddress memberAddress= billMemberAddressMapper.selectOneByExample(example);
+                //供应商发货
+                configMessageAPI.addConfigMessageServer(AppType.ZHUANGXIU, memberAddress.getMemberId(), "0", "供应商发货", String.format
+                        (DjConstants.PushMessage.YZ_FN_001, memberAddress.getAddress(),splitDeliver.getNumber()), 3,null,null);
+                //判断房子是否已竣工，若未竣工，则推送消息给大管家
+                if(splitDeliver.getHouseId()!=null){
+                    House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+                    example=new Example(HouseFlow.class);
+                    example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,splitDeliver.getHouseId())
+                            .andEqualTo(HouseFlow.WORKER_TYPE_ID,"3");
+                    HouseFlow houseFlow= houseFlowMapper.selectOneByExample(example);//查询大管家信息
+                    if(house.getVisitState()==1&&houseFlow!=null){//大管家已收货
+                        configMessageAPI.addConfigMessageServer( AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "供应商发货", String.format
+                                (DjConstants.PushMessage.DGJ_S_001, memberAddress.getAddress(),splitDeliver.getNumber()), 3,null,null);
+                    }
+                }
+
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
