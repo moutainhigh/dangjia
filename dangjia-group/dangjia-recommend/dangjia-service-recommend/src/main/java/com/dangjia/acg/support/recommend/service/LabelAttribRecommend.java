@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.mapper.recommend.IHouseMapper;
 import com.dangjia.acg.mapper.recommend.IRecommendItemSubMapper;
+import com.dangjia.acg.mapper.recommend.IWorkerTypeMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 //import com.dangjia.acg.service.core.HouseFlowService;
@@ -16,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +35,10 @@ public class LabelAttribRecommend {
     private static Logger logger = LoggerFactory.getLogger(LabelAttribRecommend.class);
 
     @Autowired
-    private HouseService houseService;
-
-//    @Autowired
-//    private HouseFlowService houseFlowService;
+    private IHouseMapper houseMapper;
 
     @Autowired
-    private WorkerTypeService workerTypeService;
+    private IWorkerTypeMapper workerTypeMapper;
 
     @Autowired
     private IRecommendItemSubMapper recommendItemSubMapper;
@@ -74,15 +74,15 @@ public class LabelAttribRecommend {
     private List<String> queryItemSubIdByHouseAttrib(String memberId){
 
         // 获取房子属性/标签
-        ServerResponse houseRes = houseService.queryMyHouseByMemberId(memberId);
-        List<House> houseList = (List<House>)houseRes.getResultObj();
+        // 获取房子
+        List<House> houseList = queryMyHouseByMemberId(memberId);
 //        logger.debug("用户["+memberId+"]房子信息:"+ JSON.toJSONString(houseList));
         if( houseList == null || houseList.size() < 1 ){
             return null;
         }
 
         // 获取房子当前[所有][正在施工][工序+排期]
-        List<WorkerType> workerTypeList = workerTypeService.queryWorkerTypeListByMemberId(memberId);
+        List<WorkerType> workerTypeList = workerTypeMapper.queryWorkerTypeListByMemberId(memberId);
 //        logger.debug("用户["+memberId+"]房子所有正在施工的工序与排期信息:"+ JSON.toJSONString(workerTypeList));
         if( workerTypeList == null || workerTypeList.size() < 1 ){
             return null;
@@ -94,7 +94,7 @@ public class LabelAttribRecommend {
         }
 
         // 再查工序
-        List<Integer> typeList = workerTypeService.queryTypeBySort(sortNextList);
+        List<Integer> typeList = workerTypeMapper.queryTypeBySort(sortNextList);
 //        logger.debug("用户["+memberId+"]房子所有正在施工的下一步工序信息:"+ JSON.toJSONString(typeList));
         if( typeList == null || typeList.size() < 1 ){
             return null;
@@ -111,5 +111,15 @@ public class LabelAttribRecommend {
             return null;
         }
         return itemSubIdList;
+    }
+
+    /** 我的房子 */
+    private List<House> queryMyHouseByMemberId(String memberId){
+        Example example = new Example(House.class);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, memberId)
+                .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
+                .andEqualTo(House.DATA_STATUS, 0);
+        return houseMapper.selectByExample(example);
     }
 }
