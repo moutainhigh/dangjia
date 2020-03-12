@@ -13,6 +13,7 @@ import com.dangjia.acg.dto.activity.DjStoreActivityProductDTO;
 import com.dangjia.acg.dto.activity.DjStoreParticipateActivitiesDTO;
 import com.dangjia.acg.dto.activity.HomeLimitedPurchaseActivitieDTO;
 import com.dangjia.acg.dto.deliver.GroupBooking;
+import com.dangjia.acg.dto.member.MemberDTO;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.activity.DjActivitySessionMapper;
 import com.dangjia.acg.mapper.activity.DjStoreActivityMapper;
@@ -881,9 +882,16 @@ public class DjStoreActivityService {
     public ServerResponse queryActivityPurchaseRotation(String storeActivityProductId, Integer activityType) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            List<Member> members = orderMapper.queryActivityPurchaseRotation(activityType, storeActivityProductId);
-            members.forEach(member -> member.setHead(imageAddress+member.getHead()));
-            return ServerResponse.createBySuccess("查询成功",members);
+            List<MemberDTO> memberDTOS = orderMapper.queryActivityPurchaseRotation(activityType, storeActivityProductId);
+            memberDTOS.forEach(memberDTO ->{
+                memberDTO.setHead(imageAddress+memberDTO.getHead());
+                try {
+                    memberDTO.setAirtime(DateUtil.daysBetweenTime(memberDTO.getOrderPayTime(),new Date()));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            });
+            return ServerResponse.createBySuccess("查询成功",memberDTOS);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

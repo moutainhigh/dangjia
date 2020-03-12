@@ -4,6 +4,7 @@ import com.dangjia.acg.dto.deliver.BudgetOrderDTO;
 import com.dangjia.acg.dto.deliver.BudgetOrderItemDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
+import com.dangjia.acg.dto.member.MemberDTO;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.member.Member;
@@ -93,8 +94,8 @@ public interface IOrderMapper extends Mapper<Order> {
                               @Param("houseId") String houseId);
 
 
-    List<Member> queryActivityPurchaseRotation(@Param("activityType") Integer activityType,
-                                               @Param("storeActivityProductId") String storeActivityProductId);
+    List<MemberDTO> queryActivityPurchaseRotation(@Param("activityType") Integer activityType,
+                                                  @Param("storeActivityProductId") String storeActivityProductId);
 
 }
 

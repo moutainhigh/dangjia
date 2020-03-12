@@ -439,10 +439,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             and   (ddsd.shipping_state = 1 or ddsd.shipping_state = 7)
     </select>
 
-    <select id="queryActivityPurchaseRotation" resultType="com.dangjia.acg.modle.member.Member">
+    <select id="queryActivityPurchaseRotation" resultType="com.dangjia.acg.dto.member.MemberDTO">
         SELECT
             b.head,
-            if(b.name IS NULL OR b.name='',b.nick_name,b.name) name
+            if(b.name IS NULL OR b.name='',b.nick_name,b.name) name,
+            a.order_pay_time AS orderPayTime
         FROM
             dj_deliver_order a,
             dj_member b
@@ -456,14 +457,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AND a.order_source=6
             AND (a.order_status=2 OR a.order_status=9)
         </if>
-        <choose>
-            <when test="null!=storeActivityProductId and ''!=storeActivityProductId">
-                AND a.store_activity_product_id=#{storeActivityProductId}
-            </when>
-            <otherwise>
-                AND a.store_activity_product_id IS NOT NULL
-            </otherwise>
-        </choose>
+        <if test="null!=storeActivityProductId and ''!=storeActivityProductId">
+            AND a.store_activity_product_id=#{storeActivityProductId}
+        </if>
         ORDER BY a.order_pay_time desc
         limit 10
     </select>
