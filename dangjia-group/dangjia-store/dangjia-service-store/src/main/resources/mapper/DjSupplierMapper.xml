@@ -46,7 +46,9 @@
             da.sup_id as supId,
             da.shop_id as shopId,
             da.fail_reason as failReason,
-            da.contract
+            da.contract,
+            ds.transportation_cost as transportationCost,
+            ds.email
         FROM
             dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
