@@ -136,4 +136,13 @@ public class WorkerTypeService {
     public List<WorkerType> queryWorkerTypeListByMemberId(String memberId){
         return workerTypeMapper.queryWorkerTypeListByMemberId(memberId);
     }
+
+    /**
+     * @Description:查询工序 根据排期
+     * @author: luof
+     * @date: 2020-3-12
+     */
+    public List<Integer> queryTypeBySort(List<Integer> sortList){
+        return workerTypeMapper.queryTypeBySort(sortList);
+    }
 }

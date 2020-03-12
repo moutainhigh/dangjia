@@ -26,6 +26,13 @@ public interface IWorkerTypeMapper extends Mapper<WorkerType> {
      * @author: luof
      * @date: 2020-3-12
      */
-    List<WorkerType> queryWorkerTypeListByMemberId(String memberId);
+    List<WorkerType> queryWorkerTypeListByMemberId(@Param("memberId")String memberId);
+
+    /**
+     * @Description:查询工序 根据排期
+     * @author: luof
+     * @date: 2020-3-12
+     */
+    List<Integer> queryTypeBySort(@Param("sortList")List<Integer> sortList);
 }
 

@@ -30,5 +30,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where h.member_id = #{memberId}
           AND chf.work_steta in (0,1,4)
     </select>
+
+    <!-- 查询工序 根据排期 -->
+    <select id="queryTypeBySort" resultType="java.lang.Integer">
+        SELECT type
+        FROM dj_core_worker_type
+        WHERE sort in
+        <foreach collection="sortList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
 </mapper>
 
