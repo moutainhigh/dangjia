@@ -400,8 +400,10 @@
 
         <if test="null!=attributeVal">
             AND
-            <foreach collection="attributeVal" index="index" item="item" open="(" separator="OR" close=")">
-                FIND_IN_SET( #{item},bp.value_id_arr)
+            <foreach collection="attributeVal" index="index" item="item" open="(" separator="and" close=")">
+                <foreach collection="item.split('-')"  item="val" index="index" open="(" separator="OR" close=")">
+                    FIND_IN_SET(#{val},bp.value_id_arr)
+                </foreach>
             </foreach>
         </if>
         <if test="brandVal!=null and brandVal!=''">
