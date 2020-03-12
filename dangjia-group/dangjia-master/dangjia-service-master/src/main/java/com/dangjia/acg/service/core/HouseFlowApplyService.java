@@ -799,7 +799,7 @@ public class HouseFlowApplyService {
             if (ms != null) {
                 for (Customer m : ms) {
                     configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "竣工提醒",
-                            "您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6);
+                            "您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6,null,null);
                 }
             }
 
@@ -819,7 +819,7 @@ public class HouseFlowApplyService {
                         MainUser us = userMapper.selectByPrimaryKey(residentialRange.getUserId());
                         if(null != us && !CommonUtil.isEmpty(us.getMemberId())){
                             configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "竣工提醒",
-                                    "您有一个归于您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6);
+                                    "您有一个归于您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6,null,null);
                         }
                     }
                 }
@@ -832,7 +832,7 @@ public class HouseFlowApplyService {
                     if(null != us && !CommonUtil.isEmpty(us.getMemberId())){
                         Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "竣工提醒",
-                                "您的跨域客户【" + member.getNickName() + "】已竣工，请及时查看提成。", 6);
+                                "您的跨域客户【" + member.getNickName() + "】已竣工，请及时查看提成。", 6,null,null);
                     }
 
                 }
@@ -911,8 +911,8 @@ public class HouseFlowApplyService {
             }
             worker.setVolume(worker.getVolume().add(new BigDecimal(1)));
             memberMapper.updateByPrimaryKeySelective(worker);
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, hfa.getWorkerId(), "0", "业主验收竣工通过",
-                    String.format(DjConstants.PushMessage.GZ_G_WORK_Y, house.getHouseName()), "");
+            configMessageService.addConfigMessage( AppType.GONGJIANG, hfa.getWorkerId(), "0", "业主验收竣工通过",
+                    String.format(DjConstants.PushMessage.GZ_G_WORK_Y, house.getHouseName()), 3,null,null);
 
             //超过免费要货次数,收取管家运费
 //            extraOrderSplitFare(hwo);

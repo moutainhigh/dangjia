@@ -420,8 +420,8 @@ public class HouseWorkerSupService {
                 }
                 //计划顺延
                 houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), hfa.getSuspendDay(), null);
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠申请停工",
-                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "");
+                configMessageService.addConfigMessage(AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠申请停工",
+                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), 3,null,null);
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

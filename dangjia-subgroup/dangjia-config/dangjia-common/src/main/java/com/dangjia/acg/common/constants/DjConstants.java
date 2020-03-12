@@ -184,8 +184,8 @@ public class DjConstants {
         public final static String STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE = "业主您好！【%s】有工匠停工，请查看";
         public final static String CRAFTSMAN_NEW_REPLACE = "业主您好！经多方协调，当家为您更换新的【%s】，请等待新【%s】抢单。";
         public final static String STEWARD_APPLY_FINISHED = "大管家您好！【%s】【%s】申请阶段/整体完工，请审核！";
-        public final static String STEWARD_APPLY_FINISHED_NOT_PASS = "工匠您好！您申请的【%s】阶段/整体完工未通过大管家的审核，请及时整改！";
-        public final static String STEWARD_APPLY_FINISHED_PASS = "工匠您好！您申请的【%s】阶段/整体完工已通过大管家的审核，请查看。";
+        public final static String STEWARD_APPLY_FINISHED_NOT_PASS = "工匠您好！您申请的【%s】阶段/整体完工未通过审核，请及时整改！";
+        public final static String STEWARD_APPLY_FINISHED_PASS = "工匠您好！您申请的【%s】阶段/整体完工已通过审核，请查看。";
         public final static String CRAFTSMAN_EVALUATE = "工匠您好！【%s】业主已对您进行评价，立即查看";
         public final static String CRAFTSMAN_ALL_FINISHED = "业主您好！您的美宅【%s】大管家已申请竣工验收，请确认。";
         public final static String STEWARD_EVALUATE = "大管家您好！【%s】业主已对您进行评价，立即查看";
@@ -229,7 +229,7 @@ public class DjConstants {
         public final static String STEWARD_B_SERVER = "业主您好！工匠根据【%s】装修施工需要，补部分包工包料，请查看并支付";
         public final static String CRAFTSMAN_Y_MATERIAL = "业主您好！【%s】工匠已为您安排了材料发货，请及时收货。";
         public final static String CRAFTSMAN_T_MATERIAL = "业主您好！根据【%s】装修施工需要，现场盘点部分材料退货，具体退货数量以卖家验货为准，请知晓。";
-        public final static String CRAFTSMAN_B_MATERIAL = "业主您好！工匠根据【%s】装修施工需要，补部分材料，请查看并支付";
+        public final static String CRAFTSMAN_B_MATERIAL = "业主您好！根据【%s】装修施工情况，现场需要补部分材料，请查看并支付。";
 
         public final static String CRAFTSMAN_B_WORK = "业主您好！工匠根据【%s】装修施工需要，补部分人工，请查看并支付";
         public final static String CRAFTSMAN_T_WORK = "工匠您好！业主根据【%s】装修施工需要，退部分人工，请审核";

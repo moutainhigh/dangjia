@@ -237,9 +237,9 @@ public class QuantityRoomService {
             }
             house.setDesignerOk(9);
             //推送消息给业主已完成量房
-            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
+            configMessageService.addConfigMessage(AppType.ZHUANGXIU, house.getMemberId(),
                     "0", "设计师完成量房", String.format(DjConstants.PushMessage.LIANGFANGWANCHENG,
-                            house.getHouseName()), "");
+                            house.getHouseName()), 3,null,null);
         }
         house.setDataStatus(0);
         iHouseMapper.updateByPrimaryKeySelective(house);

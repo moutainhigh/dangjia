@@ -231,9 +231,9 @@ public class EvaluateService {
                 memberMapper.updateByPrimaryKeySelective(member);
             }
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(),
+            configMessageService.addConfigMessage(AppType.GONGJIANG, houseFlowApply.getWorkerId(),
                     "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,
-                            house.getHouseName()), "5");
+                            house.getHouseName()), 3,null,null);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -269,9 +269,9 @@ public class EvaluateService {
             houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(), 1));
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
+            configMessageService.addConfigMessage(AppType.GONGJIANG, member.getId(), "0",
                     "阶段/整体审核超时扣钱提醒", String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI, house.getHouseName(),
-                            workerType.getName()), "0");
+                            workerType.getName()), 3,null,null);
         }
     }
 
@@ -284,9 +284,9 @@ public class EvaluateService {
             updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), houseFlow.getId(),new BigDecimal(evaluation), desc);
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
 
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
+            configMessageService.addConfigMessage( AppType.GONGJIANG, member.getId(), "0",
                     workerType.getName() + desc,
-                    String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
+                    String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), 3,null,null);
         }
     }
 
@@ -394,8 +394,11 @@ public class EvaluateService {
                 hf.setPause(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
+            configMessageService.addConfigMessage(AppType.GONGJIANG, houseFlowApply.getWorkerId(),
+                    "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,
+                            house.getHouseName()), 3,null,null);
             //生成任务
-            taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
+            taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "大管家验收", "icon/sheji.png", 3, houseFlowApply.getId());
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -505,7 +508,7 @@ public class EvaluateService {
                     String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
                     configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "竣工提醒",
                             "您有已竣工的房子【" + house.getHouseName() + "】", 0, url
-                                    + Utils.getCustomerDetails(house.getMemberId(), djAlreadyRobSingle.get(0).getId(), 1, "4"));
+                                    + Utils.getCustomerDetails(house.getMemberId(), djAlreadyRobSingle.get(0).getId(), 1, "4"),null);
                 }
             }
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -586,9 +589,9 @@ public class EvaluateService {
                 //评价之后修改工人的好评率
                 updateFavorable(worker.getId());
                 if(worker.getWorkerType()==3){
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
+                    configMessageService.addConfigMessage( AppType.GONGJIANG, supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), 3,null,null);
                 }else {
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+                    configMessageService.addConfigMessage( AppType.GONGJIANG, worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), 3,null,null);
                 }
             }
 //            if(houseFlow.getWorkerType()==3&&houseFlowApply.getApplyType()==2){

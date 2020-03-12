@@ -781,8 +781,8 @@ public class HouseService {
         try {
 
             //通知业主确认开工
-            configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
-                    String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
+            configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
+                    String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), 3,null,null);
 //            通知设计师/精算师/大管家 抢单
             Example example = new Example(WorkerType.class);
             example.createCriteria().andCondition(WorkerType.TYPE + " in(1,2) ");
@@ -841,7 +841,7 @@ public class HouseService {
                     String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
                     configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
                             "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                    + Utils.getCustomerDetails(memberId, djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+                                    + Utils.getCustomerDetails(memberId, djAlreadyRobSingle1.get(0).getId(), 1, "4"),null);
                 }
             }
         }
@@ -1360,12 +1360,12 @@ public class HouseService {
             MainUser us = userMapper.selectByPrimaryKey(userId2);
             Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
             configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
-                    "您的跨域客户【" + member.getNickName() + "】已确认开工， 请及时查看提成。", 6);
+                    "您的跨域客户【" + member.getNickName() + "】已确认开工， 请及时查看提成。", 6,null,null);
         } else {
             //销售所选楼栋是否在自己楼栋范围内推送消息
             MainUser us = userMapper.selectByPrimaryKey(userId2);
             configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
-                    "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工， 请及时查看提成。", 6);
+                    "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工， 请及时查看提成。", 6,null,null);
         }
     }
 
@@ -2315,7 +2315,8 @@ public class HouseService {
                 if (price == 0) {
                     return ServerResponse.createByErrorMessage("大管家没有精算人工费,请重新添加");
                 }else{
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "精算师上传精算", String.format(DjConstants.PushMessage.ACTUARY_UPLOADING, house.getHouseName()), houseId);
+                    configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "精算师上传精算",
+                            String.format(DjConstants.PushMessage.ACTUARY_UPLOADING, house.getHouseName()),3,houseId,null);
                     //精算审核任务
                     taskStackService.insertTaskStackInfo(houseId,house.getMemberId(),"精算审核","icon/jingsuan.png",16,houseId);
                 }
@@ -3563,8 +3564,8 @@ public class HouseService {
             houseFlowApplyImageMapper.insert(houseFlowApplyImage);
         }
         StorefrontProduct storefrontProduct=masterStorefrontProductMapper.selectByPrimaryKey(productId);
-        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家主动验收",
-                String.format(DjConstants.PushMessage.GZ_G_YANSHOU_Y, house.getHouseName(), storefrontProduct.getProductName()), "");
+        configMessageService.addConfigMessage(AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家主动验收",
+                String.format(DjConstants.PushMessage.GZ_G_YANSHOU_Y, house.getHouseName(), storefrontProduct.getProductName()), 3,null,null);
 
         //生成任务发送给业主
         taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
@@ -3594,11 +3595,11 @@ public class HouseService {
         Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
         worker.initPath(address);
         if(memberCheck==1){
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主审核主动验收通过",
-                    String.format(DjConstants.PushMessage.YZ_G_YANSHOU_Y, house.getHouseName(), storefrontProduct.getProductName()), "");
+            configMessageService.addConfigMessage(AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主审核主动验收通过",
+                    String.format(DjConstants.PushMessage.YZ_G_YANSHOU_Y, house.getHouseName(), storefrontProduct.getProductName()), 3,null,null);
         }else{
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主审核主动验收未通过",
-                    String.format(DjConstants.PushMessage.YZ_G_YANSHOU_N, house.getHouseName(), storefrontProduct.getProductName()), "");
+            configMessageService.addConfigMessage( AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主审核主动验收未通过",
+                    String.format(DjConstants.PushMessage.YZ_G_YANSHOU_N, house.getHouseName(), storefrontProduct.getProductName()), 3,null,null);
 
         }
         return ServerResponse.createBySuccess("操作成功", worker);

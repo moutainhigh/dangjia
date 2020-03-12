@@ -635,8 +635,8 @@ public class ComplainService {
                             memberMapper.updateByPrimaryKeySelective(member);
                         }
                         House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主验收竣工未通过",
-                                String.format(DjConstants.PushMessage.GZ_G_WORK_N, house.getHouseName()), "");
+                        configMessageService.addConfigMessage( AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主验收竣工未通过",
+                                String.format(DjConstants.PushMessage.GZ_G_WORK_N, house.getHouseName()), 3,null,null);
 
                         break;
                     case 4:// 4:部分收货申诉，计算金钱给到对应的店铺

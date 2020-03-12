@@ -2,12 +2,16 @@ package com.dangjia.acg.controller.config;
 
 import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.modle.config.ConfigMessage;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -65,7 +69,7 @@ public class ConfigMessageController implements ConfigMessageAPI {
     @Override
     @ApiMethod
     public ServerResponse addConfigMessage(String memberId, String title, String alert, Integer type, String data) {
-        return configMessageService.addConfigMessage(AppType.SALE,memberId,title,alert,type,data);
+        return configMessageService.addConfigMessage(AppType.SALE,memberId,title,alert,type,data,null);
     }
 
     /**
@@ -81,6 +85,14 @@ public class ConfigMessageController implements ConfigMessageAPI {
     @ApiMethod
     public ServerResponse addRefundConfigMessage(HttpServletRequest request,AppType appType,String memberId,String targetType,
                                                  String title,String alert,String typeText){
-        return configMessageService.addConfigMessage(request,AppType.ZHUANGXIU,memberId,title,alert,targetType,typeText);
+        String data = null;
+        int type = 0;
+        typeText = (!CommonUtil.isEmpty(typeText)) ? typeText : "2";
+        if (!StringUtils.isNumeric(typeText)) {
+            data = typeText;
+        } else {
+            type = Integer.parseInt(typeText);
+        }
+        return configMessageService.addConfigMessage(AppType.ZHUANGXIU,memberId,title,alert,type,data,null);
     }
 }

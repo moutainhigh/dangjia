@@ -166,8 +166,8 @@ public class OrderSplitService {
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
 //            //业主
-            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "供应商发货", String.format
-                    (DjConstants.PushMessage.YZ_F_001, house.getHouseName()), "");
+            configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "供应商发货", String.format
+                    (DjConstants.PushMessage.YZ_F_001, house.getHouseName()),3,null,null);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();

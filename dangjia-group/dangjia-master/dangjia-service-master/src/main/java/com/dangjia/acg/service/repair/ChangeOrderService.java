@@ -116,8 +116,8 @@ public class ChangeOrderService {
                 /*configMessageService.addConfigMessage(null,AppType.GONGJIANG,house.getMemberId(),"0","工匠补人工申请",String.format
                         (DjConstants.PushMessage.STEWARD_B_CHECK_WORK,house.getHouseName(),workerType.getName()) ,"");*/
             } else {//退
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, house.getMemberId(), "0", "业主退人工变更", String.format
-                        (DjConstants.PushMessage.STEWARD_T_CHECK_WORK, house.getHouseName()), "");
+                configMessageService.addConfigMessage( AppType.GONGJIANG, house.getMemberId(), "0", "业主退人工变更", String.format
+                        (DjConstants.PushMessage.STEWARD_T_CHECK_WORK, house.getHouseName()), 3,null,null);
                 //退人工流水记录判断
                 if(check!=2){
                     //fzh.3.0大管家审核不通过，流水记录
@@ -265,9 +265,9 @@ public class ChangeOrderService {
                 return ServerResponse.createByErrorMessage("添加审核流程失败");
             }
             //通知消息给工匠
-            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=3";
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "退人工", String.format
-                    (DjConstants.PushMessage.GJ_T_003, house.getHouseName()), url);
+//            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=3";
+            configMessageService.addConfigMessage( AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "退人工", String.format
+                    (DjConstants.PushMessage.GJ_T_003, house.getHouseName()), 3,null,null);
 
             //生成退人工审核任务给到业主
             //taskStackService.insertTaskStackInfo(houseId,houseFlow.getWorkerId(),"退人工审核",workerType.getImage(),12,changeOrder.getId());//存变更申请单ID
@@ -282,8 +282,8 @@ public class ChangeOrderService {
                 return ServerResponse.createByErrorMessage("添加审核流程失败");
             }
             //通知消息给业主
-            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "补人工", String.format
-                    (DjConstants.PushMessage.YZ_Y_001, house.getHouseName(), workerType.getName()), "");
+            configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "补人工", String.format
+                    (DjConstants.PushMessage.YZ_Y_001, house.getHouseName(), workerType.getName()), 3,null,null);
 
             //生成补人工审核任务给到业主
            // taskStackService.insertTaskStackInfo(houseId,house.getMemberId(),workerType.getName()+"申请补人工",workerType.getImage(),2,changeOrder.getId());//存变更申请单ID

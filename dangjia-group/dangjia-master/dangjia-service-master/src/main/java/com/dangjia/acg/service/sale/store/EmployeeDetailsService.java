@@ -63,7 +63,7 @@ public class EmployeeDetailsService {
             if (monthlyTargetMappper.updateByPrimaryKeySelective(monthlyTarget) > 0) {
                 if (!CommonUtil.isEmpty(u.getMemberId()))
                     configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "月目标提醒",
-                            "您本月有新的下单目标，请及时查看", 5);
+                            "您本月有新的下单目标，请及时查看", 5,null,null);
                 return ServerResponse.createBySuccessMessage("制定成功");
             }
             return ServerResponse.createByErrorMessage("制定失败");
@@ -76,7 +76,7 @@ public class EmployeeDetailsService {
         if (monthlyTargetMappper.insert(monthlyTarget) > 0) {
             if (!CommonUtil.isEmpty(u.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "月目标提醒",
-                        "您本月有新的下单目标，请及时查看", 5);
+                        "您本月有新的下单目标，请及时查看", 5,null,null);
             return ServerResponse.createBySuccessMessage("制定成功");
         }
         return ServerResponse.createByErrorMessage("制定失败");

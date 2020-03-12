@@ -2,6 +2,7 @@ package com.dangjia.acg.service.member;
 
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -11,7 +12,10 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.*;
 import com.dangjia.acg.common.util.nimserver.NIMPost;
+import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.dto.member.MemberDTO;
@@ -69,6 +73,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -84,6 +89,7 @@ import java.util.*;
 @Service
 public class MemberService {
     private Logger logger = LoggerFactory.getLogger(MemberService.class);
+
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -172,11 +178,12 @@ public class MemberService {
     @Autowired
     private IHomeShellProductSpecMapper productSpecMapper;
 
+
     /**
      * 获取用户手机号
      *
      * @param id     来源ID
-     * @param idType 1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销, 6=用户地址
+     * @param idType 1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销, 6=用户地址, 7=IM用户手机
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
@@ -212,6 +219,12 @@ public class MemberService {
                 MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(id);
                 if (memberAddress != null) {
                     mobile = memberAddress.getMobile();
+                }
+                break;
+            case "7":
+                List<NimUserInfo> userInfo = NimUserService.getUserInfo("N",id);
+                if (userInfo != null&&userInfo.size()>0) {
+                    mobile = userInfo.get(0).getMobile();
                 }
                 break;
             default:
@@ -509,7 +522,7 @@ public class MemberService {
             try {
                 //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
                 redPackPayService.checkUpActivity(request, user.getMobile(), "1");
-                configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
+                configMessageService.addConfigMessage(AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", 3,null,null);
             } catch (Exception e) {
                 logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
             }

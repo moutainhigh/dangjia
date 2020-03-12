@@ -102,57 +102,8 @@ public class ConfigMessageService {
         return ServerResponse.createBySuccess("ok", pageResult);
     }
 
-    /**
-     * 推送至个人消息（即将废弃）
-     */
-    public ServerResponse addConfigMessage(HttpServletRequest request, AppType appType, String memberId,
-                                           String targetType, String title, String alert, String typeText) {
-        String data = null;
-        int type = 0;
-        typeText = (!CommonUtil.isEmpty(typeText)) ? typeText : "2";
-        if (!CommonUtil.isEmpty(typeText) && "6".equals(typeText)) {
-            data = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JUGLELIST,
-                    "", "", "评价记录");
-        } else if (!CommonUtil.isEmpty(typeText) && "7".equals(typeText)) {
-            data = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JIANGFALIST,
-                    "", "", "奖罚记录");
-        } else
-            if (!StringUtils.isNumeric(typeText)) {
-            data = typeText;
-        } else {
-            type = Integer.parseInt(typeText);
-        }
-        return addConfigMessage(appType, memberId, targetType, title, alert, type, data);
-    }
 
-    /**
-     * 推送至个人消息(无语音，type！=0）
-     *
-     * @param appType  应用端类别
-     * @param memberId 接收人
-     * @param title    推送标题
-     * @param alert    推送内容
-     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页，201：备忘录提醒）
-     * @return
-     */
-    public ServerResponse addConfigMessage(AppType appType, String memberId, String title, String alert, int type) {
-        return addConfigMessage(appType, memberId, title, alert, type, null);
-    }
 
-    /**
-     * 推送至个人消息(无语音）
-     *
-     * @param appType  应用端类别
-     * @param memberId 接收人
-     * @param title    推送标题
-     * @param alert    推送内容
-     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
-     * @param data     跳转地址
-     * @return
-     */
-    public ServerResponse addConfigMessage(AppType appType, String memberId, String title, String alert, int type, String data) {
-        return addConfigMessage(appType, memberId, title, alert, type, data, null);
-    }
 
     /**
      * 推送至个人消息
@@ -161,7 +112,7 @@ public class ConfigMessageService {
      * @param memberId 接收人
      * @param title    推送标题
      * @param alert    推送内容
-     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param type     动作类型（https://www.showdoc.cc/435995198400770?page_id=4031363147616085）
      * @param data     跳转地址
      * @param speak    语音提示内容
      * @return
@@ -170,22 +121,6 @@ public class ConfigMessageService {
         return addConfigMessage(appType, memberId, "0", title, alert, type, data, speak);
     }
 
-    /**
-     * 推送消息(无语音）
-     *
-     * @param appType    应用端类别
-     * @param memberId   接收人
-     * @param targetType 消息类型 0=个人推送  1=全推
-     * @param title      推送标题
-     * @param alert      推送内容
-     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页，7查看钱包，8查看订单详情）
-     * @param data       跳转地址
-     * @return
-     */
-    public ServerResponse addConfigMessage(AppType appType, String memberId, String targetType,
-                                           String title, String alert, int type, String data) {
-        return addConfigMessage(appType, memberId, targetType, title, alert, type, data, null);
-    }
 
     /**
      * 推送消息
@@ -195,7 +130,7 @@ public class ConfigMessageService {
      * @param targetType 消息类型 0=个人推送  1=全推
      * @param title      推送标题
      * @param alert      推送内容
-     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页，7查看钱包，8查看订单详情）
+     * @param type       动作类型（https://www.showdoc.cc/435995198400770?page_id=4031363147616085）
      * @param data       跳转地址
      * @param speak      语音提示内容
      * @return

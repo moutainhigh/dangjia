@@ -99,7 +99,8 @@ public class HouseDesignPayService {
                 house.setDataStatus(0);
                 house.setDesignerOk(6);
                 if (hwo != null) {
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图未通过", String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), "");
+                    configMessageService.addConfigMessage( AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图未通过",
+                            String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), 3,null,null);
                 }
                 houseMapper.updateByPrimaryKeySelective(house);
                 //增加平面审核流水
@@ -130,7 +131,8 @@ public class HouseDesignPayService {
                 quantityRoomMapper.insert(quantityRoom);
                 house.setDataStatus(0);
                 if (hwo != null) {
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图未通过", String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), "");
+                    configMessageService.addConfigMessage(AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图未通过",
+                            String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), 3,null,null);
                 }
                 houseMapper.updateByPrimaryKeySelective(house);
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -287,7 +289,8 @@ public class HouseDesignPayService {
 
 
                 if (hwo != null) {
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图未通过", String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), "");
+                    configMessageService.addConfigMessage(AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图未通过",
+                            String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), 3,null,null);
                 }
                 break;
             case 2:
@@ -308,7 +311,8 @@ public class HouseDesignPayService {
                 quantityRoomMapper.insert(quantityRoom);
 
                 if (hwo != null) {
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图未通过", String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), "");
+                    configMessageService.addConfigMessage(AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图未通过",
+                            String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), 3,null,null);
                 }
                 break;
             case 3:
@@ -328,18 +332,21 @@ public class HouseDesignPayService {
                     order.setOperationState(2);
 
                     if (hwo != null) {
-                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "设计图已通过", String.format("恭喜！您设计的【%s】设计图已通过。", house.getHouseName()), "");
+                        configMessageService.addConfigMessage( AppType.GONGJIANG, hwo.getWorkerId(), "0", "设计图已通过",
+                                String.format("恭喜！您设计的【%s】设计图已通过。", house.getHouseName()), 3,null,null);
                     }
                     designBusinessOrderMapper.updateByPrimaryKeySelective(order);
                 } else {
                     if (hwo != null) {
-                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "业主要求修改设计图", String.format("【%s】业主要求修改设计图。", house.getHouseName()), "");
+                        configMessageService.addConfigMessage( AppType.GONGJIANG, hwo.getWorkerId(), "0", "业主要求修改设计图",
+                                String.format("【%s】业主要求修改设计图。", house.getHouseName()), 3,null,null);
                     }
                 }
                 break;
             case 4:
                 if (hwo != null) {
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "业主要求修改设计图", String.format("【%s】业主要求修改设计图。", house.getHouseName()), "");
+                    configMessageService.addConfigMessage( AppType.GONGJIANG, hwo.getWorkerId(), "0", "业主要求修改设计图",
+                            String.format("【%s】业主要求修改设计图。", house.getHouseName()), 3,null,null);
                 }
                 break;
         }
@@ -466,7 +473,8 @@ public class HouseDesignPayService {
                     }
                     order.setOperationState(2);
                     if (hwo != null) {
-                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "设计图已通过", String.format("恭喜！您设计的【%s】设计图已通过。", house.getHouseName()), "");
+                        configMessageService.addConfigMessage(AppType.GONGJIANG, hwo.getWorkerId(), "0", "设计图已通过",
+                                String.format("恭喜！您设计的【%s】设计图已通过。", house.getHouseName()), 3,null,null);
                     }
                 } else {
                     Integer frequency = order.getFrequency();
@@ -476,7 +484,8 @@ public class HouseDesignPayService {
                     order.setFrequency(frequency + 1);
                     order.setOperationState(0);
                     if (hwo != null) {
-                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "设计图未通过", String.format("抱歉！您设计的【%s】设计图未通过。", house.getHouseName()), "");
+                        configMessageService.addConfigMessage( AppType.GONGJIANG, hwo.getWorkerId(), "0", "设计图未通过",
+                                String.format("抱歉！您设计的【%s】设计图未通过。", house.getHouseName()), 3,null,null);
                     }
                 }
                 designBusinessOrderMapper.updateByPrimaryKeySelective(order);

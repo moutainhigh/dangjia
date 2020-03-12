@@ -599,7 +599,7 @@ public class DjMaintenanceRecordService {
               djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
               //发送消息给工匠，需要重新处理
                 configMessageService.addConfigMessage( AppType.GONGJIANG, djMaintenanceRecord.getWorkerMemberId(),
-                        "0", "业主拒绝通过", String.format(DjConstants.CommonMessage.YEZHU_REFUSE,member.getName()),2, "业主拒绝通过");
+                        "0", "业主拒绝通过", String.format(DjConstants.CommonMessage.YEZHU_REFUSE,member.getName()),2, "业主拒绝通过",null);
 
            }else if(djMaintenanceRecord!=null&&auditResult==1){
                 //验收通过，修改状态为验收通过
@@ -619,7 +619,7 @@ public class DjMaintenanceRecordService {
 
                 }
                 configMessageService.addConfigMessage( AppType.GONGJIANG, djMaintenanceRecord.getWorkerMemberId(),
-                        "0", "业主审核通过", String.format(DjConstants.CommonMessage.YEZHU_ACCEPT,member.getName()),2, "业主审核通过");
+                        "0", "业主审核通过", String.format(DjConstants.CommonMessage.YEZHU_ACCEPT,member.getName()),2, "业主审核通过",null);
 
                 String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
                 WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
@@ -879,7 +879,7 @@ public class DjMaintenanceRecordService {
                     //5.通知业主已退款
                     //推送消息给业主退货退款通知
                     configMessageService.addConfigMessage( AppType.ZHUANGXIU, member.getId(),
-                            "0", "有退款到账啦", String.format(DjConstants.PushMessage.YEZHUENDMAINTENANCE),7, "提前结束维保订单");
+                            "0", "有退款到账啦", String.format(DjConstants.PushMessage.YEZHUENDMAINTENANCE),7, "提前结束维保订单",null);
 
                 }
             }
