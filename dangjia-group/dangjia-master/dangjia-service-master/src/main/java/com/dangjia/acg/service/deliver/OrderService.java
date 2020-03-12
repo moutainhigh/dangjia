@@ -1890,9 +1890,9 @@ public class OrderService {
                 parentOrder=orderMapper.selectOneByExample(example);
             }
             if(null!=parentOrder) {
-                JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
+                BusinessOrder businessOrder = (BusinessOrder) serverResponse.getResultObj();
                 example = new Example(Order.class);
-                example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER, obj.getString("number"))
+                example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER, businessOrder.getNumber())
                         .andEqualTo(Order.DATA_STATUS, 0);
                 Order order = orderMapper.selectOneByExample(example);
                 order.setParentOrderId(parentOrder.getId());

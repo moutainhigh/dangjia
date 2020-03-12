@@ -368,6 +368,7 @@
         INNER JOIN dj_basics_product_template bp ON bp.goods_id = bg.id  AND bp.city_id = #{cityId}
         INNER JOIN dj_basics_storefront_product p ON bp.id = p.prod_template_id  AND p.city_id = #{cityId}
         INNER JOIN dj_basics_storefront s ON s.id = p.storefront_id  AND s.city_id = #{cityId}
+        INNER JOIN dj_basics_goods_category c ON c.id = bg.category_id
         WHERE
         p.is_shelf_status = 1
         AND bg.data_status = 0
@@ -378,9 +379,13 @@
             <foreach collection="name" index="index" item="item" open="(" separator="OR" close=")">
                 CONCAT(p.product_name) LIKE CONCAT('%', #{item}, '%')
             </foreach>
-            ) OR (
+            OR
             <foreach collection="name" index="index" item="item" open="(" separator="OR" close=")">
                 CONCAT(bp.name) LIKE CONCAT('%', #{item}, '%')
+            </foreach>
+            OR
+            <foreach collection="name" index="index" item="item" open="(" separator="OR" close=")">
+                CONCAT(c.name) LIKE CONCAT('%', #{item}, '%')
             </foreach>
             )
         </if>
