@@ -8,10 +8,10 @@ package com.dangjia.acg.common.enums;
  */
 public enum RecommendTargetType {
 
-    GOODS(0, "商品"),
-    MANUAL(1, "攻略(指南)"),
-    CASE(2, "案例"),
-    SITE(3, "工地");
+    GOODS(1, "商品"),
+    MANUAL(2, "攻略(指南)"),
+    CASE(3, "案例"),
+    SITE(4, "工地");
 
     private Integer code;
 

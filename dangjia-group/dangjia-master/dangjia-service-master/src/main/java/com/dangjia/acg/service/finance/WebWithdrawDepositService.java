@@ -152,10 +152,10 @@ public class WebWithdrawDepositService {
                     worker.setModifyDate(new Date());
                     iMemberMapper.updateByPrimaryKeySelective(worker);
                     //提现失败推送
-                    configMessageService.addConfigMessage(null, appType,
+                    configMessageService.addConfigMessage(appType,
                             withdrawDeposit.getWorkerId(),
                             "0", "提现结果",
-                            DjConstants.PushMessage.WITHDRAW_CASH_ERROR, "");
+                            DjConstants.PushMessage.WITHDRAW_CASH_ERROR,3,null,null);
                 }
                 //如果是店铺/供应商驳回操作店铺供应商表
                 if (srcWithdrawDeposit.getRoleType() == 4 || srcWithdrawDeposit.getRoleType() == 5) {
@@ -171,10 +171,10 @@ public class WebWithdrawDepositService {
                 if (StringUtils.isNoneBlank(withdrawDeposit.getMemo()))
                     srcWithdrawDeposit.setMemo(withdrawDeposit.getMemo());
                 //提现成功推送
-                configMessageService.addConfigMessage(null, appType,
+                configMessageService.addConfigMessage(appType,
                         withdrawDeposit.getWorkerId(),
                         "0", "提现结果",
-                        DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, "");
+                        DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, 3,null,null);
                 if (srcWithdrawDeposit.getRoleType() == 4 || srcWithdrawDeposit.getRoleType() == 5) {
                     //同意供应商/店铺提现
                     setAgreeWithdraw(srcWithdrawDeposit.getRoleType(),

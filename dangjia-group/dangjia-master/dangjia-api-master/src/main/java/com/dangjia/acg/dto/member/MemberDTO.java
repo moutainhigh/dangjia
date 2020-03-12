@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.member;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,4 +27,10 @@ public class MemberDTO {
     private Integer bankCardCount;//银行卡数量
 
     private BigDecimal surplusMoney;//余额
+
+    private String name;
+
+    private long airtime;//活动播报时间
+
+    private Date orderPayTime;
 }

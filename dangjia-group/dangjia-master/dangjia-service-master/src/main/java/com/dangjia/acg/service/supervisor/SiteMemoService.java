@@ -378,7 +378,7 @@ public class SiteMemoService {
                 appType = AppType.GONGJIANG;
             }
             configMessageService.addConfigMessage(appType, siteMemo.getMemberId(), "备忘录提醒",
-                    siteMemo.getRemark(), 201);
+                    siteMemo.getRemark(), 201,null,null);
         }
         SiteMemo siteMemo = new SiteMemo();
         siteMemo.setId(null);

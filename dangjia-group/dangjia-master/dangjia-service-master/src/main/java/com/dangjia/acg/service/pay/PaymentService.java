@@ -609,11 +609,11 @@ public class PaymentService {
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 if (workerType == 3) {
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要包工包料",
-                            String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
+                    configMessageService.addConfigMessage(AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要包工包料",
+                            String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), 3,null,null);
                 } else {
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
-                            (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
+                    configMessageService.addConfigMessage(AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
+                            (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), 3,null,null);
                 }
             }
         }
@@ -1241,6 +1241,9 @@ public class PaymentService {
         JSONArray productArray= JSON.parseArray(productJsons);
         if(productArray.size()==0){
             return ServerResponse.createByErrorMessage("参数错误");
+        }
+        if(CommonUtil.isEmpty(addressId)){
+            return ServerResponse.createByErrorMessage("请选择地址");
         }
         Map<String,ShoppingCartListDTO> productMap = new HashMap<>();
         String[] productIds=new String[productArray.size()];
@@ -2232,7 +2235,8 @@ public class PaymentService {
                 JSONObject productObj = productArray.getJSONObject(i);
                 activityProductDTO=new ActivityProductDTO();
                 activityProductDTO.setProductId(productObj.getString("productId"));
-                activityProductDTO.setPrice(productObj.getDouble("price"));
+
+                //activityProductDTO.setPrice(productObj.getDouble("price"));
                 activityProductDTO.setShopCount(productObj.getDouble("shopCount"));
                 activityProductDTOList.add(activityProductDTO);
             }
@@ -2262,7 +2266,7 @@ public class PaymentService {
             //满足条件的优惠券记录
             List<ActivityRedPackRecordDTO> redPacetResultList = new ArrayList<>();
             ActivityRedPackRecordDTO recommendCuponsPack=new ActivityRedPackRecordDTO();//推荐优惠券
-            List<ActivityRedPackRecordDTO> redPacketRecordSelectList = activityRedPackRecordMapper.queryMyAticvityList(membreId,null,3,activityRedPackId);
+            List<ActivityRedPackRecordDTO> redPacketRecordSelectList = activityRedPackRecordMapper.queryMyAticvityList(membreId,null,3,null);
             if (redPacketRecordSelectList.size() == 0) {
                 return null;
             }
@@ -2272,10 +2276,12 @@ public class PaymentService {
             String categoryTopId;//顶级类别id
             String storefrontId;//店铺ID
             Integer fromObjectType;
+            Double totalPrice=0d;
             List productlist;
             for (ActivityRedPackRecordDTO redPacketRecord : redPacketRecordSelectList) {
                 Double totalMoney=0d;//符合条件的商品总额
                 Double concessionMoney=0d;//可优惠金额
+                totalPrice=0d;
                 productlist=new ArrayList();
                 for (ActivityProductDTO activityProductDTO : activityProductDTOList) {
                     //查询当前商品的商品模板ID，获取ID，类别ID，顶级类别Id，店铺ID
@@ -2285,7 +2291,9 @@ public class PaymentService {
                     categoryId=(String)product.get("categoryId");//类别ID
                     categoryTopId=(String)product.get("categoryTopId");//顶级类别id
                     storefrontId=(String)product.get("storefrontId");//店铺ID
+                    activityProductDTO.setPrice((Double)product.get("price"));
                     fromObjectType=redPacketRecord.getFromObjectType();//3类别，4货品，5商品，6城市，7店铺
+                    totalPrice=MathUtil.add(totalPrice, MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
                     //判断优惠是城市券还是店铺券
                     if(redPacketRecord.getSourceType()==1){//城市券
                         if(fromObjectType==6){
@@ -2332,7 +2340,11 @@ public class PaymentService {
                         if("0".equals(redPacketRecord.getType())){
                             concessionMoney=redPacketRecord.getMoney();
                         }else if("1".equals(redPacketRecord.getType())){
-                            concessionMoney=MathUtil.mul(MathUtil.mul(totalMoney,redPacketRecord.getSatisfyMoney()),10);
+                            Double cMoeny=MathUtil.sub(10,redPacketRecord.getMoney());//折扣
+                            if(cMoeny<0){
+                                cMoeny=0d;
+                            }
+                            concessionMoney=MathUtil.div(MathUtil.mul(totalMoney,cMoeny),10);
                         }
                         redPacketRecord.setTotalMoney(totalMoney);
                         redPacketRecord.setConcessionMoney(concessionMoney);
@@ -2350,7 +2362,11 @@ public class PaymentService {
                     if("2".equals(redPacketRecord.getType())){
                         concessionMoney=redPacketRecord.getMoney();
                     }else if("1".equals(redPacketRecord.getType())){
-                        concessionMoney=MathUtil.mul(MathUtil.mul(totalMoney,redPacketRecord.getSatisfyMoney()),10);
+                        Double cMoeny=MathUtil.sub(10,redPacketRecord.getMoney());//折扣
+                        if(cMoeny<0){
+                            cMoeny=0d;
+                        }
+                        concessionMoney=MathUtil.div(MathUtil.mul(totalMoney,cMoeny),10);
                     }
                     redPacketRecord.setTotalMoney(totalMoney);
                     redPacketRecord.setConcessionMoney(concessionMoney);
@@ -2368,6 +2384,14 @@ public class PaymentService {
             if (redPacetResultList.size() == 0) {
                 return null;
             }
+            if(!CommonUtil.isEmpty(activityRedPackId)){
+                for (ActivityRedPackRecordDTO activityRedPackRecordDTO : redPacetResultList) {
+                    if(activityRedPackId.equals(activityRedPackRecordDTO.getId())){
+                        recommendCuponsPack=activityRedPackRecordDTO;
+                    }
+                }
+            }
+            redPackMap.put("totalPrice",totalPrice);//订单总额
             redPackMap.put("recommendCuponsPack",recommendCuponsPack);//推荐优惠券
             redPackMap.put("redPacetResultList",redPacetResultList);//符合条件的优惠券
             return redPackMap;
@@ -2384,7 +2408,7 @@ public class PaymentService {
      * @param type   1精算商品,2购物车商品,3立即购商品
      */
     public ServerResponse getPaymentPage(String userToken,  String taskId, String cityId,String houseId,
-                                         String productJsons,int type,String storeActivityProductId) {
+                                         String productJsons,int type,String storeActivityProductId,String activityRedPackId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -2591,7 +2615,7 @@ public class PaymentService {
                 return ServerResponse.createByErrorMessage("参数错误");
             }
             //获取符合条件的有效的优惠券
-            Map<String,Object> redPackMap=discountPage(member.getId(),activityProductDTOList,null);
+            Map<String,Object> redPackMap=discountPage(member.getId(),activityProductDTOList, activityRedPackId);
             if(redPackMap!=null){
                 //推荐优惠券
                 ActivityRedPackRecordDTO recommendCuponsPack=(ActivityRedPackRecordDTO)redPackMap.get("recommendCuponsPack");

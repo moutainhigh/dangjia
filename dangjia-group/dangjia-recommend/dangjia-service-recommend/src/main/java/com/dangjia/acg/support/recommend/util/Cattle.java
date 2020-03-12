@@ -23,25 +23,15 @@ public class Cattle {
      */
     public static void filterRepeatOne(RecommendComposeChunk recommendComposeChunk){
 
-        List<RecommendTargetInfo> targetList1 = recommendComposeChunk.getBrowseGoodsRecommendList();
-        List<RecommendTargetInfo> targetList2 = recommendComposeChunk.getBrowseCaseRecommendList();
+        List<RecommendTargetInfo> browseGoodsRecommendList = recommendComposeChunk.getBrowseGoodsRecommendList();
+        List<RecommendTargetInfo> browseCaseRecommendList = recommendComposeChunk.getBrowseCaseRecommendList();
 
-        int repeatNum = 0;
-        List<RecommendTargetInfo> targetList2copy = new ArrayList<RecommendTargetInfo>();
-
-        for( RecommendTargetInfo target1 : targetList1 ){
-            for( RecommendTargetInfo target2 : targetList2 ){
-                if( target1.getId().equals(target2.getId()) ){
-                    repeatNum++;
-                }else{
-                    targetList2copy.add(target2);
-                }
-            }
-        }
+        List<RecommendTargetInfo> browseCaseRecommendListCopy = filterRepeat(browseGoodsRecommendList, browseCaseRecommendList);
+        int repeatNum = browseCaseRecommendListCopy.size() - browseCaseRecommendList.size();
 
         List<RecommendTargetInfo> totalRecommendList = new ArrayList<RecommendTargetInfo>();
-        totalRecommendList.addAll(targetList1);
-        totalRecommendList.addAll(targetList2copy);
+        totalRecommendList.addAll(browseGoodsRecommendList);
+        totalRecommendList.addAll(browseCaseRecommendListCopy);
         recommendComposeChunk.setTotalRecommendList(totalRecommendList);
 
         repeatNum += recommendComposeChunk.getLabelAttribRecommendNumber();
@@ -55,20 +45,35 @@ public class Cattle {
      */
     public static void filterRepeatTwo(RecommendComposeChunk recommendComposeChunk){
 
-        List<RecommendTargetInfo> targetList1 = recommendComposeChunk.getTotalRecommendList();
-        List<RecommendTargetInfo> targetList2 = recommendComposeChunk.getLabelAttribRecommendList();
+        List<RecommendTargetInfo> totalRecommendList = recommendComposeChunk.getTotalRecommendList();
+        List<RecommendTargetInfo> labelAttribRecommendList = recommendComposeChunk.getLabelAttribRecommendList();
 
-        List<RecommendTargetInfo> targetList2copy = new ArrayList<RecommendTargetInfo>();
+        List<RecommendTargetInfo> labelAttribRecommendListCopy = filterRepeat(totalRecommendList, labelAttribRecommendList);
 
-        for( RecommendTargetInfo target1 : targetList1 ){
-            for( RecommendTargetInfo target2 : targetList2 ){
-                if( !target1.getId().equals(target2.getId()) ){
-                    targetList2copy.add(target2);
+        recommendComposeChunk.getTotalRecommendList().addAll(labelAttribRecommendListCopy);
+    }
+
+    /**
+     * @Description: 过滤重复
+     * @author: luof
+     * @date: 2020-3-11
+     */
+    public static List<RecommendTargetInfo> filterRepeat(List<RecommendTargetInfo> sourceList, List<RecommendTargetInfo> noumenonList){
+
+        List<RecommendTargetInfo> noumenonListCopy = new ArrayList<RecommendTargetInfo>();
+        for( RecommendTargetInfo noumenon : noumenonList ){
+            boolean repeat = false;
+            for( RecommendTargetInfo source : sourceList ){
+                if( noumenon.getId().equals(source.getId()) ){
+                    repeat = true;
+                    break;
                 }
             }
+            if( !repeat ){
+                noumenonListCopy.add(noumenon);
+            }
         }
-
-        recommendComposeChunk.getTotalRecommendList().addAll(targetList2copy);
+        return noumenonListCopy;
     }
 
     /**
@@ -107,6 +112,19 @@ public class Cattle {
             }
             if( RecommendSource.browse_goods.getCode() == source || RecommendSource.browse_case.getCode() == source ){
                 number -= pageResult.getList().size();
+                number += recommendComposeChunk.getLabelAttribRecommendNumber();
+                recommendComposeChunk.setLabelAttribRecommendNumber(number);
+            }
+        }else{
+            List<RecommendTargetInfo> emptyList = new ArrayList<RecommendTargetInfo>();
+            if( RecommendSource.browse_goods.getCode() == source ){
+                recommendComposeChunk.setBrowseGoodsRecommendList(emptyList);
+            }else if( RecommendSource.browse_case.getCode() == source ){
+                recommendComposeChunk.setBrowseCaseRecommendList(emptyList);
+            }else if( RecommendSource.label_attrib.getCode() == source ){
+                recommendComposeChunk.setLabelAttribRecommendList(emptyList);
+            }
+            if( RecommendSource.browse_goods.getCode() == source || RecommendSource.browse_case.getCode() == source ){
                 number += recommendComposeChunk.getLabelAttribRecommendNumber();
                 recommendComposeChunk.setLabelAttribRecommendNumber(number);
             }

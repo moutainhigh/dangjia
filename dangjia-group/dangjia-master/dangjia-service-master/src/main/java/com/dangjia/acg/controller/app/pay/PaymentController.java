@@ -72,8 +72,8 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getPaymentPage(String userToken, String taskId, String cityId, String houseId,String productIds, Integer type, String storeActivityProductId) {
-        return paymentService.getPaymentPage(userToken,  taskId,cityId,  houseId, productIds,type,storeActivityProductId);
+    public ServerResponse getPaymentPage(String userToken, String taskId, String cityId, String houseId,String productIds, Integer type, String storeActivityProductId,String activityRedPackId) {
+        return paymentService.getPaymentPage(userToken,  taskId,cityId,  houseId, productIds,type,storeActivityProductId, activityRedPackId);
     }
 
     @Override

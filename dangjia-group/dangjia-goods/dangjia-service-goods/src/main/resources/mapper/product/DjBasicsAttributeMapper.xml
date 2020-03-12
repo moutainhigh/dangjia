@@ -64,19 +64,15 @@
         FROM
             dj_basics_attribute a
         INNER JOIN dj_basics_attribute_value vl on a.id=vl.attribute_id
-        INNER JOIN dj_basics_product_template p ON FIND_IN_SET(vl.id, p.value_id_arr)
+        INNER JOIN dj_basics_goods_category c ON c.id = a.category_id
         WHERE
             a.type = 1
         <if test="wordKey!=null and wordKey!=''">
-            AND  p.`name` LIKE  CONCAT('%',#{wordKey},'%')
+            AND  c.`name` LIKE  CONCAT('%',#{wordKey},'%')
         </if>
         <if test="categoryId!=null and categoryId!=''">
-            AND p.category_id = #{categoryId}
+            AND a.category_id = #{categoryId}
         </if>
-        <if test="cityId!=null and cityId!=''">
-            AND p.city_id = #{cityId}
-        </if>
-
         GROUP BY
           vl.id
         ORDER BY

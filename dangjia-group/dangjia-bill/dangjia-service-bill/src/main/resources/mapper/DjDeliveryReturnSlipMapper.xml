@@ -170,18 +170,6 @@
     <!--drs.id = #{id}-->
     <!--</update>-->
 
-    <update id="setDeliveryTask">
-        UPDATE
-        <if test="invoiceType==1">
-            dj_deliver_split_deliver
-            set shipping_state=1
-        </if>
-        <if test="invoiceType==2">
-            dj_repair_mend_deliver
-            set shipping_state=#{shippingState}
-        </if>
-        where id=#{id}
-    </update>
 
     <select id="querySupplierSettlementManagement"
             resultType="com.dangjia.acg.dto.delivery.SupplierSettlementManagementDTO">

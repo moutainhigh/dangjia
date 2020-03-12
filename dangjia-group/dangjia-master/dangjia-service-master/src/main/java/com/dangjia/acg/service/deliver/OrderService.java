@@ -534,11 +534,11 @@ public class OrderService {
 
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (worker.getWorkerType() == 3) {
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要服务",
-                        String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
+                configMessageService.addConfigMessage(AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要服务",
+                        String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), 3,null,null);
             } else {
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
-                        (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
+                configMessageService.addConfigMessage(AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
+                        (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), 3,null,null);
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         }

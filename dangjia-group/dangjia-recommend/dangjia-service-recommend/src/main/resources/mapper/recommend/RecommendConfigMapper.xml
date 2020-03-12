@@ -19,7 +19,7 @@
 
     <!-- 修改单个推荐配置 -->
     <update id="updateSingle">
-        update dj_recommend_target_info
+        update dj_recommend_config
         set modify_date = #{modifyDate}
             , config_value = #{configValue}
         WHERE

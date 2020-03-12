@@ -21,4 +21,11 @@ public interface IRecommendItemSubMapper extends Mapper<RecommendItemSub> {
      * @date: 2020-3-9
      */
     List<RecommendItemSub> queryList(@Param("itemId") String itemId, @Param("itemSubName") String itemSubName);
+
+    /**
+     * @Description: 查询推荐参考子项ID列表
+     * @author: luof
+     * @date: 2020-3-9
+     */
+    List<String> queryItemSubIdByItemIdAndUnique(@Param("itemId") String itemId, @Param("uniqueList")List<String> uniqueList);
 }

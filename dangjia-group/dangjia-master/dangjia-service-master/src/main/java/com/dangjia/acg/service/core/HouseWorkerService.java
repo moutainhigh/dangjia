@@ -209,12 +209,12 @@ public class HouseWorkerService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             if (house != null) {
                 //提醒原工匠
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, workerId, "0", "业主换人提醒",
-                        String.format(DjConstants.PushMessage.STEWARD_REPLACE, workerType.getName(),house.getHouseName()), "5");
+                configMessageService.addConfigMessage( AppType.GONGJIANG, workerId, "0", "业主换人提醒",
+                        String.format(DjConstants.PushMessage.STEWARD_REPLACE, workerType.getName(),house.getHouseName()), 3,null,null);
 
                 //提醒业主
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "换人提醒",
-                        String.format(DjConstants.PushMessage.CRAFTSMAN_NEW_REPLACE, workerType.getName(),workerType.getName()), "5");
+                configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "换人提醒",
+                        String.format(DjConstants.PushMessage.CRAFTSMAN_NEW_REPLACE, workerType.getName(),workerType.getName()), 3,null,null);
 
 
             }
@@ -674,27 +674,27 @@ public class HouseWorkerService {
 //            3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
                     //通知业主设计师抢单成功
                     if (worker.getWorkerType() == 1) {//设计师
-                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计师抢单提醒",
-                                String.format(DjConstants.PushMessage.DESIGNER_GRABS_THE_BILL, house.getHouseName()), "");
+                        configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "设计师抢单提醒",
+                                String.format(DjConstants.PushMessage.DESIGNER_GRABS_THE_BILL, house.getHouseName()), 3,null,null);
                     }
                     //通知业主精算师抢单成功
                     if (worker.getWorkerType() == 2) {//精算师
-                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "精算师抢单提醒",
-                                String.format(DjConstants.PushMessage.BUDGET_GRABS_THE_BILL, house.getHouseName()), "");
+                        configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "精算师抢单提醒",
+                                String.format(DjConstants.PushMessage.BUDGET_GRABS_THE_BILL, house.getHouseName()), 3,null,null);
                     }
                     //通知业主大管家抢单成功
                     if (worker.getWorkerType() == 3) {//大管家
-                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家抢单提醒",
-                                String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), "");
+                        configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家抢单提醒",
+                                String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), 3,null,null);
                     }
                     if (worker.getWorkerType() > 3) {//其他工匠
-                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠抢单提醒",
-                                String.format(DjConstants.PushMessage.CRAFTSMAN_RUSH_TO_PURCHASE, house.getHouseName()), "4");
+                        configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠抢单提醒",
+                                String.format(DjConstants.PushMessage.CRAFTSMAN_RUSH_TO_PURCHASE, house.getHouseName()), 3,null,null);
                         //通知大管家已有工匠抢单
                         //通知大管家抢单
                         HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
-                                String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), "4");
+                        configMessageService.addConfigMessage( AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
+                                String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), 3,null,null);
                     }
                 }
                 example = new Example(WorkerType.class);
@@ -915,6 +915,7 @@ public class HouseWorkerService {
         houseService.insertConstructionRecord(hfa);
         //每日完工
         houseFlowApplyService.checkWorker(hfa.getId(), false);
+
         return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）每日完工申请成功");
     }
 
@@ -975,8 +976,8 @@ public class HouseWorkerService {
         // 阶段完工,管家审核通过工匠完工申请 @link checkOk()
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisorHF.getWorkerId(), "0", "阶段完工申请",
-                String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workerType.getName()), "5");
+        configMessageService.addConfigMessage( AppType.GONGJIANG, supervisorHF.getWorkerId(), "0", "阶段完工申请",
+                String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workerType.getName()), 3,null,null);
         setHouseFlowApplyImage(hfa, house, imageList);
         /**
          * 2019/12/26 FZH 增加可退材料到业主审核
@@ -987,7 +988,9 @@ public class HouseWorkerService {
                String mendOrderId = repairMendOrderService.workerApplyReturnMaterial( worker,house.getCityId(), house.getId(), materialProductArr);
                 //生成工匠退材料任务
                 taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),workerType.getName()+"发起退材料", workerType.getImage(),11,mendOrderId);
-
+                //清点材料
+                configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "清点剩余材料",
+                        String.format(DjConstants.PushMessage.STEWARD_EXCESS_MATERIAL, house.getHouseName()), 3,null,null);
             }
         }
         return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）阶段完工申请成功");
@@ -1055,8 +1058,8 @@ public class HouseWorkerService {
         hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisorHF.getWorkerId(), "0", "整体完工申请",
-                String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workerType.getName()), "5");
+        configMessageService.addConfigMessage( AppType.GONGJIANG, supervisorHF.getWorkerId(), "0", "整体完工申请",
+                String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workerType.getName()), 3,null,null);
         setHouseFlowApplyImage(hfa, house, imageList);
         return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）整体完工申请成功");
     }
@@ -1263,9 +1266,9 @@ public class HouseWorkerService {
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         //推送消息给业主大管家巡查完成
-        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
+        configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(),
                 "0", "大管家巡查", String.format(DjConstants.PushMessage.DAGUANGJIAXUNCHAWANGCHENG,
-                        house.getHouseName()), "5");
+                        house.getHouseName()), 3,null,null);
         setHouseFlowApplyImage(hfa, house, imageList);
         return ServerResponse.createBySuccessMessage("巡查成功");
     }
@@ -1564,8 +1567,8 @@ public class HouseWorkerService {
             house.setTaskNumber(house.getTaskNumber() + 1);
             houseMapper.updateByPrimaryKeySelective(house);
 
-            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "竣工验收申请",
-                    String.format(DjConstants.PushMessage.CRAFTSMAN_ALL_FINISHED, house.getHouseName()), "");
+            configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "竣工验收申请",
+                    String.format(DjConstants.PushMessage.CRAFTSMAN_ALL_FINISHED, house.getHouseName()), 3,null,null);
             return ServerResponse.createBySuccessMessage("申请验收成功");
         } catch (Exception e) {
             e.printStackTrace();

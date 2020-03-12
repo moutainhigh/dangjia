@@ -48,8 +48,11 @@
         FROM
         dj_recommend_target_info
         <where>
-            <if test="null != itemSubId and ''!=itemSubId">
-                AND item_sub_id = #{itemSubId}
+            <if test="null != itemSubIdList">
+                AND item_sub_id IN
+                <foreach collection="itemSubIdList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
             </if>
             <if test="null != targetType and ''!=targetType">
                 AND target_type = #{targetType}
@@ -107,8 +110,12 @@
             dj_recommend_target_info
         WHERE
             item_sub_id = #{itemSubId}
-            AND target_type = #{targetType}
-            AND target_id = #{targetId}
+        <if test="null != targetType and ''!=targetType">
+        AND target_type = #{targetType}
+        </if>
+        <if test="null != targetId and ''!=targetId">
+        AND target_id = #{targetId}
+        </if>
     </select>
 
     <!-- 新增单个 -->
