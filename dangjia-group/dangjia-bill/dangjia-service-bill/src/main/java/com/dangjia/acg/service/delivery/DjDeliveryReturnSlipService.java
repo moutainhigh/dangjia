@@ -28,6 +28,7 @@ import com.dangjia.acg.mapper.repair.IBillMendDeliverMapper;
 import com.dangjia.acg.service.storefront.BillStorefrontService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,8 +152,9 @@ public class DjDeliveryReturnSlipService {
 
 
     /**
-     * 处理供货任务
-     *
+     * 供应商发货
+     * shippingState   1 发货、2、//确认退货3、//拒绝退货
+     * 4、//部分收货
      * @param id
      * @return
      */
@@ -183,27 +185,11 @@ public class DjDeliveryReturnSlipService {
                         }
                     }
                 }
+                //修改发货单
+                splitDeliver.setShippingState(1);
+                billDjDeliverSplitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             }
-            if (djDeliveryReturnSlipMapper.setDeliveryTask(id, invoiceType,shippingState) > 0) {
-                JSONArray jsonArr = JSONArray.parseArray(jsonStr);
-                jsonArr.forEach(o ->{
-                    JSONObject obj = (JSONObject) o;
-                    Double supActualCount = obj.getDouble("supActualCount");
-                    String repairMendMaterielId = obj.getString("repairMendMaterielId");
-                    MendMateriel mendMateriel=new MendMateriel();
-                    mendMateriel.setId(repairMendMaterielId);
-                    mendMateriel.setActualCount(supActualCount);
-                    iBillMendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
-                });
-                if(!CommonUtil.isEmpty(reasons)){
-                    MendDeliver mendDeliver=new MendDeliver();
-                    mendDeliver.setId(id);
-                    mendDeliver.setReason(reasons);
-                    iBillMendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
-                }
-                return ServerResponse.createBySuccessMessage("操作成功");
-            }
-            return ServerResponse.createByErrorMessage("操作失败");
+            return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             logger.error("操作失败", e);
             return ServerResponse.createByErrorMessage("操作失败: " + e);

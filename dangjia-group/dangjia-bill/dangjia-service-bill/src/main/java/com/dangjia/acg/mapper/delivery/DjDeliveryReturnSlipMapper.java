@@ -57,9 +57,6 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
 
 
 
-    int setDeliveryTask(@Param("id") String id,
-                        @Param("invoiceType") Integer invoiceType,
-                        @Param("shippingState") Integer shippingState);
 
     List<SupplierSettlementManagementDTO> querySupplierSettlementManagement(@Param("supId") String supId,
                                                                             @Param("applyState") Integer applyState,
