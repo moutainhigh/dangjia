@@ -2232,7 +2232,8 @@ public class PaymentService {
                 JSONObject productObj = productArray.getJSONObject(i);
                 activityProductDTO=new ActivityProductDTO();
                 activityProductDTO.setProductId(productObj.getString("productId"));
-                activityProductDTO.setPrice(productObj.getDouble("price"));
+
+                //activityProductDTO.setPrice(productObj.getDouble("price"));
                 activityProductDTO.setShopCount(productObj.getDouble("shopCount"));
                 activityProductDTOList.add(activityProductDTO);
             }
@@ -2285,6 +2286,7 @@ public class PaymentService {
                     categoryId=(String)product.get("categoryId");//类别ID
                     categoryTopId=(String)product.get("categoryTopId");//顶级类别id
                     storefrontId=(String)product.get("storefrontId");//店铺ID
+                    activityProductDTO.setPrice((Double)product.get("price"));
                     fromObjectType=redPacketRecord.getFromObjectType();//3类别，4货品，5商品，6城市，7店铺
                     //判断优惠是城市券还是店铺券
                     if(redPacketRecord.getSourceType()==1){//城市券

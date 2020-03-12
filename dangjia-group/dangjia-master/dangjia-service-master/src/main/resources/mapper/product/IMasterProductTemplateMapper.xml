@@ -189,7 +189,8 @@
             c.id prodTemplateId,
             c.goods_id goodsId,
             c.category_id categoryId,
-            g.parent_top categoryTopId
+            g.parent_top categoryTopId,
+            p.sell_price price
         FROM
             dj_basics_storefront_product p,
             dj_basics_product_template c,
