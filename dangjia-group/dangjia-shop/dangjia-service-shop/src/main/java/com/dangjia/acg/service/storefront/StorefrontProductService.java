@@ -179,6 +179,12 @@ public class StorefrontProductService {
                 StorefrontProduct storefrontProduct = new StorefrontProduct();
                 storefrontProduct.setDataStatus(0);
                 storefrontProduct.setProductName(djBasicsProductTemplate.getName());
+                if(StringUtils.isEmpty(storefrontProduct.getDetailImage())){
+                    storefrontProduct.setDetailImage(djBasicsProductTemplate.getDetailImage());
+                }
+                if(StringUtils.isEmpty(storefrontProduct.getImage())){
+                    storefrontProduct.setImage(djBasicsProductTemplate.getImage());
+                }
                 storefrontProduct.setGoodsId(djBasicsProductTemplate.getGoodsId());
                 int i = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, exampleup);
                 if (i < 0)
