@@ -1242,6 +1242,9 @@ public class PaymentService {
         if(productArray.size()==0){
             return ServerResponse.createByErrorMessage("参数错误");
         }
+        if(CommonUtil.isEmpty(addressId)){
+            return ServerResponse.createByErrorMessage("请选择地址");
+        }
         Map<String,ShoppingCartListDTO> productMap = new HashMap<>();
         String[] productIds=new String[productArray.size()];
         for (int i = 0; i < productArray.size(); i++) {
@@ -2263,7 +2266,7 @@ public class PaymentService {
             //满足条件的优惠券记录
             List<ActivityRedPackRecordDTO> redPacetResultList = new ArrayList<>();
             ActivityRedPackRecordDTO recommendCuponsPack=new ActivityRedPackRecordDTO();//推荐优惠券
-            List<ActivityRedPackRecordDTO> redPacketRecordSelectList = activityRedPackRecordMapper.queryMyAticvityList(membreId,null,3,activityRedPackId);
+            List<ActivityRedPackRecordDTO> redPacketRecordSelectList = activityRedPackRecordMapper.queryMyAticvityList(membreId,null,3,null);
             if (redPacketRecordSelectList.size() == 0) {
                 return null;
             }
@@ -2381,6 +2384,13 @@ public class PaymentService {
             if (redPacetResultList.size() == 0) {
                 return null;
             }
+            if(!CommonUtil.isEmpty(activityRedPackId)){
+                for (ActivityRedPackRecordDTO activityRedPackRecordDTO : redPacetResultList) {
+                    if(activityRedPackId.equals(activityRedPackRecordDTO.getId())){
+                        recommendCuponsPack=activityRedPackRecordDTO;
+                    }
+                }
+            }
             redPackMap.put("totalPrice",totalPrice);//订单总额
             redPackMap.put("recommendCuponsPack",recommendCuponsPack);//推荐优惠券
             redPackMap.put("redPacetResultList",redPacetResultList);//符合条件的优惠券
@@ -2398,7 +2408,7 @@ public class PaymentService {
      * @param type   1精算商品,2购物车商品,3立即购商品
      */
     public ServerResponse getPaymentPage(String userToken,  String taskId, String cityId,String houseId,
-                                         String productJsons,int type,String storeActivityProductId) {
+                                         String productJsons,int type,String storeActivityProductId,String activityRedPackId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -2605,7 +2615,7 @@ public class PaymentService {
                 return ServerResponse.createByErrorMessage("参数错误");
             }
             //获取符合条件的有效的优惠券
-            Map<String,Object> redPackMap=discountPage(member.getId(),activityProductDTOList,null);
+            Map<String,Object> redPackMap=discountPage(member.getId(),activityProductDTOList, activityRedPackId);
             if(redPackMap!=null){
                 //推荐优惠券
                 ActivityRedPackRecordDTO recommendCuponsPack=(ActivityRedPackRecordDTO)redPackMap.get("recommendCuponsPack");
