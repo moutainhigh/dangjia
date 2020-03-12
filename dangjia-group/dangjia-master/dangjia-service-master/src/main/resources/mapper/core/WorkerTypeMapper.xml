@@ -20,5 +20,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getName" resultType="String">
         SELECT name from dj_core_worker_type where type=#{type}
     </select>
+
+    <!-- 根据用户id查询[所有房子][正在施工][所有工序与排期] -->
+    <select id="queryWorkerTypeListByMemberId" resultType="com.dangjia.acg.modle.core.WorkerType">
+        SELECT cwt.type, cwt.sort
+        FROM dj_core_house_flow chf
+        LEFT JOIN dj_house h ON chf.house_id = h.id
+        LEFT JOIN dj_core_worker_type cwt ON chf.worker_type = cwt.type
+        where h.member_id = #{memberId}
+          AND chf.work_steta in (0,1,4)
+    </select>
 </mapper>
 

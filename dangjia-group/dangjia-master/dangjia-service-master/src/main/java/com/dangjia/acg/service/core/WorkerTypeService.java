@@ -127,4 +127,13 @@ public class WorkerTypeService {
         workerTypeMapper.updateByPrimaryKeySelective(workerType);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
+
+    /**
+     * @Description:根据用户id查询[所有房子][正在施工][所有工序与排期]
+     * @author: luof
+     * @date: 2020-3-12
+     */
+    public List<WorkerType> queryWorkerTypeListByMemberId(String memberId){
+        return workerTypeMapper.queryWorkerTypeListByMemberId(memberId);
+    }
 }

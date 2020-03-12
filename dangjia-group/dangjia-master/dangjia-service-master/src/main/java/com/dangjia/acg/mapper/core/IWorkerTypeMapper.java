@@ -20,5 +20,12 @@ public interface IWorkerTypeMapper extends Mapper<WorkerType> {
     List<WorkerType> unfinishedFlow(@Param("houseId") String houseId);
 
     String getName(@Param("type") int type);
+
+    /**
+     * @Description:根据用户id查询[所有房子][正在施工][所有工序与排期]
+     * @author: luof
+     * @date: 2020-3-12
+     */
+    List<WorkerType> queryWorkerTypeListByMemberId(String memberId);
 }
 
