@@ -15,6 +15,8 @@ import com.dangjia.acg.service.home.HomeModularService;
 import com.dangjia.acg.service.house.HouseChoiceCaseService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.storefront.StorefrontProductService;
+import com.dangjia.acg.support.recommend.util.RecommendConfigItem;
+import com.dangjia.acg.support.recommend.util.RecommendMainItem;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -52,6 +54,9 @@ public class RecommendTargetService {
 
     @Autowired
     private HouseService houseService;
+
+    @Autowired
+    private RecommendConfigService recommendConfigService;
 
     /**
      * @Description: 查询推荐目标列表
@@ -146,40 +151,64 @@ public class RecommendTargetService {
             return ServerResponse.createByErrorMessage("参数[targetType]超出范围!");
         }
 
-        List<RecommendTargetInfo> recommendTargetInfoList = null;
         // 商品
         if( RecommendTargetType.GOODS.getCode().intValue() == type.getCode().intValue()){
-            recommendTargetInfoList = queryGoodsOptionalList(targetName, pageDTO);
+            return queryGoodsOptionalList(targetName, pageDTO);
         }
 
         // 攻略(指南)
         else if( RecommendTargetType.MANUAL.getCode().intValue() == type.getCode().intValue() ){
-            recommendTargetInfoList = queryManualOptionalList(targetName, pageDTO);
+            return queryManualOptionalList(targetName, pageDTO);
         }
 
         // 案例
         else if( RecommendTargetType.CASE.getCode().intValue() == type.getCode().intValue() ){
-            recommendTargetInfoList = queryHouseCaseOptionalList(targetName, pageDTO);
+            return queryHouseCaseOptionalList(targetName, pageDTO);
         }
 
         // 工地
         else if( RecommendTargetType.SITE.getCode().intValue() == type.getCode().intValue() ){
-            recommendTargetInfoList = queryHouseSiteOptionalList(targetName, pageDTO);
+            return queryHouseSiteOptionalList(targetName, pageDTO);
         }
+        return ServerResponse.createByErrorMessage("参数[targetType]超出范围!");
+    }
 
-        if( recommendTargetInfoList == null ){
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
-        }
-
-        PageInfo pageResult = new PageInfo(recommendTargetInfoList);
-        return ServerResponse.createBySuccess("查询成功", pageResult);
+    // 组装返回响应
+    private ServerResponse assembleReturnResponse(ServerResponse serverResponse, List<RecommendTargetInfo> recommendTargetInfoList){
+        ServerResponse returnResponse = new ServerResponse();
+        returnResponse.setResultCode(serverResponse.getResultCode());
+        returnResponse.setResultMsg(serverResponse.getResultMsg());
+        PageInfo<RecommendTargetInfo> pageInfo = new PageInfo<RecommendTargetInfo>();
+        PageInfo<BasicsStorefrontProductViewDTO> pageResult = (PageInfo)serverResponse.getResultObj();
+        pageInfo.setEndRow(pageResult.getEndRow());
+        pageInfo.setIsFirstPage(pageResult.isIsFirstPage());
+        pageInfo.setHasNextPage(pageResult.isHasNextPage());
+        pageInfo.setHasPreviousPage(pageResult.isHasPreviousPage());
+        pageInfo.setIsFirstPage(pageResult.isIsFirstPage());
+        pageInfo.setIsLastPage(pageResult.isIsLastPage());
+        pageInfo.setLastPage(pageResult.getLastPage());
+        pageInfo.setNavigateFirstPage(pageResult.getNavigateFirstPage());
+        pageInfo.setNavigateLastPage(pageResult.getNavigateLastPage());
+        pageInfo.setNavigatePages(pageResult.getNavigatePages());
+        pageInfo.setNavigatepageNums(pageResult.getNavigatepageNums());
+        pageInfo.setNextPage(pageResult.getNextPage());
+        pageInfo.setPageNum(pageResult.getPageNum());
+        pageInfo.setPageSize(pageResult.getPageSize());
+        pageInfo.setPages(pageResult.getPages());
+        pageInfo.setPrePage(pageResult.getPrePage());
+        pageInfo.setSize(pageResult.getSize());
+        pageInfo.setStartRow(pageResult.getStartRow());
+        pageInfo.setTotal(pageResult.getTotal());
+        pageInfo.setList(recommendTargetInfoList);
+        returnResponse.setResultObj(pageInfo);
+        return  returnResponse;
     }
 
     // 查询商品可选列表
-    private List<RecommendTargetInfo> queryGoodsOptionalList(String name, PageDTO pageDTO){
+    private ServerResponse queryGoodsOptionalList(String name, PageDTO pageDTO){
 
         ServerResponse serverResponse = storefrontProductService.queryProductGroundByKeyWord(name, pageDTO);
-
+        logger.debug("查询商品可选列表 结果:"+JSON.toJSONString(serverResponse));
         if( serverResponse.isSuccess() ){
             List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
             PageInfo<BasicsStorefrontProductViewDTO> pageResult = (PageInfo)serverResponse.getResultObj();
@@ -191,16 +220,16 @@ public class RecommendTargetService {
                 recommendTargetInfo.setImage(dto.getStorefrontProduct().getImage());
                 recommendTargetInfoList.add(recommendTargetInfo);
             }
-            return recommendTargetInfoList;
+            return assembleReturnResponse(serverResponse, recommendTargetInfoList);
         }
-        return null;
+        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
     }
 
     // 查询攻略（指南）可选列表
-    private List<RecommendTargetInfo> queryManualOptionalList(String name, PageDTO pageDTO){
+    private ServerResponse queryManualOptionalList(String name, PageDTO pageDTO){
 
         ServerResponse serverResponse = homeModularService.queryRenovationManualList(name, pageDTO);
-
+        logger.debug("查询攻略可选列表 结果:"+JSON.toJSONString(serverResponse));
         if( serverResponse.isSuccess() ){
             List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
             PageInfo<RenovationManual> pageResult =  (PageInfo)serverResponse.getResultObj();
@@ -212,16 +241,16 @@ public class RecommendTargetService {
                 recommendTargetInfo.setImage(renovationManual.getImage());
                 recommendTargetInfoList.add(recommendTargetInfo);
             }
-            return recommendTargetInfoList;
+            return assembleReturnResponse(serverResponse, recommendTargetInfoList);
         }
-        return null;
+        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
     }
 
     // 查询案例可选列表
-    private List<RecommendTargetInfo> queryHouseCaseOptionalList(String title, PageDTO pageDTO){
+    private ServerResponse queryHouseCaseOptionalList(String title, PageDTO pageDTO){
 
         ServerResponse serverResponse = houseChoiceCaseService.queryHouseChoiceCasesList(title, pageDTO);
-
+        logger.debug("查询案例可选列表 结果:"+JSON.toJSONString(serverResponse));
         if( serverResponse.isSuccess() ) {
             List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
             PageInfo<HouseChoiceCase> pageResult = (PageInfo)serverResponse.getResultObj();
@@ -233,16 +262,16 @@ public class RecommendTargetService {
                 recommendTargetInfo.setImage(houseChoiceCase.getImage());
                 recommendTargetInfoList.add(recommendTargetInfo);
             }
-            return recommendTargetInfoList;
+            return assembleReturnResponse(serverResponse, recommendTargetInfoList);
         }
-        return null;
+        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
     }
 
     // 查询工地可选列表
-    private List<RecommendTargetInfo> queryHouseSiteOptionalList(String residential, PageDTO pageDTO){
+    private ServerResponse queryHouseSiteOptionalList(String residential, PageDTO pageDTO){
 
         ServerResponse serverResponse = houseService.queryHouseListByResidential(residential, pageDTO);
-
+        logger.debug("查询工地可选列表 结果:"+JSON.toJSONString(serverResponse));
         if( serverResponse.isSuccess() ) {
             List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
             PageInfo<House> pageResult = (PageInfo)serverResponse.getResultObj();
@@ -255,9 +284,9 @@ public class RecommendTargetService {
                 recommendTargetInfo.setVisitState(house.getVisitState());
                 recommendTargetInfoList.add(recommendTargetInfo);
             }
-            return recommendTargetInfoList;
+            return assembleReturnResponse(serverResponse, recommendTargetInfoList);
         }
-        return null;
+        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
     }
 
     /**
@@ -333,21 +362,10 @@ public class RecommendTargetService {
 
         try {
 
-
-            if( null == target ){
-                return ServerResponse.createByErrorMessage("参数[target]为空!");
-            }
-            if( null == target.getItemSubId() ){
-                return ServerResponse.createByErrorMessage("参数[itemSubId]为空!");
-            }
-            if( null == target.getTargetType() ){
-                return ServerResponse.createByErrorMessage("参数[targetType]为空!");
-            }
-            if( null == target.getTargetId() ){
-                return ServerResponse.createByErrorMessage("参数[targetId]为空!");
-            }
-            if( null == target.getTargetName() ){
-                return ServerResponse.createByErrorMessage("参数[targetName]为空!");
+            // 新增检查
+            ServerResponse checkR = addCheck(target);
+            if( checkR != null ){
+                return checkR;
             }
 
             // 过滤重复
@@ -375,15 +393,42 @@ public class RecommendTargetService {
         }
     }
 
+    // 新增检查
+    private ServerResponse addCheck(RecommendTargetInfo target){
+        if( null == target ){
+            return ServerResponse.createByErrorMessage("参数[target]为空!");
+        }
+        if( null == target.getItemSubId() ){
+            return ServerResponse.createByErrorMessage("参数[itemSubId]为空!");
+        }
+        if( null == target.getTargetType() ){
+            return ServerResponse.createByErrorMessage("参数[targetType]为空!");
+        }
+        if( null == target.getTargetId() ){
+            return ServerResponse.createByErrorMessage("参数[targetId]为空!");
+        }
+        if( null == target.getTargetName() ){
+            return ServerResponse.createByErrorMessage("参数[targetName]为空!");
+        }
+        if( target.getItemSubId().equals(RecommendMainItem.default_item.getItemId()) ){
+            int defaultNumber = recommendTargetMapper.queryCount(target.getItemSubId(), null, null);
+            int defaultNumberConfig = recommendConfigService.queryConfigValue(RecommendConfigItem.default_item_number.getCode());
+            if( defaultNumber >= defaultNumberConfig ){
+                return ServerResponse.createByErrorMessage("默认项数量超出!");
+            }
+        }
+        return null;
+    }
+
     /**
      * @Description: 查询推荐目标 分页
      * @author: luof
      * @date: 2020-3-9
      */
-    public ServerResponse queryPage(PageDTO pageDTO, String itemSubId, Integer targetType) {
+    public ServerResponse queryPage(PageDTO pageDTO, List<String> itemSubIdList, Integer targetType) {
 
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<RecommendTargetInfo> recommendTargetInfoList = recommendTargetMapper.queryListOfOrder(itemSubId, targetType, null);
+        List<RecommendTargetInfo> recommendTargetInfoList = recommendTargetMapper.queryListOfOrder(itemSubIdList, targetType, null);
         if ( recommendTargetInfoList == null || recommendTargetInfoList.size() == 0 ) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
         }

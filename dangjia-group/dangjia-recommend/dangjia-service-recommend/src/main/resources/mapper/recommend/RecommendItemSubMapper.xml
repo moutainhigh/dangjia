@@ -21,4 +21,15 @@
 
     </select>
 
+    <!-- 查询推荐参考子项ID列表 -->
+    <select id="queryItemSubIdByItemIdAndUnique" resultType="java.lang.String">
+        SELECT id
+        FROM dj_recommend_item_sub
+        WHERE item_id = #{itemId}
+          AND source_unique IN
+        <foreach collection="uniqueList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
 </mapper>

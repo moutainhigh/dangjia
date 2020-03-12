@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("dangjia-service-recommend")
 public interface RecommendQueryAPI {
 
-    @PostMapping("/recommend/query")
+    @PostMapping("/recommend/query/page")
     @ApiOperation(value = "推荐查询", notes = "")
-    ServerResponse queryRecommend(@RequestParam("userToken")String userToken,
+    ServerResponse queryRecommendPage(@RequestParam("userToken")String userToken,
                                   @RequestParam("pageDTO") PageDTO pageDTO);
 }

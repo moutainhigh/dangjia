@@ -30,7 +30,7 @@ public interface IRecommendTargetMapper extends Mapper<RecommendTargetInfo> {
      * @author: luof
      * @date: 2020-3-9
      */
-    List<RecommendTargetInfo> queryListOfOrder(@Param("itemSubId") String itemSubId,
+    List<RecommendTargetInfo> queryListOfOrder(@Param("itemSubIdList") List<String> itemSubIdList,
                                                @Param("targetType") Integer targetType,
                                                @Param("targetName") String targetName);
 

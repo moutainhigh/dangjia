@@ -1,6 +1,7 @@
 package com.dangjia.acg.controller.recommend;
 
 import com.dangjia.acg.api.RecommendQueryAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.recommend.RecommendQueryService;
@@ -24,7 +25,8 @@ public class RecommendQueryController implements RecommendQueryAPI {
      * @date: 2020-3-10
      */
     @Override
-    public ServerResponse queryRecommend(String userToken, PageDTO pageDTO) {
+    @ApiMethod
+    public ServerResponse queryRecommendPage(String userToken, PageDTO pageDTO) {
         return recommendQueryService.queryRecommend(userToken, pageDTO);
     }
 }
