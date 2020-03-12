@@ -1285,42 +1285,43 @@ public class MemberService {
             map.put("appKey", NIMPost.APPKEY);
             datas.add(map);
         }
-        example = new Example(MemberInfo.class);
-        example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID, member.getId()).andEqualTo(MemberInfo.POLICY_ID, 2);
-        infos = memberInfoMapper.selectByExample(example);
-        if (infos != null && infos.size() > 0) {//有工匠
-            Map<String, Object> map = new HashMap<>();
-            map.put("memberType", 1);
-            map.put("id", member.getId());
-            map.put("nickName", member.getNickName());
-            map.put("name", member.getNickName());
-            map.put("mobile", member.getMobile());
-            map.put("head", member.getHead());
-            if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
-                WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                map.put("workerTypeId", member.getWorkerTypeId());
-                if (wt != null) {
-                    map.put("workerName", wt.getName());
-                }
-            }
-            map.put("appKey", NIMPost.APPKEY);
-            datas.add(map);
-        }
-        MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
-        if (mainUser != null) {
-            ServerResponse serverResponse = setSale(null, mainUser.getId());
-            if (serverResponse.isSuccess()) {//有销售
-                Map<String, Object> map = new HashMap<>();
-                map.put("memberType", 2);
-                map.put("id", mainUser.getId());
-                map.put("nickName", member.getNickName());
-                map.put("name", member.getNickName());
-                map.put("mobile", member.getMobile());
-                map.put("head", member.getHead());
-                map.put("appKey", NIMPost.APPKEY);
-                datas.add(map);
-            }
-        }
+        //网易云信只需要一个身份用户
+//        example = new Example(MemberInfo.class);
+//        example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID, member.getId()).andEqualTo(MemberInfo.POLICY_ID, 2);
+//        infos = memberInfoMapper.selectByExample(example);
+//        if (infos != null && infos.size() > 0) {//有工匠
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("memberType", 1);
+//            map.put("id", member.getId());
+//            map.put("nickName", member.getNickName());
+//            map.put("name", member.getNickName());
+//            map.put("mobile", member.getMobile());
+//            map.put("head", member.getHead());
+//            if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
+//                WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+//                map.put("workerTypeId", member.getWorkerTypeId());
+//                if (wt != null) {
+//                    map.put("workerName", wt.getName());
+//                }
+//            }
+//            map.put("appKey", NIMPost.APPKEY);
+//            datas.add(map);
+//        }
+//        MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
+//        if (mainUser != null) {
+//            ServerResponse serverResponse = setSale(null, mainUser.getId());
+//            if (serverResponse.isSuccess()) {//有销售
+//                Map<String, Object> map = new HashMap<>();
+//                map.put("memberType", 2);
+//                map.put("id", mainUser.getId());
+//                map.put("nickName", member.getNickName());
+//                map.put("name", member.getNickName());
+//                map.put("mobile", member.getMobile());
+//                map.put("head", member.getHead());
+//                map.put("appKey", NIMPost.APPKEY);
+//                datas.add(map);
+//            }
+//        }
         if (datas.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
         }
