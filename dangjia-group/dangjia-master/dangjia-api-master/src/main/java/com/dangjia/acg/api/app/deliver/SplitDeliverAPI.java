@@ -27,7 +27,8 @@ public interface SplitDeliverAPI {
     @ApiOperation(value = "部分收货", notes = "部分收货")
     ServerResponse partSplitDeliver(@RequestParam("userToken") String userToken,@RequestParam("splitDeliverId") String splitDeliverId,
                                     @RequestParam("image") String image,
-                                    @RequestParam("splitItemList") String splitItemList);
+                                    @RequestParam("splitItemList") String splitItemList,
+                                    @RequestParam("userRole")Integer userRole);
 
     /**
      * 确认收货
@@ -36,7 +37,8 @@ public interface SplitDeliverAPI {
     @ApiOperation(value = "确认收货", notes = "确认收货")
     ServerResponse affirmSplitDeliver(@RequestParam("userToken") String userToken,@RequestParam("splitDeliverId") String splitDeliverId,
                                       @RequestParam("image") String image,
-                                      @RequestParam("splitItemList") String splitItemList);
+                                      @RequestParam("splitItemList") String splitItemList,
+                                      @RequestParam("userRole")Integer userRole);
 
     /**
      * 委托大管家收货

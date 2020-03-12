@@ -268,7 +268,9 @@ public class DjConstants {
         public final static String YZ_FN_001 = "业主您好！【%s】装修材料【%s】已发货，请注意查收";
         public final static String YZ_F_001 = "业主您好！【%s】装修材料已发货，请注意查收";
         public final static String YZ_S_001 = "业主您好！【%s】装修材料【%s】已收货";//业主您好！【%s】装修材料已收货
-        public final static String YZ_DS_001 = "业主您好！【%s】装修材料已由他人代收货，请在48小时内验货";
+        public final static String YZ_DS_001 = "业主您好！【%s】装修材料【%s】已由他人代收货，请知晓";
+
+        public final static String DGJ_S_001 = "大管家您好！【%s】装修材料【%s】已收货";
 
         //public final static String YZ_B_010 = "业主您好！【%s】补【%s】人工申请大管家已同意，请查看数量";
         public final static String DGJ_B_010 = "大管家您好！【%s】补【%s】人工申请未通过";
@@ -295,6 +297,14 @@ public class DjConstants {
         public final static String YZ_G_YANSHOU_Y = "大管家您好！【%s】主动验收%s已通过，恭喜！";
         public final static String YZ_G_YANSHOU_N = "大管家您好！【%s】主动验收%s未通过，请现场达到标准后再次申请。";
 
+
+        public final static String GZ_WB_001 = "您好！【%s】产生了质保，您将要承担部分责任，具体以现场维保为准，请知晓。";
+        public final static String GZ_WB_002 = "您好！【%s】产生了质保，您需要承担部分责任，请知晓。";
+
+        public final static String GZ_BS_TG = "您好！【%s】质保报销申请已通过，请查收。";
+        public final static String GZ_BS_BTG = "您好！【%s】质保报销申请未通过，请修改。";
+
+        public final static String YZ_WB_YS = "业主您好！【%s】【%s】维保已完成，请验收！";
 
     }
 

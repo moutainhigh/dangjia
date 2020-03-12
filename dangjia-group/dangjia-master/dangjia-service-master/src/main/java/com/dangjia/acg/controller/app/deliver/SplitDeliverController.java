@@ -28,8 +28,8 @@ public class SplitDeliverController implements SplitDeliverAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse partSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList) {
-        return splitDeliverService.partSplitDeliver(userToken, splitDeliverId, image, splitItemList);
+    public ServerResponse partSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList,Integer userRole) {
+        return splitDeliverService.partSplitDeliver(userToken, splitDeliverId, image, splitItemList,userRole);
     }
 
     /**
@@ -37,11 +37,11 @@ public class SplitDeliverController implements SplitDeliverAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse affirmSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList) {
+    public ServerResponse affirmSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList,Integer userRole) {
         if (CommonUtil.isEmpty(splitItemList)) {
-            return splitDeliverService.affirmSplitDeliver(userToken, splitDeliverId, image);
+            return splitDeliverService.affirmSplitDeliver(userToken, splitDeliverId, image,userRole);
         } else {//IOS接口调错  此方法为补救
-            return splitDeliverService.partSplitDeliver(userToken, splitDeliverId, image, splitItemList);
+            return splitDeliverService.partSplitDeliver(userToken, splitDeliverId, image, splitItemList,userRole);
         }
     }
 

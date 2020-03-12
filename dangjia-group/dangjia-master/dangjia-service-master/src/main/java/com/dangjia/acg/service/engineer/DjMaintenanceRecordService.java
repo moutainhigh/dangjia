@@ -48,6 +48,7 @@ import com.dangjia.acg.modle.engineer.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.BasicsProductTemplateRatio;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
@@ -64,6 +65,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.member.MemberAddressService;
 import com.dangjia.acg.service.node.NodeProgressService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
@@ -166,6 +168,8 @@ public class DjMaintenanceRecordService {
     private ComplainService complainService;
     @Autowired
     private DjMaintenanceManualAllocationMapper manualAllocationMapper;
+    @Autowired
+    private MemberAddressService memberAddressService;
     @Autowired
     private PaymentService paymentService;
     private static Logger logger = LoggerFactory.getLogger(DjMaintenanceRecordService.class);
@@ -697,6 +701,10 @@ public class DjMaintenanceRecordService {
                         WorkerType workerType=workerTypeMapper.selectByPrimaryKey(templateRatio.getProductResponsibleId());
                         //推送扣款通知给原工匠
                         taskStackService.insertTaskStackInfo(houseId,worker.getId(),"维保责任划分",workerType.getImage(),9,recordResponsibleParty.getId());
+                        //查询维保商品
+                        MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(null,houseFlow.getHouseId());
+                        configMessageService.addConfigMessage( AppType.GONGJIANG, houseFlow.getWorkerId(),
+                                "0", "维保责任划分", String.format(DjConstants.PushMessage.GZ_WB_002,memberAddress.getAddress()),3, null,null);
                     }
                     recordResponsibleParty.setMaintenanceRecordId(djMaintenanceRecord.getId());
                     recordResponsibleParty.setResponsiblePartyId(responsiblePartyId);
@@ -2188,6 +2196,7 @@ public class DjMaintenanceRecordService {
             complain.setModifyDate(new Date());
             complain.setCreateDate(null);
             complain.setOperateName(mainUser.getUsername());
+            MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(null,complain.getHouseId());
             //type: 0 -确定处理 1-结束流程
             if (type == 0) {
                 complain.setStatus(2);
@@ -2230,10 +2239,20 @@ public class DjMaintenanceRecordService {
                 }
                 djMaintenanceRecordProduct.setComplainId(complain.getId());
                 djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct);
-
+                //发送消息
+                if(memberAddress!=null){
+                    configMessageService.addConfigMessage( AppType.GONGJIANG, complain.getMemberId(), "0", "报销申请审核通过", String.format
+                            (DjConstants.PushMessage.GZ_BS_TG, memberAddress.getAddress()), 3,null,null);
+                }
             }else if(type == 1){
+
                 complain.setStatus(1);
                 complain.setRejectReason(rejectReason);
+                //发送消息
+                if(memberAddress!=null){
+                    configMessageService.addConfigMessage( AppType.GONGJIANG, complain.getMemberId(), "0", "报销申请审核未通过", String.format
+                            (DjConstants.PushMessage.GZ_BS_BTG, memberAddress.getAddress()), 3,null,null);
+                }
             }
             iComplainMapper.updateByPrimaryKeySelective(complain);
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -2302,6 +2321,14 @@ public class DjMaintenanceRecordService {
             taskStack.setState(0);
             taskStack.setRemarks(remark);
             iMasterTaskStackMapper.insert(taskStack);
+            //推送消息
+            MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(null,djMaintenanceRecord.getHouseId());
+            if(memberAddress!=null){
+                WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
+                configMessageService.addConfigMessage( AppType.ZHUANGXIU, djMaintenanceRecord.getMemberId(), "0", "维保验收申请", String.format
+                        (DjConstants.PushMessage.YZ_WB_YS, memberAddress.getAddress(),workerType.getName()), 3,null,null);
+            }
+
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -2332,6 +2359,33 @@ public class DjMaintenanceRecordService {
 
             djMaintenanceRecord.setState(5);
             djMaintenanceRecord.setModifyDate(new Date());
+            //判断是否维保期内的质保，若是，则发送需担责消息给需担责的工匠
+            if(djMaintenanceRecord.getOverProtection()==0){
+                //查对应的商品信息
+                Example example=new Example(DjMaintenanceRecordProduct.class);
+                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,djMaintenanceRecord.getId())
+                        .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_PRODUCT_TYPE,1);
+                List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
+                if(mrProductList!=null&&mrProductList.size()>0){
+                    DjMaintenanceRecordProduct djMaintenanceRecordProduct=mrProductList.get(0);
+                    StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(djMaintenanceRecordProduct.getProductId());
+                    //责任占比
+                    example=new Example(BasicsProductTemplateRatio.class);
+                    example.createCriteria().andEqualTo(BasicsProductTemplateRatio.PRODUCT_TEMPLATE_ID,storefrontProduct.getProdTemplateId())
+                    .andEqualTo(BasicsProductTemplateRatio.PRODUCT_RESPONSIBLE_TYPE,2);
+                    List<BasicsProductTemplateRatio> templateRatioList=iMasterProductTemplateRatioMapper.selectByExample(example);
+                    if(templateRatioList!=null){
+                        for(BasicsProductTemplateRatio templateRatio:templateRatioList){
+                            HouseFlow houseFlow=iHouseFlowMapper.getByWorkerTypeId(djMaintenanceRecord.getHouseId(),templateRatio.getProductResponsibleId());
+                            //查询维保商品
+                            MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(null,houseFlow.getHouseId());
+                            configMessageService.addConfigMessage( AppType.GONGJIANG, houseFlow.getWorkerId(),
+                                    "0", "维保责任提醒", String.format(DjConstants.PushMessage.GZ_WB_001,memberAddress.getAddress()),3, null,null);
+                        }
+                    }
+
+                }
+            }
             djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

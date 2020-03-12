@@ -72,6 +72,14 @@ public class ConfigMessageController implements ConfigMessageAPI {
         return configMessageService.addConfigMessage(AppType.SALE,memberId,title,alert,type,data,null);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse addConfigMessageServer(AppType appType, String memberId, String targetType, String title, String alert, Integer type, String data, String speak) {
+        return configMessageService.addConfigMessage(appType,memberId,targetType,title,alert,type,data,speak);
+    }
+
+
+
     /**
      *  业主退货退款，消息推送
      * @param memberId

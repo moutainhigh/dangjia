@@ -16,6 +16,7 @@ import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
@@ -24,6 +25,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -31,11 +33,13 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.member.MemberAddressService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -89,12 +93,16 @@ public class SplitDeliverService {
 
     @Autowired
     private MasterAccountFlowRecordService masterAccountFlowRecordService;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
+    @Autowired
+    private MemberAddressService memberAddressService;
 
     /**
      * 部分收货
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse partSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList) {
+    public ServerResponse partSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList,Integer userRole) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -131,10 +139,26 @@ public class SplitDeliverService {
             splitDeliver.setApplyMoney(applyMoney);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
 
-            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-            //业主
-            configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料部分收货", String.format
-                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName(),splitDeliver.getNumber()), 3,null,null);
+            MemberAddress memberAddress=memberAddressService.getMemberAddressInfo(splitDeliver.getAddressId(),splitDeliver.getHouseId());
+            if(userRole==1) {//业主
+                //业主
+                configMessageService.addConfigMessage( AppType.ZHUANGXIU, memberAddress.getMemberId(), "0", "装修材料部分收货", String.format
+                        (DjConstants.PushMessage.YZ_S_001, memberAddress.getAddress(),splitDeliver.getNumber()), 3,null,null);
+            }else if(userRole==2){//工匠代收
+                //业主
+                configMessageService.addConfigMessage( AppType.ZHUANGXIU, memberAddress.getMemberId(), "0", "装修材料部分收货", String.format
+                        (DjConstants.PushMessage.YZ_DS_001, memberAddress.getAddress(),splitDeliver.getNumber()), 3,null,null);
+            }
+
+            //判断房子是否已竣工，若未竣工，则推送消息给大管家
+            if(splitDeliver.getHouseId()!=null){
+                House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+                HouseFlow houseFlow= houseFlowMapper.getByWorkerTypeId(splitDeliver.getHouseId(),"3");//查询大管家信息
+                if(house.getVisitState()==1&&houseFlow!=null){//大管家已收货
+                    configMessageService.addConfigMessage( AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "装修材料部分收货", String.format
+                            (DjConstants.PushMessage.DGJ_S_001, memberAddress.getAddress(),splitDeliver.getNumber()), 3,null,null);
+                }
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -208,7 +232,7 @@ public class SplitDeliverService {
      * 确认收货
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse affirmSplitDeliver(String userToken, String splitDeliverId, String image) {
+    public ServerResponse affirmSplitDeliver(String userToken, String splitDeliverId, String image,Integer userRole) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -254,16 +278,33 @@ public class SplitDeliverService {
                 }
             }
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-
+            //House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            MemberAddress memberAddress= memberAddressService.getMemberAddressInfo(splitDeliver.getAddressId(),splitDeliver.getHouseId());
             //第三步:订单钱存入店铺账号余额，记录对应的流水信息
            if (!CommonUtil.isEmpty(splitDeliver.getStorefrontId())){
-                    masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), house.getId(),
+                    masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), splitDeliver.getHouseId(),
                             0, splitDeliver.getId(), splitDeliver.getTotalAmount(),"确认收货流水记录", operator.getId());
            }
-            //第五步：给业主发送短信
-            configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料已收货", String.format
-                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName(),splitDeliver.getNumber()), 3,null,null);
+           if(userRole==1){//业主
+               //第五步：给业主发送短信（自己收）
+               configMessageService.addConfigMessage( AppType.ZHUANGXIU, memberAddress.getMemberId(), "0", "装修材料已收货", String.format
+                       (DjConstants.PushMessage.YZ_S_001, memberAddress.getAddress(),splitDeliver.getNumber()), 3,null,null);
+           }else if(userRole==2){//工匠
+               //第五步：给业主发送短信（代收信息）
+               configMessageService.addConfigMessage( AppType.ZHUANGXIU, memberAddress.getMemberId(), "0", "装修材料已收货", String.format
+                       (DjConstants.PushMessage.YZ_DS_001, memberAddress.getAddress(),splitDeliver.getNumber()), 3,null,null);
+           }
+
+           //判断房子是否已竣工，若未竣工，则推送消息给大管家
+            if(splitDeliver.getHouseId()!=null){
+                House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+                HouseFlow houseFlow= houseFlowMapper.getByWorkerTypeId(splitDeliver.getHouseId(),"3");//查询大管家信息
+                if(house.getVisitState()==1&&houseFlow!=null){//大管家已收货
+                    configMessageService.addConfigMessage( AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "装修材料已收货", String.format
+                            (DjConstants.PushMessage.DGJ_S_001, memberAddress.getAddress(),splitDeliver.getNumber()), 3,null,null);
+                }
+            }
+
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             logger.error("操作失败",e);
