@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.supplier;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -10,6 +11,7 @@ import com.dangjia.acg.modle.supplier.DjSupApplication;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -138,12 +140,15 @@ public class DjSupApplicationService {
             {
                 return ServerResponse.createByErrorMessage("没有查询到合同!");
             }
-            String[] split = djSupApplication.getContract().split(",");
-            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            for (int i = 0; i < split.length; i++) {
-                split[i]=imageAddress+split[i];
+            if(StringUtils.isNotBlank(djSupApplication.getContract())) {
+                String[] split = djSupApplication.getContract().split(",");
+                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                for (int i = 0; i < split.length; i++) {
+                    split[i] = imageAddress + split[i];
+                }
+                return ServerResponse.createBySuccess("查询成功",split);
             }
-            return ServerResponse.createBySuccess("查询成功",split);
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询失败:"+e);
         }
