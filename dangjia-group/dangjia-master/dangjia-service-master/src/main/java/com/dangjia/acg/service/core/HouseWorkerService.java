@@ -988,7 +988,9 @@ public class HouseWorkerService {
                String mendOrderId = repairMendOrderService.workerApplyReturnMaterial( worker,house.getCityId(), house.getId(), materialProductArr);
                 //生成工匠退材料任务
                 taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),workerType.getName()+"发起退材料", workerType.getImage(),11,mendOrderId);
-
+                //清点材料
+                configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "清点剩余材料",
+                        String.format(DjConstants.PushMessage.STEWARD_EXCESS_MATERIAL, house.getHouseName()), 3,null,null);
             }
         }
         return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）阶段完工申请成功");

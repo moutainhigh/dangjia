@@ -134,7 +134,7 @@ public class SplitDeliverService {
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             //业主
             configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料部分收货", String.format
-                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), 3,null,null);
+                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName(),splitDeliver.getNumber()), 3,null,null);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -263,7 +263,7 @@ public class SplitDeliverService {
            }
             //第五步：给业主发送短信
             configMessageService.addConfigMessage( AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料已收货", String.format
-                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), 3,null,null);
+                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName(),splitDeliver.getNumber()), 3,null,null);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             logger.error("操作失败",e);

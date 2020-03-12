@@ -476,6 +476,9 @@ public class OrderSplitService {
                     splitDeliver.setDeliveryMobile(deliveryMobile);//送货人号码
                     splitDeliver.setShippingState(1);//已发货
                     splitDeliver.setSendTime(new Date());//发货时间
+                    //供应商发货
+                    configMessageService.addConfigMessage( AppType.ZHUANGXIU, memberAddress.getMemberId(), "0", "供应商发货", String.format
+                            (DjConstants.PushMessage.YZ_FN_001, memberAddress.getAddress(),splitDeliver.getNumber()), 3,null,null);
                 }
                 //判断是当前供应商下是否有发货与安装/施工分开的商品，如果是，则添加安装人员
                 if(isDeliveryInstall!=null&&"1".equals(isDeliveryInstall)){
@@ -485,6 +488,9 @@ public class OrderSplitService {
                 splitDeliverMapper.insert(splitDeliver);//生成发货单
                 //4.维护对应的发货单号到发货单明细中去
                 orderSplitItemMapper.updateSplitDeliverIdByInfo(splitDeliver.getId(),orderSplitId,supplierId,splitDeliverId);
+
+
+
             }
         }
         //5.修改要货单的发货状态为已发送给供应商

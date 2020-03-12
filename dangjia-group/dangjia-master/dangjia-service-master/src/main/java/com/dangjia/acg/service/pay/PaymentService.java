@@ -2273,10 +2273,12 @@ public class PaymentService {
             String categoryTopId;//顶级类别id
             String storefrontId;//店铺ID
             Integer fromObjectType;
+            Double totalPrice=0d;
             List productlist;
             for (ActivityRedPackRecordDTO redPacketRecord : redPacketRecordSelectList) {
                 Double totalMoney=0d;//符合条件的商品总额
                 Double concessionMoney=0d;//可优惠金额
+                totalPrice=0d;
                 productlist=new ArrayList();
                 for (ActivityProductDTO activityProductDTO : activityProductDTOList) {
                     //查询当前商品的商品模板ID，获取ID，类别ID，顶级类别Id，店铺ID
@@ -2288,6 +2290,7 @@ public class PaymentService {
                     storefrontId=(String)product.get("storefrontId");//店铺ID
                     activityProductDTO.setPrice((Double)product.get("price"));
                     fromObjectType=redPacketRecord.getFromObjectType();//3类别，4货品，5商品，6城市，7店铺
+                    totalPrice=MathUtil.add(totalPrice, MathUtil.mul(activityProductDTO.getPrice(),activityProductDTO.getShopCount()));
                     //判断优惠是城市券还是店铺券
                     if(redPacketRecord.getSourceType()==1){//城市券
                         if(fromObjectType==6){
@@ -2334,7 +2337,11 @@ public class PaymentService {
                         if("0".equals(redPacketRecord.getType())){
                             concessionMoney=redPacketRecord.getMoney();
                         }else if("1".equals(redPacketRecord.getType())){
-                            concessionMoney=MathUtil.mul(MathUtil.mul(totalMoney,redPacketRecord.getSatisfyMoney()),10);
+                            Double cMoeny=MathUtil.sub(10,redPacketRecord.getMoney());//折扣
+                            if(cMoeny<0){
+                                cMoeny=0d;
+                            }
+                            concessionMoney=MathUtil.div(MathUtil.mul(totalMoney,cMoeny),10);
                         }
                         redPacketRecord.setTotalMoney(totalMoney);
                         redPacketRecord.setConcessionMoney(concessionMoney);
@@ -2352,7 +2359,11 @@ public class PaymentService {
                     if("2".equals(redPacketRecord.getType())){
                         concessionMoney=redPacketRecord.getMoney();
                     }else if("1".equals(redPacketRecord.getType())){
-                        concessionMoney=MathUtil.mul(MathUtil.mul(totalMoney,redPacketRecord.getSatisfyMoney()),10);
+                        Double cMoeny=MathUtil.sub(10,redPacketRecord.getMoney());//折扣
+                        if(cMoeny<0){
+                            cMoeny=0d;
+                        }
+                        concessionMoney=MathUtil.div(MathUtil.mul(totalMoney,cMoeny),10);
                     }
                     redPacketRecord.setTotalMoney(totalMoney);
                     redPacketRecord.setConcessionMoney(concessionMoney);
@@ -2370,6 +2381,7 @@ public class PaymentService {
             if (redPacetResultList.size() == 0) {
                 return null;
             }
+            redPackMap.put("totalPrice",totalPrice);//订单总额
             redPackMap.put("recommendCuponsPack",recommendCuponsPack);//推荐优惠券
             redPackMap.put("redPacetResultList",redPacetResultList);//符合条件的优惠券
             return redPackMap;

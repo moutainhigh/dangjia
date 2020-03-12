@@ -183,6 +183,7 @@ public class DjConstants {
         public final static String CRAFTSMAN_NOT_START = "工匠您好！【%s】今日未开工，请在12点前开工，如有不便需要请假请申请停工。";
         public final static String STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE = "业主您好！【%s】有工匠停工，请查看";
         public final static String CRAFTSMAN_NEW_REPLACE = "业主您好！经多方协调，当家为您更换新的【%s】，请等待新【%s】抢单。";
+        public final static String STEWARD_EXCESS_MATERIAL = "业主您好！工匠根据【%s】装修施工情况，帮您清点了部分可退材料，请查看。";
         public final static String STEWARD_APPLY_FINISHED = "大管家您好！【%s】【%s】申请阶段/整体完工，请审核！";
         public final static String STEWARD_APPLY_FINISHED_NOT_PASS = "工匠您好！您申请的【%s】阶段/整体完工未通过审核，请及时整改！";
         public final static String STEWARD_APPLY_FINISHED_PASS = "工匠您好！您申请的【%s】阶段/整体完工已通过审核，请查看。";
@@ -192,7 +193,7 @@ public class DjConstants {
         public final static String REFUND_SUCCESS = "业主您好！您发起的退款操作成功，请查看";
         public final static String REFUND_ERROR = "业主您好！您发起的退款操作未成功，请重新提交";
         public final static String WITHDRAW_CASH_SUCCESS = "您好！您发起的提现操作成功，请注意查收";
-        public final static String WITHDRAW_CASH_ERROR = "您好！您发起的提现操作未成功，请重新提交";
+        public final static String WITHDRAW_CASH_ERROR = "您好！您发起的提现操作未成功，请查看原因，重新提交";
         public final static String REGISTER_SUCCESS = "您好！您邀请的朋友已注册成功，为感谢您对当家装修的支持，已将优惠券放在您的券包，请查收。";
         public final static String RED_ABOUT_TO_EXPIRE = "您好！您有一张优惠券即将过期，请查看。";
 
@@ -240,32 +241,33 @@ public class DjConstants {
 
         public final static String DGJ_B_001 = "大管家您好！【%s】【%s】申请补人工，请审核并填写数量！";
         //public final static String YZ_Y_001 = "业主您好！【%s】【%s】申请补人工，大管家将审核并填写补人工数量，请知晓！";
-        public final static String YZ_Y_001 = "业主您好！【%s】【%s】申请补人工，请查看并即时处理。";
+        public final static String YZ_Y_001 = "业主您好！【%s】【%s】申请补人工，请审核。";
 
         public final static String GJ_B_001 = "工匠您好！【%s】补人工申请未通过";
         public final static String GJ_B_002 = "工匠您好！【%s】补人工申请大管家已同意，请查看数量";
 
-        public final static String GJ_B_003 = "工匠您好！补人工申请未通过，请查看。";
+        public final static String GJ_B_003 = "工匠您好！【%s】补人工业主审核未通过";
         // public final static String GJ_B_003 = "工匠您好！【%s】补人工申请未通过";
         // public final static String YZ_B_001 = "业主您好！【%s】【%s】申请补人工，大管家审核补人工未通过";
         //public final static String GJ_B_004 = "工匠您好！【%s】补人工成功";
         //工匠您好！补人工成功，请查看。
-        public final static String GJ_B_004 = "工匠您好！补人工成功，请查看。";
+        public final static String GJ_B_004 = "工匠您好！【%s】补人工业主审核通过";
 
         public final static String DGJ_T_002 = "大管家您好！【%s】业主申请退人工，请审核并填写数量！";
         //工匠您好！业主申请退人工，请查看并即时处理。
-        public final static String GJ_T_003 = "工匠您好！业主申请退人工，请查看并即时处理。";
+        public final static String GJ_T_003 = "工匠您好！【%s】业主申请退人工，请审核";
         // public final static String GJ_T_003 = "工匠您好！【%s】业主申请退人工，大管家将审核并填写退人工数量，请知晓！";
         public final static String YZ_B_002 = "业主您好！【%s】退人工申请未通过";
         public final static String YZ_T_003 = "业主您好！【%s】退人工申请大管家已同意，请查看数量";
         // public final static String YZ_T_004 = "业主您好！【%s】退人工申请未通过";
-        public final static String YZ_T_004 = "业主您好！【%s】退人工申请未通过，请查看。";
+        public final static String YZ_T_004 = "业主您好！【%s】退【%s】人工申请未通过";
         //public final static String YZ_T_005 = "业主您好！【%s】退【%s】人工成功";
         //业主您好！XX退人工成功，请查看。
-        public final static String YZ_T_005 = "业主您好！【%s】退【%s】人工成功，请查看。";
+        public final static String YZ_T_005 = "业主您好！【%s】退【%s】人工审核通过";
 
+        public final static String YZ_FN_001 = "业主您好！【%s】装修材料【%s】已发货，请注意查收";
         public final static String YZ_F_001 = "业主您好！【%s】装修材料已发货，请注意查收";
-        public final static String YZ_S_001 = "业主您好！【%s】装修材料已收货";
+        public final static String YZ_S_001 = "业主您好！【%s】装修材料【%s】已收货";//业主您好！【%s】装修材料已收货
         public final static String YZ_DS_001 = "业主您好！【%s】装修材料已由他人代收货，请在48小时内验货";
 
         //public final static String YZ_B_010 = "业主您好！【%s】补【%s】人工申请大管家已同意，请查看数量";
