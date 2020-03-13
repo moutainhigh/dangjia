@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dangjia.acg.mapper.recommend.IHouseChoiceCaseMapper">
+<mapper namespace="com.dangjia.acg.mapper.recommend.HouseChoiceCaseMapper">
 
     <!-- 查询列表 -->
     <select id="queryHouseChoiceCaseList" resultType="com.dangjia.acg.modle.house.HouseChoiceCase">

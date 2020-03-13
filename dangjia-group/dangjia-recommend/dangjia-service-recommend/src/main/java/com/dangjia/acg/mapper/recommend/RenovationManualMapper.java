@@ -11,7 +11,7 @@ import java.util.List;
  * luof
  */
 @Repository
-public interface IRenovationManualMapper {
+public interface RenovationManualMapper {
 
     /** 根据名称查询攻略 */
     List<RenovationManual> getRenovationManualByName(@Param("name")String name);

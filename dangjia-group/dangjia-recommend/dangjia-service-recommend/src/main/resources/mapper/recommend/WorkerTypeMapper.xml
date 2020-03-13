@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dangjia.acg.mapper.recommend.IWorkerTypeMapper">
+<mapper namespace="com.dangjia.acg.mapper.recommend.WorkerTypeMapper">
 
     <!-- 根据用户id查询[所有房子][正在施工][所有工序与排期] -->
     <select id="queryWorkerTypeListByMemberId" resultType="com.dangjia.acg.modle.core.WorkerType">

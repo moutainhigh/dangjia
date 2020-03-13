@@ -12,7 +12,7 @@ import java.util.List;
  * luof
  */
 @Repository
-public interface IHouseMapper extends Mapper<House> {
+public interface HouseMapper extends Mapper<House> {
 
     /** 查询房子列表 - 根据小区名 */
     List<House> queryHouseListByResidential(@Param("residential") String residential);
