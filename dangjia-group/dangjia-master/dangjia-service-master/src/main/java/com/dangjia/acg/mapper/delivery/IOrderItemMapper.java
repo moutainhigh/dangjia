@@ -3,6 +3,8 @@ package com.dangjia.acg.mapper.delivery;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
+import com.dangjia.acg.dto.delivery.MaterialNumberDTO;
+import com.dangjia.acg.dto.delivery.NodeNumberDTO;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -33,4 +35,8 @@ public interface IOrderItemMapper extends Mapper<OrderItem> {
     Map<String,Object> searchCountItemByInfo(@Param("storefrontId") String storefrontId, @Param("addressId") String addressId, @Param("houseId") String houseId, @Param("productId") String productId);
 
     List<OrderItem> getReservationDeliverState(@Param("orderId") String orderId);
+
+    List<NodeNumberDTO> queryNodeNumber(String houseId);
+
+    List<MaterialNumberDTO> queryMaterialNumber(String houseId);
 }
