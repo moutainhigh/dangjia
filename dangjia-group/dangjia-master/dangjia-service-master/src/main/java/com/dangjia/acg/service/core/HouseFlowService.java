@@ -3,6 +3,7 @@ package com.dangjia.acg.service.core;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -74,7 +75,7 @@ import java.util.*;
  */
 @Service
 public class HouseFlowService {
-
+    private static Logger logger = LoggerFactory.getLogger(HouseFlowService.class);
     @Autowired
     private RedisClient redisClient;
     @Autowired
@@ -200,6 +201,29 @@ public class HouseFlowService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,查询失败");
         }
+    }
+
+    /**
+     * 新抢单播报
+     * @param userToken
+     * @return
+     */
+    public ServerResponse getNewGrabBroadcast(String userToken){
+        try{
+            List<Map<String,Object>> houseWorkerList=houseWorkerMapper.getNewGrabBroadcast();
+            if(houseWorkerList==null||houseWorkerList.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            for(Map<String,Object> map:houseWorkerList){
+                Date createDate=(Date)map.get("createDate");
+                map.put("remainingTime",DateUtil.daysBetweenTime(createDate,new Date()));
+            }
+            return ServerResponse.createBySuccess("查询成功",houseWorkerList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
     }
 
     /**

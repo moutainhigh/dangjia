@@ -26,6 +26,8 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
 
     Long grabControl(@Param("workerId") String workerId, @Param("workerType") Integer workerType);
 
+    List<Map<String,Object>> getNewGrabBroadcast();//查询抢单播报
+
     List<HouseWorker> grabOneDayOneTime(@Param("workerId") String workerId);
 
     int doModifyAllByWorkerId(@Param("workerId") String workerId);
