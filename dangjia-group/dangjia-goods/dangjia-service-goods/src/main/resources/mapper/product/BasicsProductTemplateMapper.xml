@@ -373,7 +373,7 @@
         p.is_shelf_status = 1
         AND bg.data_status = 0
         AND p.data_status = 0
-        AND bg.type &lt;4
+        AND bg.type &lt;5
         AND bg.buy !=2
         AND bg.city_id = #{cityId}
         <if test="name!=null and name!=''">
