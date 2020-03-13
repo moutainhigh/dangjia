@@ -111,11 +111,11 @@
         <![CDATA[    and t.deliver_time<=date_add(now(), interval -((select param_value from dj_config where param_key=#{paramKey})) DAY) ]]>
 
         </if>
-        <if test="type!==2">
+        <if test="type!=2">
             and t.`status`=4
          <![CDATA[    and t.return_application_time<=date_add(now(), interval -((select param_value from dj_config where param_key=#{paramKey})) DAY) ]]>
         </if>
-        <if test="type!==3">
+        <if test="type!=3">
             and t.`status`=0
             <![CDATA[    and t.exchange_time<=date_add(now(), interval -((select param_value from dj_config where param_key=#{paramKey})) MINUTE) ]]>
         </if>
