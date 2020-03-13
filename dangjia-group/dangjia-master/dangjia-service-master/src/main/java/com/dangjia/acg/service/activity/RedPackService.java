@@ -390,6 +390,8 @@ public class RedPackService {
             activityRedPackRecord.setRedPackId(activityRedPack.getId());
             activityRedPackRecord.setPackNum("DJYHJ"+System.currentTimeMillis()+ (int) (Math.random() * 9000 + (1001+i)));
             activityRedPackRecord.setHaveReceive(4);//未领取
+            activityRedPackRecord.setStartDate(activityRedPack.getStartDate());
+            activityRedPackRecord.setEndDate(activityRedPack.getEndDate());
             activityRedPackRecord.setSort(i+1);
             activityRedPackRecordMapper.insertSelective(activityRedPackRecord);
         }
