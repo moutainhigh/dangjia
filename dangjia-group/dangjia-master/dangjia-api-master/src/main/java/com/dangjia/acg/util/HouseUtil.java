@@ -72,6 +72,7 @@ public class HouseUtil {
                 nodeDTO.setRank(5);
                 nodeDTO.setNameB("监工中");
             }
+            nodeDTO.setTotal(5);
         } else if (workerType.getType() == 4) {//拆除
             iconsY = null;
             nameBs = new String[]{"未开始", "拆除抢单", "支付拆除费", "施工交底", "施工中", "整体完工"};
@@ -140,6 +141,12 @@ public class HouseUtil {
                 }
             }
         }
+        if (houseFlow.getWorkerType() == 4) {//拆除
+            nodeDTO.setTotal(5);
+        } else {
+            nodeDTO.setTotal(6);
+        }
+
         return nodeDTO;
     }
 
@@ -183,6 +190,7 @@ public class HouseUtil {
                 nodeDTO.setNameB("完成");
                 break;
         }
+        nodeDTO.setTotal(4);
         return nodeDTO;
     }
 
@@ -230,6 +238,7 @@ public class HouseUtil {
                     nodeDTO.setNameB("完成");
                     break;
             }
+            nodeDTO.setTotal(4);
         } else {
             switch (house.getDesignerOk()) {
                 case 0://0未确定设计师
@@ -279,6 +288,7 @@ public class HouseUtil {
                     nodeDTO.setNameB("完成");
                     break;
             }
+            nodeDTO.setTotal(6);
         }
         return nodeDTO;
     }
