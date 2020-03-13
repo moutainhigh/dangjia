@@ -34,5 +34,8 @@ public interface IWorkerTypeMapper extends Mapper<WorkerType> {
      * @date: 2020-3-12
      */
     List<Integer> queryTypeBySort(@Param("sortList")List<Integer> sortList);
+
+
+    List<WorkerType> querySkillCertificationSelectedList(@Param("skillCertificationId") String skillCertificationId);
 }
 

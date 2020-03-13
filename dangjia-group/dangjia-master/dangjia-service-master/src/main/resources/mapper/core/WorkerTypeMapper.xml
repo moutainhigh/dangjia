@@ -41,5 +41,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </select>
 
+    <select id="querySkillCertificationSelectedList" resultType="com.dangjia.acg.modle.core.WorkerType">
+        SELECT
+            b.skill_pack_name
+        FROM
+            dj_skill_certification a
+        INNER JOIN dj_core_worker_type b ON a.prod_template_id = b.id
+        WHERE
+            a.type = 3
+        AND a.skill_certification_id=#{skillCertificationId}
+    </select>
+
 </mapper>
 
