@@ -4,14 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.mapper.recommend.IHouseMapper;
+import com.dangjia.acg.mapper.recommend.HouseMapper;
 import com.dangjia.acg.mapper.recommend.IRecommendItemSubMapper;
-import com.dangjia.acg.mapper.recommend.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.recommend.WorkerTypeMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-//import com.dangjia.acg.service.core.HouseFlowService;
-import com.dangjia.acg.service.core.WorkerTypeService;
-import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.recommend.RecommendTargetService;
 import com.dangjia.acg.support.recommend.util.RecommendMainItem;
 import org.slf4j.Logger;
@@ -35,10 +32,10 @@ public class LabelAttribRecommend {
     private static Logger logger = LoggerFactory.getLogger(LabelAttribRecommend.class);
 
     @Autowired
-    private IHouseMapper houseMapper;
+    private HouseMapper houseMapper;
 
     @Autowired
-    private IWorkerTypeMapper workerTypeMapper;
+    private WorkerTypeMapper workerTypeMapper;
 
     @Autowired
     private IRecommendItemSubMapper recommendItemSubMapper;

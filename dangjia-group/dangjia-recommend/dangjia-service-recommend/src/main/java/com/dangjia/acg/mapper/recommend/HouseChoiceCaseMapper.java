@@ -14,7 +14,7 @@ import java.util.List;
  * Time: 17:09
  */
 @Repository
-public interface IHouseChoiceCaseMapper extends Mapper<HouseChoiceCase> {
+public interface HouseChoiceCaseMapper extends Mapper<HouseChoiceCase> {
 
     /** 查询案例列表 */
     List<HouseChoiceCase> queryHouseChoiceCaseList(@Param("title") String title);
