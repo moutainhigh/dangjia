@@ -30,23 +30,23 @@ public class DjSkillCertification extends BaseEntity {
     private String skillCertificationId;
 
     @Column(name = "prod_template_id")
-    @Desc(value = "商品id")
-    @ApiModelProperty("商品id")
+    @Desc(value = "商品模板id/工种id")
+    @ApiModelProperty("商品模板id/工种id")
     private String prodTemplateId;
 
     @Column(name = "product_sn")
-    @Desc(value = "商品编号")
-    @ApiModelProperty("商品编号")
+    @Desc(value = "商品编号/工种类型")
+    @ApiModelProperty("商品编号/工种类型")
     private String productSn;
 
     @Column(name = "product_name")
-    @Desc(value = "商品名称")
-    @ApiModelProperty("商品名称")
+    @Desc(value = "商品名称/工种名称")
+    @ApiModelProperty("商品名称/工种名称")
     private String productName;
 
     @Column(name = "type")
-    @Desc(value = "类型 1:工匠 2：工种")
-    @ApiModelProperty("类型 1:工匠 2：工种")
+    @Desc(value = "类型 1:工匠技能认证  2:工种技能认证  3:工匠技能包认证")
+    @ApiModelProperty("类型 1:工匠技能认证  2:工种技能认证  3:工匠技能包认证")
     private Integer type;
 
     @Column(name = "product_type")
