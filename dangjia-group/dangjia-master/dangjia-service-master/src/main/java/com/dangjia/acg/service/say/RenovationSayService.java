@@ -114,11 +114,11 @@ public class RenovationSayService {
     public ServerResponse queryRenovationSayList(PageDTO pageDTO){
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(RenovationSay.class);
             example.createCriteria()
                     .andEqualTo(RenovationSay.DATA_STATUS, 0);
             example.orderBy(RenovationSay.CREATE_DATE).desc();
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<RenovationSay> renovationSays = renovationSayMapper.selectByExample(example);
             StringBuffer stringBuffer=new StringBuffer();
             renovationSays.forEach(renovationSay -> {
@@ -187,7 +187,7 @@ public class RenovationSayService {
      *app查询装修说列表
      * @return
      */
-    public ServerResponse queryAppRenovationSayList(String userToken){
+    public ServerResponse queryAppRenovationSayList(String userToken,PageDTO pageDTO){
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -198,6 +198,7 @@ public class RenovationSayService {
             example.createCriteria()
                     .andEqualTo(RenovationSay.DATA_STATUS, 0);
             example.orderBy(RenovationSay.CREATE_DATE).desc();
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<RenovationSay> renovationSays = renovationSayMapper.selectByExample(example);
             if (renovationSays != null && renovationSays.size() > 0){
                 String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
