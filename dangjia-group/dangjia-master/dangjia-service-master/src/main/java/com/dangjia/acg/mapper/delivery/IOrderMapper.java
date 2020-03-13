@@ -2,9 +2,11 @@ package com.dangjia.acg.mapper.delivery;
 
 import com.dangjia.acg.dto.deliver.BudgetOrderDTO;
 import com.dangjia.acg.dto.deliver.BudgetOrderItemDTO;
+import com.dangjia.acg.dto.delivery.HouseFlowDataDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.dto.member.MemberDTO;
+import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.member.Member;
@@ -96,6 +98,17 @@ public interface IOrderMapper extends Mapper<Order> {
 
     List<MemberDTO> queryActivityPurchaseRotation(@Param("activityType") Integer activityType,
                                                   @Param("storeActivityProductId") String storeActivityProductId);
+
+    List<HouseFlowDataDTO> queryApplyDec();
+
+    List<HouseFlowDataDTO> queryApplyPayState(@Param("houseId") String houseId);
+
+    /**
+     * 查询装修状态
+     * @param houseId
+     * @return
+     */
+    List<WorkerTypeDTO> queryType(@Param("houseId") String houseId);
 
 }
 

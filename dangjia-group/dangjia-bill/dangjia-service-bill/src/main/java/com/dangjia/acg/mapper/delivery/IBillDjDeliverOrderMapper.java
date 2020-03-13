@@ -42,10 +42,7 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
     List<AppointmentDTO> queryAppointment(@Param("orderId") String orderId);
 
 
-    List<HouseFlowDataDTO> queryApplyDec();
 
-
-    List<HouseFlowDataDTO> queryApplyPayState(@Param("houseId") String houseId);
 
 
     /**
@@ -70,12 +67,6 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      */
     int cancelBooking(@Param("orderSplitId") String orderSplitId);
 
-    /**
-     * 查询装修状态
-     * @param houseId
-     * @return
-     */
-    List<WorkerTypeDTO> queryType(@Param("houseId") String houseId);
 
     /**
      * 查询汇总信息(根据类别汇总)

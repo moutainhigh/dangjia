@@ -313,6 +313,13 @@ public class RedPackService {
             return ServerResponse.createByErrorMessage("关闭失败，请您稍后再试");
         }
     }
+    /**
+     * 提前三天检查将过期的优惠券，发通知给到业主
+     */
+    public void couponActivityRedPack(){
+        //查询三天内到期的优惠券，发送通知
+    }
+
 
     /**
      * 新增

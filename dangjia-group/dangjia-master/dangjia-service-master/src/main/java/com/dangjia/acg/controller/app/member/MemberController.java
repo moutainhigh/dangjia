@@ -185,5 +185,11 @@ public class MemberController implements MemberAPI {
     public ServerResponse queryMember(HttpServletRequest request, String userToken,String houseId,String cityId) {
         return memberService.queryMember(userToken,houseId,cityId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryOrderNumber(HttpServletRequest request, String userToken) {
+        return memberService.queryOrderNumber(userToken);
+    }
 }
 

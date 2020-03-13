@@ -650,9 +650,9 @@ public class PaymentService {
                     }
                     //判断精算师是否可抢单
                     if(desginStatus){
-                        setHouseFlowInfo(order,"2",payState,1,diffMoney,2);
-                    }else{
                         setHouseFlowInfo(order,"2",payState,1,diffMoney,1);
+                    }else{
+                        setHouseFlowInfo(order,"2",payState,1,diffMoney,2);
                     }
 
                 }

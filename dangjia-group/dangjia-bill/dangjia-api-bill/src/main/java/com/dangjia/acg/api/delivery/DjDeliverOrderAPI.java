@@ -14,13 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-bill")
 public interface DjDeliverOrderAPI {
 
-
-    @PostMapping("/app/deliverOrder/queryOrderNumber")
-    @ApiOperation(value = "查询我要装修首页", notes = "查询我要装修首页")
-    ServerResponse queryOrderNumber(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("userToken") String userToken);
-
-
     @PostMapping("app/design/getDesignImag")
     @ApiOperation(value = "获取设计图", notes = "获取设计图")
     ServerResponse getDesignImag(@RequestParam("request") HttpServletRequest request,

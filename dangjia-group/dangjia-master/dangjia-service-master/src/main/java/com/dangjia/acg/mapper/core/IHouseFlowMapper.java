@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -54,4 +55,7 @@ public interface IHouseFlowMapper extends Mapper<HouseFlow> {
      * @date: 2020-3-11
      */
     List<Integer> queryWorkerTypeListByMemberId(@Param("memberId")String memberId);
+
+
+    Map<String,Object> optimizationHander(HouseFlow houseFlow);
 }

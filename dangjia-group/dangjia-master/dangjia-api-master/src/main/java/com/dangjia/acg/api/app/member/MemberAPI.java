@@ -588,5 +588,11 @@ public interface MemberAPI {
                                 @RequestParam("userToken") String userToken,
                                 @RequestParam("houseId") String houseId,
                                 @RequestParam("cityId") String cityId);
+
+
+    @PostMapping("/app/deliverOrder/queryOrderNumber")
+    @ApiOperation(value = "查询我要装修首页", notes = "查询我要装修首页")
+    ServerResponse queryOrderNumber(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("userToken") String userToken);
 }
 

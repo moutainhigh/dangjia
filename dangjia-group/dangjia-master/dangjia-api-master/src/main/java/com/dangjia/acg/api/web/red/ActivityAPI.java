@@ -289,6 +289,10 @@ public interface ActivityAPI {
     @ApiOperation(value = "会员优惠券设置为过期", notes = "会员优惠券设置为过期")
     ServerResponse closeActivityRedPackRecord(@RequestParam("id") String id);
 
+    @PostMapping("web/activity/redRecord/couponActivityRedPack")
+    @ApiOperation(value = "提前三天检查将过期的优惠券，发通知给到业主", notes = "提前三天检查将过期的优惠券，发通知给到业主")
+    void couponActivityRedPack();
+
     @PostMapping("web/activity/redRecord/all")
     @ApiOperation(value = "获取所有优惠券客户未使用记录", notes = "获取所有优惠券客户未使用记录")
     List<ActivityRedPackRecord> queryRedPackRecord();
