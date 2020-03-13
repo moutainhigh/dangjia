@@ -140,6 +140,7 @@ public class DjSkillCertificationService {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Example example=new Example(WorkerType.class);
             example.createCriteria().andEqualTo(WorkerType.DATA_STATUS,0);
+            example.orderBy(WorkerType.SORT).asc();
             List<WorkerType> workerTypes = iWorkerTypeMapper.selectByExample(example);
             workerTypes.forEach(workerType -> {
                 workerType.setImageUrl(workerType.getImage());

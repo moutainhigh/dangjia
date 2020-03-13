@@ -1986,7 +1986,7 @@ public class MemberService {
         //1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
         for (HouseFlow houseFlow : houseFlows) {
             List<Map<String, Object>> mapList=new ArrayList<>();
-            mapList.add(iHouseFlowMapper.optimizationHander(houseFlow));
+            mapList.add(iHouseFlowMapper.optimizationHander(houseFlow.getId()));
             example = new Example(WorkerType.class);
             example.createCriteria().andEqualTo(WorkerType.TYPE, houseFlow.getWorkerType())
                     .andEqualTo(WorkerType.DATA_STATUS, 0);

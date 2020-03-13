@@ -57,5 +57,5 @@ public interface IHouseFlowMapper extends Mapper<HouseFlow> {
     List<Integer> queryWorkerTypeListByMemberId(@Param("memberId")String memberId);
 
 
-    Map<String,Object> optimizationHander(HouseFlow houseFlow);
+    Map<String,Object> optimizationHander(@Param("houseFlowId") String houseFlowId);
 }
