@@ -437,7 +437,7 @@
         INNER JOIN dj_member m ON m.id = h.member_id
         WHERE
             f.`work_type` = '2'
-        AND f.`state` = '2'
+        AND f.`state` = '0'
         AND f.`worker_type_id` = #{workerTypeId}
         AND f.`city_id` = #{cityId}
         UNION ALL

@@ -314,6 +314,15 @@ public class ActivityController  implements ActivityAPI {
     public ServerResponse closeActivityRedPackRecord(String id){
         return redPackService.closeActivityRedPackRecord(id);
     }
+
+    /**
+     * 提前三天检查将过期的优惠券，发通知给到业主
+     */
+    @Override
+    @ApiMethod
+    public void couponActivityRedPack(){
+         redPackService.couponActivityRedPack();
+    }
     /**
      * 获取所有优惠券客户未使用记录
      * @return
