@@ -12,7 +12,7 @@ import java.util.List;
  * @author: luof
  */
 @Repository
-public interface IWorkerTypeMapper extends Mapper<WorkerType> {
+public interface WorkerTypeMapper extends Mapper<WorkerType> {
 
     /**
      * @Description:根据用户id查询[所有房子][正在施工][所有工序与排期]

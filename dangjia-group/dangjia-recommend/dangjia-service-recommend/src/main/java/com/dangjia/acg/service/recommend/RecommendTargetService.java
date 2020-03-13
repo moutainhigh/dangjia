@@ -6,15 +6,15 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.recommend.IRecommendTargetMapper;
-import com.dangjia.acg.mapper.recommend.IStorefrontProductMapper;
-import com.dangjia.acg.mapper.recommend.IRenovationManualMapper;
-import com.dangjia.acg.mapper.recommend.IHouseChoiceCaseMapper;
-import com.dangjia.acg.mapper.recommend.IHouseMapper;
+import com.dangjia.acg.mapper.recommend.StorefrontProductMapper;
+import com.dangjia.acg.mapper.recommend.RenovationManualMapper;
+import com.dangjia.acg.mapper.recommend.HouseChoiceCaseMapper;
+import com.dangjia.acg.mapper.recommend.HouseMapper;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseChoiceCase;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.recommend.RecommendTargetInfo;
-import com.dangjia.acg.support.recommend.dto.BasicsStorefrontProductViewDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.support.recommend.util.RecommendConfigItem;
 import com.dangjia.acg.support.recommend.util.RecommendMainItem;
 import com.github.pagehelper.PageHelper;
@@ -43,16 +43,16 @@ public class RecommendTargetService {
     private IRecommendTargetMapper recommendTargetMapper;
 
     @Autowired
-    private IStorefrontProductMapper storefrontProductMapper;
+    private StorefrontProductMapper storefrontProductMapper;
 
     @Autowired
-    private IRenovationManualMapper renovationManualMapper;
+    private RenovationManualMapper renovationManualMapper;
 
     @Autowired
-    private IHouseChoiceCaseMapper houseChoiceCaseMapper;
+    private HouseChoiceCaseMapper houseChoiceCaseMapper;
 
     @Autowired
-    private IHouseMapper houseMapper;
+    private HouseMapper houseMapper;
 
     @Autowired
     private RecommendConfigService recommendConfigService;
@@ -173,46 +173,46 @@ public class RecommendTargetService {
     }
 
     // 组装返回响应
-    private ServerResponse assembleReturnResponse(ServerResponse serverResponse, List<RecommendTargetInfo> recommendTargetInfoList){
-        ServerResponse returnResponse = new ServerResponse();
-        returnResponse.setResultCode(serverResponse.getResultCode());
-        returnResponse.setResultMsg(serverResponse.getResultMsg());
-        PageInfo<RecommendTargetInfo> pageInfo = new PageInfo<RecommendTargetInfo>();
-        PageInfo<BasicsStorefrontProductViewDTO> pageResult = (PageInfo)serverResponse.getResultObj();
-        pageInfo.setEndRow(pageResult.getEndRow());
-        pageInfo.setIsFirstPage(pageResult.isIsFirstPage());
-        pageInfo.setHasNextPage(pageResult.isHasNextPage());
-        pageInfo.setHasPreviousPage(pageResult.isHasPreviousPage());
-        pageInfo.setIsFirstPage(pageResult.isIsFirstPage());
-        pageInfo.setIsLastPage(pageResult.isIsLastPage());
-        pageInfo.setLastPage(pageResult.getLastPage());
-        pageInfo.setNavigateFirstPage(pageResult.getNavigateFirstPage());
-        pageInfo.setNavigateLastPage(pageResult.getNavigateLastPage());
-        pageInfo.setNavigatePages(pageResult.getNavigatePages());
-        pageInfo.setNavigatepageNums(pageResult.getNavigatepageNums());
-        pageInfo.setNextPage(pageResult.getNextPage());
-        pageInfo.setPageNum(pageResult.getPageNum());
-        pageInfo.setPageSize(pageResult.getPageSize());
-        pageInfo.setPages(pageResult.getPages());
-        pageInfo.setPrePage(pageResult.getPrePage());
-        pageInfo.setSize(pageResult.getSize());
-        pageInfo.setStartRow(pageResult.getStartRow());
-        pageInfo.setTotal(pageResult.getTotal());
-        pageInfo.setList(recommendTargetInfoList);
-        returnResponse.setResultObj(pageInfo);
-        return  returnResponse;
-    }
+//    private ServerResponse assembleReturnResponse(ServerResponse serverResponse, List<RecommendTargetInfo> recommendTargetInfoList){
+//        ServerResponse returnResponse = new ServerResponse();
+//        returnResponse.setResultCode(serverResponse.getResultCode());
+//        returnResponse.setResultMsg(serverResponse.getResultMsg());
+//        PageInfo<RecommendTargetInfo> pageInfo = new PageInfo<RecommendTargetInfo>();
+//        PageInfo<BasicsStorefrontProductDTO> pageResult = (PageInfo)serverResponse.getResultObj();
+//        pageInfo.setEndRow(pageResult.getEndRow());
+//        pageInfo.setIsFirstPage(pageResult.isIsFirstPage());
+//        pageInfo.setHasNextPage(pageResult.isHasNextPage());
+//        pageInfo.setHasPreviousPage(pageResult.isHasPreviousPage());
+//        pageInfo.setIsFirstPage(pageResult.isIsFirstPage());
+//        pageInfo.setIsLastPage(pageResult.isIsLastPage());
+//        pageInfo.setLastPage(pageResult.getLastPage());
+//        pageInfo.setNavigateFirstPage(pageResult.getNavigateFirstPage());
+//        pageInfo.setNavigateLastPage(pageResult.getNavigateLastPage());
+//        pageInfo.setNavigatePages(pageResult.getNavigatePages());
+//        pageInfo.setNavigatepageNums(pageResult.getNavigatepageNums());
+//        pageInfo.setNextPage(pageResult.getNextPage());
+//        pageInfo.setPageNum(pageResult.getPageNum());
+//        pageInfo.setPageSize(pageResult.getPageSize());
+//        pageInfo.setPages(pageResult.getPages());
+//        pageInfo.setPrePage(pageResult.getPrePage());
+//        pageInfo.setSize(pageResult.getSize());
+//        pageInfo.setStartRow(pageResult.getStartRow());
+//        pageInfo.setTotal(pageResult.getTotal());
+//        pageInfo.setList(recommendTargetInfoList);
+//        returnResponse.setResultObj(pageInfo);
+//        return  returnResponse;
+//    }
 
     // 查询商品可选列表
     private ServerResponse queryGoodsOptionalList(String name, PageDTO pageDTO){
         try{
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<BasicsStorefrontProductViewDTO> list = storefrontProductMapper.queryProductGroundByKeyWord(name);
+            List<StorefrontProductDTO> list = storefrontProductMapper.queryProductGroundByKeyWord(name);
             if( list == null || list.size() < 1 ){
                 ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
             }
             List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
-            for (BasicsStorefrontProductViewDTO dto : list) {
+            for (StorefrontProductDTO dto : list) {
                 RecommendTargetInfo recommendTargetInfo = new RecommendTargetInfo();
                 recommendTargetInfo.setTargetId(dto.getId());
                 recommendTargetInfo.setTargetName(dto.getProductName());
