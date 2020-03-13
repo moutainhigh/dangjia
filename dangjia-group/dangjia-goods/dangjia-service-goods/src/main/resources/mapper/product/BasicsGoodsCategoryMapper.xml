@@ -50,6 +50,7 @@
         WHERE
         t.parent_id = #{parentId}
         <if test="cityId!=null and cityId!=''">
+            and t.owner_display='1'
             and g1.category_id=t1.id and g1.buy!=2 and  g1.city_id =#{cityId}
         </if>
         <if test="(categoryLabelId!=null and categoryLabelId!='') or (cityId!=null and cityId!='')">
