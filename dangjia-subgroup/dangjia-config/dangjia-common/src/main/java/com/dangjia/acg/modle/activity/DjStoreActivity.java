@@ -43,10 +43,10 @@ public class DjStoreActivity extends BaseEntity {
     @ApiModelProperty("报名开始时间")
     private Date registrationStartTime;
 
-    @Column(name = "end_time_registration")
+    @Column(name = "registration_end_time")
     @Desc(value = "报名结束时间")
     @ApiModelProperty("报名结束时间")
-    private Date endTimeRegistration;
+    private Date registrationEndTime;
 
     @Column(name = "spell_group")
     @Desc(value = "拼团人数")
@@ -58,10 +58,10 @@ public class DjStoreActivity extends BaseEntity {
     @ApiModelProperty("活动开始时间")
     private Date activityStartTime;
 
-    @Column(name = "end_time")
+    @Column(name = "activity_end_time")
     @Desc(value = "活动结束时间")
     @ApiModelProperty("活动结束时间")
-    private Date endTime;
+    private Date activityendTime;
 
     @Column(name = "activity_description")
     @Desc(value = "活动说明")

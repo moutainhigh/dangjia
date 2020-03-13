@@ -5,16 +5,16 @@ import com.dangjia.acg.common.enums.RecommendTargetType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.mapper.recommend.IRecommendTargetMapper;
+import com.dangjia.acg.mapper.recommend.IStorefrontProductMapper;
+import com.dangjia.acg.mapper.recommend.IRenovationManualMapper;
+import com.dangjia.acg.mapper.recommend.IHouseChoiceCaseMapper;
+import com.dangjia.acg.mapper.recommend.IHouseMapper;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseChoiceCase;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.recommend.RecommendTargetInfo;
-import com.dangjia.acg.service.home.HomeModularService;
-import com.dangjia.acg.service.house.HouseChoiceCaseService;
-import com.dangjia.acg.service.house.HouseService;
-import com.dangjia.acg.service.storefront.StorefrontProductService;
+import com.dangjia.acg.support.recommend.dto.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.support.recommend.util.RecommendConfigItem;
 import com.dangjia.acg.support.recommend.util.RecommendMainItem;
 import com.github.pagehelper.PageHelper;
@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Description: 推荐目标服务类
@@ -44,16 +43,16 @@ public class RecommendTargetService {
     private IRecommendTargetMapper recommendTargetMapper;
 
     @Autowired
-    private StorefrontProductService storefrontProductService;
+    private IStorefrontProductMapper storefrontProductMapper;
 
     @Autowired
-    private HomeModularService homeModularService;
+    private IRenovationManualMapper renovationManualMapper;
 
     @Autowired
-    private HouseChoiceCaseService houseChoiceCaseService;
+    private IHouseChoiceCaseMapper houseChoiceCaseMapper;
 
     @Autowired
-    private HouseService houseService;
+    private IHouseMapper houseMapper;
 
     @Autowired
     private RecommendConfigService recommendConfigService;
@@ -206,77 +205,86 @@ public class RecommendTargetService {
 
     // 查询商品可选列表
     private ServerResponse queryGoodsOptionalList(String name, PageDTO pageDTO){
-
-        ServerResponse serverResponse = storefrontProductService.queryProductGroundByKeyWord(name, pageDTO);
-        logger.debug("查询商品可选列表 结果:"+JSON.toJSONString(serverResponse));
-        if( serverResponse.isSuccess() ){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<BasicsStorefrontProductViewDTO> list = storefrontProductMapper.queryProductGroundByKeyWord(name);
+            if( list == null || list.size() < 1 ){
+                ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+            }
             List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
-            PageInfo<BasicsStorefrontProductViewDTO> pageResult = (PageInfo)serverResponse.getResultObj();
-            List<BasicsStorefrontProductViewDTO> basicsStorefrontProductViewDTOList =pageResult.getList();
-            for( BasicsStorefrontProductViewDTO dto : basicsStorefrontProductViewDTOList ){
+            for (BasicsStorefrontProductViewDTO dto : list) {
                 RecommendTargetInfo recommendTargetInfo = new RecommendTargetInfo();
                 recommendTargetInfo.setTargetId(dto.getId());
                 recommendTargetInfo.setTargetName(dto.getProductName());
-                recommendTargetInfo.setImage(dto.getStorefrontProduct().getImage());
+                recommendTargetInfo.setImage(dto.getImage());
                 recommendTargetInfoList.add(recommendTargetInfo);
             }
-            return assembleReturnResponse(serverResponse, recommendTargetInfoList);
+            PageInfo pageResult = new PageInfo(recommendTargetInfoList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("通过货品或者商品名称查询异常：", e);
+            return ServerResponse.createByErrorMessage("通过货品或者商品名称查询异常");
         }
-        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
     }
 
     // 查询攻略（指南）可选列表
     private ServerResponse queryManualOptionalList(String name, PageDTO pageDTO){
-
-        ServerResponse serverResponse = homeModularService.queryRenovationManualList(name, pageDTO);
-        logger.debug("查询攻略可选列表 结果:"+JSON.toJSONString(serverResponse));
-        if( serverResponse.isSuccess() ){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<RenovationManual> list = renovationManualMapper.getRenovationManualByName(name);
+            if( list == null || list.size() < 1 ){
+                ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+            }
             List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
-            PageInfo<RenovationManual> pageResult =  (PageInfo)serverResponse.getResultObj();
-            List<RenovationManual> renovationManualList = pageResult.getList();
-            for( RenovationManual renovationManual : renovationManualList ){
+            for( RenovationManual renovationManual : list ){
                 RecommendTargetInfo recommendTargetInfo = new RecommendTargetInfo();
                 recommendTargetInfo.setTargetId(renovationManual.getId());
                 recommendTargetInfo.setTargetName(renovationManual.getName());
                 recommendTargetInfo.setImage(renovationManual.getImage());
                 recommendTargetInfoList.add(recommendTargetInfo);
             }
-            return assembleReturnResponse(serverResponse, recommendTargetInfoList);
+            PageInfo pageResult = new PageInfo(recommendTargetInfoList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("通过标题查询异常：", e);
+            return ServerResponse.createByErrorMessage("通过标题查询异常");
         }
-        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
     }
 
     // 查询案例可选列表
     private ServerResponse queryHouseCaseOptionalList(String title, PageDTO pageDTO){
-
-        ServerResponse serverResponse = houseChoiceCaseService.queryHouseChoiceCasesList(title, pageDTO);
-        logger.debug("查询案例可选列表 结果:"+JSON.toJSONString(serverResponse));
-        if( serverResponse.isSuccess() ) {
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<HouseChoiceCase> list = houseChoiceCaseMapper.queryHouseChoiceCaseList(title);
+            if( list == null || list.size() < 1 ){
+                ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+            }
             List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
-            PageInfo<HouseChoiceCase> pageResult = (PageInfo)serverResponse.getResultObj();
-            List<HouseChoiceCase> houseChoiceCaseList = pageResult.getList();
-            for( HouseChoiceCase houseChoiceCase : houseChoiceCaseList ){
+            for( HouseChoiceCase houseChoiceCase : list ){
                 RecommendTargetInfo recommendTargetInfo = new RecommendTargetInfo();
                 recommendTargetInfo.setTargetId(houseChoiceCase.getId());
                 recommendTargetInfo.setTargetName(houseChoiceCase.getTitle());
                 recommendTargetInfo.setImage(houseChoiceCase.getImage());
                 recommendTargetInfoList.add(recommendTargetInfo);
             }
-            return assembleReturnResponse(serverResponse, recommendTargetInfoList);
+            PageInfo pageResult = new PageInfo(recommendTargetInfoList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("通过标题查询异常：", e);
+            return ServerResponse.createByErrorMessage("通过标题查询异常");
         }
-        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
     }
 
     // 查询工地可选列表
     private ServerResponse queryHouseSiteOptionalList(String residential, PageDTO pageDTO){
-
-        ServerResponse serverResponse = houseService.queryHouseListByResidential(residential, pageDTO);
-        logger.debug("查询工地可选列表 结果:"+JSON.toJSONString(serverResponse));
-        if( serverResponse.isSuccess() ) {
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<House> list = houseMapper.queryHouseListByResidential(residential);
+            if( list == null || list.size() < 1 ){
+                ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+            }
             List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
-            PageInfo<House> pageResult = (PageInfo)serverResponse.getResultObj();
-            List<House> houseList = pageResult.getList();
-            for( House house : houseList ){
+            for( House house : list ){
                 RecommendTargetInfo recommendTargetInfo = new RecommendTargetInfo();
                 recommendTargetInfo.setTargetId(house.getId());
                 recommendTargetInfo.setTargetName(house.getHouseName());
@@ -284,9 +292,12 @@ public class RecommendTargetService {
                 recommendTargetInfo.setVisitState(house.getVisitState());
                 recommendTargetInfoList.add(recommendTargetInfo);
             }
-            return assembleReturnResponse(serverResponse, recommendTargetInfoList);
+            PageInfo pageResult = new PageInfo(recommendTargetInfoList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("通过小区名称查询异常：", e);
+            return ServerResponse.createByErrorMessage("通过小区名称查询异常");
         }
-        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
     }
 
     /**

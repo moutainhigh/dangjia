@@ -27,10 +27,10 @@
             b.session,
             d.name AS city,
             a.activity_start_time AS activityStartTime,
-            a.end_time AS endTime,
+            a.activity_end_time AS activityEndTime,
             a.registration_start_time AS registrationStartTime,
-            a.end_time_registration AS endTimeRegistration,
-            b.end_session AS endSession,
+            a.registration_end_time AS registrationEndTime,
+            b.session_end_time AS sessionEndTime,
             b.session_start_time AS sessionStartTime,
             IF (
                 c.store_activity_id IS NULL
@@ -53,9 +53,9 @@
         SELECT
             a.id as storeActivityId,
             a.activity_start_time AS activityStartTime,
-            a.end_time AS endTime,
+            a.activity_end_time AS activityEndTime,
             a.registration_start_time AS registrationStartTime,
-            a.end_time_registration AS endTimeRegistration,
+            a.registration_end_time AS registrationEndTime,
             c.`name` AS city,
             a.activity_description AS activityDescription,
             a.cycle_purchasing AS cyclePurchasing,

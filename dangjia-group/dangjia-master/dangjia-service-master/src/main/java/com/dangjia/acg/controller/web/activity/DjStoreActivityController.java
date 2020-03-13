@@ -5,9 +5,12 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.activity.DjStoreActivity;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.service.activity.DjStoreActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -192,5 +195,15 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
     @ApiMethod
     public ServerResponse queryActivityPurchaseRotation(String storeActivityProductId, Integer activityType) {
         return djStoreActivityService.queryActivityPurchaseRotation(storeActivityProductId,activityType);
+    }
+
+    @Override
+    @ApiMethod
+    public void checkGroupPurchaseOrder() {
+        try {
+            djStoreActivityService.checkGroupPurchaseOrder();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

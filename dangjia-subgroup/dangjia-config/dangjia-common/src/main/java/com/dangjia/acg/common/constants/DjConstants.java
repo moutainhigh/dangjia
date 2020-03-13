@@ -297,6 +297,8 @@ public class DjConstants {
         public final static String YZ_G_YANSHOU_Y = "大管家您好！【%s】主动验收%s已通过，恭喜！";
         public final static String YZ_G_YANSHOU_N = "大管家您好！【%s】主动验收%s未通过，请现场达到标准后再次申请。";
 
+        public final static String YZ_PT_SUCCESS = "业主您好！【%s】与其他用户拼团成功，请查看。";
+        public final static String YZ_PT_FAIL = "业主您好！【%s】未能与其他用户拼团成功，拼团费用已自动退款。";
 
         public final static String GZ_WB_001 = "您好！【%s】产生了质保，您将要承担部分责任，具体以现场维保为准，请知晓。";
         public final static String GZ_WB_002 = "您好！【%s】产生了质保，您需要承担部分责任，请知晓。";

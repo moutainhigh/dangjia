@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * Time: 下午 4:53
  */
 @Api(description = "退款/售后定时任务")
-@FeignClient("dangjia-service-bill")
+@FeignClient("dangjia-service-master")
 public interface RefundAfterSalesJobAPI {
 
     @PostMapping("app/refund/job/returnMechantProcessTime")

@@ -352,9 +352,9 @@ public class AppActuaryOperationService {
                             = iGoodsDjStoreParticipateActivitiesMapper.selectByPrimaryKey(djStoreActivityProduct.getStoreParticipateActivitiesId());
                     DjActivitySession djActivitySession =
                             iGoodsDjActivitySessionMapper.selectByPrimaryKey(djStoreParticipateActivities.getActivitySessionId());
-                    goodsDTO.setEndSession(djActivitySession.getEndSession());
+                    goodsDTO.setEndSession(djActivitySession.getSessionEndTime());
                     goodsDTO.setSessionStartTime(djActivitySession.getSessionStartTime());
-                    goodsDTO.setMerchandiseCountdown(DateUtil.daysBetweenTime(new Date(),djActivitySession.getEndSession()));
+                    goodsDTO.setMerchandiseCountdown(DateUtil.daysBetweenTime(new Date(),djActivitySession.getSessionEndTime()));
                     goodsDTO.setActivityType(djStoreActivityProduct.getActivityType());
                 }else if(djStoreActivityProduct.getActivityType()==2) {
                     DjStoreParticipateActivities djStoreParticipateActivities

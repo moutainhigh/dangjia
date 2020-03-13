@@ -85,7 +85,8 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/searchMaintenaceRecordInfo")
     @ApiOperation(value = "查询质保详情", notes = "查询质保详情（按提交人类型查询）")
-    ServerResponse searchMaintenaceRecordInfo(String maintenanceRecordId,Integer type);
+    ServerResponse searchMaintenaceRecordInfo(@RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                              @RequestParam("type")Integer type);
 
     @PostMapping(value = "app/engineer/saveMaintenanceRecordOrder")
     @ApiOperation(value = "质保申请--提交订单", notes = "质保申请--提交订单")

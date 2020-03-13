@@ -7,6 +7,7 @@ import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.api.sale.rob.RobAPI;
 import com.dangjia.acg.api.supervisor.DjBasicsSiteMemoAPI;
+import com.dangjia.acg.api.web.activity.DjStoreActivityAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.config.ConfigMessage;
@@ -45,6 +46,8 @@ public class HouseTask {
     private RobAPI robAPI;
     @Autowired
     private DjBasicsSiteMemoAPI siteMemoAPI;
+    @Autowired
+    private DjStoreActivityAPI djStoreActivityAPI;
 
 
     private Logger log = LoggerFactory.getLogger(HouseTask.class);
@@ -64,6 +67,9 @@ public class HouseTask {
         houseFlowApplyAPI.couponApply();
         log.info(format.format(new Date()) + "结束执行完工申请业主检测任务...");
 
+        log.info(format.format(new Date()) + "开始执行拼团购倒计时测任务...");
+        djStoreActivityAPI.checkGroupPurchaseOrder();
+        log.info(format.format(new Date()) + "结束执行拼团购倒计时测任务...");
 
 //        log.info(format.format(new Date()) + "开始执行工匠保险检测任务...");
 //        houseFlowAPI.autoGiveUpOrder();

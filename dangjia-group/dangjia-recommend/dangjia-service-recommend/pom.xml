@@ -144,31 +144,7 @@
         </dependency>
         <dependency>
             <groupId>com.dangjia.acg</groupId>
-            <artifactId>dangjia-api-shop</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.dangjia.acg</groupId>
-            <artifactId>dangjia-api-store</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.dangjia.acg</groupId>
             <artifactId>dangjia-api-recommend</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.dangjia.acg</groupId>
-            <artifactId>dangjia-service-master</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.dangjia.acg</groupId>
-            <artifactId>dangjia-service-shop</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

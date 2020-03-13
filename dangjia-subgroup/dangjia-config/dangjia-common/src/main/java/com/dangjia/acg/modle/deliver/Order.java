@@ -153,8 +153,8 @@ public class Order extends BaseEntity {
 
 
 	@Column(name = "order_status")
-	@Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 9拼团中）")
-	@ApiModelProperty("订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 9拼团中）")
+	@Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 9拼团中 10拼团失败）")
+	@ApiModelProperty("订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 9拼团中 10拼团失败）")
 	private String orderStatus;//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 9拼团中）
 
 	@Column(name = "order_generation_time")
