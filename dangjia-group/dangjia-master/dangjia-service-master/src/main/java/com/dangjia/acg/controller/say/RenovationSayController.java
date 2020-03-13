@@ -49,8 +49,8 @@ public class RenovationSayController implements RenovationSayAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryAppRenovationSayList(String userToken) {
-        return renovationSayService.queryAppRenovationSayList(userToken);
+    public ServerResponse queryAppRenovationSayList(String userToken,PageDTO pageDTO) {
+        return renovationSayService.queryAppRenovationSayList(userToken,pageDTO);
     }
 
     @Override

@@ -42,7 +42,8 @@ public interface RenovationSayAPI {
 
     @PostMapping("app/renovation/queryAppRenovationSayList")
     @ApiOperation(value = "app查询装修说列表", notes = "app查询装修说列表")
-    ServerResponse queryAppRenovationSayList(@RequestParam("userToken") String userToken);
+    ServerResponse queryAppRenovationSayList(@RequestParam("userToken") String userToken,
+                                             @RequestParam("pageDTO")PageDTO pageDTO);
 
     @PostMapping("app/renovation/setThumbUp")
     @ApiOperation(value = "装修说点赞", notes = "装修说点赞")
