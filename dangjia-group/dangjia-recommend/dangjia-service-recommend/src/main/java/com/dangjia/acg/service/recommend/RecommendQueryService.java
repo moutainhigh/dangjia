@@ -7,8 +7,8 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.mapper.recommend.MemberMapper;
 import com.dangjia.acg.support.recommend.dto.RecommendComposeChunk;
-import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.recommend.RecommendTargetInfo;
@@ -43,7 +43,7 @@ public class RecommendQueryService {
     private RedisClient redisClient;
 
     @Autowired
-    private IMemberMapper memberMapper;
+    private MemberMapper memberMapper;
 
     @Autowired
     private RecommendTargetService recommendTargetService;
