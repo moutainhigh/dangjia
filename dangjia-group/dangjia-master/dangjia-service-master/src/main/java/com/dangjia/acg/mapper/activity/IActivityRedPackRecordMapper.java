@@ -21,6 +21,12 @@ public interface IActivityRedPackRecordMapper extends Mapper<ActivityRedPackReco
 
     ActivityRedPackRecord getRedPackRecordsByBusinessOrderNumber(String businessOrderNumber);
 
+    /**
+     * 查询三天内快到期的优惠券，发送消息
+     * @return
+     */
+    List<ActivityRedPackRecordDTO> queryActivityRedPackRecordThreeDayList();
+
     List<ActivityRedPackRecordDTO> queryActivityRedPackRecordList(@Param("redPackId") String redPackId);
 
     List<ActivityRedPackRecordDTO> queryMyAticvityList(@Param("memberId") String memberId,

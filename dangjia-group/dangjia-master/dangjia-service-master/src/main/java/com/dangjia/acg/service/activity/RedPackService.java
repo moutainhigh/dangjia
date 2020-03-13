@@ -5,7 +5,9 @@ import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -33,6 +35,7 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.product.MasterStorefrontService;
 import com.dangjia.acg.util.StringTool;
@@ -69,8 +72,8 @@ public class RedPackService {
 
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
-  //  @Autowired
-   // private ProductAPI productAPI;
+    @Autowired
+    private ConfigMessageService configMessageService;
     @Autowired
     private DjBasicsProductAPI djBasicsProductAPI;
     @Autowired
@@ -318,6 +321,16 @@ public class RedPackService {
      */
     public void couponActivityRedPack(){
         //查询三天内到期的优惠券，发送通知
+        try{
+            List<ActivityRedPackRecordDTO> redPackRecordList=activityRedPackRecordMapper.queryActivityRedPackRecordThreeDayList();
+            if(redPackRecordList!=null&&redPackRecordList.size()>0){
+                for(ActivityRedPackRecordDTO redPackRecordDTO:redPackRecordList){
+                    configMessageService.addConfigMessage( AppType.ZHUANGXIU, redPackRecordDTO.getMemberId(), "0", "优惠券即将过期",DjConstants.PushMessage.RED_ABOUT_TO_EXPIRE, 3,null,null);
+                }
+            }
+        }catch (Exception e){
+            logger.error("发送优惠券过期消息失败",e);
+        }
     }
 
 

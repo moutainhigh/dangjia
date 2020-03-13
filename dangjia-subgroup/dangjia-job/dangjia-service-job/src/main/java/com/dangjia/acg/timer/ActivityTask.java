@@ -103,10 +103,10 @@ public class ActivityTask {
 
   /**
    * 提前三天检查将过期的优惠券，发通知给到业主
-   * 每天凌晨(24点)执行一次
+   * 每天凌晨(10点)执行一次
    */
 
-  @Scheduled(cron = "0 0 0 * * ?") //每天凌晨(24点执行一次)
+  @Scheduled(cron = "0 0 10 * * ?") //每天凌晨(24点执行一次)
 //  @Scheduled(cron = "0 0/5 * * * ?")//5分钟执行一次
 //  @Scheduled(cron = "0/30 * * * * ?")//30秒执行一次
   public void couponActivityRedPack() {

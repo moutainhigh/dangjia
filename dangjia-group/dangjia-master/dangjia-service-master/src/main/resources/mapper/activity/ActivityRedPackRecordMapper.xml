@@ -132,6 +132,23 @@
 
     </select>
 
+    <select id="queryActivityRedPackRecordThreeDayList" resultType="com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO">
+        SELECT
+            r.end_date,
+            DATE_FORMAT(NOW(), '%Y-%m-%d'),
+            DATE_FORMAT(DATE_ADD(NOW(),INTERVAL 3 DAY), '%Y-%m-%d'),
+            r.id,
+            r.member_id memberId
+        FROM
+           dj_activity_red_pack_record r
+        WHERE
+        r.member_id IS NOT NULL
+        AND r.business_order_number IS NULL
+      <![CDATA[
+        and r.end_date<= DATE_FORMAT(DATE_ADD(NOW(),INTERVAL 2 DAY), '%Y-%m-%d')
+        and r.end_date>= DATE_FORMAT(NOW(), '%Y-%m-%d') ]]>
+    </select>
+
     <select id="queryMyAticvityList" resultType="com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO">
         SELECT
             r.id,
