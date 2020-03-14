@@ -64,6 +64,7 @@ public class UserToKenAspect {
             }
             result = joinPoint.proceed();
         } catch (Throwable e) {
+            e.printStackTrace();
             return ServerResponse.createByErrorCodeMessage(ServerCode.WRONG_PARAM.getCode(), ServerCode.WRONG_PARAM.getDesc());
         }
         return result;
