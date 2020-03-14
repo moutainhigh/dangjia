@@ -51,6 +51,6 @@ public interface IMendDeliverMapper extends Mapper<MendDeliver> {
      * @param paramNodeKey
      * @return
      */
-    List<Map<String,Object>> queryRefundDeliverJobList(@Param("nodeCode") String nodeCode,@Param("queryRefundDeliverJobList") String paramNodeKey);
+    List<Map<String,Object>> queryRefundDeliverJobList(@Param("nodeCode") String nodeCode,@Param("paramNodeKey") String paramNodeKey);
 
 }
