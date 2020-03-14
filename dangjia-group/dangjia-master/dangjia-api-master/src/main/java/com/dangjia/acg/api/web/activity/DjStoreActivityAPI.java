@@ -168,4 +168,13 @@ public interface DjStoreActivityAPI {
     @ApiOperation(value = "检测拼团购是否拼团失败", notes = "检测拼团购是否拼团失败")
     void checkGroupPurchaseOrder();
 
+
+    @PostMapping("web/activity/participates/query")
+    @ApiOperation(value = "参与集福列表", notes = "参与集福列表")
+    ServerResponse queryStoreActivityParticipatesList(PageDTO pageDTO,  String storeActivityId);
+
+    @PostMapping("web/activity/support/query")
+    @ApiOperation(value = "参与集福助力列表", notes = "参与集福助力列表")
+    ServerResponse queryStoreActivitySupportList(PageDTO pageDTO,  String participateId);
+
 }
