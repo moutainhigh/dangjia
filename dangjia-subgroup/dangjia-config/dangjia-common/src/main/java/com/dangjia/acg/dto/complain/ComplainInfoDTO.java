@@ -16,6 +16,7 @@ public class ComplainInfoDTO {
     private List<String> imageURLList;//图片(全路径)
     private String rejectReason;//驳回原因
     private String houseId;//工地ID
+    private String workerTypeId;//工种ID
     private Integer status;//处理状态.-1:无。0:待处理。1.驳回。2.接受。
 
 }

@@ -61,7 +61,7 @@ public class DjStoreActivity extends BaseEntity {
     @Column(name = "activity_end_time")
     @Desc(value = "活动结束时间")
     @ApiModelProperty("活动结束时间")
-    private Date activityendTime;
+    private Date activityEndTime;
 
     @Column(name = "activity_description")
     @Desc(value = "活动说明")
