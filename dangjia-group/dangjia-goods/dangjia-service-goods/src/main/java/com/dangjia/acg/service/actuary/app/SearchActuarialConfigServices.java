@@ -132,6 +132,9 @@ public class SearchActuarialConfigServices {
                 ap.setImageSingle(StringTool.getImageSingle(ap.getImage(),address));//图一张
                 //查询单位
                 String unitId=ap.getUnit();
+                if(StringUtils.isNotBlank(ap.getStorefrontIcon())){
+                    ap.setStorefrontIcon(address+ap.getStorefrontIcon());
+                }
                 //查询单位
                 if(ap.getConvertQuality()!=null&&ap.getConvertQuality()>0){
                     unitId=ap.getConvertUnit();
