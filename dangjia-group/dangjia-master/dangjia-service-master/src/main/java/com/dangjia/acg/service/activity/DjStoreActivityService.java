@@ -1043,6 +1043,8 @@ public class DjStoreActivityService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+
     /**
      * 参与集福助力列表
      * @param pageDTO

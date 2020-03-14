@@ -208,4 +208,27 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 参与集福列表
+     * @param pageDTO
+     * @param storeActivityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryStoreActivityParticipatesList(PageDTO pageDTO,  String storeActivityId){
+        return djStoreActivityService.queryStoreActivityParticipatesList(pageDTO,storeActivityId);
+    }
+    /**
+     * 参与集福助力列表
+     * @param pageDTO
+     * @param participateId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryStoreActivitySupportList(PageDTO pageDTO,  String participateId){
+        return djStoreActivityService.queryStoreActivitySupportList(pageDTO,participateId);
+    }
 }
