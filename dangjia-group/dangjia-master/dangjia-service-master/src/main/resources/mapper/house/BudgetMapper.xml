@@ -11,7 +11,7 @@
 			dj_actuary_budget_material bw
 		WHERE  bw.house_id = #{houseId}
 		and product_type='2'
-	    and bw.delete_state = 3
+	    and bw.delete_state = 0
 	    and bw.worker_type_id = #{workerTypeId}
 	</select>
 
