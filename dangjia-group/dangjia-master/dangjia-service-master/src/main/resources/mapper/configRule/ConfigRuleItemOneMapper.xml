@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.configRule.IConfigRuleItemOneMapper">
+
+    <select id="getRuleItemOneData" resultType="com.dangjia.acg.model.config.DjConfigRuleItemOne">
+        SELECT
+        o.id,
+        IFNULL(o.module_id, #{moduleId}) moduleId,
+        IFNULL(o.batch_code, #{batchCodeTow}) batchCode,
+        o.type_id,
+        r.id rankId,
+        IFNULL(o.rule_field_name, #{fieldName}) ruleFieldName,
+        IFNULL(o.rule_field_value, '0') ruleFieldValue,
+        IFNULL(o.rule_field_code, #{fieldKey}) ruleFieldCode,
+        o.create_date createDate,
+        o.modify_date modifyDate,
+        o.data_status dataStatus
+        FROM
+        dj_config_rule_rank r
+        LEFT JOIN dj_config_rule_item_one o ON r.id = o.rank_id
+        AND o.module_id=#{moduleId} and o.rule_field_code = #{fieldKey}
+        <if test="null!=typeId and ''!=typeId">
+            AND o.type_id=#{typeId}
+        </if>
+
+        <if test="null!=batchCode and ''!=batchCode">
+            AND o.batch_code=#{batchCode}
+        </if>
+        ORDER BY o.create_date DESC LIMIT #{limit}
+    </select>
+
+    <select id="getRuleItemOneWorkerData" resultType="com.dangjia.acg.model.config.DjConfigRuleItemOne">
+        SELECT
+        o.id,
+        IFNULL(o.module_id, #{moduleId}) moduleId,
+        IFNULL(o.batch_code, #{batchCodeTow}) batchCode,
+        o.type_id,
+        r.id rankId,
+        r.name rankName,
+        IFNULL(o.rule_field_name, #{fieldName}) ruleFieldName,
+        IFNULL(o.rule_field_value, '0') ruleFieldValue,
+        IFNULL(o.rule_field_code, #{fieldKey}) ruleFieldCode,
+        o.create_date createDate,
+        o.modify_date modifyDate,
+        o.data_status dataStatus
+        FROM
+        dj_core_worker_type r
+        LEFT JOIN dj_config_rule_item_one o ON r.id = o.rank_id
+        AND o.module_id=#{moduleId}  and o.rule_field_code = #{fieldKey}
+        <if test="null!=batchCode and ''!=batchCode">
+            AND o.batch_code=#{batchCode}
+        </if>
+        WHERE
+        r.type != 7 and r.type != 5
+        AND r.type > 3
+        ORDER BY o.create_date DESC LIMIT #{limit}
+    </select>
+</mapper>
+

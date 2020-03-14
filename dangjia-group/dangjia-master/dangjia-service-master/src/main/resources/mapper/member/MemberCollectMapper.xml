@@ -14,7 +14,6 @@
         h.task_number as taskNumber,
         h.square,
         h.number,
-        h.style,
         h.designer_ok as designerOk,
         h.budget_ok as budgetOk,
         h.image,
@@ -43,17 +42,86 @@
         h.optional_label as optionalLabel
     </sql>
 
+    <!--房子收藏列表-->
     <select id="queryCollectHouse" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         <include refid="basic_h_columns"/>
         FROM
             `dj_member_collect` c
-        INNER JOIN dj_house h ON h.id = c.house_id
-        where 	c.data_status = 0
+        INNER JOIN dj_house h ON h.id = c.collect_id
+        where 	c.data_status = 0 and c.condition_type = 0
         <if test="memberId!=null and memberId!=''">
             AND c.member_id = #{memberId}
         </if>
         ORDER BY c.create_date DESC
+    </select>
+
+
+    <select id="queryRandomProduct" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        SELECT
+            bsp.id AS productId,
+            bsp.product_name AS productName,
+            bpt.id as productTemplateId,
+            bsp.image,
+            bsp.sell_price AS price,
+            bpt.unit_id AS unitId,
+            bpt.unit_name AS unitName
+        FROM
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt
+        WHERE
+            bsp.prod_template_id = bpt.id
+            AND bsp.city_id = #{cityId}
+        ORDER BY RAND() LIMIT #{limit}
+    </select>
+
+
+    <select id="queryRandomProductByCategoryId" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        SELECT
+            bsp.id AS productId,
+            bsp.product_name AS productName,
+            bpt.id as productTemplateId,
+            bsp.image,
+            bsp.sell_price AS price,
+            bpt.unit_id AS unitId,
+            bpt.unit_name AS unitName
+        FROM
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt
+        WHERE
+            bsp.prod_template_id = bpt.id
+        AND bpt.category_id = (
+            SELECT
+                t1.category_id
+            FROM
+                dj_basics_storefront_product t,
+                dj_basics_product_template t1
+            WHERE
+                t.prod_template_id = t1.id
+            AND t.id = #{storefrontProductId}
+        )
+        ORDER BY RAND() LIMIT #{limit}
+    </select>
+
+    <select id="queryCollectGood" resultType="com.dangjia.acg.dto.product.MemberCollectDTO">
+        SELECT
+            mc.id,
+            bsp.id as productId,
+            bsp.product_name as productName,
+            bsp.sell_price as sellPrice,
+            bsp.image as image,
+            bpt.unit_name,
+            bsp.adjusted_price as adjustedPrice,
+            bsp.modity_price_time as modityPriceTime
+        FROM
+            dj_member_collect mc,
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt
+        WHERE
+            mc.collect_id = bsp.id
+        AND bsp.prod_template_id = bpt.id
+        AND mc.condition_type = 1
+        AND mc.member_id=#{memberId}
     </select>
 
 </mapper>

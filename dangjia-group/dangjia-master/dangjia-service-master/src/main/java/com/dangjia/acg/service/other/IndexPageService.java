@@ -3,7 +3,6 @@ package com.dangjia.acg.service.other;
 import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
 import com.dangjia.acg.common.constants.Constants;
-import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -12,31 +11,25 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
-import com.dangjia.acg.dto.design.QuantityRoomDTO;
-import com.dangjia.acg.dto.house.ShareDTO;
 import com.dangjia.acg.dto.label.OptionalLabelDTO;
+import com.dangjia.acg.dto.label.OptionalLaelDetail;
 import com.dangjia.acg.dto.other.HouseDetailsDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.deliver.IOrderMapper;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.house.IModelingLayoutMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.label.OptionalLabelMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
-import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.ModelingLayout;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.dangjia.acg.modle.label.OptionalLabel;
-import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.house.HouseDistributionService;
+import com.dangjia.acg.service.label.OptionalLabelServices;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +70,8 @@ public class IndexPageService {
     private IHouseMapper iHouseMapper;
     @Autowired
     private HouseDistributionService houseDistributionService;
+    @Autowired
+    private OptionalLabelServices optionalLabelServices;
 
 
 
@@ -358,10 +353,10 @@ public class IndexPageService {
                 liangArr = house.getLiangDian().split(",");
             }
             List<String> dianList = new ArrayList<>();
-            if (!CommonUtil.isEmpty(house.getStyle())) {
-                dianList.add(house.getStyle());
-
-            }
+//            if (!CommonUtil.isEmpty(house.getStyle())) {
+//                dianList.add(house.getStyle());
+//
+//            }
             if (!CommonUtil.isEmpty(house.getLiangDian())) {
                 Collections.addAll(dianList, liangArr);
             }
@@ -406,10 +401,9 @@ public class IndexPageService {
                 liangArr = house.getLiangDian().split(",");
             }
             List<String> dianList = new ArrayList<>();
-            if (!CommonUtil.isEmpty(house.getStyle())) {
-                dianList.add(house.getStyle());
-
-            }
+//            if (!CommonUtil.isEmpty(house.getStyle())) {
+//                dianList.add(house.getStyle());
+//            }
             if (!CommonUtil.isEmpty(house.getLiangDian())) {
                 Collections.addAll(dianList, liangArr);
             }
@@ -468,33 +462,17 @@ public class IndexPageService {
             houseDetailsDTO.setMapList(mapList);
             houseDetailsDTO.setTotalPrice(totalPrice);
             if (!CommonUtil.isEmpty(house.getOptionalLabel())) {
-                List<OptionalLabelDTO> fieldValues = new ArrayList<>();
+                List<OptionalLaelDetail> fieldValues = new ArrayList<>();
                 String[] optionalLabel = house.getOptionalLabel().split(",");
-//                for (String s : optionalLabel) {
-//                    fieldValues.add(s);
-//                };
-                List<OptionalLabel> optionalLabels = optionalLabelMapper.selectAll();
+                example=new Example(OptionalLabel.class);
+                example.createCriteria().andEqualTo(OptionalLabel.DATA_STATUS,0)
+                        .andIsNull(OptionalLabel.PARENT_ID);
+                List<OptionalLabel> optionalLabels = optionalLabelMapper.selectByExample(example);
                 for (OptionalLabel label : optionalLabels) {
-                    OptionalLabelDTO optionalLabelDTO = new OptionalLabelDTO();
-                    optionalLabelDTO.setId(label.getId());
-                    optionalLabelDTO.setLabelName(label.getLabelName());
-                    optionalLabelDTO.setStatus("1");
-                    for (String s : optionalLabel) {
-                        if (s.equals(label.getId())) {
-                            optionalLabelDTO.setStatus("0");
-                            break;
-                        }
-                    }
-                    fieldValues.add(optionalLabelDTO);
+                    OptionalLaelDetail optionalLaelDetail =
+                            optionalLabelServices.queryOptionalLabelById1(label.getId(),optionalLabel);
+                    fieldValues.add(optionalLaelDetail);
                 }
-//                example = new Example(OptionalLabel.class);
-//                example.createCriteria().andIn(OptionalLabel.ID,fieldValues);
-////                example.orderBy(HouseFlow.WORKER_TYPE);
-//                List<OptionalLabel> optionalLabels=optionalLabelMapper.selectByExample(example);
-//                for (int i = 0; i < optionalLabels.size(); i++) {
-//                    fieldValues.remove(i);
-//                    fieldValues.add(i,optionalLabels.get(i).getLabelName());
-//                }
                 houseDetailsDTO.setLabelList(fieldValues);
             }
             return ServerResponse.createBySuccess("查询成功", houseDetailsDTO);

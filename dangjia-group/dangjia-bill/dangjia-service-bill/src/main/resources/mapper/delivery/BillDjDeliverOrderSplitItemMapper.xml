@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper">
+
+
+    <!-- 查询退货退款列表详情 -->
+    <select id="queryReturnRefundOrderItemList" resultType="com.dangjia.acg.dto.refund.RefundOrderItemDTO">
+
+        SELECT
+        t.order_split_id orderSplitId,
+        t.product_id productId,
+        t.id orderSplitItemId,
+        t3.id orderItemId,
+        t.storefront_id storefrontId,
+        t.product_name productName,
+        t.product_sn productSn,
+        t.product_type productType,
+        t.price price,
+        t.unit_name unitName,
+        IFNULL(t.image, t1.image) image,
+        t.shop_count shopCount,
+        IFNULL(t.ask_count, 0) askCount,
+        IFNULL(t.receive, 0) receive,
+        IFNULL(t.receive, 0)-IFNULL(t.return_count,0)  surplusCount,
+        IFNULL(t3.stevedorage_cost, 0) stevedorageCost,
+        IFNULL(t3.transportation_cost, 0) transportationCost,
+        t1.prod_template_id productTemplateId,
+        t1.is_upstairs_cost isUpstairsCost,
+        IFNULL(t1.move_cost, 0) moveCost
+        FROM
+        dj_deliver_order_split_item t
+        LEFT JOIN  dj_deliver_order_item t3 on t.order_item_id=t3.id
+        INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
+        INNER JOIN dj_deliver_split_deliver t2 on t.split_deliver_id=t2.id
+        INNER JOIN dj_basics_product_template t4 on t1.prod_template_id=t4.id
+        INNER JOIN dj_basics_goods t5 on t4.goods_id=t5.id
+        WHERE  t.receive>IFNULL(t.return_count,0)
+        and t2.shipping_state in(2,4,5,7,8)
+        and t.is_reservation_deliver = '1'
+        and t5.sales='0'
+        and t.order_split_id=#{orderSplitId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (t.product_name LIKE CONCAT('%',#{searchKey},'%')
+            or t4.number LIKE CONCAT('%',#{searchKey},'%'))
+        </if>
+    </select>
+
+    <select id="queryReturnRefundOrderItemInfo" resultType="com.dangjia.acg.dto.refund.RefundOrderItemDTO">
+
+        SELECT
+        t.order_split_id orderSplitId,
+        t.product_id productId,
+        t.id orderSplitItemId,
+        t3.id orderItemId,
+        t.storefront_id storefrontId,
+        t.product_name productName,
+        t.product_sn productSn,
+        t.product_type productType,
+        t.price price,
+        t.unit_name unitName,
+        IFNULL(t.image, t1.image) image,
+        t.shop_count shopCount,
+        IFNULL(t.ask_count, 0) askCount,
+        IFNULL(t.receive, 0) receive,
+        IFNULL(t.receive, 0)-IFNULL(t.return_count,0)  surplusCount,
+        IFNULL(t3.stevedorage_cost, 0) stevedorageCost,
+        IFNULL(t3.transportation_cost, 0) transportationCost,
+        t1.prod_template_id productTemplateId,
+        t1.is_upstairs_cost isUpstairsCost,
+        IFNULL(t1.move_cost, 0) moveCost,
+        t.discount_price discountPrice
+        FROM
+          dj_deliver_order_split_item t
+        LEFT JOIN  dj_deliver_order_item t3 on t.order_item_id=t3.id
+        INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
+        INNER JOIN dj_deliver_split_deliver t2 on t.split_deliver_id=t2.id
+        INNER JOIN dj_basics_product_template t4 on t1.prod_template_id=t4.id
+        INNER JOIN dj_basics_goods t5 on t4.goods_id=t5.id
+        WHERE  t.receive>IFNULL(t.return_count,0)
+         and t2.shipping_state in(2,4,5,7,8)
+         and t.is_reservation_deliver = '1'
+         and t5.sales='0'
+         and t.id=#{orderSplitItemId}
+         limit 1
+    </select>
+
+    <select id="querySplitDeliverId" resultType="java.lang.String">
+        SELECT
+            b.split_deliver_id
+        FROM
+            dj_deliver_order_item a,
+            dj_deliver_order_split_item b
+        WHERE
+            FIND_IN_SET(a.id, b.order_item_id)
+        AND a.order_id = #{orderId}
+        GROUP BY b.split_deliver_id
+    </select>
+
+
+</mapper>

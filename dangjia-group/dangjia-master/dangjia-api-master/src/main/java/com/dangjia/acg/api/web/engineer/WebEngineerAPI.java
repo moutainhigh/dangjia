@@ -31,7 +31,8 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/changePayed")
     @ApiOperation(value = "已支付换工匠", notes = "已支付换工匠")
-    ServerResponse changePayed(@RequestParam("houseWorkerId") String houseWorkerId,
+    ServerResponse changePayed(@RequestParam("userToken") String userToken,
+                               @RequestParam("houseWorkerId") String houseWorkerId,
                                @RequestParam("workerId") String workerId);
 
     @PostMapping(value = "web/engineer/changeWorker")
@@ -96,7 +97,14 @@ public interface WebEngineerAPI {
     ServerResponse artisanList(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("name") String name,
                                @RequestParam("workerTypeId") String workerTypeId,
-                               @RequestParam("type") String type, @RequestParam("checkType") String checkType ,
+                               @RequestParam("type") String type,
+                               @RequestParam("checkType") String checkType ,
+                               @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping(value = "web/engineer/searchWorkerAllList")
+    @ApiOperation(value = "人工定责--查询所有工匠列表", notes = "人工定责--查询所有工匠列表")
+    ServerResponse searchWorkerAllList(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("searckKey") String searckKey ,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping(value = "web/engineer/setMemberStyle")
@@ -108,8 +116,36 @@ public interface WebEngineerAPI {
     ServerResponse getMemberStyles(@RequestParam("request") HttpServletRequest request,@RequestParam("mamberId")  String mamberId);
     @PostMapping(value = "web/engineer/getWareHouse")
     @ApiOperation(value = "仓库列表", notes = "仓库列表")
-    ServerResponse getWareHouse(@RequestParam("houseId") String houseId,
+    ServerResponse getWareHouse(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("searckKey") String searckKey ,
+                                @RequestParam("cityId") String cityId,
+                                @RequestParam("houseId") String houseId,
                                @RequestParam("pageDTO") PageDTO pageDTO);
+
+    /**
+     * 店铺--业主仓库列表（店铺汇总）
+     * @param request
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param addressId 地址ID
+     * @param storefrontId 店铺ID
+     * @param pageDTO 分页
+     * @return
+     */
+    @PostMapping(value = "web/engineer/getStorefrontWareHouse")
+    @ApiOperation(value = "业主仓库列表（店铺汇总）", notes = "仓库列表（店铺汇总）")
+    ServerResponse getStorefrontWareHouse(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("cityId") String cityId,
+                                @RequestParam("houseId") String houseId,
+                                @RequestParam("addressId") String addressId,
+                                @RequestParam("storefrontId") String storefrontId,
+                                @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @GetMapping("/web/engineer/exportStorefrontWareHouse")
+    @ApiOperation(value = "店铺--导出仓库", notes = "店铺--导出仓库", produces = "*/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream")
+    ServerResponse exportStorefrontWareHouse(@RequestParam("response") HttpServletResponse response, @RequestParam("houseId") String houseId,@RequestParam("addressId") String addressId,
+                                             @RequestParam("storefrontId") String storefrontId,@RequestParam("userName") String userName,@RequestParam("address") String address);
+
 
     @GetMapping("/web/engineer/exportWareHouse")
     @ApiOperation(value = "导出仓库", notes = "导出仓库", produces = "*/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream")

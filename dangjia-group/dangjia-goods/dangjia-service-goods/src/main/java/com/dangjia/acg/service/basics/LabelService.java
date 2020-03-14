@@ -39,14 +39,11 @@ public class LabelService {
     protected static final Logger LOG = LoggerFactory.getLogger(LabelService.class);
 
     //查询所有的标签
-    public ServerResponse<PageInfo> getAllLabel(PageDTO pageDTO) {
+    public ServerResponse<PageInfo> getAllLabel(PageDTO pageDTO,String cityId) {
         try {
-            if (pageDTO == null) {
-                pageDTO = new PageDTO();
-            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Map<String, Object>> mapList = new ArrayList<>();
-            List<Label> labelList = iLabelMapper.getLabel();
+            List<Label> labelList = iLabelMapper.getLabel(cityId);
             for (Label label : labelList) {
                 Map<String, Object> map = new HashMap<>();
                 if (!StringUtils.isNotBlank(label.getId())) {
@@ -68,13 +65,14 @@ public class LabelService {
     }
 
     //新增商品标签
-    public ServerResponse insert(String labelName) {
+    public ServerResponse insert(String labelName,String cityId) {
         try {
             if (iLabelMapper.getLabelByName(labelName).size() > 0)
                 return ServerResponse.createByErrorMessage("标签名称已存在");
 
             Label label = new Label();
             label.setName(labelName);
+            label.setCityId(cityId);
             iLabelMapper.insert(label);
             return ServerResponse.createBySuccessMessage("新增成功");
         } catch (Exception e) {
@@ -84,7 +82,7 @@ public class LabelService {
     }
 
     //修改商品标签
-    public ServerResponse update(String labelId, String labelName) {
+    public ServerResponse update(String labelId, String labelName,String cityId) {
         try {
             Label oldLabel = iLabelMapper.selectByPrimaryKey(labelId);
             if (oldLabel == null)
@@ -95,6 +93,7 @@ public class LabelService {
                     return ServerResponse.createByErrorMessage("标签名称已存在");
             }
 //            oldLabel.setId(labelId);
+            oldLabel.setCityId(cityId);
             oldLabel.setName(labelName);
             oldLabel.setModifyDate(new Date());
             iLabelMapper.updateByPrimaryKeySelective(oldLabel);

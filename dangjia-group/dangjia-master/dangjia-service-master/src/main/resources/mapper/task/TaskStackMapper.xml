@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.task.IMasterTaskStackMapper">
+
+
+    <select id="selectTaskStackInfo" resultType="com.dangjia.acg.dto.core.Task">
+        SELECT
+            t.id taskStackId,
+            t.create_date date,
+            t.member_id memberId,
+            t.NAME,
+            t.house_id houseId,
+            t.image,
+            t.type,
+            t.DATA taskId,
+            t.Data htmlUrl
+        FROM
+            dj_task_stack t
+        where t.state = 0
+        and t.house_id=#{houseId}
+        and t.member_id=#{memberId}
+	</select>
+    <select id="selectTaskStackInfoByType" resultType="com.dangjia.acg.dto.core.Task">
+        SELECT
+            t.id taskStackId,
+            t.create_date date,
+            t.member_id memberId,
+            t.NAME,
+            t.house_id houseId,
+            t.image,
+            t.type,
+            t.DATA taskId,
+            t.Data htmlUrl
+        FROM
+            dj_task_stack t
+        where t.state = 0
+        and t.house_id=#{houseId}
+        and t.type=#{type}
+	</select>
+
+</mapper>

@@ -52,7 +52,7 @@
         SELECT
 		<include refid="all_columns" />
         from dj_basics_goods_group
-        where 1=1
+        where 1=1 and city_id = #{cityId}
 		<if test="name!=null and name!=''">
 			and
 			name like CONCAT('%',#{name},'%')
@@ -69,7 +69,7 @@
 		SELECT
 		<include refid="all_columns" />
 		from dj_basics_goods_group
-		where 1=1
+		where 1=1 and city_id = #{cityId}
 		<if test="name!=null and name!=''">
 			and
 			name =#{name}
@@ -113,7 +113,7 @@
 	<!-- 根据商品id查询所有货品 -->
 	<select id="getProductList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
 		SELECT id,name 
-		FROM dj_basics_product
+		FROM dj_basics_product_template
 		where goods_id=#{id}
 		ORDER BY create_date desc
 	</select>
@@ -122,7 +122,7 @@
 		SELECT
 		<include refid="all_Base_columns"/>
 		FROM dj_basics_group_link
-		where group_id=#{groupId}
+		where group_id=#{groupId} and city_id = #{cityId}
 		ORDER BY create_date desc
 	</select>
 	<!-- 根据关联组id查询关联货品关系 多返回了一个 unitName -->
@@ -143,7 +143,7 @@
 		 p.unit_name as unitName,
 		 p.convert_unit as convertUnit,
 		 unit.name as convertUnitName
-		FROM dj_basics_group_link as g, dj_basics_product as p, dj_basics_unit as unit
+		FROM dj_basics_group_link as g, dj_basics_product_template as p, dj_basics_unit as unit
 		where group_id= #{groupId} and p.id = g.product_id and unit.id = p.convert_unit
 		ORDER BY g.create_date desc
 	</select>

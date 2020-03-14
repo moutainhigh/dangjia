@@ -47,7 +47,7 @@ public class GatewayApplication {
 	@Bean
 	MultipartConfigElement multipartConfigElement() {
 		MultipartConfigFactory factory = new MultipartConfigFactory();
-		factory.setLocation("/data/temporary/");
+		factory.setLocation("/data/dangjia/temporary/");
 		return factory.createMultipartConfig();
 	}
 }

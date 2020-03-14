@@ -36,7 +36,7 @@ public class HouseDataController implements HouseDataAPI {
     @Override
     @ApiMethod
     public ServerResponse workerGoodsAll(String cityId, String workerTypeId, PageDTO pageDTO) {
-        return fillWorkerService.repairBudgetWorker(1, workerTypeId, null, null, pageDTO);
+        return fillWorkerService.repairBudgetWorker(1, workerTypeId, null,  pageDTO,cityId,null);
     }
 
     /**
@@ -52,11 +52,11 @@ public class HouseDataController implements HouseDataAPI {
     /**
      * 人工详情
      */
-    @Override
+   /* @Override
     @ApiMethod
     public ServerResponse workerGoodsDetail(String cityId, String workerGoodsId) {
         return actuaryOperationService.getCommo(workerGoodsId, 1);//人工详情
-    }
+    }*/
 
     /**
      * 查询工序人工
@@ -64,17 +64,17 @@ public class HouseDataController implements HouseDataAPI {
     @Override
     @ApiMethod
     public ServerResponse getBudgetWorker(String cityId, String houseId, String workerTypeId, PageDTO pageDTO) {
-        return fillWorkerService.repairBudgetWorker(0, workerTypeId, houseId, "", pageDTO);
+        return fillWorkerService.repairBudgetWorker(0, workerTypeId, houseId,  pageDTO,cityId,"1");
     }
 
     /**
      * 材料详情
      */
-    @Override
+   /* @Override
     @ApiMethod
     public ServerResponse goodsDetail(String cityId, String productId) {
         return actuaryOperationService.getCommo(productId, 2);//材料详情
-    }
+    }*/
 
     /**
      * 查询工序材料

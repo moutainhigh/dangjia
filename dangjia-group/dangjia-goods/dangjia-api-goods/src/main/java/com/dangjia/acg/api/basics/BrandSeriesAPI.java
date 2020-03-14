@@ -28,7 +28,8 @@ public interface BrandSeriesAPI {
     @PostMapping("/basics/brandSeries/getAllBrandExplain")
     @ApiOperation(value = "查询所有", notes = "查询所有")
     ServerResponse<PageInfo> getAllBrandExplain(@RequestParam("request") HttpServletRequest request,
-                                                @RequestParam("pageDTO") PageDTO pageDTO);
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                                @RequestParam("cityId") String cityId);
 
     /**
      * 修改
@@ -41,7 +42,8 @@ public interface BrandSeriesAPI {
     ServerResponse updateBrandExplain(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("id") String id,
                                       @RequestParam("name") String name,
-                                      @RequestParam("content") String content);
+                                      @RequestParam("content") String content,
+                                      @RequestParam("cityId") String cityId);
 
     /**
      * 新增
@@ -54,7 +56,8 @@ public interface BrandSeriesAPI {
     ServerResponse insetBrandExplain(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("name") String name,
                                      @RequestParam("content") String content,
-                                     @RequestParam("brandId") String brandId);
+                                     @RequestParam("brandId") String brandId,
+                                     @RequestParam("cityId") String cityId);
 
     /**
      * 删除

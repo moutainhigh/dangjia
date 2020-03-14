@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.deliver;
 
 import com.dangjia.acg.api.app.deliver.SplitDeliverAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
@@ -27,8 +28,8 @@ public class SplitDeliverController implements SplitDeliverAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse partSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList) {
-        return splitDeliverService.partSplitDeliver(userToken, splitDeliverId, image, splitItemList);
+    public ServerResponse partSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList,Integer userRole) {
+        return splitDeliverService.partSplitDeliver(userToken, splitDeliverId, image, splitItemList,userRole);
     }
 
     /**
@@ -36,11 +37,11 @@ public class SplitDeliverController implements SplitDeliverAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse affirmSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList) {
+    public ServerResponse affirmSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList,Integer userRole) {
         if (CommonUtil.isEmpty(splitItemList)) {
-            return splitDeliverService.affirmSplitDeliver(userToken, splitDeliverId, image);
+            return splitDeliverService.affirmSplitDeliver(userToken, splitDeliverId, image,userRole);
         } else {//IOS接口调错  此方法为补救
-            return splitDeliverService.partSplitDeliver(userToken, splitDeliverId, image, splitItemList);
+            return splitDeliverService.partSplitDeliver(userToken, splitDeliverId, image, splitItemList,userRole);
         }
     }
 
@@ -76,7 +77,20 @@ public class SplitDeliverController implements SplitDeliverAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse splitDeliverList(String houseId, Integer shipState) {
-        return splitDeliverService.splitDeliverList(houseId, shipState);
+    public ServerResponse splitDeliverList(PageDTO pageDTO, String houseId, Integer shipState) {
+        return splitDeliverService.splitDeliverList( pageDTO,houseId, shipState);
     }
+
+    /**
+     * 确认安装
+     * @param userToken
+     * @param splitDeliverId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse confirmInstallation( String userToken,String splitDeliverId) {
+        return splitDeliverService.confirmInstallation(userToken,splitDeliverId);
+    }
+
 }

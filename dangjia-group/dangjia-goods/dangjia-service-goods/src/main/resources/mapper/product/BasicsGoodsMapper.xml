@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.IBasicsGoodsMapper">
+
+    <sql id="all_columns">
+		id,
+		NAME,
+		category_id as categoryId,
+		type,
+		buy,
+		sales,
+		other_name AS otherName,
+		unit_id as unitId,
+		create_date,
+		modify_date,
+		is_influe_decoration_progress as isInflueDecorationProgress,
+		irreversible_reasons as irreversibleReasons,
+		istop,
+		brand_id as brandId,
+		is_elevator_fee as isElevatorFee,
+		indicative_price as indicativePrice,
+		label_ids as  labelIds,
+		is_reservation_deliver as isReservationDeliver,
+		attribute_id_arr attributeIdArr,
+		housekeeper_acceptance housekeeperAcceptance,
+		technology_ids technologyIds
+	</sql>
+
+    <sql id="new_columns">
+		id,
+		NAME,
+		category_id as categoryId,
+		type,
+		buy,
+		sales,
+		other_name AS otherName,
+		unit_id as unitId,
+		create_date,
+		modify_date,
+		is_influe_decoration_progress as isInflueDecorationProgress,
+		irreversible_reasons as irreversibleReasons,
+		istop,
+		brand_id as brandId,
+		is_elevator_fee as isElevatorFee,
+		indicative_price as indicativePrice,
+		label_ids as  labelIds,
+		is_reservation_deliver as isReservationDeliver,
+		attribute_id_arr attributeIdArr,
+		housekeeper_acceptance housekeeperAcceptance,
+		technology_ids technologyIds
+	</sql>
+    <!-- 删除对象 -->
+    <delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM dj_basics_goods
+		WHERE id=#{id}
+	</delete>
+    <!-- 查询所有 -->
+    <select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_goods
+        <if test="category_id!=null">
+            where
+            category_id=#{categoryId}
+            and city_id=#{cityId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+    <!-- 根据id查询属性对象 -->
+    <select id="queryById" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_goods
+        where
+        id =#{id}
+        ORDER BY create_date desc
+    </select>
+
+    <select id="getActuarialGoodsListByCategoryId" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+        SELECT
+            t3.id ,
+            t3.NAME ,
+            t3.category_id categoryId
+        FROM
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2,
+            dj_basics_goods t3
+        WHERE
+            t1.prod_template_id = t2.id
+        AND t2.goods_id = t3.id
+        AND t3.category_id = #{categoryId}
+        and t1.is_shelf_status='1'
+        and t1.data_status= 0
+        and t2.city_id=#{cityId}
+        GROUP BY
+            t3.id,
+            t3.NAME,
+            t3.category_id
+    </select>
+
+    <!-- 根据name查询属性对象 -->
+    <select id="queryByName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_goods
+        where data_status = 0
+        AND name LIKE CONCAT('%',#{name},'%')
+        ORDER BY create_date desc
+    </select>
+
+
+    <!-- 根据类别id查询商品对象 -->
+    <select id="queryByCategoryId" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_goods
+        where category_id=#{categoryId}
+        <if test="cityId!=null">
+            and city_id=#{cityId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+
+    <!-- 查询某个分类的商品 模糊name -->
+    <select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+        SELECT
+        id,
+        NAME,
+        category_id as categoryId,
+        type,
+        buy,
+        sales,
+        other_name AS otherName,
+        unit_id as unitId,
+        create_date,
+        modify_date,
+        is_influe_decoration_progress as isInflueDecorationProgress,
+        irreversible_reasons as irreversibleReasons,
+        istop,
+        brand_id as brandId,
+        is_elevator_fee as isElevatorFee,
+        indicative_price as indicativePrice,
+        label_ids as  labelIds,
+        is_reservation_deliver as isReservationDeliver,
+        attribute_id_arr attributeIdArr
+        FROM dj_basics_goods bg
+        where 1=1 and city_id=#{cityId}
+        <if test="categoryId!=null and categoryId!=''">
+            and bg.category_id=#{categoryId}
+        </if>
+        <if test="name!=null and name!=''">
+            AND (
+            bp.`name` LIKE CONCAT('%',#{name}, '%' )
+            OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
+            or exists (select 1 from dj_basics_product_template t1 where t1.name like CONCAT('%',#{name}, '%'))
+            )
+        </if>
+        GROUP BY bg.id
+    </select>
+
+
+</mapper>

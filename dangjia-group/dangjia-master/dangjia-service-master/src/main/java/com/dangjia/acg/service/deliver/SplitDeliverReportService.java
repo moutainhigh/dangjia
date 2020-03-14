@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.deliver;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -7,12 +9,17 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO;
 import com.dangjia.acg.dto.deliver.SplitReportSupplierDTO;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
+import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -23,15 +30,40 @@ import java.util.List;
 @Service
 public class SplitDeliverReportService {
 
+    private static Logger logger = LoggerFactory.getLogger(SplitDeliverReportService.class);
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private RedisClient redisClient;
 
-    public ServerResponse getSplitReportSuppliers(String houseId){
-        List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getSplitReportSuppliers(houseId);
+    public ServerResponse getSplitReportSuppliers(HttpServletRequest request, String houseId){
+        String userID = request.getParameter(Constants.USERID);
+        //通过缓存查询店铺信息
+        StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,StorefrontDTO.class);
+
+        List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getSplitReportSuppliers(houseId,storefront.getId());
         return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);
+    }
+
+
+    /**
+     * 根据指定地址查询对应的供应商信息
+     * @param request
+     * @param addressId
+     * @param storefrontId
+     * @return
+     */
+    public ServerResponse getReportAdressSuppliers(HttpServletRequest request, String addressId,String storefrontId){
+        try{
+            List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getReportAdressSuppliers(addressId,storefrontId);
+            return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+        }
+        return ServerResponse.createByErrorMessage("查询失败");
     }
 
     public ServerResponse getSplitReportDeliverOrders(String houseId,String supplierId){

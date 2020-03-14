@@ -23,8 +23,38 @@ public class MendWorkerController implements MendWorkerAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse repairBudgetWorker(HttpServletRequest request, Integer type, String workerTypeId, String houseId, String name,
-                                             PageDTO pageDTO) {
-        return mendWorkerService.repairBudgetWorker(type, workerTypeId, houseId, name, pageDTO);
+    public ServerResponse repairBudgetWorker(HttpServletRequest request, Integer type, String workerTypeId, String houseId,
+                                             PageDTO pageDTO,String cityId) {
+        return mendWorkerService.repairBudgetWorker(type, workerTypeId, houseId, pageDTO,cityId,"3");
     }
+
+    /**
+     *  查询符合条件的人工商品大类
+     * @param request
+     * @param workerId
+     * @param cityId
+     * @return
+     */
+   /* @Override
+    @ApiMethod
+    public ServerResponse getWorkerProductCategoryList(HttpServletRequest request, String workerId,String cityId){
+        return mendWorkerService.getWorkerProductCategoryList(workerId,cityId);
+    }*/
+
+
+    /**
+     * 查询符合条件的人工商品
+     * @param request
+     * @param userToken
+     * @param searchKey
+     * @param pageDTO
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getWorkerProductList(HttpServletRequest request,String userToken,String houseId,String searchKey,PageDTO pageDTO,String cityId){
+        return mendWorkerService.getWorkerProductList(userToken,houseId,searchKey,pageDTO,cityId);
+    }
+
 }

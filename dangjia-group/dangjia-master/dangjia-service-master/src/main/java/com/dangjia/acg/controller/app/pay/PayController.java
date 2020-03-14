@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.pay;
 
 import com.dangjia.acg.api.app.pay.PayAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.pay.PayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,5 +31,11 @@ public class PayController implements PayAPI {
     @ApiMethod
     public void weixinAsynchronous(HttpServletRequest request, HttpServletResponse response){
         payService.weixinAsynchronous(request,response);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getPayURL(String businessOrderNumber){
+       return payService.getPayURL(businessOrderNumber);
     }
 }

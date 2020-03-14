@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.activity.DjStoreActivityMapper">
+
+    <select id="queryActivitiesByStorefront" resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
+        SELECT
+            b.id AS storeParticipateActivitiesId,
+            a.id,
+            a.activity_type AS activityType,
+            a.state,
+            if(b.store_activity_id IS NULL OR b.store_activity_id="",0,b.registration_status) AS registrationStatus
+        FROM
+            dj_store_activity a
+        LEFT JOIN dj_store_participate_activities b ON a.id = b.store_activity_id
+        AND b.storefront_id = #{storefrontId}
+        WHERE
+            a.activity_type = #{activityType}
+            ORDER BY a.create_date
+    </select>
+
+    <select id="queryActivitiesSessionByStorefront"
+            resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
+        SELECT
+            c.id AS storeParticipateActivitiesId,
+            a.id AS storeActivityId,
+            b.id AS activitySessionId,
+            b.session,
+            d.name AS city,
+            a.activity_start_time AS activityStartTime,
+            a.activity_end_time AS activityEndTime,
+            a.registration_start_time AS registrationStartTime,
+            a.registration_end_time AS registrationEndTime,
+            b.session_end_time AS sessionEndTime,
+            b.session_start_time AS sessionStartTime,
+            IF (
+                c.store_activity_id IS NULL
+                OR c.store_activity_id = "",
+                0,
+                c.registration_status
+            ) AS registrationStatus
+        FROM
+            dj_store_activity a
+        INNER JOIN dj_activity_session b ON a.id = b.store_activity_id
+        LEFT JOIN dj_store_participate_activities c ON c.activity_session_id=b.id
+        AND c.storefront_id =#{storefrontId}
+        INNER JOIN dj_other_city d ON d.id = a.city_id
+        WHERE
+          a.id =#{id}
+          ORDER BY b.session asc
+    </select>
+
+    <select id="queryActivitiesOrSessionById" resultType="com.dangjia.acg.dto.activity.DjStoreActivityDTO">
+        SELECT
+            a.id as storeActivityId,
+            a.activity_start_time AS activityStartTime,
+            a.activity_end_time AS activityEndTime,
+            a.registration_start_time AS registrationStartTime,
+            a.registration_end_time AS registrationEndTime,
+            c.`name` AS city,
+            a.activity_description AS activityDescription,
+            a.cycle_purchasing AS cyclePurchasing,
+            d.id AS storeParticipateActivitiesId
+            <if test="activityType==1">
+                ,b.id as activitySessionId
+            </if>
+        FROM
+            dj_store_activity a
+            <if test="activityType==1">
+                INNER JOIN dj_activity_session b
+                ON a.id = b.store_activity_id
+            </if>
+            INNER JOIN dj_other_city c
+            ON c.id=a.city_id
+            LEFT JOIN dj_store_participate_activities d
+            ON a.id=d.store_activity_id
+        WHERE 1=1
+        <choose>
+            <when test="activityType==1">
+                AND b.id=#{id}
+            </when>
+            <otherwise>
+                AND a.id=#{id}
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="querySpellDeals" resultType="java.util.Map">
+        SELECT
+            a.id AS orderId,
+            a.order_pay_time AS orderPayTime,
+            c.head,
+            (
+                b.spell_group - (
+                    SELECT
+                        COUNT(0)+1
+                    FROM
+                        dj_deliver_order d
+                    WHERE
+                        d.order_source = 6
+                    AND d.order_status = 9
+                    AND d.parent_order_id = a.id
+                )
+            ) AS shortPeople
+        FROM
+            dj_deliver_order a
+        INNER JOIN dj_store_activity b ON a.store_activity_id = b.id
+        INNER JOIN dj_member c ON a.member_id = c.id
+        WHERE
+            a.store_activity_id IS NOT NULL
+        AND a.order_source = 6
+        AND a.order_status = 9
+        AND parent_order_id IS NULL
+        AND a.store_activity_product_id = #{storeActivityProductId}
+        ORDER BY a.order_pay_time asc limit 10
+    </select>
+</mapper>

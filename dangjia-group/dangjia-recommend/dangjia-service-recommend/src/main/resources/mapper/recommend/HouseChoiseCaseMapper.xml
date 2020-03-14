@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.recommend.HouseChoiceCaseMapper">
+
+    <!-- 查询列表 -->
+    <select id="queryHouseChoiceCaseList" resultType="com.dangjia.acg.modle.house.HouseChoiceCase">
+        SELECT
+        id
+        , title
+        , image
+        FROM
+        dj_core_house_choice_case
+        WHERE
+        data_status = 0
+        <if test="title != null and title != ''">
+            AND `title` LIKE CONCAT('%',#{title},'%')
+        </if>
+    </select>
+
+</mapper>
+

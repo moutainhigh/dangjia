@@ -48,37 +48,7 @@
 		name
 	</sql>
 
-    <!-- 查询所有顶级分类 -->
-	<select id="getParentTopList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
-		SELECT id,name 
-		FROM dj_basics_goods_category 
-		where parent_id=1
-		ORDER BY create_date desc
-	</select>
-	
-	<!-- 查询所有子分类 -->
-	<select id="getChildList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
-		SELECT id,name 
-		FROM dj_basics_goods_category 
-		where parent_id=#{id}
-		ORDER BY create_date desc
-	</select>
-	
-	<!-- 根据分类id查询所有商品 -->
-	<select id="getGoodsList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
-		SELECT id,name 
-		FROM dj_basics_goods
-		where category_id=#{id}
-		ORDER BY create_date desc
-	</select>
-	
-	<!-- 根据商品id查询所有货品 -->
-	<select id="getProductList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
-		SELECT id,name 
-		FROM dj_basics_product
-		where goods_id=#{id}
-		ORDER BY create_date desc
-	</select>
+
 	
 	<!-- 新增关联组和货品关系-->
 	<insert id="addGroupLink" parameterType="com.dangjia.acg.modle.basics.GroupLink">
@@ -93,7 +63,8 @@
 		state,
 		is_switch,
 		create_date,
-		modify_date
+		modify_date,
+		city_id
 		)
 		VALUES (
 		#{id},
@@ -106,7 +77,8 @@
 		#{state},
 		#{isSwitch},
 		SYSDATE(),
-		SYSDATE()
+		SYSDATE(),
+		#{cityId}
 		)
 	</insert>
 	<!-- 根据关联组id删除货品关联关系 -->
@@ -150,7 +122,7 @@
 		 g.create_date as createDate,
 		 g.modify_date as modifyDate,
 		 p.unit_name as unitName
-		FROM dj_basics_group_link as g, dj_basics_product as p
+		FROM dj_basics_group_link as g, dj_basics_product_template as p
 		where group_id= #{groupId} and p.id = g.product_id
 		ORDER BY g.create_date desc
 	</select>
@@ -184,6 +156,7 @@
 		FROM dj_basics_group_link
 		where group_id=#{groupId}
 		and product_id=#{productId}
+		and city_id = #{cityId}
 		ORDER BY create_date desc
 	</select>
 

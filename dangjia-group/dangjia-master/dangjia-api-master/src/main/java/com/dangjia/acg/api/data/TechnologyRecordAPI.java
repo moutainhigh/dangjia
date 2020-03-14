@@ -1,7 +1,11 @@
 package com.dangjia.acg.api.data;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.deliver.OrderItemDTO;
+import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.Warehouse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,4 +55,11 @@ public interface TechnologyRecordAPI {
     @ApiOperation(value = "查仓库", notes = "查仓库")
     ServerResponse getByProductId(@RequestParam("productId") String productId,
                              @RequestParam("houseId") String houseId);
+
+    @PostMapping("/data/technologyRecord/getAllProductListByhouseMemberId")
+    @ApiOperation(value = "查询当前工匠在当前房子上的所有已购买材料", notes = "查询当前工匠在当前房子上的所有已购买材料")
+    ServerResponse getAllProductListByhouseMemberId(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("houseId") String houseId,
+                                                    @RequestParam("userToken") String userToken,
+                                                    @RequestParam("searchKey") String searchKey);
 }

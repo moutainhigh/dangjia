@@ -27,19 +27,19 @@ public class ClassificationController implements ClassificationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getGoodsCategoryList(HttpServletRequest request) {
-        return classificationService.getGoodsCategoryList();
+    public ServerResponse getGoodsCategoryList(HttpServletRequest request,String cityId) {
+        return classificationService.getGoodsCategoryList(cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getProductList(HttpServletRequest request, PageDTO pageDTO, String categoryId) {
-        return classificationService.getProductList(pageDTO, categoryId);
+    public ServerResponse getProductList(HttpServletRequest request, PageDTO pageDTO, String categoryId,String cityId) {
+        return classificationService.getProductList(pageDTO, categoryId,cityId);
     }
 
-    @Override
+    /*@Override
     @ApiMethod
     public ServerResponse getWorkerGoodsList(HttpServletRequest request, PageDTO pageDTO, String workerTypeId) {
         return classificationService.getWorkerGoodsList(pageDTO, workerTypeId);
-    }
+    }*/
 }

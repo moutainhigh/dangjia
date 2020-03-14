@@ -4,6 +4,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.user.UserRoleDTO;
@@ -23,6 +24,7 @@ import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.crypto.hash.Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MainUserService {
@@ -274,6 +278,64 @@ public class MainUserService {
         userRolesVO.setRoles(list);
         return ServerResponse.createBySuccess("ok", userRolesVO);
 
+    }
+
+    public ServerResponse updateMainInfoById(String userId,String userName,String email){
+        MainUser mainUser=userMapper.selectByPrimaryKey(userId);
+        if(mainUser==null){
+            return ServerResponse.createByErrorMessage("用户信息不存在，不能修改");
+        }
+        if(StringUtils.isBlank(userName)){
+            return ServerResponse.createByErrorMessage("用户姓名不能为空");
+        }
+        mainUser.setUsername(userName);
+        mainUser.setEmail(email);
+        userMapper.updateByPrimaryKey(mainUser);
+        return ServerResponse.createBySuccessMessage("修改成功");
+    }
+
+    public ServerResponse updateMainUserPwd(String userId,String oldPwd,String newPwd){
+        MainUser mainUser=userMapper.selectByPrimaryKey(userId);
+        if(mainUser==null){
+            return ServerResponse.createByErrorMessage("用户信息不存在，不能修改");
+        }
+        if(StringUtils.isBlank(oldPwd)||StringUtils.isBlank(newPwd)){
+            return ServerResponse.createByErrorMessage("密码不能为空");
+        }
+        if(!DigestUtils.md5Hex(oldPwd).equals(mainUser.getPassword())){
+            return ServerResponse.createByErrorMessage("旧密码输入不正确，不能修改");
+        }
+        // 修改密码
+        int num = this.updatePwd(userId,
+                DigestUtils.md5Hex(newPwd));
+        if (num != 1) {
+            return ServerResponse.createByErrorMessage("修改密码失败，已经离职或该用户被删除！");
+        }
+        return ServerResponse.createBySuccessMessage("修改成功");
+    }
+    /**
+     * 查询用户个人信息
+     * @param mobile
+     * @return
+     */
+    public ServerResponse searchMainInfo(String mobile){
+
+        Map<String,Object> map=new HashMap<>();
+        MainUser mainUser=userMapper.findUserByMobile(mobile);
+        if(mainUser!=null){
+            map= BeanUtils.beanToMap(mainUser);
+            //查询对应的部门名称
+            Department department=departmentMapper.selectByPrimaryKey(mainUser.getDepartmentId());
+            if(department!=null){
+                map.put("departName",department.getName());
+            }
+            //查询对应的岗位名称
+            Job job=jobMapper.selectByPrimaryKey(mainUser.getJobId());
+            if(job!=null){
+                map.put("jobName",job.getName());
+            }
+        }
+        return ServerResponse.createBySuccess("查询成功",map);
     }
 
     public MainUser findUserByMobile(String mobile) {

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * author: Ronalcheng
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "提供精算数据接口", description = "提供精算数据接口")
 public interface ActuaryAPI {
 
+
     @PostMapping("/data/actuary/getActuaryBudgetOk")
     @ApiOperation(value = "返回精算列表", notes = "返回精算列表")
     ServerResponse getActuaryBudgetOk(
@@ -27,8 +29,51 @@ public interface ActuaryAPI {
             @RequestParam("name") String name,
             @RequestParam("budgetOk") String budgetOk,
             @RequestParam("workerKey") String workerKey,
-            @RequestParam("userId") String userId
+            @RequestParam("userId") String userId,
+            @RequestParam("budgetStatus") String budgetStatus,
+            @RequestParam("decorationType") String decorationType
     );
+
+    /**
+     * 查询精算的订单详情
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param  workerTypeId 查询类型：1设计，2精算
+     * @return
+     */
+    @PostMapping("/data/actuary/getBudgetOrderDetail")
+    @ApiOperation(value = "查询精算的订单详情", notes = "查询精算的订单详情")
+    ServerResponse getBudgetOrderDetail(@RequestParam("cityId") String cityId,
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("workerTypeId") String workerTypeId);
+
+    @PostMapping("/data/actuary/searchActuarialProductList")
+    @ApiOperation(value = "精算接口--查询默认配置的设计商品", notes = "查询设计精算阶段配置列表")
+    ServerResponse searchActuarialProductList(@RequestParam("request") HttpServletRequest request,
+                                              @RequestParam("cityId") String cityId);
+
+    @PostMapping("/data/actuary/saveRecommendedGoods")
+    @ApiOperation(value = "精算接口--保存推荐的设计商品", notes = "精算接口--保存推荐的设计商品")
+    ServerResponse saveRecommendedGoods(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("cityId") String cityId,
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("productStr") String productStr);
+
+    /**
+     * 审核结果
+     * @param request
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param auditResultType 审核结果（1审核通过，2审核不通过）
+     * @return
+     */
+    @PostMapping("/data/actuary/checkDesignPicture")
+    @ApiOperation(value = "精算接口--审核设计图纸接口", notes = "精算接口--审核设计图纸接口")
+    ServerResponse checkDesignPicture(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("houseId") String houseId,
+                                      @RequestParam("auditResultType") String auditResultType);
+
     @PostMapping("/data/actuary/getActuaryWaitPay")
     @ApiOperation(value = "返回待业主支付精算列表", notes = "返回待业主支付精算列表")
     ServerResponse getActuaryWaitPay(

@@ -7,10 +7,10 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IGoodsCategoryMapper;
-import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
-import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,33 +29,34 @@ import java.util.List;
 @Service
 public class ClassificationService {
     @Autowired
-    private IGoodsCategoryMapper iGoodsCategoryMapper;
-    @Autowired
-    private IWorkerGoodsMapper iWorkerGoodsMapper;
+    private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
+   // @Autowired
+    //private IWorkerGoodsMapper iWorkerGoodsMapper;
     @Autowired
     private ConfigUtil configUtil;
 
-    public ServerResponse getGoodsCategoryList() {
-        Example example = new Example(GoodsCategory.class);
+    public ServerResponse getGoodsCategoryList(String cityId) {
+        Example example = new Example(BasicsGoodsCategory.class);
         example.createCriteria()
-                .andEqualTo(GoodsCategory.PARENT_TOP, "1")
-                .andEqualTo(GoodsCategory.DATA_STATUS, 0);
-        example.orderBy(GoodsCategory.SORT).asc();
-        List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.selectByExample(example);
+                .andEqualTo(BasicsGoodsCategory.PARENT_TOP, "1")
+                .andEqualTo(BasicsGoodsCategory.DATA_STATUS, 0)
+                .andEqualTo(BasicsGoodsCategory.CITY_ID,cityId);
+        example.orderBy(BasicsGoodsCategory.SORT).asc();
+        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.selectByExample(example);
         if (goodsCategoryList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        for (GoodsCategory goodsCategory : goodsCategoryList) {
+        for (BasicsGoodsCategory goodsCategory : goodsCategoryList) {
             String imageUrl = goodsCategory.getImage();
             goodsCategory.setImage(CommonUtil.isEmpty(imageUrl) ? null : (imageAddress + imageUrl));
         }
         return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
     }
 
-    public ServerResponse getProductList(PageDTO pageDTO, String categoryId) {
+    public ServerResponse getProductList(PageDTO pageDTO, String categoryId,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<HomeProductDTO> homeProductDTOS = iGoodsCategoryMapper.getProductList(categoryId);
+        List<HomeProductDTO> homeProductDTOS = iBasicsGoodsCategoryMapper.getProductList(categoryId);
         if (homeProductDTOS.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -69,7 +70,7 @@ public class ClassificationService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
-    public ServerResponse getWorkerGoodsList(PageDTO pageDTO, String workerTypeId) {
+   /* public ServerResponse getWorkerGoodsList(PageDTO pageDTO, String workerTypeId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(WorkerGoods.class);
         example.createCriteria()
@@ -90,5 +91,5 @@ public class ClassificationService {
         }
         pageResult.setList(workerGoodsList);
         return ServerResponse.createBySuccess("查询成功", pageResult);
-    }
+    }*/
 }

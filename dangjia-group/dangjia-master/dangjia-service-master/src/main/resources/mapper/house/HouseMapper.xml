@@ -14,7 +14,6 @@
         task_number as taskNumber,
         square,
         number,
-        style,
         designer_ok as designerOk,
         budget_ok as budgetOk,
         image,
@@ -53,7 +52,6 @@
         h.task_number as taskNumber,
         h.square,
         h.number,
-        h.style,
         h.designer_ok as designerOk,
         h.budget_ok as budgetOk,
         h.image,
@@ -98,10 +96,20 @@
         s.store_name storeName,
         gr.operatorName,
         gr.operatorMobile,
-        gr.operatorId
+        gr.operatorId,
+        IFNULL(ma.address,CONCAT(
+        house.residential,
+        IFNULL(house.building, '*'),
+        '栋',
+        IFNULL(CONCAT(house.unit, '单元'),'' ),
+        IFNULL(house.number, '*'),
+        '号'
+        )) houseName,
+        ma.input_area inputArea
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
+        LEFT JOIN dj_member_address ma on house.id=ma.house_id
         LEFT JOIN (
         SELECT
         wk.house_id,
@@ -113,7 +121,7 @@
         dj_core_house_worker wk
         LEFT JOIN dj_member gr ON gr.id = wk.worker_id
         WHERE
-        wk.worker_type = 1 and wk.work_type in (1,6)
+        wk.worker_type = 1 and  wk.work_type in (1,6)
         ORDER BY
         wk.house_id,
         wk.create_date DESC
@@ -146,9 +154,8 @@
             AND house.designer_ok =1
         </if>
         <if test="designerType == 2">
-            AND house.visit_state=1
-            AND house.decoration_type =1
-            AND house.designer_ok in (9,5,6)
+            AND house.decoration_type=1
+            AND house.designer_ok in (1,9,5,6)
         </if>
         <if test="designerType == 3">
             AND house.visit_state=1
@@ -199,7 +206,6 @@
                square,
                work_deposit_id    as workDepositId,
                refer_house_id     as referHouseId,
-               style,
                house_type         as houseType,
                drawings,
                decoration_type    as decorationType
@@ -208,6 +214,365 @@
           AND id = #{houseId}
     </select>
 
+    <!-- 根据房子ID查询对应的房子信息-->
+    <select id="getHouseDetailByHouseId"  resultType="com.dangjia.acg.dto.house.HouseDTO">
+        SELECT
+            h.id houseId,
+            m.id AS memberId,
+            m. NAME AS memberName,
+            m.mobile AS mobile,
+            IFNULL(
+                ma.address,
+                CONCAT(
+                    h.residential,
+                    IFNULL(h.building, '*'),
+                    '栋',
+                    IFNULL(CONCAT(h.unit, '单元'), ''),
+                    IFNULL(h.number, '*'),
+                    '号'
+                )
+            ) address,
+            IFNULL(ma.input_area, h.square) inputArea
+        FROM
+            dj_house h
+        INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_member_address ma ON h.id = ma.house_id
+        WHERE house_id=#{houseId}
+    </select>
+
+    <!-- 查询当前房子的订单详情(包含增值商品信息的查询)-->
+    <select id="getBudgetOrderDetailByHouseId" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+        SELECT
+            t.id orderId,
+            t1.id orderItemId,
+            IFNULL(t1.image, t2.image) image,
+            t1.product_name productName,
+            t1.price,
+            IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
+            t1.shop_count shopCount,
+            t2.prod_template_id productTemplateId,
+            t1.product_id productId,
+            t1.worker_type_id workerTypeId,
+            t.order_number as orderNumber,
+            t.order_status as orderStatus
+        FROM
+            dj_deliver_order t,
+            dj_deliver_order_item t1,
+            dj_basics_storefront_product t2
+            <if test="workerTypeId!=null and workerTypeId!=''">
+                ,dj_pay_business_order t3
+            </if>
+        WHERE
+            t.id = t1.order_id
+        AND t1.product_id = t2.id
+        AND t.house_id = #{houseId}
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND t1.worker_type_id =#{workerTypeId}
+            and t.business_order_number=t3.number
+            and t3.state = 3
+        </if>
+        UNION ALL
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        t2.image image,
+        t3.product_name productName,
+        t3.price,
+        IFNULL(t3.price*t1.shop_count,0) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t3.added_product_id productId,
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus
+        FROM
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2,
+        dj_deliver_order_added_product t3
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            ,dj_pay_business_order t4
+        </if>
+        WHERE
+        t.id = t1.order_id
+        AND t3.added_product_id= t2.id
+        and t1.id=t3.any_order_id
+        AND t.house_id = #{houseId}
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND t1.worker_type_id =#{workerTypeId}
+            and t.business_order_number=t4.number
+            and t4.state = 3
+        </if>
+    </select>
+
+    <select id="getOrderDetailByHouseId" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        IFNULL(t1.image, t2.image) image,
+        t1.product_name productName,
+        t1.price,
+        IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t1.product_id productId,
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus
+        FROM
+            dj_deliver_order t,
+            dj_deliver_order_item t1,
+            dj_basics_storefront_product t2,
+            dj_pay_business_order t3
+        WHERE
+        t.id = t1.order_id
+        AND t1.product_id = t2.id
+        AND t.house_id = #{houseId}
+        AND t1.worker_type_id =#{workerTypeId}
+        and t.business_order_number=t3.number
+        and t3.state in(1,2)
+        UNION ALL
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        t2.image image,
+        t3.product_name productName,
+        t3.price,
+        IFNULL(t3.price*t1.shop_count,0) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t3.added_product_id productId,
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus
+        FROM
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2,
+        dj_deliver_order_added_product t3,
+        dj_pay_business_order t4
+        WHERE
+        t.id = t1.order_id
+        AND t3.added_product_id= t2.id
+        and t1.id=t3.any_order_id
+        AND t.house_id = #{houseId}
+        AND t1.worker_type_id =#{workerTypeId}
+        and t.business_order_number=t4.number
+        and t4.state in(1,2)
+    </select>
+
+    <!-- 查询当前房子的订单详情(包含增值商品信息的查询)-->
+    <select id="getBudgetOrderDetailByInFo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        IFNULL(t1.image, t2.image) image,
+        t1.product_name productName,
+        t1.price,
+        IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t1.product_id productId,
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus,
+        ho.business_id as businessId
+        FROM
+        dj_core_house_worker ho,
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            ,dj_pay_business_order t3
+        </if>
+        WHERE
+        t.id = t1.order_id
+
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND t1.product_type in(1,2)
+            AND ho.worker_type_id = t.worker_type_id
+        </if>
+
+        AND t1.product_id = t2.id
+        AND (t.house_id = #{houseId} or t.id = #{houseId})
+        AND (ho.house_id=t.house_id or ho.business_id=t.id)
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            <if test="type != null">
+                AND ho.worker_type_id =#{workerTypeId}
+                AND ho.type = #{type}
+            </if>
+            <if test="type == null">
+                AND t1.worker_type_id =#{workerTypeId}
+            </if>
+            and t.business_order_number=t3.number
+            and t3.state = 3
+        </if>
+        UNION ALL
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        t2.image image,
+        t3.product_name productName,
+        t3.price,
+        IFNULL(t3.price*t1.shop_count,0) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t3.added_product_id productId,
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus,
+        ho.business_id as businessId
+        FROM
+        dj_core_house_worker ho,
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2,
+        dj_deliver_order_added_product t3
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            ,dj_pay_business_order t4
+        </if>
+        WHERE
+        t.id = t1.order_id
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND t1.product_type in(1,2)
+            AND ho.worker_type_id = t.worker_type_id
+        </if>
+        AND t3.added_product_id= t2.id
+        and t1.id=t3.any_order_id
+        AND (t.house_id = #{houseId} or t.id = #{houseId})
+        AND (ho.house_id=t.house_id or ho.business_id=t.id)
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            <if test="type != null">
+                AND ho.worker_type_id =#{workerTypeId}
+                AND ho.type = #{type}
+            </if>
+            <if test="type == null">
+                AND t1.worker_type_id =#{workerTypeId}
+            </if>
+            and t.business_order_number=t4.number
+            and t4.state = 3
+        </if>
+    </select>
+
+    <select id="queryTestNumber" resultType="java.lang.Integer">
+       select count(*) from
+            dj_basics_product_template t,
+            dj_basics_technology t1,
+            dj_matter_technology_record t2,
+            dj_core_house_flow_apply t3
+        where
+            FIND_IN_SET(t1.id,t.technology_ids)
+        and t2.technology_Id = t1.id
+        and t2.house_flow_apply_id = t3.id
+        and t3.worker_id = #{workerId}
+        and t2.house_id= #{houseId}
+        and t.id = #{id}
+        and t2.state=1
+        and t1.type in(2,3)
+    </select>
+
+    <select id="queryArrNumber" resultType="java.lang.Integer">
+        select count(*) from
+            dj_basics_product_template t,
+            dj_basics_technology t1
+        where
+            FIND_IN_SET(t1.id,t.technology_ids)
+        and t.id = #{id}
+    </select>
+
+
+    <select id="getNoTechnologyName" resultType="java.lang.String">
+       SELECT
+            t1.`name`
+        FROM
+            dj_basics_product_template t
+        INNER JOIN dj_basics_technology t1 ON FIND_IN_SET(t1.id, t.technology_ids)
+        LEFT JOIN (
+            SELECT
+                t1.id,
+                t1.`name`
+            FROM
+                dj_basics_product_template t
+            INNER JOIN dj_basics_technology t1 ON FIND_IN_SET(t1.id, t.technology_ids)
+            INNER JOIN dj_matter_technology_record t2 ON t2.technology_Id = t1.id
+            INNER JOIN dj_core_house_flow_apply t3 ON t2.house_flow_apply_id = t3.id
+            WHERE  t3.worker_id = #{workerId}
+            AND t2.house_id= #{houseId}
+            AND t.id = #{id}
+            AND t2.state=1
+            AND t1.type IN (2, 3)
+        ) a1 ON a1.id = t1.id
+        WHERE
+            t.id = #{id}
+        AND a1.id IS NULL
+        LIMIT 1
+    </select>
+    <select id="getBudgetOrderNewInfo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        IFNULL(t1.image, t2.image) image,
+        t1.product_name productName,
+        t1.price,
+        IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t1.product_id productId,
+        t1.worker_type_id workerTypeId
+        FROM
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2,
+        dj_pay_business_order t3
+        WHERE
+        t.id = t1.order_id
+        AND t1.product_id = t2.id
+        and t.business_order_number=t3.number
+        and t3.state = 3
+        AND t.house_id = #{houseId}
+        AND t1.worker_type_id =#{workerTypeId}
+        and t1.shop_count>IFNULL(t1.return_count,0)+IFNULL(t1.ask_count,0)
+    </select>
+    <!--查询是否有待处理的补差价单-->
+    <select id="getBudgetDifferenceOrder" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+
+       SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        IFNULL(t1.image, t2.image) image,
+        t1.product_name productName,
+        t1.price,
+        IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
+        t1.shop_count shopCount,
+        t1.product_id productId,
+        t1.worker_type_id workerTypeId
+        FROM
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_pay_business_order t2
+        WHERE
+        t.id = t1.order_id
+        AND t.business_order_number = t2.number
+        AND t.house_id = #{houseId}
+        AND t1.worker_type_id =#{workerTypeId}
+        and t2.state in(1,2)
+    </select>
+
+    <!-- 可以默认配置的设计商品，精算师选择-->
+    <select id="selectDesignProductList" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+         SELECT
+          t1.product_id productTemplateId,
+          t3.name productName,
+          t3.image,
+          t3.price
+        FROM
+            dj_actuarial_product_config t1,
+            dj_basics_product_template t3
+        WHERE t1.product_id = t3.id
+        and t1.city_id=#{cityId}
+        and t1.worker_type_id=#{workerTypeId}
+        and t1.service_type_id=#{serviceTypeId}
+    </select>
     <!--查询所有的房子 指定房子 装修状态-->
     <select id="getAllHouseByVisitState" resultType="com.dangjia.acg.modle.house.House">
         SELECT
@@ -218,8 +583,69 @@
         AND visit_state=#{visitState}
     </select>
 
+    <!--查询对应店铺发货任务信息-->
+    <select id="getHouseAddrssByAddress" resultType="com.dangjia.acg.dto.deliver.DeliverHouseDTO">
+        SELECT
+           tt.*, (
+                SELECT COUNT(1)
+                FROM
+                    dj_deliver_order_split tcount
+                WHERE ( tcount.house_id = tt.houseId OR tcount.address_id = tt.addressId )
+                AND tcount.apply_status = '1'
+                AND tcount.storefront_id = #{storefrontId}
+            ) AS wait,
+           (
+            SELECT COUNT(1)
+            FROM
+                dj_deliver_order_split tcount
+            WHERE (tcount.house_id = tt.houseId OR tcount.address_id = tt.addressId)
+            AND tcount.apply_status = '2'
+            AND tcount.storefront_id = #{storefrontId}
+            ) AS sent,
+            ma.address houseName,
+            ma.member_id AS memberId,
+            ma.mobile mobile,
+            m.`name` NAME
+        FROM (
+            SELECT
+                ord.house_id houseId,
+                ord.address_id addressId,
+                ord.storefont_id storefrontId,
+                h.create_date AS createDate,
+                h.construction_date AS constructionDate
+            FROM
+            dj_deliver_order ord
+            LEFT JOIN dj_house h on ord.house_id=h.id
+            INNER JOIN dj_pay_business_order pbo on ord.business_order_number=pbo.number
+            WHERE ord.storefont_id = #{storefrontId}
+            and pbo.state=3
+            and pbo.data_status=0
+            <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
+                and h.construction_date BETWEEN #{startDate} and #{endDate}
+            </if>
+           group by ord.house_id,ord.address_id
+        ) tt,dj_member_address ma,dj_member m
+        where (tt.addressId=ma.id or tt.houseId=ma.house_id) and ma.member_id=m.id
+        <if test="likeAddress!=null and likeAddress!=''">
+            AND ma.address LIKE CONCAT('%' ,#{likeAddress}, '%')
+        </if>
+        group by ma.id
+        ORDER BY
+        wait DESC,
+        sent DESC,
+        tt.createDate DESC
 
-    <!--查询所有的房子 指定房子 装修状态-->
+    </select>
+
+    <select id="queryCoutHouseOrder" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+          dj_deliver_order_split tcount
+        where (tcount.house_id = #{houseId} OR tcount.address_id = #{addressId})
+        and tcount.apply_status= #{applyStatus}
+        and tcount.storefront_id=#{storefrontId}
+    </select>
+
+<!--查询所有的房子 指定房子 装修状态-->
     <select id="getByLikeAddress" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         house.id,
@@ -232,10 +658,14 @@
         house.create_date as createDate,
         house.construction_date as constructionDate,
         house.modify_date as modifyDate,
-        (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 1 and house_id = house.id) as waitCount,
-        (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 2 and house_id = house.id) as sendCount
+        (SELECT COUNT(*) from dj_deliver_order_split ddos where ddos.apply_status = 1 and ddos.house_id = house.id) as waitCount,
+        (SELECT COUNT(*) from dj_deliver_order_split ddos where ddos.apply_status = 2 and ddos.house_id = house.id) as sendCount
         FROM dj_house as house
+        inner join dj_deliver_order_split  as dos on dos.house_id=house.id
         WHERE house.visit_state > 0
+        <if test="storefrontId!=null and storefrontId!=''">
+            and dos.storefront_id = #{storefrontId}
+        </if>
         <if test="cityId!=null and cityId!=''">
             and house.city_id = #{cityId}
         </if>
@@ -254,6 +684,7 @@
             CONCAT('%',#{likeAddress},'%')
 
         </if>
+        group by house.id
         ORDER BY waitCount DESC,sendCount DESC,house.create_date DESC
     </select>
 
@@ -287,7 +718,7 @@
         </if>
         from dj_house h
         INNER JOIN `dj_house_modeling_village` v ON h.village_id = v.id
-        INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM `dj_design_quantity_room_images` a GROUP BY a.house_id ) b ON
+        INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM `dj_design_quantity_room_images`  a GROUP BY a.house_id ) b ON
         b.house_id=h.id
         where
         h.data_status=0
@@ -326,7 +757,7 @@
         mv.*, (
         st_distance (
         point (mv.locationx, mv.locationy),
-        point (#{locationx} ,#{locationy})
+        point (#{locationx}	,#{locationy})
         ) * 111195 / 1000
         ) AS juli
         FROM
@@ -376,7 +807,6 @@
         m.mobile as mobile,
         h.visit_state as visitState,
         h.show_house as showHouse,
-        h.style as style,
         h.square as square,
         h.build_square as buildSquare,
         h.decoration_type as decorationType,
@@ -446,14 +876,14 @@
     <select id="getActuaryAll" resultType="com.dangjia.acg.dto.house.HouseListDTO">
         SELECT
         h.id as houseId,
-        CONCAT(
+        IFNULL(ma.address,CONCAT(
         h.residential,
         IFNULL(h.building, '*'),
         '栋',
         IFNULL(CONCAT(h.unit, '单元'),'' ),
         IFNULL(h.number, '*'),
         '号'
-        ) houseName,
+        )) houseName,
         h.city_name as cityName,
         h.budget_ok as budgetOk,
         h.designer_ok as designerOk,
@@ -465,7 +895,6 @@
         m.mobile as mobile,
         h.visit_state as visitState,
         h.show_house as showHouse,
-        h.style as style,
         h.square as square,
         h.build_square as buildSquare,
         h.decoration_type as decorationType,
@@ -483,10 +912,12 @@
         s.store_name storeName,
         gr.operatorName,
         gr.operatorMobile,
-        gr.operatorId
+        gr.operatorId,
+        ma.input_area inputArea
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_member_address ma on h.id=ma.house_id
         LEFT JOIN (
         SELECT
         wk.house_id,
@@ -498,7 +929,7 @@
         dj_core_house_worker wk
         LEFT JOIN dj_member gr ON gr.id = wk.worker_id
         WHERE
-        wk.worker_type = 2 and wk.work_type in (1,6)
+        wk.worker_type = 2 and  wk.work_type in (1,6)
         ORDER BY
         wk.house_id,
         wk.create_date DESC
@@ -509,7 +940,15 @@
         )
         WHERE
         (h.decoration_type = 2 or (h.decoration_type != 2 and h.designer_ok =3))
-
+        <if test="budgetStatus!=null and budgetStatus!=''">
+            and h.budget_ok = #{budgetStatus}
+        </if>
+        <if test="decorationType!=null and decorationType == 2">
+            and h.decoration_type = #{decorationType}
+        </if>
+        <if test="decorationType!=null and decorationType == 1">
+            and h.decoration_type != 2
+        </if>
         <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.operatorName,gr.operatorMobile) like CONCAT('%',#{workerKey},'%')
         </if>
@@ -517,7 +956,7 @@
             and gr.operatorId = #{userId}
         </if>
         <if test="dataStatus == 1">
-            AND h.data_status=1 and h.budget_ok != 3 and h.budget_ok >0
+            AND h.data_status=1  and h.budget_ok != 3 and h.budget_ok >0
         </if>
         <if test="dataStatus == 0">
             AND h.data_status=0
@@ -527,7 +966,7 @@
         </if>
         <if test="budgetOk!=null and budgetOk!=''">
             <if test="budgetOk==1">
-                and (h.budget_ok =1 or h.budget_ok = 4)
+                and (h.budget_ok =1 or h.budget_ok = 4 or h.budget_ok = 6)
             </if>
             <choose>
                 <when test="userId != null and userId != ''">
@@ -578,7 +1017,6 @@
         h.task_number as taskNumber,
         h.square,
         h.number,
-        h.style,
         h.pause,
         h.designer_ok as designerOk,
         h.budget_ok as budgetOk,
@@ -603,8 +1041,7 @@
         h.is_select as isSelect,
         (
         case
-        when (f.supervisor_start = 1 or f.supervisor_start = 0 ) and h.visit_state !=2 and h.visit_state !=3 and
-        h.visit_state !=4 and h.visit_state !=5 and
+        when (f.supervisor_start = 1 or f.supervisor_start = 0 ) and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and
         h.pause=0 then f.supervisor_start
         when h.visit_state = 3 then 3
         when h.visit_state = 4 then 4
@@ -618,21 +1055,21 @@
         FROM
         dj_house h
         INNER JOIN (
-        SELECT f.house_id,f.supervisor_start ,m.`name` supName,m.mobile supMobile
-        FROM dj_core_house_flow f
-        LEFT JOIN dj_member m ON f.worker_id = m.id
-        WHERE f.worker_type=3 and f.work_type > 1
+            SELECT f.house_id,f.supervisor_start ,m.`name` supName,m.mobile supMobile
+            FROM dj_core_house_flow f
+            LEFT JOIN dj_member m ON f.worker_id = m.id
+            WHERE f.worker_type=3 and f.work_type > 1
         ) f ON h.id=f.house_id
         INNER JOIN dj_member m ON h.member_id = m.id
         <if test="(visitState &lt;= 0 ) and !(startDate!=null and endDate!=null and startDate!='' and endDate!='')">
             LEFT JOIN (
-            SELECT po.house_id,MIN(po.create_date) create_date from dj_core_house_flow_apply po where po.apply_type = 4
-            GROUP BY po.house_id
+                SELECT po.house_id,MIN(po.create_date) create_date from dj_core_house_flow_apply po  where po.apply_type = 4
+                GROUP BY po.house_id
             ) o on o.house_id=h.id
         </if>
         <if test="(visitState &gt; 0 ) or (startDate!=null and endDate!=null and startDate!='' and endDate!='')">
             INNER JOIN (
-            SELECT po.house_id,MIN(po.create_date) create_date from dj_core_house_flow_apply po where po.apply_type = 4
+            SELECT po.house_id,MIN(po.create_date) create_date from dj_core_house_flow_apply po  where po.apply_type = 4
             GROUP BY po.house_id
             ) o on o.house_id=h.id
         </if>
@@ -642,8 +1079,7 @@
             AND FIND_IN_SET(h.city_id,#{cityKey})
         </if>
         <if test="visitState==0 || visitState==1">
-            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and
-            h.visit_state !=5 and h.pause=0
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0
         </if>
         <if test="visitState>=2">
             and h.visit_state = #{visitState}
@@ -672,12 +1108,7 @@
             or m.name like CONCAT('%',#{searchKey},'%')
             )
         </if>
-        <if test="visitState==3">
-            ORDER by h.completed_date desc
-        </if>
-        <if test="visitState!=3">
-            ORDER by h.modify_date desc
-        </if>
+        ORDER by h.modify_date desc
     </select>
 
     <select id="getHouseDateByMemberId" parameterType="String" resultType="date">
@@ -696,7 +1127,7 @@
             dj_repair_mend_order o
             INNER JOIN dj_repair_mend_materiel m ON m.mend_order_id = o.id
             WHERE
-            o.type IN ( 2, 4 ) and o.state = 4
+            o.type IN ( 2, 4,5 ) and o.state = 4
             AND o.house_id = #{houseId}
             AND m.product_id = #{productId}
     </select>
@@ -978,6 +1409,24 @@
         WHERE pho.task_id = #{taskId} AND pay_order_number IS NOT NULL
     </select>
 
+    <!-- 查询房子列表 - 根据小区名 -->
+    <select id="queryHouseListByResidential" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        id
+        , residential
+        , building
+        , unit
+        , number
+        , image
+        , visit_state 'visitState'
+        FROM
+        dj_house
+        WHERE
+        data_status = 0
+        <if test="residential != null and residential != ''">
+            AND residential LIKE CONCAT('%',#{residential},'%')
+        </if>
+    </select>
 
 </mapper>
 

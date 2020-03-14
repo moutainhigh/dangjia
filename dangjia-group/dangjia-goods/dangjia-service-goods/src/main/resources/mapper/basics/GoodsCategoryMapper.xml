@@ -5,76 +5,63 @@
 <mapper namespace="com.dangjia.acg.mapper.basics.IGoodsCategoryMapper">
 
     <sql id="all_columns">
-        id,
-        name,
-        parent_id as parentId,
-        parent_top as parentTop,
+         id,
+        NAME,
+        parent_id AS parentId,
+        parent_top AS parentTop,
         image,
-        create_date as createDate,
-        modify_date as modifyDate
+        create_date AS createDate,
+        modify_date AS modifyDate,
+        is_last_category AS isLastCategory,
+        purchase_restrictions AS purchaseRestrictions,
+        cover_image AS coverImage,
+        category_label_ids categoryLabelId,
+        owner_display ownerDisplay
 	</sql>
     <!-- 删除对象 -->
     <delete id="deleteById" parameterType="java.lang.String">
 		DELETE FROM dj_basics_goods_category 
 		WHERE id=#{id}
 	</delete>
-    <!-- 查询所有 -->
-    <select id="query" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
-		SELECT
-            id,
-            name,
-            parent_id as parentId,
-            parent_top as parentTop,
-            image,
-            create_date as createDate,
-            modify_date as modifyDate
-		FROM dj_basics_goods_category
-	</select>
-    <!-- 批量插入数据 -->
-    <insert id="insertBatch" parameterType="java.util.List">
-        insert into dj_basics_goods_category
-        (<include refid="all_columns"/>)
-        values
-        <foreach collection="list" item="goods" index="index" separator=",">
-            (
-            #{goods.id}, #{goods.name},#{goods.parent_id}, #{goods.parent_top},
-            #{goods.image},SYSDATE(),SYSDATE()
-            )
-        </foreach>
-    </insert>
+
 
     <!-- 根据父id查询下属商品类别 -->
-    <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
+    <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
         SELECT
         <include refid="all_columns"/>
         FROM dj_basics_goods_category where parent_id =#{parentId}
-        ORDER BY create_date desc
+        ORDER BY sort,create_date asc
     </select>
 
     <!-- 根据父id查询下属商品类别 -->
-    <select id="queryCategoryByName" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
+    <select id="queryCategoryByName" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
         SELECT
         <include refid="all_columns"/>
         FROM dj_basics_goods_category where name =#{name}
-        ORDER BY create_date desc
+        ORDER BY sort,create_date asc
     </select>
     <select id="getProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
         SELECT
         p.id AS id,
         p.image AS image,
         p.price AS price,
-        u.name AS unitName,
-        g.type AS goodsType,
+        u. NAME AS unitName,
+        g.type AS productType,
         0 AS type,
-        p.NAME AS NAME
+        p. NAME AS NAME
         FROM
-        dj_basics_product p
-        INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
-        INNER JOIN dj_basics_goods g ON g.id = p.goods_id
-        INNER JOIN dj_basics_unit u ON u.id = p.convert_unit
-        WHERE
-        p.maket = 1
+        dj_basics_product_template p,
+        dj_basics_goods_category c,
+        dj_basics_goods g,
+        dj_basics_unit u
+        WHERE c.id = p.category_id
+        AND p.goods_id=g.id
+        and g.category_id=c.id
+        AND u.id = p.convert_unit
+        AND p.maket = 1
         AND p.type = 1
+        and p.maket = 1
+        AND g.type &lt;4
         <if test="categoryId!=null and categoryId!=''">
             AND c.parent_top = #{categoryId}
         </if>
@@ -83,4 +70,54 @@
     </select>
 
 
+    <select id="queryNewcategoryIdList" resultType="com.dangjia.acg.dto.budget.AllCategoryDTO">
+             SELECT
+                bcl.id AS id,
+                bcl. NAME AS NAME,
+                sum(abm.price) AS priceArr,
+                '' AS sfpriceArr
+                FROM
+                    dj_actuary_budget_material abm
+                INNER JOIN dj_basics_storefront_product dbg ON dbg.id = abm.product_id
+                INNER JOIN dj_basics_product_template bpt ON dbg.prod_template_id = bpt.id
+                INNER JOIN dj_basics_goods_category bgc ON bpt.category_id = bgc.id
+                INNER JOIN dj_basics_category_label bcl ON FIND_IN_SET(
+                    bcl.id,
+                    bgc.category_label_ids
+                )
+                WHERE
+                    abm.house_id = #{houseId}
+                GROUP BY
+                    bcl.id
+            UNION ALL
+                SELECT
+                    bcl.id AS id,
+                    bcl. NAME AS NAME,
+                    '' AS priceArr,
+                    IFNULL(sum(abm.price), '') AS sfpriceArr
+                FROM
+                    dj_actuary_budget_material abm
+                INNER JOIN dj_basics_storefront_product dbg ON dbg.id = abm.product_id
+                INNER JOIN dj_basics_product_template bpt ON dbg.prod_template_id = bpt.id
+                INNER JOIN dj_basics_goods_category bgc ON bpt.category_id = bgc.id
+                INNER JOIN dj_basics_category_label bcl ON FIND_IN_SET(
+                    bcl.id,
+                    bgc.category_label_ids
+                )
+                WHERE
+                    abm.house_id =#{houseId}
+                AND steta = 2
+                GROUP BY
+                    bcl.id
+    </select>
+
+    <select id="queryCategoryListDTO" resultType="com.dangjia.acg.dto.product.CategoryListDTO">
+        SELECT
+            a.id,a.name
+        FROM
+            dj_basics_goods_category a
+        INNER JOIN dj_basics_category_label b ON b.id = a.category_label_ids
+        WHERE
+            b.id =#{categoryLabelId}
+    </select>
 </mapper>

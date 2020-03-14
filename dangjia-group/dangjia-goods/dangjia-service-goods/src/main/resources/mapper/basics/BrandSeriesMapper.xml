@@ -16,33 +16,50 @@
 	<!--根据货品id查询品牌系列名-->
 	<select id="getAttributesName" resultType="java.lang.String">
         select CONCAT(bs.name,'  ',p.value_name_arr)
-		From dj_basics_brand_series bs, dj_basics_product p
+		From dj_basics_brand_series bs, dj_basics_product_template p
 		where
 		    p.brand_series_id = bs.id
 		and
 		    p.id = #{productId}
 	</select>
 	<!--根据货品id查询品牌系列名-->
-	<select id="brandSeriesName" resultType="java.lang.String">
+	<!--<select id="brandSeriesName" resultType="java.lang.String">
         select bs.name
 		From dj_basics_brand_series bs, dj_basics_product p
 		where
 		    p.brand_series_id = bs.id
 		and
 		    p.id = #{productId}
+	</select>-->
+
+
+    <!--根据货品id查询品牌系列名-->
+    <select id="brandSeriesName" resultType="java.lang.String">
+     select bb.name from dj_basics_product_template bp
+     INNER JOIN dj_basics_goods bg on bp.goods_id = bg.id
+     INNER JOIN dj_basics_brand bb on bg.brand_id = bb.id
+     where p.id = #{productId}
 	</select>
+
 	<select id="brandName" resultType="java.lang.String">
-        select bs.name
+       <!-- select bs.name
 		From dj_basics_brand bs, dj_basics_product p
 		where
 		    p.brand_id = bs.id
+		update 2019-09-24
+		-->
+		select bs.name
+		From dj_basics_brand bs, dj_basics_product_template p,dj_basics_goods g
+		where
+		g.brand_id = bs.id
+		and p.goods_id=g.id
 		and
-		    p.id = #{productId}
+		p.id = #{productId}
 	</select>
 	<!--根据货品id查询品牌系列-->
 	<select id="brandSeriesByPid" resultType="com.dangjia.acg.modle.brand.BrandSeries">
         select bs.*
-		From dj_basics_brand_series bs, dj_basics_product p
+		From dj_basics_brand_series bs, dj_basics_product_template p
 		where
 		    p.brand_series_id = bs.id
 		and
@@ -62,7 +79,7 @@
 		FROM dj_basics_brand_series
 		<if test="brandId!=null">
 		where
-			brand_id=#{brandId}
+			brand_id=#{brandId} and city_id = #{cityId}
 		</if>
 		ORDER BY create_date desc
 	</select>
@@ -72,24 +89,6 @@
 		WHERE id=#{id}
 	</delete>
 
-	<!-- 根据商品id查询关联品牌系列 -->
-	<select id="queryBrandByGid" resultType="com.dangjia.acg.modle.brand.BrandSeries">
-		SELECT
-		id,
-		name,
-		brand_id as brandId,
-		content,
-		image
-		FROM dj_basics_brand_series
-		where
-		id in(
-		select
-		series_id
-		from dj_basics_goods_series
-		where
-		goods_id=#{goodsId}
-		)
-		ORDER BY create_date desc
-	</select>
+
 </mapper>
 

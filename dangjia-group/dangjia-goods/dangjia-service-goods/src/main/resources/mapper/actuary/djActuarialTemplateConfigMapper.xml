@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.actuary.DjActuarialTemplateConfigMapper">
+
+    <sql id="all_columns">
+        id,
+        config_name configName,
+        config_type configType
+        `create_date` AS createDate,
+        `modify_date` AS modifyDate,
+        `data_status` as dataStatus,
+         excel_address as excelAddress,
+         config_detail configDetail,
+         create_by as createBy,
+         update_by as updateBy,
+         is_calculated_area,
+         default_recommend,
+         is_hide
+    </sql>
+
+    <resultMap id="actuarialTemplateMap" type="com.dangjia.acg.dto.actuary.ActuarialTemplateConfigDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="configName" column="configName"/>
+        <result property="configType" column="configType"/>
+        <result property="configDetail" column="configDetail"/>
+        <collection property="productList" column="{actuarialTemplateId=id}" ofType="map" select="selectProductList"/>
+    </resultMap>
+
+    <resultMap id="actuarialProductMap" type="java.util.Map">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="productId" column="productId"/>
+        <result property="productName" column="productName"/>
+        <result property="goodsId" column="goodsId"/>
+        <result property="goodsName" column="goodsName"/>
+        <result property="isCalculatedArea" column="isCalculatedArea"/>
+        <result property="defaultRecommend" column="defaultRecommend"/>
+        <result property="isHide" column="isHide"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="categoryName" column="categoryName"/>
+    </resultMap>
+
+    <!-- 查询设计精算阶段的配置模板 -->
+    <select id="queryActuarialTemplateConfig" resultMap="actuarialTemplateMap">
+        SELECT
+            id,
+            config_name configName,
+            config_type configType,
+            config_detail configDetail
+        FROM
+            dj_actuarial_template_config ac
+        where ac.config_type in(1,2)
+        and city_id=#{cityId}
+        <if test="serviceTypeId!=null and serviceTypeId!=''">
+            and ac.service_type_id=#{serviceTypeId}
+        </if>
+        <if test="id!=null and id!=''">
+            and ac.id=#{id}
+        </if>
+    </select>
+
+    <select id="selectProductList" resultMap="actuarialProductMap">
+
+        SELECT
+            t1.id,
+          t1.product_id productId,
+          t3.name productName,
+          t1.goods_id goodsId,
+          t2.`name` goodsName,
+          t1.is_calculated_area isCalculatedArea,
+          t1.default_recommend defaultRecommend,
+          t1.is_hide isHide,
+          t4.id categoryId,
+          t4.name categoryName
+        FROM
+            dj_actuarial_product_config t1,
+            dj_basics_goods t2,
+            dj_basics_product_template t3,
+            dj_basics_goods_category t4
+        WHERE
+            t1.goods_id = t2.id
+        AND t1.product_id = t3.id
+        and t3.category_id=t4.id
+        and t1.actuarial_template_id=#{actuarialTemplateId}
+    </select>
+
+
+
+
+    <resultMap id="searchAppActuarialMap" type="com.dangjia.acg.dto.actuary.app.ActuarialTemplateConfigAppDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="configName" column="configName"/>
+        <result property="configType" column="configType"/>
+        <result property="configDetail" column="configDetail"/>
+        <collection property="productList" column="{actuarialTemplateId=id}" ofType="map" select="selectAppProductList"/>
+    </resultMap>
+
+    <resultMap id="searchAppProductMap" type="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        <id property="id" column="id"/>
+        <result property="goodsId" column="goodsId"/>
+        <result property="productId" column="productId"/>
+        <result property="productTemplateId" column="productTemplateId"/>
+        <result property="productName" column="productName"/>
+        <result property="storefrontId" column="storefrontId"/>
+        <result property="price" column="price"/>
+        <result property="image" column="image"/>
+        <result property="productSn" column="productSn"/>
+        <result property="unit" column="unit"/>
+        <result property="unitName" column="unitName"/>
+        <result property="valueIdArr" column="valueIdArr"/>
+        <result property="valueNameArr" column="valueNameArr"/>
+        <result property="brandId" column="brandId"/>
+        <result property="isCalculatedArea" column="isCalculatedArea"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="productType" column="productType"/>
+        <result property="convertQuality" column="convertQuality"/>
+        <result property="convertUnit" column="convertUnit"/>
+        <result property="goodsBuy" column="goodsBuy"/>
+    </resultMap>
+
+    <!-- 我要装修（设计精算数据查询) -->
+    <select id="searchAppActuarialList" resultMap="searchAppActuarialMap">
+        SELECT
+        id,
+        config_name configName,
+        config_type configType,
+        config_detail configDetail
+        FROM
+        dj_actuarial_template_config ac
+        where ac.config_type in(1,2)
+        and ac.city_id=#{cityId}
+        and service_type_id = #{serviceTypeId}
+        <if test = "configType!=null and configType!=''">
+            ac.config_type =#{configType}
+        </if>
+        order by configType
+    </select>
+
+    <select id="selectAppProductList" resultMap="searchAppProductMap">
+        SELECT
+            t2.id productId,
+            t2.storefront_id storefrontId,
+            t3.id productTemplateId,
+            t3.product_sn productSn,
+            t2.product_name productName,
+            t3.goods_id goodsId,
+            t2.sell_price price,
+            t3.image,
+            t3.unit_id unit,
+            t3.unit_name unitName,
+            t3.value_id_arr valueIdArr,
+            t3.value_name_arr valueNameArr,
+            t4.brand_id brandId,
+            t1.is_calculated_area isCalculatedArea,
+            t4.category_id categoryId,
+            t4.type productType,
+            t4.buy goodsBuy,
+            t3.convert_quality convertQuality,
+            t3.convert_unit convertUnit
+        FROM
+            dj_actuarial_product_config t1,
+            dj_basics_storefront_product t2,
+            dj_basics_product_template t3,
+            dj_basics_goods t4
+        WHERE t1.product_id=t2.prod_template_id
+        and t1.product_id = t3.id
+        and t3.goods_id=t4.id
+        and t2.is_shelf_status=1
+        and t1.actuarial_template_id =#{actuarialTemplateId}
+        and is_hide='0'
+    </select>
+
+</mapper>

@@ -11,9 +11,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result column="house_id" property="houseId"/>
         <result column="house_name" property="houseName"/>
         <result column="memberName" property="memberName"/>
+        <result column="workerTypeName" property="workerTypeName"/>
+        <result column="workerTypeColor" property="workerTypeColor"/>
         <result column="type" property="type"/>
         <result column="remarks" property="remarks"/>
         <result column="state" property="state"/>
+        <result column="images" property="images"/>
         <result column="create_date" property="createDate"/>
         <result column="modify_date" property="modifyDate"/>
         <result column="data_status" property="dataStatus"/>
@@ -35,7 +38,46 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             </collection>
         </association >
     </resultMap>
+    <select id="queryRewardPunishRecordBykeyWord" resultType="com.dangjia.acg.dto.supervisor.WorkerRewardPunishRecordDTO">
+        select
+        IFNULL(dm.name,'') as name ,
+        IFNULL(dm.mobile,'') as mobile,
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as shipAddress,
+        IFNULL(rpr.type,'') as type,
+        IFNULL(rpr.id,'') as id,
+        rpr.reward_punish_correlation_id as rewordPunishCorrelationId
+        from dj_worker_reward_punish_record rpr left join dj_member dm
+        on rpr.operator_id=dm.id left join dj_house dh on rpr.house_id=dh.id
+        where 1=1
+        <if test="null!=type and ''!=type">
+           and  rpr.type=#{type}
+        </if>
+        <if test="null!=keyWord and ''!=keyWord">
+            AND (
+            dm.name LIKE CONCAT('%',#{keyWord},'%') or
+            dm.mobile LIKE CONCAT('%',#{keyWord},'%') or
+            dm.nick_name LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+    </select>
 
+    <select id="queryRewardPunishRecordDetail" resultType="com.dangjia.acg.dto.supervisor.JFRewardPunishRecordDTO">
+        select
+        IFNULL(rpr.type,'')  as type,
+        IFNULL(rpr.create_date,'')  as createDate,
+        IFNULL(dm.`name`,'')  as name ,
+        IFNULL(dm.worker_type,'')  as workerType,
+        IFNULL(dm.mobile,'')  as mobile,
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        IFNULL(rpc.name,'')  as rpcName,
+        IFNULL(rpc.content,'') as content,
+        '' as images
+        from
+        dj_worker_reward_punish_record rpr inner join dj_member dm on rpr.member_id=dm.id
+        inner join dj_house dh on rpr.house_id=dh.id  inner join dj_worker_reward_punish_correlation rpc
+        on rpr.reward_punish_correlation_id=rpc.id
+        where rpr.id=#{id}
+    </select>
     <select id="queryRewardPunishRecord" resultMap="findRewardPerms">
 		SELECT
             r.id,
@@ -57,24 +99,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             IFNULL(h.number, '*'),
             '号'
             ) house_name,
-            u.nick_name memberName,
+            u.name memberName,
             t.id tid,
             t.`name` tname,
             t.content tcontent,
             t.type ttype,
             t.state tstate,
+            wt.name workerTypeName,
+            wt.color workerTypeColor,
             m.`id` mid,
             m.`reward_punish_correlation_id` mreward_punish_correlation_id,
             m.`name` mname,
             m.type mtype,
             m.quantity mquantity,
             m.units munits,
+            r.images,
             m.start_time mstart_time,
             m.end_time mend_time
         FROM
             `dj_worker_reward_punish_record` r
         LEFT JOIN dj_house h ON r.house_id = h.id
         INNER JOIN dj_member u ON r.member_id = u.id
+        left JOIN dj_core_worker_type wt on wt.id=u.worker_type_id
         INNER JOIN dj_worker_reward_punish_correlation t ON r.reward_punish_correlation_id = t.id
         INNER JOIN dj_worker_reward_punish_condition m ON r.reward_punish_correlation_id = m.reward_punish_correlation_id
         where r.data_status=0

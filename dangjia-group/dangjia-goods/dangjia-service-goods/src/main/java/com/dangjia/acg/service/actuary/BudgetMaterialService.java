@@ -8,13 +8,14 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,14 +46,14 @@ public class BudgetMaterialService {
     @Autowired
     private IAttributeValueMapper iAttributeValueMapper;
     @Autowired
-    private IProductMapper iProductMaper;
-    @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
     private ConfigUtil configUtil;
 
     @Autowired
     private BudgetWorkerService budgetWorkerService;
+    @Autowired
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
 
 
     private static Logger LOG = LoggerFactory.getLogger(BudgetMaterialService.class);
@@ -104,7 +105,7 @@ public class BudgetMaterialService {
             budgetWorkerService.setGoods(mapList);
             for (Map<String, Object> obj : mapList) {
                 String goodsId = obj.get("goodsId").toString();
-                Goods goods = iGoodsMapper.queryById(goodsId);
+                BasicsGoods goods = iGoodsMapper.queryById(goodsId);
                 if (goods != null) {
                     Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
                     if (unit != null)
@@ -146,7 +147,7 @@ public class BudgetMaterialService {
     //根据类别Id查到所有所属商品goods
     public ServerResponse getAllGoodsByCategoryId(String categoryId) {
         try {
-            List<Goods> mapList = iGoodsMapper.queryByCategoryId(categoryId);
+            List<BasicsGoods> mapList = iGoodsMapper.queryByCategoryId(categoryId);
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -158,15 +159,15 @@ public class BudgetMaterialService {
     public ServerResponse getAllProductByGoodsId(String goodsId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Product> pList = iProductMaper.queryByGoodsId(goodsId);
+            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.queryByGoodsId(goodsId);
 
             List<Map<String, Object>> mapList = new ArrayList<>();
-            for (Product p : pList) {
+            for (DjBasicsProductTemplate p : pList) {
                 if (p.getImage() == null) {
                     continue;
                 }
 
-                List<Technology> pTechnologyList = iTechnologyMapper.queryTechnologyByWgId(p.getId());
+               /* List<Technology> pTechnologyList = iTechnologyMapper.queryTechnologyByWgId(p.getId());
                 List<Map<String, Object>> tTechnologymMapList = new ArrayList<>();
                 for (Technology t : pTechnologyList) {
                     if (t.getImage() == null) {
@@ -181,7 +182,7 @@ public class BudgetMaterialService {
                     map.put("imageUrl", imgStr.toString());
                     map.put("sampleImageUrl", address + t.getSampleImage());
                     tTechnologymMapList.add(map);
-                }
+                }*/
 
 
                 String[] imgArr = p.getImage().split(",");
@@ -219,7 +220,7 @@ public class BudgetMaterialService {
                 }
                 map.put("newValueNameArr", strNewValueNameArr);
 
-                map.put("tTechnologymMapList", tTechnologymMapList);
+              //  map.put("tTechnologymMapList", tTechnologymMapList);
                 mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
@@ -228,6 +229,5 @@ public class BudgetMaterialService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
 
 }

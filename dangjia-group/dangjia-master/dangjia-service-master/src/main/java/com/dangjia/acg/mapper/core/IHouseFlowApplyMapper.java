@@ -1,12 +1,15 @@
 package com.dangjia.acg.mapper.core;
 
+import com.dangjia.acg.dto.core.AcceptanceDynamicDTO;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.worker.Evaluate;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
@@ -17,6 +20,8 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
 
     List<HouseFlowApply> noPassList(@Param("houseFlowId") String houseFlowId);
 
+    //管家未主动验收的商品数量
+    Integer getSupplierNoActiveProductNum(@Param("houseId") String houseId);
     /**
      * 删除未审核申请
      */
@@ -87,5 +92,23 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
 
 
     List<HouseFlowApply> getBroadcastList(@Param("cityId") String cityId);
+
+
+
+    List<Evaluate> getOwnerComment(@Param("houseId") String houseId,
+                                   @Param("workerId") String workerId,
+                                   @Param("applyType") Integer applyType,
+                                   @Param("workerType") Integer workerType);
+
+    void updateIsReadType(Map<String,Object> map);
+
+    List<HouseFlowApply> queryAcceptanceDynamic(@Param("houseId") String houseId);
+
+    HouseFlowApply querySupervisorAcceptanceDynamic(@Param("houseFlowId") String houseFlowId);
+
+    HouseFlowApply queryApplyComplaints(@Param("houseFlowApplyId") String houseFlowApplyId);
+
+    List<Map> getApplyCheckInfo(@Param("houseFlowApplyId") String houseFlowApplyId);
+
 
 }

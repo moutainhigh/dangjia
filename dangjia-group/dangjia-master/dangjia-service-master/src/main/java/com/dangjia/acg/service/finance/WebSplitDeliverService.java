@@ -3,29 +3,39 @@ package com.dangjia.acg.service.finance;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.dto.receipt.ReceiptDTO;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
-import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
+import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
+import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
 import com.dangjia.acg.mapper.receipt.IReceiptMapper;
 import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
+import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.receipt.Receipt;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.SupplierProduct;
+import com.dangjia.acg.modle.supplier.DjSupplier;
+import com.dangjia.acg.service.configRule.ConfigRuleService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +44,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.*;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ysl
@@ -60,7 +74,16 @@ public class WebSplitDeliverService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ConfigUtil configUtil;
-
+    @Autowired
+    private IMasterStorefrontMapper iMasterStorefrontMapper;
+    @Autowired
+    private IMasterSupplierMapper iMasterSupplierMapper;
+    @Autowired
+    private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
     /**
      * 所有供应商
      *
@@ -71,10 +94,17 @@ public class WebSplitDeliverService {
      * @param endDate    结束时间
      * @return
      */
-    public ServerResponse getAllSplitDeliver(PageDTO pageDTO, String cityId,Integer applyState, String searchKey, String beginDate, String endDate) {
+    public ServerResponse getAllSplitDeliver(PageDTO pageDTO, String cityId,String userId,Integer applyState, String searchKey, String beginDate, String endDate) {
         try {
             if (applyState == null) {
                 applyState = -1;
+            }
+            Storefront storefront=null;
+            if(applyState !=-1) {
+                storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+                if (storefront == null) {
+                    return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+                }
             }
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate) && (applyState == 0 || applyState == -1)) {
                 applyState = -2;
@@ -86,43 +116,7 @@ public class WebSplitDeliverService {
                 }
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(cityId,applyState, searchKey, beginDate, endDate);
-            for (WebSplitDeliverItemDTO webSplitDeliverItemDTOList : webSplitDeliverItemDTOLists) {
-                Integer wait=0;
-                Integer sent=0;
-
-                Example example = new Example(SplitDeliver.class);
-                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, webSplitDeliverItemDTOList.getSupplierId()).andIn(SplitDeliver.APPLY_STATE,Arrays.asList(0,1,2));
-                List<SplitDeliver> splitDelivers=iSplitDeliverMapper.selectByExample(example);
-                for (SplitDeliver splitDeliver : splitDelivers) {
-                    if(splitDeliver.getApplyState()!=null) {
-                        if (splitDeliver.getApplyState() == 0) {
-                            wait++;
-                        }
-                        if (splitDeliver.getApplyState() == 1 || splitDeliver.getApplyState() == 2) {
-                            sent++;
-                        }
-                    }
-                }
-
-                example = new Example(MendDeliver.class);
-                example.createCriteria().andEqualTo(MendDeliver.SUPPLIER_ID, webSplitDeliverItemDTOList.getSupplierId()).andIn(SplitDeliver.APPLY_STATE,Arrays.asList(0,1));
-                List<MendDeliver> mendDelivers=iMendDeliverMapper.selectByExample(example);
-                for (MendDeliver mendDeliver : mendDelivers) {
-                    if(mendDeliver.getApplyState()!=null) {
-                        if (mendDeliver.getApplyState() == 0) {
-                            wait++;
-                        }
-                        if (mendDeliver.getApplyState() == 1) {
-                            sent++;
-                        }
-                    }
-                }
-
-                webSplitDeliverItemDTOList.setSent(sent);
-                webSplitDeliverItemDTOList.setWait(wait);
-
-            }
+            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(storefront==null?null:storefront.getId(),cityId,applyState, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -256,8 +250,10 @@ public class WebSplitDeliverService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse settlemen(String image, String merge, String supplierId) throws RuntimeException {
+    public ServerResponse settlemen(String image, String merge, String supplierId, String userId, String cityId, Double settlementAmount, String sourceType) throws RuntimeException {
         try {
+            Receipt receipt = new Receipt();
+            receipt.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             if (StringUtils.isNotEmpty(merge)) {
                 JSONArray itemObjArr = JSON.parseArray(merge);
                 double splitDeliverPrice = 0d;
@@ -271,26 +267,110 @@ public class WebSplitDeliverService {
                         SplitDeliver splitDeliver = new SplitDeliver();
                         splitDeliver.setId(id);
                         splitDeliver.setApplyState(2);
+                        splitDeliver.setReceiptNum(receipt.getNumber());
                         this.setSplitDeliver(splitDeliver);
-                        splitDeliverPrice += iSplitDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
+                        splitDeliverPrice += iSplitDeliverMapper.selectByPrimaryKey(id).getApplyMoney();
                     } else if (deliverType == 2) {
                         //退货单结算通过
                         MendDeliver mendDeliver = new MendDeliver();
                         mendDeliver.setId(id);
                         mendDeliver.setApplyState(2);
                         mendDeliver.setShippingState(2);
+                        mendDeliver.setReceiptNum(receipt.getNumber());
                         iMendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
-                        mendDeliverPrice += iMendDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
+                        mendDeliverPrice += iMendDeliverMapper.selectByPrimaryKey(id).getApplyMoney();
                     }
                 }
                 //添加回执
-                Receipt receipt = new Receipt();
                 receipt.setImage(image);
                 receipt.setMerge(merge);
                 receipt.setCreateDate(new Date());
                 receipt.setSupplierId(supplierId);
                 receipt.setTotalAmount(splitDeliverPrice - mendDeliverPrice);
+                receipt.setSourceType(sourceType);
                 iReceiptMapper.insert(receipt);
+                //店铺信息
+                Example example=new Example(Storefront.class);
+                example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId)
+                        .andEqualTo(Storefront.DATA_STATUS,0)
+                        .andEqualTo(Storefront.USER_ID,userId);
+                Storefront storefront = iMasterStorefrontMapper.selectOneByExample(example);
+
+                AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
+                AccountFlowRecord accountFlowRecord2=new AccountFlowRecord();
+                if(sourceType.equals("1")){
+                    Double[] depositCfg= configRuleUtilService.getRetentionUpperLimit(ConfigRuleService.SG008,null);
+                    //扣除店铺余额
+                    //入账前金额
+                    accountFlowRecord2.setAmountBeforeMoney(storefront.getSurplusMoney());
+                    storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
+                    //入账后金额
+                    accountFlowRecord.setAmountAfterMoney(storefront.getSurplusMoney());
+                    iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
+                    accountFlowRecord2.setFlowType("1");
+                    accountFlowRecord2.setMoney(settlementAmount);
+                    accountFlowRecord2.setState(9);
+                    accountFlowRecord2.setDefinedAccountId(storefront.getId());
+                    accountFlowRecord2.setDefinedName("合并結算");
+                    accountFlowRecord2.setCreateBy(userId);
+                    //供应商加余额
+                    DjSupplier djSupplier = iMasterSupplierMapper.selectByPrimaryKey(supplierId);
+
+                    //入账前金额
+                    accountFlowRecord.setAmountBeforeMoney(djSupplier.getSurplusMoney());
+
+                    BigDecimal workPrice =new BigDecimal(settlementAmount);
+                    BigDecimal retentionPrice  =new BigDecimal(djSupplier.getRetentionMoney());
+                    //算订单的5%
+                    BigDecimal mid = workPrice.multiply(new BigDecimal(depositCfg[0])).divide(new BigDecimal(100));
+                    if (!(retentionPrice.add(mid).compareTo(new BigDecimal(depositCfg[1])) == -1 ||
+                            retentionPrice.add(mid).compareTo(new BigDecimal(depositCfg[1])) == 0)) {
+                        mid = new BigDecimal(depositCfg[1]).subtract(retentionPrice);//只收这么多了
+                    }
+                    if (djSupplier.getRetentionMoney() < depositCfg[1]) {//押金没收够并且没有算过押金
+                        //实际滞留金减上限
+                        djSupplier.setRetentionMoney(MathUtil.add(retentionPrice.doubleValue(),mid.doubleValue()));
+                    }
+
+                    BigDecimal applyMoney = workPrice.subtract(mid);
+                    djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+applyMoney.doubleValue());
+                    djSupplier.setTotalAccount(CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount()+applyMoney.doubleValue());
+                    //入账后金额
+                    accountFlowRecord.setAmountAfterMoney(djSupplier.getSurplusMoney());
+
+                    accountFlowRecord.setFlowType("2");
+                    accountFlowRecord.setMoney(settlementAmount);
+                    accountFlowRecord.setState(0);
+                    accountFlowRecord.setDefinedAccountId(supplierId);
+                    accountFlowRecord.setDefinedName("合并結算");
+                    accountFlowRecord.setCreateBy(userId);
+
+                    //供应商滞留金收取
+                    if(mid.doubleValue()>0){
+                        AccountFlowRecord flow=new AccountFlowRecord();
+                        flow.setAmountAfterMoney(djSupplier.getSurplusMoney());
+                        flow.setFlowType("2");
+                        flow.setMoney(settlementAmount);
+                        flow.setDefinedAccountId(supplierId);
+                        flow.setDefinedName("滞留金收取");
+                        flow.setCreateBy(userId);
+                        flow.setState(5);
+                        flow.setHouseOrderId(receipt.getId());
+                        flow.setAmountBeforeMoney(retentionPrice.doubleValue());//更新前总额
+                        flow.setAmountAfterMoney(djSupplier.getRetentionMoney());//更新后总额
+                        flow.setCreateBy(userId);
+                        flow.setUpdateBy(userId);
+                        iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+                    }
+                }
+                if(sourceType.equals("1")){
+                    //供应商流水
+                    accountFlowRecord.setHouseOrderId(receipt.getId());
+                    iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+                    //店铺流水
+                    accountFlowRecord2.setHouseOrderId(receipt.getId());
+                    iMasterAccountFlowRecordMapper.insert(accountFlowRecord2);
+                }
             }
             return ServerResponse.createBySuccess("结算成功");
         } catch (Exception e) {
@@ -341,6 +421,7 @@ public class WebSplitDeliverService {
                             supplierDeliverDTO.setShipAddress(splitDeliver.getShipAddress());
                             Double totalAmount = iOrderSplitItemMapper.getSplitDeliverSellPrice(supplierDeliverDTO.getId());
                             supplierDeliverDTO.setTotalAmount(totalAmount);
+//                            supplierDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
                             supplierDeliverDTO.setApplyMoney(splitDeliver.getApplyMoney());
                             supplierDeliverDTO.setDeliverType(1);
                             sd += splitDeliver.getApplyMoney();

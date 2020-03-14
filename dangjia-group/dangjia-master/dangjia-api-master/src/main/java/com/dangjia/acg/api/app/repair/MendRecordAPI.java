@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.repair;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,7 +30,8 @@ public interface MendRecordAPI {
 
     @PostMapping(value = "app/repair/mendRecord/recordList")
     @ApiOperation(value = "记录列表", notes = "记录列表")
-    ServerResponse recordList(@RequestParam("userToken") String userToken,
+    ServerResponse recordList(@RequestParam("pageDTO") PageDTO pageDTO,
+                              @RequestParam("userToken") String userToken,
                               @RequestParam("roleType") Integer roleType,
                               @RequestParam("houseId") String houseId,
                               @RequestParam("queryId") String queryId,
@@ -43,5 +45,6 @@ public interface MendRecordAPI {
 
     @PostMapping(value = "app/repair/mendRecord/backOrder")
     @ApiOperation(value = "撤回补货要货订单", notes = "撤回补货要货订单")
-    ServerResponse backOrder(@RequestParam("mendOrderId") String mendOrderId, @RequestParam("type") Integer type);
+    ServerResponse backOrder(@RequestParam("mendOrderId") String mendOrderId,
+                             @RequestParam("type") Integer type);
 }

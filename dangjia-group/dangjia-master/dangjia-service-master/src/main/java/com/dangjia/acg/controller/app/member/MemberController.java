@@ -8,7 +8,11 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.member.MemberService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,10 +24,7 @@ public class MemberController implements MemberAPI {
     private MemberService memberService;
     @Autowired
     private CraftsmanConstructionService constructionService;
-    @Override
-    public String getUserToKenStr(String userRole,String memberId){
-        return memberService.getUserToKenStr(userRole, memberId);
-    }
+
     @Override
     @ApiMethod
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
@@ -43,21 +44,35 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse login(String phone, String password, Integer userRole) {
-        return memberService.login(phone, password, userRole);
+    public ServerResponse login(String phone, String password,String loginMode, Integer userRole) {
+        return memberService.login(phone, password,loginMode, userRole);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse registerCode(String phone) {
-        return memberService.registerCode(phone);
+    public ServerResponse registerCode(String phone,String codeType) {
+        return memberService.registerCode(phone,codeType);
     }
+
 
     @Override
     @ApiMethod
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse checkRegister(HttpServletRequest request, String phone, String password, Integer smscode, String invitationCode, Integer userRole, String longitude, String latitude) {
         return memberService.checkRegister(request, phone, smscode, password, invitationCode, userRole, longitude, latitude);
     }
+
+    /**
+     * 注销账号
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public  ServerResponse cancellationAccountMember(String userToken){
+        return memberService.cancellationAccountMember(userToken);
+    }
+
 
     @Override
     @ApiMethod
@@ -119,7 +134,22 @@ public class MemberController implements MemberAPI {
     public ServerResponse getMyHomePage(String userToken, Integer userRole) {
         return memberService.getMyHomePage(userToken, userRole);
     }
-
+    /**
+     * 获取我的徽章
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMyInsigniaList(String userToken){
+        return memberService.getMyInsigniaList(userToken);
+    }
+    /**
+     * 获取我的徽章--徽章详情
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMyInsigniaDetail(String userToken,String code){
+        return memberService.getMyInsigniaDetail(userToken,code);
+    }
 
     @Override
     @ApiMethod
@@ -148,6 +178,18 @@ public class MemberController implements MemberAPI {
     @ApiMethod
     public ServerResponse promotionList(HttpServletRequest request, String userToken, PageDTO pageDTO) {
         return memberService.promotionList(userToken,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryMember(HttpServletRequest request, String userToken,String houseId,String cityId) {
+        return memberService.queryMember(userToken,houseId,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryOrderNumber(HttpServletRequest request, String userToken) {
+        return memberService.queryOrderNumber(userToken);
     }
 }
 

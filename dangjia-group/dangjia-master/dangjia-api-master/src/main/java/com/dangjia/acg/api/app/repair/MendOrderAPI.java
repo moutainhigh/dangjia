@@ -57,6 +57,12 @@ public interface MendOrderAPI {
                                      @RequestParam("workerTypeId") String workerTypeId,
                                      @RequestParam("dateNum") Integer dateNum);
 
+   /* @PostMapping(value = "app/repair/mendOrder/saveConfirmWorker")
+    @ApiOperation(value = "工匠补人工提交(新流程)", notes = "工匠补人工提交(新流程)")
+    ServerResponse saveConfirmWorker(@RequestParam("houseId") String houseId,
+                                     @RequestParam("workerId") String workerId,
+                                     @RequestParam("dateNum") Integer dateNum);*/
+
     @PostMapping(value = "app/repair/mendOrder/getMendWorkerList")
     @ApiOperation(value = "补退订单表单明细", notes = "补人工单明细")
     ServerResponse getMendWorkerList(@RequestParam("houseId") String houseId,
@@ -116,6 +122,8 @@ public interface MendOrderAPI {
     ServerResponse saveMendMaterial(@RequestParam("userToken") String userToken,
                                     @RequestParam("houseId") String houseId,
                                     @RequestParam("productArr") String productArr);
+
+
 
 }
 

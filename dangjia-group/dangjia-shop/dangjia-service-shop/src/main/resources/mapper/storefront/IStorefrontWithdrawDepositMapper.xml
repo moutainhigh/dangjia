@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.storefront.IStorefrontWithdrawDepositMapper">
+
+    <select id="queryBankCard" resultType="com.dangjia.acg.modle.other.BankCard">
+        SELECT
+          obc.id,
+          obc.create_date as createDate,
+          obc.modify_date as createDate,
+          obc.bank_name as bankName,
+          obc.bank_card_image as bankCardImage,
+          obc.bk_max_amt as bkMaxAmt,
+          obc.bk_min_amt as bkMinAmt,
+          obc.sign,
+          obc.data_status as dataStatus
+        FROM
+            dj_worker_worker_bank_card wwbc,
+            dj_other_bank_card obc
+        WHERE
+            wwbc.bank_card_id = obc.id
+        AND wwbc.bank_card_number = #{bankCardNumber}
+        AND wwbc.worker_id = #{workerId}
+    </select>
+
+</mapper>

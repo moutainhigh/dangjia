@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.IShoppingCartMapper">
+	<sql id="all_storefront_column">
+          s.id,
+          s.user_id AS userId,
+          s.city_id AS cityId,
+          s.storefront_name AS storefrontName,
+          s.storefront_address AS storefrontAddress,
+          s.storefront_desc AS storefrontDesc,
+          s.storefront_logo AS storefrontLogo,
+          s.storekeeper_name AS storekeeperName,
+          s.mobile,
+          s.email,
+          s.create_date AS createDate,
+          s.modify_date AS modifyDate,
+          s.data_status AS dataStatus
+    </sql>
+
+    <sql id="all_columns">
+		id,
+		city_id as cityId,
+		member_id as memberId,
+		product_id as productId,
+		product_sn as productSn,
+		product_name as productName,
+		image,
+		price ,
+		shop_count as shopCount,
+		unit_name as unitName,
+		category_id as categoryId,
+		product_type as productType,
+		storefront_id as storefrontId ,
+		create_date AS createDate,
+        modify_date AS modifyDate,
+        data_status AS dataStatus
+	</sql>
+	<resultMap id="shoppingCarts" type="com.dangjia.acg.dto.product.ShoppingCartDTO" >
+		<result column="storefrontId" property="storefrontId"/>
+		<result column="storefrontName" property="storefrontName"/>
+		<result column="storefrontIcon" property="storefrontIcon"/>
+		<collection property="shoppingCartListDTOS" ofType="com.dangjia.acg.dto.product.ShoppingCartListDTO">
+			<result  column="price" property="price"/>
+			<result  column="shopCount" property="shopCount"/>
+			<result  column="unitName" property="unitName"/>
+			<result  column="productType" property="productType"/>
+			<result  column="productId" property="productId"/>
+			<result  column="productName" property="productName"/>
+			<result  column="productSn" property="productSn"/>
+			<result  column="productSn" property="productSn"/>
+			<result  column="categoryId" property="categoryId"/>
+			<result  column="image" property="image"/>
+			<result  column="sellPrice" property="sellPrice"/>
+			<result  column="isReservationDeliver" property="isReservationDeliver"/>
+			<result  column="valueNameArr" property="valueNameArr"/>
+			<result  column="unitType" property="unitType"/>
+		</collection>
+	</resultMap>
+	<select id="queryShoppingCartDTOS" resultMap="shoppingCarts">
+		SELECT
+			a.id,
+			a.id AS storefrontId,
+			a.storefront_name AS storefrontName,
+			a.storefront_logo AS storefrontIcon,
+			b.sell_price price,
+			0 shopCount,
+			e. NAME AS unitName,
+			d.type AS productType,
+			b.id AS productId,
+			b.product_name AS productName,
+			c.product_sn AS productSn,
+			c.category_id AS categoryId,
+			b.image,
+			b.sell_price AS sellPrice,
+			d.is_reservation_deliver AS isReservationDeliver,
+			c.value_name_arr AS valueNameArr,
+			c.value_id_arr AS valueIdArr,
+			e.type AS unitType
+		FROM
+			dj_basics_storefront a
+		INNER JOIN dj_basics_storefront_product b ON b.storefront_id = a.id
+		INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
+		INNER JOIN dj_basics_goods d ON c.goods_id = d.id
+		INNER JOIN dj_basics_unit e ON c.convert_unit = e.id
+		WHERE 1=1
+		<if test="productIds!=null or productIds!=''">
+			AND b.id in
+			<foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+   	</select>
+
+	<select id="queryShoppingCartDTOS1" resultMap="shoppingCarts">
+		SELECT
+			e.storefront_name AS storefrontName,
+			e.storefront_logo AS storefrontIcon,
+			b.storefront_id AS storefrontId,
+			a.rush_purchase_price AS price,
+			d.type AS productType,
+			b.id AS productId,
+			b.product_name AS productName,
+			c.product_sn AS productSn,
+			c.category_id AS categoryId,
+			b.image,
+			b.sell_price AS sellPrice,
+			d.is_reservation_deliver AS isReservationDeliver,
+			c.value_name_arr AS valueNameArr,
+			c.value_id_arr AS valueIdArr
+		FROM
+			dj_store_activity_product a
+		INNER JOIN dj_basics_storefront_product b ON b.id = a.product_id
+		INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
+		INNER JOIN dj_basics_goods d ON c.goods_id = d.id
+		INNER JOIN dj_basics_storefront e ON e.id = b.storefront_id
+		WHERE a.id = #{storeActivityProductId}
+	</select>
+
+  	<select id="queryCartList" resultType="com.dangjia.acg.dto.product.ShoppingCartListDTO">
+		SELECT
+			a.id,
+			b.sell_price as price,
+			a.shop_count as shopCount,
+			a.unit_name as unitName,
+			a.product_type as productType,
+			a.storefront_id as storefrontId ,
+			a.product_type as productType,
+			b.id AS productId,
+			b.product_name AS productName,
+			a.product_sn as productSn,
+			b.image,
+			b.sell_price AS sellPrice,
+			a.is_reservation_deliver AS isReservationDeliver,
+			a.unit_type as unitType,
+			a.value_id_arr as valueIdArr,
+			a.category_id as categoryId,
+			a.unit_type as unitType,
+			a.category_id as categoryId,
+			b.adjusted_price as adjustedPrice,
+			b.modity_price_time as modityPriceTime
+		FROM
+			dj_repair_shopping_cart a
+		INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
+		WHERE a.member_id =#{memberId}
+		AND a.city_id =#{cityId}
+		AND a.storefront_id=#{storefrontId}
+		AND a.product_type &lt; 4
+		<if test="null!=productIds and productIds.size>0">
+			AND a.product_id in
+			<foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+
+	<select id="querySingleCartList" resultType="com.dangjia.acg.dto.product.ShoppingCartListDTO">
+		SELECT
+		a.id,
+		b.sell_price as price,
+		a.shop_count as shopCount,
+		a.unit_name as unitName,
+		a.product_type as productType,
+		a.storefront_id as storefrontId ,
+		a.product_type as productType,
+		b.id AS productId,
+		b.product_name AS productName,
+		a.product_sn as productSn,
+		b.image,
+		b.sell_price AS sellPrice,
+		a.is_reservation_deliver AS isReservationDeliver,
+		a.unit_type as unitType,
+		a.value_id_arr as valueIdArr,
+		a.category_id as categoryId,
+		a.unit_type as unitType,
+		a.category_id as categoryId,
+		b.adjusted_price as adjustedPrice,
+		b.modity_price_time as modityPriceTime
+		FROM
+		dj_repair_shopping_cart a
+		INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
+		WHERE a.id=#{id}
+	</select>
+
+	<select id="queryStorefrontIds" resultType="com.dangjia.acg.modle.storefront.Storefront">
+		SELECT
+		<include refid="all_storefront_column"/>
+		FROM
+		dj_repair_shopping_cart c
+		INNER JOIN dj_basics_storefront  s on c.storefront_id=s.id
+		WHERE
+		c.member_id =#{memberId}
+			AND c.city_id =#{cityId}
+		group by storefront_id
+	</select>
+
+	<select id="queryPurchaseRestrictions" resultType="java.lang.Integer">
+		SELECT
+			bgc.purchase_restrictions
+		FROM
+			dj_basics_storefront_product bsp,
+			dj_basics_product_template bst,
+			dj_basics_goods_category bgc
+		WHERE
+			bsp.prod_template_id = bst.id
+		AND bgc.id = bst.category_id
+		AND bsp.id = #{storefrontProductId}
+	</select>
+
+
+
+
+</mapper>
+

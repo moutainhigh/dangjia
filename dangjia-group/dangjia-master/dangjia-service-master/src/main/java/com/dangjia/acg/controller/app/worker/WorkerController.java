@@ -6,6 +6,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.worker.WorkerBankCard;
 import com.dangjia.acg.service.worker.RewardPunishService;
+import com.dangjia.acg.service.worker.WorkerIntegraService;
 import com.dangjia.acg.service.worker.WorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,23 @@ public class WorkerController implements WorkerAPI {
     private RewardPunishService rewardPunishService;
 
 
+    @Autowired
+    private WorkerIntegraService workerIntegraService;
+    /**
+     * 获取积分排行记录
+     * @param type   0=排行榜 1=飙升榜
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryRankingIntegral(Integer type, String userToken){
+        return workerIntegraService.queryRankingIntegral(type, userToken);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getComprehensiveWorker(String userToken){
+        return workerIntegraService.getComprehensiveWorker(userToken);
+    }
     /**
      * 查询通讯录
      */
@@ -81,8 +99,8 @@ public class WorkerController implements WorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getMyBankCard(String userToken){
-        return  workerService.getMyBankCard(userToken);
+    public ServerResponse getMyBankCard(String userToken,String userId){
+        return  workerService.getMyBankCard(userToken,userId);
     }
     /**
      * 添加银行卡
@@ -91,8 +109,21 @@ public class WorkerController implements WorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,WorkerBankCard bankCard){
-        return  workerService.addMyBankCard(request,userToken,bankCard);
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,WorkerBankCard bankCard,
+                                        String userId,String phone,Integer smscode){
+        return  workerService.addMyBankCard(request,userToken,bankCard,userId,phone,smscode);
+    }
+
+
+    /**
+     * 绑定银行卡验证码
+     * @param phone
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse registerCode(HttpServletRequest request,String phone) {
+        return  workerService.registerCode(phone);
     }
 
     /**
@@ -104,6 +135,16 @@ public class WorkerController implements WorkerAPI {
     @ApiMethod
     public ServerResponse delMyBankCard(HttpServletRequest request, String userToken,String workerBankCardId){
         return  workerService.delMyBankCard(request,userToken,workerBankCardId);
+    }
+
+    /**
+     * 解绑银行卡
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse untyingBankCard(HttpServletRequest request,String userId, String workerBankCardId,String payPassword){
+        return  workerService.untyingBankCard(userId,workerBankCardId,payPassword);
     }
 
     /**
@@ -135,9 +176,21 @@ public class WorkerController implements WorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryRewardPunishRecord(String userToken, String workerId,PageDTO pageDTO){
-        return rewardPunishService.queryRewardPunishRecord(userToken, workerId,pageDTO);
+    public ServerResponse queryRewardPunishRecord(String userToken, String workerId,String houseId,PageDTO pageDTO){
+        return rewardPunishService.queryRewardPunishRecord(userToken, workerId, houseId,pageDTO);
     }
+    /**
+     *奖罚记录（我的）
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMyRewardPunishRecord(String userToken, String houseId,PageDTO pageDTO){
+        return rewardPunishService.getMyRewardPunishRecord(userToken,  houseId,pageDTO);
+    }
+
+
     /**
      *奖罚详情
      * @param recordId

@@ -25,9 +25,11 @@ public interface ActuaryOpeAPI {
                                    @RequestParam("type")Integer type);
 
     @PostMapping("/actuary/actuaryOpe/categoryIdList")
-    @ApiOperation(value = "所有分类", notes = "所有分类")
+    @ApiOperation(value = "", notes = "所有分类")
     ServerResponse categoryIdList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId,
                                   @RequestParam("type")Integer type);
+
+
 
     @PostMapping("/actuary/actuaryOpe/actuary")
     @ApiOperation(value = "精算详情", notes = "精算详情")

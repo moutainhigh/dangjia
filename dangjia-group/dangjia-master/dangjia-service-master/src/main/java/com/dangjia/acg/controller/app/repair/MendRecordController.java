@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.repair;
 
 import com.dangjia.acg.api.app.repair.MendRecordAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.repair.MendRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class MendRecordController implements MendRecordAPI {
     private MendRecordService mendRecordService;
 
     /**
-     * 补退明细
+     * 审/要/补/退明细
      */
     @Override
     @ApiMethod
@@ -41,8 +42,8 @@ public class MendRecordController implements MendRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse recordList(String userToken, Integer roleType, String houseId, String queryId, Integer type) {
-        return mendRecordService.recordList(userToken, roleType, houseId, queryId, type);
+    public ServerResponse recordList(PageDTO pageDTO,String userToken, Integer roleType, String houseId, String queryId, Integer type) {
+        return mendRecordService.recordList(pageDTO,userToken, roleType, houseId, queryId, type);
     }
 
     /**

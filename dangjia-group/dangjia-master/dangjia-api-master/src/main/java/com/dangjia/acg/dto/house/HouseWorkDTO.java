@@ -12,4 +12,5 @@ public class HouseWorkDTO {
     private String phone;
     private BigDecimal haveMoney;//已获工钱
     private String workerId;
+    private String head; //头像
 }

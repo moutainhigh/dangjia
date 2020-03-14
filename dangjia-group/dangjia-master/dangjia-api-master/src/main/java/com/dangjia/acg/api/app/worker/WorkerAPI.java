@@ -17,8 +17,17 @@ import javax.servlet.http.HttpServletRequest;
  * Time: 18:56
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "工匠管理接口", description = "工匠管理关联接口")
+@Api(value = "工匠管理关联接口", description = "工匠管理关联接口")
 public interface WorkerAPI {
+
+    @PostMapping("app/worker/integral/ranking")
+    @ApiOperation(value = "获取积分排行记录", notes = "获取积分排行记录")
+    ServerResponse queryRankingIntegral(Integer type, String userToken);
+
+
+    @PostMapping("app/worker/comprehensive")
+    @ApiOperation(value = "获取综合评分", notes = "获取综合评分")
+    ServerResponse getComprehensiveWorker(String userToken);
 
     @PostMapping("app/worker/getMailList")
     @ApiOperation(value = "通讯录", notes = "通讯录")
@@ -47,19 +56,36 @@ public interface WorkerAPI {
 
     @PostMapping("app/worker/getMyBankCard")
     @ApiOperation(value = "我的银行卡", notes = "我的银行卡")
-    ServerResponse getMyBankCard(@RequestParam("userToken") String userToken);
+    ServerResponse getMyBankCard(@RequestParam("userToken") String userToken,
+                                 @RequestParam("userId")  String userId);
 
     @PostMapping("app/worker/addMyBankCard")
     @ApiOperation(value = "添加银行卡", notes = "添加银行卡")
     ServerResponse addMyBankCard(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
-                                 @RequestParam("bankCard") WorkerBankCard bankCard);
+                                 @RequestParam("bankCard") WorkerBankCard bankCard,
+                                 @RequestParam("userId")  String userId,
+                                 @RequestParam("phone") String phone,
+                                 @RequestParam("smscode") Integer smscode);
+
+    @PostMapping("web/worker/registerCode")
+    @ApiOperation(value = "绑定银行卡验证码", notes = "绑定银行卡验证码")
+    ServerResponse registerCode(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("phone") String phone);
 
     @PostMapping("app/worker/delMyBankCard")
     @ApiOperation(value = "删除银行卡", notes = "删除银行卡")
     ServerResponse delMyBankCard(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
                                  @RequestParam("workerBankCardId") String workerBankCardId);
+
+    @PostMapping("app/worker/untyingBankCard")
+    @ApiOperation(value = "解绑银行卡", notes = "解绑银行卡")
+    ServerResponse untyingBankCard(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("userId") String userId,
+                                   @RequestParam("workerBankCardId") String workerBankCardId,
+                                   @RequestParam("payPassword") String payPassword);
+
 
     @PostMapping("app/worker/getRanking")
     @ApiOperation(value = "邀请排行榜", notes = "邀请排行榜")
@@ -73,8 +99,14 @@ public interface WorkerAPI {
     @ApiOperation(value = "奖罚记录", notes = "奖罚记录")
     ServerResponse queryRewardPunishRecord(@RequestParam("userToken") String userToken,
                                            @RequestParam("workerId") String workerId,
+                                           @RequestParam("houseId") String houseId,
                                            @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping("/app/rewardPunish/my/list")
+    @ApiOperation(value = "奖罚记录", notes = "奖罚记录")
+    ServerResponse getMyRewardPunishRecord(@RequestParam("userToken") String userToken,
+                                           @RequestParam("houseId") String houseId,
+                                           @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("/app/rewardPunish/get")
     @ApiOperation(value = "奖罚详情", notes = "奖罚详情")

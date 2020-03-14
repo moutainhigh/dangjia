@@ -15,6 +15,7 @@ import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationStage;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -95,7 +96,7 @@ public class HomeModularService {
             }
             map.put("describe", describe.toString());
             map.put("houseId", houseFlowApply.getHouseId());
-            map.put("image",address + image);
+            map.put("imageUrl",address + image);
             listMap.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", listMap);
@@ -176,5 +177,17 @@ public class HomeModularService {
             }
         }
         return stages;
+    }
+
+    /** 根据名称查询攻略 */
+    public ServerResponse queryRenovationManualList(String name, PageDTO pageDTO){
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<RenovationManual> renovationManualList = renovationManualMapper.getRenovationManualByName(name);
+        if( renovationManualList == null || renovationManualList.size() < 1 ){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+
+        PageInfo pageResult = new PageInfo(renovationManualList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 }

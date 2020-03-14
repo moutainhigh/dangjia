@@ -25,10 +25,10 @@ public interface HouseWorkerAPI {
 
     @PostMapping("app/core/houseWorker/setWorkerGrab")
     @ApiOperation(value = "工匠抢单", notes = "工匠抢单")
-    ServerResponse setWorkerGrab(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("userToken") String userToken,
+    ServerResponse setWorkerGrab(@RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
-                                 @RequestParam("houseFlowId") String houseFlowId);
+                                 @RequestParam("houseFlowId") String houseFlowId,
+                                 @RequestParam("type") Integer type);
 
     /**
      * showdoc
@@ -79,23 +79,63 @@ public interface HouseWorkerAPI {
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 4
      * @Author: Ruking 18075121944
-     * @Date: 2019/6/24 12:03 PM
+     * @Date: 2019/11/14 12:03 PM
      */
     @PostMapping("app/core/houseWorker/getHouseWorker")
     @ApiOperation(value = "获取工匠详情", notes = "获取工匠详情")
     ServerResponse getHouseWorker(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseFlowId") String houseFlowId);
 
+
+    @PostMapping("app/core/houseWorker/getWorkerInfo")
+    @ApiOperation(value = "新获取工匠详情", notes = "新获取工匠详情")
+    ServerResponse getWorkerInFo(@RequestParam("userToken") String userToken,
+                                  @RequestParam("workerId") String workerId,
+                                 @RequestParam("orderId") String orderId);
+
+
+    @PostMapping("app/core/houseWorker/getWorkerComplainInFo")
+    @ApiOperation(value = "申请更换工匠详情", notes = "申请更换工匠详情")
+    ServerResponse getWorkerComplainInFo(@RequestParam("userToken") String userToken,
+                                         @RequestParam("houseFlowId") String houseFlowId);
+
+
     @PostMapping("app/core/houseWorker/getConstructionByWorkerId")
     @ApiOperation(value = "根据工人查询自己的施工界面", notes = "根据工人查询自己的施工界面")
     ServerResponse getConstructionByWorkerId(@RequestParam("request") HttpServletRequest request,
                                              @RequestParam("userToken") String userToken,
+                                             @RequestParam("houseWorkerId") String houseWorkerId,
                                              @RequestParam("cityId") String cityId);
+
+    @PostMapping("app/core/houseWorker/getConstructionInfo")
+    @ApiOperation(value = "大管家查看工地进度详情", notes = "大管家查看工地进度详情")
+    ServerResponse getConstructionInfo(HttpServletRequest request, String userToken, String houseId,String houseFlowId);
+
+    @PostMapping("app/core/houseWorker/getJobsInfo")
+    @ApiOperation(value = "大管家查看任务详情", notes = "大管家查看任务详情")
+    ServerResponse getJobsInfo(HttpServletRequest request, String userToken, String houseId, String productId);
 
     @PostMapping("app/core/houseWorker/getHouseFlowApply")
     @ApiOperation(value = "获取申请单明细", notes = "获取申请单明细")
     ServerResponse getHouseFlowApply(@RequestParam("userToken") String userToken, @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 
+
+    @PostMapping("app/core/worker/detection/timeout")
+    @ApiOperation(value = "是否超过期限没有施工，则需要重新培训", notes = "是否超过期限没有施工，则需要重新培训")
+    ServerResponse getHouseDetectionTimeout(@RequestParam("userToken")String userToken);
+    /**
+     *
+     * @param userToken
+     * @param applyType
+     * @param houseFlowId
+     * @param applyDec
+     * @param imageList
+     * @param latitude
+     * @param longitude
+     * @param returnableMaterial 是否有可退材料（1是，0否）
+     * @param materialProductArr 可退材料列表
+     * @return
+     */
     @PostMapping("app/core/houseWorker/setHouseFlowApply")
     @ApiOperation(value = "提交审核、停工", notes = "提交审核、停工")
     ServerResponse setHouseFlowApply(@RequestParam("userToken") String userToken,
@@ -103,21 +143,23 @@ public interface HouseWorkerAPI {
                                      @RequestParam("houseFlowId") String houseFlowId,
                                      @RequestParam("applyDec") String applyDec,
                                      @RequestParam("imageList") String imageList,
-                                     @RequestParam("houseFlowId2") String houseFlowId2,
                                      @RequestParam("latitude") String latitude,
-                                     @RequestParam("longitude") String longitude);
+                                     @RequestParam("longitude") String longitude,
+                                     @RequestParam("returnableMaterial") String returnableMaterial,
+                                     @RequestParam("materialProductArr") String materialProductArr);
 
     @PostMapping("app/core/houseWorker/getAdvanceInAdvance")
     @ApiOperation(value = "提前进场", notes = "提前进场")
     ServerResponse getAdvanceInAdvance(@RequestParam("userToken") String userToken,
                                        @RequestParam("houseFlowId") String houseFlowId);
 
+    @PostMapping("app/core/houseWorker/setHouseFlowImage")
+    @ApiOperation(value = "上传水电管路图", notes = "上传水电管路图")
+    ServerResponse setHouseFlowImage(@RequestParam("houseId") String houseId, @RequestParam("imageList") String imageList);
 
     /**
      * showdoc
      *
-     * @param pageNum   必选 int 页码
-     * @param pageSize  必选 int 记录数
      * @param userToken 必选/可选 string userToken
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
      * @catalog 当家接口文档/房产任务模块
@@ -150,11 +192,15 @@ public interface HouseWorkerAPI {
     @PostMapping("app/core/houseWorker/setSwitchHouseFlow")
     @ApiOperation(value = "切换工地", notes = "切换工地")
     ServerResponse setSwitchHouseFlow(@RequestParam("userToken") String userToken,
-                                      @RequestParam("houseFlowId") String houseFlowId);
+                                      @RequestParam("houseWorkerId") String houseWorkerId);
 
     @PostMapping("app/core/houseWorker/setSupervisorApply")
     @ApiOperation(value = "大管家申请验收", notes = "大管家申请验收")
     ServerResponse setSupervisorApply(@RequestParam("userToken") String userToken,
                                       @RequestParam("houseFlowId") String houseFlowId);
 
+    @PostMapping("app/core/houseWorker/autoDistributeHandle")
+    @ApiOperation(value = "大管家自动派单", notes = "大管家自动派单")
+    ServerResponse autoDistributeHandle(
+            @RequestParam("houseFlowId") String houseFlowId);
 }

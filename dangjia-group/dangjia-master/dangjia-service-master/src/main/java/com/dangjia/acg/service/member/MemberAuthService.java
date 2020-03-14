@@ -1,8 +1,13 @@
 package com.dangjia.acg.service.member;
 
 
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.net.MininProgramUtil;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.member.IMemberAuthMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -12,10 +17,13 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 当家用户第三方认证
@@ -30,6 +38,8 @@ public class MemberAuthService {
     private MemberService memberService;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private RedisClient redisClient;
 
     /**
      * 当家用户第三方认证登录
@@ -112,15 +122,16 @@ public class MemberAuthService {
      * @param memberAuth     当家用户第三方认证表
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse newUserBinding(HttpServletRequest request, String phone, String password,
                                          int smscode, String invitationCode,
-                                         MemberAuth memberAuth ,String longitude, String latitude) {
+                                         MemberAuth memberAuth, String longitude, String latitude) {
         if (memberAuth.getUserRole() == null || memberAuth.getUserRole() == 0
                 || memberAuth.getOpenType() == null || memberAuth.getOpenType() == 0
                 || memberAuth.getUnionid() == null) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
-        ServerResponse response = memberService.checkRegister(request, phone, smscode, password, invitationCode, memberAuth.getUserRole(),longitude,latitude);
+        ServerResponse response = memberService.checkRegister(request, phone, smscode, password, invitationCode, memberAuth.getUserRole(), longitude, latitude);
         if (!response.isSuccess()) {
             return response;
         }
@@ -134,6 +145,7 @@ public class MemberAuthService {
      * @param memberAuth 当家用户第三方认证表
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse bindingThirdParties(String userToken, MemberAuth memberAuth) {
         if (memberAuth.getUserRole() == null || memberAuth.getUserRole() == 0
                 || memberAuth.getOpenType() == null || memberAuth.getOpenType() == 0
@@ -228,5 +240,157 @@ public class MemberAuthService {
             return ServerResponse.createBySuccess("查询成功", 0);
         }
         return ServerResponse.createBySuccess("查询成功", 1);
+    }
+
+    /**
+     * 微信小程序登录
+     *
+     * @param code 登录时获取的 code
+     * @return 登录信息
+     */
+    public ServerResponse miniProgramLogin(String code) {
+        Object jscode2session = jscode2session(code);
+        if (jscode2session instanceof ServerResponse) {
+            return (ServerResponse) jscode2session;
+        }
+        JSONObject object = (JSONObject) jscode2session;
+        String openid = object.getString("openid");
+        String sessionKey = object.getString("session_key");
+        String unionid = object.getString("unionid");
+        if (CommonUtil.isEmpty(unionid)) {
+            Map map = new HashMap();
+            map.put("openid", openid);
+            map.put("sessionKey", sessionKey);
+            map.put("loginType", 1);
+            return ServerResponse.createBySuccess("登录失败", map);
+        }
+        ServerResponse serverResponse = authLogin(1, unionid, 1);
+        if (serverResponse.isSuccess()) {
+            Map map = BeanUtils.beanToMap(serverResponse.getResultObj());
+            map.put("openid", openid);
+            map.put("sessionKey", sessionKey);
+            map.put("unionid", unionid);
+            map.put("loginType", 0);
+            return ServerResponse.createBySuccess("登录成功，正在跳转", map);
+        } else {
+            if (serverResponse.getResultCode() == ServerCode.NO_DATA.getCode()) {
+                Map map = new HashMap();
+                map.put("openid", openid);
+                map.put("sessionKey", sessionKey);
+                map.put("unionid", unionid);
+                map.put("loginType", 1);
+                return ServerResponse.createBySuccess("登录失败", map);
+            } else {
+                return serverResponse;
+            }
+        }
+    }
+
+    /**
+     * 小程序获取手机号
+     */
+    public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String sessionKey) {
+        request.setAttribute("isShow", "true");
+        Map<String, String> map = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
+        if (map == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到相关信息");
+        } else {
+            return ServerResponse.createBySuccess("获取成功", map);
+        }
+    }
+
+    /**
+     * 小程序通过Code注册登录账号
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse miniProgramCodeRegister(HttpServletRequest request, String encrypted, String iv,
+                                                  String sessionKey, String openid, String unionid,
+                                                  String name, String iconurl) {
+        Map<String, String> map = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
+        if (map == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
+        }
+        String phone = map.get("phone");
+        if (phone == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
+        } else {
+            return miniProgramRegister(request, phone, openid, unionid, name, iconurl);
+        }
+    }
+
+    /**
+     * 小程序通过手机号注册登录账号
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse miniProgramPhoneRegister(HttpServletRequest request, String phone, String smscode, String openid, String unionid,
+                                                   String name, String iconurl) {
+        Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
+        Integer smscodeInt;
+        try {
+            smscodeInt = Integer.valueOf(smscode);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("验证码错误");
+        }
+        if (!smscodeInt.equals(registerCode)) {
+            return ServerResponse.createByErrorMessage("验证码错误");
+        } else {
+            return miniProgramRegister(request, phone, openid, unionid, name, iconurl);
+        }
+    }
+
+    private ServerResponse miniProgramRegister(HttpServletRequest request, String phone, String openid, String unionid, String name, String iconurl) {
+        if (CommonUtil.isEmpty(phone) || phone.length() != 11) {
+            return ServerResponse.createByErrorMessage("手机号不正确");
+        }
+        Member member = memberMapper.getByPhone(phone);
+        if (member == null) {
+            ServerResponse response = memberService.register(request, phone, null,
+                    null, 1, null, null);
+            if (!response.isSuccess()) {
+                return response;
+            }
+            member = memberMapper.getByPhone(phone);
+        }
+        Example example = new Example(MemberAuth.class);
+        example.createCriteria()
+                .andEqualTo(MemberAuth.OPEN_TYPE, 1)
+                .andEqualTo(MemberAuth.MEMBER_ID, member.getId())
+                .andEqualTo(MemberAuth.DATA_STATUS, 0);
+        List<MemberAuth> memberAuthList = memberAuthMapper.selectByExample(example);
+        if (memberAuthList != null && memberAuthList.size() > 0) {
+            return ServerResponse.createByErrorMessage("此账号已绑定过,请勿重复绑定");
+        }
+        MemberAuth memberAuth = new MemberAuth();
+        memberAuth.setIconurl(iconurl);
+        memberAuth.setOpenType(1);
+        memberAuth.setOpenid(openid);
+        memberAuth.setAccessToken("");
+        memberAuth.setUnionid(unionid);
+        memberAuth.setName(name);
+        memberAuth.setUserRole(1);
+        memberAuth.setMemberId(member.getId());
+        memberAuthMapper.insertSelective(memberAuth);
+        return memberService.getUser(member, 1);
+    }
+
+    private Object jscode2session(String code) {
+        try {
+            JSONObject object = MininProgramUtil.jscode2session(code);
+            Integer errcode = object.getInteger("errcode");
+            if (errcode != null && errcode != 0) {
+                switch (errcode) {
+                    case 45011:
+                        return ServerResponse.createByErrorMessage("频率限制，每个用户每分钟100次");
+                    case -1:
+                        return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
+                    default:
+                        return ServerResponse.createByErrorMessage("code 无效");
+                }
+            } else {
+                return object;
+            }
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
+        }
     }
 }

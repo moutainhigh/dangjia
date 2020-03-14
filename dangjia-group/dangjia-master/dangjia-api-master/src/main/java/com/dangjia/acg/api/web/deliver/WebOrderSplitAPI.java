@@ -9,6 +9,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 @FeignClient("dangjia-service-master")
 @Api(value = "发货管理web接口", description = "发货管理web接口")
@@ -24,7 +26,7 @@ public interface WebOrderSplitAPI {
     ServerResponse rejectionSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId);
 
     @PostMapping("web/deliver/orderSplit/splitDeliverDetail")
-    @ApiOperation(value = "发货单明细", notes = "发货单明细")
+    @ApiOperation(value = "发货任务--货单详情--清单", notes = "发货任务--货单详情--清单")
     ServerResponse splitDeliverDetail(@RequestParam("splitDeliverId") String splitDeliverId);
 
     @PostMapping("web/deliver/orderSplit/splitDeliverList")
@@ -36,26 +38,86 @@ public interface WebOrderSplitAPI {
     @ApiOperation(value = "从供应商撤回发货单", notes = "从供应商撤回发货单")
     ServerResponse withdrawSupplier(@RequestParam("orderSplitId") String orderSplitId);
 
+    /**
+     * 发送给供应商，分发任务
+     * @param orderSplitId 要货单ID
+     * @param splitDeliverId 发货单ID(重新发货时为必填）
+     * @param splitItemList [{id:”aa”,supplierId:”xx”},{id:”bb”,supplierId:”xx”}] 分发明细 id要货单明细ID，supplierId 供应商ID
+
+     * @return
+     */
     @PostMapping("web/deliver/orderSplit/sentSupplier")
-    @ApiOperation(value = "发送供应商", notes = "发送供应商")
-    ServerResponse sentSupplier(@RequestParam("orderSplitId") String orderSplitId,
-                                @RequestParam("splitItemList") String splitItemList);
+    @ApiOperation(value = "发送供应商(分发任务)", notes = "发送供应商（分发任务）")
+    ServerResponse sentSupplier(
+            @RequestParam("orderSplitId") String orderSplitId,
+            @RequestParam("splitDeliverId") String splitDeliverId,
+            @RequestParam("splitItemList") String splitItemList);
+
+    @PostMapping("web/deliver/orderSplit/saveSentSupplier")
+    @ApiOperation(value = "分发供应商--生成发货单", notes = "分发供应商--生成发货单")
+    ServerResponse saveSentSupplier(
+            @RequestParam("orderSplitId") String orderSplitId,
+            @RequestParam("splitDeliverId") String splitDeliverId,
+            @RequestParam("cityId") String cityId,
+            @RequestParam("userId") String userId,
+            @RequestParam("installName") String installName,
+            @RequestParam("installMobile") String installMobile,
+            @RequestParam("deliveryName") String deliberyName,
+            @RequestParam("deliveryMobile") String deliveryMobile);
+
+    /**
+     * 发货列表--保存上门安装信息
+     * @param splitDeliverId 发货单ID
+     * @param installName 安装人姓名
+     * @param installMobile 安装人电话
+     * @return
+     */
+    @PostMapping("web/deliver/orderSplit/saveInstallInfo")
+    @ApiOperation(value = "发货列表--保存上门安装信息", notes = "发货列表--保存上门安装信息")
+    ServerResponse saveInstallInfo(
+            @RequestParam("splitDeliverId") String splitDeliverId,
+            @RequestParam("installName") String installName,
+            @RequestParam("installMobile") String installMobile);
+
+
+    /**
+     * 部分收货申诉接口
+     * @param splitDeliverId 发货单ID
+     * @param splitItemList 发货单明细列表
+     * @param type 类型：1.认可部分收货，2申请平台申诉
+     * @param applicationStatus 申请身份：1工匠，2业主，3店铺，4供应商
+     * @return
+     */
+    @PostMapping("web/deliver/orderSplit/platformComplaint")
+    @ApiOperation(value = "部分收货申诉接口", notes = "部分收货申诉接口")
+    ServerResponse platformComplaint(
+            @RequestParam("splitDeliverId") String splitDeliverId,
+            @RequestParam("splitItemList") String splitItemList,
+            @RequestParam("type") Integer type,
+            @RequestParam("userId") String userId,
+            @RequestParam("applicationStatus") Integer applicationStatus);
 
     @PostMapping("web/deliver/orderSplit/cancelOrderSplit")
     @ApiOperation(value = "取消打回", notes = "取消打回")
     ServerResponse cancelOrderSplit(@RequestParam("orderSplitId") String orderSplitId);
 
     @PostMapping("web/deliver/orderSplit/cancelSplitDeliver")
-    @ApiOperation(value = "发货单取消打回(仅还原库存)", notes = "发货单取消打回")
+    @ApiOperation(value = "撤回发货单", notes = "撤回发货单")
     ServerResponse cancelSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId);
 
     @PostMapping("web/deliver/orderSplit/orderSplitItemList")
-    @ApiOperation(value = "要货单看明细", notes = "要货单看明细")
-    ServerResponse orderSplitItemList(@RequestParam("orderSplitId") String orderSplitId);
+    @ApiOperation(value = "货单列表--分发任务/重新发货列表", notes = "货单列表--分发任务/重新发货列表")
+    ServerResponse orderSplitItemList(@RequestParam("orderSplitId") String orderSplitId,@RequestParam("splitDeliverId") String splitDeliverId);
+
+    @PostMapping("web/deliver/orderSplit/getOrderSplitDeliverList")
+    @ApiOperation(value = "货单列表--货单详情列表 ", notes = "货单列表--货单详情列表")
+    ServerResponse getOrderSplitDeliverList(@RequestParam("request") HttpServletRequest request,@RequestParam("orderSplitId") String orderSplitId);
+
 
     @PostMapping("web/deliver/orderSplit/getHouseList")
-    @ApiOperation(value = "材料员看房子列表", notes = "材料员看房子列表")
-    ServerResponse getHouseList(@RequestParam("cityId") String cityId,
+    @ApiOperation(value = "货单列表(列表)", notes = "货单列表（发货任务列表）")
+    ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("cityId") String cityId,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("likeAddress") String likeAddress,
                                 @RequestParam("startDate")String startDate,
@@ -63,11 +125,20 @@ public interface WebOrderSplitAPI {
     );
 
     @PostMapping("web/deliver/orderSplit/getOrderSplitList")
-    @ApiOperation(value = "根据房子id查询要货单列表", notes = "根据房子id查询要货单列表")
-    ServerResponse getOrderSplitList(@RequestParam("houseId") String houseId);
+    @ApiOperation(value = "根据地址和店铺查询地应的货单列表", notes = "根据地址和店铺查询对应的货单列表")
+    ServerResponse getOrderSplitList(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("userId")String userId,
+                                     @RequestParam("cityId") String cityId,
+                                     @RequestParam("pageDTO") PageDTO pageDTO,
+                                     @RequestParam("addressId") String addressId,
+                                     @RequestParam("houseId") String houseId,
+                                     @RequestParam("storefrontId") String storefrontId);
 
     @PostMapping("web/deliver/orderSplit/setSplitDeliver")
     @ApiOperation(value = "修改 供应商结算状态", notes = "修改 供应商结算状态")
     ServerResponse setSplitDeliver(@RequestParam("splitDeliver") SplitDeliver splitDeliver);
+
+
+
 
 }

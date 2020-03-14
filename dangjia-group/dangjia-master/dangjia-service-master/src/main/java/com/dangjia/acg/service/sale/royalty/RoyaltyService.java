@@ -3,7 +3,6 @@ package com.dangjia.acg.service.sale.royalty;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
@@ -17,8 +16,6 @@ import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.royalty.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +39,6 @@ public class RoyaltyService {
     private SurfaceMapper surfaceMapper;
     @Autowired
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
-    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
 
     @Autowired
     private DjAreaMatchMapper djAreaMatchMapper;
@@ -126,11 +122,8 @@ public class RoyaltyService {
         Example example=new Example(DjRoyaltyMatch.class);
         example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,houseId)
                 .andNotEqualTo(DjRoyaltyMatch.ORDER_STATUS,1);
-        logger.info("houseId========================================"+houseId);
         List<DjRoyaltyMatch> djRoyaltyMatches = djRoyaltyMatchMapper.selectByExample(example);
-        logger.info("djRoyaltyMatches========================================"+djRoyaltyMatches);
         for (DjRoyaltyMatch djRoyaltyMatch : djRoyaltyMatches) {
-            logger.info("djRoyaltyMatch.getHouseId()========================================"+djRoyaltyMatch.getHouseId());
             DjRoyaltyMatch djRoyaltyMatch1=new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(0);
             djRoyaltyMatch1.setOrderStatus(1);
@@ -163,20 +156,16 @@ public class RoyaltyService {
                                        String buildingName,
                                        String buildingId,
                                        String resourceId) {
-        logger.info("编辑删除原来的信息========================================"+!CommonUtil.isEmpty(resourceId));
         if(!CommonUtil.isEmpty(resourceId)){
-            logger.info("编辑删除原来的信息1========================================"+resourceId);
             Example example = new Example(DjAreaMatch.class);
             example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID, resourceId);
             djAreaMatchMapper.deleteByExample(example);
-
 //            Example example1 = new Example(DjAreaMatchSetup.class);
 //            example.createCriteria().andEqualTo(DjAreaMatchSetup.RESOURCE_ID, resourceId);
             Map<String,Object> map = new HashMap<>();
             map.put("resourceId",resourceId);
             djAreaMatchSetupMapper.deleteBuildingId(map);
         }
-
         String resource = ((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
         String[] arr = buildingId.split(",");
         for (String s : arr) {

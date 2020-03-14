@@ -1,5 +1,7 @@
 package com.dangjia.acg.mapper.repair;
 
+import com.dangjia.acg.dto.repair.MendOrderDTO;
+import com.dangjia.acg.dto.repair.SurplusMaterialDTO;
 import com.dangjia.acg.modle.repair.MendOrder;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -45,17 +47,52 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
 
     /**
      * 按state 和 收货地址 搜索
-     * @param houseId
      * @param type   0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
-     * @param beginDate
-     * @param endDate
      * @param likeAddress
      * @return
      */
-    List<MendOrder> materialByStateAndLikeAddress(@Param("houseId") String houseId,
-                                    @Param("type") Integer type,
-                                    @Param("beginDate") String beginDate,
-                                    @Param("endDate") String endDate,
-                                    @Param("likeAddress") String likeAddress);
+    List<MendOrder> materialByStateAndLikeAddress(
+            @Param("storefrontId") String storefrontId,
+            @Param("type") Integer type,
+             @Param("state") String state,
+            @Param("likeAddress") String likeAddress);
+
+
+
+    List<MendOrder> storeReturnDistributionSupplier(
+            @Param("storefrontId") String storefrontId,
+            @Param("likeAddress") String likeAddress);
+
+    /**
+     * 查询符合条件的退货申请单
+     * @param storefrontId 店铺ID
+     * @param type 查询类型：1退货退款，2仅退款
+     * @param state 状态默认：1待处理，2已处理
+     * @param likeAddress
+     * @return
+     */
+    List<MendOrderDTO> searchReturnRrefundList(
+            @Param("storefrontId") String storefrontId,
+            @Param("type") Integer type,
+            @Param("state") Integer state,
+            @Param("likeAddress") String likeAddress);
+
+    Integer searchReturnRrefundCount(@Param("storefrontId") String storefrontId,@Param("type") Integer type,@Param("state") Integer state);
+    /**
+     * 按state 和 收货地址 搜索
+     * @param type   0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
+     * @param likeAddress
+     * @return
+     */
+    List<MendOrder> materialByStateAndLikeAddressHandle(
+            @Param("storefrontId") String storefrontId,
+            @Param("type") Integer type,
+            @Param("state") String state,
+            @Param("likeAddress") String likeAddress);
+
+
+    List<SurplusMaterialDTO> querySurplusMaterial(@Param("data") String data);
+
+    List<SurplusMaterialDTO> queryTrialRetreatMaterial(@Param("data") String data);
 
 }

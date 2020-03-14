@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.engineer.DjMaintenanceRecordResponsiblePartyMapper">
+
+    <select id="queryDjMaintenanceRecordResponsibleParty"
+            resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordResponsiblePartyDTO">
+        SELECT
+            mrrp.responsible_party_id responsiblePartyId,
+            mrrp.maintenance_record_id maintenanceRecordId,
+            mrrp.proportion,
+            mrrp.responsible_party_type responsiblePartyType,
+            <if test="responsiblePartyType==1">
+                bs.storefront_name responsiblePartyName,
+                bs.storefront_logo image
+            </if>
+            <if test="responsiblePartyType==3">
+                IF(m.name IS NULL OR m.name="",m.nick_name,m.name) responsiblePartyName,
+                m.head image
+            </if>
+        FROM
+            dj_maintenance_record_responsible_party mrrp
+            <if test="responsiblePartyType==1">
+                ,dj_basics_storefront bs
+            </if>
+            <if test="responsiblePartyType==3">
+                ,dj_member m
+            </if>
+        WHERE
+            1=1
+            <if test="responsiblePartyType==1">
+                AND mrrp.responsible_party_id = bs.id
+            </if>
+            <if test="responsiblePartyType==3">
+                AND mrrp.responsible_party_id = m.id
+            </if>
+            AND mrrp.id=#{id}
+    </select>
+
+
+
+    <select id="queryDimensionRecord" resultType="com.dangjia.acg.dto.engineer.DimensionRecordDTO">
+        SELECT
+            mr.id AS mrId,
+            mrrp.proportion AS proportion,
+            mrrp.id AS mrrpId,
+            mrrp.maintenance_total_price AS maintenanceTotalPrice,
+            h.address houseName,
+            mrrp.create_date paymentDate,
+            mrrp.maintenance_total_price paymentAmount
+        FROM
+            dj_maintenance_record_responsible_party mrrp
+        INNER JOIN dj_maintenance_record mr ON mrrp.maintenance_record_id = mr.id
+        INNER JOIN dj_member_address h ON (mr.house_id = h.house_id)
+        WHERE
+            mrrp.responsible_party_type = 2
+        AND mrrp.responsible_party_id = #{workerId}
+        AND mr.house_id = #{houseId}
+    </select>
+
+    <select id="queryDimensionRecordInFo" resultType="com.dangjia.acg.dto.engineer.DimensionRecordDTO">
+        select
+            mr.house_id as houseId,
+            mr.id as mrId,
+            mr.owner_name as ownerName,
+            mr.worker_type_id as workerTypeId,
+            mrrp.proportion AS proportion,
+            mrrp.id as mrrpId,
+            mrrp.responsible_party_id AS responsiblePartyId,
+            mrrp.maintenance_total_price as maintenanceTotalPrice,
+            h.square as square,
+            mrrp.total_price as totalPrice,
+            CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) houseName,
+           (case when mrrp.create_date>=DATE_ADD(NOW(),INTERVAL -7 DAY) THEN 1 else 0 end ) isComplain,
+           IFNULL(mrrp.stevedorage_cost,0) stevedorageCost,
+           IFNULL(mrrp.transportation_cost,0) transportationCost,
+           mrrp.complain_id complainId
+        from dj_maintenance_record mr
+        INNER JOIN  dj_maintenance_record_responsible_party mrrp on mrrp.maintenance_record_id = mr.id
+        INNER JOIN dj_house h on mr.house_id = h.id
+        where  1=1
+        <if test="mrrpId != null and mrrpId != ''">
+            and mrrp.id = #{mrrpId}
+        </if>
+        <if test="type == 2">
+            and mrrp.responsible_party_type = #{type}
+        </if>
+    </select>
+
+    <select id="queryResponsibleParty" resultType="com.dangjia.acg.dto.engineer.ComplainDataDTO">
+        SELECT
+            c. status,
+            c.create_date AS createDate,
+            c.description,
+            c.image,
+            c.handle_date AS handleDate,
+            m. NAME AS name,
+            m.mobile AS mobile,
+            m.head AS head
+        FROM
+            dj_complain c
+        INNER JOIN dj_member m ON c.member_id = m.id
+        WHERE
+            c.complain_type = 10
+        AND c.data_status = 0
+        AND c.member_id = #{responsiblePartyId}
+        AND c.house_id = #{houseId}
+    </select>
+
+    <select id="toQualityMoney" resultType="com.dangjia.acg.dto.engineer.ToQualityMoneyDTO">
+       SELECT
+            mr.payment_date AS paymentDate,
+            mr.house_id AS houseId,
+            mr.since_purchase_amount AS sincePurchaseAmount,
+            mr.id AS mrId,
+            mr.create_date as createDate,
+            mrrp.proportion AS proportion,
+            mrrp.id AS mrrpId,
+            (((mr.since_purchase_amount + IFNULL(mr.enough_amount,0)) * mrrp.proportion) / 100) as paymentAmount,
+            mrrp.responsible_party_id AS responsiblePartyId,
+            mr.enough_amount AS enoughAmount,
+            m.retention_money AS retentionMoney,
+            m.worker_type_id as workerTypeId,
+            CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) houseName
+        FROM
+            dj_maintenance_record_responsible_party mrrp
+        INNER JOIN dj_maintenance_record mr ON mrrp.maintenance_record_id = mr.id
+        INNER JOIN dj_member m ON mrrp.responsible_party_id = m.id
+        INNER JOIN dj_house h on mr.house_id = h.id
+        WHERE
+            mrrp.id = #{data}
+    </select>
+
+    <select id="queryGuaranteeMoneyList" resultType="com.dangjia.acg.dto.engineer.ResponsiblePartyDTO">
+        SELECT
+            t.id accountflowRecordId,
+            t.house_order_id maintenanceRecordId,
+            t.state,
+            IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,-- 房子地址
+            t.create_date as createDate -- 时间
+        FROM
+            dj_account_flow_record t,
+            dj_house dh
+        WHERE
+            t.state in(6,7)
+        AND t.house_id = dh.id
+        and t.defined_account_id=#{storefrontId}
+        order by t.create_date desc
+    </select>
+
+    <select id="queryGuaranteeMoneyDetail" resultType="com.dangjia.acg.dto.engineer.ResponsiblePartyDetailDTO">
+        SELECT
+            rrp.id responsiblePartyId,
+            dmr.house_id AS houseId,
+            IFNULL(dmr.create_date, '') AS createDate,	-- 时间
+            IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+            rrp.maintenance_total_price totalAmount,-- 维保总金额
+            rrp.proportion AS proportion,-- 维保责任方占比
+            dm.worker_type_id AS workerTypeId, -- 工匠类型
+            rrp.create_date responsiblePartyDate, -- 责任划分时间
+            DATE_ADD(rrp.create_date,INTERVAL 3 DAY) endResponsiblePartyDate,-- 可申诉截止时间
+            IFNULL(c.`status`,-1) complainStatus, -- 申诉状态
+            c.id complainId,
+            c.reject_reason complainReason,
+            c.image complainImage,
+            c.content complainContent,
+            IFNULL((case when rrp.complain_id is null and DATE_ADD(rrp.create_date,INTERVAL 3 DAY)>NOW() then 1 else 0 end ),0) isComplain
+        FROM
+            dj_maintenance_record dmr
+        INNER JOIN dj_maintenance_record_responsible_party rrp ON rrp.maintenance_record_id = dmr.id
+        INNER JOIN dj_house dh ON dmr.house_id = dh.id
+        INNER JOIN dj_member dm ON dm.id = dmr.worker_member_id
+        LEFT JOIN dj_complain c on rrp.complain_id=c.id
+        WHERE
+            rrp.responsible_party_type = 1
+        AND dmr.state = 2
+        AND dmr.id = #{maintenanceRecordId}
+    </select>
+
+</mapper>

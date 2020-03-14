@@ -22,7 +22,12 @@ public class BudgetWorkerDTO {
 
     private Double shopCount;//购买总数
 
+    private Double totalPrice;//总价格
+
     private String unitName;//单位
 
     private String image;
+    private String valueNameArr;
+
+
 }

@@ -1,0 +1,63 @@
+package com.dangjia.acg.api.product;
+
+import com.dangjia.acg.common.model.PageDTO;
+import com.dangjia.acg.common.response.ServerResponse;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+
+/**
+ * Created with IntelliJ IDEA.
+ * author: chenyufeng
+ * Date: 2019/11.2
+ * Time: 14:15
+ */
+@Api(description = "材料精算接口")
+@FeignClient("dangjia-service-goods")
+public interface DjActuaryBudgetMaterialAPI {
+
+    @PostMapping("/product/djActuaryBudgetMaterial/makeBudgets")
+    @ApiOperation(value = "生成精算", notes = "生成精算")
+    ServerResponse makeBudgets(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("actuarialTemplateId") String actuarialTemplateId,
+                               @RequestParam("houseId") String houseId,
+                               @RequestParam("workerTypeId") String workerTypeId,
+                               @RequestParam("listOfGoods") String listOfGoods,
+                               @RequestParam("cityId") String cityId);
+
+    @PostMapping("/actuary/actuaryOpe/newcategoryIdList")
+    @ApiOperation(value = "精算-所有分类", notes = "精算-所有分类")
+    ServerResponse newcategoryIdList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId);
+
+    @PostMapping("/actuary/actuaryOpe/allGoodsCategoryList")
+    @ApiOperation(value = "精算-全部列表或者单个列表", notes = "精算-全部列表或者单个列表")
+    ServerResponse allGoodsCategoryList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId,
+                                        @RequestParam("bclId")String bclId);
+
+
+    @PostMapping("/app/product/djActuaryBudgetMaterial/queryMakeBudgetsList")
+    @ApiOperation(value = "查询精算列表", notes = "查询精算列表")
+    ServerResponse queryMakeBudgetsList(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("bclId") String bclId,
+                                        @RequestParam("categoryId") String categoryId,
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("cityId") String cityId);
+
+    @PostMapping("/app/product/djActuaryBudgetMaterial/queryBasicsProduct")
+    @ApiOperation(value = "查询精算详情列表", notes = "查询精算详情列表")
+    ServerResponse queryBasicsProduct(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("productId") String productId,
+                                      @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("cityId")String cityId,
+                                      @RequestParam("categoryId")String categoryId,
+                                      @RequestParam("goodsId")String goodsId,
+                                      @RequestParam("name")String name,
+                                      @RequestParam("attributeVal")String attributeVal,
+                                      @RequestParam("brandVal")String brandVal,
+                                      @RequestParam("orderKey")String orderKey);
+
+}

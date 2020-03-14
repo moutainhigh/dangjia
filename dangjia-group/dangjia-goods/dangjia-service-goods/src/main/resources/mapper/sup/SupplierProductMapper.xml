@@ -41,7 +41,8 @@
            sp.data_status AS dataStatus
        FROM
         dj_sup_supplier_product  sp
-        INNER JOIN dj_basics_product p ON sp.product_id=p.id
+        INNER JOIN dj_basics_storefront_product p ON sp.product_id=p.id
+        INNER JOIN dj_basics_product_template p1 on p.prod_template_id=p1.id
         WHERE  sp.is_supply = 1
         <if test="productId!=null and productId!=''">
             and sp.product_id =#{productId}
@@ -50,7 +51,7 @@
             and sp.supplier_id =#{supplierId}
         </if>
         ORDER BY
-        p.category_id DESC
+        p1.category_id DESC
     </select>
 
 </mapper>

@@ -1,5 +1,6 @@
 package com.dangjia.acg.common.util;
 
+import com.dangjia.acg.model.DateRange;
 import org.apache.log4j.Logger;
 import org.springframework.util.StringUtils;
 
@@ -46,6 +47,8 @@ public class DateUtil implements AutoCloseable, Serializable {
     public static final String FORMAT10 = "yyMMddHHmmssSSS";
 
     public static final String FORMAT11 = "yyyy-MM-dd HH:mm";
+    /***/
+    public static final String FORMAT12 = "yyyy.MM.dd";
 
     @Override
     public void close() throws Exception {
@@ -131,6 +134,14 @@ public class DateUtil implements AutoCloseable, Serializable {
      */
     public static String format(Date date) {
         return threadLocal.get().format(date);
+    }
+
+    public static String getDateFormat(Date date,String partten){
+        Long curr = date.getTime();//获取当前时间戳 (毫秒)
+        System.out.println(curr); //1540202972921
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(partten);
+        System.out.println(simpleDateFormat.format(curr)); //2018-10-22 18:09:32
+        return simpleDateFormat.format(curr);
     }
 
     /***
@@ -222,6 +233,9 @@ public class DateUtil implements AutoCloseable, Serializable {
                 break;
             case 19:
                 format = "yyyy-MM-dd HH:mm:ss";
+                break;
+            case 16:
+                format = "yyyy-MM-dd HH:mm";
                 break;
             default:
                 return null;
@@ -641,8 +655,33 @@ public class DateUtil implements AutoCloseable, Serializable {
     }
 
     /**
+     * 两个时间相差多少
+     * @param first
+     * @param second
+     * @return
+     * @throws ParseException
+     */
+    public static long daysBetweenTime(Date first, Date second) throws ParseException {
+        try{
+            SimpleDateFormat sformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            first = sformat.parse(sformat.format(first));
+            second = sformat.parse(sformat.format(second));
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(first);
+            long firstMills = calendar.getTimeInMillis();
+            calendar.setTime(second);
+            long secondMills = calendar.getTimeInMillis();
+
+            long mills = secondMills - firstMills;
+            return mills>0?mills/1000:0;
+        }catch (Exception e){
+            return 0;
+        }
+
+    }
+
+    /**
      * 两个时间相差多少天多少秒多少小时
-     *
      * @param first
      * @param second
      * @return
@@ -667,6 +706,69 @@ public class DateUtil implements AutoCloseable, Serializable {
         long minutes = (mills % rateD % rateH) / rateM;
         long seconds = (mills % rateD % rateH % rateM) / rateS;
         return "" + days + "天" + hours + "时" + minutes + "分" + seconds + "秒";
+    }
+    /**
+     * 两个时间相差多少分钟
+     * @param first
+     * @param second
+     * @return
+     * @throws ParseException
+     */
+    public static String daysBetweenMinutes(Date first, Date second) {
+        try {
+            SimpleDateFormat sformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            first = sformat.parse(sformat.format(first));
+            second = sformat.parse(sformat.format(second));
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(first);
+            long firstMills = calendar.getTimeInMillis();
+            calendar.setTime(second);
+            long secondMills = calendar.getTimeInMillis();
+            long rateD = 1000 * 60 * 60 * 24;
+            long rateH = 1000 * 60 * 60;
+            long rateM = 1000 * 60;
+            long rateS = 1000;
+            long mills = secondMills - firstMills;
+            long days = mills / rateD;
+            long hours = (mills % rateD) / rateH;
+            long minutes = (mills % rateD % rateH) / rateM;
+            return String.valueOf(minutes);
+        }catch (ParseException e){
+            return "0";
+        }
+
+    }
+    /**
+     * 两个时间相差多少天多少秒多少小时(只到分，如果相差为负数，返回，0天0时0分
+     * @param first
+     * @param second
+     * @return
+     * @throws ParseException
+     */
+    public static String daysBetweenMinute(Date first, Date second) throws ParseException {
+        SimpleDateFormat sformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        first = sformat.parse(sformat.format(first));
+        second = sformat.parse(sformat.format(second));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(first);
+        long firstMills = calendar.getTimeInMillis();
+        calendar.setTime(second);
+        long secondMills = calendar.getTimeInMillis();
+        long rateD = 1000 * 60 * 60 * 24;
+        long rateH = 1000 * 60 * 60;
+        long rateM = 1000 * 60;
+        long rateS = 1000;
+        long mills = secondMills - firstMills;
+        long days = mills / rateD;
+        long hours = (mills % rateD) / rateH;
+        long minutes = (mills % rateD % rateH) / rateM;
+        long seconds = (mills % rateD % rateH % rateM) / rateS;
+        if(days>=0&&hours>=0&&minutes>=0){
+            return "" + days + "天" + hours + "时" + minutes + "分" ;
+        }else{
+            return "" + 0 + "天" + 0 + "时" + 0 + "分" ;
+        }
+
     }
 
     /***
@@ -840,6 +942,22 @@ public class DateUtil implements AutoCloseable, Serializable {
         Calendar ca = Calendar.getInstance();
         ca.setTime(date);
         ca.add(Calendar.MINUTE, minutes);
+        return ca.getTime();
+    }
+    /***
+     * 在当前日期上减多少分钟
+     *
+     * @param date    日期
+     * @param minutes 分钟
+     * @return date
+     */
+    public static Date delDateMinutes(Date date, int minutes) {
+        if (date == null) {
+            return null;
+        }
+        Calendar ca = Calendar.getInstance();
+        ca.setTime(date);
+        ca.add(Calendar.MINUTE, -minutes);
         return ca.getTime();
     }
 
@@ -1129,7 +1247,7 @@ public class DateUtil implements AutoCloseable, Serializable {
      * @return String
      */
     public static String getDateString1(Long time) {
-        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT3);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT12);
 
         return sdf.format(time);
     }
@@ -1263,7 +1381,6 @@ public class DateUtil implements AutoCloseable, Serializable {
         date.add(paramMap);
         return date;
     }
-
     /**
      * 根据月份获取当前月份日期
      *
@@ -1292,7 +1409,6 @@ public class DateUtil implements AutoCloseable, Serializable {
         }
         return date;
     }
-
     /**
      * 获取当天开始时间戳
      *
@@ -1399,19 +1515,197 @@ public class DateUtil implements AutoCloseable, Serializable {
         long hour = (l / (60 * 60 * 1000) - day * 24);
         long min = ((l / (60 * 1000)) - day * 24 * 60 - hour * 60);
         long sec = (l / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - min * 60);
-        return min + "分" + sec + "秒";
+        return min + "分" + sec+"秒";
     }
 
-    public static void main(String[] args) {
-        try {
-            Date date = parseDate("2019-12-18");
-            System.out.println(dateToString(date, "yyyy-MM-dd"));
-            Date d2 = new Date();
-            System.out.println(getDiffTime(date.getTime(), d2.getTime()));
-            System.out.println(date.getTime()>d2.getTime());
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
+
+    /**
+     * 获取date的月份的时间范围
+     * @param date
+     * @return
+     */
+    public static DateRange getMonthRange(Date date) {
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(date);
+        startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        setMaxTime(startCalendar);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(date);
+        endCalendar.set(Calendar.DAY_OF_MONTH, endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        setMaxTime(endCalendar);
+
+        return new DateRange(startCalendar.getTime(), endCalendar.getTime());
+    }
+    /**
+     * 获取当前季度的时间范围
+     * @return current quarter
+     */
+    public static DateRange getThisQuarter() {
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.set(Calendar.MONTH, ((int) startCalendar.get(Calendar.MONTH) / 3) * 3);
+        startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        setMinTime(startCalendar);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.set(Calendar.MONTH, ((int) startCalendar.get(Calendar.MONTH) / 3) * 3 + 2);
+        endCalendar.set(Calendar.DAY_OF_MONTH, endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        setMaxTime(endCalendar);
+
+        return new DateRange(startCalendar.getTime(), endCalendar.getTime());
+    }
+
+    /**
+     * 获取昨天的时间范围
+     * @return
+     */
+    public static DateRange getYesterdayRange() {
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.add(Calendar.DAY_OF_MONTH, -1);
+        setMinTime(startCalendar);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.add(Calendar.DAY_OF_MONTH, -1);
+        setMaxTime(endCalendar);
+
+        return new DateRange(startCalendar.getTime(), endCalendar.getTime());
+    }
+
+    /**
+     * 获取当前月份的时间范围
+     * @return
+     */
+    public static DateRange getThisMonth(){
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        setMinTime(startCalendar);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.set(Calendar.DAY_OF_MONTH, endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        setMaxTime(endCalendar);
+
+        return new DateRange(startCalendar.getTime(), endCalendar.getTime());
+    }
+
+    /**
+     * 获取上个月的时间范围
+     * @return
+     */
+    public static DateRange getLastMonth(){
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.add(Calendar.MONTH, -1);
+        startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        setMinTime(startCalendar);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.add(Calendar.MONTH, -1);
+        endCalendar.set(Calendar.DAY_OF_MONTH, endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        setMaxTime(endCalendar);
+
+        return new DateRange(startCalendar.getTime(), endCalendar.getTime());
+    }
+
+    /**
+     * 获取上个季度的时间范围
+     * @return
+     */
+    public static DateRange getLastQuarter() {
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.set(Calendar.MONTH, ((int) startCalendar.get(Calendar.MONTH) / 3 - 1) * 3);
+        startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        setMinTime(startCalendar);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.set(Calendar.MONTH, ((int) endCalendar.get(Calendar.MONTH) / 3 - 1) * 3 + 2);
+        endCalendar.set(Calendar.DAY_OF_MONTH, endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        setMaxTime(endCalendar);
+
+        return new DateRange(startCalendar.getTime(), endCalendar.getTime());
+    }
+
+    private static void setMinTime(Calendar calendar){
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+    }
+
+    private static void setMaxTime(Calendar calendar){
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMaximum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.getActualMaximum(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.getActualMaximum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getActualMaximum(Calendar.MILLISECOND));
+    }
+
+    /**
+     * 根据开始时间和结束时间返回时间段内的时间集合
+     * @param beginDate
+     * @param endDate
+     * @return List<Date>
+     * @throws ParseException
+     */
+    public static List<String> getDatesBetweenTwoDate(String beginDate, String endDate) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT1);
+        List<String> lDate = new ArrayList<String>();
+        lDate.add(beginDate);//把开始时间加入集合
+        Calendar cal = Calendar.getInstance();
+        //使用给定的 Date 设置此 Calendar 的时间
+        cal.setTime(sdf.parse(beginDate));
+        boolean bContinue = true;
+        while (bContinue) {
+            //根据日历的规则，为给定的日历字段添加或减去指定的时间量
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            // 测试此日期是否在指定日期之后
+            if (sdf.parse(endDate).after(cal.getTime())) {
+                lDate.add(sdf.format(cal.getTime()));
+            } else {
+                break;
+            }
         }
+        lDate.add(endDate);//把结束时间加入集合
+        return lDate;
+    }
+
+    /**
+     * 判断日期是否是周末
+     * @param bDate
+     * @return
+     * @throws ParseException
+     */
+    public static boolean isWeekend(String bDate) throws ParseException {
+        DateFormat format1 = new SimpleDateFormat(FORMAT1);
+        Date bdate = format1.parse(bDate);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(bdate);
+        if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+    public static Integer getWeekendDay(Date startDate,Date endDate){
+        Integer dayNum=0;
+        try {
+            List<String> allData= getDatesBetweenTwoDate(getDateString(startDate.getTime()),getDateString(endDate.getTime()));
+            for (String allDatum : allData) {
+                if(isWeekend(allDatum)){
+                    dayNum++;
+                }
+            }
+        } catch (Exception e) {
+            return dayNum;
+        }
+        return dayNum;
+    }
+    public static void main(String[] args) {
+
+        DateRange currentQuarter = getThisQuarter();
+        System.out.println("当前季度的时间范围： "+getDateString(currentQuarter.getStart().getTime())+" - "+getDateString(currentQuarter.getEnd().getTime()));
+
+        DateRange lastQuarter = getLastQuarter();
+        System.out.println("上个季度的时间范围: "+DateUtil.getDateString(lastQuarter.getStart().getTime())+" - "+getDateString(lastQuarter.getEnd().getTime()));
+
     }
 
 }

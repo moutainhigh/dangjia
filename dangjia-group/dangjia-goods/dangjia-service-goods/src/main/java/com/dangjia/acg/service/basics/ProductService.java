@@ -16,13 +16,13 @@ import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.house.MaterialRecord;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -77,11 +77,11 @@ public class ProductService {
     private static Logger LOG = LoggerFactory.getLogger(ProductService.class);
 
     //查询product
-    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId) {
+    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId,String cityId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Product> productList = iProductMapper.query(categoryId);
+            List<Product> productList = iProductMapper.query(categoryId,cityId);
             PageInfo pageResult = new PageInfo(productList);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Product p : productList) {
@@ -115,7 +115,7 @@ public class ProductService {
     }
 
     //查询单位
-    public ServerResponse queryUnit() {
+    public ServerResponse queryUnit(String cityId) {
         try {
             List<Unit> unitList = iUnitMapper.getUnit();
             return ServerResponse.createBySuccess("查询成功", unitList);
@@ -126,9 +126,9 @@ public class ProductService {
     }
 
     //查询品牌
-    public ServerResponse queryBrand() {
+    public ServerResponse queryBrand(String cityId) {
         try {
-            List<Brand> brandList = iBrandMapper.getBrands();
+            List<Brand> brandList = iBrandMapper.getBrands(cityId);
             return ServerResponse.createBySuccess("查询成功", brandList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,9 +145,9 @@ public class ProductService {
      * @param: @return
      * @return: JsonResult
      */
-    public ServerResponse queryBrandSeries(String brandId) {
+    public ServerResponse queryBrandSeries(String brandId,String cityId) {
         try {
-            List<BrandSeries> brandList = iBrandSeriesMapper.queryBrandSeries(brandId);
+            List<BrandSeries> brandList = iBrandSeriesMapper.queryBrandSeries(brandId,cityId);
             return ServerResponse.createBySuccess("查询成功", brandList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -163,7 +163,7 @@ public class ProductService {
      * @param productArr
      * @return
      */
-    public ServerResponse insertProduct(String productArr) {
+    public ServerResponse insertProduct(String productArr,String cityId) {
         try {
             JSONArray jsonArr = JSONArray.parseArray(productArr);
             for (int i = 0; i < jsonArr.size(); i++) {
@@ -213,7 +213,7 @@ public class ProductService {
                             && StringUtils.isNoneBlank(brandId)
                             && StringUtils.isNoneBlank(brandSeriesId)) {
 
-                        List<Product> pValueList = iProductMapper.getPListByBrandSeriesIdAndNullValueId(brandId, brandSeriesId);
+                        List<Product> pValueList = iProductMapper.getPListByBrandSeriesIdAndNullValueId(brandId, brandSeriesId,cityId);
                         if (pValueList.size() > 0) {
                             String ret = checkProduct(name, productSn, id, jsonArr);
                             if (!ret.equals("ok")) {
@@ -221,7 +221,7 @@ public class ProductService {
                             }
                         }
 
-                        //统计 没有品牌和系列时，同属性的
+                        // 没有品牌和系列时，同属性的
                         for (int j = 0; j < jsonArr.size(); j++) {
                             JSONObject objJ = jsonArr.getJSONObject(j);
                             if (brandId.equals(objJ.getString("brandId"))
@@ -244,7 +244,7 @@ public class ProductService {
                             && !StringUtils.isNoneBlank(brandId)
                             && !StringUtils.isNoneBlank(brandSeriesId)) {
 
-                        List<Product> pValueList = iProductMapper.getPListByValueIdArrByNullBrandId(valueIdArr);
+                        List<Product> pValueList = iProductMapper.getPListByValueIdArrByNullBrandId(valueIdArr,cityId);
                         if (pValueList.size() > 0) {
                             String ret = checkProduct(name, productSn, id, jsonArr);
                             if (!ret.equals("ok")) {
@@ -274,7 +274,7 @@ public class ProductService {
                             && StringUtils.isNoneBlank(valueIdArr)
                             && StringUtils.isNoneBlank(brandId)
                             && StringUtils.isNoneBlank(brandSeriesId)) {
-                        List<Product> pValueList = iProductMapper.getPListByBrandSeriesId(brandId, brandSeriesId, valueIdArr);
+                        List<Product> pValueList = iProductMapper.getPListByBrandSeriesId(brandId, brandSeriesId, valueIdArr,cityId);
                         if (pValueList.size() > 0) {
                             String ret = checkProduct(name, productSn, id, jsonArr);
                             if (!ret.equals("ok")) {
@@ -370,7 +370,7 @@ public class ProductService {
                 if (!StringUtils.isNoneBlank(obj.getString("valueNameArr"))) {
                     product.setValueNameArr(null);
                 } else {
-                    product.setValueNameArr(obj.getString("valueNameArr"));
+                    product.setValueNameArr(obj.getString("valueNameArr").replaceAll(",", " "));
                 }
 
                 if (!StringUtils.isNoneBlank(obj.getString("valueIdArr"))) {
@@ -385,6 +385,7 @@ public class ProductService {
                     product.setAttributeIdArr(obj.getString("attributeIdArr"));
                 }
 
+                product.setCityId(cityId);
                 if (productId == null || "".equals(productId)) {//没有id则新增
                     product.setCreateDate(new Date());
                     product.setModifyDate(new Date());
@@ -396,7 +397,7 @@ public class ProductService {
                 }
 
                 LOG.info("insertProduct productId:" + product.getId());
-                String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, product.getId());
+                String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, product.getId(),cityId);
                 if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
                     return ServerResponse.createByErrorMessage(ret);
 
@@ -472,7 +473,7 @@ public class ProductService {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Product product =iProductMapper.selectByPrimaryKey(id);
-            Goods oldGoods = iGoodsMapper.selectByPrimaryKey(product.getGoodsId());
+            BasicsGoods oldGoods = iGoodsMapper.selectByPrimaryKey(product.getGoodsId());
             String[] imgArr = product.getImage().split(",");
             StringBuilder imgStr = new StringBuilder();
             StringBuilder imgUrlStr = new StringBuilder();
@@ -577,7 +578,7 @@ public class ProductService {
      * @param labelId
      * @return
      */
-    public ServerResponse updateProductLabel(String id, String labelId) {
+    public ServerResponse updateProductLabel(String id, String labelId,String cityId) {
         Label oldLabel = iLabelMapper.selectByPrimaryKey(labelId);
         Product pt = iProductMapper.getById(id);
         if (oldLabel == null)
@@ -586,7 +587,7 @@ public class ProductService {
             return ServerResponse.createBySuccessMessage("product不存在");
 
         // 查询goods及下属product  queryGoodsList
-        List<Product> productList = iProductMapper.queryByGoodsId(pt.getGoodsId());
+        List<Product> productList = iProductMapper.queryByGoodsId(pt.getGoodsId(),cityId);
         for (Product product : productList) {
             //查找 对应product对应的goods中，有没有已经设置过该标签
             if (iLabelMapper.selectByPrimaryKey(product.getLabelId()).getName().equals(oldLabel.getName()))
@@ -610,7 +611,7 @@ public class ProductService {
      * @param productLabelList
      * @return
      */
-    public ServerResponse updateProductLabelList(String productLabelList) {
+    public ServerResponse updateProductLabelList(String productLabelList,String cityId) {
 
         JSONArray productLabelLists = JSONArray.parseArray(productLabelList);
         for (int i = 0; i < productLabelLists.size(); i++) {
@@ -623,7 +624,7 @@ public class ProductService {
                 return ServerResponse.createBySuccessMessage("商品不存在");
 
             // 查询goods及下属product  queryGoodsList
-            List<Product> productList = iProductMapper.queryByGoodsId(pt.getGoodsId());
+            List<Product> productList = iProductMapper.queryByGoodsId(pt.getGoodsId(),cityId);
             for (Product product : productList) {
                 //查找 对应product对应的goods中，有没有已经设置过该标签
                 if (iLabelMapper.selectByPrimaryKey(product.getLabelId()).getName().equals(oldLabel.getName()))
@@ -665,7 +666,7 @@ public class ProductService {
             productsDTO.setUnitName(product.getUnitName());
             productsDTO.setLabelId(product.getLabelId());
             productsDTO.setShopCount(shopCount);
-            Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
             if (goods != null) {
                 productsDTO.setGoodsName(goods.getName());
                 productsDTO.setProductType(String.valueOf(goods.getType()));

@@ -1,9 +1,5 @@
 package com.dangjia.acg.common.util;
 
-import cn.jsms.api.SendSMSResult;
-import cn.jsms.api.common.SMSClient;
-import cn.jsms.api.common.model.SMSPayload;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,6 +68,18 @@ public class JsmsUtil {
 	 * @return
 	 */
 	public static String SMS(int code, String phone) {
+		Map<String,String> temp_para=new HashMap();
+		temp_para.put("code",String.valueOf(code));
+		String result =sendSMS(phone,"157269",temp_para);
+		return result;
+	}
+	/**
+	 * 验证码短信(登陆)
+	 * @param code 验证码COde
+	 * @param phone 接收手机号
+	 * @return
+	 */
+	public static String loginSMS(int code, String phone) {
 		Map<String,String> temp_para=new HashMap();
 		temp_para.put("code",String.valueOf(code));
 		String result =sendSMS(phone,"157269",temp_para);

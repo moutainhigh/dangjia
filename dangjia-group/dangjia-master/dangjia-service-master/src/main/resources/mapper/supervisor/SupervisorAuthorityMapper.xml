@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.supervisor.ISupervisorAuthorityMapper">
+
+    <select id="getStayAuthorityList" resultType="com.dangjia.acg.dto.supervisor.AuthorityDTO">
+        SELECT
+        IFNULL(
+        ma.address,
+        CONCAT(
+        h.residential,
+        IFNULL( h.building, '*' ),
+        '栋',
+        IFNULL( CONCAT( h.unit, '单元' ), '' ),
+        IFNULL( h.number, '*' ),
+        '号'
+        )
+        ) houseName,
+        h.id AS houseId,
+        m.nick_name AS memberName,
+        m.mobile AS memberPhone,
+        m.id AS memberId,
+        h.construction_date constructionDate,
+        (
+        CASE
+        WHEN ( f.supervisor_start = 1 OR f.supervisor_start = 0 )
+        AND h.visit_state != 2
+        AND h.visit_state != 3
+        AND h.visit_state != 4
+        AND h.visit_state != 5
+        AND h.pause = 0 THEN
+        f.supervisor_start
+        WHEN h.visit_state = 3 THEN
+        3
+        WHEN h.visit_state = 4 THEN
+        4
+        WHEN h.visit_state = 5 THEN
+        5
+        WHEN ( h.visit_state = 2 OR h.pause = 1 ) THEN
+        2
+        END
+        ) AS visitState
+        FROM
+        dj_house h
+        INNER JOIN (
+        SELECT
+        f.house_id,
+        f.supervisor_start
+        FROM
+        dj_core_house_flow f
+        LEFT JOIN dj_member m ON f.worker_id = m.id
+        WHERE
+        f.worker_type = 3
+        AND f.work_type > 1
+        ) f ON h.id = f.house_id
+        INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_member_address ma ON h.id = ma.house_id
+        WHERE
+        h.data_status = 0
+        <if test="cityId!=null and cityId!=''">
+            AND FIND_IN_SET(h.city_id,#{cityId})
+        </if>
+        <if test="visitState==0 || visitState==1">
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and
+            h.visit_state !=5 and h.pause=0
+        </if>
+        <if test="visitState>=2">
+            and h.visit_state = #{visitState}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{searchKey},'%')
+            or m.nick_name like CONCAT('%',#{searchKey},'%')
+            or m.name like CONCAT('%',#{searchKey},'%')
+            or ma.address like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER BY
+        h.modify_date DESC
+    </select>
+
+    <select id="getAuthorityList" resultType="com.dangjia.acg.dto.supervisor.AuthorityDTO">
+        SELECT
+        IFNULL(
+        ma.address,
+        CONCAT(
+        h.residential,
+        IFNULL( h.building, '*' ),
+        '栋',
+        IFNULL( CONCAT( h.unit, '单元' ), '' ),
+        IFNULL( h.number, '*' ),
+        '号'
+        )
+        ) houseName,
+        h.id AS houseId,
+        m.nick_name AS memberName,
+        m.mobile AS memberPhone,
+        m.id AS memberId,
+        h.construction_date constructionDate,
+        (
+        CASE
+        WHEN ( f.supervisor_start = 1 OR f.supervisor_start = 0 )
+        AND h.visit_state != 2
+        AND h.visit_state != 3
+        AND h.visit_state != 4
+        AND h.visit_state != 5
+        AND h.pause = 0 THEN
+        f.supervisor_start
+        WHEN h.visit_state = 3 THEN
+        3
+        WHEN h.visit_state = 4 THEN
+        4
+        WHEN h.visit_state = 5 THEN
+        5
+        WHEN ( h.visit_state = 2 OR h.pause = 1 ) THEN
+        2
+        END
+        ) AS visitState
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h on sa.house_id = h.id
+        INNER JOIN (
+        SELECT
+        f.house_id,
+        f.supervisor_start
+        FROM
+        dj_core_house_flow f
+        LEFT JOIN dj_member m ON f.worker_id = m.id
+        WHERE
+        f.worker_type = 3
+        AND f.work_type > 1
+        ) f ON h.id = f.house_id
+        INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_member_address ma ON h.id = ma.house_id
+        WHERE
+        h.data_status = 0
+        and sa.data_status =0
+        <if test="memberId!=null and memberId!=''">
+            AND sa.member_id = #{memberId}
+        </if>
+        <if test="visitState==0 || visitState==1">
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and
+            h.visit_state !=5 and h.pause=0
+        </if>
+        <if test="visitState>=2">
+            and h.visit_state = #{visitState}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{searchKey},'%')
+            or m.nick_name like CONCAT('%',#{searchKey},'%')
+            or m.name like CONCAT('%',#{searchKey},'%')
+            or ma.address like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER BY
+        h.modify_date DESC
+    </select>
+
+    <select id="getSupHomePage" resultType="com.dangjia.acg.dto.supervisor.PatrolRecordIndexDTO">
+        SELECT
+        count( 1 ) AS num,
+        '全部' AS NAME,
+        1 AS sortNum,
+        'iconWork/home_icon_quanbu.png' AS image
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h ON sa.house_id = h.id
+        WHERE
+        h.data_status = 0
+        AND sa.member_id = #{memberId}
+        <if test="cityId!=null and cityId!=''">
+            AND h.city_id = #{cityId}
+        </if>
+        UNION ALL
+        SELECT
+        count( 1 ) AS num,
+        '在施工地' AS NAME,
+        2 AS sortNum,
+        'iconWork/home_icon_zaishigong.png' AS image
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h ON sa.house_id = h.id
+        INNER JOIN (
+        SELECT
+        f.house_id,
+        f.supervisor_start
+        FROM
+        dj_core_house_flow f
+        LEFT JOIN dj_member m ON f.worker_id = m.id
+        WHERE
+        f.worker_type = 3
+        AND f.work_type > 1
+        ) f ON h.id = f.house_id
+        WHERE
+        h.data_status = 0
+        AND sa.member_id = #{memberId}
+        <if test="cityId!=null and cityId!=''">
+            AND h.city_id = #{cityId}
+        </if>
+        AND f.supervisor_start = 1
+        AND h.visit_state != 2
+        AND h.visit_state != 3
+        AND h.visit_state != 4
+        AND h.visit_state != 5
+        AND h.pause = 0
+        UNION ALL
+        SELECT
+        count( 1 ) AS num,
+        '本周新开' AS NAME,
+        3 AS sortNum,
+        'iconWork/home_icon_week.png' AS image
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h ON sa.house_id = h.id
+        INNER JOIN ( SELECT house_id, MIN( create_date ) create_date FROM dj_core_house_flow_apply WHERE apply_type = 4
+        GROUP BY house_id ) b ON b.house_id = h.id
+        AND DATE_FORMAT( b.create_date, '%x年-第%v周' ) = DATE_FORMAT( SYSDATE( ), '%x年-第%v周' )
+        WHERE
+        h.data_status = 0
+        AND sa.member_id = #{memberId}
+        <if test="cityId!=null and cityId!=''">
+            AND h.city_id = #{cityId}
+        </if>
+        UNION ALL
+        SELECT
+        count( 1 ) AS num,
+        '本月竣工' AS NAME,
+        4 AS sortNum,
+        'iconWork/home_icon_month.png' AS image
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h ON sa.house_id = h.id
+        WHERE
+        h.data_status = 0
+        AND sa.member_id = #{memberId}
+        AND DATE_FORMAT( h.completed_date, '%Y%m' ) = DATE_FORMAT( CURDATE( ), '%Y%m' )
+        AND h.visit_state = 3
+        <if test="cityId!=null and cityId!=''">
+            AND h.city_id = #{cityId}
+        </if>
+        UNION ALL
+        SELECT
+        count( 1 ) AS num,
+        '今日开工' AS NAME,
+        5 AS sortNum,
+        'iconWork/home_icon_tadyFinish.png' AS image
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h ON sa.house_id = h.id
+        INNER JOIN ( SELECT house_id, create_date FROM dj_core_house_flow_apply WHERE apply_type = 4 AND DATE_FORMAT(
+        create_date, '%Y-%m-%d' ) = DATE_FORMAT( SYSDATE( ), '%Y-%m-%d' ) GROUP BY house_id ) b ON b.house_id = h.id
+        WHERE
+        h.data_status = 0
+        AND sa.member_id = #{memberId}
+        AND h.visit_state = 1
+        <if test="cityId!=null and cityId!=''">
+            AND h.city_id = #{cityId}
+        </if>
+        UNION ALL
+        SELECT
+        count( 1 ) AS num,
+        '连续3天未开工' AS NAME,
+        6 AS sortNum,
+        'iconWork/home_icon_threeday.png' AS image
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h ON sa.house_id = h.id
+        INNER JOIN ( SELECT house_id, create_date FROM dj_core_house_flow_apply WHERE apply_type = 4 GROUP BY house_id
+        ORDER BY create_date DESC ) b ON b.house_id = h.id
+        AND DATE_SUB( CURDATE( ), INTERVAL 3 DAY ) >= b.create_date
+        WHERE
+        h.data_status = 0
+        AND sa.member_id = #{memberId}
+        <if test="cityId!=null and cityId!=''">
+            AND h.city_id = #{cityId}
+        </if>
+        UNION ALL
+        SELECT
+        count( 1 ) AS num,
+        '超期施工' AS NAME,
+        7 AS sortNum,
+        'iconWork/home_icon_overdue.png' AS image
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h ON sa.house_id = h.id
+        INNER JOIN ( SELECT house_id, MAX( end_date ) end_date FROM dj_core_house_flow GROUP BY house_id ) a ON
+        a.house_id = h.id
+        WHERE
+        h.data_status = 0
+        AND sa.member_id = #{memberId}
+        <if test="cityId!=null and cityId!=''">
+            AND h.city_id = #{cityId}
+        </if>
+        UNION ALL
+        SELECT
+        count( 1 ) AS num,
+        '维保工地' AS NAME,
+        8 AS sortNum,
+        'iconWork/home_icon_tadyFinish.png' AS image
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h ON sa.house_id = h.id
+        INNER JOIN dj_maintenance_record dmr ON dmr.house_id = h.id
+        INNER JOIN DJ_maintenance_record_product mrp on dmr.id=mrp.maintenance_record_id
+        WHERE
+        h.data_status = 0
+        AND sa.member_id = #{memberId}
+        AND mrp.maintenance_product_type = 1
+        <if test="cityId!=null and cityId!=''">
+            AND h.city_id = #{cityId}
+        </if>
+    </select>
+
+    <select id="getSupHouseList" resultType="com.dangjia.acg.dto.supervisor.AuthorityDTO">
+        SELECT
+        IFNULL(
+        ma.address,
+        CONCAT(
+        h.residential,
+        IFNULL( h.building, '*' ),
+        '栋',
+        IFNULL( CONCAT( h.unit, '单元' ), '' ),
+        IFNULL( h.number, '*' ),
+        '号'
+        )
+        ) houseName,
+        h.id AS houseId,
+        h.start_date AS startDate,
+        h.end_date AS endDate,
+        <if test="sortNum!=null and sortNum ==8">
+            mrp.total_price AS price,
+            mrp.maintenance_record_id maintenanceRecordId,
+        </if>
+        <if test="type!=null and type ==1">
+            ROUND(
+            6378.138 * 2
+            * ASIN(
+            SQRT(
+            POW(
+            SIN(
+            (
+            #{latitude} * PI() / 180 - mv.locationy * PI() / 180
+            ) / 2
+            )
+            ,
+            2
+            ) + COS(
+            #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
+            SIN(
+            (
+            #{longitude} * PI() / 180 - mv.locationx * PI() / 180
+            ) / 2
+            ),
+            2
+            )
+            )
+            ) * 1000
+            ) AS juli ,
+        </if>
+        h.city_name AS address
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h ON sa.house_id = h.id
+        LEFT JOIN dj_member_address ma ON h.id = ma.house_id
+        <if test="type!=null and type ==1">
+            INNER JOIN dj_house_modeling_village mv ON mv.id=h.village_id
+        </if>
+        <if test="sortNum!=null and sortNum ==2">
+            INNER JOIN (
+            SELECT
+            f.house_id,
+            f.supervisor_start
+            FROM
+            dj_core_house_flow f
+            LEFT JOIN dj_member m ON f.worker_id = m.id
+            WHERE
+            f.worker_type = 3
+            AND f.work_type > 1
+            ) f ON h.id = f.house_id
+        </if>
+        <if test="sortNum!=null and sortNum ==3">
+            INNER JOIN ( SELECT house_id, MIN( create_date ) create_date FROM dj_core_house_flow_apply WHERE apply_type
+            = 4 GROUP BY house_id ) b ON b.house_id = h.id
+            AND DATE_FORMAT( b.create_date, '%x年-第%v周' ) = DATE_FORMAT( SYSDATE( ), '%x年-第%v周' )
+        </if>
+        <if test="sortNum!=null and sortNum ==5">
+            INNER JOIN ( SELECT house_id, create_date FROM dj_core_house_flow_apply WHERE apply_type = 4 AND
+            DATE_FORMAT( create_date, '%Y-%m-%d' ) = DATE_FORMAT( SYSDATE( ), '%Y-%m-%d' ) GROUP BY house_id ) b ON
+            b.house_id = h.id
+        </if>
+        <if test="sortNum!=null and sortNum ==6">
+            INNER JOIN ( SELECT house_id, create_date FROM dj_core_house_flow_apply WHERE apply_type = 4 GROUP BY
+            house_id ORDER BY create_date DESC ) b ON b.house_id = h.id
+            AND DATE_SUB( CURDATE( ), INTERVAL 3 DAY ) >= b.create_date
+        </if>
+        <if test="sortNum!=null and sortNum ==7">
+            INNER JOIN ( SELECT house_id, MAX( end_date ) end_date FROM dj_core_house_flow GROUP BY house_id ) a ON
+            a.house_id = h.id
+        </if>
+        <if test="sortNum!=null and sortNum ==8">
+            INNER JOIN dj_maintenance_record dmr ON dmr.house_id = h.id
+            INNER JOIN DJ_maintenance_record_product mrp on dmr.id=mrp.maintenance_record_id
+        </if>
+        WHERE
+        h.data_status = 0
+        AND
+        sa.member_id = #{memberId}
+        <if test="cityId!=null and cityId!=''">
+            and h.city_id = #{cityId}
+        </if>
+        <if test="sortNum!=null and sortNum ==2">
+            AND f.supervisor_start = 1
+            AND h.visit_state != 2
+            AND h.visit_state != 3
+            AND h.visit_state != 4
+            AND h.visit_state != 5
+            AND h.pause = 0
+        </if>
+        <if test="sortNum!=null and sortNum ==4">
+            AND DATE_FORMAT( h.completed_date, '%Y%m' ) = DATE_FORMAT( CURDATE( ), '%Y%m' )
+            AND h.visit_state = 3
+        </if>
+        <if test="sortNum!=null and sortNum ==5">
+            AND h.visit_state = 1
+        </if>
+        <!--查询维保商品-->
+        <if test="sortNum!=null and sortNum ==8">
+            and mrp.maintenance_product_type = 1
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and (CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{searchKey},'%')
+            or ma.address like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        <if test="type!=null and type ==1">
+            ORDER BY
+            juli ASC
+        </if>
+        <if test="type ==null or type ==0">
+            ORDER BY
+            h.modify_date DESC
+        </if>
+        <if test="sortNum!=null and sortNum ==8 and type !=null and type ==2">
+            ORDER BY
+            mrp.total_price DESC
+        </if>
+        <if test="sortNum!=null and sortNum ==8 and type !=null and type ==3">
+            ORDER BY
+            mrp.total_price ASC
+        </if>
+    </select>
+
+    <select id="getFatalism" resultType="java.lang.Integer">
+        select
+        COUNT(DISTINCT to_days(create_date))
+        from dj_core_house_flow_apply
+        where house_id = #{houseId}
+        <if test="workerType!=null and workerType !=''">
+            and worker_type = #{workerType}
+        </if>
+        and apply_type = 4
+    </select>
+
+    <select id="getAcceptanceCheck" resultType="java.lang.Integer">
+        SELECT
+            COUNT(id)
+        FROM
+            dj_core_house_flow_apply
+        WHERE
+            house_id = #{houseId}
+            AND ( apply_type = 1 OR apply_type = 2 )
+            AND ( member_check = 1 OR member_check = 3 )
+    </select>
+
+    <select id="getAllNumber" resultType="java.lang.Integer">
+        SELECT
+			count(t4.id)
+		FROM
+			dj_house_warehouse t1,
+			dj_basics_storefront_product t2,
+			dj_basics_product_template t3,
+			dj_basics_technology t4
+		WHERE
+			t1.product_type = 2
+		and t1.house_id=#{houseId}
+		AND t1.product_id = t2.id
+		AND t2.prod_template_id = t3.id
+		and t4.worker_type_id=#{workerTypeId}
+		AND FIND_IN_SET(t4.id, t3.technology_ids)
+    </select>
+
+    <select id="getCompleteNumber" resultType="java.lang.Integer">
+        SELECT
+            count( id )
+        FROM
+            dj_matter_technology_record
+        WHERE
+            house_id = #{houseId}
+            AND worker_type_id = #{workerTypeId}
+            AND state = 1
+    </select>
+
+</mapper>

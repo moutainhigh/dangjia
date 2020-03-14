@@ -5,7 +5,10 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.pay.PayService;
 import com.dangjia.acg.service.pay.PaymentService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,11 +32,6 @@ public class PaymentController implements PaymentAPI {
     public ServerResponse setServersSuccess(String businessOrderId, BigDecimal money, String image ){
         return paymentService.setServersSuccess(businessOrderId, money,image);
     }
-    @Override
-    @ApiMethod
-    public void budgetCorrect(String businessOrderNumber, String payState, String houseFlowId) {
-        paymentService.budgetCorrect(businessOrderNumber, payState, houseFlowId);
-    }
 
     @Override
     @ApiMethod
@@ -49,8 +47,15 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber, Integer userRole) {
-        return payService.getWeiXinSign(businessOrderNumber, userRole);
+    public ServerResponse setWebPaySuccess(String businessOrderNumber) {
+        return paymentService.setWebPaySuccess(businessOrderNumber);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber,String openId, Integer userRole) {
+        return payService.getWeiXinSign(userToken,businessOrderNumber, openId, userRole);
     }
 
     @Override
@@ -61,34 +66,55 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, Integer type) {
-        return paymentService.getPaymentOrder(userToken, houseId, taskId, type);
-    }
-
-    /**
-     * 支付页面(通用)
-     */
-
-    @Override
-    @ApiMethod
-    public ServerResponse getPaymentAllOrder(String userToken, String businessOrderNumber, Integer type) {
-        if (type == null) {
-            type = 0;
-        }
-        return paymentService.getPaymentAllOrder(userToken, businessOrderNumber, type);
+    public ServerResponse getPaymentOrder(String userToken, String taskId) {
+        return paymentService.getPaymentOrder(userToken,  taskId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getPaymentPage(String userToken, String houseId, String taskId, Integer type) {
-        return paymentService.getPaymentPage(userToken, houseId, taskId, type);
+    public ServerResponse getPaymentPage(String userToken, String taskId, String cityId, String houseId,String productIds, Integer type, String storeActivityProductId,String activityRedPackId) {
+        return paymentService.getPaymentPage(userToken,  taskId,cityId,  houseId, productIds,type,storeActivityProductId, activityRedPackId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse generateOrder(String userToken,String cityId,String productIds,String workerId, String addressId,String activityRedPackId){
+        return paymentService.generateOrder(userToken, cityId,productIds, workerId,  addressId,activityRedPackId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse generateBudgetOrder(String userToken,String cityId,String houseFlowId){
+        return paymentService.generateBudgetOrder(userToken, cityId, houseFlowId);
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse editOrder(String userToken, String orderId, String workerId, String addressId, String houseId){
+        return paymentService.editOrder(userToken,orderId,workerId,addressId,houseId);
+    }
 
     @Override
     @ApiMethod
     public ServerResponse queryInsuranceInfo(HttpServletRequest request,String userToken, String workerId) {
         return paymentService.queryInsuranceInfo(userToken,workerId);
+    }
+
+    /**
+     * 查询符合条件的优惠券
+     * @param userToken
+     * @param productJsons
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivityRedPackInfo(String userToken,String productJsons){
+        return paymentService.queryActivityRedPackInfo(userToken,productJsons);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setServersSuccess(String payOrderId) {
+        return paymentService.setServersSuccess(payOrderId);
     }
 
 

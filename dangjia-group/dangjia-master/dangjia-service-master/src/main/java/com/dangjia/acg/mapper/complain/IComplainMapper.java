@@ -14,6 +14,11 @@ public interface IComplainMapper extends Mapper<Complain> {
 
     List<ComplainDTO> getComplainList(@Param("complainType")  Integer complainType, @Param("state")  Integer state, @Param("searchKey")  String searchKey);
 
-    ComplainDTO getComplain( @Param("complainId")  String complainId);
+    List<ComplainDTO> getMaintenanceRecordList(@Param("complainType")  Integer complainType,
+                                               @Param("state")  Integer state,
+                                               @Param("searchKey")  String searchKey);
+
+
+    ComplainDTO getComplain(@Param("complainId")  String complainId);
 
 }

@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper">
+
+    <sql id="new_columns">
+        id as id,
+        name as name,
+        goods_id as goodsId,
+        category_id as categoryId,
+        product_sn as productSn,
+        image as image,
+        unit_id as unitId,
+        label_id as labelId,
+        unit_name as unitName,
+        value_name_arr valueNameArr,
+        value_id_arr AS valueIdArr,
+        type as type,
+        maket,
+        istop,
+        price as price,
+        other_name as otherName,
+        create_date as createDate,
+        modify_date as modifyDate,
+        weight,
+        cost,
+        profit,
+        convert_unit convertUnit,
+        convert_quality convertQuality,
+        is_influe_warranty_period AS isInflueWarrantyPeriod,
+        max_warranty_period_year AS maxWarrantyPeriodYear,
+        min_warranty_period_year AS minWarrantyPeriodYear,
+        marketing_name AS marketingName,
+        cartage_price cartagePrice,
+        detail_image detailImage,
+        guaranteed_policy guaranteedPolicy,
+        refund_policy refundPolicy,
+        work_explain as workExplain,
+        worker_dec as workerDec,
+        worker_standard as workerStandard,
+        worker_type_id as workerTypeId,
+        adjusted_price as adjustedPrice,
+        modity_price_time as modityPriceTime,
+        technology_ids as technologyIds,
+        considerations,
+        calculate_content calculateContent,
+        build_content buildContent,
+        is_agency_purchase isAgencyPurchase,
+        is_relateion_product isRelateionProduct,
+        steward_exploration stewardExploration,
+        maintenance_investigation maintenanceInvestigation
+    </sql>
+
+    <!-- 查询当前添加商品的属性值是否已被用(存在相关属性值的商品) -->
+    <select id="getPListByValueIdArr" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        select
+        p.id as id,
+        p.name as name,
+        p.goods_id as goodsId,
+        p.category_id as categoryId,
+        p.product_sn as productSn,
+        p.image as image,
+        p.unit_id as unitId,
+        p.label_id as labelId,
+        p.unit_name as unitName,
+        p.type as type,
+        p.istop,
+        p.price as price,
+        p.other_name as otherName,
+        p.value_name_arr valueNameArr,
+        p.value_id_arr AS valueIdArr,
+        p.weight,
+        p.cost,
+        p.profit,
+        p.convert_unit convertUnit,
+        p.convert_quality convertQuality,
+        p.is_influe_warranty_period AS isInflueWarrantyPeriod,
+        p.max_warranty_period_year AS maxWarrantyPeriodYear,
+        p.min_warranty_period_year AS minWarrantyPeriodYear,
+        p.marketing_name AS marketingName,
+        p.cartage_price cartagePrice,
+        p.detail_image detailImage,
+        p.guaranteed_policy guaranteedPolicy,
+        p.refund_policy refundPolicy,
+        p.work_explain as workExplain,
+        p.worker_dec as workerDec,
+        p.worker_standard as workerStandard,
+        p.worker_type_id as workerTypeId,
+        p.adjusted_price as adjustedPrice,
+        p.modity_price_time as modityPriceTime,
+        p.technology_ids as technologyIds,
+        p.considerations,
+        p.calculate_content calculateContent,
+        p.build_content buildContent,
+        p.is_agency_purchase isAgencyPurchase,
+        p.is_relateion_product isRelateionProduct
+        from dj_basics_product_template p
+        where p.data_status = 0
+        and type=1 and maket=1
+        <if test="valueIdArr!=null and valueIdArr!=''">
+            and p.value_id_arr=#{valueIdArr}
+        </if>
+    </select>
+
+    <!-- 根据名称查询 -->
+    <select id="queryByName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product_template
+        where data_status = 0
+        and city_id=#{cityId}
+        <if test="name!=null and name!=''">
+            and
+            name=#{name}
+        </if>
+        ORDER BY istop DESC,create_date desc
+    </select>
+
+    <!-- 根据货号查询 -->
+    <select id="queryByProductSn" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product_template
+        where data_status = 0
+        <if test="productSn!=null and productSn!=''">
+            and
+            product_sn=#{productSn}
+        </if>
+        ORDER BY istop DESC,create_date desc
+    </select>
+
+   <!-- &lt;!&ndash; 根据材料商品编号查询  营销名称&ndash;&gt;
+        <select  id ="queryProductMaterial"  parameterType="java.lang.String"    resultType="com.dangjia.acg.dto.product.AppBasicsProductDTO">
+            select
+            p.id,p.name,p.goods_id,p.category_id,p.product_sn,p.image,
+            p.unit_name,p.unit_id,p.label_id,p.type,p.maket,p.price,p.other_name,
+            p.istop,p.remark  ,p.marketing_name,b.name as attributeIdArr   from dj_basics_product_template  p
+            left join dj_basics_attribute b on b.id=p.value_id_arr
+
+            <if test="productSn!=null and productSn!=''">
+                and
+                p.product_sn=#{productSn}
+            </if>
+            where  1=1 and p.data_status = 0
+            ORDER BY p.istop DESC,p.create_date desc
+        </select>
+    &lt;!&ndash; 根据人工商品编号查询  没有规格、没有营销名称&ndash;&gt;
+        <select  id ="queryProductWorker" parameterType="java.lang.String" resultType="com.dangjia.acg.dto.product.AppBasicsProductDTO">
+            select
+            p.id,p.name,p.goods_id,p.category_id,p.product_sn,p.image,
+            p.unit_name,p.unit_id,p.label_id,p.type,p.maket,p.price,p.other_name,
+            p.istop,p.remark,p.marketing_name as marketing_name ,p.attribute_id_arr as attributeIdArr  from dj_basics_product_template  p
+            <if test="productSn!=null and productSn!=''">
+             and
+             p.product_sn=#{productSn}
+            </if>
+
+            where  1=1 and p.data_status = 0
+            ORDER BY p.istop DESC,p.create_date desc
+        </select>-->
+
+    <!--  按照 属性id 和属性值查找商品 -->
+    <select id="getPListByValueIdArrOrAttrId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        select
+        p.id as id,
+        p.name as name,
+        p.goods_id as goodsId,
+        p.category_id as categoryId,
+        p.product_sn as productSn,
+        p.image as image,
+        p.unit_id as unitId,
+        p.label_id as labelId,
+        p.unit_name as unitName,
+        p.type as type,
+        p.price as price,
+        p.istop,
+        p.attribute_id_arr AS attributeIdArr,
+        p.value_name_arr AS valueNameArr
+        from dj_basics_product_template p
+        where
+        p.type=1 and p.maket=1
+        <if test="attributeIdArr!=null and attributeIdArr!=''">
+            and FIND_IN_SET(#{attributeIdArr},p.attribute_id_arr)
+        </if>
+        <if test="valueIdArr!=null and valueIdArr!=''">
+            and FIND_IN_SET(#{valueIdArr},p.value_id_arr)
+        </if>
+    </select>
+
+    <!--更新货品属性-->
+    <update id="updateProductValueId" parameterType="java.lang.String">
+        UPDATE `dj_basics_product_template` pm
+        SET pm.value_name_arr =
+          ( SELECT GROUP_CONCAT( v.NAME ) FROM dj_basics_attribute_value v WHERE FIND_IN_SET( v.id, pm.value_id_arr ) )
+        WHERE
+        FIND_IN_SET(#{valueId}, pm.value_id_arr )
+    </update>
+
+    <!-- 根据商品Id查询所有货品 -->
+    <select id="queryProductTemplateByGoodsId" resultType="com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO">
+        SELECT bpt.id AS id,
+        bpt.name AS NAME,
+        bpt.goods_id AS goodsId,
+        bpt.category_id AS categoryId,
+        bpt.product_sn AS productSn,
+        bpt.image AS image,
+        bpt.unit_id AS unitId,
+        bpt.label_id AS labelId,
+        bpt.unit_name AS unitName,
+        bpt.value_name_arr valueNameArr,
+        bpt.value_id_arr AS valueIdArr,
+        bpt.type AS TYPE,
+        bpt.maket,
+        bpt.istop,
+        bpt.price AS price,
+        bpt.other_name AS otherName,
+        bpt.create_date AS createDate,
+        bpt.modify_date AS modifyDate,
+        bpt.weight,
+        bpt.cost,
+        bpt.profit,
+        bpt.convert_unit convertUnit,
+        bpt.convert_quality convertQuality,
+        bpt.is_influe_warranty_period AS isInflueWarrantyPeriod,
+        bpt.max_warranty_period_year AS maxWarrantyPeriodYear,
+        bpt.min_warranty_period_year AS minWarrantyPeriodYear,
+        bpt.marketing_name AS marketingName,
+        bpt.cartage_price cartagePrice,
+        bpt.detail_image detailImage,
+        bpt.guaranteed_policy guaranteedPolicy,
+        bpt.refund_policy refundPolicy,
+        bpt.work_explain AS workExplain,
+        bpt.worker_dec AS workerDec,
+        bpt.worker_standard AS workerStandard,
+        bpt.worker_type_id AS workerTypeId,
+        bpt.adjusted_price AS adjustedPrice,
+        bpt.modity_price_time as modityPriceTime,
+        bpt.technology_ids AS technologyIds,
+        bpt.considerations,
+        bpt.calculate_content calculateContent,
+        bpt.build_content buildContent,
+        bpt.is_agency_purchase isAgencyPurchase,
+        bpt.is_relateion_product isRelateionProduct,
+        dbg.NAME AS goodsName,
+        IFNULL(dsap.sell_price,bpt.price) sellPrice,
+        IFNULL(dsap.supplied_num,0) AS suppliedNum,
+        IFNULL(dsap.is_shelf_status,0)  AS isShelfStatus
+        FROM dj_basics_product_template bpt
+        INNER  JOIN dj_basics_goods dbg ON dbg.id=bpt.goods_id
+        LEFT JOIN (select * from  dj_basics_storefront_product t where t.storefront_id=#{storefontId})dsap  ON dsap.prod_template_id=bpt.id
+        WHERE bpt.city_id=#{cityId}
+        and bpt.type=#{type}
+        <if test="bgtype!=null and bgtype!=''">
+            and FIND_IN_SET(dbg.type,#{bgtype})
+        </if>
+        <if test="name!=null and name!=''">
+            AND (
+            dbg.name   LIKE CONCAT('%',#{name},'%')
+            OR
+            bpt.name LIKE CONCAT('%',#{name},'%')
+            )
+        </if>
+        <if test="categoryId!=null and categoryId!=''">
+           and  bpt.category_id=#{categoryId}
+        </if>
+        AND bpt.data_status = 0
+        ORDER BY bpt.istop DESC,bpt.create_date DESC
+
+    </select>
+
+
+    <!-- 根据商品Id查询所有货品 -->
+    <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product_template
+        where  goods_id=#{goodsId}
+        and data_status = 0
+        ORDER BY istop DESC,create_date desc
+    </select>
+
+    <!-- 根据商品Id查询所有货品 -->
+    <select id="queryByGoodsIdLimit12" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product_template
+        where  goods_id=#{goodsId}
+        and data_status = 0
+        ORDER BY  RAND() LIMIT 12
+    </select>
+
+    <!-- 根据货品ID查询暂存的商品 -->
+    <select id="queryTemporaryStorage" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product_template
+        where goods_id=#{goodsId}
+        and  data_status=#{dataStatus}
+        and data_status=0
+        AND city_id = #{cityId}
+        ORDER BY istop DESC,create_date desc
+        limit 1
+    </select>
+
+    <update id="updateProductCategoryByGoodsId">
+        update dj_basics_product_template set category_id=#{categoryId} where goods_id=#{goodsId}
+    </update>
+
+
+    <!-- 查询所有的商品信息 -->
+    <select id="queryProductByCategoryId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product_template
+        where data_status = 0
+        <if test="categoryId!=null and categoryId!=''">
+           and category_id=#{categoryId}
+           and city_id=#{cityId}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and name LIKE CONCAT('%',#{searchKey},'%')
+        </if>
+        ORDER BY istop DESC,create_date desc
+    </select>
+
+    <!-- 根据货品id查询货品对象 -->
+    <select id="getById" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product_template
+        where id=#{id}
+        and data_status=0
+        ORDER BY istop DESC,create_date desc
+    </select>
+
+
+    <select id="serchCategoryProduct" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        SELECT
+
+        p.id productId,
+        s.id storefrontId,
+        s.storefront_name storefrontName,
+        s.system_logo storefrontIcon,
+        p.product_name productName,
+        p.image image,
+        p.sell_price price,
+
+        bp.id productTemplateId,
+        bp.category_id categoryId,
+        bp.product_sn productSn,
+        bp.name productName,
+        bp.goods_id goodsId,
+        bp.unit_id unit,
+        bp.unit_name unitName,
+        bp.value_id_arr valueIdArr,
+        bp.value_name_arr valueNameArr,
+        bg.type productType,
+        bg.buy goodsBuy,
+        bp.convert_quality convertQuality,
+        bp.convert_unit convertUnit,
+        '0' isActivityRedPack,
+        bg.brand_id brandId
+
+
+        FROM
+        dj_basics_goods bg
+        INNER JOIN dj_basics_product_template bp ON bp.goods_id = bg.id  AND bp.city_id = #{cityId}
+        INNER JOIN dj_basics_storefront_product p ON bp.id = p.prod_template_id  AND p.city_id = #{cityId}
+        INNER JOIN dj_basics_storefront s ON s.id = p.storefront_id  AND s.city_id = #{cityId}
+        INNER JOIN dj_basics_goods_category c ON c.id = bg.category_id
+        WHERE
+        p.is_shelf_status = 1
+        AND bg.data_status = 0
+        AND p.data_status = 0
+        AND bg.type &lt;5
+        AND bg.buy !=2
+        AND bg.city_id = #{cityId}
+        <if test="name!=null and name!=''">
+            AND (
+            <foreach collection="name" index="index" item="item" open="(" separator="OR" close=")">
+                CONCAT(p.product_name) LIKE CONCAT('%', #{item}, '%')
+            </foreach>
+            OR
+            <foreach collection="name" index="index" item="item" open="(" separator="OR" close=")">
+                CONCAT(bp.name) LIKE CONCAT('%', #{item}, '%')
+            </foreach>
+            OR
+            <foreach collection="name" index="index" item="item" open="(" separator="OR" close=")">
+                CONCAT(c.name) LIKE CONCAT('%', #{item}, '%')
+            </foreach>
+            )
+        </if>
+        <if test="categoryId!=null and categoryId!=''">
+            AND bg.category_id = #{categoryId}
+        </if>
+
+        <if test="goodsId!=null and goodsId!=''">
+            AND bg.id = #{goodsId}
+        </if>
+
+        <if test="null!=attributeVal">
+            AND
+            <foreach collection="attributeVal" index="index" item="item" open="(" separator="and" close=")">
+                <foreach collection="item.split('-')"  item="val" index="index" open="(" separator="OR" close=")">
+                    FIND_IN_SET(#{val},bp.value_id_arr)
+                </foreach>
+            </foreach>
+        </if>
+        <if test="brandVal!=null and brandVal!=''">
+            AND
+            <foreach collection="brandVal" index="index" item="item" open="(" separator="OR" close=")">
+                bg.brand_id = #{item}
+            </foreach>
+        </if>
+        <if test="orderKey!=null and orderKey!='' and orderKey==0 ">
+            ORDER BY bp.price
+        </if>
+        <if test="orderKey!=null and orderKey!='' and orderKey==1 ">
+            ORDER BY bp.price DESC
+        </if>
+        <if test="orderKey==null or orderKey==''">
+            ORDER BY
+            bp.istop DESC,
+            bg.category_id,
+            bg.`name` DESC
+        </if>
+
+    </select>
+
+    <select id="queryProductByTechnologyIds" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product_template t
+        where t.data_status = 0
+        AND t.maket = 1
+        AND FIND_IN_SET(#{technologyId}, t.technology_ids)
+        ORDER BY istop DESC,create_date desc
+    </select>
+
+
+    <!--补货查询商品库服务-->
+    <select id="queryProductData" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        select
+        sp.id as storefrontProductId,
+        p.id as id,
+        IFNULL(sp.market_name,p.name) as name,
+        p.goods_id as goodsId,
+        p.category_id as categoryId,
+        p.product_sn as productSn,
+        sp.image as image,
+        p.unit_id as unitId,
+        p.label_id as labelId,
+        p.unit_name as unitName,
+        p.type as type,
+        sp.sell_price as price,
+        p.istop,
+        p.value_id_arr AS valueIdArr,
+        p.value_name_arr AS valueNameArr
+        FROM
+        dj_basics_product_template p
+        INNER JOIN dj_basics_goods g ON p.goods_id = g.id
+        INNER JOIN dj_basics_goods_category ca ON ca.id = p.category_id
+        INNER JOIN dj_basics_storefront_product sp ON p.id=sp.prod_template_id
+        <if test="name!=null and name!=''">
+            INNER JOIN dj_basics_goods_category tca ON tca.id = ca.parent_top
+        </if>
+        WHERE p.data_status = 0
+        <if test="productType!=null and productType!=''">
+            AND g.type =#{productType}
+        </if>
+        <if test="name!=null and name!=''">
+            AND (
+            CONCAT(
+            IFNULL(g.other_name,''),
+            ca.`name`,
+            IFNULL(tca.`name`,''),
+            p.`name`,
+            IFNULL(p.value_name_arr,'')
+            )
+            LIKE CONCAT('%',#{name},'%')
+            )
+        </if>
+        <if test="productId!=null and productId!=''">
+            AND sp.id in
+            <foreach collection="productId" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        <if test="categoryId!=null and categoryId!=''">
+            AND (ca.parent_top=#{categoryId} OR p.category_id=#{categoryId})
+        </if>
+        ORDER BY p.istop DESC,p.`name` DESC
+    </select>
+
+
+    <select id="queryChooseGoods" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+            p.*
+        FROM
+            dj_basics_goods_category gc
+        INNER JOIN dj_basics_goods g ON gc.id = g.category_id
+        INNER JOIN dj_basics_product_template p ON g.id = p.goods_id
+        WHERE
+            (
+                gc. NAME = "设计师"
+                OR gc. NAME = "精算师"
+            )
+    </select>
+
+    <select id="queryStoreWorkerGoodsDTO" resultType="com.dangjia.acg.dto.basics.WorkerGoodsDTO">
+        SELECT DISTINCT
+         p.id,
+         p.NAME AS NAME,
+         p.product_sn AS workerGoodsSn,
+         g.name goodsName,
+         g.type productType,
+         p.image,
+         p.worker_dec AS workerDec,
+         p.unit_id AS unitId,
+         p.unit_name AS unitName,
+         p.other_name AS otherName,
+         p.worker_type_id AS workerTypeId,
+         p.price,
+         p.istop,
+         g.sales,
+         p.work_explain AS workExplain,
+         p.worker_standard AS workerStandard,
+         p.maket,
+         p.adjusted_price AS adjustedPrice,
+         p.modity_price_time as modityPriceTime,
+         p.technology_ids AS technologyIds,
+         p.considerations AS considerations,
+         p.calculate_content AS calculateContent,
+         p.build_content AS buildContent,
+         p.create_date AS createDate,
+         p.modify_date AS modifyDate,
+         t1.storefront_id storefrontId
+        FROM
+            dj_basics_product_template p,
+            dj_basics_storefront_product t1,
+            dj_basics_goods g
+        WHERE
+            p.goods_id = g.id
+        AND p.id = t1.prod_template_id
+        AND p.data_status = 0
+        AND p.maket = 1
+        AND t1.is_shelf_status = '1'
+         and p.product_sn=#{productSn}
+        ORDER BY
+            t1.sell_price DESC
+        LIMIT 1
+    </select>
+
+
+    <select id="getProductListByStoreproductId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+            t1.id as id,
+            t1.product_name  as name,
+            t.goods_id as goodsId,
+            t.category_id as categoryId,
+            t.product_sn as productSn,
+            t.image as image,
+            t1.sell_price price,
+            t.type,
+            t.value_id_arr valueIdArr,
+            t.value_id_arr value_name_arr,
+            t.technology_ids technologyIds
+        FROM dj_basics_product_template t,
+             dj_basics_storefront_product t1
+        WHERE
+           t.id = t1.prod_template_id
+           and t1.is_shelf_status = 1
+           AND t1.id = #{storefontProductId}
+           and t1.data_status=0
+    </select>
+    <select  id="getGoodsListByStorefontId" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+        SELECT
+          t2.id,
+          t2.name,
+          t1.sell_price price
+        FROM
+            dj_basics_product_template t,
+            dj_basics_storefront_product t1,
+            dj_basics_goods  t2
+        WHERE
+            t.id = t1.prod_template_id
+        AND t1.storefront_id = #{storefontId}
+        and t2.category_id = #{categoryId}
+        and t1.data_status=0
+        group by t2.name
+    </select>
+
+    <select  id="getProductTempListByStorefontId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+            t1.id,
+            t1.product_name name,
+            t.type,
+            t1.sell_price price,
+            t.value_id_arr valueIdArr,
+            t.value_name_arr valueNameArr
+       FROM
+            dj_basics_storefront_product t1
+        INNER JOIN dj_basics_product_template t on t.id=t1.prod_template_id
+        WHERE
+            t.id = t1.prod_template_id
+        and t1.is_shelf_status = '1'
+        AND t1.storefront_id = #{storefontId}
+        and t1.goods_id = #{goodsId}
+        group by t1.product_name
+    </select>
+
+    <!--根据商品模板ID查询对应店铺商品信息-->
+    <select id="getStorefrontInfoByprodTemplateId" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
+        SELECT
+            t1.storefront_id storefrontId,
+            t1.id storefrontProductId,
+            t.id productTemplateId,
+            t.category_id categoryId,
+            t.product_sn productSn,
+            t1.product_name productName,
+            t.goods_id goodsId,
+            t.cost,
+            IFNULL(ifnull(t1.sell_price,t.price),0) sellPrice,
+            t1.image,
+            t.convert_quality convertQuality,
+            t.convert_unit convertUnit,
+            t.unit_id unitId,
+            t.unit_name unitName,
+            t.unit_id,
+            t.unit_name,
+            t.label_id
+        FROM
+            dj_basics_product_template t,
+            dj_basics_storefront_product t1
+        WHERE
+            t.id = t1.prod_template_id
+        and t1.is_shelf_status = '1'
+        and t1.data_status=0
+        and t.data_status = 0
+        <if test="prodTemplateId!=null and prodTemplateId!=''">
+            AND t.id = #{prodTemplateId}
+        </if>
+        <if test="prodTemplateSn!=null and prodTemplateSn!=''">
+            AND t.product_sn = #{prodTemplateSn}
+        </if>
+        GROUP BY
+            t1.sell_price ASC
+        limit 1
+    </select>
+
+
+
+    <select id="getProductStoreListByGoodsId"  resultType="java.util.Map" >
+        SELECT
+            t2.id productId,
+            t2.id productTemplateId,
+            t2.goods_id goodsId,
+            t2.product_sn productSn,
+            t2.`name` productName,
+            t3. NAME goodsName,
+            t2.category_id categoryId,
+          t4.name unitName
+        FROM
+            dj_basics_storefront_product t1
+            INNER JOIN dj_basics_product_template t2 on t1.prod_template_id = t2.id
+            INNER JOIN dj_basics_goods t3 on t2.goods_id = t3.id
+        LEFT JOIN dj_basics_unit t4 on t3.unit_id=t4.id
+        WHERE t2.goods_id = #{goodsId}
+        AND t1.is_shelf_status = '1'
+        AND t1.data_status = '0'
+        GROUP BY
+            t1.prod_template_id,
+            t2.goods_id,
+            t2.product_sn,
+            t2. NAME,
+            t3. NAME,
+            t2.category_id,
+            t4.name
+
+
+    </select>
+    <!--查询所有的人工商品-->
+    <select id="queryAllWorkerProductList" resultType="java.util.Map">
+        SELECT
+            t.id,
+            t.name
+        FROM
+            dj_basics_product_template t,
+            dj_basics_goods t1
+        WHERE
+            t.goods_id = t1.id
+        AND t1.type = 2
+        AND t.maket = 1
+        AND t.data_status = 0
+        and t.city_id=#{cityId}
+        <if test="name!=null and name!=''">
+            and t.name like CONCAT('%',#{name},'%')
+        </if>
+
+    </select>
+
+    <update id="updateProductByMaintenaceInvestigation">
+        update dj_basics_product_template set maintenance_investigation=0 where maintenance_investigation=1
+    </update>
+
+    <select id="queryMaintenanceRecordProduct" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        SELECT
+            p.id productId,
+            s.id storefrontId,
+            s.storefront_name storefrontName,
+            s.system_logo storefrontIcon,
+            p.product_name productName,
+            p.image image,
+            p.sell_price price,
+            bp.id productTemplateId,
+            bp.category_id categoryId,
+            bp.id productId,
+            bp.product_sn productSn,
+            bp. NAME productName,
+            bp.goods_id goodsId,
+            bp.unit_id unit,
+            bp.unit_name unitName,
+            bp.value_id_arr valueIdArr,
+            bp.value_name_arr valueNameArr,
+            bg.type productType,
+            bg.buy goodsBuy,
+            bp.convert_quality convertQuality,
+            bp.convert_unit convertUnit,
+            '0' isActivityRedPack,
+            bg.brand_id brandId
+        FROM
+            dj_basics_goods bg
+        INNER JOIN dj_basics_product_template bp ON bp.goods_id = bg.id
+        INNER JOIN dj_basics_storefront_product p ON bp.id = p.prod_template_id
+        INNER JOIN dj_basics_storefront s ON s.id = p.storefront_id
+        INNER JOIN dj_basics_goods_category gc on bg.category_id=gc.id
+        WHERE
+            p.is_shelf_status = 1
+        AND bg.data_status = 0
+        <choose>
+            <when test="null!=workerTypeId and ''!=workerTypeId">
+                AND bg.type = 5
+                and bp.worker_type_id=#{workerTypeId}
+            </when>
+            <otherwise>
+                and bg.type=0
+            </otherwise>
+        </choose>
+        and bg.city_id= #{cityId}
+        <if test="topCategoryId!=null and topCategoryId!=''">
+            and gc.parent_top=#{topCategoryId}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and t.name like CONCAT('%',#{searchKey},'%')
+        </if>
+    </select>
+</mapper>

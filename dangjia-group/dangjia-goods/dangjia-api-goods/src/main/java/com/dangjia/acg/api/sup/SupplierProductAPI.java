@@ -23,7 +23,7 @@ public interface SupplierProductAPI {
 
     @PostMapping("/sup/supplierProduct/info")
     @ApiOperation(value = "供应商明细", notes = "供应商明细")
-    Supplier getSupplier(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
+    Supplier getSupplier(@RequestParam("cityId") String cityId, @RequestParam("productId") String productId);
 
     @PostMapping("/sup/supplierProduct/byTelephone")
     @ApiOperation(value = "供应商登录", notes = "供应商登录")

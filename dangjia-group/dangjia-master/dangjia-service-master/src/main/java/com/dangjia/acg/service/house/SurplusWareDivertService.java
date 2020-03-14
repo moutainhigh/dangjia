@@ -3,6 +3,7 @@ package com.dangjia.acg.service.house;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -12,12 +13,12 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareDivertMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareDivert;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.SurplusWareHouseItem;
-import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +46,8 @@ public class SurplusWareDivertService {
     private IHouseMapper iHouseMapper;
     @Autowired
     private ForMasterAPI forMasterAPI;
-
+    @Autowired
+    private DjSupplierAPI djSupplierAPI ;
     /**
      * 添加临时仓库清点数据
      */
@@ -116,9 +118,10 @@ public class SurplusWareDivertService {
                         return serverResponse;
                     address = toSurplusWareHouse.getAddress();
                 } else if (divertType == 2) {//供应商  toSurplusWareHouseId : 是供应商id
-                    Supplier toSupplier = forMasterAPI.getSupplier(house.getCityId(), toSurplusWareHouseId);
-                    if (toSupplier != null)
-                        address = toSupplier.getName();
+                    //Supplier toSupplier = forMasterAPI.getSupplier(house.getCityId(), toSurplusWareHouseId);
+                    DjSupplier djSupplier =djSupplierAPI.queryDjSupplierByPass(toSurplusWareHouseId);
+                    if (djSupplier != null)
+                        address = djSupplier.getName();
                 } else if (divertType == 3) {// 业主   toSurplusWareHouseId : 这里是 房子的id
                     house = iHouseMapper.selectByPrimaryKey(toSurplusWareHouseId);
                     toSurplusWareHouse = iSurplusWareHouseMapper.getSurplusWareHouseByHouseId(house.getId());
@@ -176,7 +179,7 @@ public class SurplusWareDivertService {
                 newSurplusWareHouseItem.setSurplusWareHouseId(toSurplusWareHouse.getId());
                 newSurplusWareHouseItem.setProductId(productId);
                 newSurplusWareHouseItem.setProductCount(divertCount);
-                Product product;
+                DjBasicsProductTemplate product;
                 House house = iHouseMapper.selectByPrimaryKey(toSurplusWareHouse.getHouseId());
                 if (house != null) {
                     product = forMasterAPI.getProduct(house.getCityId(), productId);
@@ -222,7 +225,7 @@ public class SurplusWareDivertService {
             detailsDTO.setProductName(surplusWareHouseItem.getProductName());
             detailsDTO.setProductCount(surplusWareHouseItem.getProductCount());
             detailsDTO.setCreateDate(surplusWareHouseItem.getCreateDate());
-            Product product = forMasterAPI.getProduct("", surplusWareHouseItem.getProductId());
+            DjBasicsProductTemplate product = forMasterAPI.getProduct("", surplusWareHouseItem.getProductId());
             if (product != null)
                 detailsDTO.setProductUnit(product.getUnitName());
             detailsDTO.setSurplusWareHouseId(surplusWareHouseItem.getSurplusWareHouseId());

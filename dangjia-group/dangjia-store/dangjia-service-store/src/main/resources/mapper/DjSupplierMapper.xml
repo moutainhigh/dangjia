@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.supplier.DjSupplierMapper">
+
+
+    <select id="querySupplyList" resultType="com.dangjia.acg.modle.storefront.Storefront">
+        SELECT
+          b.id,
+          b.create_date as createDate,
+          b.modify_date as modifyDate,
+          b.data_status as dataStatus,
+          b.user_id as userId,
+          b.city_id as cityId,
+          b.storefront_name as storefrontName,
+          b.storefront_address as storefrontAddress,
+          b.storefront_desc as storefrontDesc,
+          b.storefront_logo as storefrontLogo,
+          b.storekeeper_name as storekeeperName,
+          b.mobile,
+          b.email
+        FROM
+            dj_sup_application a
+        INNER JOIN dj_basics_storefront b ON a.shop_id = b.id
+        WHERE    1=1
+        and a.sup_id =#{supId}
+        AND a.application_status = 1
+        AND a.data_status = 0
+        AND b.data_status = 0
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            b.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            b.mobile LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
+
+    <select id="queryDjSupplierByShopID" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
+        SELECT
+            da.id,
+            ds.id as dsId,
+            ds. NAME ,
+            ds.address ,
+            ds.check_people as checkPeople,
+            ds.telephone,
+            da.application_status as applicationStatus,
+            da.sup_id as supId,
+            da.shop_id as shopId,
+            da.fail_reason as failReason,
+            da.contract,
+            ds.transportation_cost as transportationCost,
+            ds.email
+        FROM
+            dj_sup_application da
+        INNER JOIN dj_supplier ds ON da.sup_id = ds.id
+        WHERE  da.data_status=0
+         and da.shop_id = #{shopId}
+        <if test="null!=applicationStatus and ''!=applicationStatus">
+            AND   da.application_status=#{applicationStatus}
+        </if>
+        <if test="null!=keyWord and ''!=keyWord">
+            AND (
+            ds.name LIKE CONCAT('%',#{keyWord},'%') or
+            ds.telephone LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+        order by da.application_status,da.create_date desc
+    </select>
+
+    <select id="queryDjSupplierByPass" resultType="com.dangjia.acg.modle.supplier.DjSupplier" >
+             SELECT
+            ds.id,
+            ds.create_date,
+            ds.modify_date,
+            ds.data_status,
+            ds.user_id userId,
+            ds.city_id cityId,
+            ds.NAME,
+            ds.address,
+            ds.check_people checkPeople,
+            ds.telephone,
+            ds.email
+            FROM dj_supplier ds INNER JOIN dj_sup_application_product dsa ON ds.id=dsa.sup_id
+            WHERE   ds.id=#{supplierId}
+            and dsa.supply_relationship=0
+            and  dsa.application_status=1
+            ORDER BY ds.create_date DESC
+            limit 1
+
+    </select>
+
+    <select id="queryDJsupplierById" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
+        SELECT
+            ds. NAME,
+            ds.address,
+            ds.check_people as checkPeople,
+            ds.telephone,
+            da.application_status as applicationStatus
+        FROM
+            dj_sup_application da
+        INNER JOIN dj_supplier ds ON da.sup_id = ds.id
+        WHERE 1=1 and da.shop_id = #{shopId}
+        and  ds.id=#{id}
+    </select>
+
+    <select id="querySingleDjSupplier" resultType="com.dangjia.acg.modle.supplier.DjSupplier">
+        SELECT
+            id,
+            create_date,
+            modify_date,
+            data_status,
+            user_id userId,
+            city_id cityId,
+            NAME,
+            address,
+            check_people as checkPeople,
+            telephone,
+            email,
+            transportation_cost transportationCost
+        FROM dj_supplier
+        where city_id=#{cityId}
+        and user_id=#{userId}
+        and data_status=0
+    </select>
+
+    <select id="myWallet" resultType="java.lang.Double">
+        SELECT
+            IFNULL(sum(total_amount),0)
+        FROM
+            dj_deliver_split_deliver
+        WHERE
+            supplier_id =#{supId}
+        AND shipping_state IN (1, 2, 4, 5, 7, 8)
+        AND TIMESTAMPDIFF(DAY,send_time,SYSDATE())>=7
+    </select>
+
+    <update id="setSurplusMoney">
+        UPDATE dj_supplier a
+        INNER JOIN (
+            SELECT
+                supplier_id,
+                IFNULL(sum(surplus_money), 0) AS surplus_money
+            FROM
+                (
+                    SELECT
+                        supplier_id,
+                        IFNULL(sum(total_amount), 0) AS surplus_money
+                    FROM
+                        dj_deliver_split_deliver
+                    WHERE
+                        apply_state = 2
+                    AND TIMESTAMPDIFF(DAY, send_time, SYSDATE())<![CDATA[<]]> 7
+                    GROUP BY
+                        supplier_id
+                    UNION
+                    SELECT
+                        defined_account_id AS supplier_id,
+                        IFNULL(sum(money), 0) AS surplus_money
+                    FROM
+                        dj_account_flow_record
+                    WHERE
+                        flow_type = 2
+                    AND state = 4
+                    AND TIMESTAMPDIFF(DAY, create_date, SYSDATE())<![CDATA[<]]> 7
+                    GROUP BY
+                        defined_account_id
+                ) c
+            GROUP BY
+                supplier_id
+        ) b ON a.id = b.supplier_id
+        SET a.surplus_money = (
+            a.total_account - b.surplus_money
+        )
+    </update>
+
+    <select id="queryLikeSupplier" resultType="com.dangjia.acg.dto.supplier.SupplierLikeDTO">
+        select
+        ds.id,
+        ds.create_date,
+        ds.modify_date,
+        ds.data_status,
+        ds.user_id userId,
+        ds.city_id cityId,
+        ds.NAME,
+        ds.address,
+        ds.check_people checkPeople,
+        ds.telephone,
+        ds.email
+        from dj_supplier ds
+        where 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            ds.name LIKE CONCAT('%',#{searchKey},'%') or
+            ds.check_people LIKE CONCAT('%',#{searchKey},'%') or
+            ds.telephone LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
+
+
+</mapper>

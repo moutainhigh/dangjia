@@ -68,8 +68,6 @@ public class DesignDataService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    private IHouseWorkerMapper houseWorkerMapper;
-    @Autowired
     private IPayConfigurationMapper payConfigurationMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
@@ -77,6 +75,8 @@ public class DesignDataService {
     private HouseRemarkMapper houseRemarkMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
 
     /**
      * 获取平面图
@@ -120,27 +120,19 @@ public class DesignDataService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "已经提前结束装修");
         }
         DesignListDTO designDTO = new DesignListDTO();
-        if (worker != null && house.getDesignerState() != 3 && house.getDesignerState() != 7
-                && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
+        if (worker != null && house.getDesignerState() != 3 && house.getDesignerState() != 7 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
             if (!CommonUtil.isEmpty(type) && type == 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
             }
             if (house.getDesignerState() != 5 && house.getDesignerState() != 2) {
-//                if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getVisitState() == 1) {
-//                    designDTO.setHistoryRecord(0);
-//                    String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-//                    designDTO.addButton(Utils.getButton("申请提前结束", webAddress + "ownerEnd?title=填写原因&houseId=" + houseId, 0));
-//                    return ServerResponse.createBySuccess("设计师还在设计中", designDTO);
-//                } else {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
-//                }
             }
             Example example = new Example(PayConfiguration.class);
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(PayConfiguration.DATA_STATUS, 0);
             String message;
             if (house.getVisitState() != 3) {
-                designDTO.addButton(Utils.getButton("需要修改设计", 1));
+                designDTO.addButton(Utils.getButton("需要修改设计", 5001));
                 if (house.getDesignerState() == 5) {
                     ServerResponse serverResponse = getPlaneMap(houseId);
                     if (!serverResponse.isSuccess()) {
@@ -150,7 +142,7 @@ public class DesignDataService {
                     message = "温馨提示:您需要修改平面图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
                     QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                     designDTO.setData(quantityRoomDTO.getImages());
-                    designDTO.addButton(Utils.getButton("确认平面图", 2));
+                    designDTO.addButton(Utils.getButton("确认平面图", 5002));
                 } else {
                     ServerResponse serverResponse = getConstructionPlans(houseId);
                     if (!serverResponse.isSuccess()) {
@@ -160,7 +152,7 @@ public class DesignDataService {
                     message = "温馨提示:您需要修改施工图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
                     QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                     designDTO.setData(quantityRoomDTO.getImages());
-                    designDTO.addButton(Utils.getButton("确认施工图", 2));
+                    designDTO.addButton(Utils.getButton("确认施工图", 5003));
                 }
                 List<PayConfiguration> payConfigurations = payConfigurationMapper.selectByExample(example);
                 if (payConfigurations != null && payConfigurations.size() > 0) {
@@ -200,8 +192,9 @@ public class DesignDataService {
                     && ((house.getDecorationType() == 2 && worker.getWorkerType() == 2)
                     || (house.getDecorationType() != 2 && worker.getWorkerType() == 1))) ? 1 : 0;
             designDTO.setHistoryRecord(historyRecord);
-            if (house.getVisitState() != 3 && worker != null && house.getDesignerState() != 7
-                    && worker.getId().equals(house.getMemberId())) {
+            if (house.getVisitState() != 3 && worker != null
+                    && worker.getId().equals(house.getMemberId())
+                    && house.getDesignerState() != 7) {
                 Example example = new Example(DesignBusinessOrder.class);
                 Example.Criteria criteria = example.createCriteria()
                         .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
@@ -217,11 +210,11 @@ public class DesignDataService {
                 if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
                     DesignBusinessOrder order = designBusinessOrders.get(0);
                     if (order.getOperationState() == 1) {
-                        designDTO.addButton(Utils.getButton("需要修改设计", 4));
-                        designDTO.addButton(Utils.getButton("确认设计", 5));
+                        designDTO.addButton(Utils.getButton("需要修改设计", 5001));
+                        designDTO.addButton(Utils.getButton("确认设计", 5004));
                     }
                 } else {
-                    designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
+                    designDTO.addButton(Utils.getButton("申请额外修改设计", 5005));
                 }
             }
         }
@@ -247,7 +240,6 @@ public class DesignDataService {
             quantityRoomDTO.setUserType(-1);
             getUserName(quantityRoomDTO);
         }
-
         pageResult.setList(quantityRoomDTOS);
         return ServerResponse.createBySuccess("查询历史记录成功", pageResult);
 
@@ -332,19 +324,14 @@ public class DesignDataService {
      * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工
      * @param searchKey    业主手机号/房子名称
      */
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType,
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, Integer designerType,
                                         String searchKey, String workerKey, String userId) {
-        String userID = request.getParameter(Constants.USERID);
-
+        Member member = memberMapper.selectByPrimaryKey(userId);
         int flag = 0;
-        if (!CommonUtil.isEmpty(userId)) {
-            Member member = memberMapper.selectByPrimaryKey(userId);
-            if (member != null) {
-                //设计师
-                flag = member.getWorkerType();
-            }
+        if (member != null) {
+            //设计师
+            flag = member.getWorkerType();
         }
-
         String cityKey = request.getParameter(Constants.CITY_ID);
         if (CommonUtil.isEmpty(cityKey)) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -388,8 +375,8 @@ public class DesignDataService {
                 List<QuantityRoomImages> images = quantityRoomDTO.getImages();
                 if (images != null && images.size() > 0) {
                     String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-                    designDTO.setImage(images.get(0).getBaseImage(imageAddress));
-                    designDTO.setImageUrl(images.get(0).getImage());
+                    designDTO.setImage(images.get(0).getImage());
+                    designDTO.setImageUrl(images.get(0).getImageUrl());
                 }
             }
             designDTO.setShowUpdata(0);
@@ -487,7 +474,8 @@ public class DesignDataService {
         String[] fieldBudgetNames = new String[]{"grabOrders", "payment", "uploadActuarial", "confirmActuarial", "construction", "end"};
         //"抢单数","业主支付数","量房数","已上传平面图数","确认平面图数","已上传施工图数","确认施工图数","进入精算数","提前结束数"
         String[] fieldDesignNames = new String[]{
-                "grabOrders", "payment", "measuringRoom", "uploadPlan", "confirmPlan", "uploadConstruction", "confirmConstruction", "sctuarialFigure", "end"};
+                "grabOrders", "payment", "measuringRoom", "uploadPlan", "confirmPlan", "uploadConstruction",
+                "confirmConstruction", "sctuarialFigure", "end"};
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Member> memberList = memberMapper.artisanList(cityId, null, workerTypeId, null, "2");
         List<Map> memberMapList = new ArrayList<>();
@@ -631,8 +619,6 @@ public class DesignDataService {
             Lists.add(map);
         }
         quantityInfoDTO.setListFour(Lists);
-
-
         //获取量房信息
         PageInfo oneList = getInfo(houseId, 0);
         //获取平面图信息
@@ -642,8 +628,6 @@ public class DesignDataService {
         quantityInfoDTO.setTypeOneList(oneList);
         quantityInfoDTO.setTypeTwoList(twoList);
         quantityInfoDTO.setTypeThreeList(threeList);
-
-
         quantityInfoDTO.setNumberType(0);
         if (oneList.getSize() > 0) {
             quantityInfoDTO.setNumberType(2);
@@ -654,14 +638,13 @@ public class DesignDataService {
         if (threeList.getSize() > 0) {
             quantityInfoDTO.setNumberType(4);
         }
-
         List<QuantityRoomDTO> ddd = threeList.getList();
         for (QuantityRoomDTO aa : ddd) {
             if (aa.getFlag() == 0) {
                 quantityInfoDTO.setNumberType(5);
+                break;
             }
         }
-
         return ServerResponse.createBySuccess("查询成功", quantityInfoDTO);
     }
 
@@ -776,10 +759,9 @@ public class DesignDataService {
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
                 .andEqualTo(HouseFlow.WORKER_TYPE_ID, 2);
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-        Date dd = null;
         if (houseFlows.size() > 0) {
             map = new HashMap();
-            dd = houseMapper.getModifyDate(houseFlows.get(0).getId());
+            Date dd = houseMapper.getModifyDate(houseFlows.get(0).getId());
             map.put("createDate", dd);
             map.put("type", "支付");
             map.put("name", storeList.getOperatorName());

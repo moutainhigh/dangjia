@@ -18,12 +18,32 @@ public class ComplainController implements ComplainAPI {
     ComplainService complainService;
 
 
+    @Override
+    @ApiMethod
+    public ServerResponse insertComplain(HttpServletRequest request, String userId, String cityId,Integer complainType, String mendOrderId, String content, String images) {
+        return complainService.insertComplain(request,userId,cityId,complainType,mendOrderId,content,images);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse insertGroundComplain(HttpServletRequest request, String userId, String cityId, Integer complainType, String houseId, String content, String images) {
+        return complainService.insertGroundComplain(request,userId,cityId,complainType,houseId,content,images);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse complainResponsibleParty(HttpServletRequest request, String userId, String cityId, String responsiblePartyId, String content, String images) {
+        return complainService.complainResponsibleParty(request,userId,cityId,responsiblePartyId,content,images);
+    }
+
+
     //添加申诉
     @Override
     @ApiMethod
     public ServerResponse addComplain(HttpServletRequest request, String userToken, String memberId, Integer complainType, String businessId,
-                                      String houseId, String files) {
-        return complainService.addComplain(userToken, memberId, complainType, businessId, houseId, files);
+                                      String houseId, String files, String changeReason,String image) {
+        return complainService.addComplain(userToken, memberId, complainType,
+                businessId, houseId, files, changeReason,image);
     }
 
     //查询申诉
@@ -37,9 +57,12 @@ public class ComplainController implements ComplainAPI {
     @Override
     @ApiMethod
     public ServerResponse updataComplain(HttpServletRequest request, String userId, String complainId, Integer state, String description,
-                                         String files, String operateId, String operateName) {
-        return complainService.updataComplain(userId, complainId, state, description, files, operateId, operateName);
+                                         String files, String operateId, String operateName,String rejectReason) {
+        return complainService.updataComplain(userId, complainId, state, description, files,
+                operateId, operateName,rejectReason);
     }
+
+
 
     @Override
     @ApiMethod

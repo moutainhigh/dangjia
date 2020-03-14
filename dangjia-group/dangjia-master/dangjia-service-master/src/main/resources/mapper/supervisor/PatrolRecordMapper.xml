@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.supervisor.IPatrolRecordMapper">
+    <select id="getPatrolRecordList" resultType="com.dangjia.acg.dto.supervisor.PatrolRecordDTO">
+        SELECT
+        pr.id AS patrolRecordId,
+        pr.member_id AS operatorId,
+        IFNULL( m.`name`, u.username ) AS operatorName,
+        IFNULL( m.mobile, u.mobile ) AS operatorMobile,
+        IFNULL(
+        ma.address,
+        CONCAT(
+        h.residential,
+        IFNULL( h.building, '*' ),
+        '栋',
+        IFNULL( CONCAT( h.unit, '单元' ), '' ),
+        IFNULL( h.number, '*' ),
+        '号'
+        )
+        ) houseName,
+        h.id AS houseId,
+        pr.type AS type,
+        pr.create_date AS createDate
+        FROM
+        dj_basics_patrol_record pr
+        INNER JOIN dj_house h ON pr.house_id = h.id
+        LEFT JOIN dj_member m ON pr.member_id = m.id
+        LEFT JOIN dj_user u ON pr.member_id = u.id
+        LEFT JOIN dj_member_address ma ON h.id = ma.house_id
+        WHERE 1=1
+        <if test="type!=null and type != -1">
+            and pr.type =#{type}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or u.mobile like CONCAT('%',#{searchKey},'%')
+            or CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{searchKey},'%')
+            or m.nick_name like CONCAT('%',#{searchKey},'%')
+            or u.username like CONCAT('%',#{searchKey},'%')
+            or m.name like CONCAT('%',#{searchKey},'%')
+            or ma.address like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER BY
+        pr.create_date
+    </select>
+
+    <select id="getAppPatrolRecordList" resultType="com.dangjia.acg.dto.supervisor.PatrolRecordDTO">
+        SELECT
+        pr.id AS patrolRecordId,
+        pr.member_id AS operatorId,
+        m.`name` AS operatorName,
+        m.mobile AS operatorMobile,
+        IFNULL(
+        ma.address,
+        CONCAT(
+        h.residential,
+        IFNULL( h.building, '*' ),
+        '栋',
+        IFNULL( CONCAT( h.unit, '单元' ), '' ),
+        IFNULL( h.number, '*' ),
+        '号'
+        )
+        ) houseName,
+        h.id AS houseId,
+        pr.type AS type,
+        pr.images AS images,
+        pr.create_date AS createDate,
+        pr.content AS content,
+        pr.reward_punish_id AS rewardPunishId
+        FROM
+        dj_basics_patrol_record pr
+        INNER JOIN dj_house h ON pr.house_id = h.id
+        INNER JOIN dj_member m ON pr.member_id = m.id
+        LEFT JOIN dj_member_address ma ON h.id = ma.house_id
+        WHERE pr.member_id = #{memberId}
+        <if test="type!=null and type == 2">
+            and pr.type = 2
+        </if>
+        <if test="type!=null and type != 2">
+            and pr.type !=2
+        </if>
+        ORDER BY
+        pr.create_date
+    </select>
+</mapper>

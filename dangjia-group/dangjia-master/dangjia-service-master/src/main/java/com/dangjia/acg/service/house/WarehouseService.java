@@ -5,6 +5,7 @@ import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -14,28 +15,29 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
-import com.dangjia.acg.dto.budget.GoodsItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.house.WarehouseGoodsDTO;
-import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
-import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
+import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
+import com.dangjia.acg.mapper.delivery.IProductChangeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
-import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
-import com.dangjia.acg.modle.repair.MendWorker;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -47,7 +49,6 @@ import tk.mybatis.mapper.entity.Example;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class WarehouseService {
@@ -58,7 +59,6 @@ public class WarehouseService {
     private GoodsCategoryAPI goodsCategoryAPI;
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
@@ -69,10 +69,6 @@ public class WarehouseService {
     private IHouseMapper houseMapper;
     @Autowired
     private IProductChangeMapper productChangeMapper;
-
-    @Autowired
-    private IMendWorkerMapper mendWorkerMapper;
-
     @Autowired
     private IMaterialRecordMapper materialRecordMapper;
     @Autowired
@@ -81,9 +77,11 @@ public class WarehouseService {
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
     private IMendMaterialMapper mendMaterielMapper;
-
-
+    @Autowired
+    private DjBasicsProductAPI djBasicsProductAPI;
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
 
 
     /**
@@ -152,11 +150,12 @@ public class WarehouseService {
                 warehouseDTO.setBackCount((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
+               // warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
-                Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
-                if (product != null) {
-                    Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+//                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
+                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                if (storefrontProduct != null) {
+                    BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), storefrontProduct.getGoodsId());
                     if (goods != null) {
                         warehouseDTO.setSales(goods.getSales());
                     }
@@ -186,43 +185,6 @@ public class WarehouseService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if (!CommonUtil.isEmpty(type) && "2".equals(type)) {
                 List<BudgetItemDTO> budgetItemDTOS = actuaryOpeAPI.getHouseWorkerInfo(house.getCityId(), "3", houseId, address);
-                for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
-                    Double rowPrice =0d;
-                    List<MendWorker> budgetWorkerList =mendWorkerMapper.mendWorkerList(houseId,budgetItemDTO.getWorkerTypeId());
-                    List<GoodsItemDTO> goodsItemDTOList = budgetItemDTO.getGoodsItemDTOList();
-                    Map<String,GoodsItemDTO> goodsItemDTOMap=new HashMap<>();
-                    for (GoodsItemDTO goodsItemDTO : goodsItemDTOList) {
-                        goodsItemDTOMap.put(goodsItemDTO.getId(),goodsItemDTO);
-                    }
-                    //从list集合中，取出字段name的列表
-                    List<String> ids = goodsItemDTOList.stream().map(p -> p.getId()).collect(Collectors.toList());
-
-                    for (MendWorker budgetWorker : budgetWorkerList) {
-                        if(!ids.contains(budgetWorker.getWorkerGoodsId())){
-                            MendWorker mendWorker=mendMaterielMapper.getMendWorker(budgetWorker.getWorkerGoodsId(),houseId);
-                            GoodsItemDTO goodsItemDTO = goodsItemDTOMap.get(budgetWorker.getWorkerGoodsId());
-                            if(goodsItemDTO==null){
-                                goodsItemDTO = new GoodsItemDTO();
-                            }
-                            goodsItemDTO.setGoodsImage(address + mendWorker.getImage());
-                            goodsItemDTO.setGoodsName(mendWorker.getWorkerGoodsName());
-                            goodsItemDTO.setConvertCount(mendWorker.getShopCount());
-                            goodsItemDTO.setPrice(mendWorker.getPrice());
-                            goodsItemDTO.setUnitName(mendWorker.getUnitName());
-                            goodsItemDTO.setId(mendWorker.getWorkerGoodsId());//人工商品id
-                            goodsItemDTO.setShopCount(0d);
-                            goodsItemDTO.setBackCount(0d);
-                            goodsItemDTO.setRepairCount(mendWorker.getShopCount());
-                            goodsItemDTO.setSurCount(mendWorker.getShopCount());
-                            goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
-                            rowPrice+=goodsItemDTO.getTolPrice();
-                            goodsItemDTOMap.put(goodsItemDTO.getId(),goodsItemDTO);
-                            goodsItemDTOList.add(goodsItemDTO);
-                        }
-                    }
-                    budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
-                    budgetItemDTO.setRowPrice(budgetItemDTO.getRowPrice()+rowPrice);
-                }
                 map.put("goodsItemDTOList", budgetItemDTOS);
             } else {
                 Example example = new Example(Warehouse.class);
@@ -239,13 +201,13 @@ public class WarehouseService {
                 List<String> categoryIdList = warehouseMapper.categoryIdList(houseId);
                 for (String categoryId : categoryIdList) {
                     //获取低级类别
-                    GoodsCategory goodsCategoryNext = goodsCategoryAPI.getGoodsCategory(house.getCityId(), categoryId);
+                    BasicsGoodsCategory goodsCategoryNext = goodsCategoryAPI.getGoodsCategory(house.getCityId(), categoryId);
                     if (goodsCategoryNext == null) {
                         continue;
                     }
                     //获取顶级类别
-                    GoodsCategory goodsCategoryParentTop = goodsCategoryAPI.getGoodsCategory(house.getCityId(), goodsCategoryNext.getParentTop());
-                    GoodsCategory goodsCategory;
+                    BasicsGoodsCategory goodsCategoryParentTop = goodsCategoryAPI.getGoodsCategory(house.getCityId(), goodsCategoryNext.getParentTop());
+                    BasicsGoodsCategory goodsCategory;
                     if (goodsCategoryParentTop == null) {
                         goodsCategory = goodsCategoryNext;
                     } else {
@@ -278,13 +240,21 @@ public class WarehouseService {
                         warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
                         warehouseDTO.setTolPrice((warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack())  - warehouse.getWorkBack()) * warehouse.getPrice());
-                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
+                       // warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                         // type为空时查询 是否更换
                         if (CommonUtil.isEmpty(type)) {
                             if (productChangeMapper.queryProductChangeExist(warehouse.getHouseId(), warehouse.getProductId(), "0") > 0) {
                                 warehouseDTO.setChangeType(1);
                             }
                         }
+
+                        //品牌+规格
+                        String brandName=forMasterAPI.brandName("",warehouse.getProductId());  //通过商品id去关联，然后组合商品名称
+                        DjBasicsProductTemplate djBasicsProduct=djBasicsProductAPI.queryDataByProductId(warehouse.getProductId());  //通过商品id去关联规格
+                        String valueIdArr=djBasicsProduct.getValueIdArr();
+                        String guige=djBasicsProductAPI.getNewValueNameArr(valueIdArr);
+                        warehouseDTO.setBrandName(brandName+" "+guige);
+
                         warehouseDTOS.add(warehouseDTO);
                         rowPrice = rowPrice.add(new BigDecimal(warehouseDTO.getTolPrice()));
                     }
@@ -298,9 +268,7 @@ public class WarehouseService {
                 }
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
-
             Double workerPrice = actuaryOpeAPI.getHouseWorkerPrice(house.getCityId(), "3", houseId);
-            workerPrice+=mendWorkerMapper.getMendWorkerPrice(houseId);
             Double caiPrice = warehouseMapper.getHouseGoodsPrice(houseId, name);
             Double totalPrice = workerPrice + caiPrice;
             map.put("workerPrice", workerPrice);
@@ -411,6 +379,7 @@ public class WarehouseService {
                     warehouseDTO.put("image", address+warehouse.getImage());//图片地址
 
                     warehouseDTO.put("repairCount", warehouse.getRepairCount());//补货数
+                    warehouseDTO.put("repairCount", warehouse.getRepairCount());//补货数
                     warehouseDTO.put("shopCount", warehouse.getShopCount());//购买数
                     warehouseDTO.put("receive", warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));//收货数
                     warehouseDTO.put("workBack", (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));//工匠退货数
@@ -425,30 +394,16 @@ public class WarehouseService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }else{
             House house = houseMapper.selectByPrimaryKey(houseId);
-            BudgetWorker budgetWorker= budgetWorkerAPI.getHouseBudgetWorkerId(house.getCityId(),house.getId(),gid);
+            BudgetMaterial budgetWorker= budgetWorkerAPI.getHouseBudgetWorkerId(house.getCityId(),house.getId(),gid);
             Map warehouseDTO = new HashMap();
             if(budgetWorker!=null) {
-                warehouseDTO.put("name", budgetWorker.getName());//商品名字
+                warehouseDTO.put("name", budgetWorker.getProductName());//商品名字
                 warehouseDTO.put("image", address+budgetWorker.getImage());//图片地址
                 warehouseDTO.put("type", type);
                 warehouseDTO.put("repairCount", budgetWorker.getRepairCount());//补人工数
-                warehouseDTO.put("shopCount", budgetWorker.getShopCount());//购买数
+                warehouseDTO.put("shopCount", budgetWorker.getShopCount() + budgetWorker.getRepairCount());//购买数
                 warehouseDTO.put("workBack", budgetWorker.getBackCount());//退人工数
                 warehouseDTO.put("tolPrice", (budgetWorker.getShopCount() + budgetWorker.getRepairCount()) * budgetWorker.getPrice());//实际花费
-                List<WarehouseGoodsDTO> goodsDTOS=mendMaterielMapper.getWarehouseWorker(gid,houseId);
-                warehouseDTO.put("list",goodsDTOS);
-                return ServerResponse.createBySuccess("查询成功", warehouseDTO);
-            }
-
-            MendWorker mendWorker=mendMaterielMapper.getMendWorker(gid,houseId);
-            if(mendWorker!=null) {
-                warehouseDTO.put("name", mendWorker.getWorkerGoodsName());//商品名字
-                warehouseDTO.put("image", address+mendWorker.getImage());//图片地址
-                warehouseDTO.put("type", type);
-                warehouseDTO.put("repairCount", mendWorker.getShopCount());//补人工数
-                warehouseDTO.put("shopCount", 0);//购买数
-                warehouseDTO.put("workBack", 0);//退人工数
-                warehouseDTO.put("tolPrice", mendWorker.getShopCount()  * mendWorker.getPrice());//实际花费
                 List<WarehouseGoodsDTO> goodsDTOS=mendMaterielMapper.getWarehouseWorker(gid,houseId);
                 warehouseDTO.put("list",goodsDTOS);
                 return ServerResponse.createBySuccess("查询成功", warehouseDTO);

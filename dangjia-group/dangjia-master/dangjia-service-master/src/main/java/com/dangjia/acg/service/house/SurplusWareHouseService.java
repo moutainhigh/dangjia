@@ -13,12 +13,12 @@ import com.dangjia.acg.mapper.house.ISurplusWareDivertMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareDivert;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.SurplusWareHouseItem;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -170,7 +170,7 @@ public class SurplusWareHouseService {
                     newSurplusWareHouseItem.setProductId(productId);
                     newSurplusWareHouseItem.setProductCount(productCount);
                     House house = iHouseMapper.selectByPrimaryKey(srcSurplusWareHouse.getHouseId());
-                    Product product;
+                    DjBasicsProductTemplate product;
                     if (house != null) {
                         product = forMasterAPI.getProduct(house.getCityId(), productId);
                     } else {

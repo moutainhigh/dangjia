@@ -19,10 +19,9 @@ import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,11 +139,11 @@ public class HouseDataService {
                         tActuaryGoodsTotal.setName(workerType.getString(WorkerType.NAME));
                         tActuaryGoodsTotal.setPriceTotal(0.0);
                         if (j == 0)
-                            tActuaryGoodsTotal.setGoodsType("材料");
+                            tActuaryGoodsTotal.setProductType("材料");
                         if (j == 1)
-                            tActuaryGoodsTotal.setGoodsType("包工包料");
+                            tActuaryGoodsTotal.setProductType("包工包料");
                         if (j == 2)
-                            tActuaryGoodsTotal.setGoodsType("人工");
+                            tActuaryGoodsTotal.setProductType("人工");
                         mapsTotal.put(workerType.getString(WorkerType.ID) + "-" + j, tActuaryGoodsTotal);
                     }
                     JSONObject workerType = (JSONObject) aJsonArray;  // 3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
@@ -156,7 +155,7 @@ public class HouseDataService {
                     for (BudgetMaterial material : materialMapList) {
                         if (CommonUtil.isEmpty(material.getProductName()))
                             continue;
-                        Goods goods = iGoodsMapper.selectByPrimaryKey(material.getGoodsId());
+                        BasicsGoods goods = iGoodsMapper.selectByPrimaryKey(material.getGoodsId());
                         if (goods == null) continue;
                         TActuaryGoods tActuaryGoods = new TActuaryGoods();
                         tActuaryGoods.setName(workerType.getString(WorkerType.NAME));
@@ -190,9 +189,9 @@ public class HouseDataService {
                                 break;
                         }
                         if (0 == goods.getType())//0:材料；1：包工包料
-                            tActuaryGoods.setGoodsType("材料");//商品类型 : 材料，包工包料，人工，
+                            tActuaryGoods.setProductType("材料");//商品类型 : 材料，包工包料，人工，
                         else if (1 == goods.getType())
-                            tActuaryGoods.setGoodsType("包工包料");//商品类型 : 材料，包工包料，人工，
+                            tActuaryGoods.setProductType("包工包料");//商品类型 : 材料，包工包料，人工，
                         TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID) + "-" + goods.getType());
                         if (goods.getBuy() == 2) //自购
                         {
@@ -216,8 +215,8 @@ public class HouseDataService {
 
                     //根据houseId和wokerTypeId查询房子人工精算
                     //                List<Map<String, Object>> workerMapList = iBudgetWorkerMapper.getBudgetWorkerById(houseId, workerTypeId);
-                    List<BudgetWorker> workerMapList = iBudgetWorkerMapper.getBudgetWorkerByHouseIdAndWorkerTypeId(houseId, workerType.getString(WorkerType.ID));
-                    for (BudgetWorker worker : workerMapList) {
+                    List<BudgetMaterial> workerMapList = iBudgetWorkerMapper.getBudgetWorkerByHouseIdAndWorkerTypeId(houseId, workerType.getString(WorkerType.ID));
+                    for (BudgetMaterial worker : workerMapList) {
                         TActuaryGoods tActuaryGoods = new TActuaryGoods();
                         tActuaryGoods.setName(workerType.getString(WorkerType.NAME));
 
@@ -237,17 +236,17 @@ public class HouseDataService {
                                 break;
                         }
 
-                        tActuaryGoods.setGoodsType("人工");//商品类型 : 人工，材料，包工包料
-                        if (CommonUtil.isEmpty(worker.getName()))
+                        tActuaryGoods.setProductType("人工");//商品类型 : 人工，材料，包工包料
+                        if (CommonUtil.isEmpty(worker.getProductName()))
                             continue;
-                        tActuaryGoods.setProductName(worker.getName());
+                        tActuaryGoods.setProductName(worker.getProductName());
                         tActuaryGoods.setProductNum(worker.getShopCount());
                         tActuaryGoods.setShopNum(worker.getShopCount());
                         tActuaryGoods.setGoodsUnitName(worker.getUnitName());
                         tActuaryGoods.setPrice(worker.getPrice());
                         tActuaryGoods.setPriceTotal(worker.getTotalPrice());
                         tActuaryGoods.setUnit(worker.getUnitName());
-                        tActuaryGoods.setProductSn(worker.getWorkerGoodsSn());
+                        tActuaryGoods.setProductSn(worker.getProductSn());
                         tActuaryGoodsList.add(tActuaryGoods);
 
                         TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID) + "-2");

@@ -20,5 +20,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getName" resultType="String">
         SELECT name from dj_core_worker_type where type=#{type}
     </select>
+
+    <!-- 根据用户id查询[所有房子][正在施工][所有工序与排期] -->
+    <select id="queryWorkerTypeListByMemberId" resultType="com.dangjia.acg.modle.core.WorkerType">
+        SELECT cwt.type, cwt.sort
+        FROM dj_core_house_flow chf
+        LEFT JOIN dj_house h ON chf.house_id = h.id
+        LEFT JOIN dj_core_worker_type cwt ON chf.worker_type = cwt.type
+        where h.member_id = #{memberId}
+          AND chf.work_steta in (0,1,4)
+    </select>
+
+    <!-- 查询工序 根据排期 -->
+    <select id="queryTypeBySort" resultType="java.lang.Integer">
+        SELECT type
+        FROM dj_core_worker_type
+        WHERE sort in
+        <foreach collection="sortList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="querySkillCertificationSelectedList" resultType="com.dangjia.acg.modle.core.WorkerType">
+        SELECT
+            b.skill_pack_name
+        FROM
+            dj_skill_certification a
+        INNER JOIN dj_core_worker_type b ON a.prod_template_id = b.id
+        WHERE
+            a.type = 3
+        AND a.skill_certification_id=#{skillCertificationId}
+    </select>
+
 </mapper>
 

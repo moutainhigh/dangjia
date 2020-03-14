@@ -10,6 +10,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.engineer.EngineerService;
 import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +43,8 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse changePayed(String houseWorkerId, String workerId) {
-        return engineerService.changePayed(houseWorkerId, workerId);
+    public ServerResponse changePayed(String userToken,String houseWorkerId, String workerId) {
+        return engineerService.changePayed( userToken,houseWorkerId, workerId);
     }
 
     /**
@@ -166,6 +167,19 @@ public class WebEngineerController implements WebEngineerAPI {
     }
 
     /**
+     * 人工定责--查询所有工匠列表
+     * @param request
+     * @param searckKey 查询条件（用户名/电话）
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchWorkerAllList(HttpServletRequest request, String searckKey ,PageDTO pageDTO){
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return engineerService.searchWorkerAllList(cityId,searckKey ,pageDTO);
+    }
+    /**
      *  修改设计师绑定风格
      * @param request
      * @param member
@@ -186,8 +200,31 @@ public class WebEngineerController implements WebEngineerAPI {
     }
     @Override
     @ApiMethod
-    public ServerResponse getWareHouse(String houseId, PageDTO pageDTO) {
-        return engineerService.getWareHouse(houseId, pageDTO);
+    public ServerResponse getWareHouse( HttpServletRequest request,String searckKey ,String cityId,String houseId, PageDTO pageDTO) {
+        return engineerService.getWareHouse(request, searckKey ,cityId,houseId, pageDTO);
+    }
+
+    /**
+     * 店铺--业主仓库（店铺汇总）
+     * @param request
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param addressId 地址ID
+     * @param storefrontId 店铺ID
+     * @param pageDTO 分页
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getStorefrontWareHouse(HttpServletRequest request,String cityId,String houseId,String addressId,String storefrontId, PageDTO pageDTO){
+        return engineerService.getStorefrontWareHouse(request,cityId,houseId,addressId,storefrontId, pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse exportStorefrontWareHouse(HttpServletResponse response,String houseId, String addressId,
+                                             String storefrontId, String userName,  String address){
+        return engineerService.exportStorefrontWareHouse(response, houseId,addressId,storefrontId, userName, address);
     }
 
     @Override

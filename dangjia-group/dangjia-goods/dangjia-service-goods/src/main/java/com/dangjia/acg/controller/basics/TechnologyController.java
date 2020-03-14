@@ -90,8 +90,9 @@ public class TechnologyController implements TechnologyAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryTechnology(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String name, Integer materialOrWorker) {
-        return technologyService.queryTechnology(pageDTO, workerTypeId, name, materialOrWorker);
+    public ServerResponse<PageInfo> queryTechnology(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String name,
+                                                    Integer materialOrWorker,String cityId) {
+        return technologyService.queryTechnology(pageDTO, workerTypeId, name, materialOrWorker,cityId);
     }
 
     @Override
@@ -111,14 +112,26 @@ public class TechnologyController implements TechnologyAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryTechnologyByWgId(HttpServletRequest request, String workerGoodsId) {
-        return technologyService.queryTechnologyByWgId(workerGoodsId);
+    public ServerResponse queryTechnologyByWgId(HttpServletRequest request, String workerGoodsId,String cityId) {
+        return technologyService.queryTechnologyByWgId(workerGoodsId,cityId);
     }
 
     //根据名称查询所有工艺（名称去重）
     @Override
     @ApiMethod
-    public ServerResponse queryByName(HttpServletRequest request,String name,String workerTypeId){
-        return technologyService.queryByName(name, workerTypeId);
+    public ServerResponse queryByName(HttpServletRequest request,String name,String workerTypeId,String cityId,Integer materialOrWorker,PageDTO pageDTO){
+        return technologyService.queryByName(name, workerTypeId,cityId,materialOrWorker,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryTechnologyWorkerType(HttpServletRequest request) {
+        return technologyService.queryTechnologyWorkerType();
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryTechnologDetail(String id) {
+        return technologyService.queryTechnologDetail(id);
     }
 }

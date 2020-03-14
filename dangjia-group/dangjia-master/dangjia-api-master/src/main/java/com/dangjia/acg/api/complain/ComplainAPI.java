@@ -17,6 +17,37 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "申诉接口", description = "申诉接口")
 public interface ComplainAPI {
 
+    @PostMapping("/complain/insertComplain")
+    @ApiOperation(value = "添加申诉(店铺)", notes = "添加申诉(店铺)")
+    ServerResponse insertComplain(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("userId") String userId,
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("complainType") Integer complainType,
+                                  @RequestParam("mendOrderId") String mendOrderId,
+                                  @RequestParam("content") String content,
+                                  @RequestParam("images") String images
+                                  );
+
+    @PostMapping("/complain/insertGroundComplain")
+    @ApiOperation(value = "添加申诉(上架商品)", notes = "添加申诉(上架商品)")
+    ServerResponse insertGroundComplain(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("userId") String userId,
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("complainType") Integer complainType,
+                                  @RequestParam("houseId") String houseId,
+                                  @RequestParam("content") String content,
+                                  @RequestParam("images") String images);
+
+    @PostMapping("/complain/complainResponsibleParty")
+    @ApiOperation(value = "店铺--申诉维保定责", notes = "店铺--申诉维保定责")
+    ServerResponse complainResponsibleParty(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("userId") String userId,
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("responsiblePartyId") String responsiblePartyId,
+                                  @RequestParam("content") String content,
+                                  @RequestParam("images") String images
+    );
+
     @PostMapping("/complain/addComplain")
     @ApiOperation(value = "添加申诉", notes = "添加申诉")
     ServerResponse addComplain(@RequestParam("request") HttpServletRequest request,
@@ -25,7 +56,9 @@ public interface ComplainAPI {
                                @RequestParam("complainType") Integer complainType,
                                @RequestParam("businessId") String businessId,
                                @RequestParam("houseId") String houseId,
-                               @RequestParam("files") String files);
+                               @RequestParam("files") String files,
+                               @RequestParam("changeReason")String changeReason,
+                               @RequestParam("image")String image);
 
     @PostMapping("/complain/getComplainList")
     @ApiOperation(value = "查询申诉", notes = "查询申诉")
@@ -45,7 +78,10 @@ public interface ComplainAPI {
                                   @RequestParam("description") String description,
                                   @RequestParam("operateId") String operateId,  //操作人id
                                   @RequestParam("operateName") String operateName,  //操作人姓名
-                                  @RequestParam("files") String files);
+                                  @RequestParam("files") String files,
+                                  @RequestParam("rejectReason")  String rejectReason);
+
+
 
     @PostMapping("/complain/getComplain")
     @ApiOperation(value = "获取申诉详情", notes = "获取申诉详情")

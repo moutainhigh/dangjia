@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.actuary.DjSimulationTemplateConfigDetailMapper">
+
+
+    <!-- 查询设计精算阶段的配置模板 -->
+    <select id="selectCurrentIndexByTemplateId" resultType="java.lang.String">
+       select IFNULL(max(template_detail_index),0)+1 from dj_simulation_template_config_detail t where t.simulation_template_id=#{templateId}
+    </select>
+
+    <select id="getSimulateionConfigDetail" resultType="com.dangjia.acg.dto.actuary.SimulationTemplateConfigDetailDTO">
+        SELECT
+            id,
+            simulation_template_id simulationTemplateId,
+            CODE,
+            NAME,
+            image,
+            label_name labelName
+        FROM
+            dj_simulation_template_config_detail
+        where config_status = 0
+        and id=#{simulationDetailId}
+    </select>
+
+    <!--将临时数据改为正式数据 -->
+    <update id="updateTemplateDetailConfig">
+       update dj_simulation_template_config_detail set config_status = 1 where config_status=0 and city_id=#{cityId} and service_type_id = #{serviceTypeId}
+    </update>
+
+    <insert id="batchInsertTempateDetail">
+        INSERT INTO dj_simulation_template_config_detail (
+            id,
+            simulation_template_id,
+            CODE,
+            NAME,
+            image,
+            label_name,
+            template_detail_index,
+            config_status,
+            create_date,
+            modify_date,
+            create_by,
+            update_by,
+            city_id,
+            service_type_id
+        ) SELECT
+            CONCAT(
+                DATE_FORMAT(now(), '%Y%m%d%k%i%s'),
+                "",
+                CEILING(RAND() * 900000 + 100000)
+            ),
+            simulation_template_id,
+            CODE,
+            NAME,
+            image,
+            label_name,
+            template_detail_index,
+            0,
+            create_date,
+            modify_date,
+            create_by,
+            update_by,
+            city_id,
+            service_type_id
+        FROM
+            dj_simulation_template_config_detail
+        WHERE
+            config_status = 1
+        and city_id=#{cityId}
+        and service_type_id = #{serviceTypeId}
+    </insert>
+
+    <!--我要装修：根据标题 ID查询标题 详情列表信息-->
+    <select id="searchSimulationTitleDetailList" resultType="com.dangjia.acg.dto.actuary.app.SimulationTemplateConfigDetailAppDTO">
+        SELECT
+            id titleDetailId,
+            CODE,
+            NAME,
+            image,
+            CONCAT(#{addressUrl},image) imageUrl,
+            label_name labelName
+        FROM
+            dj_simulation_template_config_detail
+        where config_status = 1
+        and data_status = 0
+        and city_id=#{cityId}
+        and simulation_template_id=#{simulationTemplateId}
+        order by template_detail_index
+    </select>
+</mapper>

@@ -39,7 +39,8 @@ public interface ChangeOrderAPI {
                                 @RequestParam("type") Integer type,
                                 @RequestParam("contentA") String contentA,
                                 @RequestParam("contentB") String contentB,
-                                @RequestParam("workerTypeId") String workerTypeId);
+                                @RequestParam("workerTypeId") String workerTypeId,
+                                @RequestParam("productArr") String productArr);
 
 
     @PostMapping(value = "app/repair/changeOrder/checkHouseFlowApply")
@@ -47,5 +48,8 @@ public interface ChangeOrderAPI {
     ServerResponse checkHouseFlowApply(@RequestParam("userToken") String userToken,
                                 @RequestParam("houseId") String houseId,
                                 @RequestParam("type") Integer type,
-                                @RequestParam("workerTypeId") String workerTypeId);
+                                @RequestParam("workerTypeId") String workerTypeId,
+                                @RequestParam("productArr") String productArr);
+
+
 }

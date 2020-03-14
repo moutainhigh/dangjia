@@ -1,9 +1,7 @@
 package com.dangjia.acg.mapper.house;
 
-import com.dangjia.acg.dto.house.DesignDTO;
-import com.dangjia.acg.dto.house.HouseDTO;
-import com.dangjia.acg.dto.house.HouseListDTO;
-import com.dangjia.acg.dto.house.UserInfoDateDTO;
+import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
+import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.modle.house.House;
@@ -27,6 +25,100 @@ public interface IHouseMapper extends Mapper<House> {
 
     HouseDTO startWorkPage(@Param("houseId") String houseId);
 
+    /**
+     * 查询房子信息
+     * @param houseId
+     * @return
+     */
+    HouseDTO getHouseDetailByHouseId(@Param("houseId") String houseId);
+
+    /**
+     * 查询房子订单信息
+     * @param houseId 房子信息
+     * @param workerTypeId 订单类型（1设计，2精算）
+     * @return
+     */
+    List<HouseOrderDetailDTO> getBudgetOrderDetailByHouseId(@Param("houseId") String houseId,
+                                                            @Param("workerTypeId") String workerTypeId);
+
+    /**
+     * 查询房子订单信息
+     * @param houseId 房子信息
+     * @param workerTypeId 订单类型（1设计，2精算）
+     * @return
+     */
+    List<HouseOrderDetailDTO> getOrderDetailByHouseId(@Param("houseId") String houseId,
+                                                            @Param("workerTypeId") String workerTypeId);
+
+
+
+    /**
+     * 查询房子订单信息
+     * @param houseId 房子信息
+     * @param workerTypeId 订单类型（1设计，2精算）
+     * @return
+     */
+    List<HouseOrderDetailDTO> getBudgetOrderDetailByInFo(@Param("houseId") String houseId,
+                                                            @Param("workerTypeId") String workerTypeId,
+                                                            @Param("type") Integer type);
+
+
+    /**
+     * 已完成的节点
+     * @param id
+     * @param houseId
+     * @param workerId
+     * @return
+     */
+    int queryTestNumber(@Param("id") String id,
+                        @Param("houseId") String houseId,
+                        @Param("workerId") String workerId);
+
+    /**
+     * 所有的节点
+     * @param id
+     * @return
+     */
+    int queryArrNumber(@Param("id") String id);
+
+    /**
+     * 未完成的节点
+     * @param id
+     * @param houseId
+     * @param workerId
+     * @return
+     */
+    String getNoTechnologyName(@Param("id") String id,
+                        @Param("houseId") String houseId,
+                        @Param("workerId") String workerId);
+
+    /**
+     * 判断当前订单是否为已退款状态
+     * @param houseId
+     * @param workerTypeId
+     * @return
+     */
+    List<HouseOrderDetailDTO> getBudgetOrderNewInfo(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
+
+    /**
+     * 查询订单是否退货退款
+     * @param cityId
+     * @param workerTypeId
+     * @return
+     */
+    List<HouseOrderDetailDTO> selectDesignProductList(@Param("cityId") String cityId, @Param("workerTypeId") String workerTypeId,
+                                                      @Param("serviceTypeId") String serviceTypeId);
+
+    /**
+     * 查询是否有待处理的补差价订单
+     * @param houseId
+     * @param workerTypeId
+     * @return
+     */
+    List<HouseOrderDetailDTO> getBudgetDifferenceOrder(@Param("houseId") String houseId, @Param("workerTypeId") String workerTypeId);
+
+    Integer queryCoutHouseOrder(@Param("addressId") String addressId,@Param("houseId") String houseId,@Param("storefrontId") String storefrontId,@Param("applyStatus") Integer applyStatus);
+
     /***
      * 根据房子装修状态查询所有的房子
      * @param visitState 0待确认开工,1装修中,2休眠中,3已完工
@@ -34,7 +126,8 @@ public interface IHouseMapper extends Mapper<House> {
      */
     List<House> getAllHouseByVisitState(@Param("visitState") Integer visitState);
 
-    List<House> getByLikeAddress(@Param("cityId") String cityId, @Param("likeAddress") String likeAddress, @Param("startDate") String startDate, @Param("endDate") String endDate);
+    List<DeliverHouseDTO> getHouseAddrssByAddress(@Param("storefrontId") String storefrontId, @Param("cityId") String cityId, @Param("likeAddress") String likeAddress, @Param("startDate") String startDate, @Param("endDate") String endDate);
+    List<House> getByLikeAddress(@Param("storefrontId") String storefrontId,@Param("cityId") String cityId,@Param("likeAddress") String likeAddress,@Param("startDate") String startDate, @Param("endDate") String endDate);
 
     List<DesignDTO> getDesignList(@Param("designerType") Integer designerType,
                                   @Param("cityKey") String cityKey,
@@ -48,9 +141,9 @@ public interface IHouseMapper extends Mapper<House> {
                               @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare, @Param("houseType") Integer houseType);
 
     List<House> getSameLayoutDistance(@Param("cityId") String cityId, @Param("locationx") String locationx, @Param("locationy") String locationy,
-                                      @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare, @Param("villageId") String villageId);
+                              @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare, @Param("villageId") String villageId);
 
-    List<House> getReferenceBudget(@Param("cityId") String cityId, @Param("villageId") String villageId, @Param("houseType") Integer houseType,
+    List<House> getReferenceBudget(@Param("cityId") String cityId, @Param("villageId") String villageId, @Param("houseType") String houseType,
                                    @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare);
 
 
@@ -59,11 +152,13 @@ public interface IHouseMapper extends Mapper<House> {
                                      @Param("searchKey") String searchKey,
                                      @Param("workerKey") String workerKey,
                                      @Param("dataStatus") String dataStatus,
-                                     @Param("userId") String userId);
+                                     @Param("userId") String userId,
+                                     @Param("budgetStatus") String budgetStatus,
+                                     @Param("decorationType") String  decorationType);
 
-    List<HouseListDTO> getHouseList(@Param("cityKey") String cityKey, @Param("userKey") String userKey, @Param("memberId") String memberId, @Param("visitState") Integer visitState, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("orderBy") String orderBy, @Param("searchKey") String searchKey);
+    List<HouseListDTO> getHouseList(@Param("cityKey")  String cityKey,@Param("userKey") String userKey,@Param("memberId") String memberId, @Param("visitState") Integer visitState, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("orderBy") String orderBy, @Param("searchKey") String searchKey);
 
-    List<House> getHouseListLikeSearchKey(@Param("cityKey") String cityKey, @Param("visitState") Integer visitState, @Param("searchKey") String searchKey, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("supKey") String supKey);
+    List<House> getHouseListLikeSearchKey(@Param("cityKey")  String cityKey,@Param("visitState") Integer visitState, @Param("searchKey") String searchKey,@Param("startDate") String startDate, @Param("endDate") String endDate, @Param("supKey") String supKey);
 
     Date getHouseDateByMemberId(@Param("memberId") String memberId);
 
@@ -72,11 +167,11 @@ public interface IHouseMapper extends Mapper<House> {
     int getBuildDay(@Param("houseId") String houseId);
 
 
-    List<DesignDTO> getHouseProfitList(@Param("cityId") String cityId, @Param("villageId") String villageId, @Param("visitState") String visitState, @Param("searchKey") String searchKey);
+    List<DesignDTO> getHouseProfitList(@Param("cityId")String cityId ,@Param("villageId")  String villageId,@Param("visitState") String visitState, @Param("searchKey") String searchKey);
 
     List<HouseProfitSummaryDTO> getHouseProfitSummary(@Param("houseId") String houseId);
 
-    List<House> getRecommended(@Param("latitude") String latitude, @Param("longitude") String longitude, @Param("limit") Integer limit);
+    List<House> getRecommended(@Param("latitude")  String latitude,@Param("longitude") String longitude, @Param("limit") Integer limit);
 
 
     House queryPromotionListHouse(@Param("memberId") String memberId);
@@ -87,5 +182,8 @@ public interface IHouseMapper extends Mapper<House> {
     UserInfoDateDTO getDesignListInfo(@Param("houseId") String houseId);
 
     Date getModifyDate(@Param("taskId") String taskId);
+
+    /** 查询房子列表 - 根据小区名 */
+    List<House> queryHouseListByResidential(@Param("residential") String residential);
 
 }

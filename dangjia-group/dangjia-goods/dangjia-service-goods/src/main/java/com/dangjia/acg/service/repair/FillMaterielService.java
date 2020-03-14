@@ -2,7 +2,6 @@ package com.dangjia.acg.service.repair;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.app.deliver.ProductChangeAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
@@ -15,14 +14,15 @@ import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.repair.BudgetMaterialDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
-import com.dangjia.acg.mapper.basics.IProductMapper;
+import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
+import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.deliver.ProductChange;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.actuary.ActuaryOperationService;
 import com.dangjia.acg.service.data.ForMasterService;
 import com.github.pagehelper.PageHelper;
@@ -42,8 +42,10 @@ import java.util.Map;
  */
 @Service
 public class FillMaterielService {
+    //@Autowired
+   // private IProductMapper iProductMapper;
     @Autowired
-    private IProductMapper iProductMapper;
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -61,8 +63,7 @@ public class FillMaterielService {
     @Autowired
     private MemberAPI memberAPI;
     @Autowired
-    private ProductChangeAPI productChangeAPI;
-
+    private IGoodsStorefrontProductMapper iGoodsStorefrontProductMapper;
 
     /**
      * 管家审核验收申请
@@ -101,7 +102,7 @@ public class FillMaterielService {
                 Object warehouseStr = response.getResultObj();
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);
                 if (warehouse == null) continue;
-                Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(warehouse.getProductId());
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setImage(address + product.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
@@ -146,53 +147,44 @@ public class FillMaterielService {
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name, "0");
             //补材料的
             List<MendMateriel> mendMaterielList = getForBudgetAPI.askAndQuit(worker.getWorkerTypeId(), houseId, categoryId, name);
-
-            //更换的
-            List<ProductChange> productChanges = productChangeAPI.queryChangeDetail(houseId);
-
-
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
 
             List<String> productIdList = new ArrayList<>();
 
-            Map<String, String>  map = new HashMap();
+            Map map = new HashMap();
             for (BudgetMaterial bm : budgetMaterialList) {
                 productIdList.add(bm.getProductId());
+                map.put(bm.getProductId(), "0");
             }
             for (MendMateriel mendMateriel : mendMaterielList) {
-                productIdList.add(mendMateriel.getProductId());
-            }
-            for (String productId : productIdList) {
-                map.put(productId, "0");
-                for (ProductChange productChange : productChanges) {
-                    if(productChange.getSrcProductId().equals(productId)){
-                        map.put(productChange.getDestProductId(), "0");
-                    }
+                if (map.get(mendMateriel.getProductId()) == null) {
+                    productIdList.add(mendMateriel.getProductId());
+                    map.put(mendMateriel.getProductId(), "0");
                 }
             }
-            for(Map.Entry<String, String> entry : map.entrySet()){
-                String id = entry.getKey();
+            for (String id : productIdList) {
                 ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
                 Object warehouseStr = response.getResultObj();
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);
                 if (warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                StorefrontProduct storefrontProduct = iGoodsStorefrontProductMapper.selectByPrimaryKey(id);
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
                 warehouseDTO.setMaket(1);
-                if (product.getMaket() == 0 || product.getType() == 0) {
+                if (storefrontProduct.getIsShelfStatus().equals("0") || product.getType() == 0) {
                     warehouseDTO.setMaket(0);
                 }
-                Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+                BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
                 if (goods != null) {
                     warehouseDTO.setSales(goods.getSales());
                 }
-                warehouseDTO.setImage(address + product.getImage());
+                warehouseDTO.setImage(address + storefrontProduct.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
-                warehouseDTO.setProductName(product.getName());
+                warehouseDTO.setProductName(storefrontProduct.getProductName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
@@ -240,10 +232,10 @@ public class FillMaterielService {
                 productType = "1";
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Product> productList = iProductMapper.queryProductData(name, categoryId, productType, null);
+            List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryProductData(name, categoryId, productType, null);
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
-                for (Product product : productList) {
+                for (DjBasicsProductTemplate product : productList) {
                     GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null);
                     if (goodsDTO != null) {
                         goodsDTOList.add(goodsDTO);
@@ -282,7 +274,7 @@ public class FillMaterielService {
                 if (warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
 
-                Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(warehouse.getProductId());
                 warehouseDTO.setImage(address + product.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
@@ -322,7 +314,7 @@ public class FillMaterielService {
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<BudgetMaterialDTO> budgetMaterialDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
-                Product product = iProductMapper.selectByPrimaryKey(budgetMaterial.getProductId());
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(budgetMaterial.getProductId());
                 BudgetMaterialDTO budgetMaterialDTO = new BudgetMaterialDTO();
                 budgetMaterialDTO.setId(budgetMaterial.getId());
                 budgetMaterialDTO.setProductId(budgetMaterial.getProductId());

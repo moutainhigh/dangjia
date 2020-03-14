@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.core;
 
+import com.dangjia.acg.dto.core.AllgrabBean;
 import com.dangjia.acg.dto.core.HouseWorkerDTO;
 import com.dangjia.acg.dto.house.MyHouseFlowDTO;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -24,11 +26,20 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
 
     Long grabControl(@Param("workerId") String workerId, @Param("workerType") Integer workerType);
 
+    List<Map<String,Object>> getNewGrabBroadcast();//查询抢单播报
+
     List<HouseWorker> grabOneDayOneTime(@Param("workerId") String workerId);
 
     int doModifyAllByWorkerId(@Param("workerId") String workerId);
 
-    List<HouseWorker> getDetailHouseWorker(@Param("workerId") String workerId);
+    List<HouseWorker> getDetailHouseWorker(@Param("workerId") String workerId,@Param("nameKey") String nameKey,
+                                           @Param("type") Integer type,
+                                           @Param("orderTakingTime") Integer orderTakingTime,
+                                           @Param("houseType") Integer houseType,
+                                           @Param("startTime") Integer startTime,
+                                           @Param("isPlanWeek") Integer isPlanWeek,
+                                           @Param("isPatrol") Integer isPatrol
+    );
 
     List<MyHouseFlowDTO> getMyHouseFlowList(@Param("workerId") String workerId, @Param("workerType") Integer workerType);
 
@@ -43,4 +54,9 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
     List<HouseWorkerDTO> queryWorkerHouse(@Param("workerId") String workerId);
 
     int changeWorkerByHouseIdWorkerId(@Param("houseId") String houseId, @Param("workerId") String workerId);
+
+    List<Map<String, Object>>  getSupWorkerConfInfo( @Param("locationx") String locationx, @Param("locationy") String locationy);
+    List<AllgrabBean>  getGrabList(@Param("workerId") String workerId,@Param("workerTypeId") String workerTypeId, @Param("cityId") String cityId, @Param("workerType") Integer workerType, @Param("type") Integer type);
+
+
 }

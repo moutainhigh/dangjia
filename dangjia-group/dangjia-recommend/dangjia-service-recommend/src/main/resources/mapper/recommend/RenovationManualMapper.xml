@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.recommend.RenovationManualMapper">
+
+    <!-- 根据名称查询攻略 -->
+    <select id="getRenovationManualByName" resultType="com.dangjia.acg.modle.matter.RenovationManual">
+        SELECT
+            id, `name`, image
+        FROM dj_matter_renovation_manual
+        WHERE state=0
+        <if test="name != null and name != ''" >
+            AND `name` LIKE CONCAT('%',#{name},'%')
+        </if>
+        AND data_status = 0
+    </select>
+
+</mapper>

@@ -5,8 +5,13 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.deliver.SplitDeliverReportService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -16,15 +21,28 @@ public class WebSplitReportController implements WebSplitReportAPI {
     private SplitDeliverReportService splitDeliverReportService;
 
     /**
-     * 指定房子所有发货的供应商
+     * 指定房子所有的供应商
      * @param houseId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getSplitReportSuppliers(String houseId){
-        return splitDeliverReportService.getSplitReportSuppliers(houseId);
+    public ServerResponse getSplitReportSuppliers(HttpServletRequest request,String houseId){
+        return splitDeliverReportService.getSplitReportSuppliers(request,houseId);
     }
+
+    /**
+     * 查询指定地址下的所有供应商
+     * @param request
+     * @param addressId 地址ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getReportAdressSuppliers(HttpServletRequest request, String addressId,String storefrontId){
+        return splitDeliverReportService.getReportAdressSuppliers(request,addressId,storefrontId);
+    }
+
 
     /**
      * 指定供应商所有的要货订单

@@ -2,38 +2,73 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dangjia.acg.mapper.deliver.IOrderMapper">
+ <mapper namespace="com.dangjia.acg.mapper.delivery.IOrderMapper">
     <sql id="all_columns">
         id,
-        house_id as houseId,
-        business_order_number as businessOrderNumber,
-        total_amount as totalAmount,
-        worker_type_name as workerTypeName,
-        worker_type_id as workerTypeId,
-        style_name as styleName,
-        style_price as stylePrice,
-        budget_cost as budgetCost,
-        type,
+        create_date AS createDate,
+        house_id AS houseId,
+        business_order_number AS businessOrderNumber,
+        total_amount AS totalAmount,
+        style_price AS  stylePrice,
+        budget_cost AS budgetCost,
+        worker_type_name AS workerTypeName,
         payment,
-        create_date as createDate,
-        modify_date as modifyDate,
-        data_status as dataStatus
+        worker_type_id AS workerTypeId,
+        style_name AS styleName,
+        type,
+        product_type AS productType,
+        modify_date AS modifyDate,
+        data_status AS dataStatus,
+        parent_order_id AS parentOrderId,
+        order_number AS orderNumber,
+        member_id AS memberId,
+        worker_id AS workerId,
+        address_id AS addressId,
+        storefont_id AS storefontId,
+        city_id AS cityId,
+        total_discount_price AS totalDiscountPrice,
+        total_stevedorage_cost AS totalStevedorageCost,
+        total_transportation_cost AS totalTransportationCost,
+        actual_payment_price AS actualPaymentPrice,
+        is_pay_money AS isPayMoney,
+        is_show_order AS isShowOrder,
+        order_status AS orderStatus,
+        order_generation_time AS orderGenerationTime,
+        order_pay_time AS orderPayTime,
+        order_source AS orderSource,
+        create_by AS createBy,
+        update_by AS updateBy,
+        cancellation_time AS cancellationTime,
+        store_activity_id AS storeActivityId,
+        store_activity_product_id AS  storeActivityProductId
     </sql>
 
     <!-- 查询工种订单 -->
+    <select id="getStorefontOrder" resultType="com.dangjia.acg.modle.deliver.Order">
+        SELECT
+        <include refid="all_columns"/>
+        from dj_deliver_order
+        where
+            storefont_id = #{storefontId}
+        and parent_order_id = #{parentOrderId}
+        and product_type = #{productType}
+
+        and
+          parent_order_id!=id
+        LIMIT 1
+    </select>
     <select id="getWorkerOrder" resultType="com.dangjia.acg.modle.deliver.Order">
         SELECT
         <include refid="all_columns"/>
         from dj_deliver_order
         where
-            house_id = #{houseId}
+        house_id = #{houseId}
         and
-            worker_type_id = #{workerTypeId}
+        worker_type_id = #{workerTypeId}
         and
-            type = 1
+        type = 1
         LIMIT 1
     </select>
-
     <!-- 根据订单号查询订单 -->
     <select id="byBusinessOrderNumber" resultType="com.dangjia.acg.modle.deliver.Order">
         SELECT
@@ -41,6 +76,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_deliver_order
         where
             business_order_number = #{businessOrderNumber}
+        ORDER BY create_date desc
+    </select>
+
+    <!-- 根据订单号查询订单 -->
+    <select id="byBusinessOrderNumberAndOrderStatus" resultType="com.dangjia.acg.modle.deliver.Order">
+        SELECT
+        <include refid="all_columns"/>
+        from dj_deliver_order
+        where
+        business_order_number = #{businessOrderNumber}
+        <if test="orderStatus!=null and orderStatus!=''">
+            and orderStatus = #{orderStatus}
+        </if>
         ORDER BY create_date desc
     </select>
 
@@ -59,5 +107,385 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             create_date DESC
     </select>
 
+    <select id="getOrderInfo" resultType="com.dangjia.acg.modle.deliver.Order">
+        SELECT
+            id,
+            order_number orderNumber,
+            order_status orderStatus,
+            order_generation_time orderGenerationTime
+        FROM
+            dj_deliver_order
+        WHERE
+            house_id = #{houseId}
+        AND order_type = '1'
+        AND (parent_order_id = '0' or parent_order_id is null)
+        limit 1
+
+    </select>
+
+    <select id="getOrderDetailInfoList" resultType="com.dangjia.acg.modle.deliver.OrderItem">
+       SELECT
+            t1.id,
+            t1.order_id orderId,
+            t1.storefont_id storefontId,
+            t1.product_id productId,
+            t1.price price,
+            t1.shop_count shopCount,
+            t1.total_price totalPrice,
+            t1.order_type orderType
+        FROM
+            dj_deliver_order t,
+            dj_deliver_order_item t1
+        WHERE
+            t.id = t1.order_id
+        AND t.house_id = #{houseId}
+        AND t.order_type = '1'
+
+    </select>
+
+    <update id="updateOrderDetail" parameterType="com.dangjia.acg.modle.deliver.OrderItem">
+        UPDATE dj_deliver_order_item
+        SET  product_id = #{productId},
+             price = #{price},
+             shop_count = #{shopCount},
+             total_price = #{totalPrice},
+             update_by = #{updateBy},
+             modify_date = now()
+        WHERE
+            id = #{id}
+    </update>
+
+    <update id="updateOrder" >
+         update dj_deliver_order
+         set is_pay_money=1,
+         total_amount=(select sum(t.total_price) from dj_deliver_order_item t where t.order_id=#{orderId})
+         where id=#{orderId}
+    </update>
+
+
+    <select id="getOrderInfoByHouseId" resultType="com.dangjia.acg.dto.deliver.BudgetOrderDTO">
+       SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontIcon,
+            t1.total_amount totalAmount,
+            t1.actual_payment_price actualTotalAmount,
+            t1.create_date  createDate,
+            t1.order_source orderSource,
+            t3.modify_date orderPayTime
+        FROM
+            dj_deliver_order t1,
+            dj_pay_business_order t3,
+            dj_basics_storefront t4
+        WHERE t1.business_order_number = t3.number
+        and t1.storefont_id=t4.id
+        AND t3.state = #{state}
+        and t1.order_source=#{orderSource}
+        and t1.house_id=#{houseId}
+        and EXISTS(select 1 from dj_deliver_order_item tt where t1.id=tt.order_id and tt.worker_type_id in('1','2'))
+        limit 1
+    </select>
+
+    <select id="getOrderInfoItemList" resultType="com.dangjia.acg.dto.deliver.BudgetOrderItemDTO">
+
+        SELECT
+        t.product_id productId,
+        t.id orderItemId,
+        t.storefont_id storefrontId,
+        t.product_name productName,
+        t.product_sn productSn,
+        t.product_type productType,
+        t.price price,
+        IFNULL(t.image,t1.image) image,
+        t.shop_count shopCount,
+        IFNULL(t.ask_count,0) askCount,
+        IFNULL(t.return_count,0) returnCount,
+        (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
+        IFNULL(t.stevedorage_cost,0) stevedorageCost,
+        IFNULL(t.transportation_cost,0) transportationCost,
+        t1.prod_template_id productTemplateId,
+        t1.is_upstairs_cost isUpstairsCost,
+        IFNULL(t1.move_cost,0) moveCost
+        FROM
+        dj_deliver_order_item t,
+        dj_basics_storefront_product t1,
+        dj_deliver_order t2
+        WHERE t.product_id =t1.id
+        and t.order_id =  #{orderId}
+        and t.data_status = '0'
+        and t.order_id=t2.id
+        and t.worker_type_id in('1','2')
+        and t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
+    </select>
+   <select id="getDesgionTotalMoney" resultType="java.lang.Double">
+       SELECT
+           sum(IFNULL(t.price,0)*t.shop_count) totalDesigenMoney
+        FROM
+        dj_deliver_order_item t,
+        dj_basics_storefront_product t1,
+        dj_deliver_order t2
+        WHERE t.product_id =t1.id
+        and t.order_id =  #{orderId}
+        and t.data_status = '0'
+        and t.order_id=t2.id
+        and t.worker_type_id ='1'
+   </select>
+
+    <select id="selectCountOrderByMemberId" resultType="java.lang.Integer">
+        SELECT
+             count(1)
+        FROM
+            dj_pay_business_order t1,
+            dj_deliver_order t2,
+            dj_member_address ma
+        where t1.number=t2.business_order_number
+        and (t2.house_id=ma.house_id or t2.address_id=ma.id)
+        and t1.state in(1,2)
+        and ma.member_id=#{memberId}
+    </select>
+
+    <select id="selectOrderItemByMemberId" resultType="java.lang.Integer">
+        SELECT
+             count(1)
+        FROM
+            dj_pay_business_order t1,
+            dj_deliver_order t2,
+          dj_deliver_order_item t3,
+            dj_member_address ma
+        where t1.number=t2.business_order_number
+        and t2.id=t3.order_id
+        and (t2.house_id=ma.house_id or t2.address_id=ma.id)
+        and t1.state=3
+        and t3.shop_count>(IFNULL(t3.ask_count,0)+IFNULL(t3.return_count,0))
+        and ma.member_id=#{memberId}
+    </select>
+
+    <select id="selectOrderSplitItemByMemberId" resultType="java.lang.Integer">
+        SELECT
+             count(1)
+        FROM
+            dj_deliver_order_split t1,
+            dj_deliver_order_split_item t2,
+            dj_member_address ma
+        WHERE
+            t1.id = t2.order_split_id
+        AND (
+            t1.house_id = ma.house_id
+            or t1.address_id = ma.id
+        )
+        and t1.apply_status in(1,4)
+        AND ma.member_id = #{memberId}
+    </select>
+
+    <select id="selectOrderSplitDeliverByMemberId" resultType="java.lang.Integer">
+        SELECT
+          count(1)
+        FROM
+            dj_deliver_split_deliver t1,
+            dj_member_address ma
+        WHERE
+            (
+                t1.house_id = ma.house_id
+                or t1.address_id = ma.id
+            )
+        AND (
+            t1.shipping_state IN (0, 1)
+            OR (
+                t1.shipping_state = 4
+                AND t1.apply_state IN (0, 2)
+            )
+        )
+        AND ma.member_id = #{memberId}
+    </select>
+
+    <select id="selectMendOrderByMemberId" resultType="java.lang.Integer">
+
+        SELECT
+          count(1)
+        FROM
+            dj_repair_mend_order t1,
+            dj_member_address ma
+        WHERE
+            (
+                t1.house_id = ma.house_id
+                or t1.address_id = ma.id
+            )
+        AND t1.state = 1
+        and t1.type in(2,4,5)
+        AND ma.member_id = #{memberId}
+    </select>
+    <select id="selectMendDeliverByMemberId" resultType="java.lang.Integer">
+
+        SELECT
+          count(1)
+        FROM
+            dj_repair_mend_deliver t1,
+            dj_member_address ma
+        WHERE
+            (
+                t1.house_id = ma.house_id
+                or t1.address_id = ma.id
+            )
+        AND t1.shipping_state in(0,4,5)
+        AND ma.member_id = #{memberId}
+    </select>
+
+    <select id="queryDeliverOrderObligation" resultType="java.lang.Integer">
+        SELECT
+          count(0)
+        FROM
+            dj_deliver_order t1,
+            dj_pay_business_order t2
+        WHERE
+          t1.business_order_number = t2.number
+        AND (t1.id = t1.parent_order_id or t1.parent_order_id is null)
+        AND t2.state in(1,2)
+        AND t1.data_status=0
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND t1.house_id=#{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = t1.address_id
+                        OR ma.house_id = t1.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+    </select>
+
+
+    <select id="queryAppHairOrderList" resultType="java.lang.Integer">
+        select
+          count(0)
+        from dj_deliver_order_split dos
+        LEFT JOIN dj_deliver_order_split_item dosi on dos.id = dosi.order_split_id
+        LEFT JOIN dj_deliver_split_deliver ddsd on dosi.split_deliver_id = ddsd.id
+        inner join dj_basics_storefront dbs on dbs.id=dosi.storefront_id
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND dos.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = dos.address_id
+                        OR ma.house_id = dos.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and dos.data_status = 0 and dos.apply_status = 2
+        <if test="cityId!=null and cityId!=''">
+            and  dos.city_id = #{cityId}
+        </if>
+        and (
+        (dosi.split_deliver_id is null or dosi.split_deliver_id = '')
+        or
+        (dosi.split_deliver_id is not null and ddsd.shipping_state = 0)
+        )
+    </select>
+
+
+    <select id="queryAppOrderList" resultType="java.lang.Integer">
+        select
+          count(0)
+        from dj_deliver_split_deliver ddsd
+        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND ddsd.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = ddsd.address_id
+                        OR ma.house_id = ddsd.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and ddsd.data_status = 0
+        <if test="cityId!=null and cityId!=''">
+            and  ddsd.city_id = #{cityId}
+        </if>
+            and   (ddsd.shipping_state = 1 or ddsd.shipping_state = 7)
+    </select>
+
+    <select id="queryActivityPurchaseRotation" resultType="com.dangjia.acg.dto.member.MemberDTO">
+        SELECT
+            b.head,
+            if(b.name IS NULL OR b.name='',b.nick_name,b.name) name,
+            a.order_pay_time AS orderPayTime
+        FROM
+            dj_deliver_order a,
+            dj_member b
+        WHERE
+            a.member_id = b.id
+        <if test="activityType==1">
+            AND a.order_source=7
+            AND a.order_status=2
+        </if>
+        <if test="activityType==2">
+            AND a.order_source=6
+            AND (a.order_status=2 OR a.order_status=9)
+        </if>
+        <if test="null!=storeActivityProductId and ''!=storeActivityProductId">
+            AND a.store_activity_product_id=#{storeActivityProductId}
+        </if>
+        ORDER BY a.order_pay_time desc
+        limit 10
+    </select>
+
+
+    <select id="queryApplyDec" resultType="com.dangjia.acg.dto.delivery.HouseFlowDataDTO">
+        select apply_dec as applyDec,create_date AS createDate
+        from dj_core_house_flow_apply
+        order by create_date DESC limit 4
+    </select>
+
+    <select id="queryApplyPayState" resultType="com.dangjia.acg.dto.delivery.HouseFlowDataDTO">
+        select apply_dec as applyDec,create_date AS createDate
+        from dj_core_house_flow_apply WHERE is_read_type = 0 and house_id = #{houseId}
+    </select>
+
+    <select id="queryType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO" parameterType="java.lang.String">
+        select
+            cwt.type as type,
+            chf.worker_type_id as workerTypeId,
+            chf.work_steta as workSteta
+        from
+        dj_core_house_flow chf INNER JOIN
+        dj_core_worker_type cwt on chf.worker_type_id = cwt.id
+        where chf.house_id = #{houseId}
+        ORDER BY chf.modify_date desc
+    </select>
 </mapper>
 

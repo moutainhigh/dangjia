@@ -14,7 +14,29 @@
         is_select as isSelect,
         data_status as dataStatus,
         create_date as createDate,
-        modify_date as modifyDate
+        modify_date as modifyDate,
+        business_id as businessId,
+        type,
+        order_id as orderId,
+        price
+    </sql>
+
+    <sql id="all_w_columns">
+        w.id,
+        w.house_id as houseId,
+        w.worker_id as workerId,
+        w.worker_type_id as workerTypeId,
+        w.worker_type as workerType,
+        w.work_type as workType,
+        w.is_select as isSelect,
+        w.data_status as dataStatus,
+        w.create_date as createDate,
+        w.modify_date as modifyDate,
+        w.business_id as businessId,
+        w.type,
+        w.order_id as orderId,
+        w.price
+
     </sql>
 
     <!-- 根据工人id查询所有房子任务-->
@@ -59,7 +81,7 @@
         hw.create_date as createDate,
         hw.modify_date as modifyDate
         from `dj_core_house_worker` hw
-        INNER JOIN dj_core_house_flow h ON hw.house_id = h.house_id  AND hw.worker_type_id=h.worker_type_id
+       INNER JOIN dj_core_house_flow h ON hw.house_id = h.house_id  AND hw.worker_type_id=h.worker_type_id
         WHERE
         h.work_steta NOT IN (0, 2, 6) AND hw.work_type =6 AND hw.worker_type >2
         GROUP BY hw.worker_id
@@ -71,34 +93,50 @@
         from
         dj_core_house_worker
         where
-        work_type = #{workType}
-        and
         worker_type_id = #{workerTypeId}
         and
         house_id = #{houseId}
+        <if test="workType!=null and workType!=''">
+            and work_type = #{workType}
+        </if>
         GROUP BY is_select desc limit 1
+    </select>
+
+    <!-- 新抢单播报 -->
+    <select id="getNewGrabBroadcast" resultType="java.util.HashMap">
+        SELECT
+            m.address,
+            w.create_date createDate
+        FROM
+            dj_core_house_worker w,
+            dj_member_address m
+        WHERE
+            w.house_id = m.house_id
+        ORDER BY
+            w.create_date DESC
+        LIMIT 10
     </select>
 
     <!-- 根据工人id查询未完工任务-->
     <select id="grabControl" resultType="java.lang.Long">
         SELECT
-        count( * )
+            count( * )
         FROM
-        dj_core_house_worker hw
-        INNER JOIN dj_core_house_flow hf ON hw.house_id = hf.house_id
-        AND hw.worker_type_id = hf.worker_type_id
-        INNER JOIN dj_house h ON hw.house_id = h.id
+            dj_core_house_worker hw
+            INNER JOIN dj_core_house_flow hf ON hw.house_id = hf.house_id
+            AND hw.worker_type_id = hf.worker_type_id
+            INNER JOIN dj_house h ON hw.house_id = h.id
         WHERE
-        hw.worker_id = #{workerId}
-        <if test="workerType!=null and workerType!=3">
-            AND hw.work_type !=2
-        </if>
-        AND hw.work_type IN ( 1, 6 )
-        AND hf.work_steta != 1
-        AND hf.work_steta != 2
-        AND hf.work_steta != 6
-        AND h.visit_state != 3
-        AND h.visit_state != 4
+            hw.worker_id = #{workerId}
+            <if test="workerType!=null and workerType!=3">
+                AND hw.work_type !=2
+            </if>
+            AND hw.work_type IN ( 1, 6 )
+            AND hf.work_steta != 1
+            AND hf.work_steta != 2
+            AND hf.work_steta != 6
+            AND h.visit_state != 3
+            AND h.visit_state != 4
     </select>
 
     <!-- 查询当天是否抢单-->
@@ -127,12 +165,105 @@
     <select id="getDetailHouseWorker" parameterType="java.lang.String"
             resultType="com.dangjia.acg.modle.core.HouseWorker">
         SELECT
-        <include refid="all_columns"/>
-        from dj_core_house_worker
-        where worker_id = #{workerId}
-        and work_type in(1,6)
-        and is_select = 1
-        order by modify_date desc
+        <include refid="all_w_columns"/>
+        from dj_core_house_worker w
+        <if test="nameKey!=null and nameKey!=''">
+            LEFT JOIN dj_house h ON w.house_id = h.id
+            LEFT JOIN dj_deliver_order o ON o.id = w.business_id
+            LEFT JOIN dj_member_address ma on ma.id=o.address_id
+        </if>
+        <if test="houseType!=null and houseType==1">
+            INNER JOIN (
+            SELECT house_id, MAX(end_date) end_date  FROM
+            dj_core_house_flow GROUP BY house_id
+            ) a ON a.house_id = w.house_id
+        </if>
+        <if test="startTime!=null and startTime==1">
+            INNER JOIN (
+                SELECT
+                 house_id,create_date
+                FROM
+                 dj_core_house_flow_apply
+                WHERE
+                  apply_type = 4
+                  AND DATE_FORMAT(create_date, '%Y-%m-%d') = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+                GROUP BY
+                 house_id
+            ) b ON b.house_id = w.house_id
+        </if>
+        <if test="startTime!=null and startTime==2">
+        INNER JOIN (
+            SELECT
+              house_id,MIN(create_date) create_date
+            FROM
+              dj_core_house_flow_apply
+            WHERE
+              apply_type = 4
+            GROUP BY
+              house_id
+        ) b ON b.house_id = w.house_id  AND DATE_FORMAT(b.create_date, '%x年-第%v周' ) = DATE_FORMAT( SYSDATE(), '%x年-第%v周' )
+        </if>
+        <if test="isPlanWeek!=null and isPlanWeek==1">
+            LEFT JOIN (
+                SELECT
+                  house_id, create_date
+                FROM
+                  dj_basics_site_memo
+                WHERE
+                  type =1
+                  AND DATE_FORMAT(create_date, '%x年-第%v周' ) = DATE_FORMAT( SYSDATE(), '%x年-第%v周' )
+                GROUP BY
+                  house_id
+            ) c ON c.house_id = w.house_id
+        </if>
+
+        <if test="isPatrol!=null and isPatrol==1">
+            INNER JOIN (
+                SELECT
+                house_id, COUNT(id) patrol
+                FROM dj_core_house_flow_apply
+                WHERE apply_type = 5
+                GROUP BY house_id
+            ) fa ON fa.house_id = w.house_id
+        </if>
+        where w.worker_id = #{workerId}
+        and w.business_id is not null
+        and w.work_type in(1,6)
+        <if test="nameKey!=null and nameKey!=''">
+            AND (
+                CONCAT(
+                h.residential,
+                IFNULL(h.building, '*'),
+                '栋',
+                IFNULL(CONCAT(h.unit, '单元'), ''),
+                IFNULL(h.number, '*'),
+                '号'
+               ) LIKE CONCAT('%', #{nameKey}, '%')
+               OR ma.address LIKE CONCAT('%', #{nameKey}, '%')
+            )
+        </if>
+        <if test="type!=null">
+            AND w.type =  #{type}
+        </if>
+        <if test="houseType!=null and houseType==1">
+            AND a.end_date &lt;= CONCAT(
+            DATE_FORMAT(SYSDATE(), '%Y-%m-%d'),
+            ' 23:59:59'
+            )
+        </if>
+        <if test="isPlanWeek!=null and isPlanWeek==1">
+            and c.house_id is null
+        </if>
+        <if test="isPatrol!=null and isPatrol==1">
+            AND fa.patrol &lt; w.patrol
+        </if>
+
+        <if test="orderTakingTime!=null and orderTakingTime==0">
+            order by w.create_date
+        </if>
+        <if test="orderTakingTime!=null and orderTakingTime==1">
+            order by w.create_date desc
+        </if>
     </select>
 
     <!--&lt;!&ndash;查出所有 &ndash;&gt;-->
@@ -209,7 +340,7 @@
         AND h.visit_state != 3
         AND h.visit_state != 4
         ORDER BY
-        hw.modify_date DESC
+        hw.create_date DESC
     </select>
     <update id="changeWorkerByHouseIdWorkerId" parameterType="java.lang.String">
         UPDATE dj_core_house_worker
@@ -217,6 +348,182 @@
         WHERE house_id = #{houseId}
           AND worker_id = #{workerId}
     </update>
+
+    <!-- 所有管家地域距离、积分、持单量的记录 -->
+    <select id="getSupWorkerConfInfo" resultType="java.util.Map">
+       SELECT
+			m.id workerId,
+			m.`name` workerName,
+			m.evaluation_score evaluationScore,
+			IFNULL(o.methods, 0) methods,
+			IFNULL(ROUND(j.juli,2), 99.99) juli
+		FROM
+			`dj_member` m
+		LEFT JOIN (
+			SELECT
+				hw.worker_id,
+				count(hw.id) methods
+			FROM
+				dj_core_house_worker hw
+			LEFT JOIN dj_core_house_flow hf ON hw.house_id = hf.house_id
+			AND hw.worker_type_id = hf.worker_type_id
+			WHERE
+				hw.work_type IN (1, 6)
+			AND hw.worker_type = 3
+			AND hf.work_steta NOT IN (1, 2, 6)
+			GROUP BY
+				hw.worker_id
+		) o ON o.worker_id = m.id
+		LEFT JOIN (
+			SELECT
+				hw.worker_id,
+				MIN(v.juli) juli
+			FROM
+				dj_core_house_worker hw
+			INNER JOIN dj_house h ON h.id = hw.house_id
+			INNER JOIN (
+				SELECT
+					mv.*, (
+						st_distance (
+							point (mv.locationx, mv.locationy),
+							point (#{locationx}, #{locationy})
+						) * 111195 / 1000
+					) AS juli
+				FROM
+					`dj_house_modeling_village` mv
+				WHERE
+					mv.locationx IS NOT NULL
+			) v ON v.id = h.village_id
+			WHERE
+				hw.worker_type = 3
+			GROUP BY
+				hw.worker_id
+		) j ON j.worker_id = m.id
+		WHERE
+			m.`worker_type` = '3'
+		AND m.`check_type` = '2'
+		And m.auto_order=0
+		AND m.`real_name_state` = '3'
+		AND m.evaluation_score >= 60
+
+    </select>
+
+
+    <!-- 抢单列表；装修、维保、体验-->
+    <select id="getGrabList" resultType="com.dangjia.acg.dto.core.AllgrabBean">
+        SELECT a.houseName,
+                a.butType,
+                a.workerTypeId,
+                a.houseFlowId,
+                a.createDate,
+                a.type,
+                a.orderType,
+                a.square,
+                a.houseMember,
+                a.workertotal
+         FROM (SELECT
+            IFNULL(
+                CONCAT(
+                    h.residential,
+                    IFNULL(h.building, '*'),
+                    '栋',
+                    IFNULL(CONCAT(h.unit, '单元'), ''),
+                    IFNULL(h.number, '*'),
+                    '号'
+                ),
+                a.address
+            ) houseName,
+            '0' butType,
+            f.worker_type_id workerTypeId,
+            f.id houseFlowId,
+            f.create_date createDate,
+            '0' type,
+            '0' orderType,
+            CONCAT(
+                IFNULL(h.square, '***'),
+                'm²'
+            ) square,
+            IFNULL(m.nick_name, m.`name`) houseMember,
+            f.work_price workertotal
+        FROM
+            `dj_core_house_flow` f
+        INNER JOIN dj_house h ON h.id = f.house_id
+        INNER JOIN dj_member_address a ON a.house_id = f.house_id
+        INNER JOIN dj_member m ON m.id = h.member_id
+        WHERE
+            f.`work_type` = '2'
+        AND f.`state` = '0'
+        AND f.`worker_type_id` = #{workerTypeId}
+        AND f.`city_id` = #{cityId}
+        UNION ALL
+            SELECT
+                a.address houseName,
+                '0' butType,
+                f.worker_type_id workerTypeId,
+                f.id houseFlowId,
+                f.create_date createDate,
+                '1' type,
+                '0' orderType,
+                '' square,
+                a.`name` houseMember,
+                f.total_amount workertotal
+            FROM
+                `dj_deliver_order` f
+            INNER JOIN dj_member_address a ON a.house_id = f.house_id
+            WHERE
+                (
+                    f.worker_id IS NULL
+                    OR f.worker_id = ''
+                )
+            AND f.type = '4'
+            AND f.order_status = '2'
+            AND f.`city_id` = #{cityId}
+            UNION ALL
+                SELECT
+                    CONCAT(
+                        h.residential,
+                        IFNULL(h.building, '*'),
+                        '栋',
+                        IFNULL(CONCAT(h.unit, '单元'), ''),
+                        IFNULL(h.number, '*'),
+                        '号'
+                    ) houseName,
+                    '0' butType,
+                    f.worker_type_id workerTypeId,
+                    f.id houseFlowId,
+                    f.create_date createDate,
+                    '2' type,
+                    '0' orderType,
+                    CONCAT(
+                        IFNULL(h.square, '***'),
+                        'm²'
+                    ) square,
+                    IFNULL(m.nick_name, m.`name`) houseMember,
+                    '0' workertotal
+                FROM
+                    `dj_maintenance_record` f
+                INNER JOIN dj_house h ON h.id = f.house_id
+                INNER JOIN dj_member m ON m.id = f.member_id
+                WHERE
+                <if test="workerType!=null and workerType==3">
+                    (
+                        f.steward_order_time IS NULL
+                          AND
+                        (f.steward_id = #{workerId} OR f.steward_id  IS NULL)
+                    )
+                </if>
+                <if test="workerType!=null and workerType!=3">
+                    ( f.worker_create_date IS NULL  AND f.`worker_type_id` = #{workerTypeId} )
+                    and
+                    (f.worker_member_id = #{workerId} OR f.worker_member_id  IS NULL)
+                </if>
+                AND h.`city_id` = #{cityId}
+        ) a
+        <if test="type!=null and type!='-1'">
+           where a.type = #{type}
+        </if>
+        ORDER BY a.createDate DESC
+    </select>
 
 </mapper>
 

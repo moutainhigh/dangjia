@@ -6,9 +6,14 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 /**
  * author: Ronalcheng
@@ -17,10 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class HouseController implements HouseAPI {
-
+    protected static final Logger logger = LoggerFactory.getLogger(HouseController.class);
     @Autowired
     private HouseService houseService;
 
+    @Override
+    @ApiMethod
+    public House selectHouseById(String  id) {
+        return houseService.selectHouseById(id);
+    }
 
     /**
      * 切换房产
@@ -46,16 +56,74 @@ public class HouseController implements HouseAPI {
         return houseService.queryMyHouse(userToken);
     }
 
+
     /**
-     * @param userToken
-     * @param houseType 装修的房子类型0：新房；1：老房
-     * @param drawings  有无图纸0：无图纸；1：有图纸
+     *
+     * @param userToken 用户token
+     * @param cityId 城市ID
+     * @param houseType 房屋ID
+     * @param latitude 纬度
+     * @param longitude 经度
+     * @param address 地址
+     * @param name 地址名称
+     * @param square 面积
+     * @param actuarialDesignAttr 设计精算列表 (
+     *      * id	String	设计精算模板ID
+     *      * configName	String	设计精算名称
+     *      * configType	String	配置类型1：设计阶段 2：精算阶段
+     *      * productList	List	商品列表
+     *      * productList.productId	String	商品ID
+     *      * productList.productName	String	商品名称
+     *      * productList.productSn	String	商品编码
+     *      * productList.goodsId	String	货品ID
+     *      * productList.storefrontId	String	店铺ID
+     *      * productList.price	double	商品价格
+     *      * productList.unit	String	商品单位
+     *      * productList.unitName	String	单位名称
+     *      * productList.image	String	图片
+     *      * productList.imageUrl	String	详情图片地址
+     *      * productList.valueIdArr	String	商品规格ID
+     *      * productList.valueNameArr	String	商品规格名称
+     * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setStartHouse(String userToken, String cityId, Integer houseType, Integer drawings,
-                                        String latitude, String longitude, String address, String name) {
-        return houseService.setStartHouse(userToken, cityId, houseType, drawings, latitude, longitude, address, name);
+    public ServerResponse setStartHouse(String userToken, String cityId, String houseType,
+                                        String latitude, String longitude, String address, String name, BigDecimal square, String actuarialDesignAttr) {
+        try{
+            return houseService.setStartHouse(userToken, cityId, houseType, latitude, longitude, address, name,square,actuarialDesignAttr);
+
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+
+    /**
+     *
+     * @param userToken 用户token
+     * @param cityId 城市ID
+     * @param houseType 房屋类型
+     * @param addressId 地址ID
+     * @param activityRedPackId 优惠券ID
+     * @param actuarialDesignAttr 设计精算列表 商品列表(
+     * id	String	设计精算模板ID
+     * configName	String	设计精算名称
+     * configType	String	配置类型1：设计阶段 2：精算阶段
+     * productList	List	商品列表
+     * productList.productId	String	商品ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse applicationDecorationHouse(String userToken,String cityId,String houseType,String addressId,String activityRedPackId,String actuarialDesignAttr){
+        try{
+            return houseService.applicationDecorationHouse(userToken, cityId, houseType, addressId,activityRedPackId,actuarialDesignAttr);
+
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
     }
 
     /**
@@ -69,6 +137,17 @@ public class HouseController implements HouseAPI {
     public ServerResponse revokeHouse(@RequestParam("userToken") String userToken) {
         return houseService.revokeHouse(userToken);
     }
+    /**
+     * 查询房子提交的货品记录
+     *
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchBudgetInfoList(String userToken){
+        return houseService.searchBudgetInfoList(userToken);
+    }
 
     /**
      * 修改房子精算状态
@@ -80,20 +159,21 @@ public class HouseController implements HouseAPI {
     @Override
     @ApiMethod
     public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
-        return houseService.setHouseBudgetOk(houseId, budgetOk);
+        return houseService.setHouseBudgetOk(houseId, budgetOk,null);
     }
 
     /**
      * app修改房子精算状态
-     *
-     * @param houseId
+     * @param userToken
+     * @param houseId 来源ID
      * @param budgetOk
+     * @param taskId 任务ID
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setHouseBudgetOk(String userToken, String houseId, Integer budgetOk) {
-        return houseService.setHouseBudgetOk(houseId, budgetOk);
+    public ServerResponse setHouseBudgetOk(String userToken, String houseId, Integer budgetOk,String taskId) {
+        return houseService.setHouseBudgetOk(houseId, budgetOk,taskId);
     }
 
 
@@ -195,14 +275,13 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getReferenceBudget(String cityId, String villageId, Double square, Integer houseType) {
-        if (square != null && !"".equals(square)) {
-            Double minSquare = square - 15;
-            Double maxSquare = square + 15;
-            return houseService.getReferenceBudget(cityId, villageId, minSquare, maxSquare, houseType);
-        } else {
-            return ServerResponse.createByErrorMessage("请输入正确的面积");
+    public ServerResponse getReferenceBudget(HttpServletRequest request, String cityId, String villageId, Double square, String houseType) {
+        if (square == null) {
+            square = 15d;
         }
+        Double minSquare = square - 15;
+        Double maxSquare = square + 15;
+        return houseService.getReferenceBudget(request, cityId, villageId, minSquare, maxSquare, houseType);
     }
 
     @Override
@@ -223,6 +302,47 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse getHouseChoiceCases(String id) {
         return houseService.getHouseChoiceCases(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryAcceptanceDynamic(PageDTO pageDTO,String houseId) {
+        return houseService.queryAcceptanceDynamic(pageDTO,houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryApplyComplaints(String houseFlowApplyId) {
+        return houseService.queryApplyComplaints(houseFlowApplyId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setRemindButlerCheck(String houseFlowApplyId) {
+        return houseService.setRemindButlerCheck(houseFlowApplyId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setHousekeeperInitiatedAcceptance(String houseFlowId,String productId, Integer supervisorCheck, String image, String applyDec) {
+        try {
+            return houseService.setHousekeeperInitiatedAcceptance(houseFlowId, productId,supervisorCheck,image,applyDec);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createBySuccessMessage("操作失败");
+        }
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse setOwnerBy(String houseFlowApplyId,Integer memberCheck) {
+        try {
+            return houseService.setOwnerBy(houseFlowApplyId,memberCheck);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
 }

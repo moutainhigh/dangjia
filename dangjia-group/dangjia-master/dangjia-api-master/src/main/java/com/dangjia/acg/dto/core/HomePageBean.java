@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.core;
 
+import com.dangjia.acg.dto.shell.HomeShellProductDTO;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -16,18 +17,24 @@ import java.util.List;
 public class HomePageBean {
 
     private BigDecimal evaluation;//积分
+    private BigDecimal overall;//综合分
     private String favorable;//好评率
     private String gradeName;//工匠等级别称
     private String ioflow;//工匠头像
     private String workerId;//工匠ID
     private String workerName;//工匠名称
-    private List<ListBean> list;
+    private Integer orderTakingNum;//接单数量
 
-    @Data
-    public static class ListBean {
-        private String imageUrl;//菜单图片地址
-        private String name;//菜单名称
-        private String url;//点击URL
-        private int type;//0:h5;1:我的资料
-    }
+
+    private List list;//徽章
+
+    private HomeShellProductDTO homeShellProduct;//当家贝商品
+//
+//    @Data
+//    public static class ListBean {
+//        private String imageUrl;//菜单图片地址
+//        private String name;//菜单名称
+//        private String url;//点击URL
+//        private int type;//0:h5;1:我的资料
+//    }
 }

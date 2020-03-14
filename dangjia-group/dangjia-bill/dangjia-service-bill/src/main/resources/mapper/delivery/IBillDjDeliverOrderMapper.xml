@@ -1,0 +1,1289 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper">
+
+
+
+    <select id="queryDjDeliverOrderStorefront" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontIcon
+        FROM
+            dj_deliver_order t1,
+            dj_pay_business_order t3,
+            dj_basics_storefront t4
+            <if test="null==houseId or ''==houseId">
+                ,dj_member_address t5
+            </if>
+        WHERE
+            t1.business_order_number = t3.number
+        AND t1.storefont_id = t4.id
+        AND t1.payment IS NOT NULL
+        AND t3.state = 3
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND t1.house_id=#{houseId}
+            </when>
+            <otherwise>
+                AND (t1.house_id = t5.house_id OR t1.address_id = t5.id)
+                AND t5.member_id = #{memberId}
+                AND t5.data_status=0
+            </otherwise>
+        </choose>
+        AND EXISTS (
+            SELECT
+                1
+            FROM
+                dj_deliver_order_item t2
+            WHERE
+                t1.id = t2.order_id
+            AND t2.shop_count > (
+                IFNULL(t2.ask_count, 0) + IFNULL(t2.return_count, 0)
+            )
+            AND t2.data_status = 0
+            AND t2.is_reservation_deliver=1
+            AND (t2.reservation_deliver_time IS NULL OR t2.reservation_deliver_time='')
+        )
+      GROUP BY t1.id
+    </select>
+
+
+    <select id="queryAppointment" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
+        SELECT
+            t.product_id productId,
+            t.id orderItemId,
+            t.storefont_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            t.order_id as orderId,
+            IFNULL(t.image,t1.image) image,
+            t.shop_count shopCount,
+            IFNULL(t.ask_count,0) askCount,
+            IFNULL(t.return_count,0) returnCount,
+            (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
+            t1.prod_template_id productTemplateId,
+            t.reservation_deliver_time as reservationDeliverTime,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr
+        FROM
+            dj_deliver_order_item t,
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2
+        WHERE t.product_id =t1.id
+        AND t1.prod_template_id=t2.id
+        AND t.order_id =  #{orderId}
+        AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
+        AND t.data_status = 0
+        AND t.is_reservation_deliver = 1
+        AND (
+            t.reservation_deliver_time IS NULL
+            OR t.reservation_deliver_time = ''
+        )
+        ORDER BY t.create_date
+    </select>
+
+
+    <select id="queryReservedStorefront" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+             t1.house_id,
+             t1.storefront_id storefrontId,
+             t1.id orderSplitId,
+             t1.address_id addressId,
+             t1.house_id houseId,
+             t4.storefront_name storefrontName,
+             t1.order_id orderId
+        FROM
+         dj_deliver_order_split t1,
+         dj_basics_storefront t4,
+         dj_deliver_order_split_item t2
+        WHERE t4.id = t1.storefront_id
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND t1.house_id=#{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                    1
+                    FROM
+                    dj_member_address t5
+                    WHERE
+                    t5.member_id = #{memberId}
+                    AND t5.data_status = 0
+                    AND (
+                    t1.house_id = t5.house_id
+                    OR t1.address_id = t5.id
+                    )
+                )
+            </otherwise>
+        </choose>
+          and t1.id = t2.order_split_id
+          AND t2.data_status = 0
+          AND t2.is_reservation_deliver = 1
+          AND t2.reservation_deliver_time IS NOT NULL
+        GROUP BY t1.id
+    </select>
+
+
+    <select id="queryReserved" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
+        SELECT
+            t.product_id productId,
+            t.id as orderSplitItemId,
+            t.storefront_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            IFNULL(t.image, t1.image) image,
+            IFNULL(t.ask_count, 0) askCount,
+            t1.prod_template_id productTemplateId,
+            t.reservation_deliver_time AS reservationDeliverTime,
+            t.unit_name as unitName,
+            t.order_split_id as orderSplitId,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr,
+            t.num as shopCount
+        FROM
+            dj_deliver_order_split_item t,
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2
+        WHERE
+            t.product_id = t1.id
+        AND t1.prod_template_id=t2.id
+        AND t.data_status = 0
+        AND t.order_split_id =  #{orderSplitId}
+    </select>
+
+    <!--取消预约-->
+    <delete id="cancelBooking">
+        DELETE dj_deliver_order_split a,
+         dj_deliver_order_split_item b
+        FROM
+            dj_deliver_order_split a,
+            dj_deliver_order_split_item b
+        WHERE
+            a.id = b.order_split_id
+        AND a.id = #{orderSplitId}
+    </delete>
+
+
+
+    <!--searchDecorationTotalCost查询全部花费-->
+    <select id="searchDecorationTotalCost" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+       SELECT
+            sum(actualPaymentPrice) actualPaymentPrice,
+            sum(purchaseTotalPrice) purchaseTotalPrice
+        FROM
+            (
+                SELECT
+                    sum(
+                        IFNULL(
+                            t2.actual_payment_price,
+                            IFNULL(
+                                t2.total_price,
+                                t2.price * t2.shop_count
+                            )
+                        ) + IFNULL(
+                            (
+                                SELECT
+                                    price
+                                FROM
+                                    dj_deliver_order_added_product tt
+                                WHERE
+                                    tt.any_order_id = t2.id
+                            ),
+                            0
+                        ) * t2.shop_count
+                    ) actualPaymentPrice,
+                    0 purchaseTotalPrice
+                FROM
+                    dj_deliver_order t1,
+                    dj_deliver_order_item t2
+                WHERE
+                    t1.id = t2.order_id
+                AND t1.house_id = #{houseId}
+                and EXISTS(select 1 from dj_basics_storefront_product t where t2.product_id=t.id)
+                UNION ALL
+                    SELECT
+                        sum(IFNULL(t1.total_price, 0)) actualPaymentPrice,
+                        sum(IFNULL(t1.total_price, 0)) purchaseTotalPrice
+                    FROM
+                        dj_actuary_budget_material t1
+                    WHERE
+                        t1.steta = 2
+                    AND t1.delete_state != 1
+                    AND t1.product_id IS NULL
+                    AND t1.house_id = #{houseId}
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_deliver_order t4
+                        WHERE
+                            t1.house_id = t4.house_id
+                        AND t1.worker_type_id = t4.worker_type_id
+                    )
+            ) m
+
+    </select>
+    <!--  查询当前用户的花费，根据类别汇总 -->
+    <select id="searchDecorationCostList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+        SELECT
+            m.categoryId,
+            m.categoryName,
+            sum(actualPaymentPrice) actualPaymentPrice,
+            sum(purchaseTotalPrice) purchaseTotalPrice
+        FROM
+            (
+                SELECT
+                    t5.id categoryId,
+                    t5. NAME categoryName,
+                    (
+                        IFNULL(
+                        t2.actual_payment_price,
+                        IFNULL(
+                        t2.total_price,
+                        t2.price * t2.shop_count
+                        )
+                        ) + IFNULL(
+                        (
+                        SELECT
+                        price
+                        FROM
+                        dj_deliver_order_added_product tt
+                        WHERE
+                        tt.any_order_id = t2.id
+                        ),
+                        0
+                        ) * t2.shop_count
+                    ) actualPaymentPrice,
+                   0 purchaseTotalPrice
+                FROM
+                    dj_deliver_order t1,
+                    dj_deliver_order_item t2,
+                    dj_basics_storefront_product t3,
+                    dj_basics_product_template t4,
+                    dj_basics_goods_category t5
+                WHERE
+                    t1.id = t2.order_id
+                AND t2.product_id = t3.id
+                AND t3.prod_template_id = t4.id
+                AND t4.category_id = t5.id
+                AND t1.house_id = #{houseId}
+                <if test="null!=labelValId and ''!=labelValId">
+                    and FIND_IN_SET(#{labelValId} ,t5.category_label_ids)
+                </if>
+                UNION ALL
+                    SELECT
+                        t3.id categoryId,
+                        t3.`name` categoryName,
+                        IFNULL(t1.total_price, 0) actualPaymentPrice,
+                IFNULL(t1.total_price, 0) purchaseTotalPrice
+                    FROM
+                        dj_actuary_budget_material t1,
+                        dj_basics_goods t2,
+                        dj_basics_goods_category t3
+                    WHERE
+                        t1.steta = 2
+                    AND t1.goods_id = t2.id
+                    AND t2.category_id = t3.id
+                    AND t1.delete_state != 1
+                    AND t1.product_id IS NULL
+                    AND t1.house_id = #{houseId}
+                    <if test="null!=labelValId and ''!=labelValId">
+                        and FIND_IN_SET(#{labelValId} ,t3.category_label_ids)
+                    </if>
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_deliver_order t4
+                        WHERE
+                            t1.house_id = t4.house_id
+                        AND t1.worker_type_id = t4.worker_type_id
+                    )
+            ) m
+        group by m.categoryId,
+            m.categoryName
+
+    </select>
+    <!--  查询当前用户的花费，具体详情花费 -->
+    <select id="searchDecorationCostDetailList" resultType="com.dangjia.acg.dto.order.DecorationCostItemDTO">
+
+        SELECT
+          t5.category_id categoryId,
+          t2.id orderItemId,
+          t4.goods_id goodsId,
+          t5.name goodsName,
+          t2.product_id productId,
+          t4.id productTemplateId,
+          t2.product_name productName,
+          t4.product_sn productSn,
+          IFNULL(t4.convert_unit,t4.unit_id) unitId,
+          t2.unit_name unitName,
+          t4.image,
+          t2.price price,
+          t2.shop_count shopCount,
+          (IFNULL(t2.actual_payment_price,IFNULL(t2.total_price,t2.price*t2.shop_count))+ IFNULL(
+           (SELECT price FROM dj_deliver_order_added_product tt WHERE tt.any_order_id = t2.id),0) * t2.shop_count) actualPaymentPrice,
+          1 steta,
+          '' actuaryBudgetId,
+          t5.housekeeper_acceptance showHousekeeperAcceptance
+        FROM
+            dj_deliver_order t1,
+            dj_deliver_order_item t2,
+            dj_basics_storefront_product t3,
+            dj_basics_product_template t4,
+            dj_basics_goods t5,
+            dj_basics_goods_category t6
+        WHERE
+            t1.id = t2.order_id
+        and t2.product_id=t3.id
+        and t3.prod_template_id=t4.id
+        and t4.goods_id=t5.id
+        and t5.category_id = t6.id
+        and t1.house_id=#{houseId}
+        and t5.category_id=#{categoryId}
+        <if test="null!=labelValId and ''!=labelValId">
+            and FIND_IN_SET(#{labelValId} ,t6.category_label_ids)
+        </if>
+        union all
+        SELECT
+                t2.category_id categoryId,
+                '' orderItemId,
+                t2.id goodsId,
+                t2.name goodsName,
+                '' productId,
+                '' productTemplateId,
+                t2.name productName,
+                '' productSn,
+                '' image,
+                t1.price,
+                t1.shop_count shopCount,
+                t1.total_price actualPaymentPrice,
+                2 steta,
+                t1.id actuaryBudgetId,
+                t2.housekeeper_acceptance showHousekeeperAcceptance
+            FROM
+                dj_actuary_budget_material t1,
+                dj_basics_goods t2,
+                dj_basics_goods_category t3
+            WHERE
+                t1.steta = 2
+            AND t1.goods_id = t2.id
+            AND t2.category_id = t3.id
+            AND t1.delete_state != 1
+            AND t1.product_id IS NULL
+            AND t1.house_id = #{houseId}
+            and t2.category_id=#{categoryId}
+            <if test="null!=labelValId and ''!=labelValId">
+                and FIND_IN_SET(#{labelValId} ,t3.category_label_ids)
+            </if>
+            AND EXISTS (
+                SELECT
+                    1
+                FROM
+                    dj_deliver_order t4
+                WHERE
+                    t1.house_id = t4.house_id
+                AND t1.worker_type_id = t4.worker_type_id
+            )
+    </select>
+
+    <!--按类别标签汇总花费信息-->
+    <select id="searchDecorationCategoryLabelList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+        SELECT
+            m1.id labelValId,
+            m1.name labelValName,
+            sum(actualPaymentPrice) actualPaymentPrice,
+            sum(purchaseTotalPrice) purchaseTotalPrice
+        FROM
+            (
+                SELECT t5.category_label_ids,
+                    (IFNULL(
+                        t2.actual_payment_price,
+                        IFNULL(
+                            t2.total_price,
+                            t2.price * t2.shop_count
+                        )
+                       )+ IFNULL(
+                        (
+                        SELECT
+                        price
+                        FROM
+                        dj_deliver_order_added_product tt
+                        WHERE
+                        tt.any_order_id = t2.id
+                        ),
+                        0
+                        ) * t2.shop_count
+                     )actualPaymentPrice,
+                    0 purchaseTotalPrice
+                FROM
+                    dj_deliver_order t1,
+                    dj_deliver_order_item t2,
+                    dj_basics_storefront_product t3,
+                    dj_basics_product_template t4,
+                    dj_basics_goods_category t5
+                WHERE
+                    t1.id = t2.order_id
+                AND t2.product_id = t3.id
+                AND t3.prod_template_id = t4.id
+                AND t4.category_id = t5.id
+                AND t1.house_id = #{houseId}
+                UNION ALL
+                    SELECT
+                        t3.category_label_ids,
+                        IFNULL(t1.total_price, 0) actualPaymentPrice,
+                        IFNULL(t1.total_price, 0) purchaseTotalPrice
+                    FROM
+                        dj_actuary_budget_material t1,
+                        dj_basics_goods t2,
+                        dj_basics_goods_category t3
+                    WHERE
+                        t1.steta = 2
+                    AND t1.goods_id = t2.id
+                    AND t2.category_id = t3.id
+                    AND t1.delete_state != 1
+                    AND t1.product_id IS NULL
+                    AND t1.house_id = #{houseId}
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_deliver_order t4
+                        WHERE
+                            t1.house_id = t4.house_id
+                        AND t1.worker_type_id = t4.worker_type_id
+                    )
+            ) m,dj_basics_category_label m1 where FIND_IN_SET(m1.id,m.category_label_ids)
+        GROUP BY
+            m1.id,
+            m1.name
+    </select>
+    <select id="selectDeliverOrderByHouse" resultType="com.dangjia.acg.dto.delivery.DjDeliverOrderDTO">
+        SELECT
+        ddo.id,
+        IFNULL(ddo.house_id,'') as houseId,
+        IFNULL(ddo.business_order_number,'') as businessOrderNumber,
+        IFNULL(ddo.total_amount,'') as totalAmount,
+        IFNULL(ddo.member_id,'') as memberId,
+        IFNULL(ddo.address_id,'') as addressId,
+        IFNULL(ddo.worker_id,'') as workerId,
+        IFNULL(ddo.worker_type_name,'') as workerTypeName,
+        IFNULL(ddo.worker_type_id,'') as workerTypeId,
+        IFNULL(ddo.style_name,'') as styleName,
+        IFNULL(ddo.style_price,'') as stylePrice,
+        IFNULL(ddo.budget_cost,'') as budgetCost,
+        ddo.type,
+        ddo.payment,
+        IFNULL(dbs.system_logo,'') as storefrontIcon,
+        IFNULL(ddo.storefont_id,'') as storefrontId,
+        IFNULL(ddo.city_id,'') as cityId,
+        IFNULL(ddo.total_discount_price,'') as totalDiscountPrice,
+        IFNULL(ddo.total_stevedorage_cost,'') as totalStevedorageCost,
+        IFNULL(ddo.total_transportation_cost,'') as totalTransportationCost,
+        IFNULL(ddo.order_type,'')  as orderType,
+        IFNULL(ddo.actual_payment_price,'') as actualPaymentPrice,
+        IFNULL(ddo.is_pay_money,'')  as isPayMoney,
+        IFNULL(ddo.is_show_order,'') as isShowOrder,
+        IFNULL(ddo.order_status,'') as orderStatus,
+        IFNULL(ddo.order_generation_time,ddo.create_date)  as orderGenerationTime,
+        IFNULL(ddo.order_source,'') as orderSource,
+        IFNULL(ddo.create_date,null) as createDate,
+        IFNULL(ddo.modify_date,null) as modifyDate,
+        IFNULL(ddo.data_status,'') as dataStatus,
+        IFNULL(dbs.storefront_name,'') as storefrontName
+        from dj_deliver_order ddo left join  dj_basics_storefront dbs on ddo.storefont_id=dbs.id
+        where
+        ddo.house_id = #{houseId}
+        <if test="cityId!=null and cityId!=''">
+            and  ddo.city_id = #{cityId}
+        </if>
+        <if test="orderStatus!=null and orderStatus!=''">
+            and  ddo.order_status = #{orderStatus}
+        </if>
+    </select>
+    <!--发货详情-->
+    <!--订单快照-->
+    <!--订单列表（待收货、已经完成）发货单-->
+    <select id="querySplitDeliverByHouse" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">
+        select
+        IFNULL(ddsd.id,'') as id,
+        IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
+        IFNULL(ddsd.create_date,'') as createDate,-- 创建时间
+        IFNULL(ddsd.number,'') as number,-- 订单号
+        IFNULL(ddsd.shipping_state,'') as shippingState,-- 订单状态
+        IFNULL(ddsd.total_amount,'') as totalAmount,-- 总价格
+        '' as total-- 件数
+        from dj_deliver_split_deliver ddsd
+        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
+        where ddsd.house_id=#{houseId}
+        <if test="cityId!=null and cityId!=''">
+            and  ddsd.city_id = #{cityId}
+        </if>
+        <if test="orderStatus!=null and orderStatus!=''">
+            and  ddsd.shipping_state = #{orderStatus}
+        </if>
+    </select>
+
+    <!-- 查询订单首页 -->
+    <select id="queryOrderInfo" resultType="com.dangjia.acg.dto.order.DOrderInfoDTO">
+        SELECT
+        m.address houseName,
+        m.mobile AS mobile,
+        m.id AS memberId,
+        ss.*
+        FROM
+        (
+            SELECT
+                ddo.id AS id,
+                ddo.address_id,
+                ddo.house_id,
+                bs.storefront_name AS storefrontName,
+                IFNULL(ddo.total_amount, 0) AS totalAmount,
+                IFNULL(ddo.actual_payment_price, 0) AS actualPaymentPrice,
+                ddo.order_number AS orderNumber,
+                ddo.create_date AS createDate,
+                ddo.payment AS payment,
+                ddo.order_generation_time AS orderGenerationTime,
+                ddo.order_pay_time AS orderPayTime,
+                pbo.state AS state,
+                pbo.pay_order_number AS payOrderNumber,
+                pbo.type AS type,
+                pbo.id AS pboId,
+                pbo.image AS pboImage,
+                ddo.total_discount_price totalDiscountPrice,
+                ddo.cancellation_time AS cancellationTime,
+                pbo.red_packet_pay_money_id discountId
+            FROM
+                dj_deliver_order ddo,
+                dj_pay_business_order pbo,
+                dj_basics_storefront bs
+            WHERE
+             ddo.storefont_id = #{storefontId}
+            AND pbo.state = #{state}
+            AND ddo.business_order_number = pbo.number
+            AND bs.id = ddo.storefont_id
+            <if test="null != id  and '' != id">
+                and ddo.id = #{id}
+            </if>
+            ORDER BY
+            ddo.order_generation_time DESC
+        ) ss,
+        dj_member_address m
+        WHERE
+        (ss.address_id = m.id
+        OR ss.house_id = m.id)
+        <if test="null != orderKey and '' != orderKey">
+            and (
+            m.mobile like CONCAT('%',#{orderKey},'%')
+            or
+            m.address LIKE CONCAT('%',#{orderKey},'%')
+            or
+            ss.orderNumber LIKE CONCAT('%',#{orderKey},'%')
+            or
+            ss.payOrderNumber LIKE CONCAT('%',#{orderKey},'%')
+            )
+        </if>
+    </select>
+
+
+
+    <select id="queryOrderFineInfo" resultType="com.dangjia.acg.dto.order.DOrderFineInfoDTO">
+            select
+                bsp.image as image,
+                bpt.name as name,
+                bpt.product_sn as productSn,
+                doi.price as price,
+                doi.shop_count AS shopCount,
+                doi.ask_count as askCount,
+                doi.return_count as returnCount,
+                doi.stevedorage_cost stevedorageCost,
+                doi.transportation_cost transportationCost,
+                (doi.price*doi.shop_count) totalPrice,
+                (IFNULL(doi.shop_count,0) - IFNULL(doi.ask_count,0) - IFNULL(doi.return_count,0)) AS remnantCount,
+                (IFNULL(doi.shop_count,0) * IFNULL(doi.price,0)) AS remember
+            from
+                dj_deliver_order_item doi
+            INNER JOIN dj_basics_storefront_product bsp on doi.product_id = bsp.id
+            INNER JOIN dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
+            where doi.order_id = #{orderId}
+    </select>
+
+
+    <select id="selectOrderDetailById" resultType="com.dangjia.acg.dto.delivery.AppOrderDetailDTO">
+        select
+        ddo.house_id as houseId,-- 房子id
+        ddo.id as orderId,-- 订单编号
+        IFNULL(ddo.order_status,'') as orderStatus,
+        IFNULL(ddo.create_date,'') as createDate,
+        IFNULL(ddo.order_generation_time,ddo.create_date) as orderGenerationTime,-- 成交时间
+        IFNULL(ddo.total_amount,'') as totalAmount,-- 商品总额
+        IFNULL(ddo.total_transportation_cost,'') as totalTransportationCost,-- 运费
+        IFNULL(ddo.total_stevedorage_cost,'') as totalStevedorageCost,-- 搬运费
+        IFNULL(ddo.total_discount_price,'') as totalDiscountPrice,-- 优惠卷名称
+        ddo.order_pay_time as orderPayTime
+        from  dj_deliver_order ddo where ddo.id=#{orderId}
+    </select>
+
+    <select id="selectOrderItemDetailById" resultType="com.dangjia.acg.dto.delivery.AppOrderItemDetailDTO">
+        select
+        IFNULL(ddoi.product_id,'') as productId,
+        IFNULL(dbs.storefront_name,'') as storefrontName ,-- 店铺名称
+        IFNULL(ddoi.product_name,'') as productName,-- 商品名称
+        IFNULL(ddoi.shop_count,'') as shopCount,-- 购买数量
+        -- 规格
+        IFNULL(ddoi.price,'') as price ,-- 价格
+        IFNULL(dbs.mobile,'') as mobile,-- 电话
+        ddoi.image as image
+        from dj_deliver_order_item ddoi inner join dj_basics_storefront dbs
+        on ddoi.storefont_id=dbs.id  inner join dj_basics_product_template dbpt
+        on dbpt.id=ddoi.product_id  where ddoi.order_id=#{orderId} and ddoi.order_status=#{orderStatus}
+    </select>
+    <!--搬运费详情-->
+    <select id="queryStevedorage" resultType="com.dangjia.acg.dto.delivery.CostDetailDTO">
+        select
+        IFNULL(ddoi.image,'') as iamge,
+        IFNULL(ddoi.stevedorage_cost,'') as stevedorageCost,
+        IFNULL(dbs.storefront_name,'') as storefrontName  from dj_deliver_order_item  ddoi
+        inner join dj_basics_storefront dbs  on ddoi.storefont_id=dbs.id
+        where ddoi.order_id=#{orderId}
+    </select>
+    <!--运费详情-->
+    <select id="queryTransportationCost" resultType="com.dangjia.acg.dto.delivery.CostDetailDTO">
+        select
+        IFNULL(ddoi.image,'') as image,
+        IFNULL(ddoi.transportation_cost,'') as transportationCost,
+        IFNULL(dbs.storefront_name,'') as  storefrontName   from dj_deliver_order_item  ddoi
+        inner join dj_basics_storefront dbs  on ddoi.storefont_id=dbs.id
+        where ddoi.order_id=#{orderId}
+    </select>
+
+    <!--待发货店铺查询-->
+    <select id="queryDeliverOrderHump" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontIcon,
+            t1.create_date AS createDate,
+            t1.actual_payment_price AS actualPaymentPrice,
+            t1.total_amount totalAmount,
+            2 AS shippingType,
+            t4.storefront_type AS storefrontType,
+            t1.worker_type_id AS workerTypeId,
+            IF (
+                (
+                    SELECT
+                        count(1)
+                    FROM
+                        dj_deliver_order_item t2
+                    WHERE
+                        t2.is_reservation_deliver = '1'
+                    AND t1.id = t2.order_id
+                    AND (t2.reservation_deliver_time IS NULL OR t2.reservation_deliver_time='')
+                ) > 0,
+                '5',
+                '1004'
+            ) AS shippingState,
+            t1.order_source AS orderSource,
+            t1.store_activity_id AS storeActivityId,
+            t1.parent_order_id AS parentOrderId
+        FROM
+            dj_deliver_order t1
+        INNER JOIN dj_pay_business_order t3 ON t1.business_order_number = t3.number
+        INNER JOIN dj_basics_storefront t4 ON t1.storefont_id = t4.id
+        WHERE
+            t3.state = 3
+        AND t1.payment IS NOT NULL
+        <choose>
+            <when test="null!=memberId and ''!=memberId">
+                AND t1.member_id=#{memberId}
+            </when>
+            <otherwise>
+                AND t1.house_id=#{houseId}
+            </otherwise>
+        </choose>
+        AND t1.data_status=0
+        AND EXISTS (
+            SELECT
+                1
+            FROM
+                dj_deliver_order_item t2
+            WHERE
+                t1.id = t2.order_id
+            AND t2.shop_count > (
+                IFNULL(t2.ask_count, 0) + IFNULL(t2.return_count, 0)
+            )
+            AND t2.data_status = 0
+        )
+        ORDER BY t1.order_pay_time DESC
+    </select>
+
+    <select id="queryAppointmentHump" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
+        SELECT
+            t.id as orderItemId,
+            t.product_id productId,
+            t.id orderItemId,
+            t.storefont_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t2.price price,
+            t.order_id as orderId,
+            IFNULL(t.image,t1.image) image,
+            t.shop_count shopCount,
+            IFNULL(t.ask_count,0) askCount,
+            IFNULL(t.return_count,0) returnCount,
+            (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
+            t1.prod_template_id productTemplateId,
+            t.reservation_deliver_time as reservationDeliverTime,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr,
+            t.is_reservation_deliver as isReservationDeliver,
+            t.order_status as shippingType,
+            IF(t.is_reservation_deliver='1','5','1004') as  shippingState,
+            t.create_date as createDate,
+            t3.order_number orderNumber,
+            t2.unit_name as unitName,
+            CONCAT_WS("/",t2.price,t2.unit_name ) as priceUnitName
+        FROM
+            dj_deliver_order_item t,
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2,
+            dj_deliver_order t3
+        WHERE t.product_id =t1.id
+        AND t3.id = t.order_id
+        AND t1.prod_template_id=t2.id
+        AND t.order_id =  #{orderId}
+        AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
+        AND t.data_status = 0
+        ORDER BY t3.order_pay_time DESC
+    </select>
+
+    <select id="queryDeliverOrderObligation" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            '当家店铺' storefrontName,
+            t1.create_date as createDate,
+            t1.actual_payment_price as actualPaymentPrice,
+            t1.total_amount totalAmount,
+            <if test="state==2">
+                1 as shippingType,
+                '3,4' as shippingState
+            </if>
+            <if test="state==4">
+                5 as shippingType
+            </if>
+        FROM
+            dj_deliver_order t1,
+            dj_pay_business_order t2
+        WHERE
+            t1.business_order_number = t2.number
+            AND (t1.id = t1.parent_order_id or t1.parent_order_id is null)
+        <choose>
+            <when test="state==2">
+                AND t2.state in(1,2)
+            </when>
+            <otherwise>
+                AND t2.state=#{state}
+            </otherwise>
+        </choose>
+            AND t1.data_status=0
+          <choose>
+              <when test="null!=houseId and ''!=houseId">
+                  AND t1.house_id=#{houseId}
+              </when>
+              <otherwise>
+                  AND EXISTS (
+                      SELECT
+                        *
+                      FROM
+                        dj_member_address ma
+                      WHERE
+                        ma.member_id=#{memberId}
+                      AND (
+                          ma.id = t1.address_id
+                          OR ma.house_id = t1.house_id
+                      )
+                  )
+              </otherwise>
+          </choose>
+        ORDER BY t1.create_date DESC
+    </select>
+
+    <select id="queryDeliverOrderItemObligation" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
+        SELECT
+            t2.product_id productId,
+            t2.id orderItemId,
+            t2.storefont_id storefrontId,
+            t2.product_name productName,
+            t2.product_sn productSn,
+            t2.product_type productType,
+            t2.price price,
+            t2.order_id AS orderId,
+            IFNULL(t2.image, t3.image) image,
+            t2.shop_count shopCount,
+            IFNULL(t2.ask_count, 0) askCount,
+            IFNULL(t2.return_count, 0) returnCount,
+            (
+                t2.shop_count - (
+                    IFNULL(t2.ask_count, 0) + IFNULL(t2.return_count, 0)
+                )
+            ) surplusCount,
+            t3.prod_template_id productTemplateId,
+            t2.reservation_deliver_time AS reservationDeliverTime,
+            IFNULL(t2.total_price, 0) AS totalPrice,
+            t4.value_name_arr AS valueNameArr,
+            t4.value_id_arr AS valueIdArr,
+            t1.order_status as shippingType,
+            IF(t1.order_source='1','3','3,4') as shippingState,
+            t1.create_date as createDate,
+            t1.order_number orderNumber
+        FROM
+            dj_deliver_order t1,
+            dj_deliver_order_item t2,
+            dj_basics_storefront_product t3,
+            dj_basics_product_template t4
+        WHERE
+            t1.id = t2.order_id
+        AND t2.product_id = t3.id
+        AND t3.prod_template_id = t4.id
+        AND t1.parent_order_id = #{orderId}
+        AND t2.data_status=0
+        ORDER BY t1.create_date DESC
+    </select>
+
+
+    <select id="queryPaymentToBeMade" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontIcon,
+            t1.create_date AS createDate,
+            IFNULL(t1.actual_payment_price,0) AS actualPaymentPrice,
+            IFNULL(t1.total_amount,0) totalAmount,
+            t4.mobile,
+            IFNULL(t1.total_stevedorage_cost,0) as totalStevedorageCost,
+            IFNULL(t4.storefront_type,0) as storefrontType,
+            IFNULL(t1.total_transportation_cost,0) as totalTransportationCost
+        FROM
+            dj_deliver_order t1,
+            dj_basics_storefront t4
+        WHERE
+            (t1.parent_order_id = #{orderId} or t1.id=#{orderId})
+        AND t1.data_status=0
+        AND t1.storefont_id=t4.id
+    </select>
+
+    <select id="queryAppOrderList" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">
+        select
+        IFNULL(ddsd.id,'') as id,
+        IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
+        dbs.storefront_logo as StorefrontIcon,
+        dbs.storefront_type as storefrontType,
+        ddsd.house_id as houseId,
+        IFNULL(ddsd.create_date,'') as createDate,-- 创建时间
+        IFNULL(ddsd.number,'') as orderNumber,-- 订单号
+        IFNULL(ddsd.shipping_state,'') as shippingState,-- 订单状态
+        IFNULL(ddsd.total_amount,'') as totalAmount,-- 总价格
+        ddsd.city_id as cityId,
+        ddsd.order_split_id as orderSplitId
+        from dj_deliver_split_deliver ddsd
+        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND ddsd.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = ddsd.address_id
+                        OR ma.house_id = ddsd.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and ddsd.data_status = 0
+        <if test="cityId!=null and cityId!=''">
+            and  ddsd.city_id = #{cityId}
+        </if>
+        <if test="orderStatus!=null and orderStatus == 1">
+            and   (ddsd.shipping_state = 1 or ddsd.shipping_state = 7)
+        </if>
+        <if test="orderStatus!=null and orderStatus == 2">
+            and (ddsd.shipping_state = 8 or ddsd.shipping_state = 2 or ddsd.shipping_state = 5)
+        </if>
+        <if test="orderStatus!=null and orderStatus == 3">
+            and ddsd.shipping_state = 10
+        </if>
+        <if test="arr != null and arr != ''">
+            and ddsd.id in
+            <foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+
+    <select id="queryAppHairOrderList" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">
+        select  IFNULL(dos.id,'') as id,
+        IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
+        dbs.storefront_logo as StorefrontIcon,
+        dbs.storefront_type as storefrontType,
+        dos.house_id as houseId,
+        IFNULL(dos.create_date,'') as createDate,-- 创建时间
+        IFNULL(dos.number,'') as orderNumber,-- 订单号
+        IFNULL(dos.total_amount,'') as totalAmount,-- 总价格
+        dos.city_id as cityId,
+        dosi.order_split_id as orderSplitId,
+        dosi.image as image,
+        dosi.product_name as productName,
+        dosi.price as price,
+        dosi.num as num
+        from dj_deliver_order_split dos
+        LEFT JOIN dj_deliver_order_split_item dosi on dos.id = dosi.order_split_id
+        LEFT JOIN dj_deliver_split_deliver ddsd on dosi.split_deliver_id = ddsd.id
+        inner join dj_basics_storefront dbs on dbs.id=dosi.storefront_id
+        where 1=1
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND dos.house_id = #{houseId}
+            </when>
+            <otherwise>
+                AND EXISTS (
+                    SELECT
+                      *
+                    FROM
+                      dj_member_address ma
+                    WHERE
+                      ma.member_id=#{memberId}
+                    AND (
+                        ma.id = dos.address_id
+                        OR ma.house_id = dos.house_id
+                    )
+                )
+            </otherwise>
+        </choose>
+        and dos.data_status = 0 and dos.apply_status = 2
+        <if test="cityId!=null and cityId!=''">
+            and  dos.city_id = #{cityId}
+        </if>
+        and (
+         (dosi.split_deliver_id is null or dosi.split_deliver_id = '')
+         or
+         (dosi.split_deliver_id is not null and ddsd.shipping_state = 0)
+            )
+    </select>
+
+
+    <select id="queryAppHairOrderInFo" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">
+        select  IFNULL(dos.id,'') as id,
+        IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
+        dbs.storefront_logo as StorefrontIcon,
+        dbs.storefront_type as storefrontType,
+        dos.house_id as houseId,
+        IFNULL(dos.create_date,'') as createDate,-- 创建时间
+        IFNULL(dos.number,'') as orderNumber,-- 订单号
+        IFNULL(dos.total_amount,'') as totalAmount,-- 总价格
+        dos.city_id as cityId,
+        dosi.id as dosiId,
+        dosi.order_split_id as orderSplitId,
+        dosi.image as image,
+        dosi.num as num,
+        dosi.is_reservation_deliver as isReservationDeliver,
+        dosi.reservation_deliver_time as reservationDeliverTime,
+        dosi.product_name as productName,
+        dosi.price as price
+        from dj_deliver_order_split dos
+        LEFT JOIN dj_deliver_order_split_item dosi on dos.id = dosi.order_split_id
+        LEFT JOIN dj_deliver_split_deliver ddsd on dosi.split_deliver_id = ddsd.id
+        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
+        where dosi.order_split_id = #{id}
+    </select>
+
+    <select id="queryValueIdArr" resultType="java.lang.String">
+        select bpt.value_id_arr as valueIdArr
+        from dj_deliver_order_split_item dosi
+        INNER JOIN dj_basics_storefront_product bsp on dosi.product_id = bsp.id
+        INNER JOIN  dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
+        where dosi.id = #{id}
+    </select>
+
+    <select id="queryTypeArr" resultType="java.lang.Integer">
+        select e.type from
+        dj_deliver_order_split_item a
+        INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
+        INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
+        INNER JOIN dj_basics_unit e ON c.unit_id=e.id where a.id = #{id}
+    </select>
+
+    <select id="queryHumpDetail" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontIcon,
+            t4.storefront_type as storefrontType
+        FROM
+            dj_deliver_order t1,
+            dj_pay_business_order t3,
+            dj_basics_storefront t4
+        WHERE
+            t1.business_order_number = t3.number
+        AND t1.storefont_id = t4.id
+        AND t1.payment IS NOT NULL
+        AND t3.state = 3
+        AND t1.id = #{orderId}
+        AND t1.data_status=0
+        AND EXISTS (
+            SELECT
+                1
+            FROM
+                dj_deliver_order_item t2
+            WHERE
+                t1.id = t2.order_id
+            AND t2.shop_count > (
+                IFNULL(t2.ask_count, 0) + IFNULL(t2.return_count, 0)
+            )
+            AND t2.data_status = 0
+        )
+    </select>
+
+    <select id="queryOrderSnapshot" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontIcon,
+            t4.storefront_type as storefrontType
+        FROM
+            dj_deliver_order t1,
+            dj_basics_storefront t4
+        WHERE t1.storefont_id = t4.id
+        AND t1.id = #{orderId}
+        AND t1.data_status=0
+    </select>
+
+
+
+    <select id="queryOrderSnapshotHump" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
+        SELECT
+            t.product_id productId,
+            t.id orderItemId,
+            t.storefont_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            t.order_id as orderId,
+            IFNULL(t.image,t1.image) image,
+            t.shop_count shopCount,
+            IFNULL(t.ask_count,0) askCount,
+            IFNULL(t.return_count,0) returnCount,
+            (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
+            t1.prod_template_id productTemplateId,
+            t.reservation_deliver_time as reservationDeliverTime,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr,
+            t.is_reservation_deliver as isReservationDeliver
+        FROM
+            dj_deliver_order_item t,
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2
+        WHERE t.product_id =t1.id
+        AND t1.prod_template_id=t2.id
+        AND t.order_id =  #{orderId}
+        AND t.data_status = 0
+        ORDER BY t.create_date
+    </select>
+
+
+    <select id="querySales" resultType="java.lang.Integer">
+        select dg.sales from
+        dj_deliver_order_split_item dosi
+        INNER JOIN dj_basics_storefront_product bsp on dosi.product_id =  bsp.id
+        INNER JOIN dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods dg on bpt.goods_id = dg.id
+        where dosi.id = #{id}
+    </select>
+
+    <select id="queryWorkerGoods" resultType="com.dangjia.acg.dto.delivery.WorkerGoodsInFoDTO">
+        select
+            m.name,
+            m.id as workerId,
+            ddo.create_date as createDate,
+            doi.image as image,
+            doi.worker_goods_name as workerGoodsName,
+            doi.price as price,
+            ddo.order_status AS orderStatus,
+            doi.id as doiId,
+            ddo.order_number as orderNumber,
+            ddo.total_amount as totalAmount,
+            ddo.id as ddoId
+        from dj_deliver_order ddo
+        LEFT JOIN dj_deliver_order_item doi on ddo.id = doi.order_id
+        INNER JOIN dj_member m on ddo.worker_id = m.id
+        where ddo.data_status = 0
+        and ddo.product_type != 0
+        and ddo.order_status = #{orderStatus}
+        and ddo.house_id = #{houseId}
+    </select>
+
+    <select id="queryWorkerGoodsInFo" resultType="com.dangjia.acg.dto.delivery.WorkerGoodsInFoDTO">
+        select
+            m.name,
+            ddo.worker_id as workerId,
+            doi.create_date as createDate,
+            doi.image as image,
+            doi.worker_goods_name as workerGoodsName,
+            doi.price as price,
+            doi.order_status AS orderStatus,
+            doi.id as doiId,
+            ddo.order_number as orderNumber,
+            ddo.total_amount as totalAmount,
+            ddo.id as ddoId,
+            bsp.prod_template_id as productTemplateId,
+            ddo.house_id as houseId,
+            ddo.style_name as styleName,
+            doi.unit_name as unitName
+        from dj_deliver_order ddo
+        INNER JOIN dj_deliver_order_item doi on ddo.id = doi.order_id
+        INNER JOIN dj_basics_storefront_product bsp on bsp.id = doi.product_id
+        INNER JOIN dj_member m on ddo.worker_id = m.id
+        where doi.order_id = #{id}
+    </select>
+
+    <select id="queryArrNumber" resultType="java.lang.Integer">
+        select count(*) from
+            dj_basics_product_template t,
+            dj_basics_technology t1
+        where
+            FIND_IN_SET(t1.id,t.technology_ids)
+        and t.id = #{id}
+    </select>
+
+    <select id="queryTestNumber" resultType="java.lang.Integer">
+       select count(*) from
+            dj_basics_product_template t,
+            dj_basics_technology t1,
+            dj_matter_technology_record t2,
+            dj_core_house_flow_apply t3
+        where
+            FIND_IN_SET(t1.id,t.technology_ids)
+        and t2.technology_Id = t1.id
+        and t2.house_flow_apply_id = t3.id
+        and t3.worker_id = #{workerId}
+        and t2.house_id= #{houseId}
+        and t.id = #{id}
+        and t1.type in(2,3)
+    </select>
+
+    <select id="queryCostDetailsAfterCompletion" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+        SELECT
+            t3.product_name productName,
+            t2.create_date createDate,
+            (
+                IFNULL(
+                    t2.actual_payment_price,
+                    IFNULL(
+                        t2.total_price,
+                        t2.price * t2.shop_count
+                    )
+                ) + IFNULL(
+                    (
+                        SELECT
+                            price
+                        FROM
+                            dj_deliver_order_added_product tt
+                        WHERE
+                            tt.any_order_id = t2.id
+                    ),
+                    0
+                ) * t2.shop_count
+            ) actualPaymentPrice,
+        IF (
+            t1.worker_type_id IS NULL
+            OR t1.worker_type_id = '',
+            0,
+            t1.worker_type_id
+        ) workerTypeId
+        FROM
+            dj_deliver_order t1,
+            dj_deliver_order_item t2,
+            dj_basics_storefront_product t3,
+            dj_basics_product_template t4,
+            dj_basics_goods_category t5
+        WHERE
+            t1.id = t2.order_id
+        AND t2.product_id = t3.id
+        AND t3.prod_template_id = t4.id
+        AND t4.category_id = t5.id
+        AND t1.house_id = #{houseId}
+    </select>
+
+    <select id="selectDeliverOrderInfoById" resultType="java.util.Map">
+        SELECT
+           t.id orderId,
+           t.order_number orderNumber,
+           t.total_amount totalAmount,
+           t.actual_payment_price actualPaymentPrice,
+           t.total_stevedorage_cost totalStevedorageSost,
+           t.total_transportation_cost totalTransportationSost,
+           t.total_discount_price totalDiscountPrice,
+           IFNULL(t.order_generation_time,t.create_date) orderGenerationTime,
+           m.member_id memberId,
+           m.`name` memberName,
+           m.mobile memberMobile,
+           m.address address,
+           '' discountId
+        FROM
+            dj_deliver_order t
+        LEFT JOIN dj_member_address m ON (t.address_id=m.id or t.house_id=m.house_id)
+        where t.id=#{orderId}
+        limit 1
+
+    </select>
+</mapper>

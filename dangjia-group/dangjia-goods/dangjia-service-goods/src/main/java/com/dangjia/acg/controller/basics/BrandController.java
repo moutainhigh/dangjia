@@ -29,8 +29,8 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<Brand> selectBrandById(HttpServletRequest request, String brandId) {
-        return brandService.select(brandId);
+    public ServerResponse<Brand> selectBrandById(HttpServletRequest request, String brandId,String cityId) {
+        return brandService.select(brandId,cityId);
     }
 
     /**
@@ -42,8 +42,8 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> selectBrandByName(HttpServletRequest request, PageDTO pageDTO, String name) {
-        return brandService.getBrandByName(pageDTO, name);
+    public ServerResponse<PageInfo> selectBrandByName(HttpServletRequest request, PageDTO pageDTO, String name,String cityId) {
+        return brandService.getBrandByName(pageDTO, name,cityId);
     }
 
     /**
@@ -53,8 +53,8 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getAllBrand(HttpServletRequest request, PageDTO pageDTO) {
-        return brandService.getAllBrand(pageDTO);
+    public ServerResponse<PageInfo> getAllBrand(HttpServletRequest request, PageDTO pageDTO,String cityId) {
+        return brandService.getAllBrand(pageDTO,cityId);
 
     }
 
@@ -65,8 +65,8 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateBrand(HttpServletRequest request, String id, String name, String brandSeriesList) {
-        return brandService.update(id, name, brandSeriesList);
+    public ServerResponse updateBrand(HttpServletRequest request, String id, String name, String image,String brandSeriesList,String cityId) {
+        return brandService.update(id, name,image, brandSeriesList,cityId);
 
     }
 
@@ -77,8 +77,8 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertBrand(HttpServletRequest request, String brandSeriesList, String name) {
-        return brandService.insert(brandSeriesList, name);
+    public ServerResponse insertBrand(HttpServletRequest request, String brandSeriesList, String name,String image,String cityId) {
+        return brandService.insert(brandSeriesList, name,image,cityId);
 
     }
 

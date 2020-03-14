@@ -142,7 +142,7 @@ public class ClueService {
                 clueDTO.setClueId(c.getId());
                 clueDTO.setPhaseStatus(c.getPhaseStatus());
                 BeanUtils.beanToBean(c, clueDTO);
-                if (c.getLabelId() != null) {
+                if (!CommonUtil.isEmpty(c.getLabelId())) {
                     String[] split = c.getLabelId().split(",");
                     StringBuilder sb = new StringBuilder();
                     String ids[][] = new String[split.length][2];

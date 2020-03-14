@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.worker.IRewardPunishCorrelationMapper">
-    <resultMap id="findCorrelationPerms" type="com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO" >
-        <id column="id" property="id" />
+    <resultMap id="findCorrelationPerms" type="com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO">
+        <id column="id" property="id"/>
         <result column="create_date" property="createDate"/>
         <result column="modify_date" property="modifyDate"/>
         <result column="data_status" property="dataStatus"/>
@@ -13,7 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result column="type" property="type"/>
         <result column="state" property="state"/>
         <collection property="conditionList" ofType="com.dangjia.acg.modle.worker.RewardPunishCondition">
-            <id column="mid" property="id" />
+            <id column="mid" property="id"/>
             <result column="mreward_punish_correlation_id" property="rewardPunishCorrelationId"/>
             <result column="mname" property="name"/>
             <result column="mtype" property="type"/>
@@ -58,9 +58,70 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="name!=null and name!=''">
             AND r.name LIKE CONCAT('%',#{name},'%')
         </if>
-        <if test="state!=null">
-            AND r.state=#{state}
+        <if test="type!=null">
+            AND r.type=#{type}
         </if>
+    </select>
+
+    <select id="queryCorrelationList" resultType="java.util.Map">
+        SELECT
+        id,
+        NAME
+        FROM
+        dj_worker_reward_punish_correlation
+        WHERE 1=1
+        <if test="type!=null and type!=''">
+            and type = #{type}
+        </if>
+        order by create_date desc
+
+    </select>
+
+    <select id="queryCraftsmenList" resultType="com.dangjia.acg.dto.worker.CraftsmenListDTO">
+        select
+        IFNULL(chfa.worker_id,'') as workerId,
+        IFNULL(dm.head ,'')as head,
+        IFNULL(chfa.worker_type_id,'') as workerTypeId,
+        IFNULL(dm.name,'') as name,
+        IFNULL(dm.mobile,'') as mobile
+        From dj_core_house_flow_apply chfa inner join dj_member dm on dm.id=chfa.worker_id
+        where house_id=#{houseId} group by chfa.worker_id
+    </select>
+
+    <select id="queryPunishRecordList" resultType="com.dangjia.acg.dto.worker.RewardPunishRecordListDTO">
+
+        select
+        IFNULL(rpr.reward_punish_correlation_id,'') as id,
+        IFNULL(rpr.type,'') as type ,
+        IFNULL(dmr.worker_type_id,'') as workerTypeId,
+        IFNULL(rpr.create_date,'') as createDate,
+        IFNULL(dm.`name` ,'')as operatorName ,
+        IFNULL(rpr.images,'') as images
+        from
+        dj_worker_reward_punish_record rpr
+        inner join dj_member dm on rpr.operator_id=dm.id
+        inner join dj_member dmr on rpr.member_id=dmr.id
+        where rpr.house_id=#{houseId}
+
+    </select>
+
+    <select id="queryPunishRecordDetailList" resultType="com.dangjia.acg.dto.worker.RewardPunishRecordDetailDTO">
+        select
+        IFNULL(dm.name,'') as name,
+        IFNULL(dm.head,'') as head,
+        IFNULL(dm.worker_type_id,'') as workerTypeId,
+        IFNULL(dm.mobile,'') as mobile,
+        IFNULL(rpc.name,'') as punishName,
+        IFNULL(rpc.content,'') as content,
+        IFNULL(rpr.create_date,'') as createDate,
+        IFNULL(dmr.name,'') as operatorName,
+        IFNULL(rpr.images,'') as images
+        from
+        dj_worker_reward_punish_correlation   rpc inner join dj_worker_reward_punish_record rpr
+        on rpr.reward_punish_correlation_id=rpc.id inner join dj_member dm on dm.id=rpr.member_id
+        inner join dj_member dmr on rpr.operator_id=dmr.id
+        where rpr.reward_punish_correlation_id=#{id}
+
     </select>
 </mapper>
 

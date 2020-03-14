@@ -30,11 +30,9 @@ import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
-import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.util.LocationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -254,8 +252,8 @@ public class StewardService {
             houseFlowMapper.updateByPrimaryKeySelective(hf);
             House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家交底",
-                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_FINISHED, house.getHouseName(), workerType.getName()), "");
+            configMessageService.addConfigMessage(AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家交底",
+                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_FINISHED, house.getHouseName(), workerType.getName()), 3,null,null);
             return ServerResponse.createBySuccessMessage("交底成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -291,6 +289,8 @@ public class StewardService {
             }
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                     String.format(DjConstants.GJPageAddress.READPROJECTINFO, userToken, hf.getCityId(), "交底详情") + "&houseFlowId=" + houseFlowId;
+            //直接交底
+//            confirmProjectInfo(houseFlowId);
             return ServerResponse.createBySuccess("交底成功", url);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("扫码失败");

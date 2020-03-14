@@ -1,7 +1,7 @@
 package com.dangjia.acg.dto.actuary;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -13,7 +13,7 @@ import java.math.BigDecimal;
  */
 @Data
 @FieldNameConstants(prefix = "")
-public class BudgetStageCostDTO extends BaseEntity {
+public class BudgetStageCostDTO extends GoodsBaseEntity {
 
     @Desc(value = "房子ID")
     private String houseId;

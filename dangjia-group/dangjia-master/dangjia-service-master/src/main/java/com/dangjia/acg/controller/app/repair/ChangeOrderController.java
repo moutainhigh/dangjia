@@ -53,8 +53,8 @@ public class ChangeOrderController implements ChangeOrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse workerSubmit(String userToken,String houseId,Integer type,String contentA,String contentB,String workerTypeId){
-        return changeOrderService.workerSubmit(userToken,houseId,type,contentA,contentB,workerTypeId);
+    public ServerResponse workerSubmit(String userToken,String houseId,Integer type,String contentA,String contentB,String workerTypeId,String productArr){
+        return changeOrderService.workerSubmit(userToken,houseId,type,contentA,contentB,workerTypeId, productArr);
     }
 
     /**
@@ -63,7 +63,8 @@ public class ChangeOrderController implements ChangeOrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse checkHouseFlowApply(String userToken,String houseId,Integer type,String workerTypeId){
-        return changeOrderService.checkHouseFlowApply(userToken,houseId,type,workerTypeId);
+    public ServerResponse checkHouseFlowApply(String userToken,String houseId,Integer type,String workerTypeId,String productArr){
+        return changeOrderService.checkHouseFlowApply(userToken,houseId,type,workerTypeId,productArr);
     }
+
 }

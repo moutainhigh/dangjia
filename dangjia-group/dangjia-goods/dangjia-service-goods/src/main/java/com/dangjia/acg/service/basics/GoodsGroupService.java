@@ -11,7 +11,10 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.basics.*;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -35,7 +38,7 @@ public class GoodsGroupService {
     @Autowired
     private IGroupLinkMapper iGroupLinkMapper;
     @Autowired
-    private IProductMapper iProductMapper;
+    private IBasicsProductTemplateMapper iProductMapper;
     @Autowired
     private IGoodsMapper iGoodsMapper;
     @Autowired
@@ -58,9 +61,10 @@ public class GoodsGroupService {
             for (int i = 0; i < pidList.size(); i++) {//循环添加商品关系
                 JSONObject obj = pidList.getJSONObject(i);
                 GroupLink groupLink = new GroupLink();
+                groupLink.setCityId(goodsGroup.getCityId());
                 groupLink.setGroupId(goodsGroupId);//关联组id
                 groupLink.setGroupName(goodsGroup.getName());//关联组名称
-                Product product = iProductMapper.getById(obj.getString("productId"));//查询货品
+                DjBasicsProductTemplate product = iProductMapper.getById(obj.getString("productId"));//查询货品
                 if (product == null) {
                     continue;
                 }
@@ -86,7 +90,7 @@ public class GoodsGroupService {
     /*
      * 根据关联组id查询货品关联关系
      */
-    public ServerResponse getGoodsGroupById(String goodsGroupId) {
+    public ServerResponse getGoodsGroupById(String goodsGroupId,String cityId) {
         try {
             GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(goodsGroupId);
             if (goodsGroup == null) {
@@ -98,7 +102,7 @@ public class GoodsGroupService {
             gMap.put("state", goodsGroup.getState());
             gMap.put("createDate", goodsGroup.getCreateDate().getTime());
             gMap.put("modifyDate", goodsGroup.getModifyDate().getTime());
-            List<GroupLink> listGlink = iGoodsGroupMapper.queryGroupLinkByGid(goodsGroupId);
+            List<GroupLink> listGlink = iGoodsGroupMapper.queryGroupLinkByGid(goodsGroupId,cityId);
             List<Map<String, Object>> glList = new ArrayList<>();
             for (GroupLink groupLink : listGlink) {
                 Map<String, Object> obj = new HashMap<>();
@@ -126,10 +130,10 @@ public class GoodsGroupService {
      *
      * @return
      */
-    public ServerResponse<PageInfo> getAllList(PageDTO pageDTO, String name, Integer state) {
+    public ServerResponse<PageInfo> getAllList(PageDTO pageDTO, String name, Integer state,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            List<GoodsGroup> gList = iGoodsGroupMapper.getAllList(name, state);
+            List<GoodsGroup> gList = iGoodsGroupMapper.getAllList(name, state,cityId);
             List<Map<String, Object>> list = new ArrayList<>();
             for (GoodsGroup goodsGroup : gList) {
                 Map<String, Object> obj = new HashMap<>();
@@ -149,7 +153,7 @@ public class GoodsGroupService {
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
+            throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
         }
     }
 
@@ -162,18 +166,18 @@ public class GoodsGroupService {
      * @param name
      * @return
      */
-    public ServerResponse queryGoodsGroupListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name) {
+    public ServerResponse queryGoodsGroupListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name,String cityId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
             // 去除商品是 包工包料类型的 或者 是自购的
-            List<Goods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name, "0", "2");
+            List<BasicsGoods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name, "0", "2",cityId);
             List<Map<String, Object>> gMapList = new ArrayList<>();
-            for (Goods goods : goodsList) {
+            for (BasicsGoods goods : goodsList) {
                 List<Map<String, Object>> mapList = new ArrayList<>();
-                List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
-                for (Product p : productList) {
+                List<DjBasicsProductTemplate> productList = iProductMapper.queryByGoodsId(goods.getId());
+                for (DjBasicsProductTemplate p : productList) {
 //                    LOG.info("p :" + p);
                     if (p.getType() == 0)//去除禁用的
                         continue;
@@ -218,7 +222,7 @@ public class GoodsGroupService {
      * @param jsonStr
      * @return
      */
-    public ServerResponse addGoodsGroup(String jsonStr) {
+    public ServerResponse addGoodsGroup(String jsonStr,String cityId) {
         try {
 //            LOG.info("jsonStr :" + jsonStr);
             JSONObject jsonObject = JSONObject.parseObject(jsonStr);
@@ -233,9 +237,10 @@ public class GoodsGroupService {
             GoodsGroup goodsGroup = null;  //数据库里存在的 父标签对象
             if (!StringUtils.isNotBlank(groupId))//没有id则新增
             {
-                if (iGoodsGroupMapper.selectByName(groupName).size() > 0)
+                if (iGoodsGroupMapper.selectByName(groupName,cityId).size() > 0)
                     return ServerResponse.createByErrorMessage("该关联组已存在");
                 goodsGroup = new GoodsGroup();
+                goodsGroup.setCityId(cityId);
                 goodsGroup.setName(groupName);
                 goodsGroup.setState(groupState);
                 //初始化 所有可切换的 关联组id
@@ -244,10 +249,11 @@ public class GoodsGroupService {
 //                iGoodsGroupMapper.addGoodsGroup(goodsGroup);
             } else {//修改
                 goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(groupId);
+                goodsGroup.setCityId(cityId);
                 if (goodsGroup == null)
                     return ServerResponse.createByErrorMessage("该关联组不存在");
 
-                List<GoodsGroup> goodsGroups = iGoodsGroupMapper.selectByName(groupName);//要修改的name
+                List<GoodsGroup> goodsGroups = iGoodsGroupMapper.selectByName(groupName,cityId);//要修改的name
                 if (goodsGroups.size() > 1)
                     return ServerResponse.createByErrorMessage("不能修改，该关联组已存在");
                 goodsGroup.setName(groupName);
@@ -265,7 +271,7 @@ public class GoodsGroupService {
             if (StringUtils.isNotBlank(addProductIds)) {
                 addProductIdsArr = addProductIds.split(",");
                 for (String productId : addProductIdsArr) {
-                    Product product = iProductMapper.selectByPrimaryKey(productId);//根据商品id查询商品对象
+                    DjBasicsProductTemplate product = iProductMapper.selectByPrimaryKey(productId);//根据商品id查询商品对象
                     if (product == null)
                         return ServerResponse.createByErrorMessage("该货品不存在");
                     GroupLink groupLink = new GroupLink();
@@ -275,6 +281,7 @@ public class GoodsGroupService {
                     groupLink.setProductName(product.getName());//货品名称
                     groupLink.setGoodsId(product.getGoodsId());
                     groupLink.setIsSwitch(1);//默认不可切换
+                    groupLink.setCityId(cityId);
                     groupLink.setGoodsName(iGoodsMapper.selectByPrimaryKey(product.getGoodsId()) == null ? "" : iGoodsMapper.selectByPrimaryKey(product.getGoodsId()).getName());
                     iGroupLinkMapper.addGroupLink(groupLink);//新增关联组货品关系
 //                    iGoodsGroupMapper.insertSelective(groupLink);//新增关联组货品关系
@@ -289,7 +296,7 @@ public class GoodsGroupService {
             if (StringUtils.isNotBlank(deleteProductIds)) {
                 deleteProductIdArr = jsonObject.getString("deleteProductIds").split(",");
                 for (String aDeleteProductIdArr : deleteProductIdArr) {
-                    GroupLink deleteGL = iGroupLinkMapper.queryGroupLinkByGroupIdAndPid(goodsGroup.getId(), aDeleteProductIdArr);
+                    GroupLink deleteGL = iGroupLinkMapper.queryGroupLinkByGroupIdAndPid(goodsGroup.getId(), aDeleteProductIdArr,cityId);
                     iGroupLinkMapper.deleteGroupLinkById(deleteGL.getId());
                     isUpdateProduct = true;
                 }
@@ -303,7 +310,7 @@ public class GoodsGroupService {
                 //设置最新的关联组中所有 product 是否切换
                 String strNewSwitchArr = setSwitchArrByGoodsGroup(goodsGroup);
 //                LOG.info("strNewSwitchArr:" + strNewSwitchArr);
-                setSwitchByGoodsGroups(strNewSwitchArr);
+                setSwitchByGoodsGroups(strNewSwitchArr,cityId);
             }
 
             //如果有老的可切换的关联组 ，并且当前组成员 有改动，就要重新计算更新 老关联组的成员 是否可以切换
@@ -320,7 +327,7 @@ public class GoodsGroupService {
                     String strOldSwitchArr = setSwitchArrByGoodsGroup(oldGoodsGroup);
 //                    LOG.info("strOldSwitchArr:" + strOldSwitchArr);
                     //找出 老的 可切换的所有关联组
-                    setSwitchByGoodsGroups(strOldSwitchArr);
+                    setSwitchByGoodsGroups(strOldSwitchArr,cityId);
                 }
             }
 
@@ -337,7 +344,7 @@ public class GoodsGroupService {
      *
      * @param switchArrGroupId
      */
-    private void setSwitchByGoodsGroups(String switchArrGroupId) {
+    private void setSwitchByGoodsGroups(String switchArrGroupId,String cityId) {
         try {
             if (StringUtils.isNotBlank(switchArrGroupId)) {
                 String[] groupIdArr = switchArrGroupId.split(",");
@@ -352,7 +359,7 @@ public class GoodsGroupService {
                 List<GroupLink> groupLinkLists = new ArrayList<>();
 
                 for (String groupId : groupIdArr) {
-                    List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByGid(groupId);
+                    List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByGid(groupId,cityId);
                     for (GroupLink groupLink : groupLinkList) {
                         groupLinkLists.add(groupLink);
                         productIdLists.add(groupLink.getProductId());
@@ -397,7 +404,7 @@ public class GoodsGroupService {
      * @return
      */
     private String setSwitchArrByGoodsGroup(GoodsGroup goodsGroup) {
-        List<GroupLink> nowGroupLinkList = iGoodsGroupMapper.queryGroupLinkByGid(goodsGroup.getId());
+        List<GroupLink> nowGroupLinkList = iGoodsGroupMapper.queryGroupLinkByGid(goodsGroup.getId(),goodsGroup.getCityId());
         List<String> goodsIdSameByGroupList = new ArrayList<>();//存放 goods 完全一样的关联组
 
         List<String> nowGoodsIdList = new ArrayList<>();//存放 goods 完全一样的关联组
@@ -406,11 +413,11 @@ public class GoodsGroupService {
 
         //从所有组里中找 gooods 个数相同的 关联组
         //遍历 所有组里面的goods 如果是完全相同，就可以切换
-        List<GoodsGroup> srcGoodsGroups = iGoodsGroupMapper.getAllList(null, 1);//查所有关联组
+        List<GoodsGroup> srcGoodsGroups = iGoodsGroupMapper.getAllList(null, 1,goodsGroup.getCityId());//查所有关联组
         for (GoodsGroup srcGl : srcGoodsGroups) {
 //            if (srcGl.getId().equals(goodsGroup.getId()))
 //                continue;//如果是当前自己就不添加了
-            List<GroupLink> srcGroupLinkList = iGoodsGroupMapper.queryGroupLinkByGid(srcGl.getId());
+            List<GroupLink> srcGroupLinkList = iGoodsGroupMapper.queryGroupLinkByGid(srcGl.getId(),goodsGroup.getCityId());
             //数据库元数据 和 正在操作的 关联组 的 商品数量相同
             if (srcGroupLinkList.size() == nowGroupLinkList.size()) {
                 boolean isSwitch = true; //默认可以切换
@@ -464,9 +471,9 @@ public class GoodsGroupService {
     /*
      * 查找所有顶级分类列表
      */
-    public ServerResponse getGoodsCategoryList() {
+    public ServerResponse getGoodsCategoryList(String cityId) {
         try {
-            List<Map<String, Object>> goodsCategoryList = iGoodsGroupMapper.getParentTopList();
+            List<Map<String, Object>> goodsCategoryList = iGoodsGroupMapper.getParentTopList(cityId);
             return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
         } catch (Exception e) {
             e.printStackTrace();

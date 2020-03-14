@@ -9,6 +9,9 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/2 0002
@@ -18,6 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "房产接口", description = "房产接口")
 public interface HouseAPI {
 
+
+    @PostMapping("app/house/house/selectHouseById")
+    @ApiOperation(value = "根据主键id查询房子", notes = "根据主键id查询房子")
+    House selectHouseById(@RequestParam("id") String id);
     /**
      * 切换房产
      */
@@ -30,8 +37,6 @@ public interface HouseAPI {
     /**
      * showdoc
      *
-     * @param pageNum   必选 int 页码
-     * @param pageSize  必选 int 记录数
      * @param userToken 必选 string userToken
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
      * @catalog 当家接口文档/房产任务模块
@@ -63,23 +68,77 @@ public interface HouseAPI {
     ServerResponse queryMyHouse(@RequestParam("userToken") String userToken);
 
     /**
-     * @param houseType 装修的房子类型0：新房；1：老房
-     * @param drawings  有无图纸0：无图纸；1：有图纸
+     * 我要装修，APP开始装修
+     * @param userToken 用户token
+     * @param cityId 城市ID
+     * @param houseType 房屋ID
+     * @param latitude 纬度
+     * @param longitude 经度
+     * @param address 地址
+     * @param name 地址名称
+     * @param square 面积
+     * @param actuarialDesignAttr 设计精算列表 商品列表(
+     * id	String	设计精算模板ID
+     * configName	String	设计精算名称
+     * configType	String	配置类型1：设计阶段 2：精算阶段
+     * productList	List	商品列表
+     * productList.productId	String	商品ID
+     * productList.productName	String	商品名称
+     * productList.productSn	String	商品编码
+     * productList.goodsId	String	货品ID
+     * productList.storefrontId	String	店铺ID
+     * productList.price	double	商品价格
+     * productList.unit	String	商品单位
+     * productList.unitName	String	单位名称
+     * productList.image	String	图片
+     * productList.imageUrl	String	详情图片地址
+     * productList.valueIdArr	String	商品规格ID
+     * productList.valueNameArr	String	商品规格名称
+     * @return
      */
     @PostMapping("app/house/house/setStartHouse")
     @ApiOperation(value = "app开始装修", notes = "app开始装修")
     ServerResponse setStartHouse(@RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
-                                 @RequestParam("houseType") Integer houseType,
-                                 @RequestParam("drawings") Integer drawings,
+                                 @RequestParam("houseType") String houseType,
                                  @RequestParam("latitude") String latitude,
                                  @RequestParam("longitude") String longitude,
                                  @RequestParam("address") String address,
-                                 @RequestParam("name") String name);
+                                 @RequestParam("name") String name,
+                                 @RequestParam("square") BigDecimal square,
+                                 @RequestParam("actuarialDesignAttr") String actuarialDesignAttr);
+
+    /**
+     * 我要装修，APP开始装修(申请房子装修新）
+     * @param userToken 用户token
+     * @param cityId 城市ID
+     * @param houseType 房屋类型
+     * @param addressId 地址ID
+     * @param activityRedPackId 优惠券ID
+     * @param actuarialDesignAttr 设计精算列表 商品列表(
+     * id	String	设计精算模板ID
+     * configName	String	设计精算名称
+     * configType	String	配置类型1：设计阶段 2：精算阶段
+     * productList	List	商品列表
+     * productList.productId	String	商品ID
+     * @return
+     */
+    @PostMapping("app/house/house/applicationDecorationHouse")
+    @ApiOperation(value = "app开始装修", notes = "app开始装修")
+    ServerResponse applicationDecorationHouse(@RequestParam("userToken") String userToken,
+                                 @RequestParam("cityId") String cityId,
+                                 @RequestParam("houseType") String houseType,
+                                 @RequestParam("addressId") String addressId,
+                                 @RequestParam("activityRedPackId") String activityRedPackId,
+                                 @RequestParam("actuarialDesignAttr") String actuarialDesignAttr);
 
     @PostMapping("app/house/house/revokeHouse")
     @ApiOperation(value = "撤销房子装修", notes = "撤销房子装修")
     ServerResponse revokeHouse(@RequestParam("userToken") String userToken);
+
+    @PostMapping("app/house/house/searchBudgetInfoList")
+    @ApiOperation(value = "我要装修--已提交商品详情展示", notes = "已提交商品详情展示")
+    ServerResponse searchBudgetInfoList(@RequestParam("userToken") String userToken);
 
     /**
      * 修改房子精算状态
@@ -110,8 +169,6 @@ public interface HouseAPI {
     /**
      * showdoc
      *
-     * @param pageNum    必选 int 页码
-     * @param pageSize   必选 int 记录数
      * @param houseId    必选 string 房子ID
      * @param day        可选 string 时间
      * @param workerType 可选 string 工种类型
@@ -200,7 +257,8 @@ public interface HouseAPI {
     @ApiOperation(value = "APP修改精算状态", notes = "APP修改精算状态")
     ServerResponse setHouseBudgetOk(@RequestParam("userToken") String userToken,
                                     @RequestParam("houseId") String houseId,
-                                    @RequestParam("budgetOk") Integer budgetOk);
+                                    @RequestParam("budgetOk") Integer budgetOk,
+                                    @RequestParam("taskId") String taskId);
 
     @PostMapping("app/house/house/getHouseById")
     @ApiOperation(value = "根据id查询房子信息", notes = "根据id查询房子信息")
@@ -208,10 +266,11 @@ public interface HouseAPI {
 
     @PostMapping("app/house/house/getReferenceBudget")
     @ApiOperation(value = "参考报价", notes = "参考报价")
-    ServerResponse getReferenceBudget(@RequestParam("cityId") String cityId,
+    ServerResponse getReferenceBudget(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("cityId") String cityId,
                                       @RequestParam("villageId") String villageId,
                                       @RequestParam("square") Double square,
-                                      @RequestParam("houseType") Integer houseType);
+                                      @RequestParam("houseType") String houseType);
 
 
     @PostMapping("app/house/house/updateByHouseId")
@@ -238,4 +297,69 @@ public interface HouseAPI {
     ServerResponse getHouseChoiceCases(@RequestParam("id") String id);
 
 
+    /**
+     * 获取验收动态
+     *
+     * @param houseId
+     * @return
+     */
+    @PostMapping("app/house/house/queryAcceptanceDynamic")
+    @ApiOperation(value = "获取验收动态", notes = "获取验收动态")
+    ServerResponse queryAcceptanceDynamic(@RequestParam("pageDTO") PageDTO pageDTO,
+                                          @RequestParam("houseId") String houseId);
+
+    /**
+     * 查询申请投诉中
+     *
+     * @param houseFlowApplyId
+     * @return
+     */
+    @PostMapping("app/house/house/queryApplyComplaints")
+    @ApiOperation(value = "查询申请投诉", notes = "查询申请投诉")
+    ServerResponse queryApplyComplaints(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
+    /**
+     * 业主提醒大管家验收
+     *
+     * @param houseFlowApplyId
+     * @return
+     */
+    @PostMapping("app/house/house/setRemindButlerCheck")
+    @ApiOperation(value = "业主提醒大管家验收", notes = "业主提醒大管家验收")
+    ServerResponse setRemindButlerCheck(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
+    /**
+     * 大管家发起验收(主动验收)
+     *
+     * @param houseFlowId
+     * @return
+     */
+    @PostMapping("app/house/house/setHousekeeperInitiatedAcceptance")
+    @ApiOperation(value = "管家发起验收(主动验收)", notes = "管家发起验收(主动验收)")
+    ServerResponse setHousekeeperInitiatedAcceptance(@RequestParam("houseFlowId") String houseFlowId,
+                                                     @RequestParam("productId") String productId,
+                                                     @RequestParam("supervisorCheck") Integer supervisorCheck,
+                                                     @RequestParam("image") String image,
+                                                     @RequestParam("applyDec") String applyDec);
+//
+//    /**
+//     * 大管通过-业主(主动验收)
+//     *
+//     * @param houseFlowApplyId
+//     * @return
+//     */
+//    @PostMapping("app/house/house/queryActiveAcceptance")
+//    @ApiOperation(value = "大管通过-业主(主动验收)", notes = "大管通过-业主(主动验收)")
+//    ServerResponse queryActiveAcceptance(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
+    /**
+     * 业主通过(主动验收)
+     *
+     * @param houseFlowApplyId
+     * @return
+     */
+    @PostMapping("app/house/house/setOwnerBy")
+    @ApiOperation(value = "业主通过(主动验收)", notes = "业主通过(主动验收)")
+    ServerResponse setOwnerBy(@RequestParam("houseFlowApplyId") String houseFlowApplyId,
+                              @RequestParam("memberCheck") Integer memberCheck);
 }

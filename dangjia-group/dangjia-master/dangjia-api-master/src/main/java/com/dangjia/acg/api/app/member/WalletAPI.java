@@ -125,12 +125,13 @@ public interface WalletAPI {
                                     @RequestParam("workerDetailId") String workerDetailId);
 
     /**
-     * 支出 收入
+     * 资产流水
      */
     @PostMapping("app/member/wallet/workerDetail")
-    @ApiOperation(value = "支出 收入", notes = "支出 收入")
+    @ApiOperation(value = "资产流水", notes = "资产流水")
     ServerResponse workerDetail(@RequestParam("userToken") String userToken,
-                                @RequestParam("type") Integer type,
+                                @RequestParam("time") String time, @RequestParam("timeMark") String timeMark,
+                                @RequestParam("type") Integer type,@RequestParam("state") Integer state,
                                 @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
@@ -139,4 +140,12 @@ public interface WalletAPI {
     @PostMapping("app/member/wallet/walletInformation")
     @ApiOperation(value = "钱包信息, 查询余额", notes = "钱包信息, 查询余额")
     ServerResponse walletInformation(@RequestParam("userToken") String userToken);
+
+
+    /**
+     * 指定某年的收入趋势
+     */
+    @PostMapping("app/member/wallet/getIncomeTrend")
+    @ApiOperation(value = "指定某年的收入趋势", notes = "指定某年的收入趋势")
+    ServerResponse getIncomeTrend(@RequestParam("userToken") String userToken,@RequestParam("time") String time);
 }

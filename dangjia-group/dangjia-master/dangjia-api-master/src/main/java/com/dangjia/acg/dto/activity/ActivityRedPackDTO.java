@@ -1,10 +1,13 @@
 package com.dangjia.acg.dto.activity;
 
 
+import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.persistence.Column;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -31,8 +34,8 @@ public class ActivityRedPackDTO{
 	@ApiModelProperty("来源数据name")
 	private String fromObjectName;//workertypeid
 
-	@ApiModelProperty("来源数据类型 0为人工 1为材料 2为单品")
-	private int fromObjectType;//
+	@ApiModelProperty("来源数据类型 0为人工 1为材料 2为单品,3类别，4货品，5商品，6城市，7店铺")
+	private Integer fromObjectType;//
 
 
 	@ApiModelProperty("有效开始时间")
@@ -50,6 +53,8 @@ public class ActivityRedPackDTO{
 	@ApiModelProperty("优惠券剩余总数量")
 	private int surplusNums ;//
 
+	@ApiModelProperty("优惠卷类型：1城市券，2店铺券")
+	private Integer sourceType;//
 
 	@ApiModelProperty("单人领取次数 默认1")
 	private int receiveCount;
@@ -63,8 +68,17 @@ public class ActivityRedPackDTO{
 	@ApiModelProperty("备注说明适用范围")
 	private String remake;//
 
+	private BigDecimal money;//优惠卷面值
+
+	@ApiModelProperty("满足使用条件的金额数")
+	private BigDecimal satisfyMoney;//
+
 	@ApiModelProperty("状态，0正常，1停用")
 	private int deleteState;//deletestate
+
+	private String status;//优惠卷状态：1发行中，2暂停发放，3已过期，4发送完毕
+
+	private String statusNme;//状态名称
 
 	@ApiModelProperty("优惠券拆分包")
 	private List<ActivityRedPackRule> redPackRule;

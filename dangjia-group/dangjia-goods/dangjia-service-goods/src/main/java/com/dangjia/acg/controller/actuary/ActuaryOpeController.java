@@ -49,6 +49,7 @@ public class ActuaryOpeController implements ActuaryOpeAPI {
     public List<BudgetItemDTO> getHouseWorkerInfo( String cityId,String deleteState, String houseId, String address){
         return actuaryOpeService.getHouseWorkerInfo(houseId,deleteState, address);
     }
+
     @Override
     public Double getHouseWorkerPrice(String cityId,String deleteState,String houseId){
         return actuaryOpeService.getHouseWorkerPrice(houseId,deleteState);

@@ -1,6 +1,5 @@
 package com.dangjia.acg.util;
 
-import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.core.ButtonListBean;
 
@@ -31,18 +30,31 @@ public class Utils {
     public static ButtonListBean getButton(String name, int type) {
         return getButton(name, null, type);
     }
-
+    /**
+     * 获取按钮对象
+     *
+     * @param name 按钮名称
+     * @param paramVal  跳转的URL
+     * @param type 按钮类型
+     * @return 按钮对象
+     */
+    public static ButtonListBean getButton(String name, String paramVal, int type) {
+        ButtonListBean buttonListBean = new ButtonListBean();
+        buttonListBean.setButtonType(type);
+        buttonListBean.setParamVal(paramVal);
+        buttonListBean.setButtonTypeName(name);
+        return buttonListBean;
+    }
     /**
      * 获取按钮对象
      *
      * @param name 按钮名称
      * @param url  跳转的URL
-     * @param type 按钮类型
      * @return 按钮对象
      */
-    public static ButtonListBean getButton(String name, String url, int type) {
+    public static ButtonListBean getButton(String name, String url) {
         ButtonListBean buttonListBean = new ButtonListBean();
-        buttonListBean.setButtonType(type);
+        buttonListBean.setButtonType(1000);
         buttonListBean.setUrl(url);
         buttonListBean.setButtonTypeName(name);
         return buttonListBean;
@@ -80,9 +92,9 @@ public class Utils {
     }
 
 
-    public static String getCustomerDetails(String memberId, String clueId, Integer phaseStatus, String stage, String listType, String storeId) {
+    public static String getCustomerDetails(String memberId, String clueId, Integer phaseStatus, String stage , String listType ,String storeId) {
         return String.format("customerDetails?title=客户详情&memberId=%s&clueId=%s&phaseStatus=%s&stage=%s&listType=%s&storeId=%s",
-                memberId, clueId, phaseStatus + "", stage, listType, storeId);
+                memberId, clueId, phaseStatus + "", stage , listType ,storeId);
     }
 
     /**
@@ -94,23 +106,6 @@ public class Utils {
         String[] heads = {"qrcode/img_tx01.png", "qrcode/img_tx02.png", "qrcode/img_tx03.png", "qrcode/img_tx04.png", "qrcode/img_tx05.png"};
         Random r = new Random();
         return heads[r.nextInt(heads.length)];
-    }
-
-    public static String md5(String string) {
-        byte[] hash;
-        try {
-            hash = MessageDigest.getInstance("MD5").digest(string.getBytes("UTF-8"));
-        } catch (NoSuchAlgorithmException e) {
-            return string;
-        } catch (UnsupportedEncodingException e) {
-            return string;
-        }
-        StringBuilder hex = new StringBuilder(hash.length * 2);
-        for (byte b : hash) {
-            if ((b & 0xFF) < 0x10) hex.append("0");
-            hex.append(Integer.toHexString(b & 0xFF));
-        }
-        return hex.toString();
     }
 
 

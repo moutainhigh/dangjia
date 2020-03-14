@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.repair;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -16,7 +17,7 @@ public class MendOrderDTO {
     private String mendOrderId;
     private String number; //订单号
     private String orderName;//描述
-    private Date createDate;
+    private Date createDate;//申请时间
     private String houseId;
     private String address;//收货地址
     private String memberId;//业主id
@@ -35,4 +36,10 @@ public class MendOrderDTO {
     private Integer type;
     private Integer state; //0生成中,1处理中,2不通过取消,3已通过,4已结算
     private Double totalAmount; //订单总额
+
+    @Transient
+    private String deliverNumber;//退货单号
+    @Transient
+    private String supplierName;//供应商名称
+
 }

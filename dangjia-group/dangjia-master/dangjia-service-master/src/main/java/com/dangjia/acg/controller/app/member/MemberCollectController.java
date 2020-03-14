@@ -4,7 +4,6 @@ import com.dangjia.acg.api.app.member.MemberCollectAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.member.MemberCollect;
 import com.dangjia.acg.service.member.MemberCollectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,26 +22,38 @@ public class MemberCollectController implements MemberCollectAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryCollectHouse(HttpServletRequest request, String userToken, PageDTO pageDTO){
+    public ServerResponse queryCollectHouse(HttpServletRequest request, String userToken, PageDTO pageDTO) {
         return memberCollectService.queryCollectHouse(request, userToken, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addMemberCollect(HttpServletRequest request,String houseId){
-        return memberCollectService.addMemberCollect(request, houseId);
+    public ServerResponse queryCollectGood(HttpServletRequest request, String userToken, PageDTO pageDTO) {
+        return memberCollectService.queryCollectGood(userToken, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse isMemberCollect(HttpServletRequest request,String houseId){
-        return memberCollectService.isMemberCollect(request, houseId);
+    public ServerResponse addMemberCollect(HttpServletRequest request, String userToken, String collectId, String collectType) {
+        return memberCollectService.addMemberCollect(userToken, collectId, collectType);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse delMemberCollect(HttpServletRequest request,String houseId){
-        return memberCollectService.delMemberCollect(request, houseId);
+    public ServerResponse isMemberCollect(HttpServletRequest request, String userToken, String collectId, String collectType) {
+        return memberCollectService.isMemberCollect(userToken, collectId, collectType);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse delMemberCollect(HttpServletRequest request, String userToken, String collectId, String collectType) {
+        return memberCollectService.delMemberCollect(userToken, collectId, collectType);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryRelated(HttpServletRequest request, String userToken, String cityId) {
+        return memberCollectService.queryRelated(userToken, cityId);
     }
 }
 

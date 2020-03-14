@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.core.IMasterBasicsGoodsMapper">
+
+
+    <select id="queryGoodsByType" resultType="com.dangjia.acg.dto.product.BasicsGoodDTO">
+        SELECT
+             c.id goodsId,
+           c.name
+        FROM
+            dj_basics_goods c
+        WHERE
+            c.category_id=#{categoryId}
+        and c.city_id=#{cityId}
+        <if test="searchKey!=null and searchKey!=''">
+          and c.name like CONCAT('%',#{searchKey},'%')
+        </if>
+        <if test="sourceType==2">
+            AND EXISTS (
+            SELECT
+             1
+            FROM
+                dj_basics_storefront_product t,
+                dj_basics_product_template t1
+            WHERE
+                t.prod_template_id = t1.id
+            AND t.storefront_id = #{storefrontId}
+            and t1.goods_id=c.id
+            )
+        </if>
+
+    </select>
+</mapper>

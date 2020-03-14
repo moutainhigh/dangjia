@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.storefront.IStorefrontMapper">
+    <sql id="all_column">
+          `id`,
+          `user_id` AS userId,
+          `city_id` AS cityId,
+          `storefront_name` AS storefrontName,
+          `storefront_address` AS storefrontAddress,
+          `storefront_desc` AS storefrontDesc,
+          `storefront_logo` AS storefrontLogo,
+          `storekeeper_name` AS storekeeperName,
+          `mobile`,
+          `email`,
+          `create_date` AS createDate,
+          `modify_date` AS modifyDate,
+          `data_status` AS dataStatus
+    </sql>
+
+    <select id="selectStorefrontAll" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
+        SELECT
+            a.`id` AS shopId,
+            a.`user_id` AS userId,
+            a.`city_id` AS cityId,
+            a.`storefront_name` AS storefrontName,
+            a.`storefront_address` AS storefrontAddress,
+            a.`storefront_desc` AS storefrontDesc,
+            a.`storefront_logo` AS storefrontLogo,
+            a.`storekeeper_name` AS storekeeperName,
+            a.`mobile`,
+            a.`email`
+        FROM
+          dj_basics_storefront a
+        where a.city_id=#{cityId}
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            a.mobile LIKE CONCAT('%',#{searchKey},'%')
+            )
+          order by a.storefront_name
+        </if>
+    </select>
+
+    <select id="querySupplierApplicationShopList" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
+        SELECT
+            b.`id`,
+            b.`sup_id` AS supId,
+            a.`id` AS shopId,
+            a.`user_id` AS userId,
+            a.`city_id` AS cityId,
+            a.`storefront_name` AS storefrontName,
+            a.`storefront_address` AS storefrontAddress,
+            a.`storefront_desc` AS storefrontDesc,
+            a.`storefront_logo` AS storefrontLogo,
+            a.`storekeeper_name` AS storekeeperName,
+            a.`mobile`,
+            a.`email`,
+            a.`create_date` AS createDate,
+            a.`modify_date` AS modifyDate,
+            a.`data_status` AS dataStatus,
+            if(b.application_status is not null and b.application_status!="",b.application_status,-1) AS applicationStatus,
+            b.fail_reason AS failReason,
+            b.contract
+        FROM
+          dj_basics_storefront a
+        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
+        ON a.id = b.shop_id
+        where 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            a.mobile LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        <if test="applicationStatus=='-1'.toString()">
+            AND( application_status is null or application_status NOT IN(0, 1, 2))
+        </if>
+        <if test="null!=applicationStatus and ''!=applicationStatus and applicationStatus!='-1'.toString()">
+            and application_status=#{applicationStatus}
+        </if>
+        and a.`city_id`=#{cityId}
+        and exists (select 1 from dj_basics_storefront_product t where a.id=t.storefront_id and t.is_shelf_status=1)
+    </select>
+
+
+    <select id="queryLikeSingleStorefront" resultType="com.dangjia.acg.modle.storefront.Storefront">
+        select
+          <include refid="all_column"/>
+        from dj_basics_storefront
+        where 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            storefront_name LIKE CONCgouAT('%',#{searchKey},'%') or
+            mobile LIKE CONCAT('%',#{searchKey},'%') or
+            storekeeper_name LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
+
+
+    <select id="querySupplierSelectionSupply" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
+        SELECT
+            b.`id`,
+            b.`sup_id` AS supId,
+            a.`id` AS shopId,
+            a.`user_id` AS userId,
+            a.`city_id` AS cityId,
+            a.`storefront_name` AS storefrontName,
+            a.`storefront_address` AS storefrontAddress,
+            a.`storefront_desc` AS storefrontDesc,
+            a.`storefront_logo` AS storefrontLogo,
+            a.`storekeeper_name` AS storekeeperName,
+            a.`mobile`,
+            a.`email`,
+            a.`create_date` AS createDate,
+            a.`modify_date` AS modifyDate,
+            a.`data_status` AS dataStatus,
+            b.application_status  AS applicationStatus,
+            b.fail_reason AS failReason,
+            b.contract
+        FROM
+            dj_basics_storefront a
+        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId}) b
+        ON a.id = b.shop_id
+        where 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            a.mobile LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        and b.application_status=1
+        and b.contract is not null
+        and a.`city_id`=#{cityId}
+    </select>
+
+
+    <select id="queryStoreSupplierSettlement" resultType="com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO">
+        SELECT
+            a.shipAddress,
+            a.supplierId,
+            a.supMobile,
+            a.supName,
+            SUM(a.sent) sent,
+            SUM(a.wait) wait
+        FROM
+            (
+                (
+                    SELECT
+                        m.ship_address AS shipAddress,
+                        m.supplier_id AS supplierId,
+                        m.supplier_telephone AS supMobile,
+                        m.supplier_name AS supName,
+                        (
+                            SELECT
+                                COUNT(d.id)
+                            FROM
+                                dj_repair_mend_deliver d
+                            WHERE
+                                d.supplier_id = m.supplier_id
+                            AND d.apply_state = 1
+                        ) sent,
+                        (
+                            SELECT
+                                COUNT(d.id)
+                            FROM
+                                dj_repair_mend_deliver d
+                            WHERE
+                                d.supplier_id = m.supplier_id
+                            AND d.apply_state = 0
+                        ) wait
+                    FROM
+                        dj_repair_mend_deliver m
+                    WHERE
+                        m.data_status = 0
+                    AND m.apply_state IS NOT NULL
+                    AND m.apply_state != 3
+                    <if test="searchKey!=null and searchKey!=''">
+                        and (m.supplier_name like CONCAT('%',#{searchKey},'%'))
+                    </if>
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_sup_application sa
+                        WHERE
+                            sa.sup_id = m.supplier_id
+                        AND sa.shop_id = #{storefrontId}
+                        AND application_status = 1
+                    )
+                    GROUP BY
+                        m.supplier_id
+                )
+                UNION ALL
+                    (
+                        SELECT
+                            s.ship_address AS shipAddress,
+                            s.supplier_id AS supplierId,
+                            s.supplier_telephone AS supMobile,
+                            s.supplier_name AS supName,
+                            (
+                                SELECT
+                                    COUNT(d.id)
+                                FROM
+                                    dj_deliver_split_deliver d
+                                WHERE
+                                    d.supplier_id = s.supplier_id
+                                AND (
+                                    d.apply_state = 1
+                                    OR d.apply_state = 2
+                                )
+                            ) sent,
+                            (
+                                SELECT
+                                    COUNT(d.id)
+                                FROM
+                                    dj_deliver_split_deliver d
+                                WHERE
+                                    d.supplier_id = s.supplier_id
+                                AND d.apply_state = 0
+                            ) wait
+                        FROM
+                            dj_deliver_split_deliver s
+                        WHERE
+                            s.data_status = 0
+                        AND s.apply_state IS NOT NULL
+                        AND s.apply_state != 3
+                        <if test="searchKey!=null and searchKey!=''">
+                            and (s.supplier_name like CONCAT('%',#{searchKey},'%'))
+                        </if>
+                        AND EXISTS (
+                            SELECT
+                                1
+                            FROM
+                                dj_sup_application sa
+                            WHERE
+                                sa.sup_id = s.supplier_id
+                            AND sa.shop_id = #{storefrontId}
+                            AND application_status = 1
+                        )
+                        GROUP BY
+                            s.supplier_id
+                    )
+            ) a
+        GROUP BY
+            a.supplierId
+        ORDER BY
+            a.wait DESC
+    </select>
+
+    <select id="myWallet" resultType="java.lang.Double">
+        SELECT
+        IFNULL(sum(total_amount),0)
+        FROM
+        dj_deliver_split_deliver
+        WHERE
+        storefront_id =#{storefrontId}
+        AND shipping_state IN (1, 2, 4, 5, 7, 8)
+        <if test="null!=date">
+            AND TIMESTAMPDIFF(DAY,send_time,SYSDATE())>=7
+        </if>
+    </select>
+
+    <select id="selectStoreExpenseRecord" resultType="com.dangjia.acg.dto.storefront.StoreExpenseRecordDTO">
+        select a.*,m.address shipAddress from (
+            SELECT
+                ddo.id orderId,
+                ddo.house_id,
+                ddo.address_id,
+                ddo.total_stevedorage_cost totalStevedorageCost,
+                ddo.total_transportation_cost totalTransportationCost,
+                IFNULL(ddo.order_generation_time,ddo.create_date) AS orderGenerationTime,
+                ddo.order_number AS orderNumber,
+                sum(osi.price*IFNULL(IFNULL(osi.receive_count,osi.ask_count),0)+(IFNULL(osi.stevedorage_cost,0)/osi.shop_count)*IFNULL(IFNULL(osi.receive_count,osi.ask_count),0)+(IFNULL(osi.transportation_cost,0)/osi.shop_count)*IFNULL(IFNULL(osi.receive_count,osi.ask_count),0)) AS actualPaymentPrice,
+                IFNULL(ddo.actual_payment_price, 0) AS totalAmount
+            FROM
+                dj_deliver_order ddo,
+                dj_deliver_order_item osi
+            WHERE ddo.id=osi.order_id
+            AND ddo.storefont_id = #{storefrontId}
+            <if test="orderNumber!=null and orderNumber!=''">
+                and ddo.order_number LIKE CONCAT('%',#{orderNumber},'%')
+            </if>
+            <if test="orderId!=null and orderId!=''">
+                and ddo.id =#{orderId}
+            </if>
+            group by ddo.id
+            ORDER BY ddo.create_date desc) a,dj_member_address m
+         where a.address_id=m.id or a.house_id=m.house_id
+
+    </select>
+
+
+
+    <select id="storeExpenseRecordOrderDetail" resultType="com.dangjia.acg.dto.storefront.ExpenseRecordOrderDetailDTO">
+        SELECT
+            ddoi.order_id AS orderId,
+            ddoi.product_name AS productName,
+            ddoi.product_sn AS productSn,
+            ddoi.image,
+            ddoi.shop_count AS shopCount,
+            IFNULL(ddoi.ask_count, 0) AS askCount,
+            IFNULL(ddoi.ask_count, 0) AS num,
+            IFNULL(IFNULL(ddoi.receive_count, ddoi.ask_count), 0) AS receive,
+            IFNULL(ddoi.return_count, 0) AS returnCount,
+            IFNULL((select sum(t.return_count) from dj_deliver_order_split_item t where ddoi.id=t.order_item_id),0) returnRefundCount,
+            ddoi.price AS price,
+            IFNULL(p.move_cost,0) moveCost,
+            ddoi.price*ddoi.shop_count totalPrice,
+            ddoi.product_id AS productId,
+            ddoi.house_id AS houseId
+        FROM
+            dj_deliver_order_item ddoi,
+          dj_basics_storefront_product p
+        WHERE
+          ddoi.product_id=p.id
+            and ddoi.order_id = '720558991581165849924'
+    </select>
+
+    <select id="queryStoreOrderSplitItem" resultType="com.dangjia.acg.dto.storefront.StoreOrderSplitItemDTO">
+	        select
+			ddosi.id,-- 要货单号
+			IFNULL(ddosi.create_date,'') as createDate,-- 要货时间
+			IFNULL(ddosi.ask_count,'') as askCount,-- 要货数
+			IFNULL(ddosi.num,'') as num,-- 发货数
+			IFNULL(ddosi.receive,'') as receive,-- 收货数
+			IFNULL(ddosi.return_count,'') as returnCount-- 退货数
+			from dj_deliver_order_split_item ddosi
+        where 1=1
+        <if test="houseId!=null and houseId!=''">
+            and ddosi.house_id=#{houseId}
+        </if>
+        <if test="productId!=null and productId!=''">
+            and ddosi.product_id=#{productId}
+        </if>
+        <if test="storefrontId!=null and storefrontId!=''">
+            and ddosi.storefront_id=#{storefrontId}
+        </if>
+    </select>
+    <!--查看清单-->
+
+    <select id="queryStoreSplitDeliverDetail" resultType="com.dangjia.acg.dto.storefront.StoreSplitDeliverDTO">
+        select
+        CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) as shipAddress,
+        IFNULL(dm.name,'') as ownerName,
+        IFNULL(dm.mobile,'') as mobile,
+        IFNULL(ddsd.id,'') as id,
+        IFNULL(ddsd.send_time,'') as sendTime,
+        IFNULL(ddsd.rec_time,'') as recTime,
+        IFNULL(ds.name,'') as name ,
+        IFNULL(ddsd.supplier_telephone,'') as supplierTelephone,
+        IFNULL(ddsd.shipping_state,'') as shipplingState
+        from dj_deliver_split_deliver  ddsd
+        inner join dj_supplier ds on ddsd.supplier_id=ds.id
+        inner join dj_house dh  on  ddsd.house_id=dh.id
+        left  join dj_member dm on dh.member_id=dm.id
+        where  ddsd.order_split_id=#{orderSplitId}
+    </select>
+
+    <select id="queryStoreRevenueRecord" resultType="com.dangjia.acg.dto.storefront.StoreRevenueRecordDTO">
+        SELECT
+            t.create_date,
+            t.state,
+            t.money,
+            t.house_order_id anyOrderId,
+            t.id accountFlowRecordId
+        FROM
+          dj_account_flow_record t
+        WHERE
+          t.defined_account_id = #{storefrontId}
+        and state in(1,8,9)
+        <if test="orderNumber!=null and orderNumber!=''">
+            and (exists (select 1 from dj_repair_mend_deliver d where t.house_order_id=d.id and d.number like CONCAT('%',#{orderNumber},'%'))
+            or exists (select 1 from dj_receipt r where t.house_order_id=r.id and r.number like CONCAT('%',#{orderNumber},'%')))
+        </if>
+        order by create_date desc
+
+    </select>
+
+    <select id="storeAccountFlowRecordDTO" resultType="com.dangjia.acg.dto.supplier.AccountFlowRecordDTO">
+
+			SELECT
+            IFNULL(afr.state,'') as state,
+            IFNULL(afr.house_order_id,'') AS houseOrderId,
+            IFNULL(wwd.create_date,'') AS createDate,
+            IFNULL(afr.money,'') as money,
+            IFNULL(wwd.state,'') AS depositeState,
+            IFNULL(wwd.image,'') as image,
+            IFNULL(wwd.reason,'') as reason,
+            IFNULL(wwd.memo,'') as memo
+            FROM
+            dj_account_flow_record afr
+            INNER JOIN dj_worker_withdraw_deposit wwd ON afr.house_order_id = wwd.id
+            WHERE
+            afr.state = 1  -- 体现
+            AND afr.data_status = 0
+            AND afr.flow_type = 1 -- 店铺
+            AND afr.defined_account_id=#{storefrontId}
+            <if test="houseOrderId!=null and houseOrderId!=''">
+                AND afr.house_order_id=#{houseOrderId}
+            </if>
+    </select>
+
+    <select id="queryMendOrder" resultType="com.dangjia.acg.dto.storefront.StoreRepairMendOrderDTO">
+         select
+         IFNULL(drmo.id,'') as mid,-- 退货单号
+         IFNULL(drmo.create_date,'') as createDate,-- 退款时间
+         CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) as shipAddress,  -- 业主地址
+         IFNULL(dm.name ,'') as ownerName , -- 业主名称
+         IFNULL(dm.mobile,'') as mobile  -- 业主电话
+         from  dj_repair_mend_order  drmo
+         inner join dj_house dh on drmo.house_id=dh.id
+         left join dj_member dm on dh.member_id=dm.id
+         where drmo.storefront_id=#{storefrontId}
+         and drmo.id=#{mendOrderId}
+    </select>
+
+    <select id="queryMendOrderDetail" resultType="com.dangjia.acg.dto.storefront.StoreRepairMendOrderDetailDTO">
+        select
+            IFNULL(drmm.product_name,'') as productName,-- 商品名称
+            IFNULL(drmm.product_sn,'') as productSn, -- 商品编号
+            IFNULL(drmm.image,'') as image ,-- 图片
+            IFNULL(drmm.price,'') as price ,-- 单价
+            IFNULL(drmm.total_price,'') as totalPrice,-- 小计
+            IFNULL(drmm.shop_count,'') as shopCount,-- 申请退货数
+            IFNULL(drmm.actual_count,'') as actualCount-- 实际退货数
+        from dj_repair_mend_materiel drmm
+        where mend_order_id=#{mendOrderId}
+    </select>
+
+    <select id="setStorefrontSurplusMoney">
+     <![CDATA[
+        UPDATE dj_basics_storefront a
+        SET a.surplus_money = (
+        case when (a.total_account - IFNULL((select sum(fr.money) from dj_account_flow_record fr where fr.state in(0,2,4) and fr.defined_account_id=a.id and fr.create_date>ADDDATE(NOW(),-7)),0))<0 then 0
+        else (a.total_account - IFNULL((select sum(fr.money) from dj_account_flow_record fr where fr.state in(0,2,4) and fr.defined_account_id=a.id and fr.create_date>ADDDATE(NOW(),-7)),0)) end
+        ),
+        a.modify_date=now()
+        where a.city_id=#{cityId}
+     ]]>
+
+    </select>
+
+    <select id="selectCityList" resultType="java.lang.String">
+        select city_id from dj_basics_storefront group by city_id
+    </select>
+
+    <select id="selectShopStoreByTypeCityId" resultType="com.dangjia.acg.modle.storefront.Storefront">
+        select
+        <include refid="all_column"/>
+        from dj_basics_storefront
+        where city_id=#{cityId}
+        and storefront_type=#{storefrontType}
+    </select>
+</mapper>

@@ -51,20 +51,24 @@ public class EvaluateController implements EvaluateAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse checkOk(String userToken,String houseFlowApplyId,String content,Integer star,String imageList,String latitude,String longitude){
-        return evaluateService.checkOk(houseFlowApplyId,content,star, imageList, latitude, longitude);
+    public ServerResponse checkOk(String userToken,String houseFlowApplyId,String content,String imageList,String latitude,String longitude){
+        return evaluateService.checkOk(houseFlowApplyId,content,imageList, latitude, longitude);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse saveEvaluateSupervisor(String userToken, String houseFlowApplyId,String content,Integer star,String onekey){
-        return evaluateService.saveEvaluateSupervisor( userToken,houseFlowApplyId,content,star,false, onekey);
+    public ServerResponse saveEvaluateSupervisor(String userToken, String houseFlowApplyId){
+        return evaluateService.saveEvaluateSupervisor( userToken,houseFlowApplyId,false);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse saveEvaluate(String userToken,String houseFlowApplyId,String wContent,Integer wStar
-            ,String sContent, Integer sStar){
-        return evaluateService.saveEvaluate(houseFlowApplyId,wContent,wStar,sContent,sStar,false);
+    public ServerResponse saveEvaluate(String userToken,String houseFlowApplyId,String evaluateJson){
+        return evaluateService.saveEvaluate(houseFlowApplyId,evaluateJson,false);
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse waitEvaluated(String houseFlowApplyId){
+        return evaluateService.waitEvaluated(houseFlowApplyId);
     }
 }

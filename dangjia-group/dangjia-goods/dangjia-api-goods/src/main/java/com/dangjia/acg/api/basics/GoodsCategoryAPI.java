@@ -3,6 +3,7 @@ package com.dangjia.acg.api.basics;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,7 +25,7 @@ public interface GoodsCategoryAPI {
 
     @PostMapping("/basics/goodsCategory/getGoodsCategory")
     @ApiOperation(value = "商品类别明细", notes = "商品类别明细")
-    GoodsCategory getGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);
+    BasicsGoodsCategory getGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);
 
     /**
      * 新增商品类别
@@ -37,7 +38,8 @@ public interface GoodsCategoryAPI {
                                        @RequestParam("name") String name,
                                        @RequestParam("parentID") String parentID,
                                        @RequestParam("parentTop") String parentTop,
-                                       @RequestParam("sort") Integer sort);
+                                       @RequestParam("sort") Integer sort,
+                                       @RequestParam("cityId") String cityId);
 
     /**
      * 修改商品类别
@@ -51,7 +53,8 @@ public interface GoodsCategoryAPI {
                                          @RequestParam("name") String name,
                                          @RequestParam("parentID") String parentID,
                                          @RequestParam("parentTop") String parentTop,
-                                         @RequestParam("sort") Integer sort);
+                                         @RequestParam("sort") Integer sort,
+                                         @RequestParam("cityId") String cityId);
 
     /**
      * 查询商品类别列表
@@ -61,7 +64,8 @@ public interface GoodsCategoryAPI {
     @PostMapping("/basics/goodsCategory/queryGoodsCategory")
     @ApiOperation(value = "查询商品类别列表", notes = "查询商品类别列表")
     ServerResponse queryGoodsCategory(@RequestParam("request") HttpServletRequest request,
-                                      @RequestParam("parentId") String parentId);
+                                      @RequestParam("parentId") String parentId,
+                                      @RequestParam("cityId") String cityId);
 
     /**
      * 根据类别id查询关联属性
@@ -73,7 +77,9 @@ public interface GoodsCategoryAPI {
     ServerResponse<PageInfo> queryGoodsAttribute(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                                  @RequestParam("goodsCategoryId") String goodsCategoryId,
-                                                 @RequestParam("likeAttrName") String likeAttrName);
+                                                 @RequestParam("likeAttrName") String likeAttrName,
+                                                 @RequestParam("cityId") String cityId,
+                                                 @RequestParam("type") Integer type);
 
     /**
      * 根据属性名称模糊查询属性
@@ -84,7 +90,8 @@ public interface GoodsCategoryAPI {
     @ApiOperation(value = "根据属性名称模糊查询属性", notes = "根据属性名称模糊查询属性")
     ServerResponse<PageInfo> queryGoodsAttributelikeName(@RequestParam("request") HttpServletRequest request,
                                                          @RequestParam("pageDTO") PageDTO pageDTO,
-                                                         @RequestParam("name") String name);
+                                                         @RequestParam("name") String name,
+                                                         @RequestParam("cityId")String cityId);
 
     /**
      * 根据属性id查询属性及其下属属性选项
@@ -94,7 +101,8 @@ public interface GoodsCategoryAPI {
     @PostMapping("/basics/goodsCategory/queryAttributeValue")
     @ApiOperation(value = "根据属性id查询属性及其下属属性选项", notes = "根据属性id查询属性及其下属属性选项")
     ServerResponse queryAttributeValue(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("goodsAttributeId") String goodsAttributeId);
+                                       @RequestParam("goodsAttributeId") String goodsAttributeId,
+                                       @RequestParam("cityId")String cityId);
 
     /**
      * 新增属性及其属性选项
@@ -107,7 +115,8 @@ public interface GoodsCategoryAPI {
                                         @RequestParam("goodsCategoryId") String goodsCategoryId,
                                         @RequestParam("attributeName") String attributeName,
                                         @RequestParam("type") Integer type,
-                                        @RequestParam("jsonStr") String jsonStr);
+                                        @RequestParam("jsonStr") String jsonStr,
+                                        @RequestParam("cityId")String cityId);
 
     /**
      * 修改属性及其属性选项
@@ -120,7 +129,8 @@ public interface GoodsCategoryAPI {
                                           @RequestParam("attributeId") String attributeId,
                                           @RequestParam("attributeName") String attributeName,
                                           @RequestParam("type") Integer type,
-                                          @RequestParam("jsonStr") String jsonStr);
+                                          @RequestParam("jsonStr") String jsonStr,
+                                          @RequestParam("cityId") String cityId);
 
     /**
      * 删除商品属性
@@ -128,7 +138,8 @@ public interface GoodsCategoryAPI {
     @PostMapping("/basics/goodsCategory/deleteGoodsAttribute")
     @ApiOperation(value = "删除商品属性", notes = "删除商品属性")
     ServerResponse deleteGoodsAttribute(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("goodsAttributeId") String goodsAttributeId);
+                                        @RequestParam("goodsAttributeId") String goodsAttributeId,
+                                        @RequestParam("cityId") String cityId);
 
     /**
      * 删除商品属性选项
@@ -136,7 +147,8 @@ public interface GoodsCategoryAPI {
     @PostMapping("/basics/goodsCategory/deleteByAttributeId")
     @ApiOperation(value = "删除商品属性选项", notes = "删除商品属性选项")
     ServerResponse deleteByAttributeId(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("attributeValueId") String attributeValueId);
+                                       @RequestParam("attributeValueId") String attributeValueId,
+                                       @RequestParam("cityId") String cityId);
 
     /**
      * 删除商品类别
@@ -144,7 +156,8 @@ public interface GoodsCategoryAPI {
     @PostMapping("/basics/goodsCategory/deleteGoodsCategory")
     @ApiOperation(value = "删除商品类别", notes = "删除商品类别")
     ServerResponse deleteGoodsCategory(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("id") String id);
+                                       @RequestParam("id") String id,
+                                       @RequestParam("cityId") String cityId);
 
     /**
      * 查询类别id查询所有父级以及父级属性
@@ -152,9 +165,11 @@ public interface GoodsCategoryAPI {
     @PostMapping("/basics/goodsCategory/queryAttributeListById")
     @ApiOperation(value = "查询类别id查询所有父级以及父级属性", notes = "查询类别id查询所有父级以及父级属性")
     ServerResponse queryAttributeListById(@RequestParam("request") HttpServletRequest request,
-                                          @RequestParam("goodsCategoryId") String goodsCategoryId);
+                                          @RequestParam("goodsCategoryId") String goodsCategoryId,
+                                          @RequestParam("cityId") String cityId);
 
     @PostMapping("/basics/goodsCategory/queryGoodsCategoryTwo")
     @ApiOperation(value = "查询两级商品分类", notes = "查询两级商品分类")
-    ServerResponse queryGoodsCategoryTwo(@RequestParam("request") HttpServletRequest request);
+    ServerResponse queryGoodsCategoryTwo(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("cityId")String cityId);
 }

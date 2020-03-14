@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper">
+
+
+    <select id="queryCollectGood" resultType="com.dangjia.acg.dto.product.MemberCollectDTO">
+        SELECT
+            bsp.id AS productId,
+            bsp.product_name AS productName,
+            bsp.image,
+            bpt.unit_name AS unitName,
+            bsp.sell_price AS sellPrice,
+			bsp.adjusted_price as adjustedPrice,
+			bsp.modity_price_time as modityPriceTime,
+			bs.storefront_name as storefrontName,
+			bs.system_logo as systemLogo
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_storefront bs ON bs.id=bsp.storefront_id
+        WHERE
+            bsp.id =#{productId}
+    </select>
+
+    <select id="queryProfessionalHomeInspector"
+            resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
+        SELECT
+            a.image,
+            a.id AS productId,
+            a.product_name AS productName,
+            e.storefront_name AS storefrontName,
+            a.sell_price AS sellPrice,
+            b.unit_name AS unitName
+        FROM dj_basics_storefront_product a,
+            dj_basics_product_template b,
+            dj_basics_goods c,
+            dj_basics_storefront e
+        WHERE a.prod_template_id=b.id
+        AND b.goods_id=c.id
+        AND e.id=a.storefront_id
+        AND c.type=3
+        AND a.city_id=#{cityId}
+    </select>
+</mapper>

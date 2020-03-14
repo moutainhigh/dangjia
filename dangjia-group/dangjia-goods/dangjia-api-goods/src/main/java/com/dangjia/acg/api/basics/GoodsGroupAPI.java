@@ -29,7 +29,8 @@ public interface GoodsGroupAPI {
     ServerResponse<PageInfo> getAllList(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("pageDTO") PageDTO pageDTO,
                                         @RequestParam("name") String name,
-                                        @RequestParam("state") Integer state);
+                                        @RequestParam("state") Integer state,
+                                        @RequestParam("cityId")String cityId);
 
     /*
      * 添加关联组
@@ -37,7 +38,8 @@ public interface GoodsGroupAPI {
     @PostMapping("/basics/goodsGroup/addGoodsGroup")
     @ApiOperation(value = "获取所有关联组", notes = "获取所有关联组")
     ServerResponse addGoodsGroup(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("jsonStr") String jsonStr);
+                                 @RequestParam("jsonStr") String jsonStr,
+                                 @RequestParam("cityId") String cityId);
 
     /*
      * 修改关联组
@@ -52,7 +54,8 @@ public interface GoodsGroupAPI {
      */
     @PostMapping("/basics/goodsGroup/getGoodsCategoryList")
     @ApiOperation(value = "查找所有顶级分类列表", notes = "查找所有顶级分类列表")
-    ServerResponse getGoodsCategoryList(@RequestParam("request") HttpServletRequest request);
+    ServerResponse getGoodsCategoryList(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("cityId") String cityId);
 
     /*
      * 查找所有子分类列表
@@ -93,7 +96,8 @@ public interface GoodsGroupAPI {
     @PostMapping("/basics/goodsGroup/getGoodsGroupById")
     @ApiOperation(value = "根据关联组id查询货品关联关系", notes = "根据关联组id查询货品关联关系")
     ServerResponse getGoodsGroupById(@RequestParam("request") HttpServletRequest request,
-                                     @RequestParam("goodsGroupId") String goodsGroupId);
+                                     @RequestParam("goodsGroupId") String goodsGroupId,
+                                     @RequestParam("cityId") String cityId);
 
     /*
      * 根据关联组id删除关联组和货品关联关系
@@ -108,6 +112,6 @@ public interface GoodsGroupAPI {
     ServerResponse queryGoodsGroupListByCategoryLikeName(@RequestParam("request") HttpServletRequest request,
                                                          @RequestParam("pageDTO") PageDTO pageDTO,
                                                          @RequestParam("categoryId") String categoryId,
-                                                         @RequestParam("name") String name);
-
+                                                         @RequestParam("name") String name,
+                                                         @RequestParam("cityId") String cityId);
 }

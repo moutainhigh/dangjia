@@ -1,14 +1,18 @@
 package com.dangjia.acg.service.core;
 
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,11 +28,13 @@ public class WorkerTypeService {
 
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
+    @Autowired
+    private ConfigUtil configUtil;
 
     public ServerResponse unfinishedFlow(String houseId) {
         try {
             List<WorkerType> workerTypeList = workerTypeMapper.unfinishedFlow(houseId);
-            if(workerTypeList.size()==0){
+            if (workerTypeList.size() == 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关记录");
             }
             return ServerResponse.createBySuccess("查询成功", workerTypeList);
@@ -51,12 +57,18 @@ public class WorkerTypeService {
     public ServerResponse getWorkerTypeList(Integer type) {
         Example example = new Example(WorkerType.class);
         Example.Criteria criteria = example.createCriteria();
-        if (type != null && type == 0) {
-            criteria.andCondition("type not in (2,7) ");
-        } else if (type != null && type == 1) {
-            criteria.andCondition("type not in (1,2,7)");
-        } else if (type != null && type == 2) {
-            criteria.andCondition("type not in (7)");
+        if (type != null) {
+            switch (type) {
+                case 0:
+                    criteria.andCondition("type not in (2,7) ");
+                    break;
+                case 1:
+                    criteria.andCondition("type not in (1,2,7)");
+                    break;
+                case 2:
+                    criteria.andCondition("type not in (7)");
+                    break;
+            }
         }
         criteria.andNotEqualTo(WorkerType.STATE, 2);
         example.orderBy(WorkerType.SORT).asc();
@@ -66,8 +78,10 @@ public class WorkerTypeService {
                     , "查无数据");
         }
         List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         for (Map map : maps) {
             map.put("workerTypeId", map.get(WorkerType.ID));
+            map.put("image", address+map.get(WorkerType.IMAGE));
         }
         return ServerResponse.createBySuccess("查询成功", maps);
     }
@@ -84,9 +98,7 @@ public class WorkerTypeService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "查无工种");
         }
-        Map map = BeanUtils.beanToMap(workerType);
-        map.put("workerTypeId", map.get(WorkerType.ID));
-        return ServerResponse.createBySuccess("查询成功", map);
+        return ServerResponse.createBySuccess("查询成功", workerType);
     }
 
     /**
@@ -102,8 +114,7 @@ public class WorkerTypeService {
         if (workerTypeId == null) {
             return ServerResponse.createByErrorMessage("操作失败，请传入workerTypeId");
         }
-        WorkerType workerType = new WorkerType();
-        workerType.setId(workerTypeId);
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
         if (methods != null) {
             workerType.setMethods(methods);
         }
@@ -115,5 +126,23 @@ public class WorkerTypeService {
         }
         workerTypeMapper.updateByPrimaryKeySelective(workerType);
         return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+    /**
+     * @Description:根据用户id查询[所有房子][正在施工][所有工序与排期]
+     * @author: luof
+     * @date: 2020-3-12
+     */
+    public List<WorkerType> queryWorkerTypeListByMemberId(String memberId){
+        return workerTypeMapper.queryWorkerTypeListByMemberId(memberId);
+    }
+
+    /**
+     * @Description:查询工序 根据排期
+     * @author: luof
+     * @date: 2020-3-12
+     */
+    public List<Integer> queryTypeBySort(List<Integer> sortList){
+        return workerTypeMapper.queryTypeBySort(sortList);
     }
 }

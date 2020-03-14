@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.storefront.IStorefrontProductMapper">
+
+    <select id="querySingleStorefrontProductById" resultType="com.dangjia.acg.dto.storefront.StorefrontProductListDTO">
+          SELECT
+            bsp.product_name AS productName,
+            bpt.product_sn AS productSn,
+            bsp.image,
+            bpt.id AS productId
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        WHERE
+            bsp.id = #{id}
+    </select>
+
+    <!--调价列表-->
+    <select id="queryProductAdjustmentPriceListByKeyWord" resultType="com.dangjia.acg.dto.storefront.BasicsStorefrontProductMdPriceDTO">
+        SELECT
+            IFNULL(bsp.id,'') as id,-- 店铺商品id
+            IFNULL(bg. NAME,'') AS goodsName,-- 货品名称
+            IFNULL(bsp.product_name,'') AS productName,-- 商品名称
+            IFNULL(bsp.image,'') as image,-- 商品图片
+            IFNULL(bpt.value_name_arr,'') AS valueNameArr,-- 属性
+            IFNULL(bsp.sell_price,0) as sellPrice,-- 销售价格
+            IFNULL(bsp.prod_template_id,'') as prodTemplateId, -- 商品模板id
+            IFNULL(bsp.supplied_num,0)  as suppliedNum,-- 供货数
+            IFNULL(bsp.adjusted_price,0) as adjustedPrice,-- 调后价格
+            IFNULL(bsp.modity_price_time,'') as modityPriceTime, -- 调价时间
+            bsp.is_upstairs_cost isUpstairsCost,
+            bsp.move_cost moveCost
+        FROM
+        dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
+        where 1=1
+        and   bsp.data_status=0
+        and bsp.storefront_id=#{storefrontId}
+        <if test="null!=cityId and ''!=cityId">
+            and  bsp.city_id=#{cityId}
+        </if>
+        <if test="null!=keyWord and ''!=keyWord">
+            and (
+            bg.NAME LIKE CONCAT('%',#{keyWord},'%') or
+            bsp.product_name LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+    </select>
+
+    <!--判断是否是普通店铺需要供应的商品-->
+    <select id="selectProductByGoodsType" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM dj_basics_storefront_product dbsp
+        INNER JOIN dj_basics_product_template dbpt ON dbsp.prod_template_id=dbpt.id
+        INNER JOIN dj_basics_goods dbg ON dbpt.goods_id=dbg.id AND dbg.type  in (0,1)
+        WHERE dbsp.id =#{id}
+    </select>
+
+<!--已选商品-->
+    <select id="queryStorefrontProductGroundByKeyWord" resultType="com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO">
+
+        SELECT
+            bsp.id,
+            IFNULL(bsp.sell_price,0.0) as sellPrice,
+            IFNULL(bsp.supplied_num,'')  as suppliedNum,
+            IFNULL(bg.NAME,'')  AS goodsName,-- 货品名称
+            IFNULL(bsp.product_name,'')  AS productName,-- 商品名称
+            IFNULL(bpt.value_id_arr,'') valueIdArr,
+            IFNULL(bpt.value_name_arr,'')  AS valueNameArr,-- 属性
+            IFNULL(bsp.is_shelf_status,null )   AS isShelfStatus ,-- 是否上下架
+            IFNULL(bsp.prod_template_id,'')  as prodTemplateId -- 商品模板id
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
+        where bsp.storefront_id=#{storefrontId}
+        and  bsp.city_id=#{cityId}
+        and  bsp.data_status=0
+        and
+        (
+        bsp.detail_image is null  or
+        bsp.image is null   or
+        bsp.product_name is null or
+        bsp.sell_price is null or
+        bsp.supplied_num is  null
+        )
+        <if test="null!=keyWord and ''!=keyWord">
+            and (
+            bg.NAME LIKE CONCAT('%',#{keyWord},'%') or
+            bsp.product_name LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+    </select>
+    <!--上架商品-->
+    <select id="queryStorefrontProductViewDTOList" resultType="com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO">
+
+        SELECT bsp.id,
+            bg. NAME AS goodsName,-- 货品名称
+            bsp.product_name AS productName,-- 商品名称
+            IFNULL(bpt.value_id_arr,'') valueIdArr,
+            bpt.value_name_arr AS valueNameArr,-- 属性
+            IFNULL(bsp.is_shelf_status,null )   AS isShelfStatus ,-- 是否上下架
+            bsp.prod_template_id as prodTemplateId -- 商品模板id
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
+        where bsp.city_id=#{cityId}
+        and bsp.storefront_id=#{storefrontId}
+        and   bsp.data_status=0
+        and (
+            bsp.detail_image is not null  and
+            bsp.image is not null   and
+            bsp.product_name is not null and
+            bsp.sell_price is not null and
+            bsp.supplied_num is not null
+        )
+        <if test="null!=keyWord and ''!=keyWord">
+            and (
+            bg.NAME LIKE CONCAT('%',#{keyWord},'%') or
+            bsp.product_name LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+    </select>
+
+    <select id="queryCartList" resultType="com.dangjia.acg.dto.product.ShoppingCartProductDTO">
+          SELECT
+            bsp.prod_template_id AS productId,
+            bsp.product_name AS productName,
+            bsp.sell_price AS sellPrice,
+            bsp.image,
+            CONCAT_WS(
+                " ",
+                bb.`name`,
+                bpt.value_name_arr
+            ) AS specificationAttributes
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods bg ON bg.id = bpt.goods_id
+        INNER JOIN dj_basics_brand bb ON bb.id = bg.brand_id
+        WHERE
+            bsp.storefront_id =#{storefrontId}
+        AND bsp.prod_template_id =#{productId}
+    </select>
+
+
+    <select id="queryCollectGood" resultType="com.dangjia.acg.dto.product.MemberCollectDTO">
+        SELECT
+            bsp.prod_template_id AS productId,
+            bsp.product_name AS productName,
+            bsp.image,
+            bpt.unit_name AS unitName,
+			bsp.adjusted_price as adjustedPrice,
+			bsp.modity_price_time as modityPriceTime
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        WHERE
+            bsp.id =#{productId}
+    </select>
+
+<!--根据店铺id查询供应的商品
+    <select id="queryStorefrontListByStorefrontId" resultType="com.dangjia.acg.dto.storefront.StorefrontDTO">
+
+        SELECT
+            bsp.prod_template_id AS productId,
+            bsp.product_name AS productName,
+            bsp.image,
+            bpt.unit_name AS unitName
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        WHERE
+            bsp.prod_template_id =#{productId}
+            and bsp.storefront_id=#{storefrontId}
+
+    </select>-->
+
+    <select id="getStorefrontProductCount" resultType="java.lang.Integer">
+         SELECT
+        count(1)
+        FROM
+        dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
+        where bsp.is_shelf_status=1
+         and  bsp.data_status=0
+         and bsp.storefront_id=#{storefrontId}
+         and (
+            bsp.detail_image is not null  and
+            bsp.image is not null   and
+            bsp.product_name is not null and
+            bsp.sell_price is not null and
+            bsp.supplied_num is not null
+          )
+    </select>
+    <select id="queryStorefrontProductById" resultType="com.dangjia.acg.modle.storefront.StorefrontProduct">
+        select
+        id,
+        storefront_id as 'storefrontId',
+        prod_template_id as 'prodTemplateId',
+        goods_id as 'goodsId',
+        image,
+        IFNULL(detail_image,'')  as 'detailImage',
+        IFNULL(market_name,'')  as 'marketName',
+        sell_price as 'sellPrice',
+        supplied_num as 'suppliedNum',
+        IFNULL(is_upstairs_cost,'')  as 'isUpstairsCost',
+        IFNULL(is_delivery_install,'')  as 'isdeliveryInstall',
+        IFNULL(move_cost,'')   as 'moveCost',
+        is_shelf_status as 'isShelfStatus',
+        create_date as 'createDate',
+        modify_date as 'modifyDate',
+        data_status as 'dataStatus',
+        product_name as 'productName',
+        city_id as 'cityId'
+
+        from
+        dj_basics_storefront_product where id=#{id}
+    </select>
+
+    <!-- 通过货品或者商品名称查询 -->
+    <select id="queryProductGroundByKeyWord" resultType="com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO">
+
+        SELECT
+        bsp.id,
+        IFNULL(bsp.product_name,'')  AS productName
+        FROM
+        dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
+        where bsp.data_status=0
+        and
+        (
+        bsp.detail_image is null  or
+        bsp.image is null   or
+        bsp.product_name is null or
+        bsp.sell_price is null or
+        bsp.supplied_num is  null
+        )
+        <if test="null!=keyWord and ''!=keyWord">
+            and (
+            bg.NAME LIKE CONCAT('%',#{keyWord},'%') or
+            bsp.product_name LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+    </select>
+
+</mapper>

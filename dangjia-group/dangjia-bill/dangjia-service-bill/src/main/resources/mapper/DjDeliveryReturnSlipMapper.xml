@@ -1,0 +1,1130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipMapper">
+
+
+    <select id="querySupplyDeliverTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
+        SELECT
+            dsd.id as splitId,
+            dsd.storefront_id as shopId,
+            dsd.number as number,
+            dsd.create_date as createDate,
+            dsd.ship_address as shipAddress,
+            dsd.ship_name as shipName,
+            dsd.ship_mobile as shipMobile,
+            (case when (dsd.shipping_state=4 and dsd.complain_status=1) then 6
+            when (dsd.shipping_state=4 and dsd.complain_status=2) then 7
+            when ((dsd.shipping_state=4 and dsd.complain_status=3) or dsd.shipping_state in(2,8,10)) then 8
+            else dsd.shipping_state end) as shippingState,
+            dsd.total_amount as totalAmount,
+            1 as invoiceType,
+            c.status,
+            dsd.house_id as houseId,
+            dsd.supplier_id as supId
+        FROM
+             dj_deliver_split_deliver dsd
+        LEFT JOIN dj_complain c on c.business_id=dsd.id
+        WHERE dsd.supplier_id =#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            dsd.number LIKE CONCAT('%',#{searchKey},'%') or
+            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        <if test="invoiceStatus==6">
+            AND dsd.shipping_state=4
+            and dsd.complain_status=1
+        </if>
+        <if test="invoiceStatus==7">
+            AND dsd.shipping_state=4
+            and dsd.complain_status=2
+        </if>
+        <if test="invoiceStatus==4">
+            AND dsd.shipping_state=4
+            and dsd.complain_status in(0,4)
+        </if>
+        <if test="invoiceStatus==8">
+            AND (dsd.shipping_state in(2,8,10)
+             or (dsd.shipping_state=4 and dsd.complain_status=3))
+        </if>
+        <if test="invoiceStatus!=-1 and invoiceStatus!=6 and invoiceStatus!=7 and invoiceStatus!=8">
+            AND dsd.shipping_state=#{invoiceStatus}
+        </if>
+        and dsd.city_id=#{cityId}
+        and dsd.shipping_state in(0,1,2,4,5,7,8,10)
+        ORDER BY dsd.create_date desc
+    </select>
+
+    <select id="querySupplyRepairTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
+        SELECT
+        rmd.id as splitId,
+        rmd.storefront_id as shopId,
+        rmd.number as number,
+        rmd.create_date as createDate,
+        rmd.ship_address as shipAddress,
+        rmd.ship_mobile as shipMobile,
+        rmd.ship_name as shipName,
+        (case when rmd.shipping_state=6 then 1 else rmd.shipping_state end) as shippingState,
+        rmd.total_amount as totalAmount,
+        rmd.apply_money applyMoney,
+        2 as invoiceType,
+        rmd.house_id as houseId,
+        rmd.supplier_id as supId
+        FROM
+        dj_repair_mend_deliver rmd
+        WHERE rmd.supplier_id =#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            rmd.number LIKE CONCAT('%',#{searchKey},'%') or
+            rmd.ship_address LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        <if test='invoiceStatus==1'>
+            AND rmd.shipping_state in(1,6)
+        </if>
+        <if test='invoiceStatus!=-1 and invoiceStatus!=1'>
+            AND rmd.shipping_state=#{invoiceStatus}
+        </if>
+        and rmd.shipping_state in(0,1,2,4,5,6,7,8)
+        and rmd.city_id=#{cityId}
+        ORDER BY rmd.create_date desc
+    </select>
+
+    <select id="querySupplyTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
+        SELECT
+        splitId,
+        shopId,
+        number,
+        createDate,
+        shipAddress,
+        shipName,
+        shipMobile,
+        shippingState,
+        totalAmount,
+        invoiceType,
+        STATUS,
+        houseId,
+        supId
+        FROM (
+        SELECT
+        dsd.id as splitId,
+        dsd.storefront_id as shopId,
+        dsd.number as number,
+        dsd.create_date as createDate,
+        dsd.ship_address as shipAddress,
+        dsd.ship_name as shipName,
+        dsd.ship_mobile as shipMobile,
+        dsd.shipping_state as shippingState,
+        dsd.total_amount as totalAmount,
+        1 as invoiceType,
+        c.status,
+        dsd.house_id as houseId,
+        dsd.supplier_id as supId
+        FROM
+        dj_deliver_split_deliver dsd
+        LEFT JOIN dj_complain c on c.business_id=dsd.id
+        WHERE dsd.supplier_id =#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            dsd.number
+            LIKE CONCAT('%',#{searchKey},'%') or
+            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        and dsd.city_id=#{cityId}
+        and dsd.shipping_state!=3
+        UNION ALL
+        SELECT
+        rmd.id as splitId,
+        rmd.storefront_id as shopId,
+        rmd.number as number,
+        rmd.create_date as createDate,
+        rmd.ship_address as shipAddress,
+        rmd.ship_mobile as shipMobile,
+        rmd.ship_name as shipName,
+        rmd.shipping_state as shippingState,
+        rmd.total_amount as totalAmount,
+        2 as invoiceType,
+        null as status,
+        rmd.house_id as houseId,
+        rmd.supplier_id as supId
+        FROM
+        dj_repair_mend_deliver rmd
+        WHERE rmd.supplier_id =#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            rmd.number LIKE CONCAT('%',#{searchKey},'%') or
+            rmd.ship_address LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        and rmd.city_id=#{cityId}
+        )a ORDER BY createDate desc
+    </select>
+
+    <!--<update id="setDeliveryTask">-->
+    <!--UPDATE dj_delivery_return_slip drs-->
+    <!--INNER JOIN dj_delivery_return_slip_details drsd ON drs.id = drsd.delivery_return_slip_id-->
+    <!--SET drs.invoice_status = #{invoiceStatus},-->
+    <!--drsd.invoice_status = #{invoiceStatus}-->
+    <!--WHERE-->
+    <!--drs.id = #{id}-->
+    <!--</update>-->
+
+
+    <select id="querySupplierSettlementManagement"
+            resultType="com.dangjia.acg.dto.delivery.SupplierSettlementManagementDTO">
+        SELECT
+        IFNULL(storefront_id,'') as shopId,
+        IFNULL(sum(count),'0') as count,
+        IFNULL(supplier_id,'') as supId
+        FROM
+        (
+        SELECT
+        supplier_id,
+        count(0) AS count,
+        storefront_id
+        FROM
+        dj_deliver_split_deliver
+        WHERE
+        supplier_id = #{supId}
+        <if test="applyState==1">
+            and apply_state = 0
+        </if>
+        <if test="applyState==2">
+            and (
+            apply_state =1 or
+            apply_state=2
+            )
+        </if>
+        and city_id=#{cityId}
+        <if test="null!=storefronts and storefronts.size>0">
+            and storefront_id in
+            <foreach collection="storefronts" index="index" item="item" open="(" separator="," close=")">
+                #{item.id}
+            </foreach>
+        </if>
+        GROUP BY storefront_id
+        UNION ALL
+        SELECT
+        supplier_id,
+        count(0) AS count,
+        storefront_id
+        FROM
+        dj_repair_mend_deliver
+        WHERE
+        supplier_id = #{supId}
+        <if test="applyState==1">
+            and apply_state = 0
+        </if>
+        <if test="applyState==2">
+            and (
+            apply_state =1 or
+            apply_state=2
+            )
+        </if>
+        and city_id=#{cityId}
+        <if test="null!=storefronts and storefronts.size>0">
+            and storefront_id in
+            <foreach collection="storefronts" index="index" item="item" open="(" separator="," close=")">
+                #{item.id}
+            </foreach>
+        </if>
+        GROUP BY storefront_id
+        ) a
+        GROUP BY storefront_id
+    </select>
+
+    <!--<select id="querySupplierSettlementList" resultType="com.dangjia.acg.modle.delivery.DjDeliveryReturnSlip">-->
+    <!--SELECT-->
+    <!--drs.id,-->
+    <!--drs.create_date as createDate,-->
+    <!--drs.ship_address as shipAddress,-->
+    <!--drs.ship_name as shipName,-->
+    <!--drs.apply_state as applyState,-->
+    <!--drs.apply_money as applyMoney-->
+    <!--FROM-->
+    <!--dj_delivery_return_slip drs-->
+    <!--WHERE 1=1-->
+    <!--<if test="applyState==1">-->
+    <!--and apply_state = 0-->
+    <!--</if>-->
+    <!--<if test="applyState==2">-->
+    <!--and apply_state in(1,2)-->
+    <!--</if>-->
+    <!--and drs.sup_id=#{supId}-->
+    <!--and drs.shop_id=#{shopId}-->
+    <!--</select>-->
+    <select id="querySupplierSettlementList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
+        SELECT
+        number,
+        supplier_id as supId,
+        storefront_id as shopId,
+        create_date as createDate,
+        ship_address as shipAddress,
+        ship_name as shipName,
+        apply_state as applyState,
+        invoiceType,
+        sum(applyMoney) as applyMoney,
+        splitId,
+        houseId
+        FROM
+        (
+        SELECT
+        dsd.number,
+        dsd.supplier_id,
+        dsd.storefront_id,
+        dos.create_date,
+        dsd.ship_address,
+        dsd.ship_name,
+        dsd.apply_state,
+        dsd.id as splitId,
+        1 as invoiceType,
+        dsd.apply_money as applyMoney,
+        dsd.house_id as houseId
+        FROM
+        dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split dos ON dsd.order_split_id = dos.id
+        UNION ALL
+        SELECT
+        rmd.number,
+        rmd.supplier_id,
+        rmd.storefront_id,
+        rmo.create_date,
+        rmd.ship_address,
+        rmd.ship_name,
+        rmd.apply_state,
+        rmd.id as splitId,
+        2 as invoiceType,
+        rmd.apply_money as applyMoney,
+        rmd.house_id as houseId
+        FROM
+        dj_repair_mend_deliver rmd
+        INNER JOIN dj_repair_mend_order rmo ON rmd.mend_order_id = rmo.id
+        ) a
+        WHERE supplier_id =#{supId}
+        AND storefront_id =#{shopId}
+        <if test="applyState==1">
+            and apply_state = 0
+        </if>
+        <if test="applyState==2">
+            and (
+            apply_state =1 or
+            apply_state=2
+            )
+        </if>
+    </select>
+
+    <select id="queryBuyersDimensionList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
+        SELECT
+        dsd.supplier_id AS supId,
+        dsd.ship_address AS shipAddress,
+        m. NAME,
+        m.mobile,
+        sum(dosi.shop_count) AS supplyQuantity,
+        sum(dsd.total_amount) AS income,
+        h.id AS houseId
+        FROM
+        dj_deliver_split_deliver dsd
+        INNER JOIN dj_house h ON dsd.house_id = h.id
+        INNER JOIN dj_member m ON m.id = h.member_id
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+        WHERE dsd.supplier_id = #{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%') or
+            m. NAME LIKE CONCAT('%',#{searchKey},'%') or
+            m.mobile LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        and dsd.city_id=#{cityId}
+        GROUP BY h.id
+    </select>
+
+
+    <select id="queryBuyersDimensionDetailList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDetailsDTO">
+        SELECT
+            dsd.id AS orderSplitId,
+            dsd.number,
+            dsd.send_time as createDate,
+            sum(dosi.shop_count) as shopCount,
+            dsd.total_amount as totalAmount
+        FROM
+            dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+        WHERE
+            dsd.house_id = #{houseId}
+        AND dsd.supplier_id = #{supId}
+        and dsd.city_id=#{cityId}
+        GROUP BY
+            dsd.number
+    </select>
+
+    <select id="querySupplyDimensionList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
+        SELECT
+            dsd.house_id as houseId,
+            dsd.ship_address as shipAddress,
+            dsd.supplier_id as supId,
+            sum(dosi.num) as supplyQuantity,
+	        sum(sup_cost) as income
+        FROM
+            dj_deliver_order_split_item dosi
+        INNER JOIN dj_deliver_split_deliver dsd ON dsd.id = dosi.split_deliver_id
+        INNER JOIN dj_basics_storefront_product bsp ON dosi.product_id=bsp.id
+        WHERE
+            bsp.prod_template_id = #{productId}
+        AND dsd.supplier_id = #{supId}
+        AND dosi.city_id=#{cityId}
+        GROUP BY dsd.house_id
+    </select>
+
+
+    <select id="querySupplierStoreDimensionList" resultType="com.dangjia.acg.dto.delivery.SupplierStoreDimensionDTO">
+        SELECT
+            dsd.storefront_id AS shopId,
+            sum(dosi.num) as totalNumberSupply,
+            sum(total_price) as income,
+            dsd.supplier_id as supId
+        FROM
+            dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+        WHERE
+            dsd.supplier_id =#{supId}
+        and dsd.storefront_id =#{shopId}
+        and dsd.city_id=#{cityId}
+        GROUP BY
+            dsd.storefront_id
+    </select>
+
+
+    <select id="querySupplierStoreDimensionDetailList"
+            resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDetailsDTO">
+        SELECT
+        dsd.id AS orderSplitId,
+        dsd.number,
+        dsd.send_time as createDate,
+        sum(dosi.shop_count) as shopCount,
+        dsd.total_amount as totalAmount
+        FROM
+        dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+        WHERE
+        dsd.storefront_id = #{shopId}
+        AND dsd.supplier_id = #{supId}
+        and dsd.city_id=#{cityId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND dsd.number LIKE CONCAT('%',#{searchKey},'%')
+        </if>
+        GROUP BY
+        dsd.number
+    </select>
+    <select id="sellerSplitDeliverDetails" resultType="com.dangjia.acg.dto.delivery.StoreSellerSplitDeliverDetailsDTO">
+        select
+            IFNULL(dosi.product_name,'') as productName,-- 商品名称
+            IFNULL(dosi.image,'') as image,-- 商品图片
+            IFNULL(dosi.product_sn,'') as productSn,-- 商品编号
+            IFNULL(dosi.num,'') as num, -- 发货数量
+            IFNULL(dosi.receive,'') as receive,-- 收货数量
+            IFNULL(dosi.cost,'') as cost,-- 成本单价
+            IFNULL(dosi.cost*dosi.num,'') as costTotalPrice,-- 成本总价
+            IFNULL(dosi.price,'') as sellPrice,-- 销售价
+            IFNULL(dosi.price*dosi.num,'') as sellTotalPrice -- 销售总价
+            from dj_deliver_order_split_item dosi
+            inner join dj_deliver_split_deliver dsd on dsd.id = dosi.split_deliver_id
+          where dsd.id=#{splitDeliverId} and dosi.storefront_id=#{storefrontId}
+
+    </select>
+
+    <select id="storefrontProductDimensionDetail" resultType="com.dangjia.acg.dto.delivery.StoreSupplyDimensionDetailDTO">
+            SELECT
+                dsd.number,
+                -- 发货单号
+                dsd.house_id AS houseId,
+                -- 房子id
+                dsd.ship_address AS shipAddress,
+                -- 房子地址
+                dsd.submit_time as submitTime,
+                -- 下单时间
+                dsd.supplier_id AS supId,
+                -- 供应商id
+                IFNULL(dosi.num,'') AS supplyQuantity,
+                -- 本次供货数
+                IFNULL(dsd.total_amount,'') AS totalAmount,
+                -- 销售价(发货单总额)
+                IFNULL(dsd.apply_money,'') AS applyMoney,
+                -- 成本价（供应商结算价格）
+             	sum(dosi.sup_cost) as profit-- 利润
+            FROM
+                dj_deliver_order_split_item dosi -- 要货单明细
+            INNER JOIN dj_deliver_split_deliver dsd ON dsd.id = dosi.split_deliver_id -- 发货单详情
+            INNER JOIN dj_basics_storefront_product bsp ON dosi.product_id = bsp.prod_template_id -- 店铺商品
+            WHERE
+                1 = 1
+            AND bsp.prod_template_id = #{productId}
+            AND dsd.storefront_id = #{storefrontId}
+            AND dosi.city_id = #{cityId}
+            GROUP BY
+            dsd.house_id
+    </select>
+
+
+    <!--店铺利润-商品维度-->
+    <select id="storefrontProductDimension" resultType="com.dangjia.acg.dto.delivery.StoreSupplyDimensionDTO">
+        SELECT
+            mt.image,
+            mt.productId,
+            mt.productName,
+            mt.productSn,
+            sum(mt.receive) receive,
+            sum(mt.returnCount) returnCount,
+            sum(mt.totalStevedorageCost) totalStevedorageCost,
+            sum(mt.totalTransportationCost) totalTransportationCost,
+            sum(mt.totalPrice) totalPrice,
+            sum(mt.totalSupCost) totalSupCost,
+            sum(mt.profit) profit,
+            sum(mt.totalPrice) income,
+            sum(mt.totalSupCost+mt.totalStevedorageCost+mt.totalTransportationCost) expenditure
+        FROM
+            (
+                SELECT
+                    tt.image,
+                    tt.productId,
+                    tt.productName,
+                    tt.productSn,
+                    sum(tt.receive) receive,
+                    0 returnCount,
+                    sum(tt.sup_stevedorage_cost) totalStevedorageCost,
+                    sum(tt.sup_transportation_cost) totalTransportationCost,
+                    sum(
+                        tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
+                    ) totalPrice,
+                    tt.supPrice * tt.receive totalSupCost,
+                    sum(
+                        tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
+                    ) - sum(
+                        tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
+                    ) profit
+                FROM
+                    (
+                        SELECT
+                            bsp.image,
+                            bsp.product_name AS productName,
+                            bpt.product_sn AS productSn,
+                            IFNULL(
+                                (
+                                    CASE
+                                    WHEN s.shipping_state = 4
+                                    AND s.complain_status = 3 THEN
+                                        t.num
+                                    ELSE
+                                        t.receive
+                                    END
+                                ),
+                                t.num
+                            ) AS receive,
+                            t.sup_cost AS supPrice,
+                            t.price AS price,
+                            IFNULL(t.transportation_cost,0) transportation_cost,
+                            IFNULL(t.stevedorage_cost,0) stevedorage_cost,
+                            IFNULL(t.sup_transportation_cost,0) sup_transportation_cost,
+                            IFNULL(t.sup_stevedorage_cost,0) sup_stevedorage_cost,
+                            IFNULL(t.discount_price,0) discount_price,
+                            t.product_id AS productId
+                        FROM
+                            dj_deliver_split_deliver s
+                        INNER JOIN dj_deliver_order_split_item t ON s.id = t.split_deliver_id
+                        INNER JOIN dj_basics_storefront_product bsp ON t.product_id = bsp.id
+                        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+                        WHERE
+                            s.storefront_id = #{storefrontId}
+                        <if test = "null!=searchKey and ''!=searchKey" >
+                            AND (
+                            bsp.product_name LIKE CONCAT('%',#{searchKey},'%') or
+                            bpt.product_sn LIKE CONCAT('%', #{searchKey},'%')
+                            )
+                        </if>
+                    ) tt
+                GROUP BY
+                    tt.productId
+                UNION ALL
+                    SELECT
+                        tt.image,
+                        tt.productId,
+                        tt.productName,
+                        tt.productSn,
+                        0 receiver,
+                        sum(tt.returnCount) returnCount,
+                        sum(tt.stevedorage_cost*(-1)) totalStevedorageCost,
+                        sum(tt.transportation_cost*(-1)) totalTransportationCost,
+                        sum(
+                            tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
+                        ) totalPrice,
+                        tt.price * tt.returnCount-tt.discount_price totalSupCost,
+                        sum(
+                            tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
+                        ) - sum(
+                            tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost-tt.discount_price
+                        ) profit
+                    FROM
+                        (
+                            SELECT
+                                bsp.image,
+                                bsp.product_name AS productName,
+                                bpt.product_sn AS productSn,
+                                IFNULL(
+                                    (
+                                        CASE
+                                        WHEN s.shipping_state = 7 THEN
+                                            t.shop_count
+                                        ELSE
+                                            t.actual_count
+                                        END
+                                    ),
+                                    t.shop_count
+                                ) AS returnCount,
+                                t.cost AS supPrice,
+                                t.price AS price,
+                                IFNULL(t.transportation_cost,0) transportation_cost,
+                                IFNULL(t.stevedorage_cost,0) stevedorage_cost,
+                                IFNULL(t.sup_transportation_cost,0) sup_transportation_cost,
+                                IFNULL(t.sup_stevedorage_cost,0) sup_stevedorage_cost,
+                                IFNULL(t.discount_price,0) discount_price,
+                                t.product_id AS productId
+                            FROM
+                                dj_repair_mend_deliver s
+                            INNER JOIN dj_repair_mend_materiel t ON s.id = t.repair_mend_deliver_id
+                            INNER JOIN dj_basics_storefront_product bsp ON t.product_id = bsp.id
+                            INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+                            INNER JOIN dj_repair_mend_order m ON s.mend_order_id = m.id
+                            WHERE
+                                s.storefront_id = #{storefrontId}
+                            <if test = "null!=searchKey and ''!=searchKey" >
+                                AND (
+                                bsp.product_name LIKE CONCAT('%',#{searchKey},'%') or
+                                bpt.product_sn LIKE CONCAT('%', #{searchKey},'%')
+                                )
+                            </if>
+                            AND m.type IN (2, 5)
+                        ) tt
+                    GROUP BY
+                        tt.productId
+            ) mt
+        GROUP BY
+            mt.productId
+        ORDER BY
+            mt.productId
+    </select>
+    <!--利润统计-商品维度-发货单总收入支出-->
+    <select id="totalProductDimensionSplitDetail" resultType="java.util.Map">
+        SELECT
+            sum(
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
+            ) income,
+            sum(
+                tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
+            ) expenditure,
+            sum(
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
+            ) - sum(
+                tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
+            ) profit
+        FROM
+            (
+                SELECT
+                    IFNULL(
+                        (
+                            CASE
+                            WHEN s.shipping_state = 4
+                            AND s.complain_status = 3 THEN
+                                t.num
+                            ELSE
+                                t.receive
+                            END
+                        ),
+                        t.num
+                    ) AS receive,
+                    t.sup_cost AS supPrice,
+                    t.price AS price,
+                    IFNULL(t.transportation_cost, 0) transportation_cost,
+                    IFNULL(t.stevedorage_cost, 0) stevedorage_cost,
+                    IFNULL(
+                        t.sup_transportation_cost,
+                        0
+                    ) sup_transportation_cost,
+                    IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost,
+                    IFNULL(t.discount_price,0) discount_price,
+                    s.id splitId
+                FROM
+                    dj_deliver_split_deliver s
+                INNER JOIN dj_deliver_order_split_item t ON s.id = t.split_deliver_id
+               INNER JOIN dj_member_address m on (s.address_id=m.id or s.house_id=m.house_id)
+                WHERE
+                    s.storefront_id = #{storefrontId}
+                <if test = "null!=productId and ''!=productId" >
+                    AND t.product_id = #{productId}
+                </if>
+                <if test = "null!=addressId and ''!=addressId" >
+                    and m.id =#{addressId}
+                </if>
+                <if test = "null!=houseId and ''!=houseId" >
+                    and m.house_id=#{houseId}
+                </if>
+            ) tt
+    </select>
+    <!--利润统计-商品维度-发货单列表-->
+     <select id="storefrontProductDimensionSplitDetail" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionOrderDetailDTO">
+        SELECT
+            tt.splitId,
+            tt.number,
+            tt.sendTime,
+            tt.address,
+            sum(tt.receive) receive,
+            0 returnCount,
+            sum(tt.sup_stevedorage_cost) totalStevedorageCost,
+            sum(tt.sup_transportation_cost) totalTransportationCost,
+            sum(
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
+            ) totalPrice,
+            tt.supPrice * tt.receive totalSupCost,
+            sum(
+                tt.price * tt.receive + tt.transportation_cost + tt.stevedorage_cost-tt.discount_price
+            ) - sum(
+                tt.supPrice * tt.receive + tt.sup_stevedorage_cost + tt.sup_transportation_cost
+            ) profit
+        FROM
+            (
+                SELECT
+                    IFNULL(
+                        (
+                            CASE
+                            WHEN s.shipping_state = 4
+                            AND s.complain_status = 3 THEN
+                                t.num
+                            ELSE
+                                t.receive
+                            END
+                        ),
+                        t.num
+                    ) AS receive,
+                    t.sup_cost AS supPrice,
+                    t.price AS price,
+                    IFNULL(t.transportation_cost, 0) transportation_cost,
+                    IFNULL(t.stevedorage_cost, 0) stevedorage_cost,
+                    IFNULL(
+                        t.sup_transportation_cost,
+                        0
+                    ) sup_transportation_cost,
+                    IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost,
+                    IFNULL(t.discount_price,0) discount_price,
+                    s.id splitId,
+                    s.number number,
+                    s.create_date sendTime,
+                    m.address
+                FROM
+                    dj_deliver_split_deliver s
+                INNER JOIN dj_deliver_order_split_item t ON s.id = t.split_deliver_id
+                INNER JOIN dj_member_address m on (s.address_id=m.id or s.house_id=m.house_id)
+                WHERE
+                    s.storefront_id = #{storefrontId}
+                 <if test = "null!=productId and ''!=productId" >
+                     AND t.product_id = #{productId}
+                 </if>
+                 <if test = "null!=addressId and ''!=addressId" >
+                     and m.id =#{addressId}
+                 </if>
+                 <if test = "null!=houseId and ''!=houseId" >
+                     and m.house_id=#{houseId}
+                 </if>
+            ) tt
+        GROUP BY
+            tt.splitId
+        order by tt.sendTime desc
+     </select>
+
+    <!--利润统计-商品维度-退货单汇总收入支出-->
+    <select id="totalProductDimensionMendDetail" resultType="java.util.Map">
+        SELECT
+            sum(
+                tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
+            ) income,
+            sum(
+                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost-tt.discount_price
+            ) expenditure,
+            sum(
+                tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
+            ) - sum(
+                tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost-tt.discount_price
+            ) profit
+        FROM
+            (
+                SELECT
+                    s.id splitId,
+                    IFNULL(
+                        (
+                            CASE
+                            WHEN s.shipping_state = 7 THEN
+                                t.shop_count
+                            ELSE
+                                t.actual_count
+                            END
+                        ),
+                        t.shop_count
+                    ) AS returnCount,
+                    t.cost AS supPrice,
+                    t.price AS price,
+                    IFNULL(t.transportation_cost, 0) transportation_cost,
+                    IFNULL(t.stevedorage_cost, 0) stevedorage_cost,
+                    IFNULL(
+                        t.sup_transportation_cost,
+                        0
+                    ) sup_transportation_cost,
+                    IFNULL(t.discount_price,0) discount_price,
+                    IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost
+                FROM
+                    dj_repair_mend_deliver s
+                INNER JOIN dj_repair_mend_materiel t ON s.id = t.repair_mend_deliver_id
+                INNER JOIN dj_basics_storefront_product bsp ON t.product_id = bsp.id
+                INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+                INNER JOIN dj_repair_mend_order m ON s.mend_order_id = m.id
+                INNER JOIN dj_member_address ma on (s.address_id=ma.id or s.house_id=ma.house_id)
+                WHERE
+                    s.storefront_id = #{storefrontId}
+                    <if test = "null!=productId and ''!=productId" >
+                        AND t.product_id = #{productId}
+                    </if>
+                    <if test = "null!=addressId and ''!=addressId" >
+                        and ma.id =#{addressId}
+                    </if>
+                    <if test = "null!=houseId and ''!=houseId" >
+                        and ma.house_id=#{houseId}
+                    </if>
+                AND m.type IN (2, 5)
+            ) tt
+    </select>
+    <!--利润统计-商品维度-退货单列表-->
+    <select id="storefrontProductDimensionMendDetail" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionOrderDetailDTO">
+        SELECT
+            tt.splitId,
+            tt.number,
+            tt.sendTime,
+            0 receiver,
+            tt.address,
+            sum(tt.returnCount) returnCount,
+            sum(tt.sup_stevedorage_cost) totalStevedorageCost,
+            sum(tt.sup_transportation_cost) totalTransportationCost,
+            sum(
+                tt.price * tt.returnCount - tt.stevedorage_cost - tt.transportation_cost - tt.discount_price
+            ) totalPrice,
+            tt.supPrice * tt.returnCount totalSupCost,
+            sum(
+                tt.supPrice * tt.returnCount - tt.sup_stevedorage_cost - tt.sup_transportation_cost
+            ) - sum(
+                tt.price * tt.returnCount - tt.transportation_cost - tt.stevedorage_cost-tt.discount_price
+            ) profit
+        FROM
+            (
+                SELECT
+                    s.id splitId,
+                    s.number,
+                    m.create_date sendTime,
+                    ma.address,
+                    IFNULL(
+                        (
+                            CASE
+                            WHEN s.shipping_state = 7 THEN
+                                t.shop_count
+                            ELSE
+                                t.actual_count
+                            END
+                        ),
+                        t.shop_count
+                    ) AS returnCount,
+                    t.cost AS supPrice,
+                    t.price AS price,
+                    IFNULL(t.transportation_cost, 0) transportation_cost,
+                    IFNULL(t.stevedorage_cost, 0) stevedorage_cost,
+                    IFNULL(
+                        t.sup_transportation_cost,
+                        0
+                    ) sup_transportation_cost,
+                    IFNULL(t.discount_price,0) discount_price,
+                    IFNULL(t.sup_stevedorage_cost, 0) sup_stevedorage_cost
+                FROM
+                    dj_repair_mend_deliver s
+                INNER JOIN dj_repair_mend_materiel t ON s.id = t.repair_mend_deliver_id
+                INNER JOIN dj_basics_storefront_product bsp ON t.product_id = bsp.id
+                INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+                INNER JOIN dj_repair_mend_order m ON s.mend_order_id = m.id
+                INNER JOIN dj_member_address ma on (s.address_id=ma.id or s.house_id=ma.house_id)
+                WHERE
+                    s.storefront_id = #{storefrontId}
+                <if test = "null!=productId and ''!=productId" >
+                    AND t.product_id = #{productId}
+                </if>
+                <if test = "null!=addressId and ''!=addressId" >
+                    and ma.id =#{addressId}
+                </if>
+                <if test = "null!=houseId and ''!=houseId" >
+                    and ma.house_id=#{houseId}
+                </if>
+                AND m.type IN (2, 5)
+            ) tt
+        GROUP BY
+            tt.splitId
+        order by tt.sendTime desc
+    </select>
+
+    <!--店铺利润-供应商维度-->
+    <select id="supplierDimension" resultType="com.dangjia.acg.dto.delivery.StoreSupplierDimensionDTO">
+        select tt.storefrontId,sum(tt.income) income,sum(tt.expenditure) expenditure,sum(tt.profit) profit,tt.supId,tt.name,tt.telephone,tt.checkPeople from (
+            SELECT
+                dsd.storefront_id AS storefrontId,
+                sum(IFNULL(dsd.total_amount, 0)) AS income,
+                sum(IFNULL(dsd.apply_money, 0)) AS expenditure,
+                sum(IFNULL(dsd.total_amount, 0)) - sum(IFNULL(dsd.apply_money, 0)) AS profit,
+                dsd.supplier_id AS supId,
+                t.`name` NAME,
+                t.telephone,
+                t.check_people checkPeople,
+                dsd.create_date createDate
+            FROM
+                dj_deliver_split_deliver dsd,
+                dj_supplier t
+            WHERE
+               dsd.supplier_id = t.id
+            AND dsd.storefront_id = #{storefrontId}
+            <if test = "null!=startTime and ''!=startTime" >
+                and dsd.create_date>=#{startTime}
+            </if>
+            <if test = "null!=endTime and ''!=endTime" >
+                <![CDATA[   and dsd.create_date<=#{endTime} ]]>
+            </if>
+            <if test = "null!=searchKey and ''!=searchKey" >
+                AND (
+                t.name LIKE CONCAT('%',#{searchKey},'%') or
+                t.telephone LIKE CONCAT('%', #{searchKey},'%') or
+                t.check_people LIKE CONCAT('%', #{searchKey},'%')
+                )
+            </if>
+            group by dsd.supplier_id
+            union all
+            SELECT
+                dsd.storefront_id AS storefrontId,
+                sum(IFNULL(dsd.apply_money, 0)) AS income,
+                sum(IFNULL(dsd.total_amount, 0)) AS expenditure,
+                (sum(IFNULL(dsd.apply_money, 0))- sum(IFNULL(dsd.total_amount, 0))) AS profit,
+                dsd.supplier_id AS supId,
+                t.`name` NAME,
+                t.telephone,
+                t.check_people checkPeople,
+                dsd.create_date createDate
+            FROM
+                dj_repair_mend_deliver dsd,
+                dj_repair_mend_order ss,
+                dj_supplier t
+            WHERE dsd.supplier_id = t.id
+            AND dsd.storefront_id = #{storefrontId}
+            and dsd.mend_order_id=ss.id
+            and ss.type in(2,5)
+            <if test = "null!=startTime and ''!=startTime" >
+                and dsd.create_date>=#{startTime}
+            </if>
+            <if test = "null!=endTime and ''!=endTime" >
+                <![CDATA[   and dsd.create_date<DATE_ADD(#{endTime},INTERVAL 1 DAY) ]]>
+            </if>
+            <if test = "null!=searchKey and ''!=searchKey" >
+                AND (
+                t.name LIKE CONCAT('%',#{searchKey},'%') or
+                t.telephone LIKE CONCAT('%', #{searchKey},'%') or
+                t.check_people LIKE CONCAT('%', #{searchKey},'%')
+                )
+            </if>
+            group by dsd.supplier_id
+        ) tt
+        group by tt.supId
+        order by tt.createDate DESC
+    </select>
+
+    <!--店铺利润-买家维度    -->
+    <select id="sellerDimension" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionDTO">
+        SELECT
+        IFNULL(dsd.storefront_id ,'') as storefrontId, -- 店铺id
+        IFNULL(dsd.ship_address ,'')AS shipAddress, -- 房子地址
+        IFNULL(m.NAME,'') as name, -- 业主姓名
+        IFNULL(sum(dsd.total_amount),'') AS income, -- 收入
+        IFNULL(sum(dsd.apply_money),'') AS expenditure,-- 支出
+        IFNULL(sum(dsd.total_amount)-sum(dsd.apply_money),'') AS profit, -- 利润
+        h.id AS houseId -- 房子id
+        FROM
+        dj_deliver_split_deliver dsd  -- 后台生成发货单
+        INNER JOIN dj_house h ON dsd.house_id = h.id -- 房子
+        INNER JOIN dj_member m ON m.id = h.member_id -- 工人
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id -- 要货单明细
+        WHERE dsd.storefront_id = #{storefrontId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%') or
+            m.NAME LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        and dsd.city_id=#{cityId}
+        GROUP BY h.id
+    </select>
+    <!-- 店鋪利潤統計-賣家維度-订单详情列表-->
+    <select id="sellerDimensionDetail" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionDetailDTO">
+        select
+         IFNULL(id,'') as orderSplitId ,
+         IFNULL(dos.number,'') as orderNumber,-- 要货订单号
+         IFNULL(dos.create_date,'') as createDate, -- 要货下单时间
+         IFNULL(house_id,'') as houseId
+         from dj_deliver_order_split dos where house_id=#{houseId}
+
+    </select>
+    <!-- 要货单商品详情 -->
+    <select id="shippingDetails" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionOrderDetailDTO">
+        select
+        IFNULL(dsd.id,'') as splitDeliverId ,
+        IFNULL(dsd.number,'') as number,-- 发货单号
+        IFNULL(dsd.send_time,'') as sendTime,-- 发货时间
+        IFNULL(dosi.price*dosi.num,'') as price  ,--  销售价
+        IFNULL(dosi.cost*dosi.num,'') as cost ,-- 成本价
+        IFNULL(dosi.price*dosi.num-dosi.cost*dosi.num,'') as profit-- 利润
+        from  dj_deliver_split_deliver dsd
+        inner join  dj_deliver_order_split_item dosi on dsd.id = dosi.split_deliver_id
+        where dosi.order_split_id=#{orderSplitId}
+
+    </select>
+
+    <select id="supplierDimensionSupplyDetails" resultType="com.dangjia.acg.dto.delivery.SupplierDimensionSupplyDTO" >
+
+        select tt.storefrontId,tt.shipAddress,tt.name,tt.mobile,sum(tt.income) income,sum(tt.expenditure) expenditure,sum(profit) profit,houseId,addressId,supId from (
+            SELECT
+                dsd.storefront_id AS storefrontId,
+                m.address AS shipAddress,
+                m.`name`,
+                m.mobile,
+                sum(IFNULL(dsd.total_amount, 0)) AS income,
+                sum(IFNULL(dsd.apply_money, 0)) AS expenditure,
+                sum(IFNULL(dsd.total_amount, 0)) - sum(IFNULL(dsd.apply_money, 0)) AS profit,
+                m.house_id houseId,
+                m.id addressId,
+                dsd.supplier_id supId,
+                dsd.create_date
+            FROM
+               dj_deliver_split_deliver dsd
+            INNER JOIN dj_member_address m ON (dsd.address_id = m.id OR dsd.house_id = m.house_id)
+            WHERE dsd.storefront_id = #{storefrontId}
+            <if test="null!=supId and ''!=supId">
+                AND dsd.supplier_id = #{supId}
+            </if>
+            <if test="null!=searchKey and ''!=searchKey">
+                AND (
+                m.address LIKE CONCAT('%',#{searchKey},'%') or
+                m.name LIKE CONCAT('%',#{searchKey},'%') or
+                m.mobile LIKE CONCAT('%',#{searchKey},'%')
+                )
+            </if>
+            GROUP BY m.id,m.house_id
+            union all
+            SELECT
+                dsd.storefront_id AS storefrontId,
+                m.address AS shipAddress,
+                m.`name`,
+                m.mobile,
+                sum(IFNULL(dsd.apply_money, 0)) AS income,
+                sum(IFNULL(dsd.total_amount, 0)) AS expenditure,
+                (sum(IFNULL(dsd.apply_money, 0))- sum(IFNULL(dsd.total_amount, 0))) AS profit,
+                m.house_id houseId,
+                m.id addressId,
+                dsd.supplier_id supId,
+                dsd.create_date
+            FROM
+                dj_repair_mend_deliver dsd
+            INNER JOIN dj_member_address m ON (dsd.address_id = m.id OR dsd.house_id = m.house_id)
+            WHERE dsd.storefront_id = #{storefrontId}
+            <if test="null!=supId and ''!=supId">
+                AND dsd.supplier_id = #{supId}
+            </if>
+            <if test="null!=searchKey and ''!=searchKey">
+                AND (
+                m.address LIKE CONCAT('%',#{searchKey},'%') or
+                m.name LIKE CONCAT('%',#{searchKey},'%') or
+                m.mobile LIKE CONCAT('%',#{searchKey},'%')
+                )
+            </if>
+            GROUP BY m.id,m.house_id
+        ) tt
+        group by tt.addressId,tt.houseId
+        ORDER BY tt.create_date DESC
+
+    </select>
+
+<!--店铺利润统计-供应商货单详情-->
+    <select id="supplierDimensionOrderDetails" resultType="com.dangjia.acg.dto.delivery.SupplierDimensionOrderDetailDTO">
+              SELECT tt.* from (
+                  SELECT
+                            dsd.id AS splitDevlierId,
+                            dsd.number AS number,
+                            dos.create_date AS createDate,
+                            sum(IFNULL(dsd.total_amount, 0)) AS income,
+                            sum(IFNULL(dsd.apply_money, 0)) AS expenditure,
+                            sum(IFNULL(dsd.total_amount, 0)) - sum(IFNULL(dsd.apply_money, 0)) AS profit,
+                            1 type
+                        FROM
+                            dj_deliver_split_deliver dsd
+                        INNER JOIN dj_deliver_order_split dos ON dsd.order_split_id = dos.id
+                        WHERE
+                            dsd.storefront_id = #{storefrontId}
+                        AND dsd.supplier_id =  #{supId}
+                        AND (
+                            dsd.address_id = #{addressId}
+                            OR dsd.house_id = #{houseId}
+                        )
+                    union all
+                     SELECT
+                            dsd.id AS splitDevlierId,
+                            dsd.number AS number,
+                            dos.create_date AS createDate,
+                            sum(IFNULL(dsd.apply_money, 0)) AS income,
+                            sum(IFNULL(dsd.total_amount, 0)) AS expenditure,
+                            (sum(IFNULL(dsd.apply_money, 0))- sum(IFNULL(dsd.total_amount, 0))) AS profit,
+                            2 type
+                        FROM
+                            dj_repair_mend_deliver dsd
+                        INNER JOIN dj_repair_mend_order dos ON dsd.mend_order_id = dos.id
+                        WHERE
+                            dsd.storefront_id = #{storefrontId}
+                        AND dsd.supplier_id = #{supId}
+                        AND (
+                            dsd.address_id = #{addressId}
+                            OR dsd.house_id = #{houseId}
+                        )
+             ) tt WHERE tt.splitDevlierId is not null
+            order by tt.createDate DESC
+    </select>
+    <!--店铺利润统计-供应商商品详情-->
+    <select id="supplierDimensionGoodsDetails" resultType="com.dangjia.acg.dto.delivery.SupplierDimensionGoodsDetailDTO">
+        SELECT
+        IFNULL(bsp.image,'') as image,-- 商品图片
+        IFNULL(bsp.product_name,'') AS productName,-- 商品名称
+        IFNULL(bpt.product_sn,'') AS productSn,-- 商品编号
+        IFNULL(dosi.num,'') as num,-- 发货数量
+        IFNULL(dosi.receive,'') as receiveCount,-- 收货数量
+        IFNULL(dosi.cost,'') as cost,-- 成本单价
+        IFNULL(dosi.cost*dosi.num,'') as totalCost,-- 成本总价
+        IFNULL(dosi.price,'') as price,-- 销售价
+        IFNULL(dosi.num*dosi.price,'') as totalPrice,-- 销售总价
+        IFNULL(dosi.product_id,'') AS productId -- 商品id
+        FROM
+        dj_deliver_order_split_item dosi  -- 店铺商品
+        INNER JOIN dj_basics_product_template bpt ON dosi.product_id = bpt.id -- 商品模板
+        INNER JOIN dj_basics_storefront_product bsp ON dosi.product_id = bsp.prod_template_id -- 订单详情
+        WHERE
+        1 = 1
+        AND bsp.data_status = 0
+        AND bsp.is_shelf_status = 1
+        AND dosi.storefront_id = #{storefrontId}
+        AND dosi.order_split_id=#{orderSplitId}
+        GROUP BY
+        dosi.product_id
+    </select>
+</mapper>

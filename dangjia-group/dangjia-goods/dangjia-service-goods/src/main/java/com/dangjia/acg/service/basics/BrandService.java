@@ -46,20 +46,21 @@ public class BrandService {
     private ProductService productService;
 
     //查询所有品牌
-    public ServerResponse<PageInfo> getAllBrand(PageDTO pageDTO) {
+    public ServerResponse<PageInfo> getAllBrand(PageDTO pageDTO,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Brand> brandlist = iBrandMapper.getBrands();
+            List<Brand> brandlist = iBrandMapper.getBrands(cityId);
             List<Map<String, Object>> list = new ArrayList<>();
             for (Brand brand : brandlist) {
                 Map<String, Object> obj = new HashMap<>();
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", brand.getId());
                 map.put("name", brand.getName());
+                map.put("image", brand.getImage());
                 map.put("createDate", brand.getCreateDate().getTime());
                 map.put("modifyDate", brand.getModifyDate().getTime());
-                List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId());
+                List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId(),cityId);
                 List<Map<String, Object>> mapList2 = new ArrayList<>();
                 for (BrandSeries bs : mapList) {
                     String[] imgArr = bs.getImage().split(",");
@@ -72,6 +73,7 @@ public class BrandService {
                     mapList2.add(mapSeries);
                 }
                 obj.put("mapList", mapList2);
+                map.put("imageUrl",address+brand.getImage());
                 obj.put("brand", map);
                 list.add(obj);
             }
@@ -85,12 +87,12 @@ public class BrandService {
     }
 
     //根据Id查询品牌
-    public ServerResponse select(String brandId) {
+    public ServerResponse select(String brandId,String cityId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Map<String, Object> obj = new HashMap<>();
             Brand brand = iBrandMapper.selectByPrimaryKey(brandId);
-            List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId());
+            List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId(),cityId);
             List<Map<String, Object>> mapList2 = new ArrayList<>();
             for (BrandSeries bs : mapList) {
                 String imageUrl = bs.getImage();
@@ -99,7 +101,9 @@ public class BrandService {
                 mapSeries.put("imageUrl", imageUrl);
                 mapList2.add(mapSeries);
             }
-            obj.put("brand", brand);
+            Map brandMap=BeanUtils.beanToMap(brand);
+            brandMap.put("imageUrl",address+brand.getImage());
+            obj.put("brand", brandMap);
             obj.put("mapList", mapList2);
             return ServerResponse.createBySuccess("查询成功", obj);
         } catch (Exception e) {
@@ -110,9 +114,10 @@ public class BrandService {
 
     //修改品牌
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse update(String id, String name, String brandSeriesList)throws RuntimeException{
+    public ServerResponse update(String id, String name,String brandImage,
+                                 String brandSeriesList,String cityId)throws RuntimeException{
         try {
-            List<Brand> brList = iBrandMapper.getBrandByName(name);
+            List<Brand> brList = iBrandMapper.getBrandByName(name,cityId);
             Brand brand1 = iBrandMapper.selectByPrimaryKey(id);
             if (brList.size() == 1) {
                 Brand br = brList.get(0);
@@ -125,7 +130,9 @@ public class BrandService {
             Brand brand = new Brand();
             brand.setId(id);
             brand.setName(name);
+            brand.setImage(brandImage);
             brand.setModifyDate(new Date());
+            brand.setCityId(cityId);
             iBrandMapper.updateByPrimaryKeySelective(brand);
             JSONArray brandSeriesLists = JSONArray.parseArray(brandSeriesList);
             for (int i = 0; i < brandSeriesLists.size(); i++) {
@@ -138,6 +145,7 @@ public class BrandService {
                 bSeries.setBrandId(brand.getId());
                 bSeries.setContent(content);
                 bSeries.setName(brandSeriesName);
+                bSeries.setCityId(cityId);
                 if (image != null && !"".equals(image)) {
                     bSeries.setImage(image);
                 }
@@ -158,7 +166,7 @@ public class BrandService {
     }
 
     //新增品牌
-    public ServerResponse insert(String brandSeriesList, String name) {
+    public ServerResponse insert(String brandSeriesList, String name,String brandImage,String cityId) {
         try {
             Example example = new Example(Brand.class);
             example.createCriteria().andEqualTo("name", name);
@@ -167,7 +175,9 @@ public class BrandService {
                 return ServerResponse.createByErrorMessage("品牌名称重复");
             }
             Brand brand = new Brand();
+            brand.setCityId(cityId);
             brand.setName(name);
+            brand.setImage(brandImage);
             brand.setCreateDate(new Date());
             brand.setModifyDate(new Date());
             iBrandMapper.insert(brand);
@@ -179,6 +189,7 @@ public class BrandService {
                 String image = brandSeries.getString("image");
 
                 BrandSeries bSeries = new BrandSeries();
+                bSeries.setCityId(cityId);
                 bSeries.setBrandId(brand.getId());
                 bSeries.setContent(content);
                 bSeries.setName(brandSeriesName);
@@ -195,13 +206,13 @@ public class BrandService {
     }
 
     //根据品牌名称查询品牌
-    public ServerResponse<PageInfo> getBrandByName(PageDTO pageDTO, String name) {
+    public ServerResponse<PageInfo> getBrandByName(PageDTO pageDTO, String name,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            List<Brand> Brandlist = iBrandMapper.getBrandByNames(name);
+            List<Brand> Brandlist = iBrandMapper.getBrandByNames(name,cityId);
             List<Map<String, Object>> list = new ArrayList<>();
             for (Brand brand : Brandlist) {
-                List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId());
+                List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId(),cityId);
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 List<Map<String, Object>> mapList2 = new ArrayList<>();
                 for (BrandSeries bs : mapList) {
@@ -218,7 +229,9 @@ public class BrandService {
                     mapList2.add(mapSeries);
                 }
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("brand", brand);
+                Map brandMap=BeanUtils.beanToMap(brand);
+                brandMap.put("imageUrl",address+brand.getImage());
+                map.put("brand", brandMap);
                 map.put("mapList", mapList2);
                 list.add(map);
             }

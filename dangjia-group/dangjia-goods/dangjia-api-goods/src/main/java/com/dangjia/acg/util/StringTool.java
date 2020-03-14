@@ -1,5 +1,6 @@
 package com.dangjia.acg.util;
 
+import com.dangjia.acg.common.util.CommonUtil;
 import com.github.pagehelper.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 
@@ -23,6 +24,22 @@ public class StringTool {
     }
 
     //取第一张图
+    public static String getImageSingle(String images, String imageLocal) {
+        try {
+            if (StringUtil.isNotEmpty(images)) {
+                String[] imageArr = images.split(",");
+                if(imageArr.length>0){
+                    return imageLocal + imageArr[0];
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";//图片上传错误
+        }
+        return "";//暂无图片
+    }
+
+    //全部转换全路径
     public static String getImage(String images, String imageLocal) {
         try {
             if (StringUtil.isNotEmpty(images)) {
@@ -134,4 +151,17 @@ public class StringTool {
         return url;
     }
 
+    public static String getLikeV(String input) {
+        if(!CommonUtil.isEmpty(input)) {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < input.length(); i++) {
+                if (i > 0) {
+                    result.append("%");
+                }
+                result.append(input.charAt(i));
+            }
+            return result.toString();
+        }
+        return null;
+    }
 }

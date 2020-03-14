@@ -1,0 +1,234 @@
+package com.dangjia.acg.controller.web.activity;
+
+import com.dangjia.acg.api.web.activity.DjStoreActivityAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
+import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.activity.DjStoreActivity;
+import com.dangjia.acg.modle.activity.DjStoreActivityExplain;
+import com.dangjia.acg.modle.activity.DjStoreActivityFractionRate;
+import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.service.activity.DjStoreActivityService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+/**
+ * Created with IntelliJ IDEA.
+ * author: wk
+ * Date: 2020/2/15
+ * Time: 14:21
+ */
+@RestController
+public class DjStoreActivityController implements DjStoreActivityAPI {
+
+    @Autowired
+    private DjStoreActivityService djStoreActivityService;
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse addActivities(DjStoreActivity djStoreActivity,String explains,String fractionRates) {
+        try {
+            return djStoreActivityService.addActivities(djStoreActivity,explains, fractionRates);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("配置失败");
+        }
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getSession(DjStoreActivity djStoreActivity) {
+        return djStoreActivityService.getSession(djStoreActivity);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivities(PageDTO pageDTO, Integer activityType) {
+        return djStoreActivityService.queryActivities(pageDTO,  activityType);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setActivities(DjStoreActivity djStoreActivity) {
+        try {
+            return djStoreActivityService.setActivities(djStoreActivity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("编辑失败");
+        }
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivitiesById(String id) {
+        return djStoreActivityService.queryActivitiesById(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivitiesOrSessionById(String id, Integer activityType) {
+        return djStoreActivityService.queryActivitiesOrSessionById(id,activityType);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivitiesByStorefront(String userId, String cityId, Integer activityType) {
+        return djStoreActivityService.queryActivitiesByStorefront(userId,cityId,activityType);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivitiesSessionByStorefront(String userId, String cityId, String id) {
+        return djStoreActivityService.queryActivitiesSessionByStorefront(userId,cityId,id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setStoreParticipateActivities(String userId, String cityId, String storeActivityId, String activitySessionId, Integer activityType) {
+        return djStoreActivityService.setStoreParticipateActivities(userId, cityId, storeActivityId, activitySessionId, activityType);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryWaitingSelectionProduct(String userId, String cityId, PageDTO pageDTO, String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.queryWaitingSelectionProduct(userId,cityId,pageDTO,storeActivityId,activitySessionId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySelectedWaitingSelectionCount(String userId, String cityId, String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.querySelectedWaitingSelectionCount(userId,cityId,storeActivityId,activitySessionId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySelectedProduct(String userId, String cityId, PageDTO pageDTO,String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.querySelectedProduct(userId,cityId,pageDTO,storeActivityId,activitySessionId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse deleteSelectedProduct(String id) {
+        return djStoreActivityService.deleteSelectedProduct(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setSelectActiveProduct(String userId, String cityId, String storeActivityId, String activitySessionId, String productId, Integer activityType, String storeParticipateActivitiesId) {
+        return djStoreActivityService.setSelectActiveProduct(userId,cityId,storeActivityId,activitySessionId,productId,activityType,storeParticipateActivitiesId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setCommit(String jsonStr, String storeParticipateActivitiesId) {
+        try {
+            return djStoreActivityService.setCommit(jsonStr,storeParticipateActivitiesId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryAuditstoresParticipateActivities(PageDTO pageDTO) {
+        return djStoreActivityService.queryAuditstoresParticipateActivities(pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryParticipatingShopsList(PageDTO pageDTO, Integer activityType,
+                                                      String storeActivityId, String activitySessionId) {
+        return djStoreActivityService.queryParticipatingShopsList(pageDTO,activityType,storeActivityId, activitySessionId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryBillGoods(PageDTO pageDTO, String id) {
+        return djStoreActivityService.queryBillGoods(pageDTO,id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setBillGoods(String id, Integer registrationStatus, String backReason) {
+        return djStoreActivityService.setBillGoods(id,registrationStatus,backReason);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryHomeGroupActivities(Integer limit) {
+        return djStoreActivityService.queryHomeGroupActivities(limit);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryHomeLimitedPurchaseActivities(Integer limit) {
+        return djStoreActivityService.queryHomeLimitedPurchaseActivities(limit);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryBuyMoreLimitedTime(String id) {
+        return djStoreActivityService.queryBuyMoreLimitedTime(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setwithdraw(String storeParticipateActivitiesId) {
+        return djStoreActivityService.setwithdraw(storeParticipateActivitiesId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySpellGroupList(String storeActivityProductId) {
+        return djStoreActivityService.querySpellGroupList(storeActivityProductId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setSpellGroup(String orderId) {
+        return djStoreActivityService.setSpellGroup(orderId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryActivityPurchaseRotation(String storeActivityProductId, Integer activityType) {
+        return djStoreActivityService.queryActivityPurchaseRotation(storeActivityProductId,activityType);
+    }
+
+    @Override
+    @ApiMethod
+    public void checkGroupPurchaseOrder() {
+        try {
+            djStoreActivityService.checkGroupPurchaseOrder();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 参与集福列表
+     * @param pageDTO
+     * @param storeActivityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryStoreActivityParticipatesList(PageDTO pageDTO,  String storeActivityId){
+        return djStoreActivityService.queryStoreActivityParticipatesList(pageDTO,storeActivityId);
+    }
+    /**
+     * 参与集福助力列表
+     * @param pageDTO
+     * @param participateId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryStoreActivitySupportList(PageDTO pageDTO,  String participateId){
+        return djStoreActivityService.queryStoreActivitySupportList(pageDTO,participateId);
+    }
+}

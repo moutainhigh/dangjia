@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper">
+
+    <sql id="all_columns">
+        id,
+        NAME,
+        parent_id AS parentId,
+        parent_top AS parentTop,
+        cover_image AS image,
+        create_date AS createDate,
+        modify_date AS modifyDate,
+        is_last_category AS isLastCategory,
+        purchase_restrictions AS purchaseRestrictions,
+        cover_image AS coverImage,
+        category_label_ids categoryLabelId,
+        owner_display ownerDisplay
+	</sql>
+    <!-- 删除对象 -->
+    <delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM dj_basics_goods_category 
+		WHERE id=#{id}
+	</delete>
+
+    <!-- 根据父id查询下属商品类别 -->
+    <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+            t.id,
+            t.NAME,
+            t.parent_id AS parentId,
+            t.parent_top AS parentTop,
+            t.cover_image AS image,
+            t.create_date AS createDate,
+            t.modify_date AS modifyDate,
+            t.is_last_category AS isLastCategory,
+            t.purchase_restrictions AS purchaseRestrictions,
+            t.cover_image AS coverImage,
+            t.category_label_ids categoryLabelId,
+            t.owner_display ownerDisplay
+        FROM
+          dj_basics_goods_category t
+            <if test="(categoryLabelId!=null and categoryLabelId!='') or (cityId!=null and cityId!='')">
+                ,dj_basics_goods_category t1
+            </if>
+            <if test="cityId!=null and cityId!=''">
+                ,dj_basics_goods g1
+            </if>
+        WHERE
+        t.parent_id = #{parentId}
+        <if test="cityId!=null and cityId!=''">
+            and t.owner_display='1'
+            and g1.category_id=t1.id and g1.buy!=2 and  g1.city_id =#{cityId}
+        </if>
+        <if test="(categoryLabelId!=null and categoryLabelId!='') or (cityId!=null and cityId!='')">
+            <if test='parentId!=null and parentId=="1"'>
+                and  t.id=t1.parent_top
+            </if>
+            <if test='parentId!=null and parentId!="1"'>
+                and (t.id=t1.parent_id or t.id=t1.id)
+            </if>
+            <if test="categoryLabelId!=null and categoryLabelId!=''">
+                and FIND_IN_SET(#{categoryLabelId},t1.category_label_ids)
+            </if>
+        </if>
+        GROUP BY t.id
+        ORDER BY
+          t.sort,
+          t.create_date ASC
+    </select>
+
+    <!-- 根据父id查询下属商品类别 -->
+    <select id="queryCategoryByName" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_goods_category where name =#{name}
+        ORDER BY sort,create_date asc
+    </select>
+    <select id="getProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
+        SELECT
+            p.id AS id,
+            p.image AS image,
+            p.price AS price,
+            u. NAME AS unitName,
+            g.type AS productType,
+            0 AS type,
+            p. NAME AS NAME
+            FROM
+            dj_basics_product_template p,
+            dj_basics_goods_category c,
+            dj_basics_goods g,
+            dj_basics_unit u
+        WHERE c.id = p.category_id
+        AND p.goods_id=g.id
+        and g.category_id=c.id
+        AND u.id = p.convert_unit
+        AND p.maket = 1
+        AND p.type = 1
+        and p.maket = 1
+        AND p.type = 1
+        <if test="categoryId!=null and categoryId!=''">
+            AND c.parent_top = #{categoryId}
+        </if>
+        ORDER BY p.istop DESC,
+        p.create_date DESC
+    </select>
+
+    <!-- 删除商品和系列关系 -->
+    <delete id="deleteCategorysSeries" parameterType="java.lang.String">
+		DELETE FROM dj_basics_category_brand
+		WHERE category_id=#{categoryId}
+	</delete>
+
+    <!-- 根据商品id查询关联品牌 -->
+    <select id="queryBrandByCategoryid" resultType="com.dangjia.acg.modle.brand.Brand">
+		SELECT
+			id,
+			name,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_brand
+		where
+		     id in(
+		        select
+		              brand_id
+		        from dj_basics_category_brand
+		        where
+		             category_id =#{categoryId}
+		        group by brand_id
+		     )
+		ORDER BY create_date desc
+	</select>
+
+    <!-- 根据商分类顶级id查询关联品牌 -->
+    <select id="queryBrandByTopCategoryid" resultType="com.dangjia.acg.modle.brand.Brand">
+        SELECT
+        b.id,
+        b.NAME,
+        b.image,
+        b.create_date AS createDate,
+        b.modify_date AS modifyDate
+        FROM
+        dj_basics_brand b
+        INNER JOIN dj_basics_category_brand p ON  FIND_IN_SET(b.id,p.brand_id)
+        INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
+        WHERE b.data_status= 0
+        <if test="wordKey!=null and wordKey!='' and categoryId!=null and categoryId!=''">
+            AND(
+            c.`name` LIKE CONCAT('%',#{wordKey},'%')
+            OR
+               (c.id = #{categoryId} OR c.parent_top = #{categoryId})
+            )
+        </if>
+
+        <if test="(categoryId==null || categoryId=='') and wordKey!=null and wordKey!=''">
+            AND c.`name` LIKE CONCAT('%',#{wordKey},'%')
+        </if>
+        <if test="(wordKey==null || wordKey=='') and categoryId!=null and categoryId!=''">
+            AND (c.id = #{categoryId} OR c.parent_top = #{categoryId})
+        </if>
+        GROUP BY b.id
+        ORDER BY
+        c.sort DESC
+    </select>
+
+    <!-- 查询当前顶级分类下的与有类别-->
+    <select id="getAllCategoryChildById" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        T1.*,
+        IF (
+        FIND_IN_SET(parentTop, @PIDS) > 0,
+        @PIDS := CONCAT(@PIDS, ',', T1.ID),
+        0
+        ) AS ISCHILD
+        FROM
+        (
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+        dj_basics_goods_category A
+        ) AS T1,
+        (
+        SELECT
+        @PIDS := #{parentTop}
+        ) t2
+        ) t3
+        WHERE
+        ISCHILD != '0'
+    </select>
+
+
+    <!-- 根据父id查询下属商品类别，不查末级分类 -->
+    <select id="queryGoodsCategoryExistlastCategory" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_goods_category where parent_id =#{parentId}
+        and is_last_category<![CDATA[ <> ]]> '1'
+        ORDER BY sort asc
+    </select>
+
+
+    <resultMap type="com.dangjia.acg.dto.product.CategoryGoodsProductDTO" id="categoryGoodsProductMap">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="categoryName" column="categoryName"/>
+        <result property="goodsName" column="goodsName"/>
+        <result property="cityId" column="cityId"/>
+        <collection property="goodsList" column="{id=id,goodsName=goodsName,cityId=cityId}" ofType="map" select="selectGoodsList"/>
+    </resultMap>
+
+    <resultMap id="categoryGoodsMap" type="com.dangjia.acg.dto.product.CategoryGoodsDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="goodsId" column="goodsId"/>
+        <result property="goodsName" column="goodsName"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="type" column="type"/>
+        <result property="buy" column="buy"/>
+        <result property="sales" column="sales"/>
+        <collection property="productList" column="{id=id}" ofType="map" select="selectProductList"/>
+    </resultMap>
+
+    <resultMap id="goodsProductMap" type="com.dangjia.acg.dto.product.GoodsProductDTO">
+        <id property="id" column="id"/>
+        <result property="productId" column="productId"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="productName" column="productName"/>
+        <result property="goodsId" column="goodsId"/>
+    </resultMap>
+
+
+    <select id="queryCategoryListByCategoryLikeName" resultMap="categoryGoodsProductMap">
+        SELECT
+            t.id,
+            t.id categoryId,
+            t.NAME categoryName,
+            #{goodsName} goodsName,
+            #{cityId}    cityId
+        FROM
+            dj_basics_goods_category t
+        WHERE
+            is_last_category = 1
+         and parent_id= #{categoryId}
+        <if test="goodsName!=null and goodsName!=''">
+            and exists (select 1 from dj_basics_goods t1 where t.id = t1.category_id and  t1.name like CONCAT('%',#{goodsName},'%'))
+        </if>
+        ORDER BY sort,create_date asc
+
+    </select>
+
+    <select id="selectGoodsList" parameterType="java.util.Map" resultMap="categoryGoodsMap">
+
+        SELECT
+            id,
+            id goodsId,
+            NAME goodsName,
+            category_id categoryId,
+            type,
+            buy,
+            sales
+        FROM
+            dj_basics_goods
+        where category_id= #{id}
+        and city_id=#{cityId}
+        <if test="goodsName!=null and goodsName!=''">
+            and name like CONCAT('%',#{goodsName},'%')
+        </if>
+        order by create_date desc
+
+    </select>
+
+    <select id="selectProductList" parameterType="java.util.Map" resultMap="goodsProductMap">
+
+        SELECT
+        t.id productId,
+        t.NAME productName,
+        t.category_id categoryId,
+        t.goods_id goodsId
+        FROM
+        dj_basics_product_template t,
+        dj_basics_storefront_product t1
+        where t.id=t1.prod_template_id
+        and t.goods_id=#{id}
+        and t1.is_shelf_status = '1'
+        and t1.data_status=0
+        and t.maket=1
+        and t.data_status = 0
+        group by productId,productName,categoryId,goodsId
+        order by t1.sell_price asc
+
+    </select>
+
+    <select id="queryLastCategoryList" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_goods_category
+        where is_last_category= '1'
+        <if test="searchKey!=null and searchKey!=''">
+            AND name LIKE CONCAT('%',#{searchKey},'%')
+        </if>
+        ORDER BY sort,create_date asc
+    </select>
+
+    <select id="queryMaintenanceRecordTopCategory" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+         <include refid="all_columns"/>
+        FROM
+            dj_basics_goods_category gc
+        WHERE
+            gc.parent_id = '1'
+        AND EXISTS (
+            SELECT
+               1
+            FROM
+                dj_basics_goods g,
+                dj_basics_goods_category gcp,
+                dj_basics_product_template pt
+            WHERE
+                g.category_id = gcp.id
+                AND gcp.parent_top = gc.id
+                and g.city_id=#{cityId}
+                and g.id=pt.goods_id
+                <choose>
+                    <when test="null!=workerTypeId and ''!=workerTypeId">
+                        and g.type=5
+                        and pt.worker_type_id=#{workerTypeId}
+                    </when>
+                    <otherwise>
+                        and g.type=0
+                    </otherwise>
+                </choose>
+                and gcp.id=pt.category_id
+        )
+    </select>
+</mapper>

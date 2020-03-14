@@ -62,22 +62,13 @@ public interface ActuaryOperationAPI {
      * 精算商品详情
      * gId="+bm.getGoodsId()+"&cityId="+cityId+"&type="+3+"&title=服务商品详情"
      */
-    @PostMapping("/actuary/actuaryOperation/getCommo")
+    /*@PostMapping("/actuary/actuaryOperation/getCommo")
     @ApiOperation(value = "精算商品详情", notes = "精算商品详情")
     ServerResponse getCommo(@RequestParam("request") HttpServletRequest request,
                             @RequestParam("gId") String gId,
                             @RequestParam("cityId") String cityId,
-                            @RequestParam("type") Integer type);
+                            @RequestParam("type") Integer type);*/
 
-    /**
-     * 商品详情
-     * gId:  WorkerGoodsId   ProductId
-     */
-    @PostMapping("/actuary/actuaryOperation/goodsDetail")
-    @ApiOperation(value = "普通-商品详情", notes = "普通-商品详情")
-    ServerResponse getGoodsDetail(@RequestParam("request") HttpServletRequest request,
-                                  @RequestParam("gId") String gId,
-                                  @RequestParam("type") Integer type);
 
     /**
      * 工序明细

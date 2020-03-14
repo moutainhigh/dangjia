@@ -2,7 +2,7 @@ package com.dangjia.acg.api.actuary;
 
 import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -51,9 +51,9 @@ public interface BudgetWorkerAPI {
 
     @PostMapping("/actuary/budgetWorker/getHouseBudgetWorkerId")
     @ApiOperation(value = "根据工地Id和人工ID查询精算", notes = "根据工地Id和人工ID查询精算")
-    BudgetWorker getHouseBudgetWorkerId(@RequestParam("cityId") String cityId,
-                                        @RequestParam("houseId") String houseId,
-                                        @RequestParam("workerGoodsId") String workerGoodsId);
+    BudgetMaterial getHouseBudgetWorkerId(@RequestParam("cityId") String cityId,
+                                          @RequestParam("houseId") String houseId,
+                                          @RequestParam("workerGoodsId") String workerGoodsId);
     /**
      * 根据houseId和wokerTypeId查询房子人工精算
      *
@@ -70,9 +70,9 @@ public interface BudgetWorkerAPI {
      *
      * @return
      */
-    @PostMapping("/actuary/budgetWorker/getAllWorkerGoods")
+    /*@PostMapping("/actuary/budgetWorker/getAllWorkerGoods")
     @ApiOperation(value = "获取所有人工商品", notes = "获取所有人工商品")
-    ServerResponse getAllWorkerGoods(@RequestParam("request") HttpServletRequest request);
+    ServerResponse getAllWorkerGoods(@RequestParam("request") HttpServletRequest request);*/
 
     /**
      * 制作精算模板
@@ -140,7 +140,8 @@ public interface BudgetWorkerAPI {
                                @RequestParam("actuarialTemplateId") String actuarialTemplateId,
                                @RequestParam("houseId") String houseId,
                                @RequestParam("workerTypeId") String workerTypeId,
-                               @RequestParam("listOfGoods") String listOfGoods);
+                               @RequestParam("listOfGoods") String listOfGoods,
+                               @RequestParam("cityId") String cityId);
 
     @PostMapping("/actuary/budgetWorker/importExcelBudgets")
     @ApiOperation(value = "Excel导入精算", notes = "Excel导入精算")

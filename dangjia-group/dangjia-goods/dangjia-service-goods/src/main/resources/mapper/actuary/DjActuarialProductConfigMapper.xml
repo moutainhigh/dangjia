@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.actuary.DjActuarialProductConfigMapper">
+
+    <sql id="all_columns">
+            id,
+            actuarial_template_id,
+            goods_id,
+            product_id,
+            purchase_quantity,
+            worker_type_id,
+            is_calculated_area isCalculatedArea,
+            default_recommend defaultRecommend,
+            is_hide isHide,
+            create_date,
+            modify_date,
+            create_by,
+            update_by,
+            data_status
+    </sql>
+
+
+    <select id="queryActuarialProductByConfigId" resultType="com.dangjia.acg.modle.actuary.DjActuarialProductConfig">
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+            dj_actuarial_product_config
+        WHERE
+	        actuarial_template_id = #{actuarialTemplateId}
+    </select>
+
+    <delete id="deleteActuarialProductByTemplate">
+        delete from dj_actuarial_product_config
+        where exists(select 1 from dj_actuarial_template_config t where t.data_status=1 and t.id=actuarial_template_id and service_type_id = #{serviceTypeId})
+        and city_id=#{cityId}
+    </delete>
+
+
+    <resultMap id="searchAppProductMap" type="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        <id property="id" column="id"/>
+        <result property="goodsId" column="goodsId"/>
+        <result property="productTemplateId" column="productTemplateId"/>
+        <result property="productId" column="productId"/>
+        <result property="productName" column="productName"/>
+        <result property="storefrontId" column="storefrontId"/>
+        <result property="price" column="price"/>
+        <result property="image" column="image"/>
+        <result property="productSn" column="productSn"/>
+        <result property="unit" column="unit"/>
+        <result property="unitName" column="unitName"/>
+        <result property="valueIdArr" column="valueIdArr"/>
+        <result property="valueNameArr" column="valueNameArr"/>
+        <result property="brandId" column="brandId"/>
+        <result property="isCalculatedArea" column="isCalculatedArea"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="productType" column="productType"/>
+        <result property="convertQuality" column="convertQuality"/>
+        <result property="convertUnit" column="convertUnit"/>
+        <result property="goodsBuy" column="goodsBuy"/>
+    </resultMap>
+    <select id="searchChangeProductList" resultMap="searchAppProductMap">
+        SELECT
+            t2.id productId,
+            t2.storefront_id storefrontId,
+            t3.id productTemplateId,
+            t3.product_sn productSn,
+            t2.product_name productName,
+            t3.goods_id goodsId,
+            t2.sell_price price,
+            t3.image,
+            t3.unit_id unit,
+            t3.unit_name unitName,
+            t3.value_id_arr valueIdArr,
+            t3.value_name_arr valueNameArr,
+            t4.brand_id brandId,
+            IFNULL(t1.is_calculated_area,'0') isCalculatedArea,
+            t4.category_id categoryId,
+            t4.type productType,
+            t4.buy goodsBuy,
+            t3.convert_quality convertQuality,
+            t3.convert_unit convertUnit
+        FROM
+            dj_basics_storefront_product t2
+        INNER JOIN dj_basics_product_template t3 ON t2.prod_template_id=t3.id
+        INNER JOIN dj_basics_goods t4 ON T3.goods_id=T4.id
+        LEFT JOIN dj_actuarial_product_config t1 on t2.prod_template_id=t1.product_id
+        WHERE   t3.goods_id =#{goodsId}
+        and   t2.is_shelf_status='1'
+    </select>
+    <!--查询模拟花费分类汇总-->
+    <select id="querySimulationCostByCategoryId" resultType="com.dangjia.acg.dto.actuary.app.SimulationCostCategoryDTO">
+        SELECT
+            t3.id categoryId,
+            t3.`name` categoryName,
+            sum(IFNULL(t2.price,1)*CEIL(IFNULL(t1.purchase_quantity,1)/IFNULL(t2.convert_quality,1))) totalPrice
+        FROM
+            dj_actuarial_product_config t1,
+            dj_basics_product_template t2,
+            dj_basics_goods_category t3
+        WHERE
+            t1.product_id = t2.id
+        AND t2.category_id = t3.id
+        AND t1.actuarial_template_id = #{actuarialTemplateId}
+        group by t3.id,t3.name
+        order by t3.create_date desc
+    </select>
+    <!--查询模拟花费详情信息-->
+    <select id="querySimulationCostInfoList" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        SELECT
+            t2.id productId,
+            t2.product_sn productSn,
+            t2.name productName,
+            t2.goods_id goodsId,
+            t2.price price,
+            t2.image,
+            t2.unit_id unit,
+            t2.unit_name unitName,
+            t2.value_id_arr valueIdArr,
+            t2.value_name_arr valueNameArr,
+            t4.brand_id brandId,
+            IFNULL(t1.purchase_quantity,1) shopCount,
+            CEIL(IFNULL(t1.purchase_quantity,1)/IFNULL(t2.convert_quality,1))  convertCount,
+            t4.type productType,
+            t4.buy goodsBuy,
+            t4.category_id categoryId,
+            t2.convert_quality convertQuality,
+            t2.convert_unit convertUnit
+        FROM
+            dj_actuarial_product_config t1,
+            dj_basics_product_template t2,
+            dj_basics_goods_category t3,
+            dj_basics_goods t4
+        WHERE
+            t1.product_id = t2.id
+        AND t2.category_id = t3.id
+        and t2.goods_id=t4.id
+        AND t1.actuarial_template_id = #{actuarialTemplateId}
+        and t2.category_id= #{categoryId}
+    </select>
+
+
+</mapper>

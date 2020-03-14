@@ -2,11 +2,16 @@ package com.dangjia.acg.controller.data;
 
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.service.matter.TechnologyRecordService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -81,5 +86,15 @@ public class TechnologyRecordController implements TechnologyRecordAPI {
         return technologyRecordService.getByProductId(productId,houseId);
     }
 
-
+    /**
+     * 查询当前工匠在当前房子上的所有已购买材料
+     * @param houseId 房子ID
+     * @param userToken 工匠ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getAllProductListByhouseMemberId(PageDTO pageDTO, String houseId, String userToken, String searchKey){
+        return technologyRecordService.getAllProductListByhouseMemberId(pageDTO,houseId,userToken,searchKey);
+    }
 }

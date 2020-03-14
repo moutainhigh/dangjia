@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.engineer;
 
+import com.dangjia.acg.api.BasicsStorefrontAPI;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -15,6 +17,7 @@ import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
+import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper;
@@ -25,6 +28,7 @@ import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
+import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
@@ -34,10 +38,13 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.core.HouseWorkerService;
+import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +65,7 @@ import java.util.*;
  */
 @Service
 public class EngineerService {
+    private static Logger logger = LoggerFactory.getLogger(EngineerService.class);
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
@@ -92,11 +100,20 @@ public class EngineerService {
     @Autowired
     private IHouseStyleTypeMapper houseStyleTypeMapper;
 
+    @Autowired
+    private RedisClient redisClient;
+
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
+
+    @Autowired
+    private DjSkillCertificationMapper djSkillCertificationMapper;
+
     /**
      * 已支付换工匠
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse changePayed(String houseWorkerId, String workerId) {
+    public ServerResponse changePayed(String userToken,String houseWorkerId, String workerId) {
         try {
             HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, 4, houseWorker.getWorkerId(), new Date());
@@ -123,8 +140,15 @@ public class EngineerService {
             hw.setCreateDate(houseWorker.getCreateDate());
             hw.setModifyDate(new Date());
             hw.setWorkerType(houseWorker.getWorkerType());
-            hw.setWorkType(4);//4已支付被平台换
+            if(CommonUtil.isEmpty(userToken)) {
+                hw.setWorkType(4);//4已支付被平台换
+            }else{
+                hw.setWorkType(2);//3已支付被管家换
+            }
             hw.setIsSelect(0);
+            hw.setPrice(houseWorker.getPrice());
+            hw.setType(houseWorker.getType());
+            hw.setBusinessId(houseWorker.getBusinessId());
             houseWorkerMapper.insert(hw);
 
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
@@ -158,7 +182,7 @@ public class EngineerService {
     }
 
     /**
-     * 抢单未支付
+     * 抢单未确认
      * 换工匠重新抢
      */
     public ServerResponse changeWorker(String houseWorkerId) {
@@ -217,7 +241,7 @@ public class EngineerService {
             houseFlow.setWorkerId(workerId);
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-            houseWorkerService.grabSheet(worker, house, houseFlow, houseMapper);
+            houseWorkerService.grabSheet(worker, house, houseFlow);
             if (houseWorker != null) {
                 houseWorker.setWorkerId(workerId);
                 houseWorker.setWorkType(1);//已抢单
@@ -231,6 +255,9 @@ public class EngineerService {
                 houseWorker.setWorkerType(houseFlow.getWorkerType());
                 houseWorker.setWorkType(1);//已抢单
                 houseWorker.setIsSelect(1);
+                houseWorker.setPrice(houseFlow.getWorkPrice());
+                houseWorker.setType(0);
+                houseWorker.setBusinessId(houseFlow.getId());
                 houseWorkerMapper.insert(houseWorker);
             }
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
@@ -585,6 +612,13 @@ public class EngineerService {
         map.put("idnumber", worker.getIdnumber());//身份证号码
         map.put("praiseRate", worker.getPraiseRate());//好评率
         map.put("volume", worker.getVolume());//成交量
+        map.put("checkType",worker.getCheckType());//审核状态
+        Example example=new Example(DjSkillCertification.class);
+        example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID,workerId)
+                .andEqualTo(DjSkillCertification.DATA_STATUS,0)
+                .andEqualTo(DjSkillCertification.TYPE,1);
+        Integer skillCertification = djSkillCertificationMapper.selectCountByExample(example);
+        map.put("skillCertification",skillCertification>0?1:0);//是否技能认证
         return ServerResponse.createBySuccess("查询成功", map);
     }
 
@@ -613,7 +647,8 @@ public class EngineerService {
                 map.put("supMobile", supervisor.getMobile());
                 map.put("supWorkerId", supervisor.getId());
             }
-
+            map.put("designerOk", house.getDesignerOk());
+            map.put("budgetOk", house.getBudgetOk());
             example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId())
                     .andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
@@ -623,8 +658,6 @@ public class EngineerService {
             if(houseWorkerList.size()>0){
                 map.put("createDate", houseWorkerList.get(0).getCreateDate());
             }
-            map.put("designerOk", house.getDesignerOk());
-            map.put("budgetOk", house.getBudgetOk());
             map.put("workerTypeId", houseFlow.getWorkerTypeId());
             map.put("workerType", houseFlow.getWorkerType());
             map.put("workSteta", houseFlow.getWorkSteta()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
@@ -658,9 +691,7 @@ public class EngineerService {
      */
     public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String searchKey, String startDate, String endDate, String supKey) {
         String userID = request.getParameter(Constants.USERID);
-
         String cityKey = request.getParameter(Constants.CITY_ID);
-//        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
         if (CommonUtil.isEmpty(cityKey)) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -838,10 +869,40 @@ public class EngineerService {
         }
     }
 
-    public ServerResponse getWareHouse(String houseId, PageDTO pageDTO) {
+    /**
+     * 人工定责--查询所有工匠列表
+     * @param searckKey 查询条件（用户名/电话）
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse searchWorkerAllList( String cityId,String searckKey ,PageDTO pageDTO){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<Map<String,Object>> memberList = memberMapper.searchWorkerAllList(cityId,searckKey);
+            PageInfo pageResult = new PageInfo(memberList);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    public ServerResponse getWareHouse( HttpServletRequest request,String searckKey ,String cityId,String houseId, PageDTO pageDTO) {
+        String userID = request.getParameter("userId");
+        //通过缓存查询店铺信息
+        /*Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
+        if(storefront==null)
+        {
+            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+        }*/
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(Warehouse.class);
-        example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId);
+        if(!CommonUtil.isEmpty(searckKey)){
+            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId)
+                    .andLike(Warehouse.PRODUCT_NAME, "%"+searckKey+"%");
+        }else {
+            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId);
+        }
         example.orderBy(Warehouse.PRODUCT_SN).desc();
         List<Warehouse> warehouseList = iWarehouseMapper.selectByExample(example);
         if (warehouseList == null) {
@@ -877,6 +938,92 @@ public class EngineerService {
         }
         pageResult.setList(warehouseMap);
         return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
+
+    /**
+     * 店铺--业主仓库（店铺汇总）
+     * @param request
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param addressId 地址ID
+     * @param storefrontId 店铺ID
+     * @param pageDTO 分页
+     * @return
+     */
+    public ServerResponse getStorefrontWareHouse(HttpServletRequest request,String cityId,String houseId,String addressId,String storefrontId, PageDTO pageDTO){
+       try{
+           //1.将业主仓库中，不存在店铺ID的商品补上店铺ID
+           iWarehouseMapper.updateStorefrontIdByHouseId(houseId,addressId);
+           //2.查询对应的数据
+           PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+           List<Warehouse> warehouseList = iWarehouseMapper.selectWareHouseInfoByStorefrontId(houseId,addressId,storefrontId);
+           if (warehouseList == null) {
+               return ServerResponse.createByErrorMessage("查无数据");
+           }
+           PageInfo pageResult = new PageInfo(warehouseList);
+           List<WareDTO> warehouseMap = getWareList(warehouseList,houseId,null,null);
+           pageResult.setList(warehouseMap);
+           return ServerResponse.createBySuccess("查询成功",pageResult);
+       }catch (Exception e){
+           logger.error("查询异常：",e);
+           return ServerResponse.createByErrorMessage("查询异常");
+       }
+    }
+
+    private List<WareDTO> getWareList(List<Warehouse> warehouseList,String houseId,String userName,String address){
+        List<WareDTO> warehouseMap=new ArrayList<>();
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        for (Warehouse warehouse : warehouseList) {
+            List<RepairMendDTO> repairMends = houseMapper.getRepairMend(houseId, warehouse.getProductId());
+            warehouse.setWorkBack(0.0);
+            warehouse.setOwnerBack(0.0);
+            for (RepairMendDTO r : repairMends) {
+                if (r.getType() == 4) {//仅退款数
+                    warehouse.setOwnerBack(warehouse.getOwnerBack() + r.getShopCount());
+                }else {//退货退款数
+                    warehouse.setWorkBack(warehouse.getWorkBack() + r.getShopCount());
+                }
+            }
+            warehouse.setImage(StringTool.getImageSingle(warehouse.getImage(),imageAddress));
+            WareDTO wareDTO = new WareDTO();
+            BeanUtils.beanToBean(warehouse, wareDTO);
+            wareDTO.setNoSend(warehouse.getShopCount() - warehouse.getAskCount());
+            wareDTO.setUserName(userName);
+            wareDTO.setAddress(address);
+            wareDTO.setLeftAskCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getOwnerBack());
+            wareDTO.setUseCount(warehouse.getReceive() - warehouse.getWorkBack());
+            warehouseMap.add(wareDTO);
+        }
+        return warehouseMap;
+    }
+
+
+    /**
+     * 店铺--导出业主仓库
+     * @param response
+     * @param houseId
+     * @param addressId
+     * @param storefrontId
+     * @param userName
+     * @param address
+     * @return
+     */
+    public ServerResponse exportStorefrontWareHouse(HttpServletResponse response,String houseId, String addressId,
+                                                    String storefrontId, String userName,  String address){
+        try {
+            List<Warehouse> warehouseList = iWarehouseMapper.selectWareHouseInfoByStorefrontId(houseId,addressId,storefrontId);
+            if (warehouseList == null) {
+                return ServerResponse.createByErrorMessage("查无数据");
+            }
+            List<WareDTO> warehouseMap = getWareList(warehouseList,houseId,userName,address);
+            ExportExcel exportExcel = new ExportExcel();//创建表格实例
+            exportExcel.setDataList("业主仓库", WareDTO.class, warehouseMap);
+            exportExcel.write(response, houseId + ".xlsx");
+            return ServerResponse.createBySuccessMessage("导出Excel成功");
+        } catch (Exception e) {
+            logger.error("导出失败",e);
+            return ServerResponse.createByErrorMessage("导出Excel失败");
+        }
     }
 
     public ServerResponse exportWareHouse(HttpServletResponse response, String houseId, String userName, String address) {

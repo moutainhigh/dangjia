@@ -21,7 +21,46 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		modify_date as modifyDate
 	</sql>
 
-	<!--查未支付保险-->
+	<!--减少维保：工序商品购买比阈值-->
+	<select id="getPayThreshold" resultType="map">
+		SELECT
+		(
+			SELECT
+				COUNT(m.id)
+			FROM
+				dj_actuary_budget_material m
+			INNER JOIN dj_basics_product_template t ON t.product_sn = m.product_sn
+			WHERE
+				t.is_influe_warranty_period = 1
+			AND m.delete_state NOT IN (1, 5)
+			AND m.house_id = #{houseId} AND m.worker_type_id = #{workerTypeId}
+		) allNum,
+		(
+			SELECT
+				COUNT(m.id)
+			FROM
+				dj_actuary_budget_material m
+			INNER JOIN dj_basics_product_template t ON t.product_sn = m.product_sn
+			WHERE
+				t.is_influe_warranty_period = 1
+			AND m.delete_state = 2
+			AND m.house_id = #{houseId} AND m.worker_type_id = #{workerTypeId}
+		) nNum
+	</select>
+	<!--减少维保：仅退款比例阈值-->
+	<select id="getMendProduct" resultType="map">
+		SELECT
+			w.owner_back,
+			m.shop_count
+		FROM
+			dj_actuary_budget_material m
+		INNER JOIN dj_basics_product_template t ON t.product_sn = m.product_sn
+		INNER JOIN dj_house_warehouse w ON w.product_sn = m.product_sn
+		WHERE
+			t.is_influe_warranty_period = 1
+		AND m.delete_state = 3 and w.owner_back>0
+		AND m.house_id = #{houseId} AND m.worker_type_id = #{workerTypeId}
+	</select>
 	<select id="getByNotPay" resultType="com.dangjia.acg.modle.safe.WorkerTypeSafeOrder">
 		select
 		<include refid="all_columns"/>
@@ -32,7 +71,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		and state = 0
 		and data_status=0
 	</select>
-
     <!--查保险-->
     <select id="getByWorkerTypeId" resultType="com.dangjia.acg.modle.safe.WorkerTypeSafeOrder">
         select

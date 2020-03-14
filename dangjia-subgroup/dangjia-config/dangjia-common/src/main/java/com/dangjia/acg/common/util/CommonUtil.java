@@ -1,7 +1,6 @@
 package com.dangjia.acg.common.util;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.shiro.web.session.HttpServletSession;
@@ -9,12 +8,13 @@ import org.apache.shiro.web.session.HttpServletSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -477,7 +477,221 @@ public class CommonUtil {
     return valueLength;
   }
 
+  /**
+   * 计算可退搬运费
+   * @param price 单价
+   * @param shopCount 购买总数
+   * @param returnCount 退货数量
+   * @param transportationCost  购买时运费
+   * @deprecated  计算规则为可退运费=(可退价钱/购买总价)*购买时总运费,四舍五入
+   * @return
+   */
+  public static Double getReturnRransportationCost(Double price, Double shopCount, Double returnCount, Double transportationCost){
+    Double returnTotalPrice=MathUtil.mul(price,returnCount);//可退价钱
+    Double totalPrice=MathUtil.mul(price,shopCount);//购买总价
+    Double returnRransportationCost=MathUtil.mul(MathUtil.div(returnTotalPrice,totalPrice),transportationCost);
+    return new Long(Math.round(returnRransportationCost)).doubleValue();
+  }
 
+  /**
+   * 计算可退搬运费
+   * @param elevator 是否电梯房（1是，0否）
+   * @param floor 电梯楼层
+   * @param isUpstairsCost 是否按1层收取上楼费(1是，0否）
+   * @param moveCost 每层搬运费
+   * @param returnCount 退货量
+   * @deprecated 1.先判断是否按1层收取上楼费
+   *             1.1若为否，则判断是否为电梯房
+   *             1.2若为否，则楼层数设置为实际楼层数，
+   *             1.3若都不为否，则楼层数设为1
+   *            可退搬运费=楼层数*每层搬运费*退货量
+   * @return
+   */
+  public static Double getReturnStevedorageCost(Integer elevator,String floor,String isUpstairsCost,Double moveCost,Double returnCount){
+      Double floorCount=1.0;//楼层数
+      if("0".equals(isUpstairsCost)){//判断是否按1层收取上楼费，若为否
+           if(elevator==0){//若不为电梯房，则楼层数设置为实际楼层数
+             if(StringUtils.isNotBlank(floor)){
+               floorCount=new Double(floor).doubleValue();
+             }
+           }
+      }
+      return MathUtil.mul(MathUtil.mul(floorCount,moveCost),returnCount);
+  }
+
+  /**
+   * 获取计算搬运费的楼层数
+   * @param elevator
+   * @param floor
+   * @param isUpstairsCost
+   * @return
+   */
+  public Double getFloorCount(Integer elevator,String floor,String isUpstairsCost){
+    Double floorCount=1.0;//楼层数
+    if("0".equals(isUpstairsCost)){//判断是否按1层收取上楼费，若为否
+      if(elevator==0){//若不为电梯房，则楼层数设置为实际楼层数
+        if(StringUtils.isNotBlank(floor)){
+          floorCount=new Double(floor).doubleValue();
+        }
+      }
+    }
+    return floorCount;
+  }
+
+  /**
+   * 等待时间值查询
+   * @param nodeCode
+   * @return
+   */
+  public static String getParayKey(String nodeCode){
+    String parayKey="";
+    switch (nodeCode){
+      case "RA_001" :
+      case "RA_002" :
+        parayKey="RETURN_MERCHANT_PROCESS_TIME";//店铺申请等待商家处理时间（单位H）
+        break;
+      case "RA_004":
+        parayKey="RETURN_PLATFORM_INTERVENTION_TIME";//店铺拒绝退货，等待申请平台介入时间（单位H）
+        break;
+      case "RA_005":
+        parayKey="RETURN_PLATFORM_PROCESS_TIME";//业主申诉后，等待平台处理时间（单位H）
+        break;
+      default:
+        break;
+    }
+    return parayKey;
+  }
+
+
+  /**
+   * 退货单中的状态显示
+   * @param state
+   * @return
+   */
+  public static String getStateName(String state){
+    //（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回）
+    String stateName="";
+    switch (state){
+      case "1" :
+        stateName="退款待处理";
+        break;
+      case "2":
+        stateName="已拒绝退款";
+        break;
+      case "3":
+      case "4":
+        stateName="退款成功";
+        break;
+      case "5":
+      case "6":
+        stateName="退款关闭";
+        break;
+      default:
+        break;
+    }
+    return stateName;
+  }
+
+  /**
+   * 退货单中的状态显示
+   * @param state
+   * @return
+   */
+  public static String getStateWorkerName(String state){
+    String stateName="大管家审核中";
+    switch (state){
+      case "RA_012" :
+      case "RA_013" :
+        stateName="大管家审核中";
+        break;
+      case "RA_014":
+      case "RA_017":
+      case "RA_019":
+        stateName="退人工关闭";
+        break;
+      case "RA_022":
+        stateName="补人工关闭";
+        break;
+      case "RA_015":
+      case "RA_016":
+        stateName="工匠审核中";
+        break;
+      case "RA_021":
+        stateName="业主审核中";
+        break;
+      case "RA_018":
+        stateName="退人工成功";
+        break;
+      case "RA_023":
+        stateName="补人工成功";
+        break;
+      default:
+        break;
+    }
+    return stateName;
+  }
+
+  public static String getChangeStateName(String state,String type){
+    //状态：0管家处理中,1管家取消,2管家通过(补:业主审核中,退:工匠审核中),3管家重新提交数量,4补人工支付完成,5待业主支付,6退人工完成,7已撤回,8
+    String stateName="大管家审核中";
+    String workerName="工匠";
+    String str="补";
+    if("2".equals(type)){
+      str="退";
+    }
+    if("2".equals(type)||"3".equals(type)){
+      workerName="业主";
+    }
+    switch (state){
+      case "0" :
+        stateName="大管家审核中";
+        break;
+      case "1":
+      case "7":
+        stateName="退人工关闭";
+        break;
+      case "8":
+        stateName="补人工关闭";
+        break;
+      case "2":
+        stateName=workerName+"审核中";
+        break;
+      case "3":
+      case "4":
+      case "5":
+      case "6":
+        stateName=str+"人工成功";
+        break;
+      default:
+        break;
+    }
+    return stateName;
+  }
+
+  public static String getDeliverStateName(Integer state) {
+    String stateName="退货待处理";
+    //状态0供应商待确认,1已确认,2已结算,3取消，4部分退货，5业主申诉部分退货，6业主认可部分退货，7平台同意（按业主申请退），8平台驳回（按供应商同意退）
+    switch (state) {
+      case 4:
+        stateName = "部分退货";
+        break;
+      case 5:
+        stateName = "平台处理中";
+        break;
+      case 6:
+        stateName = "业主认可部分收货";
+        break;
+      case 2:
+      case 3:
+      case 7:
+      case 8:
+        stateName = "已完成";
+        break;
+      default:
+        break;
+    }
+    return stateName;
+  }
   /**
    * 判断对象属性是否是基本数据类型,包括是否包括string
    * @param className
@@ -505,4 +719,95 @@ public class CommonUtil {
             className.equals(Boolean.class) ||
             className.equals(boolean.class);
   }
+
+  private static String nums[] = {"零", "一", "二", "三", "四", "五", "六", "七", "八", "九"};
+
+  private static String pos_units[] = {"", "十", "百", "千"};
+
+  private static String weight_units[] = {"", "万", "亿"};
+
+  /**
+   * 数字转汉字【新】
+   *
+   * @param num
+   * @return
+   */
+  public static String numberToChinese(int num) {
+    if (num == 0) {
+      return "零";
+    }
+
+    int weigth = 0;//节权位
+    String chinese = "";
+    String chinese_section = "";
+    boolean setZero = false;//下一小节是否需要零，第一次没有上一小节所以为false
+    while (num > 0) {
+      int section = num % 10000;//得到最后面的小节
+      if (setZero) {//判断上一小节的千位是否为零，是就设置零
+        chinese = nums[0] + chinese;
+      }
+      chinese_section = sectionTrans(section);
+      if (section != 0) {//判断是都加节权位
+        chinese_section = chinese_section + weight_units[weigth];
+      }
+      chinese = chinese_section + chinese;
+      chinese_section = "";
+      setZero = (section < 1000) && (section > 0);
+      num = num / 10000;
+      weigth++;
+    }
+    if ((chinese.length() == 2 || (chinese.length() == 3)) && chinese.contains("一十")) {
+      chinese = chinese.substring(1, chinese.length());
+    }
+    if (chinese.indexOf("一十") == 0) {
+      chinese = chinese.replaceFirst("一十", "十");
+    }
+
+    return chinese;
+  }
+  /**
+   * 将每段数字转汉子
+   *
+   * @param section
+   * @return
+   */
+  public static String sectionTrans(int section) {
+    StringBuilder section_chinese = new StringBuilder();
+    int pos = 0;//小节内部权位的计数器
+    boolean zero = true;//小节内部的置零判断，每一个小节只能有一个零。
+    while (section > 0) {
+      int v = section % 10;//得到最后一个数
+      if (v == 0) {
+        if (!zero) {
+          zero = true;//需要补零的操作，确保对连续多个零只是输出一个
+          section_chinese.insert(0, nums[0]);
+        }
+      } else {
+        zero = false;//有非零数字就把置
+        section_chinese.insert(0, pos_units[pos]);
+        section_chinese.insert(0, nums[v]);
+      }
+      pos++;
+      section = section / 10;
+    }
+    return section_chinese.toString();
+  }
+
+  public static String md5(String string) {
+    byte[] hash;
+    try {
+      hash = MessageDigest.getInstance("MD5").digest(string.getBytes("UTF-8"));
+    } catch (NoSuchAlgorithmException e) {
+      return string;
+    } catch (UnsupportedEncodingException e) {
+      return string;
+    }
+    StringBuilder hex = new StringBuilder(hash.length * 2);
+    for (byte b : hash) {
+      if ((b & 0xFF) < 0x10) hex.append("0");
+      hex.append(Integer.toHexString(b & 0xFF));
+    }
+    return hex.toString();
+  }
+
 }

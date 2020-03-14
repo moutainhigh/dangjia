@@ -123,6 +123,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_core_house_flow
         where  house_id=#{houseId}
         and worker_type_id =#{workerTypeId}
+        limit 1
     </select>
 
     <!--根据houseId查询已进场未完工工序-->
@@ -256,6 +257,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and state=0
         and worker_type not in (1,2,3)
         order by sort asc
+    </select>
+
+    <!-- 根据用户id查询[所有房子][正在施工][所有工序] -->
+    <select id="queryWorkerTypeListByMemberId" resultType="java.lang.Integer">
+        SELECT worker_type
+        FROM dj_core_house_flow chf
+        LEFT JOIN dj_house h ON chf.house_id = h.id
+        WHERE h.member_id = #{memberId}
+          AND work_steta in (0,1,4)
+    </select>
+
+    <select id="optimizationHander" resultType="java.util.Map">
+        SELECT
+            b.name,
+            a.worker_type AS i
+        FROM
+            dj_core_house_flow a,
+            dj_core_worker_type b
+        WHERE
+            a.worker_type_id = b.id
+        AND a.id=#{houseFlowId}
     </select>
 </mapper>
 

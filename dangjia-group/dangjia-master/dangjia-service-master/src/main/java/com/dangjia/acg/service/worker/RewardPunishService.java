@@ -3,27 +3,38 @@ package com.dangjia.acg.service.worker;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.DateUtil;
-import com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO;
-import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
+import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.worker.*;
+import com.dangjia.acg.mapper.complain.IComplainMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.*;
+import com.dangjia.acg.modle.complain.Complain;
+import com.dangjia.acg.modle.core.HouseWorker;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.supervisor.PatrolRecordServices;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -52,19 +63,32 @@ public class RewardPunishService {
     private IHouseMapper houseMapper;
 
     @Autowired
+    private IComplainMapper complainMapper;
+    @Autowired
     private IWorkIntegralMapper iWorkIntegralMapper;
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
 
     @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
+    @Autowired
     private IMemberMapper memberMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
+    @Autowired
+    private ConfigUtil configUtil;
+    @Autowired
+    private PatrolRecordServices patrolRecordServices;
 
     /**
      * 保存奖罚条件及条件明细
      *
      * @return
      */
-    public ServerResponse addRewardPunishCorrelation(String id, String name, String content, Integer type, Integer state, String conditionArr,BigDecimal quantity) {
+    public ServerResponse addRewardPunishCorrelation(String id, String name, String content, Integer type, Integer state, String conditionArr, BigDecimal quantity) {
         try {
             RewardPunishCorrelation rewardPunishCorrelation = new RewardPunishCorrelation();
             rewardPunishCorrelation.setName(name);
@@ -145,11 +169,9 @@ public class RewardPunishService {
      *
      * @return
      */
-    public ServerResponse queryCorrelation(PageDTO pageDTO, String name, Integer type) {
+    public ServerResponse queryCorrelation(String name, Integer type) {
         try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<RewardPunishCorrelationDTO> correlationList = rewardPunishCorrelationMapper.queryCorrelation(name, type);
-            PageInfo pageResult = new PageInfo(correlationList);
             List<Map<String, Object>> listMap = new ArrayList<>();
             for (RewardPunishCorrelationDTO correlation : correlationList) {
                 Map<String, Object> correlationMap = BeanUtils.beanToMap(correlation);
@@ -166,8 +188,7 @@ public class RewardPunishService {
                 correlationMap.put("conditionArr", conditionArr.toString());
                 listMap.add(correlationMap);
             }
-            pageResult.setList(listMap);
-            return ServerResponse.createBySuccess("查询奖罚条件成功", pageResult);
+            return ServerResponse.createBySuccess("查询奖罚条件成功", listMap);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询奖罚条件失败");
@@ -223,6 +244,7 @@ public class RewardPunishService {
      * @param userToken
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse addRewardPunishRecord(String userToken, String userId, RewardPunishRecord rewardPunishRecord) {
         try {
             if (!CommonUtil.isEmpty(userToken)) {
@@ -246,9 +268,14 @@ public class RewardPunishService {
             updateWorkerInfo(rewardPunishRecord.getId());
             if (!CommonUtil.isEmpty(rewardPunishRecord.getHouseId()) && rewardPunishRecord.getHouseId() != null && rewardPunishRecord.getMemberId() != null) {
                 House house = houseMapper.selectByPrimaryKey(rewardPunishRecord.getHouseId());
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, rewardPunishRecord.getMemberId(),
-                        "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), "7");
+                configMessageService.addConfigMessage( AppType.GONGJIANG, rewardPunishRecord.getMemberId(),
+                        "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), 3,null,null);
             }
+            //添加记录到督导工作记录中
+            patrolRecordServices.addPatrolRecord(rewardPunishRecord.getOperatorId(),
+                    rewardPunishRecord.getHouseId(), rewardPunishRecord.getRemarks(),
+                    rewardPunishRecord.getImages(), rewardPunishRecord.getType(),
+                    rewardPunishRecord.getId());
             return ServerResponse.createBySuccessMessage("新增奖罚记录成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -304,7 +331,7 @@ public class RewardPunishService {
                     workerDetail.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(bigDecimal);
-                    workerDetail.setState(2);
+                    workerDetail.setState(12);
                     iWorkerDetailMapper.insert(workerDetail);
                 }
 
@@ -329,7 +356,7 @@ public class RewardPunishService {
                     workerDetail.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(bigDecimal);
-                    workerDetail.setState(3);
+                    workerDetail.setState(13);
                     iWorkerDetailMapper.insert(workerDetail);
                 }
             }
@@ -337,13 +364,22 @@ public class RewardPunishService {
         }
     }
 
+
+    public ServerResponse getMyRewardPunishRecord(String userToken,String houseId, PageDTO pageDTO) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        return queryRewardPunishRecord(null,member.getId(),houseId,pageDTO);
+    }
     /**
      * 根据userToken查询奖罚记录
      *
      * @param userToken
      * @return
      */
-    public ServerResponse queryRewardPunishRecord(String userToken, String workerId, PageDTO pageDTO) {
+    public ServerResponse queryRewardPunishRecord(String userToken, String workerId,String houseId, PageDTO pageDTO) {
         try {
 
             Example example = new Example(RewardPunishRecord.class);
@@ -354,10 +390,13 @@ public class RewardPunishService {
                     return (ServerResponse) object;
                 }
                 Member member = (Member) object;
-                criteria.andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
+                criteria.andEqualTo(RewardPunishRecord.OPERATOR_ID, member.getId());
             }
             if (!CommonUtil.isEmpty(workerId)) {
                 criteria.andEqualTo(RewardPunishRecord.MEMBER_ID, workerId);
+            }
+            if (!CommonUtil.isEmpty(houseId)) {
+                criteria.andEqualTo(RewardPunishRecord.HOUSE_ID, houseId);
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             example.orderBy(RewardPunishRecord.CREATE_DATE).desc();
@@ -369,6 +408,16 @@ public class RewardPunishService {
                     RewardPunishRecordDTO rewardPunishRecordDTO = new RewardPunishRecordDTO();
                     rewardPunishRecordDTO.setId(record.getId());
                     recordDTOS.addAll(rewardPunishRecordMapper.queryRewardPunishRecord(rewardPunishRecordDTO));
+                }
+                for (RewardPunishRecordDTO recordDTO : recordDTOS) {
+                    Member member=memberMapper.selectByPrimaryKey(recordDTO.getOperatorId());
+                    if(member!=null){
+                        recordDTO.setOperatorName(CommonUtil.isEmpty(member.getName())?member.getNickName():member.getName());
+                        recordDTO.setOperatorTypeName(workerTypeMapper.getName(member.getWorkerType()));
+                    }else{
+                        MainUser user=userMapper.selectByPrimaryKey(recordDTO.getOperatorId());
+                        recordDTO.setOperatorName(CommonUtil.isEmpty(user.getUsername())?user.getMobile():user.getUsername());
+                    }
                 }
                 pageResult.setList(recordDTOS);
                 return ServerResponse.createBySuccess("ok", pageResult);
@@ -389,11 +438,36 @@ public class RewardPunishService {
      */
     public ServerResponse getRewardPunishRecord(String recordId) {
         try {
+
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             RewardPunishRecordDTO example = new RewardPunishRecordDTO();
             example.setId(recordId);
             List<RewardPunishRecordDTO> recordList = rewardPunishRecordMapper.queryRewardPunishRecord(example);
             if (recordList != null && recordList.size() > 0) {
-                return ServerResponse.createBySuccess("ok", recordList.get(0));
+                RewardPunishRecordDTO rewardPunishRecordDTO=recordList.get(0);
+                if(!CommonUtil.isEmpty(rewardPunishRecordDTO.getImages())){
+                    rewardPunishRecordDTO.setImages(imageAddress+rewardPunishRecordDTO.getImages());
+                }
+                Member member=memberMapper.selectByPrimaryKey(rewardPunishRecordDTO.getOperatorId());
+                if(member!=null){
+                    rewardPunishRecordDTO.setOperatorName(CommonUtil.isEmpty(member.getName())?member.getNickName():member.getName());
+                    rewardPunishRecordDTO.setOperatorTypeName(workerTypeMapper.getName(member.getWorkerType()));
+                }else{
+                    MainUser user=userMapper.selectByPrimaryKey(rewardPunishRecordDTO.getOperatorId());
+                    rewardPunishRecordDTO.setOperatorName(CommonUtil.isEmpty(user.getUsername())?user.getMobile():user.getUsername());
+                    rewardPunishRecordDTO.setOperatorTypeName("");
+                }
+                rewardPunishRecordDTO.setIsComplain(-1);//未投诉
+                Example examples = new Example(Complain.class);
+                examples.createCriteria().andEqualTo(Complain.BUSINESS_ID,recordId)
+                            .andEqualTo(Complain.BUSINESS_ID, recordId)
+                            .andEqualTo(Complain.DATA_STATUS, 0);
+                List<Complain> complains = complainMapper.selectByExample(examples);
+                if(complains.size()>0){
+                    rewardPunishRecordDTO.setIsComplain(complains.get(0).getStatus());//-1：未投诉 0:待处理。1.驳回。2.接受
+                    rewardPunishRecordDTO.setComplainId(complains.get(0).getId());
+                }
+                return ServerResponse.createBySuccess("ok", rewardPunishRecordDTO);
             } else {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -401,6 +475,48 @@ public class RewardPunishService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("根据userToken查询奖罚记录失败");
+        }
+    }
+
+
+
+    /**
+     * 奖罚-选择工匠列表
+     *
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryCraftsmenList( String houseId) {
+        try {
+            //获取图片url
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            List<CraftsmenListDTO> listMap = new ArrayList<>();//返回工匠list
+            //管家和工匠都能联系精算和设计
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria()
+                    .andEqualTo(HouseWorker.HOUSE_ID, houseId)
+                    .andCondition(" work_type in(6,8) ")
+                    .andCondition(" worker_type > 2 ");
+            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+            for (HouseWorker houseWorker : houseWorkerList) {
+                CraftsmenListDTO map = new CraftsmenListDTO();
+                Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+                if (worker2 == null) {
+                    continue;
+                }
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId());
+                map.setWorkerTypeName(workerType.getName());
+                map.setWorkerTypeColor(workerType.getColor());
+                map.setName(worker2.getName());
+                map.setMobile(worker2.getMobile());
+                map.setHead(imageAddress+worker2.getHead());
+                map.setWorkerId( worker2.getId());
+                listMap.add(map);
+            }
+            return ServerResponse.createBySuccess("查询成功", listMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("奖罚-选择工匠列表异常");
         }
     }
 }

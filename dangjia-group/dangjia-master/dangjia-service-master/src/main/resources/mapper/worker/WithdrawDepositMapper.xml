@@ -4,41 +4,86 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.worker.IWithdrawDepositMapper">
     <select id="getWebWithdrawList" resultType="com.dangjia.acg.dto.finance.WebWithdrawDTO">
-        SELECT
-        w.id AS id,
-        w.name AS name,
-        m.mobile AS mobile,
-        w.worker_id AS workerId,
-        w.state AS state,
-        w.money AS money,
-        w.rate_money AS rateMoney,
-        w.bank_name AS bankName,
-        w.card_number AS cardNumber,
-        w.processing_date AS processingDate,
-        w.create_date AS createDate,
-        w.modify_date AS modifyDate,
-        w.data_status AS dataStatus,
-        w.role_type AS roleType,
-        w.image AS image,
-        w.reason AS reason,
-        w.memo AS memo
-        FROM
-        dj_worker_withdraw_deposit w
-        INNER JOIN dj_member m ON w.worker_id = m.id
-        WHERE
-        w.data_status = 0
-        <if test="state!=-1">
-            and w.state = #{state}
-        </if>
-        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            and w.modify_date between #{beginDate} and #{endDate}
-        </if>
-        <if test="searchKey!=null and searchKey!=''">
-            and ( w.name like CONCAT('%',#{searchKey},'%')
-            or m.mobile like CONCAT('%',#{searchKey},'%'))
-        </if>
-        ORDER BY
-        w.create_date DESC
+        select * from (
+            SELECT
+            w.id AS id,
+            w.name AS name,
+            m.mobile AS mobile,
+            w.worker_id AS workerId,
+            w.state AS state,
+            w.money AS money,
+            w.rate_money AS rateMoney,
+            w.apply_money AS applyMoney,
+            w.bank_name AS bankName,
+            w.card_number AS cardNumber,
+            w.processing_date AS processingDate,
+            w.create_date AS createDate,
+            w.modify_date AS modifyDate,
+            w.data_status AS dataStatus,
+            w.role_type AS roleType,
+            w.image AS image,
+            w.reason AS reason,
+            w.memo AS memo
+            FROM
+            dj_worker_withdraw_deposit w
+            INNER JOIN dj_member m ON w.worker_id = m.id
+            INNER JOIN
+            ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name
+            FROM
+            dj_member_city c GROUP BY c.member_id )mt ON mt.member_id = m.id
+            AND FIND_IN_SET(#{cityId}, mt.city_id )
+            WHERE
+            w.data_status = 0
+            <if test="state!=-1">
+                and w.state = #{state}
+            </if>
+            <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+                and w.create_date between #{beginDate} and #{endDate}
+            </if>
+            <if test="searchKey!=null and searchKey!=''">
+                and ( w.name like CONCAT('%',#{searchKey},'%')
+                or m.mobile like CONCAT('%',#{searchKey},'%'))
+            </if>
+            UNION
+            SELECT
+            w.id AS id,
+            w. NAME AS NAME,
+            m.mobile AS mobile,
+            w.worker_id AS workerId,
+            w.state AS state,
+            w.money AS money,
+            w.rate_money AS rateMoney,
+            w.apply_money AS applyMoney,
+            w.bank_name AS bankName,
+            w.card_number AS cardNumber,
+            w.processing_date AS processingDate,
+            w.create_date AS createDate,
+            w.modify_date AS modifyDate,
+            w.data_status AS dataStatus,
+            w.role_type AS roleType,
+            w.image AS image,
+            w.reason AS reason,
+            w.memo AS memo
+            FROM
+            dj_worker_withdraw_deposit w
+            INNER JOIN dj_user m ON w.worker_id = m.id
+            INNER JOIN
+            (SELECT c.id, GROUP_CONCAT(c.city_id) city_id, c.city_name
+            FROM dj_system_job c GROUP BY c.id )mt ON mt.id = m.job_id
+            AND FIND_IN_SET(#{cityId},mt.city_id)
+            WHERE
+            w.data_status = 0
+            <if test="state!=-1">
+                and w.state = #{state}
+            </if>
+            <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+                and w.create_date between #{beginDate} and #{endDate}
+            </if>
+            <if test="searchKey!=null and searchKey!=''">
+                and ( w.name like CONCAT('%',#{searchKey},'%')
+                or m.mobile like CONCAT('%',#{searchKey},'%'))
+            </if>
+        )t  ORDER BY t.createDate DESC
     </select>
 
 

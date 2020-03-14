@@ -172,7 +172,6 @@ public class ImageUtil {
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
         return extension;
     }
-
     /**
      * 给图片赋上全路径（多张）
      * @param address
@@ -193,4 +192,5 @@ public class ImageUtil {
         }
         return imgStr.toString();
     }
+
 }

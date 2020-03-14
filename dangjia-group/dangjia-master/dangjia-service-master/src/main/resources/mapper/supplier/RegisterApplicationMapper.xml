@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.supplier.DjRegisterApplicationMapper">
+    <sql id="all_columns">
+	        id,
+            create_date createDate,
+            modify_date modifyDate,
+            data_status dataStatus,
+            city_id cityId,
+            user_name userName,
+            PASSWORD PASSWORD,
+            NAME NAME,
+            mobile mobile,
+            card_number cardNumber,
+            card_image cardImage,
+            business_license businessLicense,
+            application_type applicationType,
+            application_status applicationStatus,
+            fail_reason failReason,
+            audit_user_id auditUserId,
+            pay_password as payPassword
+	</sql>
+    <!-- 查询所有 -->
+    <select id="getAllRegistList" resultType="com.dangjia.acg.dto.supplier.RegisterApplicationDTO">
+
+        SELECT
+            t.id,
+            t.create_date createDate,
+            t.modify_date modifyDate,
+            t.data_status dataStatus,
+            t.city_id cityId,
+            t.NAME NAME,
+            t.mobile mobile,
+            t.card_image cardImage,
+            t.card_number cardNumber,
+            t.business_license businessLicense,
+            t.application_type applicationType,
+            t.application_status applicationStatus,
+            t.fail_reason failReason,
+            t.audit_user_id auditUserId,
+            t1.name cityName
+        FROM
+            dj_register_application t
+            LEFT JOIN dj_other_city t1 on t.city_id=t1.id
+        where t.city_id=#{cityId}
+        <if test="null!=applicationStatus and ''!=applicationStatus">
+           and application_status = #{applicationStatus}
+        </if>
+        <if test="null!=searchKey and ''!=searchKey">
+            and (t.name like CONCAT('%',#{searchKey},'%')
+            or t.mobile like CONCAT('%',#{searchKey},'%'))
+        </if>
+        ORDER BY createDate DESC
+	</select>
+
+
+    <select id="getUserIdExamine" resultType="java.lang.String">
+        SELECT
+            u.id
+        FROM
+            dj_register_application d
+        LEFT JOIN dj_user u ON d.mobile = u.mobile
+        WHERE
+            1 = 1
+        AND u.id = #{userId}
+        AND u.is_del = 0
+        AND u.is_job = 0
+        AND u.data_status = 0
+        AND d.application_type = 1
+        AND application_status = 1
+        AND d.data_status = 0
+    </select>
+
+
+    <select id="queryDeWeight" resultType="com.dangjia.acg.modle.supplier.DjRegisterApplication" parameterType="java.util.Map">
+        SELECT
+           <include refid="all_columns"/>
+        FROM
+            dj_register_application
+        WHERE
+        city_id = #{cityId}
+        AND data_status = 0
+        AND mobile = #{mobile}
+        AND (application_status = 0 OR application_status = 1)
+        <foreach collection="split" item="item" index="index" open="AND(" separator="OR" close=")">
+             FIND_IN_SET(#{item},application_type)
+        </foreach>
+    </select>
+
+    <select id="queryBack" resultType="com.dangjia.acg.modle.supplier.DjRegisterApplication">
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+        dj_register_application
+        WHERE
+        city_id = #{cityId}
+        AND data_status = 0
+        AND mobile = #{mobile}
+        AND application_status = 2
+        <foreach collection="split" item="item" index="index" open="AND(" separator="OR" close=")">
+            FIND_IN_SET(#{item},application_type)
+        </foreach>
+    </select>
+
+</mapper>

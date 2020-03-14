@@ -12,6 +12,7 @@ import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +39,30 @@ public class WebHouseController implements WebHouseAPI {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         return houseService.getList(pageDTO, userID,cityKey ,visitState, startDate, endDate, searchKey, orderBy, memberId);
+        //return houseService.getHouseList(pageDTO, userID,cityKey ,visitState, startDate, endDate, searchKey, orderBy, memberId);
+    }
+
+    /**
+     * 装修列表，新查询
+     * @param request
+     * @param pageDTO
+     * @param visitState
+     * @param startDate
+     * @param endDate
+     * @param searchKey
+     * @param orderBy
+     * @param memberId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
+        String userID = request.getParameter(Constants.USERID);
+        String cityKey = request.getParameter(Constants.CITY_ID);
+        if (CommonUtil.isEmpty(cityKey)) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return houseService.getHouseList(pageDTO, userID,cityKey ,visitState, startDate, endDate, searchKey, orderBy, memberId);
     }
 
     @Override
@@ -45,7 +70,11 @@ public class WebHouseController implements WebHouseAPI {
     public ServerResponse startWorkPage(HttpServletRequest request, String houseId) {
         return houseService.startWorkPage(request, houseId);
     }
-
+    @Override
+    @ApiMethod
+    public ServerResponse calcelOrder(HttpServletRequest request,String houseId,String userToken,String user_id){
+        return houseService.calcelOrder(houseId,user_id);
+    }
     @Override
     @ApiMethod
     public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String userToken,String userId) {

@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.basics;
 
 import com.dangjia.acg.modle.basics.Technology;
+import com.dangjia.acg.modle.core.WorkerType;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -34,12 +35,16 @@ public interface ITechnologyMapper extends Mapper<Technology> {
 
     List<Technology> workerPatrolList(@Param("goodsId") String goodsId);
 
-    List<Technology> query(@Param("workerTypeId") String workerTypeId, @Param("name") String name, @Param("materialOrWorker") Integer materialOrWorker);
+    List<Technology> query(@Param("workerTypeId") String workerTypeId,
+                           @Param("name") String name,
+                           @Param("materialOrWorker") Integer materialOrWorker,
+                           @Param("cityId") String cityId);
 
     List<Technology> getByName(@Param("workerTypeId") String workerTypeId,
                                @Param("name") String name,
                                @Param("materialOrWorker") Integer materialOrWorker,
-                               @Param("goodsId") String goodsId);
+                               @Param("goodsId") String goodsId,
+                               @Param("cityId") String cityId);
 
     //根据商品id查询人工商品关联工艺实体
     List<Technology> queryTechnologyByWgId(@Param("goodsId") String goodsId);
@@ -47,6 +52,11 @@ public interface ITechnologyMapper extends Mapper<Technology> {
     Technology queryById(@Param("id") String id);
 
     //根据内容模糊搜索工艺
-    List<Technology> queryByName(@Param("name") String name,@Param("workerTypeId") String workerTypeId);
+    List<Technology> queryByName(@Param("name") String name,
+                                 @Param("workerTypeId") String workerTypeId,
+                                 @Param("cityId") String cityId,
+                                 @Param("materialOrWorker") Integer materialOrWorker);
+
+    List<WorkerType> queryTechnologyWorkerType();
 
 }

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.basics.IProductWorkerMapper">
+    <!--每工种未删除 或 已支付工钱-->
+    <select id="getWorkertoCheck" resultType="java.lang.Double">
+        select sum(wg.price*abw.shop_count)
+        from dj_actuary_budget_material abw
+        where abw.data_status = 0
+        and abw.house_id=#{houseId}
+        and abw.delete_state!=1
+        and abw.delete_state!=2
+        and abw.house_flow_id=#{houseFlowId}
+    </select>
+    <!--从精算表查每工种已支付工钱-->
+    <select id="getPayedWorker" resultType="java.lang.Double">
+        select sum(abw.price*abw.shop_count)
+        from dj_actuary_budget_material abw
+        where abw.data_status = 0
+        and abw.product_type=2
+        and abw.house_id=#{houseId}
+        and abw.delete_state =3
+        and abw.house_flow_id=#{houseFlowId}
+    </select>
+    <!-- 从精算表查代购商品支付工钱 -->
+    <select id="getAgencyPurchaseMoney" resultType="java.lang.Double">
+       SELECT
+            sum(t.total_price)
+        FROM
+            dj_actuary_budget_material t,dj_basics_storefront_product t1, dj_basics_product_template t2
+        WHERE t.product_id = t1.id
+        and t1.prod_template_id=t2.id
+        and t.house_id = #{houseId}
+        AND t.house_flow_id = #{houseFlowId}
+        AND t2.is_agency_purchase = 1
+        AND t.delete_state = 3
+    </select>
+
+    <select id="getProductWorker" resultType="com.dangjia.acg.dto.product.ProductWorkerDTO">
+
+        SELECT
+            abw.product_id AS id,
+            abw.worker_type_id AS workerTypeId,
+            abw.product_sn AS productSn,
+            abw.product_name AS name,
+            abw.price AS price,
+            abw.unit_name AS unitName,
+            abw.image AS image
+        FROM
+        dj_deliver_order_item abw
+        INNER JOIN dj_deliver_order o on o.id=abw.order_id
+        WHERE
+        o.house_id = #{houseId}
+        and abw.product_type='2'
+        AND o.payment != 0
+        <if test="orderSource!=null and orderSource!=''">
+            AND o.order_source = #{orderSource}
+        </if>
+
+        AND abw.worker_type_id = #{workerTypeId}
+    </select>
+
+    <!--更新单位-->
+    <update id="updateWorkerGoodsByUnitId" parameterType="java.lang.String">
+        update dj_basics_product_template
+        set unit_name=#{unitName}
+        where unit_id=#{unitId}
+    </update>
+    <select id="getHomeProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
+      SELECT
+            p.id AS id,
+            p.image AS image,
+            p.sell_price AS price,
+            t.unit_name AS unitName,
+            g.type AS productType,
+            g.type AS type,
+            p.product_name AS NAME
+            FROM
+                dj_basics_storefront_product  p
+                INNER JOIN dj_basics_product_template t on p.prod_template_id=t.id
+                INNER JOIN dj_basics_goods g ON g.id = p.goods_id
+            WHERE
+                p.data_status = 0
+                AND t.type = 1
+                AND p.is_shelf_status = 1
+                AND t.image !='qrcode/moren.png'
+            ORDER BY
+                rand( )
+                LIMIT 6
+    </select>
+
+    <select id="getWorkerProductList" resultType="com.dangjia.acg.dto.product.ProductAppDTO">
+        SELECT
+            t2.id productId,
+            t2.storefront_id storefrontId,
+            t3.id productTemplateId,
+            t3.product_sn productSn,
+            t2.product_name productName,
+            t3.goods_id goodsId,
+            t2.sell_price price,
+            t3.image,
+            t3.unit_id unit,
+            t3.unit_name unitName,
+            t3.value_id_arr valueIdArr,
+            t3.value_name_arr valueNameArr,
+            t4.brand_id brandId,
+            t4.category_id categoryId,
+            t4.type productType,
+            t4.buy goodsBuy,
+            t3.convert_quality convertQuality,
+            t3.convert_unit convertUnit,
+            tt.shop_count shopCount
+        FROM
+        dj_skill_certification t1
+        INNER JOIN dj_basics_storefront_product t2 ON t1.prod_template_id=t2.prod_template_id
+        INNER JOIN dj_basics_product_template t3 ON t1.prod_template_id=t3.id
+        INNER JOIN dj_basics_goods t4 on t3.goods_id=t4.id
+        LEFT JOIN (select t5.* from dj_deliver_cart t5 where t5.member_id=#{workerId} and t5.house_id=#{houseId} and t5.product_type=2) tt on t2.id=tt.product_id
+        WHERE  (t1.skill_certification_id = #{workerId} or t1.skill_certification_id =(select m.worker_type_id from dj_member m where m.id=#{workerId}))
+        and t4.type=2
+        and t2.is_shelf_status=1
+        <if test="searchKey!=null and searchKey!=''">
+            AND t2.`product_name` LIKE CONCAT('%', #{searchKey}, '%')
+        </if>
+    </select>
+
+</mapper>

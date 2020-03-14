@@ -19,14 +19,13 @@ import com.dangjia.acg.dto.deliver.ProductChangeDTO;
 import com.dangjia.acg.dto.deliver.ProductChangeItemDTO;
 import com.dangjia.acg.dto.deliver.ProductChangeOrderDTO;
 import com.dangjia.acg.dto.deliver.ProductOrderDTO;
-import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
-import com.dangjia.acg.mapper.deliver.IProductChangeOrderMapper;
+import com.dangjia.acg.mapper.delivery.IProductChangeMapper;
+import com.dangjia.acg.mapper.delivery.IProductChangeOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.deliver.ProductChange;
@@ -35,6 +34,8 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.Utils;
@@ -123,7 +124,7 @@ public class ProductChangeService {
             if (flag) {
                 srcProduct = JSON.parseObject(JSON.toJSONString(srcResponse.getResultObj()), Product.class);
                 destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
-                Goods goods = forMasterAPI.getGoods(house.getCityId(), destProduct.getGoodsId());
+                BasicsGoods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
                 if (goods != null) {
                     productType = goods.getType();
                 }
@@ -314,7 +315,7 @@ public class ProductChangeService {
                     return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                 }
                 Unit unit;
-                Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
+                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
                 ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(),product.getConvertUnit());
                 if (serverResponse.getResultObj() instanceof JSONObject) {
                     unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
@@ -379,7 +380,7 @@ public class ProductChangeService {
                         return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                     }
                     Unit unit;
-                    Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
+                    DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
                     ServerResponse serverResponse = unitAPI.getUnitById(request,house.getCityId(), product.getConvertUnit());
                     if (serverResponse.getResultObj() instanceof JSONObject) {
                         unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
@@ -502,7 +503,7 @@ public class ProductChangeService {
                         workerDetail.setMoney(toDifferPrice);
                         workerDetail.setApplyMoney(toDifferPrice);
                         workerDetail.setWalletMoney(surplusMoney);
-                        workerDetail.setState(4);//进钱//业主退
+                        workerDetail.setState(4);//进钱//业主退0
                         workerDetailMapper.insert(workerDetail);
 
                         member.setHaveMoney(haveMoney);
@@ -580,7 +581,7 @@ public class ProductChangeService {
                     }
                     // 处理新商品------begin
                     if (null == wareHouse) {
-                        Goods goods = forMasterAPI.getGoods(house.getCityId(), destProduct.getGoodsId());
+                        BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), destProduct.getGoodsId());
                         // 新商品没有则添加
                         Warehouse newWareHouse = new Warehouse();
                         newWareHouse.setHouseId(houseId);

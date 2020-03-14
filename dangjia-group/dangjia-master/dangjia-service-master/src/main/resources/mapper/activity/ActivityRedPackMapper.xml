@@ -3,5 +3,98 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.activity.IActivityRedPackMapper">
+
+    <select id="queryActivityRedPackRecords" resultType="com.dangjia.acg.dto.activity.ActivityRedPackDTO">
+
+
+        SELECT
+            tt.*,
+            (
+                CASE
+                WHEN tt.status = '4' THEN
+                '发放完毕'
+                WHEN tt.status = '3' THEN
+                '已过期'
+                WHEN tt.status = '2' THEN
+                '暂停发放'
+                ELSE
+                '发行中'
+                END
+            ) statusNme
+        FROM
+            (
+                SELECT
+                    t.id,
+                    t. NAME,
+                    t.from_object fromObject,
+                    t.from_object_name fromObjectName,
+                    t.from_object_type fromObjectType,
+                    t.source_type sourceType,
+                    t.start_date startDate,
+                    t.end_date endDate,
+                    t.num,
+                    t.surplus_nums surplusNums,
+                    (
+                        CASE
+                        WHEN t.surplus_nums = 0 THEN
+                            '4'
+                        WHEN NOW() > DATE_ADD(t.end_date, INTERVAL 1 DAY) THEN
+                            '3'
+                        WHEN t.delete_state = 1 THEN
+                            '2'
+                        ELSE
+                            '1'
+                        END
+                    ) status
+                FROM
+                    dj_activity_red_pack t
+                WHERE
+                    t.source_type = #{sourceType}
+                AND t.city_id = #{cityId}
+                <if test="sourceType==2">
+                    and t.storefront_id=#{storefrontId}
+                </if>
+            ) tt
+        WHERE 1=1
+        <if test="null!=status and ''!=status">
+           and tt.status = #{status}
+        </if>
+        ORDER BY
+            tt.startDate DESC
+
+    </select>
+
+    <select id="getNewActivityRedPackDetail" resultType="com.dangjia.acg.dto.activity.ActivityRedPackDTO">
+        SELECT
+            t.id,
+            t. NAME,
+            t.from_object fromObject,
+            t.from_object_name fromObjectName,
+          t.from_object_type fromObjectType,
+            t.start_date startDate,
+            t.end_date endDate,
+            t.source_type sourceType,
+            t.num,
+            t.surplus_nums surplusNums,
+          t.type,
+          t.satisfy_money satisfyMoney ,
+          t.money,
+            (
+                CASE
+                WHEN t.surplus_nums = 0 THEN
+                    '4'
+                WHEN NOW() > DATE_ADD(t.end_date, INTERVAL 1 DAY) THEN
+                    '3'
+                WHEN t.delete_state = 1 THEN
+                    '2'
+                ELSE
+                    '1'
+                END
+            ) STATUS
+        FROM
+            dj_activity_red_pack t
+        WHERE
+            t.id = #{redPackId}
+    </select>
 </mapper>
 

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.shell.IHomeShellOrderMapper">
+
+    <!--查询商品列表信息-->
+     <select id="selectShellOrderList" resultType="com.dangjia.acg.dto.shell.HomeShellOrderDTO">
+         SELECT
+             t.id shellOrderId,
+             t.number,
+             t.product_id productId,
+             t.exchange_client exchangeClient,
+             t.exchange_time exchangeTime,
+             t.member_id memberId,
+             t.member_name memberName,
+             t.member_mobile memberMobile,
+             t.`status`,
+             t.address_id addressId,
+             t.address,
+             t.exchange_num exchangeNum,
+             t.integral,
+             t.money,
+             t.image,
+             p. NAME productName,
+             p.product_type productType,
+             s.id productSpecId,
+             s.name productSpecName
+         FROM
+             dj_home_shell_order t,
+             dj_home_shell_product p,
+             dj_home_shell_product_spec s
+         WHERE t.data_status=0
+         and t.product_id = p.id
+         and t.product_spec_id=s.id
+         <if test="exchangeClient!=null and exchangeClient!=-1">
+             and t.exchange_client=#{exchangeClient}
+         </if>
+         <if test="status!=null and status!=-1">
+             and t.status=#{status}
+         </if>
+         <if test="null!=startTime and ''!=startTime">
+             and t.exchange_time>=#{startTime}
+         </if>
+         <if test="null!=endTime and ''!=endTime">
+          <![CDATA[ and t.exchange_time<DATE_ADD(#{endTime},INTERVAL 1 DAY) ]]>
+         </if>
+         <if test="null!=searchKey and ''!=searchKey">
+             AND (t.number LIKE CONCAT('%',#{searchKey},'%')
+             or t.member_name LIKE CONCAT('%',#{searchKey},'%')
+             or t.member_mobile LIKE CONCAT('%',#{searchKey},'%'))
+         </if>
+        order by t.exchange_time desc
+     </select>
+
+    <select id="selectExchangeCount" resultType="java.lang.Integer">
+        SELECT
+            count(t.exchange_num)
+        FROM
+            dj_home_shell_order t
+        WHERE
+            t.member_id = #{memberId}
+        AND t.product_id = #{productId}
+      <![CDATA[  and t.status<>6 ]]>
+    </select>
+
+    <select id="searchShellProductInfo" resultType="com.dangjia.acg.dto.shell.HomeShellOrderDTO">
+        SELECT
+            t.id shellOrderId,
+            t.number,
+            t.exchange_time exchangeTime,
+            t.`status`,
+            t.exchange_num exchangeNum,
+            t.integral,
+            t.money,
+            p.image,
+            p. NAME productName,
+            p.product_type productType,
+            s. NAME productSpecName
+        FROM
+            dj_home_shell_order t,
+            dj_home_shell_product p,
+            dj_home_shell_product_spec s
+        WHERE
+            t.data_status = 0
+        AND t.product_id = p.id
+        AND t.product_spec_id = s.id
+        AND t.member_id = #{memberId}
+    </select>
+
+    <select id="queryHomeShellOrderList" resultType="com.dangjia.acg.dto.shell.HomeShellOrderDTO">
+
+        SELECT
+            t.id shellOrderId,
+            t.number,
+            t.exchange_time exchangeTime,
+            t.`status`,
+            t.exchange_num exchangeNum,
+            t.integral,
+            t.money,
+            p.image,
+            p. NAME productName,
+            p.product_type productType
+        FROM
+            dj_home_shell_order t,
+            dj_home_shell_product p
+        WHERE
+            t.data_status = 0
+        AND t.product_id = p.id
+        AND p.product_type = '1'
+        <if test="type==1">
+           and t.`status`=2
+        <![CDATA[    and t.deliver_time<=date_add(now(), interval -((select param_value from dj_config where param_key=#{paramKey})) DAY) ]]>
+
+        </if>
+        <if test="type==2">
+            and t.`status`=4
+         <![CDATA[    and t.return_application_time<=date_add(now(), interval -((select param_value from dj_config where param_key=#{paramKey})) DAY) ]]>
+        </if>
+        <if test="type==3">
+            and t.`status`=0
+            <![CDATA[    and t.exchange_time<=date_add(now(), interval -((select param_value from dj_config where param_key=#{paramKey})) MINUTE) ]]>
+        </if>
+
+    </select>
+</mapper>

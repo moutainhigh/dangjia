@@ -5,6 +5,11 @@ package com.dangjia.acg.common.constants;
  */
 public final class Constants {
 
+  /**
+   * 店铺信息
+   */
+  public static final String FENGJIAN_STOREFRONT = "fengjian_storefront_";
+
 
   /**
    * 加密密钥
@@ -36,6 +41,7 @@ public final class Constants {
    */
   public static final String REDIS_SHIRO_CACHE = "shiro-cache:";
 
+
   /**
    * 会话过期时间
    */
@@ -55,9 +61,14 @@ public final class Constants {
    */
   public static final String TEMP_TOKEN = "temp-token:";
   /**
-   * 短信验证码Code
+   * 注册短信验证码Code
    */
   public static final String SMS_CODE = "sms-code:";
+
+  /**
+   * 登陆短信验证码Code
+   */
+  public static final String SMS_LOGIN_CODE = "sms_login_code:";
 
   /**
    * 用户ID
@@ -76,6 +87,10 @@ public final class Constants {
    * 用户ID
    **/
   public static final String USER_KEY = "user_";
+  /**
+   * 房子规则批次
+   **/
+  public static final String HOUSE_BATCH = "house_batch:";
   /**
    * 中台城市Key
    **/

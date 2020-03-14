@@ -68,11 +68,32 @@
     <!-- 根据mendOrderId查询所有 -->
     <select id="byMendOrderId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.repair.MendMateriel">
         SELECT
-        <include refid="all_columns"/>
-        FROM dj_repair_mend_materiel
+            drmm.id,
+            IFNULL(drmm.mend_order_id,'') as mendOrderId,
+            IFNULL(drmm.product_id,'')  as productId,
+            IFNULL(drmm.product_sn,'')  as productSn,
+            IFNULL(drmm.product_name,'')  as productName,
+            IFNULL(drmm.product_nick_name,'')  as productNickName,
+            drmm.price,
+            drmm.cost,
+            IFNULL(drmm.unit_name,'')  as unitName,
+            IFNULL(drmm.shop_count,'') as shopCount,
+            IFNULL(drmm.total_price,'')  as totalPrice,
+            IFNULL(drmm.product_type,'')  as productType,
+            IFNULL(drmm.category_id,'')  as categoryId,
+            IFNULL(drmm.image,'') as image,
+            IFNULL(drmm.create_date,'')  as createDate,
+            IFNULL(drmm.supplier_id,'')  as supplierId,
+            IFNULL(drmm.supplier_telephone,'')  as supplierTelephone,
+            IFNULL(drmm.supplier_name,'')  as supplierName,
+            IFNULL(drmm.modify_date,'')  as modifyDate,
+            IFNULL(drmm.actual_count,'') as actualCount,
+			IFNULL(ds.is_non_platform_supplier,'0') as isNonPlatformSupplier
+        FROM dj_repair_mend_materiel drmm
+        left join dj_supplier ds on drmm.supplier_id=ds.id
         where
-        mend_order_id = #{mendOrderId}
-        ORDER BY category_id, create_date desc
+        drmm.mend_order_id = #{mendOrderId}
+        ORDER BY drmm.category_id, drmm.create_date desc
     </select>
 
     <!-- 根据mendOrderId查询所有 -->
@@ -147,27 +168,141 @@
         GROUP BY
                 o.id
     </select>
-    <select id="getMendWorker" parameterType="java.lang.String"  resultType="com.dangjia.acg.modle.repair.MendWorker">
-        SELECT
-            m.id,
-            m.mend_order_id AS mendOrderId,
-            m.worker_goods_id AS workerGoodsId,
-            m.worker_goods_sn AS workerGoodsSn,
-            m.worker_goods_name AS workerGoodsName,
-            m.price,
-            m.unit_name AS unitName,
-            SUM(m.shop_count) AS shopCount,
-            SUM(m.total_price) AS totalPrice,
-            m.image,
-            m.create_date AS createDate,
-            m.modify_date AS modifyDate
-        FROM
-            dj_repair_mend_order o
-        INNER JOIN dj_repair_mend_worker m ON o.id = m.mend_order_id
+
+    <update id="setStorefrontId">
+        UPDATE dj_repair_mend_materiel a
+        INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
+        SET a.storefront_id = b.storefront_id
         WHERE
-             m.worker_goods_id =#{productId} and  o.house_id= #{houseId}
-        GROUP BY
-            m.worker_goods_id
+            a.mend_order_id = #{mendOrderId}
+    </update>
+
+
+    <select id="queryMendMaterielProgress" resultType="com.dangjia.acg.dto.repair.ReturnOrderProgressDTO">
+        SELECT
+          t1.id,
+          t1.create_date createDate,
+          t1.progress_order_id progressOrderId,
+          t1.progress_type progressType,
+          t2.`code` nodeCode,
+          t2.`name` nodeName,
+          t2.node_describe nodeDescribe,
+          t2.associated_operation associatedOperation,
+          t2.associated_operation_name  associatedOperationName
+        FROM
+            dj_deliver_order_progress t1,
+            dj_deliver_order_node t2
+        WHERE
+            t1.progress_order_id =#{progressOrderId}
+        AND t1.node_type = t2.type
+        AND t1.node_code = t2.`code`
+        and t1.data_status = 0
+        order by t1.create_date,t2.code
     </select>
+
+
+    <select id="searchReturnRefundMaterielList" resultType="com.dangjia.acg.dto.deliver.OrderSplitItemDTO">
+        SELECT
+            t.mend_order_id mendOrderId,
+            t.product_id productId,
+            t.id mendMaterielId,
+            t.storefront_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            t.unit_name unitName,
+            IFNULL(t.image, t1.image) image,
+            t.shop_count shopCount,
+            t.actual_count actualCount,
+            t1.prod_template_id productTemplateId,
+            t1.is_upstairs_cost isUpstairsCost,
+            IFNULL(t.cost,0) supCost,
+            t.supplier_id supId,
+            IFNULL(t.sup_stevedorage_cost,0) supStevedorageCost,
+            IFNULL(t.stevedorage_cost,0) stevedorageCost,
+            IFNULL(t.transportation_cost,0) transportationCost
+        FROM
+            dj_repair_mend_materiel t
+        INNER JOIN dj_basics_storefront_product t1 on t.product_id=t1.id
+        WHERE  t.mend_order_id=#{mendOrderId}
+        <if test = "mendDeliverId!=null and mendDeliverId!=''">
+            and t.repair_mend_deliver_id=#{mendDeliverId}
+        </if>
+        order by t.product_name desc
+    </select>
+
+    <select id="getsupplierInfoList" resultType="java.util.Map">
+        SELECT
+            ds.id supId,ds.name supName,dsp.price supPrice,dsp.porterage supPorterage,ds.transportation_cost transportationCost,
+            ds.is_non_platform_supplier isNonPlatformSupplier
+        FROM
+            dj_supplier ds,
+            dj_sup_application_product dsp,
+            dj_deliver_split_deliver dsd,
+            dj_deliver_order_split_item dos
+        WHERE
+            ds.id = dsp.sup_id
+        and dsp.application_status='1'
+        and ds.id=dsd.supplier_id
+        and dsd.id=dos.split_deliver_id
+        and dos.product_id=dsp.product_id
+        and dos.house_id=#{houseId}
+        and dsp.shop_id=#{storefrontId}
+        and dsp.product_id=#{productId}
+        and supply_relationship='0'
+        group by ds.id
+        order by dsp.price asc
+    </select>
+
+
+    <!--按供应商分组查询对应符合条件的信息-->
+    <select id="selectSupMaterialByMendId" resultType="java.util.Map">
+        SELECT
+            t.supplier_id supplierId,
+            t.mend_order_id mendOrderId,
+            t1.is_non_platform_supplier isNonPlatformSupplier,
+            t1.`name` supName,
+            t1.telephone,
+            t1.transportation_cost supTransportationCost,
+            sum(t.cost * IFNULL(t.actual_count, t.shop_count)) supTotalPrice,
+            sum(IFNULL(t.sup_stevedorage_cost, 0)) supStevedorageCost,
+            sum(t.price * IFNULL(t.actual_count, t.shop_count)) totalPrice,
+            sum(IFNULL(t.transportation_cost,0)) totalTransportationCost,
+            sum(IFNULL(t.stevedorage_cost,0)) totalStevedorageCost,
+            sum(IFNULL(t.price * IFNULL(t.actual_count, t.shop_count), 0)) - sum(IFNULL(t.transportation_cost,0)) - sum(IFNULL(t.stevedorage_cost,0))-sum(IFNULL(t.discount_price,0)) totalAmount,
+            sum(IFNULL(t.cost * IFNULL(t.actual_count, t.shop_count), 0)) - sum(IFNULL(t.sup_stevedorage_cost, 0)) - t1.transportation_cost applyMoney
+        FROM
+            dj_repair_mend_materiel t,
+            dj_supplier t1
+        WHERE
+            t.mend_order_id = #{mendOrderId}
+        AND t.supplier_id = t1.id
+        <if test = "mendDeliverId!=null and mendDeliverId!=''">
+            and t.repair_mend_deliver_id=#{mendDeliverId}
+        </if>
+        GROUP BY
+        t.supplier_id
+
+    </select>
+
+    <update id="updateMendDeliverIdByInfo">
+        update dj_repair_mend_materiel set repair_mend_deliver_id=#{mendDeliverId}
+        where mend_order_id=#{mendOrderId} and supplier_id=#{supplierId}
+    </update>
+
+    <select id="getMendMaterialReceiverNum" resultType="java.lang.Double">
+        select
+        <if test="type==1">
+            sum(shop_count) receive
+        </if>
+        <if test="type==2">
+            sum(IFNULL(actual_count,shop_count)) receive
+        </if>
+        from dj_repair_mend_materiel
+        where
+          repair_mend_deliver_id =#{mendDeliverId}
+    </select>
+
 </mapper>
 

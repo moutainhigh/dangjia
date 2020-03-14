@@ -38,12 +38,12 @@ public class BrandSeriesService {
     private ConfigUtil configUtil;
 
     //查询所有
-    public ServerResponse<PageInfo> getAllBrandExplain(PageDTO pageDTO) {
+    public ServerResponse<PageInfo> getAllBrandExplain(PageDTO pageDTO,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Map<String, Object>> mapList = new ArrayList<>();
-            List<BrandSeries> BrandExList = iBrandSeriesMapper.queryBrandSeries(null);
+            List<BrandSeries> BrandExList = iBrandSeriesMapper.queryBrandSeries(null,cityId);
             for (BrandSeries brandExplain : BrandExList) {
                 Map<String, Object> map = BeanUtils.beanToMap(brandExplain);
                 map.put("image", address + brandExplain.getImage());
@@ -61,10 +61,11 @@ public class BrandSeriesService {
 
     //修改
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse update(String id, String name, String content) throws RuntimeException {
+    public ServerResponse update(String id, String name, String content,String cityId) throws RuntimeException {
         try {
             BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(id);
             BrandSeries brandEx = new BrandSeries();
+            brandEx.setCityId(cityId);
             brandEx.setId(id);
             brandEx.setName(name);
             brandEx.setContent(content);
@@ -78,11 +79,12 @@ public class BrandSeriesService {
     }
 
     //新增
-    public ServerResponse insert(String name, String content, String brandId) {
+    public ServerResponse insert(String name, String content, String brandId,String cityId) {
         try {
             BrandSeries brandEx = new BrandSeries();
             brandEx.setName(name);
             brandEx.setContent(content);
+            brandEx.setCityId(cityId);
             brandEx.setBrandId(brandId);
             iBrandSeriesMapper.insert(brandEx);
             return ServerResponse.createBySuccessMessage("新增成功");

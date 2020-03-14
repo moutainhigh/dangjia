@@ -1,6 +1,6 @@
 package com.dangjia.acg.service.member;
 
-import com.dangjia.acg.api.MessageAPI;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -10,39 +10,66 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.*;
+import com.dangjia.acg.common.util.nimserver.NIMPost;
+import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
+import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HomePageBean;
+import com.dangjia.acg.dto.core.HouseResult;
+import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
+import com.dangjia.acg.dto.member.MemberDTO;
+import com.dangjia.acg.dto.member.WorkerTypeDTO;
+import com.dangjia.acg.dto.shell.HomeShellProductDTO;
+import com.dangjia.acg.dto.shell.HomeShellProductSpecDTO;
+import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
+import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.config.ISmsMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
+import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
-import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
+import com.dangjia.acg.mapper.shell.IHomeShellProductMapper;
+import com.dangjia.acg.mapper.shell.IHomeShellProductSpecMapper;
+import com.dangjia.acg.mapper.shell.IMasterOrderNodeMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
+import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
+import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.modle.config.Sms;
+import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
-import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.modle.order.OrderNode;
 import com.dangjia.acg.modle.other.City;
+import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Insurance;
+import com.dangjia.acg.modle.worker.WorkerBankCard;
 import com.dangjia.acg.service.activity.RedPackPayService;
 import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.util.RKIDCardUtil;
-import com.dangjia.acg.util.TokenUtil;
-import com.dangjia.acg.util.Utils;
+import com.dangjia.acg.service.house.MyHouseService;
+import com.dangjia.acg.util.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -50,6 +77,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -65,15 +93,21 @@ import java.util.*;
 @Service
 public class MemberService {
     private Logger logger = LoggerFactory.getLogger(MemberService.class);
+
+    @Value("${spring.profiles.active}")
+    private String active;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
     private RedPackPayService redPackPayService;
-
     @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private IWorkIntegralMapper workIntegralMapper;
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
     private ICityMapper iCityMapper;
     @Autowired
@@ -109,19 +143,47 @@ public class MemberService {
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
-    private IMenuConfigurationMapper iMenuConfigurationMapper;
-
+    private IInsuranceMapper iInsuranceMapper;
+    @Autowired
+    private DjSkillCertificationMapper djSkillCertificationMapper;
+    @Autowired
+    private IMasterOrderNodeMapper masterOrderNodeMapper;
+    @Autowired
+    private IOrderMapper iOrderMapper;
     /****
      * 注入配置
      */
     @Autowired
     private RedisClient redisClient;
     @Autowired
-    private MessageAPI messageAPI;
-    @Autowired
     private IStoreMapper iStoreMapper;
     @Autowired
     private IStoreUserMapper iStoreUserMapper;
+    @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
+    @Autowired
+    private IWorkerBankCardMapper iWorkerBankCardMapper;
+    @Autowired
+    private IActivityRedPackRecordMapper activityRedPackRecordMapper;
+    @Autowired
+    private IHomeShellProductMapper homeShellProductMapper;
+    @Autowired
+    private IHomeShellProductSpecMapper productSpecMapper;
+    @Autowired
+    private MyHouseService myHouseService;
+    @Autowired
+    private IHouseFlowMapper iHouseFlowMapper;
+    @Autowired
+    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
+    @Autowired
+    private IOrderItemMapper iOrderItemMapper;
+    @Autowired
+    private IWorkerTypeMapper iWorkerTypeMapper;
+
 
     public String getUserToKenStr(String userRole,String memberId){
         String userRoleText = "role" + userRole + ":" + memberId;
@@ -132,7 +194,7 @@ public class MemberService {
      * 获取用户手机号
      *
      * @param id     来源ID
-     * @param idType 1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销
+     * @param idType 1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销, 6=用户地址, 7=IM用户手机
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
@@ -152,10 +214,28 @@ public class MemberService {
                     mobile = supplier.getTelephone();
                 }
                 break;
+            case "4":
+                Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(id);
+                if (storefront != null) {
+                    mobile = storefront.getMobile();
+                }
+                break;
             case "5":
                 HouseDistribution distribution = iHouseDistributionMapper.selectByPrimaryKey(id);
                 if (distribution != null) {
                     mobile = distribution.getPhone();
+                }
+                break;
+            case "6":
+                MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(id);
+                if (memberAddress != null) {
+                    mobile = memberAddress.getMobile();
+                }
+                break;
+            case "7":
+                List<NimUserInfo> userInfo = NimUserService.getUserInfo("N",id);
+                if (userInfo != null&&userInfo.size()>0) {
+                    mobile = userInfo.get(0).getMobile();
                 }
                 break;
             default:
@@ -204,21 +284,35 @@ public class MemberService {
     }
 
     // 登录 接口
-    public ServerResponse login(String phone, String password, Integer userRole) {
-        //指定角色查询用户
-        Member user = new Member();
-        user.setMobile(phone);
-        user.setPassword(DigestUtils.md5Hex(password));
-//		user.setUserRole(userRole);
-        user = memberMapper.getUser(user);
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("电话号码或者密码错误");
+    public ServerResponse login(String phone, String password, String loginMode, Integer userRole) {
+        Member user;
+        //验证码登陆
+        if ("2".equals(loginMode)) {
+            Integer registerCode = redisClient.getCache(Constants.SMS_LOGIN_CODE + phone, Integer.class);
+            if (!password.equals(registerCode + "")) {
+                return ServerResponse.createByErrorMessage("验证码错误");
+            }
+            user = memberMapper.getByPhone(phone);
         } else {
-            return getUser(user, userRole);
+            //指定角色查询用户
+            user = new Member();
+            user.setMobile(phone);
+            user.setPassword(DigestUtils.md5Hex(password));
+            user = memberMapper.getUser(user);
         }
+        if (user == null) {
+            String msg = "手机号或密码错误";
+            if ("2".equals(loginMode)) {
+                msg = "手机号或验证码错误";
+            }
+            return ServerResponse.createByErrorMessage(msg);
+        }
+        return getUser(user, userRole);
+
     }
 
     ServerResponse getUser(Member user, Integer userRole) {
+
         if (userRole == 1) {
             Example example = new Example(Customer.class);
             example.createCriteria().andEqualTo(Customer.MEMBER_ID, user.getId());
@@ -324,29 +418,38 @@ public class MemberService {
         return ServerResponse.createBySuccess(accessToken);
     }
 
-    /*
+    /**
      * 接口注册获取验证码
+     *
+     * @param phone    手机号
+     * @param codeType 验证码类型，1=登陆   2=注册
+     * @return
      */
-    public ServerResponse registerCode(String phone) {
+    public ServerResponse registerCode(String phone, String codeType) {
         if (!Validator.isMobileNo(phone)) {
             return ServerResponse.createByErrorMessage("手机号不正确");
         }
         Member user = new Member();
         user.setMobile(phone);
         user = memberMapper.getUser(user);
-        if (user != null) {
+        if ("1".equals(codeType) && user == null) {
+            return ServerResponse.createByErrorMessage("手机号没有注册");
+        } else if ("2".equals(codeType) && user != null) {
             return ServerResponse.createByErrorMessage("手机号已被注册");
         } else {
-            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
-            if (registerCode == null || registerCode == 0) {
-                registerCode = (int) (Math.random() * 9000 + 1000);
+//            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
+            Integer registerCode = (int) (Math.random() * 9000 + 1000);
+            if ("1".equals(codeType)) {
+                redisClient.put(Constants.SMS_LOGIN_CODE + phone, registerCode);
+            } else {
+                redisClient.put(Constants.SMS_CODE + phone, registerCode);
             }
-            redisClient.put(Constants.SMS_CODE + phone, registerCode);
-            JsmsUtil.SMS(registerCode, phone);
+            String result = JsmsUtil.SMS(registerCode, phone);
             //记录短信发送
             Sms sms = new Sms();
             sms.setCode(String.valueOf(registerCode));
             sms.setMobile(phone);
+            sms.setContent(result);
             smsMapper.insert(sms);
             return ServerResponse.createBySuccessMessage("验证码已发送");
         }
@@ -369,6 +472,75 @@ public class MemberService {
         return ServerResponse.createBySuccess("验证码获取成功", sms.get(0).getCode());
     }
 
+    public ServerResponse register(HttpServletRequest request, String phone, String password,
+                                   String invitationCode, Integer userRole,
+                                   String longitude, String latitude) {
+        Member user = new Member();
+        user.setMobile(phone);
+        user.setPraiseRate(new BigDecimal(1));//好评率
+        user.setEvaluationScore(new BigDecimal(60));//积分
+        user.setCheckType(5);//未提交资料
+        user.setWorkerPrice(new BigDecimal(0));
+        user.setHaveMoney(new BigDecimal(0));
+        user.setSurplusMoney(new BigDecimal(0));
+        user.setRetentionMoney(new BigDecimal(0));
+        user.setVisitState(0);
+        user.setUserName(user.getMobile());
+        user.setName("");
+        user.setSmscode(0);
+        user.setOthersInvitationCode(invitationCode);
+        user.setInvitationCode(CommonUtil.randomString(6));
+        user.setNickName("当家-" + CommonUtil.randomString(6));
+        user.setInviteNum(0);
+        user.setIsCrowned(0);
+        user.setHead(Utils.getHead());
+        if (!CommonUtil.isEmpty(password))
+            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
+        user.setCityId(CommonUtil.isEmpty(request.getParameter(Constants.CITY_ID)) ? "402881882ba8753a012ba93101120116" : request.getParameter(Constants.CITY_ID));
+        user.setPolicyId(String.valueOf(userRole));
+        if (!CommonUtil.isEmpty(user.getCityId())) {
+            City city = iCityMapper.selectByPrimaryKey(user.getCityId());
+            user.setCityName(city.getName());
+        }
+
+        if (!CommonUtil.isEmpty(request.getParameter(Member.WORKER_TYPE_ID))) {
+            WorkerType wt = workerTypeMapper.selectByPrimaryKey(request.getParameter(Member.WORKER_TYPE_ID));
+            if (wt != null) {
+                user.setWorkerTypeId(wt.getId());
+                user.setWorkerType(wt.getType());
+                user.setCheckType(0);
+            }
+        }
+        memberMapper.insertSelective(user);
+        updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
+        ServerResponse serverResponse = setAccessToken(user, userRole);
+        if (!serverResponse.isSuccess()) {
+            return serverResponse;
+        }
+        MemberCity userCity = new MemberCity();
+        userCity.setMemberId(user.getId());
+        if (!CommonUtil.isEmpty(user.getCityId())) {
+            userCity.setCityId(user.getCityId());
+            userCity.setCityName(user.getName());
+            memberCityMapper.insert(userCity);
+        }
+//            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
+        if (userRole == 1) {
+            clueService.sendUser(user.getId(), user.getMobile(), longitude, latitude);
+        }
+        redisClient.deleteCache(Constants.SMS_CODE + phone);
+        if (userRole == 1) {
+            try {
+                //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
+                redPackPayService.checkUpActivity(request, user.getMobile(), "1");
+                configMessageService.addConfigMessage(AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", 3,null,null);
+            } catch (Exception e) {
+                logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
+            }
+        }
+        return ServerResponse.createBySuccess("注册成功", serverResponse.getResultObj());
+    }
+
     /**
      * 校验验证码并保存密码
      */
@@ -381,62 +553,89 @@ public class MemberService {
             if (CommonUtil.isEmpty(password) || password.length() < 6) {
                 return ServerResponse.createByErrorMessage("密码不得小于六位数");
             }
-            Member user = new Member();
-            user.setMobile(phone);
-            user.setPraiseRate(new BigDecimal(1));//好评率
-            user.setEvaluationScore(new BigDecimal(60));//积分
-            user.setCheckType(5);//未提交资料
-            user.setWorkerPrice(new BigDecimal(0));
-            user.setHaveMoney(new BigDecimal(0));
-            user.setSurplusMoney(new BigDecimal(0));
-            user.setRetentionMoney(new BigDecimal(0));
-            user.setVisitState(0);
-            user.setUserName(user.getMobile());
-            user.setName("");
-            user.setSmscode(0);
-            user.setOthersInvitationCode(invitationCode);
-            user.setInvitationCode(CommonUtil.randomString(6));
-            user.setNickName("当家-" + CommonUtil.randomString(6));
-            user.setInviteNum(0);
-            user.setIsCrowned(0);
-            user.setHead(Utils.getHead());
-            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
-            user.setCityId(CommonUtil.isEmpty(request.getParameter(Constants.CITY_ID))?"402881882ba8753a012ba93101120116":request.getParameter(Constants.CITY_ID));
-            user.setPolicyId(String.valueOf(userRole));
-            if (!CommonUtil.isEmpty(user.getCityId())) {
-                City city = iCityMapper.selectByPrimaryKey(user.getCityId());
-                user.setCityName(city.getName());
-            }
-            memberMapper.insertSelective(user);
-            updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
-            ServerResponse serverResponse = setAccessToken(user, userRole);
-            if (!serverResponse.isSuccess()) {
-                return serverResponse;
-            }
-            MemberCity userCity = new MemberCity();
-            userCity.setMemberId(user.getId());
-            if (!CommonUtil.isEmpty(user.getCityId())) {
-                userCity.setCityId(user.getCityId());
-                userCity.setCityName(user.getName());
-                memberCityMapper.insert(userCity);
-            }
-//            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
-            if (userRole == 1) {
-                clueService.sendUser(user.getId(), user.getMobile(), longitude, latitude);
-            }
-            redisClient.deleteCache(Constants.SMS_CODE + phone);
-            if (userRole == 1) {
-                try {
-                    //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
-                    redPackPayService.checkUpActivity(request, user.getMobile(), "1");
-                    configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
-                } catch (Exception e) {
-                    logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
-                }
-            }
-            return ServerResponse.createBySuccess("注册成功", serverResponse.getResultObj());
+            return register(request, phone, password, invitationCode, userRole, longitude, latitude);
         }
     }
+
+    /**
+     * 注销账号
+     *
+     * @param userToken
+     * @return
+     */
+    public ServerResponse cancellationAccountMember(String userToken) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            Map map = new HashMap();
+            map.put("state", 0);
+            //1.判断用户名下是否有未完工的房子
+            Example example = new Example(House.class);
+            example.createCriteria().andEqualTo(House.MEMBER_ID, member.getId()).andEqualTo(House.VISIT_STATE, 1);
+            List<House> houseList = houseMapper.selectByExample(example);
+            if (houseList != null && houseList.size() > 0) {
+                map.put("stateName", "用户名下有未完工的房子不能注销");
+                return ServerResponse.createBySuccess("注销失败 ", map);
+            }
+            //2.判断是否有未支付完成的订单
+            Integer count = iOrderMapper.selectCountOrderByMemberId(member.getId());
+            if (count != null && count > 0) {
+                map.put("stateName", "用户名下存在未支付完成的订单");
+                return ServerResponse.createBySuccess("注销失败 ", map);
+            }
+            //判断是否有未要货的订单
+            count = iOrderMapper.selectOrderItemByMemberId(member.getId());
+            if (count != null && count > 0) {
+                map.put("stateName", "用户名下存在已支付未要货的订单");
+                return ServerResponse.createBySuccess("注销失败 ", map);
+            }
+            //判断是否有待发货的单
+            count = iOrderMapper.selectOrderSplitItemByMemberId(member.getId());
+            if (count != null && count > 0) {
+                map.put("stateName", "用户名下存在已要货待处理的订单");
+                return ServerResponse.createBySuccess("注销失败 ", map);
+            }
+            //判断是否有待收货的单
+            count = iOrderMapper.selectOrderSplitDeliverByMemberId(member.getId());
+            if (count != null && count > 0) {
+                map.put("stateName", "用户名下存在待收货的订单");
+                return ServerResponse.createBySuccess("注销失败 ", map);
+            }
+            //判断是否有待退款的订单
+            count = iOrderMapper.selectMendOrderByMemberId(member.getId());
+            if (count != null && count > 0) {
+                map.put("stateName", "用户名下存在已申请退款待处理的订单");
+                return ServerResponse.createBySuccess("注销失败 ", map);
+            }
+            //判断是否有未处理完的退款单
+            count = iOrderMapper.selectMendDeliverByMemberId(member.getId());
+            if (count != null && count > 0) {
+                map.put("stateName", "用户名下存在正在处理中的退款单");
+                return ServerResponse.createBySuccess("注销失败 ", map);
+            }
+            //判断账户是否有余额未提现
+            Member newMember = memberMapper.selectByPrimaryKey(member.getId());
+            if (newMember.getSurplusMoney() != null && newMember.getSurplusMoney().doubleValue() > 0) {
+                map.put("stateName", "存在未提现的余额");
+                return ServerResponse.createBySuccess("注销失败 ", map);
+            }
+            newMember.setDataStatus(1);
+            newMember.setMobile("---delete----" + newMember.getMobile());
+            newMember.setName("--delet--" + member.getName());
+            newMember.setId("--delete--" + member.getId());
+            memberMapper.updateByPrimaryKey(newMember);
+            map.put("state", 1);
+            map.put("stateName", "注销成功");
+            return ServerResponse.createBySuccess("注销成功 ", map);
+        } catch (Exception e) {
+            logger.error("注销失败", e);
+            return ServerResponse.createByErrorMessage("注销失败");
+        }
+    }
+
 
     private void updateOrInsertInfo(String memberid, String policyId, String pwd) {
         try {
@@ -622,11 +821,12 @@ public class MemberService {
             int registerCode = (int) (Math.random() * 9000 + 1000);
             user.setSmscode(registerCode);
             memberMapper.updateByPrimaryKeySelective(user);
-            JsmsUtil.SMS(registerCode, phone);
+            String result = JsmsUtil.SMS(registerCode, phone);
             //记录短信发送
             Sms sms = new Sms();
             sms.setCode(String.valueOf(registerCode));
             sms.setMobile(phone);
+            sms.setContent(result);
             smsMapper.insert(sms);
             return ServerResponse.createBySuccessMessage("验证码已发送");
         }
@@ -695,6 +895,7 @@ public class MemberService {
         memberMapper.updateByPrimaryKeySelective(user);
         return ServerResponse.createBySuccessMessage("持单量设置成功");
     }
+
     /**
      * 业主列表
      */
@@ -748,7 +949,6 @@ public class MemberService {
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setMcId(customer.getId());
                 mcDTO.setPhaseStatus(customer.getPhaseStatus());
-
                 mcDTO.setMemberId(member.getId());
                 mcDTO.setMemberName(member.getName());
                 mcDTO.setMemberNickName(member.getNickName());
@@ -822,9 +1022,17 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse setMember(Member member) {
+    public ServerResponse setMember(String userToken, Member member) {
         try {
-            Member srcMember = memberMapper.selectByPrimaryKey(member.getId());
+            if (CommonUtil.isEmpty(userToken)) {
+                userToken = member.getId();
+            }
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member srcMember = (Member) object;
+
             if (srcMember == null)
                 return ServerResponse.createByErrorMessage("该业主不存在");
             if (StringUtils.isNotBlank(member.getNickName()))
@@ -833,6 +1041,8 @@ public class MemberService {
                 srcMember.setMobile(member.getMobile());
             if (StringUtils.isNotBlank(member.getRemarks()))
                 srcMember.setRemarks(member.getRemarks());
+            if (StringUtils.isNotBlank(member.getAutoOrder()))
+                srcMember.setAutoOrder(member.getAutoOrder());
             if (srcMember.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
@@ -973,6 +1183,9 @@ public class MemberService {
 
         user.setRealNameCheckTime(new Date());
         user.setRealNameState(realNameState);
+
+        user.setRealNameTime(new Date());
+        user.setRealNameCheckTime(new Date());
         if (realNameState == 3) {
             user.setRealNameDescribe("审核通过");
         } else {
@@ -1095,45 +1308,46 @@ public class MemberService {
             map.put("name", member.getNickName());
             map.put("mobile", member.getMobile());
             map.put("head", member.getHead());
-            map.put("appKey", messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+            map.put("appKey", NIMPost.APPKEY);
             datas.add(map);
         }
-        example = new Example(MemberInfo.class);
-        example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID, member.getId()).andEqualTo(MemberInfo.POLICY_ID, 2);
-        infos = memberInfoMapper.selectByExample(example);
-        if (infos != null && infos.size() > 0) {//有工匠
-            Map<String, Object> map = new HashMap<>();
-            map.put("memberType", 1);
-            map.put("id", member.getId());
-            map.put("nickName", member.getNickName());
-            map.put("name", member.getNickName());
-            map.put("mobile", member.getMobile());
-            map.put("head", member.getHead());
-            if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
-                WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                map.put("workerTypeId", member.getWorkerTypeId());
-                if (wt != null) {
-                    map.put("workerName", wt.getName());
-                }
-            }
-            map.put("appKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
-            datas.add(map);
-        }
-        MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
-        if (mainUser != null) {
-            ServerResponse serverResponse = setSale(null, mainUser.getId());
-            if (serverResponse.isSuccess()) {//有销售
-                Map<String, Object> map = new HashMap<>();
-                map.put("memberType", 2);
-                map.put("id", mainUser.getId());
-                map.put("nickName", member.getNickName());
-                map.put("name", member.getNickName());
-                map.put("mobile", member.getMobile());
-                map.put("head", member.getHead());
-                map.put("appKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
-                datas.add(map);
-            }
-        }
+        //网易云信只需要一个身份用户
+//        example = new Example(MemberInfo.class);
+//        example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID, member.getId()).andEqualTo(MemberInfo.POLICY_ID, 2);
+//        infos = memberInfoMapper.selectByExample(example);
+//        if (infos != null && infos.size() > 0) {//有工匠
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("memberType", 1);
+//            map.put("id", member.getId());
+//            map.put("nickName", member.getNickName());
+//            map.put("name", member.getNickName());
+//            map.put("mobile", member.getMobile());
+//            map.put("head", member.getHead());
+//            if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
+//                WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+//                map.put("workerTypeId", member.getWorkerTypeId());
+//                if (wt != null) {
+//                    map.put("workerName", wt.getName());
+//                }
+//            }
+//            map.put("appKey", NIMPost.APPKEY);
+//            datas.add(map);
+//        }
+//        MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
+//        if (mainUser != null) {
+//            ServerResponse serverResponse = setSale(null, mainUser.getId());
+//            if (serverResponse.isSuccess()) {//有销售
+//                Map<String, Object> map = new HashMap<>();
+//                map.put("memberType", 2);
+//                map.put("id", mainUser.getId());
+//                map.put("nickName", member.getNickName());
+//                map.put("name", member.getNickName());
+//                map.put("mobile", member.getMobile());
+//                map.put("head", member.getHead());
+//                map.put("appKey", NIMPost.APPKEY);
+//                datas.add(map);
+//            }
+//        }
         if (datas.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
         }
@@ -1148,9 +1362,11 @@ public class MemberService {
      * @return 我的页面
      */
     public ServerResponse getMyHomePage(String userToken, Integer userRole) {
+
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         if (userRole == 1) {
             HomePageBean homePageBean = new HomePageBean();
-            homePageBean.setList(getMyMenuList(userRole, null));
+//            homePageBean.setList(getMyMenuList(userRole, null));
             return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
         } else {
             Object object = constructionService.getMember(userToken);
@@ -1163,75 +1379,219 @@ public class MemberService {
             if (worker == null) {
                 return ServerResponse.createbyUserTokenError();
             }
+            WorkerComprehensiveDTO workerComprehensive = workIntegralMapper.getComprehensiveWorker(worker.getId());
             HomePageBean homePageBean = new HomePageBean();
             homePageBean.setWorkerId(worker.getId());
             homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : imageAddress + worker.getHead());
             homePageBean.setWorkerName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
             homePageBean.setEvaluation(worker.getEvaluationScore() == null ? new BigDecimal(60) : worker.getEvaluationScore());
+            homePageBean.setOverall(workerComprehensive.getOverall());
             homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
             StringBuilder stringBuffer = new StringBuilder();
-            if (worker.getIsCrowned() == null || worker.getIsCrowned() != 1) {
-                if (worker.getEvaluationScore() == null) {
-                    stringBuffer.append("普通");
-                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 90) {
-                    stringBuffer.append("金牌");
-                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 80) {
-                    stringBuffer.append("银牌");
-                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 70) {
-                    stringBuffer.append("铜牌");
-                } else {
-                    stringBuffer.append("普通");
-                }
+            stringBuffer.append(configRuleUtilService.getMemberRank(worker.getId()));
+            if (worker.getWorkerType() > 3) {
+                stringBuffer.append("工匠");
             } else {
-                stringBuffer.append("皇冠");
+                stringBuffer.append(workerTypeMapper.getName(worker.getWorkerType()));
             }
-            stringBuffer.append(worker.getWorkerType() != null && worker.getWorkerType() == 3 ? "大管家" : "工匠");
+
             homePageBean.setGradeName(stringBuffer.toString());
-            homePageBean.setList(getMyMenuList(userRole, worker.getWorkerType()));
+            Example example1 = new Example(HouseWorkerOrder.class);
+            example1.createCriteria().andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId());
+            Integer orderTakingNum = houseWorkerOrderMapper.selectCountByExample(example1);
+            homePageBean.setOrderTakingNum(orderTakingNum);
+
+            //查询保险徽章
+            Example example = new Example(Insurance.class);
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID, worker.getId())
+                    .andEqualTo(Insurance.DATA_STATUS, 0);
+            example.orderBy(Insurance.CREATE_DATE).desc();
+            List<Insurance> insurance = iInsuranceMapper.selectByExample(example);
+            List<Map<String, Object>> list = new ArrayList<>();
+            Map<String, Object> map = new HashMap<>();
+            if (insurance != null && insurance.size() > 0) {
+                if (new Date().getTime() <= insurance.get(0).getEndDate().getTime()) {
+                    map.put("type", 0);//保险期内
+                } else {
+                    map.put("type", 1);//保险期外
+                }
+                map.put("name", "保险详情");
+                map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
+                map.put("id", insurance.get(0).getId());
+                list.add(map);
+            }
+
+            //查询技能徽章
+            example = new Example(DjSkillCertification.class);
+            example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, worker.getId())
+                    .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+            List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+            if (djSkillCertifications != null && djSkillCertifications.size() > 0) {
+                map = new HashMap<>();
+                map.put("name", "技能培训");
+                map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
+                map.put("id", worker.getId());
+                list.add(map);
+            }
+            //他的徽章
+            homePageBean.setList(list);
+            //查询当这贝商品
+            HomeShellProductDTO homeShellProductDTO = homeShellProductMapper.serachShellProductInfo();
+            if (homeShellProductDTO != null) {
+                homeShellProductDTO.setImageUrl(StringTool.getImage(homeShellProductDTO.getImage(), address));
+                HomeShellProductSpecDTO productSpecDTO = productSpecMapper.selectProductSpecInfo(homeShellProductDTO.getShellProductId());
+                if (productSpecDTO != null) {
+                    homeShellProductDTO.setProductSpecId(productSpecDTO.getProductSpecId());
+                    homeShellProductDTO.setIntegral(productSpecDTO.getIntegral());
+                    homeShellProductDTO.setMoney(productSpecDTO.getMoney());
+                }
+            }
+            homePageBean.setHomeShellProduct(homeShellProductDTO);
+
             return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
         }
     }
 
-    private List<HomePageBean.ListBean> getMyMenuList(Integer userRole, Integer workerType) {
-        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-        Example example = new Example(MenuConfiguration.class);
-        Example.Criteria criteria = example.createCriteria()
-                .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
-                .andEqualTo(MenuConfiguration.MENU_TYPE, 1);
-        if (userRole == 1) {
-            criteria.andEqualTo(MenuConfiguration.SHOW_PROPRIETOR, 1);
-        } else if (workerType == null) {
-            criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
-        } else {
-            switch (workerType) {
-                case 1://设计师
-                    criteria.andEqualTo(MenuConfiguration.SHOW_DESIGNER, 1);
-                    break;
-                case 2://精算师
-                    criteria.andEqualTo(MenuConfiguration.SHOW_ACTUARIES, 1);
-                    break;
-                case 3://大管家
-                    criteria.andEqualTo(MenuConfiguration.SHOW_HOUSEKEEPER, 1);
-                    break;
-                default://工匠
-                    criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
-                    break;
+    /**
+     * 获取我的徽章
+     */
+    public ServerResponse getMyInsigniaList(String userToken) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
+            Member worker = (Member) object;
+            Example example = new Example(OrderNode.class);
+            example.createCriteria().andEqualTo(OrderNode.TYPE, "MY_INSIGNIA");
+            example.orderBy(OrderNode.SORT);
+            List<OrderNode> nodeList = masterOrderNodeMapper.selectByExample(example);
+            if (nodeList == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            List<Map<String, Object>> list = new ArrayList<>();
+            Map<String, Object> map;
+            for (OrderNode orderNode : nodeList) {
+                map = new HashMap<>();
+                map.put("head", address + orderNode.getNodeDescribe());
+                map.put("id", orderNode.getCode());
+                map.put("name", orderNode.getName());
+                map.put("code", orderNode.getCode());
+                map.put("type", 0);//未获取
+                if ("H001".equals(orderNode.getCode())) {
+                    //判断当前人员是否有保险
+                    //查询保险徽章
+                    example = new Example(Insurance.class);
+                    example.createCriteria().andEqualTo(Insurance.WORKER_ID, worker.getId())
+                            .andEqualTo(Insurance.DATA_STATUS, 0)
+                            .andGreaterThanOrEqualTo(Insurance.END_DATE, new Date());
+                    example.orderBy(Insurance.CREATE_DATE).desc();
+                    List<Insurance> insurance = iInsuranceMapper.selectByExample(example);
+                    if (insurance != null && insurance.size() > 0) {
+                        map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
+                        map.put("id", insurance.get(0).getId());
+                        map.put("type", 1);//已获取
+                    }
+                }
+                if ("H002".equals(orderNode.getCode())) {//技能详情
+                    example = new Example(DjSkillCertification.class);
+                    example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, worker.getId())
+                            .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+                    List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+                    if (djSkillCertifications != null && djSkillCertifications.size() > 0) {
+                        map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
+                        map.put("id", worker.getId());
+                        map.put("type", 1);//已获取
+                    }
+                }
+
+                list.add(map);
+            }
+            return ServerResponse.createBySuccess("查询成功", list);
+        } catch (Exception e) {
+            logger.error("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-        example.orderBy(MenuConfiguration.SORT).asc();
-        List<MenuConfiguration> menuConfigurations = iMenuConfigurationMapper.selectByExample(example);
-        List<HomePageBean.ListBean> list = new ArrayList<>();
-        for (MenuConfiguration configuration : menuConfigurations) {
-            configuration.initPath(imageAddress, webAddress);
-            HomePageBean.ListBean listBean = new HomePageBean.ListBean();
-            listBean.setName(configuration.getName());
-            listBean.setUrl(configuration.getUrl());
-            listBean.setImageUrl(configuration.getImage());
-            listBean.setType(configuration.getType());
-            list.add(listBean);
+
+    }
+
+    /**
+     * 获取我的徽章--徽章详情
+     */
+    public ServerResponse getMyInsigniaDetail(String userToken, String code) {
+        try {
+            if (code == null) {
+                return ServerResponse.createByErrorMessage("请输入查询徽章的编码");
+            }
+            Map<String, Object> map = new HashMap<>();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            Member worker = (Member) object;
+            Example example = new Example(OrderNode.class);
+            example.createCriteria().andEqualTo(OrderNode.TYPE, "MY_INSIGNIA")
+                    .andEqualTo(OrderNode.CODE, code);
+            List<OrderNode> nodeList = masterOrderNodeMapper.selectByExample(example);
+            if (nodeList != null) {
+                OrderNode orderNode = nodeList.get(0);
+                map.put("head", address + orderNode.getNodeDescribe());
+                map.put("id", orderNode.getCode());
+                map.put("name", orderNode.getName());
+                map.put("code", orderNode.getCode());
+                map.put("type", 0);//未获取
+            }
+            if ("H001".equals(code)) {
+                //判断当前人员是否有保险
+                //查询保险徽章
+                example = new Example(Insurance.class);
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, worker.getId())
+                        .andEqualTo(Insurance.DATA_STATUS, 0)
+                        .andGreaterThanOrEqualTo(Insurance.END_DATE, new Date());
+                example.orderBy(Insurance.CREATE_DATE).desc();
+                List<Insurance> insurance = iInsuranceMapper.selectByExample(example);
+                if (insurance != null && insurance.size() > 0) {
+                    Insurance rance = insurance.get(0);
+                    map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
+                    map.put("id", insurance.get(0).getId());
+                    map.put("startDate", rance.getStartDate());//保险开始时间
+                    map.put("ednDate", rance.getEndDate());//保险结束时间
+                    map.put("type", 1);//已获取
+                } else {
+                    map.put("showButton", "去购买");
+                }
+                //判断已有多少人获取
+                example = new Example(Insurance.class);
+                example.createCriteria().andEqualTo(Insurance.DATA_STATUS, 0)
+                        .andGreaterThanOrEqualTo(Insurance.END_DATE, new Date());
+                Integer count = iInsuranceMapper.selectCountByExample(example);
+                map.put("remark", "有了保险才能开工哦，安全第一");
+                map.put("countRemark", "已有<font color='#F57341'>" + count + "</font>人获得");
+
+            }
+            if ("H002".equals(code)) {//技能详情
+                example = new Example(DjSkillCertification.class);
+                example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, worker.getId())
+                        .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+                List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+                if (djSkillCertifications != null && djSkillCertifications.size() > 0) {
+                    map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
+                    map.put("id", worker.getId());
+                    map.put("type", 1);//已获取
+                }
+                example = new Example(DjSkillCertification.class);
+                example.createCriteria().andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+                Integer count = iInsuranceMapper.selectCountByExample(example);
+                map.put("remark", "由当家人员联系您进行线下培训");
+                map.put("countRemark", "已有<font color='#F57341'>" + count + "</font>人获得");
+            }
+            return ServerResponse.createBySuccess("查询成功", map);
+        } catch (Exception e) {
+            logger.error("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-        return list;
     }
 
     /**
@@ -1246,6 +1606,7 @@ public class MemberService {
         insuranceMapper.updateByPrimaryKeySelective(insurance);
         return ServerResponse.createBySuccess("保存成功", insurance.getId());
     }
+
     /**
      * 新增工匠保险信息
      *
@@ -1303,7 +1664,7 @@ public class MemberService {
         if (infos != null && infos.size() > 0) {
             for (Insurance info : infos) {
                 Map<String, Object> map = BeanUtils.beanToMap(info);
-                map.put(Insurance.HEAD, Utils.getImageAddress(imageAddress,info.getHead()));
+                map.put(Insurance.HEAD, Utils.getImageAddress(imageAddress, info.getHead()));
                 map.put("surDay", 0);
                 if (info.getEndDate() != null) {
                     Integer daynum = DateUtil.daysofTwo(new Date(), info.getEndDate());
@@ -1393,4 +1754,348 @@ public class MemberService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
+
+    /**
+     * 我的界面
+     *
+     * @param userToken
+     * @return
+     */
+    public ServerResponse queryMember(String userToken,String houseId,String cityId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            member.initPath(imageAddress);
+            MemberDTO memberDTO = new MemberDTO();
+            memberDTO.setHead(member.getHead());
+            memberDTO.setMobile(member.getMobile());
+            Example example = new Example(WorkerBankCard.class);
+            example.createCriteria().andEqualTo(WorkerBankCard.DATA_STATUS, 0)
+                    .andEqualTo(WorkerBankCard.WORKER_ID, member.getId());
+            memberDTO.setBankCardCount(iWorkerBankCardMapper.selectCountByExample(example));//银行卡数量
+            memberDTO.setDiscountCouponCount(activityRedPackRecordMapper.queryActivityRedCount(member.getId(), null));//优惠券数量(有效的）
+
+
+            //待付款
+            memberDTO.setObligationCount(iOrderMapper.queryDeliverOrderObligation(member.getId(),houseId));
+
+            //待发货
+            memberDTO.setDeliverCount(iOrderMapper.queryAppHairOrderList(cityId,houseId,member.getId()));
+
+            //待收货
+            memberDTO.setReceiveCount(iOrderMapper.queryAppOrderList(cityId,member.getId(),houseId));
+
+            memberDTO.setSurplusMoney(member.getSurplusMoney());
+            return ServerResponse.createBySuccess("查询成功", memberDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+
+
+    /**
+     * 查询我要装修首页
+     *
+     * @param userToken
+     * @return
+     */
+    public ServerResponse queryOrderNumber(String userToken) {
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        HouseResult houseResult = new HouseResult();
+        object = myHouseService.getHouse(member.getId(), houseResult);
+        if (object instanceof ServerResponse) {
+            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
+        }
+
+        House house = (House) object;
+        String houseId = house.getId();
+
+//        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
+
+        //订单状态 1待付款，2已付款，3待收货
+        WorkInFoDTO workInFoDTO = new WorkInFoDTO();
+        workInFoDTO.setHouseId(houseId);
+        //待付款
+        Map<String, Object> map = new HashMap<>();
+        map.put("stayPayment", iOrderMapper.queryDeliverOrderObligation(member.getId(),houseId));
+
+        //待发货
+        map.put("alreadyPayment", iOrderMapper.queryAppHairOrderList(house.getCityId(),houseId,member.getId()));
+
+        //待收货
+        map.put("stayGoods", iOrderMapper.queryAppOrderList(house.getCityId(),member.getId(),houseId));
+        map.put("complete", 0);
+        map.put("after", 0);
+        workInFoDTO.setOrderMap(map);
+
+        if (house != null) {
+            String houseName = house.getResidential() + house.getBuilding() + "栋" +
+                    house.getUnit() + "单元" + house.getNumber() + "号";
+            workInFoDTO.setHouseName(houseName);
+        }
+
+        HouseFlowInfoDTO houseFlowInfoDTO = new HouseFlowInfoDTO();
+        //查询今日播报信息
+        List<HouseFlowDataDTO> sowingList = iOrderMapper.queryApplyDec();
+        if (sowingList != null && !sowingList.isEmpty()) {
+            houseFlowInfoDTO.setDate(sowingList.get(0).getCreateDate());
+            houseFlowInfoDTO.setHouseFlowDataDTOS(sowingList);
+        }
+        houseFlowInfoDTO.setNumber(iOrderMapper.queryApplyPayState(houseId).size());
+        workInFoDTO.setHouseFlowInfoDTO(houseFlowInfoDTO);
+
+        //1-下单后（销售阶段） 2-下单后（销售接单） 3-下单后（设计阶段）4-下单后（精算阶段）5-下单后(施工阶段)
+        if (house != null && house.getVisitState() == 0) {
+            workInFoDTO.setHouseType(1);
+        } else if (house != null && house.getIsRobStats() == 1) {
+            workInFoDTO.setHouseType(2);
+        }
+
+        //查询当前房子状态
+        List<WorkerTypeDTO> wtdList = iOrderMapper.queryType(houseId);
+        if (!wtdList.isEmpty()) {
+            workInFoDTO.setType(wtdList.get(0).getType());
+            if (wtdList.get(0).getType() == 1) {
+                //3-下单后（设计阶段）
+                workInFoDTO.setHouseType(3);
+            } else if (wtdList.get(0).getType() == 2) {
+                //4-下单后（精算阶段）
+                workInFoDTO.setHouseType(4);
+            } else {
+                //5-下单后(施工阶段
+                workInFoDTO.setHouseType(5);
+            }
+        }
+
+        //设置菜单
+        setMenus(workInFoDTO, house);
+
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
+                .andEqualTo(HouseFlow.DATA_STATUS, 0);
+        List<HouseFlow> houseFlows = iHouseFlowMapper.selectByExample(example);
+
+        //获取工序信息
+        List<Object> workNodeListDTO = summationMethod(houseFlows, house);
+        workInFoDTO.setWorkList(workNodeListDTO);
+
+        //获取客服明细
+        Example example1 = new Example(DjAlreadyRobSingle.class);
+        example1.createCriteria()
+                .andEqualTo(DjAlreadyRobSingle.HOUSE_ID, houseId)
+                .andEqualTo(DjAlreadyRobSingle.DATA_STATUS, 0);
+        List<DjAlreadyRobSingle> lists = djAlreadyRobSingleMapper.selectByExample(example1);
+        if (!lists.isEmpty()) {
+            String userid = lists.get(0).getUserId();
+            example = new Example(MainUser.class);
+            example.createCriteria().andEqualTo(MainUser.ID, userid);
+            example.orderBy(MainUser.CREATE_DATE).desc();
+            List<MainUser> list = userMapper.selectByExample(example);
+            if (list != null && list.size() > 0) {
+                MainUser user = list.get(0);
+                map = new HashMap<>();
+                map.put("id", user.getId());
+                map.put("targetId", user.getId());
+                List<NimUserInfo> userInfoResult = NimUserService.getUserInfo(active, user.getMemberId());
+                if (userInfoResult != null &&userInfoResult.size()>0&& !CommonUtil.isEmpty(userInfoResult.get(0).getName())) {
+                    map.put("nickName", "装修顾问 " + userInfoResult.get(0).getName());
+                } else {
+                    map.put("nickName", "装修顾问 小" + user.getUsername().substring(0, 1));
+                }
+                map.put("name", user.getUsername());
+                map.put("mobile", user.getMobile());
+                Member member1 = memberMapper.selectByPrimaryKey(user.getMemberId());
+                if (member1 != null) {
+                    member1.initPath(address);
+                    map.put("head", member1.getHead());
+                } else {
+                    map.put("head", address + Utils.getHead());
+                }
+                workInFoDTO.setMap(map);
+            }
+        }
+
+
+        return ServerResponse.createBySuccess("查询成功", workInFoDTO);
+    }
+
+
+    /**
+     * 设置菜单
+     */
+    private void setMenus(WorkInFoDTO workInFoDTO, House house) {
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        List<WorkInFoDTO.BigListBean> bigList = new ArrayList<>();
+
+        WorkInFoDTO.BigListBean bigListBean = new WorkInFoDTO.BigListBean();
+        bigListBean.setName("我的工具");
+        if(workInFoDTO.getHouseType()==3){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shieji));
+            bigList.add(bigListBean);
+        }
+        if(workInFoDTO.getHouseType()==4){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.jingsuan));
+            bigList.add(bigListBean);
+        }
+        if(workInFoDTO.getHouseType()==5){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shigong));
+            bigList.add(bigListBean);
+        }
+        workInFoDTO.setBigList(bigList);//添加菜单到返回体中
+    }
+
+
+    /**
+     * 获取工序信息
+     *
+     * @param house
+     * @return
+     */
+    public List<Object> summationMethod(List<HouseFlow> houseFlows, House house) {
+        WorkNodeListDTO workNodeListDTO;
+        //查询工序节点
+        List<NodeNumberDTO> nodeNumberDTOS = iOrderItemMapper.queryNodeNumber(house.getId());
+        //查询材料数量
+        List<MaterialNumberDTO> materialNumberDTOS = iOrderItemMapper.queryMaterialNumber(house.getId());
+
+        Example example;
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<Object> workList = new ArrayList<>();
+        List<Map<String, Object>> gList;
+        Map<String, Object> listMap;
+
+        //1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
+        for (HouseFlow houseFlow : houseFlows) {
+            List<Map<String, Object>> mapList=new ArrayList<>();
+            mapList.add(iHouseFlowMapper.optimizationHander(houseFlow.getId()));
+            example = new Example(WorkerType.class);
+            example.createCriteria().andEqualTo(WorkerType.TYPE, houseFlow.getWorkerType())
+                    .andEqualTo(WorkerType.DATA_STATUS, 0);
+            List<WorkerType> workerType = iWorkerTypeMapper.selectByExample(example);
+            gList = new ArrayList<>();
+            listMap = new HashMap<>();
+            workNodeListDTO = new WorkNodeListDTO();
+
+            if (houseFlow.getWorkerTypeId().equals("1")) {
+
+                //设计师
+                listMap = new HashMap<>();
+                listMap.put("name", "实际工期");
+                if (houseFlow.getEndDate() != null) {
+                    listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
+                } else {
+                    listMap.put("value", 0 + "天");
+                }
+                gList.add(listMap);
+
+                listMap = new HashMap<>();
+                listMap.put("name", "施工节点");
+                listMap.put("value", 0 + "/" + 3);
+                workNodeListDTO.setHundred(0);
+                if (house.getDesignerOk() == 9) {
+                    //上传量房 百分比
+                    workNodeListDTO.setHundred(33);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 1 + "/" + 3);
+                } else if (house.getDesignerOk() == 7) {
+                    //平面图通过 百分比
+                    workNodeListDTO.setHundred(66);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 2 + "/" + 3);
+                } else if (house.getDesignerOk() == 3) {
+                    //施工图通过 百分比
+                    workNodeListDTO.setHundred(100);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 3 + "/" + 3);
+                }
+                gList.add(listMap);
+            } else if (houseFlow.getWorkerTypeId().equals("2")) {
+                //精算师 百分比
+                listMap = new HashMap<>();
+                listMap.put("name", "实际工期");
+                if (houseFlow.getEndDate() != null) {
+                    listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
+                } else {
+                    listMap.put("value", 0 + "天");
+                }
+                gList.add(listMap);
+
+                listMap = new HashMap<>();
+                listMap.put("name", "施工节点");
+                listMap.put("value", 0 + "/" + 1);
+                workNodeListDTO.setHundred(0);
+                if (house.getBudgetOk() == 3) {
+                    workNodeListDTO.setHundred(100);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 1 + "/" + 1);
+                }
+                gList.add(listMap);
+            } else {
+                listMap.put("name", "预计工期");
+                if (houseFlow.getStartDate() == null) {
+                    listMap.put("value", 0 + "天");
+                } else {
+                    listMap.put("value", DateUtil.getDiffDays(new Date(), houseFlow.getStartDate()) + "天");
+                }
+                gList.add(listMap);
+                listMap = new HashMap<>();
+                listMap.put("name", "实际工期");
+                if (houseFlow.getEndDate() == null) {
+                    listMap.put("value", 0 + "天");
+                } else {
+                    listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
+                }
+                gList.add(listMap);
+
+                //获取工序已验收节点
+                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == mapList.get(0).get("i")).count();
+                //获取工序全部节点
+                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")).count();
+                listMap = new HashMap<>();
+                if (iEnd == 0) {
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 0 + "/" + 0);
+                    workNodeListDTO.setHundred(0);
+                } else {
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", iEnd + "/" + iStart);
+                    workNodeListDTO.setHundred((int) (iStart / iEnd * 100));
+                }
+                gList.add(listMap);
+
+                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
+                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO::getShopCount).sum();
+                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
+                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO::getAskCount).sum();
+                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
+                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO::getReturnCount).sum();
+                listMap = new HashMap<>();
+                listMap.put("name", "材料使用");//全部节点
+                listMap.put("value", aa + rr + "/" + ss);//全部节点
+                gList.add(listMap);
+            }
+            workNodeListDTO.setLists(gList);
+            workNodeListDTO.setImage(address + workerType.get(0).getImage());
+            workNodeListDTO.setWorkName((String) mapList.get(0).get("name"));
+            workList.add(workNodeListDTO);
+        }
+        return workList;
+    }
 }

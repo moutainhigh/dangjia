@@ -13,7 +13,7 @@ public class TActuaryGoodsTotal {
     private String name;
 
     @ExcelField(titile = "性质",offset = 2) //材料，包工包料，人工
-    private String goodsType;
+    private String productType;
 
     @ExcelField(titile = "参考总花费",offset = 3)
     private Double priceTotal;

@@ -5,14 +5,18 @@
     <parent>
         <artifactId>dangjia-parent</artifactId>
         <groupId>com.dangjia.acg</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>dangjia-group</artifactId>
     <modules>
-        <module>dangjia-master</module>
-		<module>dangjia-goods</module>
+        <module>dangjia-master</module><!-- 主服务 -->
+        <module>dangjia-goods</module><!-- 商品服务 -->
+        <module>dangjia-bill</module><!-- 订单服务 -->
+        <module>dangjia-shop</module><!-- 卖家服务 -->
+        <module>dangjia-store</module><!--供货商/库存服务 -->
+        <module>dangjia-recommend</module><!--推荐服务 -->
     </modules>
     <packaging>pom</packaging>
 </project>

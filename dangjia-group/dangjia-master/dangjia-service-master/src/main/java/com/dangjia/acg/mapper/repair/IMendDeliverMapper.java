@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.repair;
 
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
+import com.dangjia.acg.dto.repair.MendDeliverDTO;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import org.apache.ibatis.annotations.Param;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface IMendDeliverMapper extends Mapper<MendDeliver> {
@@ -32,5 +34,23 @@ public interface IMendDeliverMapper extends Mapper<MendDeliver> {
      * @return
      */
     List<MendMateriel> mendDeliverDetail(@Param("id") String id);
+
+    List<MendDeliverDTO> searchReturnRefundSplitList(@Param("storefrontId") String storefrontId,@Param("state") Integer state,@Param("likeAddress") String likeAddress);
+
+    Integer searchReturnRefundSplitCount(@Param("storefrontId") String storefrontId,@Param("state") Integer state);
+
+    /**
+     * 查询符合条件的数据信息
+     * @param paramNodeKey 获取需处理的判断的时间值的key
+     * @return
+     */
+    List<Map<String,Object>> queryRefundJobList(@Param("paramNodeKey") String paramNodeKey);
+
+    /**
+     * 等待平台申请介入时间
+     * @param paramNodeKey
+     * @return
+     */
+    List<Map<String,Object>> queryRefundDeliverJobList(@Param("nodeCode") String nodeCode,@Param("queryRefundDeliverJobList") String paramNodeKey);
 
 }

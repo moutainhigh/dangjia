@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitMapper">
+
+
+
+    <!-- 查询可退货退款列表 -->
+    <select id="queryReturnRefundOrderList" resultType="com.dangjia.acg.dto.refund.RefundOrderDTO">
+        SELECT
+            t.storefront_id storefrontId,
+            t.id orderSplitId,
+            t.address_id addressId,
+            t.house_id houseId,
+            t.number orderSplitNumber,
+            t1.storefront_name storefrontName
+        FROM
+            dj_deliver_order_split t
+        INNER JOIN dj_deliver_order_split_item t3 ON t3.order_split_id = t.id
+        INNER JOIN dj_basics_storefront t1 ON t.storefront_id = t1.id
+        INNER JOIN dj_deliver_split_deliver t2 ON t3.split_deliver_id = t2.id
+        INNER JOIN dj_member_address ma on(t.address_id=ma.id or t.house_id=ma.house_id)
+        WHERE
+            t3.receive > IFNULL(t3.return_count,0)
+        AND t2.shipping_state IN (2, 4, 5, 7, 8)
+        AND t3.is_reservation_deliver = '1'
+        and ma.member_id=#{memberId}
+        <if test="null!=houseId and ''!=houseId">
+            AND t.house_id = #{houseId}
+        </if>
+        and t3.data_status = '0'
+        and EXISTS(select 1 from dj_basics_product_template t4,dj_basics_goods t5,dj_basics_storefront_product t6 where t3.product_id=t6.id and t6.prod_template_id=t4.id and t4.goods_id=t5.id and t5.sales='0')
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (t3.product_name LIKE CONCAT('%',#{searchKey},'%')
+            or t.number LIKE CONCAT('%',#{searchKey},'%'))
+        </if>
+        GROUP BY
+            t.storefront_id,
+            t.id,
+            t.address_id,
+            t.house_id,
+            t.number,
+            t1.storefront_name
+    </select>
+
+
+    <select id="queryReturnRefundOrderInfo" resultType="com.dangjia.acg.dto.refund.RefundOrderDTO">
+        SELECT
+        t.storefront_id storefrontId,
+        t.id orderSplitId,
+        t.address_id addressId,
+        t.house_id houseId,
+        t.number orderSplitNumber,
+        t1.storefront_name storefrontName,
+        t1.system_logo storefrontIcon
+        FROM
+        dj_deliver_order_split t
+        INNER JOIN dj_basics_storefront t1 ON t.storefront_id = t1.id
+        WHERE t.id = #{orderSplitId}
+        limit 1
+
+    </select>
+
+
+</mapper>

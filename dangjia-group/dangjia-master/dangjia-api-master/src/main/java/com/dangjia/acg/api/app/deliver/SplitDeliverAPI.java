@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.deliver;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,7 +27,8 @@ public interface SplitDeliverAPI {
     @ApiOperation(value = "部分收货", notes = "部分收货")
     ServerResponse partSplitDeliver(@RequestParam("userToken") String userToken,@RequestParam("splitDeliverId") String splitDeliverId,
                                     @RequestParam("image") String image,
-                                    @RequestParam("splitItemList") String splitItemList);
+                                    @RequestParam("splitItemList") String splitItemList,
+                                    @RequestParam("userRole")Integer userRole);
 
     /**
      * 确认收货
@@ -35,7 +37,8 @@ public interface SplitDeliverAPI {
     @ApiOperation(value = "确认收货", notes = "确认收货")
     ServerResponse affirmSplitDeliver(@RequestParam("userToken") String userToken,@RequestParam("splitDeliverId") String splitDeliverId,
                                       @RequestParam("image") String image,
-                                      @RequestParam("splitItemList") String splitItemList);
+                                      @RequestParam("splitItemList") String splitItemList,
+                                      @RequestParam("userRole")Integer userRole);
 
     /**
      * 委托大管家收货
@@ -60,6 +63,22 @@ public interface SplitDeliverAPI {
      */
     @PostMapping("app/deliver/splitDeliver/splitDeliverList")
     @ApiOperation(value = "收货列表", notes = "收货列表")
-    ServerResponse splitDeliverList(@RequestParam("houseId") String houseId,
-                                    @RequestParam("shipState") Integer shipState);
+    ServerResponse splitDeliverList( @RequestParam("pageDTO")PageDTO pageDTO,
+                                     @RequestParam("houseId") String houseId,
+            @RequestParam("shipState") Integer shipState);
+
+
+
+    /**
+     * 确认安装
+     * @param splitDeliverId
+     * @param userToken
+     * @return
+     */
+    @PostMapping("app/deliver/order/confirmInstallation")
+    @ApiOperation(value = "确认安装", notes = "确认安装")
+    ServerResponse confirmInstallation(@RequestParam("userToken") String userToken,@RequestParam("splitDeliverId") String splitDeliverId);
+
+
+
 }

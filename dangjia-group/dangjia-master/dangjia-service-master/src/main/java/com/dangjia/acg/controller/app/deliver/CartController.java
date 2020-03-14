@@ -36,6 +36,17 @@ public class CartController implements CartAPI {
         return cartService.setCart(request,userToken,cart);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse setCart1(HttpServletRequest request, String userToken, String jsonStr, String houseId){
+        try {
+            return cartService.setCart(userToken,jsonStr,houseId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("添加失败");
+        }
+    }
+
     /**
      * 清空购物车商品
      * @param userToken
@@ -59,6 +70,30 @@ public class CartController implements CartAPI {
     public ServerResponse queryCart(String userToken, Cart cart){
         return cartService.queryCart(userToken,cart);
     }
+    /**
+     * 查询购物车商品
+     * @param userToken
+     * @param cart
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryCategoryCart(String userToken, Cart cart){
+        return cartService.queryCategoryCart(userToken,cart);
+    }
+
+    /**
+     * 查询人工购物车商品
+     * @param userToken
+     * @param cart
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryWorkerCategoryCart(String userToken, Cart cart){
+        return cartService.queryWorkerCategoryCart(userToken,cart);
+    }
+
 
     /**
      * 要退查询仓库

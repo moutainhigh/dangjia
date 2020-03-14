@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.storefront.IStorefrontSplitDeliverMapper">
+
+    <select id="selectItemListbyReceiptNumber" resultType="com.dangjia.acg.dto.supplier.DjSupplierDeliverDTO">
+        select * from (
+            SELECT
+                t.id splitId,
+                t.number,
+                1 deliverType,
+                t.total_amount totalAmount,
+                t.apply_money applyMoney,
+                t.create_date,
+                m.address shipAddress,
+                m.name memberName,
+                m.mobile memberMobile
+            FROM
+                dj_deliver_split_deliver t,dj_member_address m
+            WHERE
+                t.receipt_num = #{receiptNumber}
+            and (t.address_id=m.id or t.house_id=m.house_id)
+            UNION ALL
+                SELECT
+                    t1.id splitId,
+                    t1.number,
+                    2 deliverType,
+                    t1.total_amount totalAmount,
+                    t1.apply_money applyMoney,
+                    t1.create_date,
+                    m.address shipAddress,
+                    m.name memberName,
+                    m.mobile memberMobile
+                FROM
+                    dj_repair_mend_deliver t1,dj_member_address m
+                WHERE
+                    t1.receipt_num = #{receiptNumber}
+            and (t1.address_id=m.id or t1.house_id=m.house_id)
+        )tt order by tt.create_date desc
+    </select>
+</mapper>

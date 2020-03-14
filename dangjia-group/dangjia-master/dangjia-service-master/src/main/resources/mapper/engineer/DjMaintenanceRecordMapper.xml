@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper">
+
+    <sql id="basic_columns">
+        id,
+        steward_processing_time AS stewardProcessingTime,
+        steward_order_time AS stewardOrderTime,
+        member_id AS memberId,
+        house_id AS houseId,
+        owner_name AS ownerName,
+        owner_mobile AS ownerMobile,
+        steward_id AS stewardId,
+        state,
+        worker_member_id AS workerMemberId,
+        worker_create_date AS workerCreateDate,
+        worker_type_safe_order_id workerTypeSafeOrderId,
+        apply_collect_time applyCollectTime,
+        over_protection overProtection
+    </sql>
+    <select id="queryDjMaintenanceRecordList" resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO">
+        SELECT
+        mr.id,
+        CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),
+        IFNULL(CONCAT(h.unit,'单元'),'*单元'),
+        IFNULL(CONCAT(h.number,'号'),'*号')) as houseAddress,
+        mr.owner_name ownerName,
+        mr.owner_mobile ownerMobile,
+        mr.state,
+        h.id houseId
+        FROM
+        dj_maintenance_record mr,
+        dj_house h
+        WHERE
+        mr.house_id = h.id
+        AND mr.handle_type=3
+        <if test="null!=searchKey and ''!=searchKey">
+            AND CONCAT(CONCAT_WS(IFNULL(h.residential, '*'),IFNULL(CONCAT(h.building, '栋'),'*栋'),IFNULL(CONCAT(h.unit,
+            '单元'),'*单元'),IFNULL(CONCAT(h.number, '号'),'*号')),mr.owner_name,mr.owner_mobile) LIKE CONCAT('%',#{searchKey},'%')
+        </if>
+        <if test="null!=state and ''!=state">
+            AND mr.state=#{state}
+        </if>
+    </select>
+
+
+    <select id="queryDjMaintenanceRecordDetail"
+            resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO">
+        SELECT
+            mr.id,
+            mr.house_id houseId,
+            mr.owner_name ownerName,
+            mr.owner_mobile ownerMobile,
+            mr.state,
+            mr.create_date createDate,
+            mr.steward_state stewardState,
+            (
+                SELECT
+                    mrc.image
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 3
+            ) ownerImage,
+            (
+                SELECT
+                    mrc.remark
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 3
+            ) ownerRemark,
+            (
+                SELECT
+
+                IF (
+                    m. NAME IS NULL
+                    OR m. NAME = '',
+                    m.nick_name,
+                    m. NAME
+                )
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.supervisor_id
+            ) supervisorName,
+            mr.service_remark serviceRemark,
+            mr.steward_id stewardId,
+            (
+                SELECT
+
+                IF (
+                    m. NAME IS NULL
+                    OR m. NAME = '',
+                    m.nick_name,
+                    m. NAME
+                )
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.steward_id
+            ) stewardName,
+            (
+                SELECT
+                    m.mobile
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.steward_id
+            ) stewardMobile,
+            mr.since_purchase_amount sincePurchaseAmount,
+            mr.owner_state ownerState,
+            (
+                SELECT
+                    mrc.image
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 2
+            ) stewardImage,
+            (
+                SELECT
+                    mrc.remark
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 2
+            ) stewardRemark,
+            mr.remark,
+            mr.steward_order_time stewardOrderTime,
+            mr.complain_type AS complainType,
+            mr.handle_type AS handleType,
+            (
+                SELECT
+
+                IF (
+                    m. NAME IS NULL
+                    OR m. NAME = '',
+                    m.nick_name,
+                    m. NAME
+                )
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.worker_member_id
+            ) workerMemberName,
+            (
+                SELECT
+                    m.mobile
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.worker_member_id
+            ) workerMobile,
+            mr.user_id AS userId,
+            mr.worker_member_id AS workerMemberId,
+            mr.worker_create_date AS workerCreateDate,
+            (
+                SELECT
+                    mrc.image
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 1
+            ) AS workerImage
+        FROM
+            dj_maintenance_record mr
+        WHERE
+            mr.id = #{id}
+    </select>
+
+    <select id="selectMaintenanceRecoredByHouseId" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecord">
+        SELECT
+           <include refid="basic_columns"/>
+        FROM
+            dj_maintenance_record
+        WHERE
+            house_id = #{houseId}
+        and worker_type_safe_order_id = #{workerTypeSafeOrderId}
+        AND state NOT IN (2, 4)
+    </select>
+
+    <select id="queryDjMaintenanceRecordListByStateTime" resultType="com.dangjia.acg.modle.house.TaskStack">
+    <![CDATA[
+        SELECT
+            t.id,
+            t.create_date createDate,
+            t.modify_date modifyDate,
+            t.house_id houseId,
+            t.image,
+            t.member_id memberId,
+            t.`name`,
+            t.remarks,
+            t.state,
+            t.type,
+            t.`data`
+        FROM
+            dj_task_stack t,
+            dj_maintenance_record t1
+        WHERE
+           t.state = 0
+        AND t.`data` = t1.id
+        AND t.type = 13
+        AND t1.apply_collect_time <date_add(now(), interval -(select param_value from dj_config where param_key='MAINTENANCE_RECORD_ACCEPTANCE_TIME') hour)
+    ]]>
+    </select>
+
+    <select id="queryRecordContentList" resultType="java.util.Map">
+        SELECT
+            c.member_id memberId,
+            c.worker_type_id workerTypeId,
+            c.type,
+           c.create_date createDate,
+           c.image,
+           c.remark
+        FROM
+            dj_maintenance_record t,
+            dj_maintenance_record_content c
+        WHERE
+            t.id = c.maintenance_record_id
+         AND t.house_id = #{houseId}
+        order by t.create_date desc,c.create_date desc
+    </select>
+</mapper>

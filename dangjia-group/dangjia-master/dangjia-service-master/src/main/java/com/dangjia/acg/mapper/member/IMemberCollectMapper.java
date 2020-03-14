@@ -1,7 +1,10 @@
 package com.dangjia.acg.mapper.member;
 
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
+import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.MemberCollect;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -17,5 +20,11 @@ import java.util.List;
 public interface IMemberCollectMapper extends Mapper<MemberCollect> {
 
     List<House> queryCollectHouse(@Param("memberId") String memberId);
+
+    List<ActuarialProductAppDTO> queryRandomProduct(@Param("limit") Integer limit, @Param("cityId") String cityId);
+
+    List<ActuarialProductAppDTO> queryRandomProductByCategoryId(@Param("storefrontProductId") String storefrontProductId,@Param("limit") Integer limit);
+
+    List<MemberCollectDTO> queryCollectGood(@Param("memberId") String memberId);
 }
 

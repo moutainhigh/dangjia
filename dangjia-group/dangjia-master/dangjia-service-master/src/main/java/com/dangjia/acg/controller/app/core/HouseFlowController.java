@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.core;
 
 import com.dangjia.acg.api.app.core.HouseFlowAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.service.core.HouseFlowService;
@@ -22,6 +23,29 @@ public class HouseFlowController implements HouseFlowAPI {
     @Autowired
     private HouseFlowService houseFlowService;
 
+    @Override
+    @ApiMethod
+    public ServerResponse getGrabBroadcast(String userToken, Integer type){
+        return houseFlowService.getGrabBroadcast(userToken,  type);
+    }
+
+    /**
+     * 新抢单播报
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getNewGrabBroadcast(String userToken){
+        return houseFlowService.getNewGrabBroadcast(userToken);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse getGrabNumber(String userToken,String cityId){
+        return houseFlowService.getGrabNumber(userToken,  cityId);
+    }
     /**
      * 抢单列表
      *
@@ -30,10 +54,16 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getGrabList( HttpServletRequest request,String userToken, String cityId) {
-        return houseFlowService.getGrabList(  request,userToken, cityId);
+    public ServerResponse getGrabList(HttpServletRequest request, PageDTO pageDTO, String userToken, String cityId,Integer type) {
+        return houseFlowService.getGrabList(request,  pageDTO, userToken, cityId, type);
     }
 
+
+    @Override
+    @ApiMethod
+    public ServerResponse getGrabInfo(HttpServletRequest request,String userToken, String houseFlowId, Integer type){
+        return houseFlowService.getGrabInfo(request,  userToken, houseFlowId,  type);
+    }
     /**
      * 抢单验证
      *
@@ -56,12 +86,25 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setGiveUpOrder(String userToken, String houseFlowId) {
-        return houseFlowService.setGiveUpOrder(userToken, houseFlowId);
+    public ServerResponse setGiveUpOrder(String userToken, String houseFlowId,Integer type) {
+        return houseFlowService.setGiveUpOrder(userToken, houseFlowId, type);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setConfirm(HttpServletRequest request, String userToken, String houseFlowId,Integer type) {
+        return houseFlowService.setConfirm(request, userToken, houseFlowId, type);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setCraftsmanInfo(String userToken, String houseFlowId) {
+        return houseFlowService.setCraftsmanInfo(userToken, houseFlowId);
     }
 
     /**
      * 工人30分钟自动放弃抢单任务，工人未购买保险或者保险服务剩余天数小于等于60天则自动放弃订单
+     *
      * @return
      */
     @Override
@@ -72,6 +115,7 @@ public class HouseFlowController implements HouseFlowAPI {
 
     /**
      * 工匠自动续保
+     *
      * @return
      */
     @Override
@@ -79,6 +123,7 @@ public class HouseFlowController implements HouseFlowAPI {
     public ServerResponse autoRenewOrder() {
         return houseFlowService.autoRenewOrder();
     }
+
     /**
      * 拒单
      *
@@ -101,8 +146,8 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setConfirmStart(HttpServletRequest request,String userToken, String houseFlowId) {
-        return houseFlowService.setConfirmStart(request,userToken, houseFlowId);
+    public ServerResponse setConfirmStart(HttpServletRequest request, String userToken, String houseFlowId) {
+        return houseFlowService.setConfirmStart(request, userToken, houseFlowId);
     }
 
     /**

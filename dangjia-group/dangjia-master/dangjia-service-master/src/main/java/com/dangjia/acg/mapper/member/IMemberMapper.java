@@ -19,6 +19,7 @@ public interface IMemberMapper extends Mapper<Member> {
 
     List<Member> artisanList(@Param("cityId") String cityId,@Param("name") String name,@Param("workerTypeId")String workerTypeId ,@Param("type") String type,@Param("checkType")String checkType);
 
+    List<Map<String,Object>> searchWorkerAllList(@Param("cityId") String cityId,@Param("searchKey") String searchKey);
     /**通过评价表的houseId获得大管家*/
     Member getSupervisor(@Param("houseId") String houseId);
 

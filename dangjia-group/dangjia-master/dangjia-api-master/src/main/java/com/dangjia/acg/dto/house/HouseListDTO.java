@@ -1,7 +1,6 @@
 package com.dangjia.acg.dto.house;
 
 import com.dangjia.acg.common.util.CommonUtil;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -29,14 +28,14 @@ public class HouseListDTO {
     private String memberId;
     private String memberName;
     private String mobile;
-    private Integer visitState;//0待确认开工,1装修中,2休眠中,3已完工
+    private Integer visitState;//0待确认开工(待付款）,1装修中,2休眠中,3已完工,4已取消
     private Integer showHouse;//0不是，1是 是否精选
     private Integer siteDisplay;//0 展示 1 不展示
     private String style;//设计风格
     private BigDecimal square;//外框面积
     private BigDecimal buildSquare;//建筑面积
     private Integer decorationType;//装修类型  0表示没有开始，1远程设计，2自带设计，3共享装修
-    private Integer houseType;//0：新房；1：老房
+    private String houseType;//0：新房；1：老房(查配置表，3.0改版）
     private String residential;//小区名
     private String building;//楼栋，后台客服填写
     private String unit;//单元号，后台客服填写
@@ -58,6 +57,9 @@ public class HouseListDTO {
     private String houseWorkerId;//工人抢单ID
     private String storeName;// 归属分店
 
+    private String houseTypeName;//服务类型
+    private String orderId;// 订单ID
+
 
     protected Date startDate;//创建时间
     private String username;// 销售名称
@@ -65,6 +67,8 @@ public class HouseListDTO {
 
     private String remarkInfo;//备注详情
     private Date remarkDate;//备注时间
+
+    private Double inputArea;//业主录入面积
 
 
 

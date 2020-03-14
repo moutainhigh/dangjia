@@ -35,54 +35,27 @@
 
 	<!--精算阶段花费统计-->
 	<select id="getHouseBudgetStageCost" resultType="com.dangjia.acg.dto.actuary.BudgetStageCostDTO">
-		(
 		SELECT
 		house_id houseId,
 		worker_type_id workerTypeId,
-		'0' type,
+		product_type type,
 		SUM(total_price) totalAmount
 		FROM
 		`dj_actuary_budget_material`
 		WHERE
-		delete_state != 1 and delete_state != 5
+		delete_state != 1
 		<if test = "workerTypeId!=null and workerTypeId!=''">
 			AND `worker_type_id` = #{workerTypeId}
 		</if>
 		AND `house_id` = #{houseId}
 		GROUP BY
 		houseId,
-		workerTypeId
-		)
-		UNION ALL
-		(
-		SELECT
-		house_id houseId,
-		worker_type_id workerTypeId,
-		'2' type,
-		SUM(total_price) totalAmount
-		FROM
-		`dj_actuary_budget_worker`
-		WHERE
-		delete_state != 1  and delete_state != 5
-		<if test = "workerTypeId!=null and workerTypeId!=''">
-			AND `worker_type_id` = #{workerTypeId}
-		</if>
-		AND `house_id` = #{houseId}
-		GROUP BY
-		houseId,
-		workerTypeId
-		);
+		workerTypeId,
+		type
 	</select>
 	<!--精算阶段总花费统计-->
 	<select id="getHouseBudgetTotalAmount" resultType="java.math.BigDecimal">
-		SELECT
-			SUM(a.totalAmount) totalAmount
-		FROM
-		(
-			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_material` WHERE delete_state != 1 AND delete_state != 5 AND `house_id` = #{houseId})
-				UNION ALL
-			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_worker` WHERE delete_state != 1 AND delete_state != 5 AND `house_id` = #{houseId})
-		) a
+		SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_material` WHERE delete_state != 1 AND `house_id` = #{houseId}
 	</select>
 	<!--精算分类(支付和未支付)-->
 	<select id="getCategoryAllList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
@@ -155,7 +128,6 @@
 		where
 		steta in (1,2)
 		and delete_state != 1
-		and delete_state != 5
 		and house_id = #{houseId}
 		<if test = "productName!=null and productName!=''">
 			and
@@ -317,13 +289,44 @@
 	<!-- 根据houseId和workerTypeId查询房子材料精算 -->
 	<select id="getBudgetMaterialById" resultType="java.util.Map">
 		SELECT
-		<include refid="all_columns"/>
-		FROM dj_actuary_budget_material
-		where house_id=#{houseId}
-		and worker_type_id =#{workerTypeId}
-		and delete_state!=1
-		and delete_state!=5
-		ORDER BY category_id,product_sn,goods_name desc
+		 t1.id,
+		 t2.prod_template_id prodTemplateId,
+		 t1.house_flow_id AS houseFlowId,
+		 t1.house_id AS houseId,
+		 t1.worker_type_id AS workerTypeId,
+		 t1.steta,
+		 t1.template_id AS templateId,
+		 t1.convert_count AS convertCount,
+		 t1.delete_state AS deleteState,
+		 t1.product_id AS productId,
+		 t1.product_sn AS productSn,
+		 t1.product_name AS productName,
+		 t1.product_nick_name AS productNickName,
+		 t1.goods_id AS goodsId,
+		 t1.goods_name AS goodsName,
+		 t1.price,
+		 t1.cost,
+		 t1.description,
+		 t1.shop_count AS shopCount,
+		 t1.unit_name AS unitName,
+		 t1.total_price AS totalPrice,
+		 t1.group_type AS groupType,
+		 t1.product_type AS productType,
+		 t1.goods_group_id AS goodsGroupId,
+		 t1.category_id AS categoryId,
+		 t1.image,
+		 t1.create_date AS createDate,
+		 t1.modify_date AS modifyDate
+		FROM
+			dj_actuary_budget_material t1,
+			dj_basics_storefront_product t2
+		WHERE
+			t1.product_id = t2.id
+		and t1.house_id=#{houseId}
+		and t1.worker_type_id =#{workerTypeId}
+		and t1.product_type !=2
+		and t1.delete_state!=1 and delete_state!=5
+		ORDER BY t1.category_id,t1.product_sn,t1.goods_name desc
 	</select>
 
 	<!-- 根据houseId和workerTypeId查询房子材料精算 -->
@@ -334,7 +337,6 @@
 		where house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
 		and delete_state!=1
-		and delete_state!=5
 		ORDER BY category_id,product_sn,goods_name desc
 	</select>
 
@@ -369,7 +371,6 @@
 		select sum(abm.price * abm.shop_count)
 		from dj_actuary_budget_material abm
 		WHERE abm.delete_state!=1
-		and  abm.delete_state!=5
 		and abm.steta=1
         and abm.house_flow_id=#{houseFlowId}
 	</select>
@@ -379,11 +380,121 @@
 		select sum(abm.price * abm.shop_count)
 		from dj_actuary_budget_material abm
 		WHERE  abm.delete_state!=1
-		and  abm.delete_state!=5
 		and abm.steta=1
         and abm.house_flow_id=#{houseFlowId}
 	</select>
+	<select id="queryShopGoods" resultType="com.dangjia.acg.dto.actuary.ShopGoodsDTO">
+	SELECT
+		l.id shopId,
+		l.storefront_name shopName,
+		l.storefront_logo shopLogo,
+		l.system_logo systemLogo
+	FROM
+		dj_basics_storefront l
+	WHERE
+		l.id IN (
+			SELECT
+				m.storefont_id
+			FROM
+				dj_actuary_budget_material m
+			WHERE
+				m.house_id =  #{houseId}
+			AND m.worker_type_id =  #{workerTypeId}
+			GROUP BY
+				m.storefont_id
+		)
+	GROUP BY
+		l.id
+	ORDER BY
+		l.id DESC
+	</select>
+	<!--查询工种材料未支付所有商品的标签-->
+	<select id="queryBudgetLabel" resultType="com.dangjia.acg.dto.actuary.BudgetLabelDTO">
+		SELECT
+			IFNULL(l.id,'-1') labelId,
+			IFNULL(l.name,'其他') labelName,
+			GROUP_CONCAT(c.id) categoryIds
+		FROM
+			dj_basics_goods_category c
+		LEFT JOIN dj_basics_goods_category l ON l.id=c.parent_id
+		WHERE
+			c.id IN (
+					SELECT
+						m.category_id
+					FROM
+						dj_actuary_budget_material m
+					WHERE m.house_id = #{houseId}
+					and m.worker_type_id = #{workerTypeId}
+					and m.storefont_id = #{storefontId}
+					and m.delete_state in (0, 4)
+					GROUP BY m.category_id
+			)
+		GROUP BY l.id
+		ORDER BY l.id desc
+	</select>
 
+	<!--查询工种材料未支付所有商品的标签-->
+	<select id="getBudgetLabel" resultType="com.dangjia.acg.dto.actuary.BudgetLabelDTO">
+		SELECT
+			IFNULL(l.id,'-1') labelId,
+			IFNULL(l.name,'其他') labelName,
+			GROUP_CONCAT(c.id) categoryIds
+		FROM
+			dj_basics_goods_category c
+		LEFT JOIN dj_basics_goods_category l ON l.id=c.parent_id
+		WHERE
+			c.id IN (
+				SELECT
+					m.category_id
+				FROM
+					dj_actuary_budget_material m
+				WHERE m.house_id = #{houseId}
+					and m.worker_type_id = #{workerTypeId}
+					and m.storefont_id = #{storefontId}
+				  	and m.delete_state in (0, 2 ,4)
+				GROUP BY m.category_id
+			  )
+			AND l.id =#{labelId}
+		GROUP BY l.id
+		ORDER BY l.id desc
+	</select>
+	<!--查询工种材料未支付所有商品-->
+	<select id="queryBudgetLabelGoods" resultType="com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO">
+		SELECT
+			m.id,
+			m.house_flow_id houseFlowId,
+			m.house_id houseId,
+			m.worker_type_id workerTypeId,
+			m.steta,
+			m.delete_state deleteState,
+			m.product_id productId,
+			m.original_product_id originalProductId,
+			m.goods_group_id goodsGroupId,
+			m.product_sn productSn,
+			m.product_name productName,
+			sp.sell_price price,
+			m.shop_count shopCount,
+			m.unit_name unitName,
+			m.total_price totalPrice,
+			m.create_date createDate,
+			m.create_date createDate,
+			m.product_type productType,
+			m.data_status dataStatus,
+			p.category_id categoryId,
+			m.image,
+			m.storefont_id storefontId,
+			p.goods_id goodsId,
+			p.value_name_arr attributeName
+		FROM
+			dj_actuary_budget_material m
+		INNER JOIN dj_basics_storefront_product sp on sp.id=m.product_id and sp.storefront_id=m.storefont_id
+		INNER JOIN dj_basics_product_template p ON sp.prod_template_id = p.id
+		WHERE m.house_id = #{houseId}
+		and m.worker_type_id = #{workerTypeId}
+		and m.storefont_id = #{storefontId}
+		and m.delete_state in (0, 2, 4)
+        AND m.product_type &lt;4
+	</select>
 
 	<insert id="insertByBatch" parameterType="java.util.List">
 		INSERT INTO dj_actuary_budget_material (

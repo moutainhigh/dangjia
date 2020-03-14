@@ -2,6 +2,8 @@ package com.dangjia.acg.dto.basics;
 
 
 import com.dangjia.acg.common.annotation.ExcelField;
+import com.dangjia.acg.dto.actuary.AttributeDTO;
+import com.dangjia.acg.modle.sup.Shop;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -23,7 +25,20 @@ public class WorkerGoodsDTO {
     private String id;
     @ApiModelProperty("name")
     private String name;
+    @ApiModelProperty("productName")
+    private String productName;
+    @ApiModelProperty("productId")
+    private String productId;
 
+    private String goodsName;
+
+    private String productTemplateId;
+
+    @ApiModelProperty("storefrontId")
+    private String storefrontId;//
+
+    private Integer sales;//退货性质0：可退；1：不可退
+    private String irreversibleReasons;//不可退原因
     @ExcelField(titile = "商品编号", offset = 2)
     private String workerGoodsSn;
     @ApiModelProperty("image")
@@ -34,8 +49,6 @@ public class WorkerGoodsDTO {
     private String unitName;
     @ApiModelProperty("price")
     private Double price;
-    @ApiModelProperty("sales")
-    private Integer sales;
     @ApiModelProperty("workExplain")
     private String workExplain;
     @ApiModelProperty("workerDec")
@@ -51,18 +64,20 @@ public class WorkerGoodsDTO {
     @ApiModelProperty("workerTypeName")
     private String workerTypeName;
     @ApiModelProperty("showGoods")
-    private Integer showGoods;
+    private String showGoods;
     @ApiModelProperty("createDate")
     private String createDate;
     @ApiModelProperty("modifyDate")
     private String modifyDate;
     @ApiModelProperty("otherName")
     private String otherName;
+
+    private int productType;//2=人工商品
     @ApiModelProperty(" 是否置顶 0=正常  1=置顶")
     private String istop;
 
-    private Double lastPrice;
-    private Date lastTime;
+    private Double adjustedPrice;
+    private Date modityPriceTime;
     private String technologyIds;
     private String considerations;
     private String calculateContent;
@@ -72,8 +87,11 @@ public class WorkerGoodsDTO {
     private String shopCount;//精算数
     private String msg;//异常说明
 
+    private String purchaseRestrictions;//购买限制（0自由购房；1有房无精算；2有房有精算）
     @ApiModelProperty("technologies")
     private List<TechnologyDTO> technologies;
 
+    private Shop shop;//店铺信息
+    private List<AttributeDTO> attrList;//品牌，系列，价格属性,
 
 }

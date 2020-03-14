@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dangjia.acg.mapper.deliver.ISplitDeliverMapper">
+<mapper namespace="com.dangjia.acg.mapper.delivery.ISplitDeliverMapper">
 
     <!--授权大管家收货-->
     <update id="supState">
@@ -16,7 +16,10 @@
         a.shipAddress,
         a.supplierId,
         a.supMobile,
-        a.supName
+        a.supName,
+        a.storefrontId,
+        SUM(a.sent) sent,
+        SUM(a.wait) wait
         FROM
         (
         (
@@ -24,22 +27,41 @@
         m.ship_address AS shipAddress,
         m.supplier_id AS supplierId,
         m.supplier_telephone AS supMobile,
-        m.supplier_name AS supName
+        m.supplier_name AS supName,
+        m.storefront_id AS storefrontId,
+        (
+        SELECT
+        COUNT(d.id)
+        FROM
+        dj_repair_mend_deliver d
+        WHERE
+        d.supplier_id = m.supplier_id
+        AND d.apply_state = 1
+        ) sent,
+        (
+        SELECT
+        COUNT(d.id)
+        FROM
+        dj_repair_mend_deliver d
+        WHERE
+        d.supplier_id = m.supplier_id
+        AND d.apply_state = 0
+        ) wait
         FROM
         dj_repair_mend_deliver m
-        inner join dj_house h on h.id = m.house_id and h.city_id = #{cityId}
         WHERE
         m.data_status = 0
+        AND m.city_id = #{cityId}
         AND m.apply_state IS NOT NULL
         AND m.apply_state != 3
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and m.modify_date between #{beginDate} and #{endDate}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and ( m.ship_address like CONCAT('%',#{searchKey},'%')
-            or m.ship_mobile like CONCAT('%',#{searchKey},'%')
-            or m.ship_name like CONCAT('%',#{searchKey},'%')
-            or m.supplier_name like CONCAT('%',#{searchKey},'%'))
+            and (m.supplier_name like CONCAT('%',#{searchKey},'%'))
+        </if>
+        <if test="storefrontId!=null and storefrontId!=''">
+            and m.storefront_id = #{storefrontId}
         </if>
         GROUP BY
         m.supplier_id
@@ -50,44 +72,99 @@
         s.ship_address AS shipAddress,
         s.supplier_id AS supplierId,
         s.supplier_telephone AS supMobile,
-        s.supplier_name AS supName
+        s.supplier_name AS supName,
+        s.storefront_id AS storefrontId,
+        (
+        SELECT
+        COUNT(d.id)
+        FROM
+        dj_deliver_split_deliver d
+        WHERE
+        d.supplier_id = s.supplier_id
+        AND (
+        d.apply_state = 1
+        OR d.apply_state = 2
+        )
+        ) sent,
+        (
+        SELECT
+        COUNT(d.id)
+        FROM
+        dj_deliver_split_deliver d
+        WHERE
+        d.supplier_id = s.supplier_id
+        AND d.apply_state = 0
+        ) wait
         FROM
         dj_deliver_split_deliver s
-        inner join dj_house h on h.id = s.house_id and h.city_id = #{cityId}
         WHERE
         s.data_status = 0
+        AND s.city_id = #{cityId}
         AND s.apply_state IS NOT NULL
         AND s.apply_state != 3
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and s.modify_date between #{beginDate} and #{endDate}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and ( s.ship_address like CONCAT('%',#{searchKey},'%')
-            or s.ship_mobile like CONCAT('%',#{searchKey},'%')
-            or s.ship_name like CONCAT('%',#{searchKey},'%')
-            or s.supplier_name like CONCAT('%',#{searchKey},'%'))
+            and (s.supplier_name like CONCAT('%',#{searchKey},'%'))
+        </if>
+        <if test="storefrontId!=null and storefrontId!=''">
+            and s.storefront_id = #{storefrontId}
         </if>
         GROUP BY
         s.supplier_id
         )
         ) a
-        GROUP BY a.supplierId
-        ORDER BY a.supName
+        GROUP BY
+        a.supplierId
+        ORDER BY
+        a.wait DESC
     </select>
 
-    <select id="getSupplierGoodsId" resultType="java.lang.String">
-        SELECT
-            d.supplier_id
+    <select id="queryNonPlatformSupplier" resultType="java.util.Map">
+        SELECT DISTINCT
+            ds.id supId,
+            ds.NAME supName,
+            0 supPrice,
+            0 supPorterage,
+            0 transportationCost,
+            ds.is_non_platform_supplier isNonPlatformSupplier
         FROM
-            `dj_deliver_order_split_item` si
-        INNER JOIN dj_deliver_split_deliver d ON si.split_deliver_id = d.id
+            dj_supplier ds
         WHERE
-            si.house_id = #{houseId}
-        AND si.product_sn =  #{productSn}
-        GROUP BY d.supplier_id
-        ORDER BY si.create_date DESC
+            ds.is_non_platform_supplier = '1'
     </select>
-    
+
+
+    <select id="getSupplierGoodsId" resultType="java.util.Map">
+        SELECT
+        distinct  IFNULL(d.sup_id ,'' )  as supplierId,IFNULL(ds.name,'') as name
+        FROM
+        `dj_deliver_order_split_item` si
+        INNER JOIN dj_sup_application_product d ON si.product_id = d.product_id
+        INNER join dj_supplier ds on ds.id=d.sup_id
+        WHERE si.house_id = #{houseId}
+        AND si.product_id =  #{productSn}
+        ORDER BY d.price asc
+    </select>
+
+    <select id="getMendMaterialSupplierId" resultType="java.util.Map">
+
+        select
+       DISTINCT IFNULL(d.sup_id ,'' )  as supplierId,IFNULL(ds.name,'') as name
+        from
+        dj_deliver_split_deliver  ddsd
+        inner join dj_deliver_order_split_item ddosi
+        on ddosi.split_deliver_id=ddsd.id
+        INNER JOIN dj_sup_application_product d ON ddosi.product_id = d.product_id
+        INNER join dj_supplier ds on ds.id=d.sup_id
+        WHERE ddsd.house_id = #{houseId}
+        AND ddosi.product_id =  #{productId}
+        ORDER BY d.price asc
+
+    </select>
+
+
     <!--根据供应商id查询要货列表-->
     <select id="getOrderSplitList" resultType="com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO">
         SELECT
@@ -192,6 +269,23 @@
         <if test="shipAddress!=null and shipAddress!=''">
             and ship_address like CONCAT('%',#{shipAddress},'%')
         </if>
+    </select>
+
+    <select id="getsupplierByProduct" resultType="java.util.Map">
+        SELECT
+            ds.id supId,ds.name supName,dsp.price supPrice,dsp.porterage supPorterage,ds.transportation_cost transportationCost,
+            ds.is_non_platform_supplier isNonPlatformSupplier
+        FROM
+            dj_supplier ds,
+            dj_sup_application_product dsp
+        WHERE
+            ds.id = dsp.sup_id
+        and dsp.application_status='1'
+        and dsp.shop_id=#{storefrontId}
+        and dsp.product_id=#{productId}
+        and supply_relationship='0'
+        group by ds.id
+        order by dsp.price asc
     </select>
 
 

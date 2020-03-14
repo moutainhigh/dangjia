@@ -30,7 +30,8 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
                                              Integer applyState, String searchKey,
                                              String beginDate, String endDate) {
         String cityId = request.getParameter(Constants.CITY_ID);
-        return webSplitDeliverService.getAllSplitDeliver(pageDTO, cityId, applyState, searchKey, beginDate, endDate);
+        String userId=request.getParameter("userId");
+        return webSplitDeliverService.getAllSplitDeliver(pageDTO, cityId,userId, applyState, searchKey, beginDate, endDate);
     }
 
     @Override
@@ -59,13 +60,13 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse Settlemen(String image, String merge, String supplierId) {
-        return webSplitDeliverService.settlemen(image, merge, supplierId);
+    public ServerResponse settlemen(String image, String merge, String supplierId, String userId, String cityId, Double settlementAmount, String sourceType) {
+        return webSplitDeliverService.settlemen(image, merge, supplierId, userId, cityId, settlementAmount, sourceType);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse ClsdMendDeliverList(String shipAddress, String beginDate, String endDate, String supplierId) {
+    public ServerResponse clsdMendDeliverList(String shipAddress, String beginDate, String endDate, String supplierId) {
         return webSplitDeliverService.clsdMendDeliverList(shipAddress, beginDate, endDate, supplierId);
     }
 

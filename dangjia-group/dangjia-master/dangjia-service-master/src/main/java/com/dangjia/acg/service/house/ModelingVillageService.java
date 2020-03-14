@@ -177,7 +177,6 @@ public class ModelingVillageService {
                     return ServerResponse.createByErrorMessage("楼栋名称不能为空");
                 ResidentialBuilding residentialBuilding;
                 if (CommonUtil.isEmpty(residentialBuildingId)) {//没有id则新增
-                    LOG.info("111111111111=======================");
                     if (CommonUtil.isEmpty(modelingVillage.getId()))//没有id则新增
                         return ServerResponse.createByErrorMessage("小区id不能为null");
                     Example example=new Example(Store.class);
@@ -195,7 +194,7 @@ public class ModelingVillageService {
                     modelingVillageMapper.updateByPrimaryKeySelective(modelingVillage);
                 } else {
                     residentialBuilding = residentialBuildingMapper.selectByPrimaryKey(residentialBuildingId);
-                    if (!residentialBuilding.getBuilding().equals(building)) {
+                    if (residentialBuilding.getBuilding().equals(building)) {
                         return ServerResponse.createByErrorMessage("楼栋名称已存在");
                     }
                     residentialBuilding.setBuilding(building);//楼栋名称

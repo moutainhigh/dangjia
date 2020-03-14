@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dangjia.acg.mapper.deliver.IOrderSplitMapper">
+<mapper namespace="com.dangjia.acg.mapper.delivery.IOrderSplitMapper">
 
 
     <update id="cancelOrderSplit" >
@@ -69,5 +69,60 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         GROUP BY
         s.category_id
     </select>
+
+    <!--查询当前地址，当前店铺下的所有要货单-->
+    <select id="searchOrderSplistByAddressId" resultType="com.dangjia.acg.dto.deliver.OrderSplitDTO">
+        SELECT
+            ddos.id orderSplitId,
+            ddos.number number,
+            ddos.create_date createDate,
+            ddos.address_id addressId,
+            ddos.house_id houseId,
+            ddos.is_reservation_deliver isReservationDeliver,
+            ddos.apply_status applystatus
+            FROM
+                dj_deliver_order_split ddos
+            WHERE
+                ddos.apply_status IN (1, 2)
+            AND ddos.storefront_id = #{storefrontId}
+            AND (
+                ddos.address_id = #{addressId}
+                OR ddos.house_id = #{houseId}
+            )
+
+    </select>
+
+    <select id="selectOrderSplitList" resultType="com.dangjia.acg.modle.deliver.OrderSplit">
+        SELECT
+            t.id,
+            t.split_parent_id splitParentId,
+            t.create_date createDate,
+            t.modify_date modifyDate,
+            t.number,
+            t.house_id houseId,
+            t.apply_status applyStatus,
+            t.member_id memberId,
+            t.member_name memberName,
+            t.mobile,
+            t.worker_type_id workerTypeId,
+            t.mend_number mendNumber,
+            t.storefront_id storefrontId,
+            t.address_id addressId,
+            t.city_id cityId,
+            t.order_id orderId
+        FROM
+            dj_deliver_order_split t
+        WHERE
+            t.house_id =#{houseId}
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND t.worker_type_id = #{workerTypeId}
+        </if>
+        AND  t.split_parent_id is null
+        ORDER BY t.create_date desc
+    </select>
+
+    <update id="updateOrderSplitStatus">
+        update dj_deliver_order_split set apply_status=5 where split_parent_id=#{orderSplitId} or id=#{orderSplitId}
+    </update>
 </mapper>
 

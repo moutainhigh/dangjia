@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.config;
 
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.config.ConfigMessage;
@@ -61,6 +62,28 @@ public interface ConfigMessageAPI {
                                     @RequestParam("alert") String alert,
                                     @RequestParam("type") Integer type,
                                     @RequestParam("data")String data);
+
+    @PostMapping("/config/message/addConfigMessageServer")
+    @ApiOperation(value = "消息推送--远程调用", notes = "远程调用")
+    ServerResponse addConfigMessageServer(@RequestParam("appType") AppType appType,
+                                    @RequestParam("memberId") String memberId,
+                                    @RequestParam("targetType") String targetType,
+                                    @RequestParam("title") String title,
+                                    @RequestParam("alert") String alert,
+                                    @RequestParam("type") Integer type,
+                                    @RequestParam("data")String data,
+                                    @RequestParam("speak")String speak);
+
+
+    @PostMapping("/config/message/addRefundConfigMessage")
+    @ApiOperation(value = "业主退货退款推送消息", notes = "业主退货退款推送消息")
+    ServerResponse addRefundConfigMessage(@RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("appType") AppType appType,
+                                          @RequestParam("memberId") String memberId,
+                                          @RequestParam("targetType") String targetType,
+                                          @RequestParam("title") String title,
+                                          @RequestParam("alert") String alert,
+                                          @RequestParam("typeText") String typeText);
 
 
 }

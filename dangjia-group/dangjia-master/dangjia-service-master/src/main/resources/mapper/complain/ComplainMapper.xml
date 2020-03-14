@@ -43,8 +43,51 @@
         </if>
         ORDER by c.modify_date desc
     </select>
+
+
+    <select id="getMaintenanceRecordList" resultType="com.dangjia.acg.dto.complain.ComplainDTO">
+        select
+        m.name as memberName,
+        m.nick_name as memberNickName,
+        m.mobile as memberMobile,
+        m.id as memberId,
+        mr.complain_type as complainType,
+        mr.create_date as createDate,
+        mr.id as id,
+        mr.handle_type as status,
+        u.username as operateName,
+        u.id as operateId,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) as houseName,
+        h.id as houseId
+        FROM
+        dj_maintenance_record mr
+        LEFT JOIN dj_member m on mr.member_id = m.id
+        LEFT JOIN dj_user  u on mr.user_id = u.id
+        LEFT JOIN dj_house h ON mr.house_id = h.id
+        where mr.data_status = 0
+        <if test="complainType != null">
+            and mr.complain_type = #{complainType}
+        </if>
+        <if test="state != null">
+            and mr.handle_type = #{state}
+        </if>
+        <if test=" searchKey!=null and searchKey != ''">
+            and CONCAT(m.mobile,m.name,m.nick_name)  like CONCAT('%',#{searchKey},'%')
+        </if>
+        ORDER by mr.modify_date desc
+    </select>
+
+
     <select id="getComplain" resultType="com.dangjia.acg.dto.complain.ComplainDTO">
-        SELECT c.id as id,
+        SELECT
+        c.id as id,
         c.member_id as memberId,
         c.user_name as memberName,
         c.user_nick_name as memberNickName,
@@ -66,7 +109,10 @@
         c.files as files,
         c.create_date as createDate,
         c.modify_date as modifyDate,
-        c.content as content
+        c.content as content,
+        c.change_reason as changeReason,
+        c.reject_reason as rejectReason,
+        c.image as image
         FROM dj_complain c
         LEFT JOIN dj_house h ON c.house_id = h.id
         WHERE c.data_status = 0
@@ -74,6 +120,11 @@
             and c.id = #{complainId}
         </if>
     </select>
+
+
+
+
+
 </mapper>
 
 

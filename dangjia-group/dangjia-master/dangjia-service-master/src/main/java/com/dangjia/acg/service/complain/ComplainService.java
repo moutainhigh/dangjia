@@ -2,36 +2,42 @@ package com.dangjia.acg.service.complain;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.api.sup.SupplierProductAPI;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
+import com.dangjia.acg.api.refund.RefundAfterSalesAPI;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.complain.ComPlainStopDTO;
 import com.dangjia.acg.dto.complain.ComplainDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
-import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
+import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordResponsiblePartyMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -39,31 +45,46 @@ import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
-import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.service.deliver.SplitDeliverService;
+import com.dangjia.acg.service.core.HouseFlowApplyService;
+import com.dangjia.acg.service.deliver.OrderSplitService;
+import com.dangjia.acg.service.engineer.DjMaintenanceRecordService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.service.product.MasterStorefrontService;
+import com.dangjia.acg.service.repair.MendMaterielService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
 
 @Service
 public class ComplainService {
+    private static Logger logger = LoggerFactory.getLogger(ComplainService.class);
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -73,7 +94,7 @@ public class ComplainService {
     @Autowired
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
-    private ITechnologyRecordMapper technologyRecordMapper;
+    private MasterProductTemplateService masterProductTemplateService;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -81,7 +102,11 @@ public class ComplainService {
     @Autowired
     private IWorkerTypeMapper iWorkerTypeMapper;
     @Autowired
-    private SupplierProductAPI supplierProductAPI;
+    private DjMaintenanceRecordResponsiblePartyMapper responsiblePartyMapper;
+    @Autowired
+    private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
+    @Autowired
+    private DjMaintenanceRecordService djMaintenanceRecordService;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -95,7 +120,7 @@ public class ComplainService {
     @Autowired
     private IWorkIntegralMapper iWorkIntegralMapper;
     @Autowired
-    private SplitDeliverService splitDeliverService;
+    private MendMaterielService mendMaterielService;
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
@@ -108,12 +133,136 @@ public class ComplainService {
     private HouseService houseService;
 
     @Autowired
-    private ForMasterAPI forMasterAPI;
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private OrderSplitService orderSplitService;
+    @Autowired
+    private HouseFlowApplyService houseFlowApplyService;
+
+    @Autowired
+    private DjSupplierAPI djSupplierAPI;
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
+    @Autowired
+    private IMendOrderMapper mendOrderMapper;
+    @Autowired
+    private MasterStorefrontService masterStorefrontService;
+
+    /**
+     * @param request
+     * @param userId
+     * @param cityId
+     * @param complainType
+     * @param houseId
+     * @param content
+     * @param images
+     * @return
+     */
+    public ServerResponse insertGroundComplain(HttpServletRequest request, String userId, String cityId, Integer complainType, String houseId, String content, String images) {
+        try {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            insertUserComplain(storefront.getStorekeeperName(), storefront.getMobile(), userId, storefront.getId(), houseId, complainType, content, images, 3);
+            return ServerResponse.createBySuccessMessage("提交申诉成功");
+        } catch (Exception e) {
+            logger.error("提交异常：", e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
+     * 店铺申诉维保责任占比
+     *
+     * @param request
+     * @param userId
+     * @param cityId
+     * @param responsiblePartyId
+     * @param content
+     * @param images
+     * @return
+     */
+    public ServerResponse complainResponsibleParty(HttpServletRequest request, String userId, String cityId, String responsiblePartyId, String content, String images) {
+        try {
+            DjMaintenanceRecordResponsibleParty rrp = responsiblePartyMapper.selectByPrimaryKey(responsiblePartyId);
+            if (rrp == null) {
+                return ServerResponse.createByErrorMessage("未找到符合条件的数据");
+            }
+            Storefront storefront = masterStorefrontService.getStorefrontById(rrp.getResponsiblePartyId());
+            DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(rrp.getMaintenanceRecordId());
+            String complainId = insertUserComplain(storefront.getStorefrontName(), storefront.getMobile(), userId, responsiblePartyId, djMaintenanceRecord.getHouseId(), 12, content, images, 3);
+            rrp.setComplainId(complainId);
+            rrp.setModifyDate(new Date());
+            responsiblePartyMapper.updateByPrimaryKeySelective(rrp);//修改对应的申诉单号到维保中去
+            return ServerResponse.createBySuccessMessage("申诉成功");
+        } catch (Exception e) {
+            logger.error("申诉保存失败", e);
+            return ServerResponse.createByErrorMessage("申诉失败");
+        }
+    }
+
+    /**
+     * 添加申诉
+     *
+     * @param request
+     * @param userId
+     * @param complainType
+     * @param mendOrderId
+     * @param content
+     * @return
+     */
+    public ServerResponse insertComplain(HttpServletRequest request, String userId, String cityId, Integer complainType, String mendOrderId, String content, String images) {
+
+        try {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);//补退订单表
+            insertUserComplain(storefront.getStorekeeperName(), storefront.getMobile(), userId, mendOrder.getBusinessOrderNumber(), mendOrder.getHouseId(), complainType, content, images, 3);
+            return ServerResponse.createBySuccessMessage("提交申诉成功");
+        } catch (Exception e) {
+            logger.error("提交异常：", e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
+     * 添加申诉
+     *
+     * @param userName          发起人姓名
+     * @param userMobile        发起人电话
+     * @param userId            发起人ID
+     * @param businessId        业务单ID
+     * @param houseId           房子ID
+     * @param complainType      申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货.8工匠申请部分退货.9工匠报销.10工匠申维保定责
+     * @param content           申诉内容
+     * @param images            申诉图片
+     * @param applicationStatus 申请身份：1工匠，2业主，3店铺，4供应商
+     */
+    public String insertUserComplain(String userName, String userMobile, String userId, String businessId, String houseId, Integer complainType, String content, String images, Integer applicationStatus) {
+        Complain complain = new Complain();
+        complain.setMemberId(userId);
+        complain.setComplainType(complainType);
+        complain.setStatus(0);
+        complain.setHouseId(houseId);
+        complain.setBusinessId(businessId);
+        complain.setContent(content);
+        complain.setUserName(userName);
+        complain.setUserMobile(userMobile);
+        complain.setImage(images);
+        complain.setApplicationStatus(applicationStatus);
+        complainMapper.insertSelective(complain);
+        return complain.getId();
+    }
+
     /**
      * 添加申诉
      *
      * @param userToken    用户Token
-     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.提前结束装修，6.业主申请换人
+     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.提前结束装修，6.业主申请换人,
+     *                     7.业主投诉验收, 8.管家投诉验收, 9.工匠投诉验收
      * @param businessId   对应业务ID
      *                     complain_type==1:对应处罚的rewardPunishRecordId,
      *                     complain_type==2:对应房子任务进程/申请表的houseFlowApplyId,
@@ -125,7 +274,7 @@ public class ComplainService {
      */
 
     public ServerResponse addComplain(String userToken, String memberId, Integer complainType,
-                                      String businessId, String houseId, String files) {
+                                      String businessId, String houseId, String files,String changeReason,String image) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
@@ -142,11 +291,18 @@ public class ComplainService {
             }
         }
         Example example = new Example(Complain.class);
-        example.createCriteria()
-                .andEqualTo(Complain.MEMBER_ID, memberId)
-                .andEqualTo(Complain.COMPLAIN_TYPE, complainType)
-                .andEqualTo(Complain.BUSINESS_ID, businessId)
-                .andEqualTo(Complain.STATUS, 0);
+        if(CommonUtil.isEmpty(memberId)) {
+            example.createCriteria()
+                    .andEqualTo(Complain.COMPLAIN_TYPE, complainType)
+                    .andEqualTo(Complain.BUSINESS_ID, businessId)
+                    .andEqualTo(Complain.STATUS, 0);
+        }else{
+            example.createCriteria()
+                    .andEqualTo(Complain.COMPLAIN_TYPE, complainType)
+                    .andEqualTo(Complain.BUSINESS_ID, businessId)
+                    .andEqualTo(Complain.MEMBER_ID, memberId)
+                    .andEqualTo(Complain.STATUS, 0);
+        }
         List list = complainMapper.selectByExample(example);
         if (list.size() > 0) {
             return ServerResponse.createByErrorMessage("请勿重复提交申请！");
@@ -158,14 +314,25 @@ public class ComplainService {
         complain.setUserId(getUserID(complainType, businessId, houseId));
         complain.setHouseId(houseId);
         complain.setFiles(files);
+        complain.setChangeReason(changeReason);
+        complain.setImage(image);
 //        1:工匠被处罚后不服.2：业主要求整改.3：要求换人.4:部分收货申诉.
         if (complainType == 4) {
-            Supplier supplier = supplierProductAPI.getSupplier(house.getCityId(),complain.getUserId());
-            if (supplier != null) {
-                complain.setUserMobile(supplier.getTelephone());
-                complain.setUserName(supplier.getName());
-                complain.setUserNickName("供应商-" + supplier.getCheckPeople());
+            DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(complain.getUserId());
+            if (djSupplier != null) {
+                if(CommonUtil.isEmpty(complain.getMemberId())) {
+                    complain.setMemberId(djSupplier.getId());
+                }
+                complain.setUserMobile(djSupplier.getTelephone());
+                complain.setUserName(djSupplier.getName());
+                complain.setUserNickName("供应商-" + djSupplier.getCheckPeople());
             }
+
+
+            OrderSplitItem orderSplitItem=new OrderSplitItem();
+            orderSplitItem.setSplitDeliverId(businessId);
+            orderSplitItem.setShippingState(1);
+            orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
         } else {
             String field = "业主-";
             Member member = memberMapper.selectByPrimaryKey(complain.getUserId());
@@ -175,6 +342,9 @@ public class ComplainService {
                     if (workerType != null) {
                         field = workerType.getName() + "-";
                     }
+                }
+                if(CommonUtil.isEmpty(complain.getMemberId())) {
+                    complain.setMemberId(member.getId());
                 }
                 complain.setUserMobile(member.getMobile());
                 complain.setUserName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
@@ -190,7 +360,7 @@ public class ComplainService {
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
         }
-        return ServerResponse.createBySuccessMessage("提交成功");
+        return ServerResponse.createBySuccess("提交成功", complain.getId());
     }
 
     /**
@@ -210,11 +380,13 @@ public class ComplainService {
                     userid = rewardPunishRecord.getMemberId();
                     break;
                 case 2://2：业主要求整改.
+                case 13:// 业主投诉验收
                     House house = houseMapper.selectByPrimaryKey(houseId);
                     Member stewardHouse = memberMapper.selectByPrimaryKey(house.getMemberId());
                     userid = stewardHouse.getId();
                     break;
                 case 3:// 3：大管家（开工后）要求换人.
+                case 14:// 管家投诉验收
                     stewardHouse = memberMapper.getSupervisor(houseId);
                     userid = stewardHouse.getId();
                     break;
@@ -226,6 +398,10 @@ public class ComplainService {
                     House house2 = houseMapper.selectByPrimaryKey(houseId);
                     Member stewardHouse2 = memberMapper.selectByPrimaryKey(house2.getMemberId());
                     userid = stewardHouse2.getId();
+                    break;
+                case 15:// 工匠投诉验收
+                    HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(businessId);
+                    userid = houseFlowApply.getWorkerId();
                     break;
             }
         return userid;
@@ -248,7 +424,9 @@ public class ComplainService {
             if (member != null) {
                 if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
                     WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                    field = workerType.getName() + "-";
+                    if(workerType!=null) {
+                        field = workerType.getName() + "-";
+                    }
                 }
                 userName = field + (CommonUtil.isEmpty(member.getName()) ? member.getUserName() : member.getName());
                 return userName;
@@ -267,20 +445,27 @@ public class ComplainService {
      * 查询申诉
      *
      * @param pageDTO      分页实体
-     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.
+     * @param complainType 申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.
+     *                     5:提前结束装修.6业主要求换人.7:业主申诉退货 8 工匠申请部分退货
+     *                     9:工匠报销
      * @param state        处理状态:0:待处理。1.驳回。2.接受。
      * @param searchKey    用户关键字查询，包含名称、手机号、昵称
      * @return
      */
-    public ServerResponse getComplainList(PageDTO pageDTO, Integer complainType, Integer state, String searchKey) {
+    public ServerResponse getComplainList(PageDTO pageDTO, Integer complainType,
+                                          Integer state, String searchKey) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            PageInfo pageResult;
+
+
+            //客户申诉列表
             if (state != null && state == -1) state = null;
             List<ComplainDTO> complainDTOList = complainMapper.getComplainList(complainType, state, searchKey);
             if (complainDTOList.size() == 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
             }
-            PageInfo pageResult = new PageInfo(complainDTOList);
+            pageResult = new PageInfo(complainDTOList);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for (ComplainDTO complainDTO : complainDTOList) {
                 String files = complainDTO.getFiles();
@@ -298,6 +483,7 @@ public class ComplainService {
                 }
             }
             pageResult.setList(complainDTOList);
+
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -315,8 +501,10 @@ public class ComplainService {
      * @param files       附件 以，分割 如：data/f.dow,data/f2.dow
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse updataComplain(String userId, String complainId, Integer state, String description,
-                                         String files, String operateId, String operateName) {
+                                         String files, String operateId, String operateName,
+                                         String rejectReason) {
         if (CommonUtil.isEmpty(complainId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
         }
@@ -328,6 +516,8 @@ public class ComplainService {
         complain.setUserId(userId);
         complain.setDescription(description);
         complain.setFiles(files);
+        //添加驳回
+        complain.setRejectReason(rejectReason);
         if (!CommonUtil.isEmpty(operateId)) {
             complain.setOperateId(operateId);
             complain.setOperateName(userMapper.selectByPrimaryKey(operateId).getUsername());
@@ -422,8 +612,8 @@ public class ComplainService {
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                         houseFlow.setPause(0);
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                        //不通过节点验收
-                        technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
+//                        //不通过节点验收
+//                        technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
 
                         //业主不通过工匠发起阶段/整体完工申请驳回次数超过两次后将扣工人钱
                         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlow.getId());
@@ -444,30 +634,16 @@ public class ComplainService {
                             member.setHaveMoney(haveMoney);
                             memberMapper.updateByPrimaryKeySelective(member);
                         }
+                        House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+                        configMessageService.addConfigMessage( AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主验收竣工未通过",
+                                String.format(DjConstants.PushMessage.GZ_G_WORK_N, house.getHouseName()), 3,null,null);
+
                         break;
-                    case 4:// 4:部分收货申诉
-                        ServerResponse response = splitDeliverService.splitDeliverDetail(complain.getBusinessId());
-                        if (response.isSuccess()) {
-                            SplitDeliverDTO json = (SplitDeliverDTO) response.getResultObj();
-                            List<SplitDeliverItemDTO> list_Map = json.getSplitDeliverItemDTOList();
-                            double applyMoney=0d;
-                            for (SplitDeliverItemDTO tmp : list_Map) {
-                                OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(tmp.getId());
-                                if (orderSplitItem.getReceive() == null || (orderSplitItem.getNum() > orderSplitItem.getReceive())) {
-                                    orderSplitItem.setReceive(orderSplitItem.getNum());
-                                    orderSplitItemMapper.updateByPrimaryKey(orderSplitItem);
-                                }
-                                applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
-                            }
-                            SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(complain.getBusinessId());
-                            splitDeliver.setApplyMoney(applyMoney);
-                            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-                        } else {
-                            return response;
-                        }
+                    case 4:// 4:部分收货申诉，计算金钱给到对应的店铺
+                        orderSplitService.platformComplaint(complain.getBusinessId(), null, 3, userId, complain.getApplicationStatus());//部分收货，平台申诉通过
                         break;
                     case 5://提前结束装修
-                        House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
+                        house = houseMapper.selectByPrimaryKey(complain.getHouseId());
                         if (house == null) {
                             return ServerResponse.createByErrorMessage("没有查询到相关房子");
                         }
@@ -493,14 +669,35 @@ public class ComplainService {
                         }
                         houseMapper.updateByPrimaryKeySelective(house);
 
-                        List<HouseFlowApply> houseFlowApplys =  houseFlowApplyMapper.getMemberCheckList(house.getId());
+                        List<HouseFlowApply> houseFlowApplys = houseFlowApplyMapper.getMemberCheckList(house.getId());
                         for (HouseFlowApply flowApply : houseFlowApplys) {
                             flowApply.setMemberCheck(2);
                             houseFlowApplyMapper.updateByPrimaryKeySelective(flowApply);
                         }
                         break;
+                    case 7://业主申诉部分退货(同意后的处理）
+                        String businessId = complain.getBusinessId();//业务订单号
+                        mendMaterielService.updatePlatformComplainInfo(businessId, userId, 7);
+                        break;
+                    case 10://工匠申诉定责（平台同意后，返还工匠的质保金)
+                        //退还工匠的质保金
+                        DjMaintenanceRecordResponsibleParty recordResponsibleParty = responsiblePartyMapper.selectByPrimaryKey(complain.getBusinessId());
+                        Member worker = memberMapper.selectByPrimaryKey(recordResponsibleParty.getResponsiblePartyId());
+                        djMaintenanceRecordService.insertWorkerMinusDetention(worker, complain.getHouseId(), BigDecimal.valueOf(recordResponsibleParty.getMaintenanceTotalPrice()), recordResponsibleParty.getMaintenanceRecordId());
+                        //添加平台人工定责问题
+                        djMaintenanceRecordService.insertMaintenanceManualAllocation(complain.getId(), complain.getHouseId(), recordResponsibleParty.getMaintenanceRecordId(), recordResponsibleParty.getMaintenanceTotalPrice());
+                        break;
+                    case 12://店铺申请定责(平台同意后，返还店铺的质保金)
+                        //1.退还店铺的质保金
+                        DjMaintenanceRecordResponsibleParty responsibleParty = responsiblePartyMapper.selectByPrimaryKey(complain.getBusinessId());
+                        djMaintenanceRecordService.insertStorefrontReationMoney(responsibleParty.getMaintenanceRecordId(), complain.getHouseId(), responsibleParty.getResponsiblePartyId(), responsibleParty.getMaintenanceTotalPrice());
+                        //添加平台人工定责问题
+                        djMaintenanceRecordService.insertMaintenanceManualAllocation(complain.getId(), complain.getHouseId(), responsibleParty.getMaintenanceRecordId(), responsibleParty.getMaintenanceTotalPrice());
+                        break;
                 }
             }
+
+
         } else {
             if (complain.getComplainType() != null && complain.getComplainType() == 2) {
                 //将申请进程打回待审核。。
@@ -515,11 +712,19 @@ public class ComplainService {
                 house.setModifyDate(new Date());
                 houseMapper.updateByPrimaryKeySelective(house);
             }
+            if (complain.getComplainType() != null && complain.getComplainType() == 7) {//业主申请退货，不同意后的处理
+                //对应订单数据退回，订单流水记录生成
+                mendMaterielService.updatePlatformComplainInfo(complain.getBusinessId(), userId, 8);
+            }
+            if (complain.getComplainType() != null && complain.getComplainType() == 4) {
+                orderSplitService.platformComplaint(complain.getBusinessId(), null, 4, userId, complain.getApplicationStatus());//部分收货，平台申诉驳回
+            }
 
         }
         complainMapper.updateByPrimaryKeySelective(complain);
         return ServerResponse.createBySuccessMessage("提交成功");
     }
+
 
     /**
      * 获取申诉详情
@@ -535,6 +740,33 @@ public class ComplainService {
         ComplainDTO complain = complainMapper.getComplain(complainId);
         if (complain == null) {
             return ServerResponse.createByErrorMessage("未找到对应申诉");
+        }
+        if(!CommonUtil.isEmpty(complain.getMemberId())){
+            if(complain.getComplainType()==13 || complain.getComplainType()==14 || complain.getComplainType()==15) {
+                complain.setMemberName("");
+                complain.setMemberNickName("");
+                complain.setMemberMobile("");
+            }
+            Example example = new Example(Member.class);
+            example.createCriteria().andIn(Member.ID,Arrays.asList(complain.getMemberId().split(",")));
+            List<Member> members = memberMapper.selectByExample(example);
+            if(members!=null) {
+                for (Member member : members) {
+                    complain.setMemberHead(address + member.getHead());
+                    if(complain.getComplainType()==13 || complain.getComplainType()==14 || complain.getComplainType()==15) {
+                        if(CommonUtil.isEmpty(complain.getMemberMobile())){
+                            complain.setMemberName(member.getName());
+                            complain.setMemberNickName(member.getNickName());
+                            complain.setMemberMobile(member.getMobile());
+                        }else {
+                            complain.setMemberName(complain.getMemberName()+"、"+member.getName());
+                            complain.setMemberNickName(complain.getMemberName()+"、"+member.getNickName());
+                            complain.setMemberMobile(complain.getMemberName()+"、"+member.getMobile());
+                        }
+
+                    }
+                }
+            }
         }
         String files = complain.getFiles();
         if (!CommonUtil.isEmpty(files)) {
@@ -558,38 +790,28 @@ public class ComplainService {
                 complain.setData(rewardPunishRecordMapper.queryRewardPunishRecord(rewardPunishRecordDTO));
             } else if (complain.getComplainType() == 4) {//收货
                 SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(complain.getBusinessId());
-                House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
-                splitDeliverDTO.setShipState(splitDeliver.getShippingState());//发货状态
-                splitDeliverDTO.setNumber(splitDeliver.getNumber());
-                splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
-                splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
-                splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
-                splitDeliverDTO.setRecTime(splitDeliver.getRecTime() == null ? splitDeliver.getModifyDate() : splitDeliver.getRecTime());//收货时间
-                splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
-                splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
-                splitDeliverDTO.setSupName(splitDeliver.getSupplierName());
-                splitDeliverDTO.setSupId(splitDeliver.getSupervisorId());
-                splitDeliverDTO.setSupMobile(splitDeliver.getShipMobile());
+                BeanUtils.beanToBean(splitDeliver, splitDeliverDTO);
                 Example example = new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId())
+                        .andEqualTo(OrderSplitItem.SHIPPING_STATE, 1);
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
                 for (OrderSplitItem orderSplitItem : orderSplitItemList) {
-                    Product product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
+                    StorefrontProductDTO storefrontProduct = masterProductTemplateService.getStorefrontProductByTemplateId(orderSplitItem.getProductId());
                     SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
-                    splitDeliverItemDTO.setImage(address + product.getImage());
-                    splitDeliverItemDTO.setProductSn(product.getProductSn());
-                    splitDeliverItemDTO.setProductName(product.getName());
+                    splitDeliverItemDTO.setImage(StringTool.getImageSingle(orderSplitItem.getImage(), address));
+                    splitDeliverItemDTO.setProductSn(storefrontProduct.getProductSn());
+                    splitDeliverItemDTO.setProductName(storefrontProduct.getProductName());
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getTotalPrice());
                     splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
-                    splitDeliverItemDTO.setNum(orderSplitItem.getNum());
+                    splitDeliverItemDTO.setNum(orderSplitItem.getNum());//要货量
                     splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
                     splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
                     splitDeliverItemDTO.setCost(orderSplitItem.getCost());
                     splitDeliverItemDTO.setId(orderSplitItem.getId());
                     splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
-                    splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());
+                    splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());//供应价
                     splitDeliverItemDTO.setAskCount(orderSplitItem.getAskCount());
                     splitDeliverItemDTOList.add(splitDeliverItemDTO);
                 }
@@ -598,8 +820,23 @@ public class ComplainService {
             } else if (complain.getComplainType() == 5) {
                 Object date = getDate(complain.getHouseId());
                 complain.setData(date);
+            } else if (complain.getComplainType() == 10 || complain.getComplainType() == 12) {//10工匠申诉维保定责 、12店铺申诉维保定责
+                //查询对应的维可定责信息
+                DjMaintenanceRecordResponsibleParty recordResponsibleParty = responsiblePartyMapper.selectByPrimaryKey(complain.getBusinessId());
+                if (recordResponsibleParty != null) {
+                    Map<String, Object> paramInfo = new HashMap<>();
+                    paramInfo.put("totalPrice", recordResponsibleParty.getTotalPrice());//维保总额
+                    paramInfo.put("proportion", recordResponsibleParty.getProportion());//维保责任占比
+                    paramInfo.put("maintenanceTotalPrice", recordResponsibleParty.getMaintenanceTotalPrice());//所需质保金
+                    complain.setData(paramInfo);
+                }
+            } else if (complain.getComplainType() == 13 || complain.getComplainType() == 14 || complain.getComplainType() == 15) {
+                Object date = houseFlowApplyService.checkDetail(complain.getBusinessId());
+                complain.setData(((ServerResponse) date).getResultObj());
             }
         }
+
+        complain.setImages(StringTool.getImage(complain.getImage(), address));
         return ServerResponse.createBySuccess("查询成功", complain);
     }
 
@@ -628,7 +865,7 @@ public class ComplainService {
                 .andEqualTo(Complain.STATUS, 0)
                 .andEqualTo(Complain.COMPLAIN_TYPE, 5);
         List<Complain> complains = complainMapper.selectByExample(example);
-        if (complains.size()>0) {
+        if (complains.size() > 0) {
             return ServerResponse.createByErrorMessage("您已提交申请，请勿重复提交！");
         }
         Complain complain = new Complain();
@@ -711,7 +948,7 @@ public class ComplainService {
             BigDecimal haveMoney = new BigDecimal(0);
             BigDecimal retentionMoney = new BigDecimal(0);
             BigDecimal deductPrice = new BigDecimal(0);
-            if (hwo!=null) {
+            if (hwo != null) {
                 workPrice = hwo.getWorkPrice();//工钱
                 haveMoney = hwo.getHaveMoney();
                 retentionMoney = hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney();//滞留金
@@ -781,7 +1018,7 @@ public class ComplainService {
 //        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
 
-        List<HouseFlowApply> houseFlowApplys =  houseFlowApplyMapper.getMemberCheckList(house.getId());
+        List<HouseFlowApply> houseFlowApplys = houseFlowApplyMapper.getMemberCheckList(house.getId());
         for (HouseFlowApply flowApply : houseFlowApplys) {
             flowApply.setMemberCheck(2);
             houseFlowApplyMapper.updateByPrimaryKeySelective(flowApply);
@@ -917,6 +1154,7 @@ public class ComplainService {
                 hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
                 hfa.setPayState(1);//是否付款
                 hfa.setApplyDec("提前结束装修");//描述
+                hfa.setIsReadType(0);
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
             }
@@ -971,6 +1209,7 @@ public class ComplainService {
             hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
             hfa.setPayState(1);//是否付款
             hfa.setApplyDec(content);//描述
+            hfa.setIsReadType(0);
             houseFlowApplyMapper.insert(hfa);
             houseService.insertConstructionRecord(hfa);
         }

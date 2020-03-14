@@ -25,4 +25,8 @@ public interface IWarehouseMapper extends Mapper<Warehouse> {
                                @Param("name")String name);
     Double getHouseGoodsPrice(@Param("houseId")String houseId, @Param("name")String name);
 
+    void updateStorefrontIdByHouseId(@Param("houseId") String houseId,@Param("addressId") String addressId);
+
+    List<Warehouse> selectWareHouseInfoByStorefrontId(@Param("houseId") String houseId,@Param("addressId") String addressId,@Param("storefrontId") String storefrontId);
+
 }

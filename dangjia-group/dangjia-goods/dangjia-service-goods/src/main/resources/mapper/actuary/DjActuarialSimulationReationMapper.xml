@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.actuary.DjActuarialSimulationRelationMapper">
+
+    <insert id="batchInsertAssemblyInfo" parameterType="java.util.List">
+        INSERT INTO dj_actuarial_simulation_relation (
+        id,
+        actuarial_template_id,
+        simulation_code_group,
+        simulation_name_group,
+        create_by,
+        create_date,
+        modify_date,
+        update_by,
+        city_id,
+        service_type_id
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.id},
+            #{item.actuarialTemplateId},
+            #{item.simulationCodeGroup},
+            #{item.simulationNameGroup},
+            #{item.createBy},
+            #{item.createDate},
+            #{item.modifyDate},
+            #{item.updateBy},
+            #{item.cityId},
+            #{item.serviceTypeId}
+            )
+        </foreach>
+
+    </insert>
+
+    <select id="querySimulateAssemblyRelateionList" resultType="com.dangjia.acg.dto.actuary.ActuarialSimulateionReationDTO">
+      SELECT
+            t1.id,
+            t2.config_name excelName,
+            t2.excel_address excelAddress,
+            CONCAT(#{address}, excel_address) excelAddressUrl,
+            t1.simulation_code_group simulationCodeGroup,
+            t1.simulation_name_group simulationNameGroup
+        FROM
+            dj_actuarial_simulation_relation t1,
+            dj_actuarial_template_config t2
+        WHERE
+            t1.actuarial_template_id = t2.id
+        and t1.city_id=#{cityId}
+        and t1.service_type_id=#{serviceTypeId}
+    </select>
+
+    <!--根据组合编码查询对应的精算模板-->
+    <select id="querySimulateAssemblyRelateionInfo" resultType="com.dangjia.acg.modle.actuary.DjActuarialSimulationRelation">
+         select
+            id,
+            actuarial_template_id actuarialTemplateId,
+            simulation_code_group simulationCodeGroup,
+            simulation_name_group simulationNameGroup
+        from dj_actuarial_simulation_relation
+        WHERE data_status= '0'
+        and city_id=#{cityId}
+        and service_type_id = #{serviceTypeId}
+        <foreach collection="codeList" item="item" index="index" >
+            and FIND_IN_SET(#{item},simulation_code_group)
+        </foreach>
+        limit 1
+    </select>
+</mapper>
+

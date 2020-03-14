@@ -1,5 +1,8 @@
 package com.dangjia.acg.timer;
 
+import com.dangjia.acg.api.BasicsStorefrontAPI;
+import com.dangjia.acg.api.StorefrontProductAPI;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.api.web.finance.WebOrderAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,19 +24,39 @@ public class OrderTask {
     @Autowired
     private WebOrderAPI webOrderAPI;
 
+    @Autowired
+    private DjSupplierAPI djSupplierAPI;
 
     private Logger log = LoggerFactory.getLogger(OrderTask.class);
+
     private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI ;
 
+    @Autowired
+    private StorefrontProductAPI storefrontProductAPI ;
   /**
    * 订单超时检测任务
    */
   @Scheduled(cron = "0 0 0 * * ?") //每天凌晨(24点执行一次)
   public void absenteeism() {
-    log.info(format.format(new Date()) + "开始执行订单超时检测任务...");
-    webOrderAPI.autoOrderCancel();
-    log.info(format.format(new Date()) + "结束执行订单超时检测任务...");
+      log.info(format.format(new Date()) + "开始执行订单超时检测任务...");
+      webOrderAPI.autoOrderCancel();
+      log.info(format.format(new Date()) + "结束执行订单超时检测任务...");
+
+      log.info(format.format(new Date()) + "开始计算供应商可提现金额任务...");
+      djSupplierAPI.setSurplusMoney();
+      log.info(format.format(new Date()) + "结束计算供应商可提现金额任务...");
+
+      log.info(format.format(new Date()) + "开始计算店铺可提现金额任务...");
+      basicsStorefrontAPI.setStorefrontSurplusMoney();
+      log.info(format.format(new Date()) + "结束计算店铺可提现金额任务...");
+
+      log.info(format.format(new Date()) + "开始计算店铺商品调价任务...");
+      storefrontProductAPI.priceAdjustmentTask();
+      log.info(format.format(new Date()) + "结束计算店铺商品调价任务...");
+
 
   }
 }

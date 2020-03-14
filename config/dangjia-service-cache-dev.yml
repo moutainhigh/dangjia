@@ -1,7 +1,7 @@
 spring:
   datasource:
       type: com.alibaba.druid.pool.DruidDataSource
-      url: jdbc:mysql://172.16.30.95:3306/test?useUnicode=true
+      url: jdbc:mysql://192.168.0.229:3306/test?useUnicode=true
       username: root
       password: root
       driverClassName: com.mysql.jdbc.Driver
@@ -22,7 +22,7 @@ spring:
       connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
   redis:
     database: 0
-    host: 172.16.30.95
+    host: 192.168.0.229
     port: 6379
     password: myredis
     pool:

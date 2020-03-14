@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.order.IBillQuantityRoomMapper">
+
+    <select id="getBillQuantityRoom" resultType="com.dangjia.acg.modle.design.QuantityRoom">
+        SELECT
+            id,
+            house_id AS houseId,
+            member_id AS memberId,
+            user_id AS userId,
+            type,
+            elevator,
+            floor,
+            operation_type AS operationType
+        FROM
+            dj_design_quantity_room
+        WHERE
+            house_id = #{houseId}
+            AND type =  #{type}
+            AND data_status = 0
+        ORDER BY
+            create_date DESC
+            LIMIT 1
+    </select>
+
+
+    <select id="getQuantityRoomList" resultType="com.dangjia.acg.dto.design.QuantityRoomDTO">
+         SELECT
+            id,
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            data_status AS dataStatus,
+            house_id AS houseId,
+            member_id AS memberId,
+            user_id AS userId,
+            type,
+            elevator,
+            floor,
+            operation_type AS operationType,
+            flag as flag,
+            owner_id AS ownerId
+        FROM
+            dj_design_quantity_room
+        WHERE
+            house_id = #{houseId}
+            AND data_status = 0
+        ORDER BY
+            create_date DESC
+    </select>
+
+    <select id="selectMaxEndDate" resultType="java.util.Date">
+        select max(end_date) as endDate
+        from dj_core_house_flow
+        where house_id = #{houseId}  AND data_status = 0
+    </select>
+
+    <select id="selectApplyInfo" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select
+        chfa.worker_type as workerType,
+        chfa.modify_date as modifyDate,
+        chfa.create_date as createDate,
+        chfa.member_check as memberCheck,
+        chfa.apply_type as applyType
+        from dj_core_house_flow_apply chfa
+        where
+            chfa.house_id = #{houseId}
+        and chfa.apply_type = 1
+        and chfa.data_status = 0
+        order by chfa.create_date
+    </select>
+
+
+    <select id="selectWorkerInfo" resultType="com.dangjia.acg.modle.core.HouseWorker">
+        select
+        chw.modify_date AS modifyDate,
+        chw.worker_type AS workerType
+        from dj_core_house_worker chw
+        where
+        chw.house_id = #{houseId}
+        AND (chw.work_type= 1 or chw.work_type =6)
+        AND chw.data_status = 0
+    </select>
+
+</mapper>
+
