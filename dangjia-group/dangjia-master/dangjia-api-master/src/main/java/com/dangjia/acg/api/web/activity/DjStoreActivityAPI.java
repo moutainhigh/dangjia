@@ -171,10 +171,10 @@ public interface DjStoreActivityAPI {
 
     @PostMapping("web/activity/participates/query")
     @ApiOperation(value = "参与集福列表", notes = "参与集福列表")
-    ServerResponse queryStoreActivityParticipatesList(PageDTO pageDTO,  String storeActivityId);
+    ServerResponse queryStoreActivityParticipatesList(@RequestParam("pageDTO") PageDTO pageDTO,  @RequestParam("storeActivityId") String storeActivityId);
 
     @PostMapping("web/activity/support/query")
     @ApiOperation(value = "参与集福助力列表", notes = "参与集福助力列表")
-    ServerResponse queryStoreActivitySupportList(PageDTO pageDTO,  String participateId);
+    ServerResponse queryStoreActivitySupportList(@RequestParam("pageDTO") PageDTO pageDTO,  @RequestParam("participateId") String participateId);
 
 }
