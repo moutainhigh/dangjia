@@ -21,10 +21,6 @@ import java.util.List;
 @Repository
 public interface IBillDjDeliverOrderItemMapper extends Mapper<OrderItem> {
 
-    List<MaterialNumberDTO> queryMaterialNumber(String houseId);
-
-    List<NodeNumberDTO> queryNodeNumber(String houseId);
-
     int updateDjDeliverOrderItemByOrderId(@Param("orderId") String orderId);
 
     int updateReserved(@Param("orderId") String orderId,

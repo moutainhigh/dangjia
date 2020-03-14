@@ -650,9 +650,9 @@ public class PaymentService {
                     }
                     //判断精算师是否可抢单
                     if(desginStatus){
-                        setHouseFlowInfo(order,"2",payState,1,diffMoney,2);
-                    }else{
                         setHouseFlowInfo(order,"2",payState,1,diffMoney,1);
+                    }else{
+                        setHouseFlowInfo(order,"2",payState,1,diffMoney,2);
                     }
 
                 }
@@ -2408,7 +2408,7 @@ public class PaymentService {
      * @param type   1精算商品,2购物车商品,3立即购商品
      */
     public ServerResponse getPaymentPage(String userToken,  String taskId, String cityId,String houseId,
-                                         String productJsons,int type,String storeActivityProductId,String activityRedPackId) {
+                                         String productJsons,Integer type,String storeActivityProductId,String activityRedPackId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {

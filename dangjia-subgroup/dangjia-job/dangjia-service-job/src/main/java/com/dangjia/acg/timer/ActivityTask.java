@@ -100,4 +100,18 @@ public class ActivityTask {
     }
     log.info(format.format(new Date()) + "结束执行优惠券检测任务...");
   }
+
+  /**
+   * 提前三天检查将过期的优惠券，发通知给到业主
+   * 每天凌晨(10点)执行一次
+   */
+
+  @Scheduled(cron = "0 0 10 * * ?") //每天凌晨(24点执行一次)
+//  @Scheduled(cron = "0 0/5 * * * ?")//5分钟执行一次
+//  @Scheduled(cron = "0/30 * * * * ?")//30秒执行一次
+  public void couponActivityRedPack() {
+    log.info(format.format(new Date()) + "开始执行活动检测任务...");
+    activityAPI.couponActivityRedPack();
+    log.info(format.format(new Date()) + "结束执行活动检测任务...");
+  }
 }

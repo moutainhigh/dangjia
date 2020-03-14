@@ -1417,7 +1417,9 @@ public class CraftsmanConstructionService {
             HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseId, 3);
             map.put("technologies",technologies);//节点列表
             map.put("productId",productId);//节点列表
-            map.put("houseFlowId",houseFlowDgj.getId());//节点列表
+            if(houseFlowDgj!=null){
+                map.put("houseFlowId",houseFlowDgj.getId());//节点列表
+            }
 
             if(goods.getHousekeeperAcceptance()==1) {
                 Example example = new Example(HouseFlowApply.class);

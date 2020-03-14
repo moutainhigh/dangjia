@@ -267,5 +267,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE h.member_id = #{memberId}
           AND work_steta in (0,1,4)
     </select>
+
+    <select id="optimizationHander" resultType="java.util.Map">
+        SELECT
+            b.name,
+            a.worker_type AS i
+        FROM
+            dj_core_house_flow a,
+            dj_core_worker_type b
+        WHERE
+            a.worker_type_id = b.id
+        AND a.id=#{houseFlowId}
+    </select>
 </mapper>
 

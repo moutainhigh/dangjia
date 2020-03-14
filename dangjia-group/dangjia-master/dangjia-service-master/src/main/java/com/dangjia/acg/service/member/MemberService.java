@@ -2,7 +2,6 @@ package com.dangjia.acg.service.member;
 
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -15,23 +14,28 @@ import com.dangjia.acg.common.util.nimserver.NIMPost;
 import com.dangjia.acg.common.util.nimserver.apply.NimUserService;
 import com.dangjia.acg.common.util.nimserver.dto.NimUserInfo;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.HomePageBean;
+import com.dangjia.acg.dto.core.HouseResult;
+import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.dto.member.MemberDTO;
+import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.dto.shell.HomeShellProductDTO;
 import com.dangjia.acg.dto.shell.HomeShellProductSpecDTO;
 import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.config.ISmsMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellProductMapper;
 import com.dangjia.acg.mapper.shell.IHomeShellProductSpecMapper;
 import com.dangjia.acg.mapper.shell.IMasterOrderNodeMapper;
@@ -42,6 +46,7 @@ import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.modle.config.Sms;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjSkillCertification;
@@ -50,6 +55,7 @@ import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.order.OrderNode;
 import com.dangjia.acg.modle.other.City;
+import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -62,10 +68,8 @@ import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.util.RKIDCardUtil;
-import com.dangjia.acg.util.StringTool;
-import com.dangjia.acg.util.TokenUtil;
-import com.dangjia.acg.util.Utils;
+import com.dangjia.acg.service.house.MyHouseService;
+import com.dangjia.acg.util.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -90,16 +94,16 @@ import java.util.*;
 public class MemberService {
     private Logger logger = LoggerFactory.getLogger(MemberService.class);
 
+    @Value("${spring.profiles.active}")
+    private String active;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
     private RedPackPayService redPackPayService;
-
     @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private IMemberMapper memberMapper;
-
     @Autowired
     private IWorkIntegralMapper workIntegralMapper;
     @Autowired
@@ -138,16 +142,12 @@ public class MemberService {
     private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
-
-
     @Autowired
     private IInsuranceMapper iInsuranceMapper;
-
     @Autowired
     private DjSkillCertificationMapper djSkillCertificationMapper;
     @Autowired
     private IMasterOrderNodeMapper masterOrderNodeMapper;
-
     @Autowired
     private IOrderMapper iOrderMapper;
     /****
@@ -159,14 +159,10 @@ public class MemberService {
     private IStoreMapper iStoreMapper;
     @Autowired
     private IStoreUserMapper iStoreUserMapper;
-
-
     @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
     private ConfigRuleUtilService configRuleUtilService;
-
-
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
     @Autowired
@@ -177,6 +173,16 @@ public class MemberService {
     private IHomeShellProductMapper homeShellProductMapper;
     @Autowired
     private IHomeShellProductSpecMapper productSpecMapper;
+    @Autowired
+    private MyHouseService myHouseService;
+    @Autowired
+    private IHouseFlowMapper iHouseFlowMapper;
+    @Autowired
+    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
+    @Autowired
+    private IOrderItemMapper iOrderItemMapper;
+    @Autowired
+    private IWorkerTypeMapper iWorkerTypeMapper;
 
 
     /**
@@ -1796,5 +1802,306 @@ public class MemberService {
             logger.info("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+
+
+
+    /**
+     * 查询我要装修首页
+     *
+     * @param userToken
+     * @return
+     */
+    public ServerResponse queryOrderNumber(String userToken) {
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        HouseResult houseResult = new HouseResult();
+        object = myHouseService.getHouse(member.getId(), houseResult);
+        if (object instanceof ServerResponse) {
+            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
+        }
+
+        House house = (House) object;
+        String houseId = house.getId();
+
+//        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
+
+        //订单状态 1待付款，2已付款，3待收货
+        WorkInFoDTO workInFoDTO = new WorkInFoDTO();
+        workInFoDTO.setHouseId(houseId);
+        //待付款
+        Map<String, Object> map = new HashMap<>();
+        map.put("stayPayment", iOrderMapper.queryDeliverOrderObligation(member.getId(),houseId));
+
+        //待发货
+        map.put("alreadyPayment", iOrderMapper.queryAppHairOrderList(house.getCityId(),houseId,member.getId()));
+
+        //待收货
+        map.put("stayGoods", iOrderMapper.queryAppOrderList(house.getCityId(),member.getId(),houseId));
+        map.put("complete", 0);
+        map.put("after", 0);
+        workInFoDTO.setOrderMap(map);
+
+        if (house != null) {
+            String houseName = house.getResidential() + house.getBuilding() + "栋" +
+                    house.getUnit() + "单元" + house.getNumber() + "号";
+            workInFoDTO.setHouseName(houseName);
+        }
+
+        HouseFlowInfoDTO houseFlowInfoDTO = new HouseFlowInfoDTO();
+        //查询今日播报信息
+        List<HouseFlowDataDTO> sowingList = iOrderMapper.queryApplyDec();
+        if (sowingList != null && !sowingList.isEmpty()) {
+            houseFlowInfoDTO.setDate(sowingList.get(0).getCreateDate());
+            houseFlowInfoDTO.setHouseFlowDataDTOS(sowingList);
+        }
+        houseFlowInfoDTO.setNumber(iOrderMapper.queryApplyPayState(houseId).size());
+        workInFoDTO.setHouseFlowInfoDTO(houseFlowInfoDTO);
+
+        //1-下单后（销售阶段） 2-下单后（销售接单） 3-下单后（设计阶段）4-下单后（精算阶段）5-下单后(施工阶段)
+        if (house != null && house.getVisitState() == 0) {
+            workInFoDTO.setHouseType(1);
+        } else if (house != null && house.getIsRobStats() == 1) {
+            workInFoDTO.setHouseType(2);
+        }
+
+        //查询当前房子状态
+        List<WorkerTypeDTO> wtdList = iOrderMapper.queryType(houseId);
+        if (!wtdList.isEmpty()) {
+            workInFoDTO.setType(wtdList.get(0).getType());
+            if (wtdList.get(0).getType() == 1) {
+                //3-下单后（设计阶段）
+                workInFoDTO.setHouseType(3);
+            } else if (wtdList.get(0).getType() == 2) {
+                //4-下单后（精算阶段）
+                workInFoDTO.setHouseType(4);
+            } else {
+                //5-下单后(施工阶段
+                workInFoDTO.setHouseType(5);
+            }
+        }
+
+        //设置菜单
+        setMenus(workInFoDTO, house);
+
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
+                .andEqualTo(HouseFlow.DATA_STATUS, 0);
+        List<HouseFlow> houseFlows = iHouseFlowMapper.selectByExample(example);
+
+        //获取工序信息
+        List<Object> workNodeListDTO = summationMethod(houseFlows, house);
+        workInFoDTO.setWorkList(workNodeListDTO);
+
+        //获取客服明细
+        Example example1 = new Example(DjAlreadyRobSingle.class);
+        example1.createCriteria()
+                .andEqualTo(DjAlreadyRobSingle.HOUSE_ID, houseId)
+                .andEqualTo(DjAlreadyRobSingle.DATA_STATUS, 0);
+        List<DjAlreadyRobSingle> lists = djAlreadyRobSingleMapper.selectByExample(example1);
+        if (!lists.isEmpty()) {
+            String userid = lists.get(0).getUserId();
+            example = new Example(MainUser.class);
+            example.createCriteria().andEqualTo(MainUser.ID, userid);
+            example.orderBy(MainUser.CREATE_DATE).desc();
+            List<MainUser> list = userMapper.selectByExample(example);
+            if (list != null && list.size() > 0) {
+                MainUser user = list.get(0);
+                map = new HashMap<>();
+                map.put("id", user.getId());
+                map.put("targetId", user.getId());
+                List<NimUserInfo> userInfoResult = NimUserService.getUserInfo(active, user.getMemberId());
+                if (userInfoResult != null &&userInfoResult.size()>0&& !CommonUtil.isEmpty(userInfoResult.get(0).getName())) {
+                    map.put("nickName", "装修顾问 " + userInfoResult.get(0).getName());
+                } else {
+                    map.put("nickName", "装修顾问 小" + user.getUsername().substring(0, 1));
+                }
+                map.put("name", user.getUsername());
+                map.put("mobile", user.getMobile());
+                Member member1 = memberMapper.selectByPrimaryKey(user.getMemberId());
+                if (member1 != null) {
+                    member1.initPath(address);
+                    map.put("head", member1.getHead());
+                } else {
+                    map.put("head", address + Utils.getHead());
+                }
+                workInFoDTO.setMap(map);
+            }
+        }
+
+
+        return ServerResponse.createBySuccess("查询成功", workInFoDTO);
+    }
+
+
+    /**
+     * 设置菜单
+     */
+    private void setMenus(WorkInFoDTO workInFoDTO, House house) {
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        List<WorkInFoDTO.BigListBean> bigList = new ArrayList<>();
+
+        WorkInFoDTO.BigListBean bigListBean = new WorkInFoDTO.BigListBean();
+        bigListBean.setName("我的工具");
+        if(workInFoDTO.getHouseType()==3){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shieji));
+            bigList.add(bigListBean);
+        }
+        if(workInFoDTO.getHouseType()==4){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.jingsuan));
+            bigList.add(bigListBean);
+        }
+        if(workInFoDTO.getHouseType()==5){
+            bigListBean.setListMap(bigListBean.getMenus(imageAddress, bigListBean.shigong));
+            bigList.add(bigListBean);
+        }
+        workInFoDTO.setBigList(bigList);//添加菜单到返回体中
+    }
+
+
+    /**
+     * 获取工序信息
+     *
+     * @param house
+     * @return
+     */
+    public List<Object> summationMethod(List<HouseFlow> houseFlows, House house) {
+        WorkNodeListDTO workNodeListDTO;
+        //查询工序节点
+        List<NodeNumberDTO> nodeNumberDTOS = iOrderItemMapper.queryNodeNumber(house.getId());
+        //查询材料数量
+        List<MaterialNumberDTO> materialNumberDTOS = iOrderItemMapper.queryMaterialNumber(house.getId());
+
+        Example example;
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<Object> workList = new ArrayList<>();
+        List<Map<String, Object>> gList;
+        Map<String, Object> listMap;
+
+        //1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
+        for (HouseFlow houseFlow : houseFlows) {
+            List<Map<String, Object>> mapList=new ArrayList<>();
+            mapList.add(iHouseFlowMapper.optimizationHander(houseFlow.getId()));
+            example = new Example(WorkerType.class);
+            example.createCriteria().andEqualTo(WorkerType.TYPE, houseFlow.getWorkerType())
+                    .andEqualTo(WorkerType.DATA_STATUS, 0);
+            List<WorkerType> workerType = iWorkerTypeMapper.selectByExample(example);
+            gList = new ArrayList<>();
+            listMap = new HashMap<>();
+            workNodeListDTO = new WorkNodeListDTO();
+
+            if (houseFlow.getWorkerTypeId().equals("1")) {
+
+                //设计师
+                listMap = new HashMap<>();
+                listMap.put("name", "实际工期");
+                if (houseFlow.getEndDate() != null) {
+                    listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
+                } else {
+                    listMap.put("value", 0 + "天");
+                }
+                gList.add(listMap);
+
+                listMap = new HashMap<>();
+                listMap.put("name", "施工节点");
+                listMap.put("value", 0 + "/" + 3);
+                workNodeListDTO.setHundred(0);
+                if (house.getDesignerOk() == 9) {
+                    //上传量房 百分比
+                    workNodeListDTO.setHundred(33);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 1 + "/" + 3);
+                } else if (house.getDesignerOk() == 7) {
+                    //平面图通过 百分比
+                    workNodeListDTO.setHundred(66);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 2 + "/" + 3);
+                } else if (house.getDesignerOk() == 3) {
+                    //施工图通过 百分比
+                    workNodeListDTO.setHundred(100);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 3 + "/" + 3);
+                }
+                gList.add(listMap);
+            } else if (houseFlow.getWorkerTypeId().equals("2")) {
+                //精算师 百分比
+                listMap = new HashMap<>();
+                listMap.put("name", "实际工期");
+                if (houseFlow.getEndDate() != null) {
+                    listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
+                } else {
+                    listMap.put("value", 0 + "天");
+                }
+                gList.add(listMap);
+
+                listMap = new HashMap<>();
+                listMap.put("name", "施工节点");
+                listMap.put("value", 0 + "/" + 1);
+                workNodeListDTO.setHundred(0);
+                if (house.getBudgetOk() == 3) {
+                    workNodeListDTO.setHundred(100);
+                    listMap = new HashMap<>();
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 1 + "/" + 1);
+                }
+                gList.add(listMap);
+            } else {
+                listMap.put("name", "预计工期");
+                if (houseFlow.getStartDate() == null) {
+                    listMap.put("value", 0 + "天");
+                } else {
+                    listMap.put("value", DateUtil.getDiffDays(new Date(), houseFlow.getStartDate()) + "天");
+                }
+                gList.add(listMap);
+                listMap = new HashMap<>();
+                listMap.put("name", "实际工期");
+                if (houseFlow.getEndDate() == null) {
+                    listMap.put("value", 0 + "天");
+                } else {
+                    listMap.put("value", DateUtil.getDiffDays(houseFlow.getEndDate(), houseFlow.getStartDate()) + "天");
+                }
+                gList.add(listMap);
+
+                //获取工序已验收节点
+                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == mapList.get(0).get("i")).count();
+                //获取工序全部节点
+                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")).count();
+                listMap = new HashMap<>();
+                if (iEnd == 0) {
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", 0 + "/" + 0);
+                    workNodeListDTO.setHundred(0);
+                } else {
+                    listMap.put("name", "施工节点");
+                    listMap.put("value", iEnd + "/" + iStart);
+                    workNodeListDTO.setHundred((int) (iStart / iEnd * 100));
+                }
+                gList.add(listMap);
+
+                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
+                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO::getShopCount).sum();
+                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
+                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO::getAskCount).sum();
+                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == mapList.get(0).get("i")
+                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO::getReturnCount).sum();
+                listMap = new HashMap<>();
+                listMap.put("name", "材料使用");//全部节点
+                listMap.put("value", aa + rr + "/" + ss);//全部节点
+                gList.add(listMap);
+            }
+            workNodeListDTO.setLists(gList);
+            workNodeListDTO.setImage(address + workerType.get(0).getImage());
+            workNodeListDTO.setWorkName((String) mapList.get(0).get("name"));
+            workList.add(workNodeListDTO);
+        }
+        return workList;
     }
 }

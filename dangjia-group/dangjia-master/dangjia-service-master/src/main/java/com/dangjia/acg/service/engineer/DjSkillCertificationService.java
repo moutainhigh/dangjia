@@ -23,7 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -77,19 +79,35 @@ public class DjSkillCertificationService {
      */
     public ServerResponse querySkillCertificationSelectedList(PageDTO pageDTO, String searchKey, String skillCertificationId, Integer type, String cityId) {
         try {
-            Example example=new Example(DjSkillCertification.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID,skillCertificationId)
-                    .andEqualTo(DjSkillCertification.TYPE,type)
-                    .andEqualTo(DjSkillCertification.CITY_ID,cityId);
-            if(StringUtils.isNotBlank(searchKey))
-                criteria.andCondition("CONCAT(product_name,product_sn) like CONCAT('%','" + searchKey + "','%')");
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
-            if(djSkillCertifications.size()<=0)
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            PageInfo pageInfo=new PageInfo(djSkillCertifications);
-            return ServerResponse.createBySuccess("查询成功",pageInfo);
+            Example example = new Example(DjSkillCertification.class);
+            if(type==2) {
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, skillCertificationId)
+                        .andEqualTo(DjSkillCertification.TYPE, type)
+                        .andEqualTo(DjSkillCertification.CITY_ID, cityId);
+                if (StringUtils.isNotBlank(searchKey))
+                    criteria.andCondition("CONCAT(product_name,product_sn) like CONCAT('%','" + searchKey + "','%')");
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+                if(djSkillCertifications.size()<=0)
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+                PageInfo pageInfo=new PageInfo(djSkillCertifications);
+                return ServerResponse.createBySuccess("查询成功",pageInfo);
+            }else{
+                Map<String,Object> map=new HashMap<>();
+                List<WorkerType> workerTypes = iWorkerTypeMapper.querySkillCertificationSelectedList(skillCertificationId);
+                map.put("workerTypes",workerTypes);
+                example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, skillCertificationId)
+                        .andEqualTo(DjSkillCertification.TYPE, 1)
+                        .andEqualTo(DjSkillCertification.CITY_ID, cityId);
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+                if(djSkillCertifications.size()>0){
+                    PageInfo pageInfo=new PageInfo(djSkillCertifications);
+                    map.put("djSkillCertifications",pageInfo);
+                }
+                return ServerResponse.createBySuccess("查询成功",map);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -112,7 +130,7 @@ public class DjSkillCertificationService {
                     JSONObject obj = (JSONObject) str;
                     DjSkillCertification djSkillCertification=new DjSkillCertification();
                     djSkillCertification.setSkillCertificationId(skillCertificationId);
-                    djSkillCertification.setType(1);
+                    djSkillCertification.setType(obj.getInteger("type"));
                     djSkillCertification.setProductType(obj.getInteger("productType"));
                     djSkillCertification.setProdTemplateId(obj.getString("id"));
                     djSkillCertification.setProductName(obj.getString("name"));
@@ -140,6 +158,7 @@ public class DjSkillCertificationService {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Example example=new Example(WorkerType.class);
             example.createCriteria().andEqualTo(WorkerType.DATA_STATUS,0);
+            example.orderBy(WorkerType.SORT).asc();
             List<WorkerType> workerTypes = iWorkerTypeMapper.selectByExample(example);
             workerTypes.forEach(workerType -> {
                 workerType.setImageUrl(workerType.getImage());

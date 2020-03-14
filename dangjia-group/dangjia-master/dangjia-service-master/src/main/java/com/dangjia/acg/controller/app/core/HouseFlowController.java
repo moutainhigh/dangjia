@@ -29,6 +29,18 @@ public class HouseFlowController implements HouseFlowAPI {
         return houseFlowService.getGrabBroadcast(userToken,  type);
     }
 
+    /**
+     * 新抢单播报
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getNewGrabBroadcast(String userToken){
+        return houseFlowService.getNewGrabBroadcast(userToken);
+    }
+
+
     @Override
     @ApiMethod
     public ServerResponse getGrabNumber(String userToken,String cityId){

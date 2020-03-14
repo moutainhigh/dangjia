@@ -3,16 +3,6 @@
 <mapper namespace="com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper">
 
 
-    <select id="queryApplyDec" resultType="com.dangjia.acg.dto.delivery.HouseFlowDataDTO">
-        select apply_dec as applyDec,create_date AS createDate
-        from dj_core_house_flow_apply
-        order by create_date DESC limit 4
-    </select>
-
-    <select id="queryApplyPayState" resultType="com.dangjia.acg.dto.delivery.HouseFlowDataDTO">
-        select apply_dec as applyDec,create_date AS createDate
-        from dj_core_house_flow_apply WHERE is_read_type = 0 and house_id = #{houseId}
-    </select>
 
     <select id="queryDjDeliverOrderStorefront" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
         SELECT
@@ -187,17 +177,6 @@
     </delete>
 
 
-    <select id="queryType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO" parameterType="java.lang.String">
-        select
-            cwt.type as type,
-            chf.worker_type_id as workerTypeId,
-            chf.work_steta as workSteta
-        from
-        dj_core_house_flow chf INNER JOIN
-        dj_core_worker_type cwt on chf.worker_type_id = cwt.id
-        where chf.house_id = #{houseId}
-        ORDER BY chf.modify_date desc
-    </select>
 
     <!--searchDecorationTotalCost查询全部花费-->
     <select id="searchDecorationTotalCost" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">

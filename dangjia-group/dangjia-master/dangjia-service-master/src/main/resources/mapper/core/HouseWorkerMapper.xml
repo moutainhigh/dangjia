@@ -102,6 +102,21 @@
         GROUP BY is_select desc limit 1
     </select>
 
+    <!-- 新抢单播报 -->
+    <select id="getNewGrabBroadcast" resultType="java.util.HashMap">
+        SELECT
+            m.address,
+            w.create_date createDate
+        FROM
+            dj_core_house_worker w,
+            dj_member_address m
+        WHERE
+            w.house_id = m.house_id
+        ORDER BY
+            w.create_date DESC
+        LIMIT 10
+    </select>
+
     <!-- 根据工人id查询未完工任务-->
     <select id="grabControl" resultType="java.lang.Long">
         SELECT
@@ -437,7 +452,7 @@
         INNER JOIN dj_member m ON m.id = h.member_id
         WHERE
             f.`work_type` = '2'
-        AND f.`state` = '2'
+        AND f.`state` = '0'
         AND f.`worker_type_id` = #{workerTypeId}
         AND f.`city_id` = #{cityId}
         UNION ALL
