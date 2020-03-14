@@ -30,6 +30,12 @@ public class DjSkillCertificationController implements DjSkillCertificationAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse queryWorkerTypeSkillWaitingList(PageDTO pageDTO, Integer workerTypeId, String searchKey, String skillCertificationId, String cityId) {
+        return djSkillCertificationService.queryWorkerTypeSkillWaitingList(pageDTO,workerTypeId,searchKey,skillCertificationId,cityId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse querySkillCertificationSelectedList(PageDTO pageDTO, String searchKey, String skillCertificationId, Integer type, String cityId) {
         return djSkillCertificationService.querySkillCertificationSelectedList(pageDTO,searchKey,skillCertificationId,type,cityId);
     }
