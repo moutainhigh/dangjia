@@ -144,13 +144,13 @@ public class DjStoreActivityService {
         //限时购
         if(djStoreActivity.getActivityType() == 1){
             //场次开始时间跟活动结束时间小于等于限购周期则只有一场
-            if (DateUtil.getHourDays(djStoreActivity.getActivityendTime(),
+            if (DateUtil.getHourDays(djStoreActivity.getActivityEndTime(),
                     djStoreActivity.getActivityStartTime()) <= djStoreActivity.getCyclePurchasing()) {
                 list.add("第1场："+DateUtil.getDateString(djStoreActivity.getActivityStartTime().getTime())
-                        +" 至 "+DateUtil.getDateString(djStoreActivity.getActivityendTime().getTime()));
+                        +" 至 "+DateUtil.getDateString(djStoreActivity.getActivityEndTime().getTime()));
             }else{
                 List<String> intervalTimeList = getIntervalTimeList(DateUtil.getDateString( djStoreActivity.getActivityStartTime().getTime())
-                        , DateUtil.getDateString(djStoreActivity.getActivityendTime().getTime()),
+                        , DateUtil.getDateString(djStoreActivity.getActivityEndTime().getTime()),
                         djStoreActivity.getCyclePurchasing());
                 for (int i = 0; i <intervalTimeList.size()-1; i++) {
                     list.add("第"+(i+1)+"场："+intervalTimeList.get(i)
@@ -227,17 +227,17 @@ public class DjStoreActivityService {
      * @param djStoreActivity
      */
     private void commonality(DjStoreActivity djStoreActivity){
-        if (DateUtil.getHourDays(djStoreActivity.getActivityendTime(),
+        if (DateUtil.getHourDays(djStoreActivity.getActivityEndTime(),
                 djStoreActivity.getActivityStartTime()) <= djStoreActivity.getCyclePurchasing()) {
             DjActivitySession djActivitySession=new DjActivitySession();
             djActivitySession.setSessionStartTime(djStoreActivity.getActivityStartTime());
-            djActivitySession.setSessionEndTime(djStoreActivity.getActivityendTime());
+            djActivitySession.setSessionEndTime(djStoreActivity.getActivityEndTime());
             djActivitySession.setSession(1);
             djActivitySession.setStoreActivityId(djStoreActivity.getId());
             djActivitySessionMapper.insert(djActivitySession);
         }else{
             List<String> intervalTimeList = getIntervalTimeList(DateUtil.getDateString(djStoreActivity.getActivityStartTime().getTime())
-                    , DateUtil.getDateString( djStoreActivity.getActivityendTime().getTime()),
+                    , DateUtil.getDateString( djStoreActivity.getActivityEndTime().getTime()),
                     djStoreActivity.getCyclePurchasing());
             for (int i = 0; i <intervalTimeList.size()-1; i++) {
                 DjActivitySession djActivitySession=new DjActivitySession();
@@ -300,10 +300,10 @@ public class DjStoreActivityService {
         if(djStoreActivity.getActivityType()==1){
             DjStoreActivity djStoreActivity1 = djStoreActivityMapper.selectByPrimaryKey(djStoreActivity.getId());
             if(djStoreActivity.getRegistrationStartTime().before(djStoreActivity.getActivityStartTime())||
-                    djStoreActivity.getRegistrationEndTime().after(djStoreActivity.getActivityendTime())){
+                    djStoreActivity.getRegistrationEndTime().after(djStoreActivity.getActivityEndTime())){
                 throw new Exception("请正确填写报名时间和活动时间");
             }
-            if(!djStoreActivity1.getActivityStartTime().equals(djStoreActivity.getActivityStartTime())&&!djStoreActivity1.getActivityendTime().equals(djStoreActivity.getActivityendTime())){
+            if(!djStoreActivity1.getActivityStartTime().equals(djStoreActivity.getActivityStartTime())&&!djStoreActivity1.getActivityEndTime().equals(djStoreActivity.getActivityEndTime())){
                 Example example=new Example(DjActivitySession.class);
                 example.createCriteria().andEqualTo(DjActivitySession.STORE_ACTIVITY_ID,djStoreActivity.getId());
                 djActivitySessionMapper.deleteByExample(example);

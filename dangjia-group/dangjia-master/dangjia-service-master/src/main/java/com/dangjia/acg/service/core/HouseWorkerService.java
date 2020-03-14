@@ -453,6 +453,7 @@ public class HouseWorkerService {
         ComplainInfoDTO complainInfoDTO = new ComplainInfoDTO();
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         complainInfoDTO.setHouseId(houseFlow.getHouseId());
+        complainInfoDTO.setWorkerTypeId(houseFlow.getWorkerTypeId());
         Example example =new Example(Complain.class);
         example.createCriteria()
                 .andIn(Complain.COMPLAIN_TYPE,Arrays.asList(3,6))
