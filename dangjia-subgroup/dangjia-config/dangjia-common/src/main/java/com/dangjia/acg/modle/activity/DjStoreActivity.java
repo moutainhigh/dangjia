@@ -29,8 +29,8 @@ import java.util.List;
 public class DjStoreActivity extends BaseEntity {
 
     @Column(name = "activity_type")
-    @Desc(value = "数据类型 1:限时购，2:拼团购")
-    @ApiModelProperty("数据类型 1:限时购，2:拼团购")
+    @Desc(value = "数据类型 1:限时购，2:拼团购，3:集福")
+    @ApiModelProperty("数据类型 1:限时购，3:集福")
     private Integer activityType;
 
     @Column(name = "city_id")
@@ -87,6 +87,21 @@ public class DjStoreActivity extends BaseEntity {
     @Desc(value = "状态 1：开启 2：停用")
     @ApiModelProperty("状态 1：开启 2：停用")
     private Integer state;
+
+    @Column(name = "red_pack_id")
+    @Desc(value = "优惠券Id，多个逗号分割")
+    @ApiModelProperty("优惠券Id，多个逗号分割")
+    private Integer redPackId;
+
+    @Column(name = "red_pack_explain")
+    @Desc(value = "优惠券使用说明")
+    @ApiModelProperty("优惠券使用说明")
+    private Integer redPackExplain;
+
+    @Column(name = "userId")
+    @Desc(value = "活动创建人")
+    @ApiModelProperty("活动创建人")
+    private String userId;
 
     @Transient
     @Desc(value = "适应地区")

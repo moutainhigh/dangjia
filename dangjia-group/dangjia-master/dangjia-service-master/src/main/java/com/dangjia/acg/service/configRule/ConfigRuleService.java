@@ -253,13 +253,15 @@ public class ConfigRuleService {
             }
             if(configRuleModule.getItemType()==2){
                 Example example=new Example(DjConfigRuleItemTwo.class);
-                example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,moduleId);
+                example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,moduleId)
+                        .andEqualTo(DjConfigRuleItemTwo.BATCH_CODE,batchCode);
                 example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
                 PageHelper.startPage(1, field.size());
                 List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
                 if (configRuleItemTwos.size() > 0) {
                     for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
                         if(!CommonUtil.isEmpty(configRuleItemTwo.getFieldValue())){
+                            configRuleItemTwo.setBatchCode(batchCodeTow);
                             configRuleItemTwo.setFieldValues(configRuleItemTwo.getFieldValue().split(","));
                         }
                     }
@@ -273,11 +275,8 @@ public class ConfigRuleService {
                     configRuleItemTwo.setFieldCode(key);
                     configRuleItemTwo.setFieldName(field.get(key));
                     if(PQ101.equals(configRuleModule.getTypeId())||
-                            MK005.equals(configRuleModule.getTypeId())||
-                            MK021.equals(configRuleModule.getTypeId())||
-                            MK022.equals(configRuleModule.getTypeId())||
-                            MK023.equals(configRuleModule.getTypeId())||
-                            MK024.equals(configRuleModule.getTypeId())){
+                            MK005.equals(configRuleModule.getTypeId())
+                            ){
                         configRuleItemTwo.setFieldValue("0,0");
                         configRuleItemTwo.setFieldValues("0,0".split(","));
                     }else{

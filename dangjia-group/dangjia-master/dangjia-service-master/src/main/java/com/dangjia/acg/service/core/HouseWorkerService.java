@@ -452,6 +452,7 @@ public class HouseWorkerService {
         //0:审核中 1：申请换人
         ComplainInfoDTO complainInfoDTO = new ComplainInfoDTO();
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        complainInfoDTO.setHouseId(houseFlow.getHouseId());
         Example example =new Example(Complain.class);
         example.createCriteria()
                 .andIn(Complain.COMPLAIN_TYPE,Arrays.asList(3,6))
@@ -778,14 +779,20 @@ public class HouseWorkerService {
         Member worker = (Member) object;
         Example example =new Example(HouseFlowApply.class);
         example.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID,worker.getId());
-        example.orderBy(HouseFlowApply.CREATE_DATE).desc();
+        example.orderBy(HouseFlowApply.MODIFY_DATE).desc();
         PageHelper.startPage(1, 1);
         List<HouseFlowApply> houseFlowApplys = houseFlowApplyMapper.selectByExample(example);
         if(houseFlowApplys.size()>0){
             HouseFlowApply houseFlowApply=houseFlowApplys.get(0);
             Integer day = configRuleUtilService.getGrabLimitDay();
-            Date maxtime=DateUtil.addDateDays(houseFlowApply.getCreateDate(),day);
+            Date maxtime=DateUtil.addDateDays(houseFlowApply.getModifyDate(),day);
             if(maxtime.getTime()<new Date().getTime()){
+                Member workers  = memberMapper.selectByPrimaryKey(worker.getId());
+                workers.setCheckType(1);
+                workers.setModifyDate(new Date());
+                houseFlowApply.setModifyDate(new Date());//更新未接单时间
+                memberMapper.updateByPrimaryKeySelective(workers);
+                houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
                 ServerResponse.createByErrorMessage("已超过"+day+"天未接单");
             }
         }

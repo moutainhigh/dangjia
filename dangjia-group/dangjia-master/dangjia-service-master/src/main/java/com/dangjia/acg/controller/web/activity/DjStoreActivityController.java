@@ -5,6 +5,8 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.activity.DjStoreActivity;
+import com.dangjia.acg.modle.activity.DjStoreActivityExplain;
+import com.dangjia.acg.modle.activity.DjStoreActivityFractionRate;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.service.activity.DjStoreActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +29,9 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addActivities(DjStoreActivity djStoreActivity) {
+    public ServerResponse addActivities(DjStoreActivity djStoreActivity,String explains,String fractionRates) {
         try {
-            return djStoreActivityService.addActivities(djStoreActivity);
+            return djStoreActivityService.addActivities(djStoreActivity,explains, fractionRates);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("配置失败");
@@ -44,8 +46,8 @@ public class DjStoreActivityController implements DjStoreActivityAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryActivities(PageDTO pageDTO) {
-        return djStoreActivityService.queryActivities(pageDTO);
+    public ServerResponse queryActivities(PageDTO pageDTO, Integer activityType) {
+        return djStoreActivityService.queryActivities(pageDTO,  activityType);
     }
 
     @Override
