@@ -3,11 +3,15 @@ package com.dangjia.acg.api.web.activity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.activity.DjStoreActivity;
+import com.dangjia.acg.modle.activity.DjStoreActivityExplain;
+import com.dangjia.acg.modle.activity.DjStoreActivityFractionRate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,7 +25,9 @@ public interface DjStoreActivityAPI {
 
     @PostMapping("web/activity/addActivities")
     @ApiOperation(value = "添加活动", notes = "添加活动")
-    ServerResponse addActivities(@RequestParam("djStoreActivity") DjStoreActivity djStoreActivity);
+    ServerResponse addActivities(@RequestParam("djStoreActivity") DjStoreActivity djStoreActivity,
+                                 @RequestParam("explains")String explains,
+                                 @RequestParam("fractionRates") String fractionRates);
 
     @PostMapping("web/activity/getSession")
     @ApiOperation(value = "场次", notes = "场次")
@@ -29,7 +35,8 @@ public interface DjStoreActivityAPI {
 
     @PostMapping("web/activity/queryActivities")
     @ApiOperation(value = "查询活动", notes = "查询活动")
-    ServerResponse queryActivities(@RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse queryActivities(@RequestParam("pageDTO") PageDTO pageDTO,
+                                   @RequestParam("activityType") Integer activityType);
 
     @PostMapping("web/activity/setActivities")
     @ApiOperation(value = "编辑活动", notes = "编辑活动")
