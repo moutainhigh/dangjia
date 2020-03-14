@@ -23,7 +23,7 @@ public interface MendOrderAPI {
 
     @PostMapping(value = "app/repair/mendOrder/landlordOnekeyBack")
     @ApiOperation(value = "业主一键退", notes = "业主一键退")
-    ServerResponse landlordOnekeyBack(String userToken, String houseId);
+    ServerResponse landlordOnekeyBack(@RequestParam("userToken") String userToken, @RequestParam("houseId") String houseId);
 
     @PostMapping(value = "app/repair/mendOrder/landlordBack")
     @ApiOperation(value = "业主退材料", notes = "业主退材料")
