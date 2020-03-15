@@ -1849,7 +1849,7 @@ public class HouseService {
                 if (serverResponse.getResultObj() != null) {
                     String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                     //增加任务(补差价订单）
-                    taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "是否提交补差价订单", "icon/sheji.png", 7, obj);
+                    taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "是否提交补差价订单", "icon/sheji.png", 1001, obj);
                 }
 
 
@@ -2364,7 +2364,7 @@ public class HouseService {
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 //生成任务
-                taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),"大管家待支付",workerType.getImage(),1,houseFlow.getId());
+                taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),"大管家待支付",workerType.getImage(),1002,houseFlow.getId());
                 configMessageService.addConfigMessage(AppType.GONGJIANG,  hwo.getWorkerId(),
                         "业主审核精算通过", String.format(DjConstants.PushMessage.ACTUARY_OK, house.getHouseName()), 0, null, "");
 

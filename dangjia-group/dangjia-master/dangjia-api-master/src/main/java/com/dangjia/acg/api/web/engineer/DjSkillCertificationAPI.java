@@ -20,12 +20,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface DjSkillCertificationAPI {
 
     @PostMapping(value = "web/engineer/querySkillsCertificationWaitingList")
-    @ApiOperation(value = "技能认证待选列表", notes = "技能认证待选列表")
+    @ApiOperation(value = "工匠技能认证待选列表", notes = "工匠技能认证待选列表")
     ServerResponse querySkillsCertificationWaitingList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                        @RequestParam("workerTypeId") Integer workerTypeId,
                                                        @RequestParam("searchKey") String searchKey,
                                                        @RequestParam("skillCertificationId") String skillCertificationId,
                                                        @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "web/engineer/queryWorkerTypeSkillWaitingList")
+    @ApiOperation(value = "工种技能包配置待选列表", notes = "工种技能包配置待选列表")
+    ServerResponse queryWorkerTypeSkillWaitingList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                   @RequestParam("workerTypeId") Integer workerTypeId,
+                                                   @RequestParam("searchKey") String searchKey,
+                                                   @RequestParam("skillCertificationId") String skillCertificationId,
+                                                   @RequestParam("cityId") String cityId);
 
     @PostMapping(value = "web/engineer/querySkillCertificationSelectedList")
     @ApiOperation(value = "技能认证已选列表", notes = "技能认证已选列表")

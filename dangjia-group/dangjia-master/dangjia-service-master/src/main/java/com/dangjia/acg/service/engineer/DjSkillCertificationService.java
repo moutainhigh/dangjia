@@ -56,6 +56,38 @@ public class DjSkillCertificationService {
      */
     public ServerResponse querySkillsCertificationWaitingList(PageDTO pageDTO, Integer workerTypeId, String searchKey, String skillCertificationId, String cityId) {
         try {
+            Map<String,Object> map=new HashMap<>();
+            Example example=new Example(WorkerType.class);
+            example.createCriteria().andEqualTo(WorkerType.DATA_STATUS,0);
+            example.orderBy(WorkerType.SORT).asc();
+            List<WorkerType> workerTypes = iWorkerTypeMapper.selectByExample(example);
+            map.put("workerTypes",workerTypes);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DjBasicsProductTemplate> djBasicsProductTemplates =
+                    iMasterProductTemplateMapper.querySkillsCertificationWaitingList(workerTypeId, skillCertificationId, searchKey, cityId);
+            if(djBasicsProductTemplates.size()>0){
+                PageInfo pageInfo=new PageInfo(djBasicsProductTemplates);
+                map.put("djSkillCertifications",pageInfo);
+            }
+            return ServerResponse.createBySuccess("查询成功",map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /***
+     *
+     * @param pageDTO
+     * @param workerTypeId
+     * @param searchKey
+     * @param skillCertificationId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse queryWorkerTypeSkillWaitingList(PageDTO pageDTO, Integer workerTypeId, String searchKey, String skillCertificationId, String cityId) {
+        try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjBasicsProductTemplate> djBasicsProductTemplates =
                     iMasterProductTemplateMapper.querySkillsCertificationWaitingList(workerTypeId, skillCertificationId, searchKey, cityId);

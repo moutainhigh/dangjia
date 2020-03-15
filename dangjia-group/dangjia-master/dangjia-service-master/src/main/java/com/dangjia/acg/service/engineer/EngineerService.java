@@ -600,6 +600,7 @@ public class EngineerService {
         map.put("haveMoney", worker.getHaveMoney());
         map.put("surplusMoney", worker.getSurplusMoney());
         map.put("retentionMoney", worker.getRetentionMoney());
+        map.put("workerTypeId",worker.getWorkerTypeId());
         if (CommonUtil.isEmpty(worker.getHead())) {
             worker.setHead(Utils.getHead());
         }

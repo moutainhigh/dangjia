@@ -31,6 +31,7 @@ import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -454,8 +455,9 @@ public class DesignerOperationService {
                 //2.生成订单信息
                 ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"2",null,null);
                 if (serverResponse.getResultObj() != null) {
-                    String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
-                    taskStackService.insertTaskStackInfo(house.getId(),member.getId(),"待支付精算费",workerType.getImage(),1,obj);//支付精算的任务
+                   // String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
+                    JSONObject obj = (JSONObject) serverResponse.getResultObj();
+                    taskStackService.insertTaskStackInfo(house.getId(),member.getId(),"待支付精算费",workerType.getImage(),1002,(String)obj.get("number"));//支付精算的任务
                 }
             }
         }
