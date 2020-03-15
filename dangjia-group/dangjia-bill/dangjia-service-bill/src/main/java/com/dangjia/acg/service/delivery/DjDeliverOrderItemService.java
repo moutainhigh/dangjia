@@ -323,7 +323,6 @@ public class DjDeliverOrderItemService {
             Example example=new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER,order.getBusinessOrderNumber());
             BusinessOrder businessOrder=iBillBusinessOrderMapper.selectOneByExample(example);
-            businessOrder.setId(null);
             businessOrder.setCreateDate(null);
             businessOrder.setDataStatus(null);
             businessOrder.setState(4);
