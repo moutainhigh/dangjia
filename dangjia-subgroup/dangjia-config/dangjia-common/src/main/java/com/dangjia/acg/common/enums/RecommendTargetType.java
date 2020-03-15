@@ -11,7 +11,8 @@ public enum RecommendTargetType {
     GOODS(1, "商品"),
     MANUAL(2, "攻略(指南)"),
     CASE(3, "案例"),
-    SITE(4, "工地");
+    SITE(4, "工地"),
+    RENOV(5, "装修说");
 
     private Integer code;
 

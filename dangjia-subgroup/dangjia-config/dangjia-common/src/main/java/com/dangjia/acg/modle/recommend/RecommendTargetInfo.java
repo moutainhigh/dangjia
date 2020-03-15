@@ -77,4 +77,19 @@ public class RecommendTargetInfo extends BaseEntity {
     @Desc(value = "装修状态")
     @ApiModelProperty("装修状态")
     private Integer visitState;
+
+    @Column(name = "fabulous")
+    @Desc(value = "点赞量")
+    @ApiModelProperty("点赞量")
+    private Integer fabulous;
+
+    @Column(name = "browse")
+    @Desc(value = "浏览量")
+    @ApiModelProperty("浏览量")
+    private Integer browse;
+
+    @Column(name = "share")
+    @Desc(value = "分享量")
+    @ApiModelProperty("分享量")
+    private Integer share;
 }

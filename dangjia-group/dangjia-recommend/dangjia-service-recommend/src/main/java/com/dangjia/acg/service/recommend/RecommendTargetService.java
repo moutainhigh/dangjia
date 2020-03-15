@@ -5,16 +5,13 @@ import com.dangjia.acg.common.enums.RecommendTargetType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.mapper.recommend.IRecommendTargetMapper;
-import com.dangjia.acg.mapper.recommend.StorefrontProductMapper;
-import com.dangjia.acg.mapper.recommend.RenovationManualMapper;
-import com.dangjia.acg.mapper.recommend.HouseChoiceCaseMapper;
-import com.dangjia.acg.mapper.recommend.HouseMapper;
+import com.dangjia.acg.mapper.recommend.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseChoiceCase;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.recommend.RecommendTargetInfo;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
+import com.dangjia.acg.modle.say.RenovationSay;
 import com.dangjia.acg.support.recommend.util.RecommendConfigItem;
 import com.dangjia.acg.support.recommend.util.RecommendMainItem;
 import com.github.pagehelper.PageHelper;
@@ -56,6 +53,9 @@ public class RecommendTargetService {
 
     @Autowired
     private RecommendConfigService recommendConfigService;
+
+    @Autowired
+    private RenovationSay2Mapper renovationSay2Mapper;
 
     /**
      * @Description: 查询推荐目标列表
@@ -169,6 +169,12 @@ public class RecommendTargetService {
         else if( RecommendTargetType.SITE.getCode().intValue() == type.getCode().intValue() ){
             return queryHouseSiteOptionalList(targetName, pageDTO);
         }
+
+        // 装修说
+        else if( RecommendTargetType.RENOV.getCode().intValue() == type.getCode().intValue() ){
+            return queryRenovationOptionalList(targetName, pageDTO);
+        }
+
         return ServerResponse.createByErrorMessage("参数[targetType]超出范围!");
     }
 
@@ -299,6 +305,33 @@ public class RecommendTargetService {
         } catch (Exception e) {
             logger.error("通过小区名称查询异常：", e);
             return ServerResponse.createByErrorMessage("通过小区名称查询异常");
+        }
+    }
+
+    // 查询装修说可选列表
+    private ServerResponse queryRenovationOptionalList(String content, PageDTO pageDTO){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<RenovationSay> list = renovationSay2Mapper.queryList(content);
+            if( list == null || list.size() < 1 ){
+                ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+            }
+            List<RecommendTargetInfo> recommendTargetInfoList = new ArrayList<RecommendTargetInfo>();
+            for( RenovationSay renovationSay : list ){
+                RecommendTargetInfo recommendTargetInfo = new RecommendTargetInfo();
+                recommendTargetInfo.setTargetId(renovationSay.getId());
+                recommendTargetInfo.setTargetName(renovationSay.getContent());
+                recommendTargetInfo.setImage(renovationSay.getCoverImage());
+                recommendTargetInfo.setFabulous(renovationSay.getFabulous());
+                recommendTargetInfo.setBrowse(renovationSay.getBrowse());
+                recommendTargetInfo.setShare(renovationSay.getShare());
+                recommendTargetInfoList.add(recommendTargetInfo);
+            }
+            PageInfo pageResult = new PageInfo(recommendTargetInfoList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("通过内容查询异常：", e);
+            return ServerResponse.createByErrorMessage("通过内容查询异常");
         }
     }
 
