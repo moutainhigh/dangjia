@@ -530,6 +530,7 @@ public class DjBasicsActuarialConfigurationServices {
                     .andEqualTo(DjActuarialTemplateConfig.DATA_STATUS,0)
                     .andEqualTo(DjActuarialTemplateConfig.SERVICE_TYPE_ID,serviceTypeId)
                     .andEqualTo(DjActuarialTemplateConfig.CITY_ID,cityId);//查类型为excel的数据列表
+            example.orderBy(DjActuarialTemplateConfig.CREATE_DATE).asc();
             List<DjActuarialTemplateConfig> templateList = djActuarialTemplateConfigMapper.selectByExample(example);
             List excelList=new ArrayList();
             if(templateList!=null&&templateList.size()>0){
