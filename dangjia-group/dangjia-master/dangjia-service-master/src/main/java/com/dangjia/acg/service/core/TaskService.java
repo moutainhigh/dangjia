@@ -215,11 +215,11 @@ public class TaskService {
     private ButtonDTO getButton(String houseId, String userToken, String imageAddress, String address) {
         ButtonDTO button = new ButtonDTO();
         House house = houseMapper.selectByPrimaryKey(houseId);
-        if (house.getVisitState() == 0) {//处于回访阶段
+        if (house!=null&&house.getVisitState() == 0) {//处于回访阶段
             button.setState(1);
             button.setHouseType(house.getHouseType());
             button.setDrawings(house.getDrawings());
-        } else {//开工状态
+        } else if(house!=null) {//开工状态
             button.setState(2);
             button.setHouseType(house.getHouseType());
             button.setDrawings(house.getDrawings());
