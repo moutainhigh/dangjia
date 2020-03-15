@@ -332,7 +332,6 @@ public class DjDeliverOrderItemService {
                 MemberAddress memberAddress=billMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
                 if(memberAddress!=null){//解除房子地址的绑定
                     memberAddress.setHouseId(null);
-                    memberAddress.setRenovationType(0);//改为非装修地址
                     memberAddress.setModifyDate(new Date());
                     billMemberAddressMapper.updateByPrimaryKey(memberAddress);
                 }
