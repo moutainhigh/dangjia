@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.recommend.StoreActivityMapper">
+
+    <!-- 查询活动列表 -->
+    <select id="queryList" resultType="com.dangjia.acg.modle.activity.DjStoreActivity">
+        SELECT id, activity_description 'activityDescription'
+        FROM dj_store_activity
+        WHERE data_status = 0
+          AND activity_type = #{activityType}
+          <if test="null!=keyword and ''!=keyword">
+          AND activity_description LIKE CONCAT('%',#{keyWord},'%')
+          </if>
+    </select>
+
+</mapper>

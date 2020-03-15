@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.recommend.ILatticeContentMapper">
+
+    <!-- 查询 总数 -->
+    <select id="queryTotal" resultType="java.lang.Integer">
+        SELECT count(*) FROM dj_lattice_content
+    </select>
+
+    <!-- 删除 全部 -->
+    <delete id="deleteAll">
+        DELETE FROM dj_lattice_content
+    </delete>
+
+    <!-- 新增 批量 -->
+    <insert id="addBatch">
+        INSERT INTO dj_lattice_content
+        VALUES
+        <foreach collection ="contentList" item="item" index= "index" separator=",">
+            (#{item.id},#{item.createDate},#{item.modifyDate},#{item.dataStatus}
+            ,#{item.areaName},#{item.areaScope},#{item.styleId},#{item.typeId}
+            ,#{item.contentId},#{item.image},#{item.url})
+        </foreach >
+    </insert>
+
+</mapper>
