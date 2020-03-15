@@ -217,6 +217,8 @@ public class RecommendTargetService {
                 recommendTargetInfo.setTargetId(dto.getId());
                 recommendTargetInfo.setTargetName(dto.getProductName());
                 recommendTargetInfo.setImage(dto.getImage());
+                recommendTargetInfo.setSellPrice(dto.getSellPrice());
+                recommendTargetInfo.setUnitName(dto.getUnitName());
                 recommendTargetInfoList.add(recommendTargetInfo);
             }
             PageInfo pageResult = new PageInfo(recommendTargetInfoList);
