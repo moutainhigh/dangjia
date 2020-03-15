@@ -23,15 +23,15 @@ spring:
     changsha:
       url: jdbc:mysql://139.159.192.14:3306/dangjia_master_showed?useUnicode=true
       username: qiyuxiang
-      password: Fengjiang123!
+      password: root
     shenzhen:
-      url: jdbc:mysql://139.159.192.14:3306/dangjia_shenzhen_showed?useUnicode=true
+      url: jdbc:mysql://139.159.192.14:3306/dangjia_master_showed?useUnicode=true
       username: qiyuxiang
-      password: Fengjiang123!
+      password: root
     zhuzhou:
-      url: jdbc:mysql://139.159.192.14:3306/dangjia_zhuzhou_showed?useUnicode=true
+      url: jdbc:mysql://139.159.192.14:3306/dangjia_master_showed?useUnicode=true
       username: qiyuxiang
-      password: Fengjiang123!
+      password: root
   elasticsearch:
     jest:
       uris: http://192.168.0.229:9200

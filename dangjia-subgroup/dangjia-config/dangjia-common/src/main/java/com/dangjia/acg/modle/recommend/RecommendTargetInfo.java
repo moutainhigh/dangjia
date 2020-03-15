@@ -60,6 +60,36 @@ public class RecommendTargetInfo extends BaseEntity {
     @ApiModelProperty("点击量")
     private Integer clickNumber;
 
+    /** 商品售价 */
+    @Column(name = "sell_price")
+    @Desc(value = "商品售价")
+    @ApiModelProperty("商品售价")
+    private Double sellPrice;
+
+    /** 单位名称 */
+    @Column(name = "unit_name")
+    @Desc(value = "单位名称")
+    @ApiModelProperty("单位名称")
+    private String unitName;
+
     /** 装修状态 */
+    @Column(name = "visit_state")
+    @Desc(value = "装修状态")
+    @ApiModelProperty("装修状态")
     private Integer visitState;
+
+    @Column(name = "fabulous")
+    @Desc(value = "点赞量")
+    @ApiModelProperty("点赞量")
+    private Integer fabulous;
+
+    @Column(name = "browse")
+    @Desc(value = "浏览量")
+    @ApiModelProperty("浏览量")
+    private Integer browse;
+
+    @Column(name = "share")
+    @Desc(value = "分享量")
+    @ApiModelProperty("分享量")
+    private Integer share;
 }
