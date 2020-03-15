@@ -322,11 +322,12 @@ public class DjDeliverOrderItemService {
             Order order = iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
             Example example=new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER,order.getBusinessOrderNumber());
-            BusinessOrder businessOrder=new BusinessOrder();
+            BusinessOrder businessOrder=iBillBusinessOrderMapper.selectOneByExample(example);
             businessOrder.setId(null);
             businessOrder.setCreateDate(null);
             businessOrder.setDataStatus(null);
             businessOrder.setState(4);
+            iBillBusinessOrderMapper.updateByPrimaryKey(businessOrder);
             if(order.getType()==1&&order.getWorkerId()!=null&&"firstOrder".equals(order.getWorkerId())){//若为装修房子订单，首次提交的订单取消时，需将地址中绑定的房子解除，房子状态改为用户已撤回
                 //判断是否为设计、精算提交的订单
                 MemberAddress memberAddress=billMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
@@ -356,7 +357,6 @@ public class DjDeliverOrderItemService {
 
             }
 
-            iBillBusinessOrderMapper.updateByExampleSelective(businessOrder,example);
             return ServerResponse.createBySuccessMessage("取消订单成功");
         } catch (Exception e) {
             e.printStackTrace();
